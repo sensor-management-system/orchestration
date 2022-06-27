@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Configuration, ConfigurationContactRole, Contact, User
-from project.api.services.idl_services import Idl
+from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -197,7 +197,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         configuration_contact_role = generate_configuration_contact_role(group_id="2")
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -211,7 +211,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         configuration_contact_role = generate_configuration_contact_role(group_id="1")
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -226,7 +226,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         configuration_contact_role = generate_configuration_contact_role(group_id="4")
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -256,7 +256,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -291,7 +291,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -307,7 +307,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -324,7 +324,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -356,7 +356,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -414,7 +414,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -439,7 +439,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -465,7 +465,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -505,7 +505,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -573,7 +573,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -600,7 +600,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -628,7 +628,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -670,7 +670,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -784,7 +784,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -826,7 +826,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -869,7 +869,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -925,7 +925,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1040,7 +1040,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1084,7 +1084,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1129,7 +1129,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1187,7 +1187,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(

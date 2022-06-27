@@ -2,10 +2,12 @@
 
 import os
 
-from flask_rest_jsonapi import JsonApiException, ResourceDetail
+from flask import g
 from sqlalchemy import or_
 
-from .base_resource import add_contact_to_object
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
+from ...frj_csv_export.resource import ResourceList
+
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from ..auth.permission_utils import (
     cfg_permission_group_defined,
@@ -18,15 +20,13 @@ from ..datalayers.esalchemy import (
     OrFilter,
     TermEqualsExactStringFilter,
 )
-from ..helpers.errors import ConflictError, ForbiddenError
-from ..helpers.resource_mixin import add_created_by_id
-from ..helpers.resource_mixin import add_updated_by_id
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import get_current_user_or_none_by_optional, token_required
-from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import ConflictError, ForbiddenError, UnauthorizedError
+from ..token_checker import token_required
 
 
 class ConfigurationList(ResourceList):
@@ -44,12 +44,16 @@ class ConfigurationList(ResourceList):
         :return: queryset or es filter
         """
         query = db.session.query(self.model)
-        current_user = get_current_user_or_none_by_optional(optional=True)
-        if current_user is None:
+        if g.user is None:
             query = query.filter_by(is_public=True)
         else:
-            if not current_user.is_superuser:
-                query = query.filter(or_(self.model.is_public, self.model.is_internal,))
+            if not g.user.is_superuser:
+                query = query.filter(
+                    or_(
+                        self.model.is_public,
+                        self.model.is_internal,
+                    )
+                )
         return query
 
     def es_query(self, view_kwargs):
@@ -59,10 +63,9 @@ class ConfigurationList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        current_user = get_current_user_or_none_by_optional(optional=True)
-        if current_user is None:
+        if g.user is None:
             return TermEqualsExactStringFilter("is_public", True)
-        if not current_user.is_superuser:
+        if not g.user.is_superuser:
             return OrFilter(
                 [
                     TermEqualsExactStringFilter("is_public", True),
@@ -97,7 +100,7 @@ class ConfigurationList(ResourceList):
         """
         result_id = result[0]["data"]["id"]
         configuration = db.session.query(Configuration).filter_by(id=result_id).first()
-        contact = add_contact_to_object(configuration)
+        contact = g.user.contact
         cv_url = os.environ.get("CV_URL")
         role_name = "Owner"
         role_uri = f"{cv_url}/contactroles/4/"
@@ -138,7 +141,8 @@ class ConfigurationDetail(ResourceDetail):
         config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
         if config:
             if config.is_internal:
-                get_current_user_or_none_by_optional()
+                if not g.user:
+                    raise UnauthorizedError("Authentication required.")
 
     def before_patch(self, args, kwargs, data):
         """check if a user has the permission to change this configuration"""

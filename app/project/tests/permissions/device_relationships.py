@@ -5,10 +5,9 @@ from unittest.mock import patch
 from project import base_url
 from project.api.models import Device
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import create_token
-from project.tests.permissions import create_a_test_device, create_a_test_contact
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token
+from project.tests.permissions import create_a_test_contact, create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -18,7 +17,9 @@ class TestDeviceRelationshipPermissions(BaseTestCase):
     def test_fail_adding_relationship_to_device_without_jwt(self):
         """Ensure adding a relationship without a valid token will fail."""
         public_sensor = create_a_test_device(
-            public=True, private=False, internal=False,
+            public=True,
+            private=False,
+            internal=False,
         )
         contact = create_a_test_contact()
         db.session.add_all([public_sensor, contact])
@@ -28,14 +29,18 @@ class TestDeviceRelationshipPermissions(BaseTestCase):
         url = base_url + f"/devices/{public_sensor.id}/relationships/contacts"
         with self.client:
             response = self.client.post(
-                url, data=json.dumps(data), content_type="application/vnd.api+json",
+                url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 401)
 
     def test_success_adding_relationship_to_device_with_no_group(self):
         """Ensure adding a relationship to a no group device will success."""
         public_sensor = create_a_test_device(
-            public=True, private=False, internal=False,
+            public=True,
+            private=False,
+            internal=False,
         )
         contact = create_a_test_contact()
         db.session.add_all([public_sensor, contact])
@@ -64,7 +69,7 @@ class TestDeviceRelationshipPermissions(BaseTestCase):
         data = {"data": [{"type": "contact", "id": contact.id}]}
         url = base_url + f"/devices/{public_sensor.id}/relationships/contacts"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -91,7 +96,7 @@ class TestDeviceRelationshipPermissions(BaseTestCase):
         data = {"data": [{"type": "contact", "id": contact.id}]}
         url = base_url + f"/devices/{public_sensor.id}/relationships/contacts"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -120,7 +125,7 @@ class TestDeviceRelationshipPermissions(BaseTestCase):
         data_2 = {"data": [{"type": "contact", "id": contact_2.id}]}
         url = base_url + f"/devices/{public_sensor.id}/relationships/contacts"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -158,7 +163,7 @@ class TestDeviceRelationshipPermissions(BaseTestCase):
         data_2 = {"data": [{"type": "contact", "id": contact_2.id}]}
         url = base_url + f"/devices/{public_sensor.id}/relationships/contacts"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -195,7 +200,7 @@ class TestDeviceRelationshipPermissions(BaseTestCase):
         data = {"data": [{"type": "contact", "id": contact.id}]}
         url = base_url + f"/devices/{public_sensor.id}/relationships/contacts"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:

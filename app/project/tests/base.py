@@ -3,16 +3,21 @@
 import json
 import os
 import time
+from contextlib import contextmanager
 
 import flask_jwt_extended
 from faker import Faker
 from flask import request
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended.exceptions import JWTDecodeError, WrongTokenError
 from flask_testing import TestCase
+from jwt.exceptions import DecodeError
+
 from project import create_app
-from project.api.auth.flask_openidconnect import open_id_connect
 from project.api.helpers.errors import UnauthorizedError
 from project.api.models.base_model import db
+from project.extensions.auth.mechanisms.mixins import CreateNewUserByUserinfoMixin
+from project.extensions.instances import auth
 
 app = create_app()
 jwt = JWTManager(app)
@@ -110,6 +115,43 @@ def get_userinfo():
         raise UnauthorizedError(repr(e))
 
 
+class LoginMechanismBySettingUserDirectly:
+    def __init__(self, get_user_function):
+        self.get_user_function = get_user_function
+
+    def init_app(self, app):
+        pass
+
+    @staticmethod
+    def can_be_applied():
+        return True
+
+    def authenticate(self):
+        fun = self.get_user_function
+        user = fun()
+        return user
+
+
+class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
+    def init_app(self, app):
+        pass
+
+    @staticmethod
+    def can_be_applied():
+        if request.headers.get("Authorization"):
+            return True
+        return False
+
+    def authenticate(self):
+        authorization_header = request.headers.get("Authorization")
+        try:
+            decode_token = flask_jwt_extended.decode_token(authorization_header)
+            identity = decode_token["sub"]
+            return self.get_user_or_create_new(identity, decode_token)
+        except (ValueError, DecodeError, TypeError, WrongTokenError):
+            return None
+
+
 class BaseTestCase(TestCase):
     """Base test case for all testing the code of our app."""
 
@@ -121,7 +163,33 @@ class BaseTestCase(TestCase):
         """
         app.config.from_object("project.config.TestingConfig")
         app.elasticsearch = None
+        # We support 2 mechanisms for testing:
+        # One is that we just reuse the existing Jwt tokens that we already have.
+        # Or we just have a force_login method in the test, so that we can enforce
+        # that we are a certain user (if the mechanism itself doesn't matter).
+        auth.mechanisms = [
+            LoginMechanismByTestJwt(),
+            LoginMechanismBySettingUserDirectly(self.get_current_user),
+        ]
         return app
+
+    def force_login(self, user):
+        self._base_test_current_user = user
+
+    def logout(self):
+        self._base_test_current_user = None
+
+    def get_current_user(self):
+        return self._base_test_current_user
+
+    @contextmanager
+    def run_requests_as(self, user):
+        previous_user = self._base_test_current_user
+        self._base_test_current_user = user
+        try:
+            yield
+        finally:
+            self._base_test_current_user = previous_user
 
     def setUp(self):
         """
@@ -133,22 +201,9 @@ class BaseTestCase(TestCase):
         db.drop_all()
         db.create_all()
         db.session.commit()
-        self.original_verify_valid_access_token_in_request = (
-            open_id_connect.__class__._verify_valid_access_token_in_request
-        )
 
-        def verify_valid_access_token_for_tests(self):
-            """Fake the verification for our tests."""
-            # We don't ask the user info endpoint, we just use data
-            # decoded from the token.
-            # Sub will be the identity.
-            attributes = get_userinfo()
-            identity = attributes["sub"]
-            return identity, attributes
-
-        open_id_connect.__class__._verify_valid_access_token_in_request = (
-            verify_valid_access_token_for_tests
-        )
+        # We start every test without being logged in
+        self.logout()
 
     def tearDown(self):
         """
@@ -161,9 +216,7 @@ class BaseTestCase(TestCase):
         db.session.remove()
         db.drop_all()
 
-        open_id_connect.__class__._verify_valid_access_token_in_request = (
-            self.original_verify_valid_access_token_in_request
-        )
+        self.logout()
 
     def add_object(self, url, data_object, object_type):
         """Ensure a new object can be added to the database."""

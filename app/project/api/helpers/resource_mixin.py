@@ -1,9 +1,8 @@
 import json
 from json import JSONDecodeError
 
-from flask import request
+from flask import g, request
 
-from ..auth.flask_openidconnect import open_id_connect
 from ..helpers.errors import BadRequestError
 
 
@@ -19,8 +18,7 @@ def add_created_by_id(data):
     check if the user exists or add the user to the database
     so that a user can't be None. Due to that created_by_id can't be None also.
     """
-    user_entry = open_id_connect.get_current_user()
-    data["created_by_id"] = user_entry.id
+    data["created_by_id"] = g.user.id
 
 
 def add_updated_by_id(data):
@@ -32,8 +30,7 @@ def add_updated_by_id(data):
     :return:
 
     """
-    user_entry = open_id_connect.get_current_user()
-    data["updated_by_id"] = user_entry.id
+    data["updated_by_id"] = g.user.id
 
 
 def decode_json_request_data():

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Any, TypeVar, Callable, Type, cast
-
+from typing import Any, Callable, List, Type, TypeVar, cast
 
 T = TypeVar("T")
 
@@ -42,7 +41,11 @@ class PermissionGroup:
         id = from_str(obj.get("id"))
         name = from_str(obj.get("name"))
         description = from_str(obj.get("description"))
-        return PermissionGroup(id, name, description,)
+        return PermissionGroup(
+            id,
+            name,
+            description,
+        )
 
     def to_dict(self) -> dict:
         """

@@ -6,14 +6,15 @@ from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, GenericPlatformAction, Platform
-from project.tests.base import BaseTestCase, fake, test_file_path
-from project.tests.base import create_token
+from project.extensions.instances import idl
 from project.tests.base import (
+    BaseTestCase,
+    create_token,
+    fake,
     generate_userinfo_data,
+    test_file_path,
 )
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
-
-from project.api.services.idl_services import Idl
 
 
 class TestGenericPlatformAction(BaseTestCase):
@@ -84,9 +85,7 @@ class TestGenericPlatformAction(BaseTestCase):
                     "begin_date": datetime.now().__str__(),
                 },
                 "relationships": {
-                    "platform": {
-                        "data": {"type": "platform", "id": platform.id}
-                    },
+                    "platform": {"data": {"type": "platform", "id": platform.id}},
                     "contact": {
                         "data": {"type": "contact", "id": contact["data"]["id"]}
                     },
@@ -99,7 +98,7 @@ class TestGenericPlatformAction(BaseTestCase):
         """Ensure a generic_platform_action can be updateded."""
         generic_platform_action_data = self.make_generic_platform_action_data()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             generic_platform_action = super().add_object(
@@ -143,7 +142,7 @@ class TestGenericPlatformAction(BaseTestCase):
         """Ensure a generic_platform_action can be deleted."""
         generic_platform_action_data = self.make_generic_platform_action_data()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             obj = super().add_object(

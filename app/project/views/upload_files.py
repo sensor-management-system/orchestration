@@ -1,8 +1,8 @@
 from flask import request, Blueprint, current_app
 
-from .flask_minio import MinioNotAvailableException
-from .helpers.errors import UnsupportedMediaTypeError, BadRequestError, ServiceIsUnreachableError
-from .token_checker import token_required
+from ..api.flask_minio import MinioNotAvailableException
+from ..api.helpers.errors import UnsupportedMediaTypeError, BadRequestError, ServiceIsUnreachableError
+from ..api.token_checker import token_required
 from ..api import minio
 from ..config import env
 

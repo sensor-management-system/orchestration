@@ -4,7 +4,6 @@ import os
 from unittest.mock import patch
 
 from project import base_url
-from project.api.auth.flask_openidconnect import open_id_connect
 from project.api.helpers.errors import UnauthorizedError
 from project.api.models.base_model import db
 from project.api.models.customfield import CustomField
@@ -55,17 +54,13 @@ class TestDeviceService(BaseTestCase):
         """Test the post request for adding a device, but without a valid token."""
         devices_json = extract_data_from_json_file(self.json_data_url, "devices")
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
-        with patch.object(
-            open_id_connect.__class__, "_verify_valid_access_token_in_request"
-        ) as mock:
-            mock.side_effect = UnauthorizedError("No valid access token.")
-            with self.client:
-                response = self.client.post(
-                    self.device_url,
-                    data=json.dumps(device_data),
-                    content_type="application/vnd.api+json",
-                    headers={"Authorization": "Bearer abcdefghij"},
-                )
+        with self.client:
+            response = self.client.post(
+                self.device_url,
+                data=json.dumps(device_data),
+                content_type="application/vnd.api+json",
+                headers={"Authorization": "Bearer abcdefghij"},
+            )
         self.assertEqual(response.status_code, 401)
 
     def test_add_device_contacts_relationship(self):
@@ -116,7 +111,10 @@ class TestDeviceService(BaseTestCase):
         # together with the device itself.
 
         device = Device(
-            short_name="device", is_public=True, is_private=False, is_internal=False,
+            short_name="device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device)
 
@@ -178,7 +176,10 @@ class TestDeviceService(BaseTestCase):
         # together with the device itself.
 
         device = Device(
-            short_name="device", is_public=True, is_private=False, is_internal=False,
+            short_name="device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device)
 
@@ -232,7 +233,10 @@ class TestDeviceService(BaseTestCase):
     def test_add_device_customfield_included(self):
         """Ensure that we can include customfields on getting a device."""
         device = Device(
-            short_name="device", is_public=True, is_private=False, is_internal=False,
+            short_name="device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device)
 
@@ -293,18 +297,24 @@ class TestDeviceService(BaseTestCase):
 
         device_calibration_action = add_device_calibration_action()
         device_id = device_calibration_action.device_id
-        _ = super().delete_object(url=f"{self.device_url}/{device_id}",)
+        _ = super().delete_object(
+            url=f"{self.device_url}/{device_id}",
+        )
 
     def test_delete_device_with_generic_action(self):
         """Ensure that a device with  a generic action can be deleted."""
 
         device_action_model = generate_device_action_model()
         device_id = device_action_model.device_id
-        _ = super().delete_object(url=f"{self.device_url}/{device_id}",)
+        _ = super().delete_object(
+            url=f"{self.device_url}/{device_id}",
+        )
 
     def test_delete_device_with_software_update__action(self):
         """Ensure that a device with  a software update action can be deleted."""
 
         device_action_model = add_device_software_update_action_model()
         device_id = device_action_model.device_id
-        _ = super().delete_object(url=f"{self.device_url}/{device_id}",)
+        _ = super().delete_object(
+            url=f"{self.device_url}/{device_id}",
+        )

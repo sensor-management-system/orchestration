@@ -4,11 +4,8 @@ from unittest.mock import patch
 from project import base_url
 from project.api.models import PlatformAttachment
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import create_token
-from project.tests.base import fake
-from project.tests.base import query_result_to_list
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions import create_a_test_platform
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -33,17 +30,31 @@ class TesPlatformAttachment(BaseTestCase):
 
     def test_get_public_platform_attachments(self):
         """Ensure that we can get a list of public platform_attachments."""
-        platform1 = create_a_test_platform(public=True, private=False, internal=False,)
-        platform2 = create_a_test_platform(public=True, private=False, internal=False,)
+        platform1 = create_a_test_platform(
+            public=True,
+            private=False,
+            internal=False,
+        )
+        platform2 = create_a_test_platform(
+            public=True,
+            private=False,
+            internal=False,
+        )
 
         attachment1 = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform1,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform1,
         )
         attachment2 = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform1,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform1,
         )
         attachment3 = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform2,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform2,
         )
 
         db.session.add_all([attachment1, attachment2, attachment3])
@@ -51,7 +62,8 @@ class TesPlatformAttachment(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                self.url, content_type="application/vnd.api+json",
+                self.url,
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -60,14 +72,26 @@ class TesPlatformAttachment(BaseTestCase):
 
     def test_get_internal_platform_attachments(self):
         """Ensure that we can get a list of internal platform_attachments only with a valid jwt."""
-        platform1 = create_a_test_platform(public=False, private=False, internal=True,)
-        platform2 = create_a_test_platform(public=False, private=False, internal=True,)
+        platform1 = create_a_test_platform(
+            public=False,
+            private=False,
+            internal=True,
+        )
+        platform2 = create_a_test_platform(
+            public=False,
+            private=False,
+            internal=True,
+        )
 
         attachment1 = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform1,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform1,
         )
         attachment2 = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform2,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform2,
         )
 
         db.session.add_all([attachment1, attachment2])
@@ -75,7 +99,8 @@ class TesPlatformAttachment(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                self.url, content_type="application/vnd.api+json",
+                self.url,
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -93,13 +118,17 @@ class TesPlatformAttachment(BaseTestCase):
         platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(platform.id is not None)
         count_platform_attachments = (
-            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,).count()
+            db.session.query(PlatformAttachment)
+            .filter_by(
+                platform_id=platform.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_platform_attachments, 0)
         payload = prepare_platform_attachment_payload(platform)
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -112,7 +141,9 @@ class TesPlatformAttachment(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 201)
         platform_attachments = query_result_to_list(
-            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,)
+            db.session.query(PlatformAttachment).filter_by(
+                platform_id=platform.id,
+            )
         )
         self.assertEqual(len(platform_attachments), 1)
 
@@ -127,13 +158,17 @@ class TesPlatformAttachment(BaseTestCase):
         platform = create_a_test_platform([403])
         self.assertTrue(platform.id is not None)
         count_platform_attachments = (
-            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,).count()
+            db.session.query(PlatformAttachment)
+            .filter_by(
+                platform_id=platform.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_platform_attachments, 0)
         payload = prepare_platform_attachment_payload(platform)
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -150,12 +185,18 @@ class TesPlatformAttachment(BaseTestCase):
         platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(platform.id is not None)
         count_platform_attachments = (
-            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,).count()
+            db.session.query(PlatformAttachment)
+            .filter_by(
+                platform_id=platform.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_platform_attachments, 0)
         attachment = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform,
         )
         db.session.add(attachment)
         db.session.commit()
@@ -170,7 +211,7 @@ class TesPlatformAttachment(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -191,20 +232,28 @@ class TesPlatformAttachment(BaseTestCase):
     def test_delete_to_a_platform_with_a_permission_group(self):
         """Delete Custom field attached to platform with same group as user
         (user is admin)."""
-        platform = create_a_test_platform(IDL_USER_ACCOUNT.administrated_permission_groups)
+        platform = create_a_test_platform(
+            IDL_USER_ACCOUNT.administrated_permission_groups
+        )
         self.assertTrue(platform.id is not None)
         count_platform_attachments = (
-            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,).count()
+            db.session.query(PlatformAttachment)
+            .filter_by(
+                platform_id=platform.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_platform_attachments, 0)
         attachment = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform,
         )
         db.session.add(attachment)
         db.session.commit()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -219,21 +268,27 @@ class TesPlatformAttachment(BaseTestCase):
 
     def test_delete_to_a_platform_with_a_permission_group_as_a_member(self):
         """Delete Custom field attached to platform with same group as user
-                (user is member)."""
+        (user is member)."""
         platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(platform.id is not None)
         count_platform_attachments = (
-            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,).count()
+            db.session.query(PlatformAttachment)
+            .filter_by(
+                platform_id=platform.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_platform_attachments, 0)
         attachment = PlatformAttachment(
-            label=fake.pystr(), url=fake.url(), platform=platform,
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform,
         )
         db.session.add(attachment)
         db.session.commit()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:

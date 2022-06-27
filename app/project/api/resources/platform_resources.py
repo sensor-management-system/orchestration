@@ -2,25 +2,24 @@
 
 import os
 
+from flask import g
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
-from ..helpers.errors import ConflictError
-from ..helpers.resource_mixin import add_updated_by_id
-from ..models.base_model import db
-from ..models.contact_role import PlatformContactRole
-from ..models.platform import Platform
-from ..resources.base_resource import add_contact_to_object
-from ..schemas.platform_schema import PlatformSchema
-from ..token_checker import token_required
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
     get_query_with_permissions,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
+from ..helpers.errors import ConflictError
 from ...frj_csv_export.resource import ResourceList
+from ..helpers.resource_mixin import add_updated_by_id
+from ..models.contact_role import PlatformContactRole
+from ..models.platform import Platform
+from ..models.base_model import db
+from ..schemas.platform_schema import PlatformSchema
+from ..token_checker import token_required
 
 
 class PlatformList(ResourceList):
@@ -71,7 +70,7 @@ class PlatformList(ResourceList):
         """
         result_id = result[0]["data"]["id"]
         platform = db.session.query(Platform).filter_by(id=result_id).first()
-        contact = add_contact_to_object(platform)
+        contact = g.user.contact
         cv_url = os.environ.get("CV_URL")
         role_name = "Owner"
         role_uri = f"{cv_url}/contactroles/4/"

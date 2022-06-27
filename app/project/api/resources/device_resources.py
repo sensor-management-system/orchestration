@@ -3,6 +3,7 @@
 import os
 
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
+from flask import g
 
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
@@ -11,7 +12,6 @@ from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.contact_role import DeviceContactRole
 from ..models.device import Device
-from ..resources.base_resource import add_contact_to_object
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
 from ...api.auth.permission_utils import (
@@ -70,7 +70,7 @@ class DeviceList(ResourceList):
         """
         result_id = result[0]["data"]["id"]
         device = db.session.query(Device).filter_by(id=result_id).first()
-        contact = add_contact_to_object(device)
+        contact = g.user.contact
         cv_url = os.environ.get("CV_URL")
         role_name = "Owner"
         role_uri = f"{cv_url}/contactroles/4/"
@@ -131,6 +131,7 @@ class DeviceDetail(ResourceDetail):
 
         In this case we want to make sure that we update the updated_by_id
         with the id of the user that run the request.
+        In Flask those data should be stored in the `g` object.
         """
         add_updated_by_id(data)
 

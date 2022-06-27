@@ -4,10 +4,10 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Device, Contact, DeviceCalibrationAction
+from project.api.models import Contact, Device, DeviceCalibrationAction
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase, create_token, generate_userinfo_data, fake
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
 )
@@ -96,7 +96,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -127,11 +127,13 @@ class TestDeviceCalibrationAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_calibration_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {
+                    "description": "updated",
+                },
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -171,7 +173,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         db.session.commit()
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -199,7 +201,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         db.session.commit()
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:

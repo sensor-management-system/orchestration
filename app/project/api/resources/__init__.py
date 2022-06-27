@@ -81,6 +81,7 @@ from .generic_platform_action_resources import (  # noqa: F401
     GenericPlatformActionDetail,
     GenericPlatformActionList,
 )
+from .ping import Ping  # noqa: F401
 from .platform_attachment_resources import (
     PlatformAttachmentList,
     PlatformAttachmentDetail,

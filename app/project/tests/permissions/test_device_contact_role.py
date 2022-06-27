@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, Device, DeviceContactRole, User
-from project.api.services.idl_services import Idl
+from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
 from project.tests.permissions.test_devices import IDL_USER_ACCOUNT
 
@@ -83,9 +83,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         self.assertEqual(role.role_name, device_contact_role.role_name)
         self.assertEqual(role.role_uri, device_contact_role.role_uri)
         self.assertEqual(role.device, device_contact_role.device)
-        self.assertEqual(
-            role.device.is_public, device_contact_role.device.is_public
-        )
+        self.assertEqual(role.device.is_public, device_contact_role.device.is_public)
         self.assertEqual(role.device.is_public, True)
         self.assertEqual(role.contact, device_contact_role.contact)
 
@@ -96,9 +94,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getlist_internal_device_contact_role_anonymous(self):
         """Ensure that a contact role for an internal device is not listed for anonymous."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         role = (
             db.session.query(DeviceContactRole)
             .filter_by(id=device_contact_role.id)
@@ -116,9 +112,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getlist_interal_device_contact_role_logged_in(self):
         """Ensure that a contact role for an internal device is listed for logged in users."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         role = (
             db.session.query(DeviceContactRole)
             .filter_by(id=device_contact_role.id)
@@ -138,15 +132,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getlist_private_device_contact_role_anonymous(self):
         """Ensure get collection for anonymous users & private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         role = (
@@ -155,9 +145,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             .one()
         )
 
-        self.assertEqual(
-            role.device.is_private, device_contact_role.device.is_private
-        )
+        self.assertEqual(role.device.is_private, device_contact_role.device.is_private)
         self.assertEqual(role.device.is_private, True)
 
         response = self.client.get(self.url)
@@ -166,15 +154,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getlist_private_device_contact_role_owner(self):
         """Ensure get collection for owner of private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         role = (
@@ -183,9 +167,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             .one()
         )
 
-        self.assertEqual(
-            role.device.is_private, device_contact_role.device.is_private
-        )
+        self.assertEqual(role.device.is_private, device_contact_role.device.is_private)
         self.assertEqual(role.device.is_private, True)
 
         access_headers = create_token({"sub": user.subject})
@@ -196,15 +178,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getlist_private_device_contact_role_different_user(self):
         """Ensure get collection for different user on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         role = (
@@ -213,9 +191,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             .one()
         )
 
-        self.assertEqual(
-            role.device.is_private, device_contact_role.device.is_private
-        )
+        self.assertEqual(role.device.is_private, device_contact_role.device.is_private)
         self.assertEqual(role.device.is_private, True)
 
         access_headers = create_token(
@@ -232,9 +208,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getlist_private_device_contact_role_different_admin(self):
         """Ensure get collection for different user (admin) on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
@@ -280,9 +254,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getone_internal_device_contact_role_anonymous(self):
         """Ensure taht a contact role for an internal device is not accessble for anonymous."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         role = (
             db.session.query(DeviceContactRole)
             .filter_by(id=device_contact_role.id)
@@ -293,9 +265,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getone_interal_device_contact_role_logged_in(self):
         """Ensure that a contact role for an internal device is listed for logged in users."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         role = (
             db.session.query(DeviceContactRole)
             .filter_by(id=device_contact_role.id)
@@ -308,15 +278,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getone_private_device_contact_role_anonymous(self):
         """Ensure get details for anonymous users & private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         response = self.client.get(self.url + f"/{device_contact_role.id}")
@@ -324,15 +290,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getone_private_device_contact_role_owner(self):
         """Ensure that the owner of a private device can access the contact role."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         access_headers = create_token({"sub": user.subject})
@@ -344,15 +306,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getone_private_device_contact_role_different_user(self):
         """Ensure get one for different user on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         access_headers = create_token(
@@ -371,9 +329,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_getone_private_device_contact_role_different_admin(self):
         """Ensure get one for different user (but admin) on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
@@ -430,7 +386,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         device_contact_role = generate_device_contact_role(group_ids=["2"])
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -444,7 +400,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         device_contact_role = generate_device_contact_role(group_ids=["1"])
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -459,7 +415,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         device_contact_role = generate_device_contact_role(group_ids=["4"])
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -489,7 +445,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -499,17 +455,13 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_delete_internal_device_contact_role_anonymous(self):
         """Ensure taht a contact role for an internal device can't be deleted by anonymous."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         response = self.client.delete(self.url + f"/{device_contact_role.id}")
         self.assertEqual(response.status_code, 401)
 
     def test_delete_interal_device_contact_role_logged_in(self):
         """Ensure that a contact role for internal device can be deleted while no group_ids."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         access_headers = create_token()
         response = self.client.delete(
             self.url + f"/{device_contact_role.id}", headers=access_headers
@@ -524,7 +476,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -540,7 +492,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -557,7 +509,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -589,7 +541,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.delete(
@@ -599,15 +551,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_delete_private_device_contact_role_anonymous(self):
         """Ensure delete for anonymous user & private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         response = self.client.delete(self.url + f"/{device_contact_role.id}")
@@ -615,15 +563,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_delete_private_device_contact_role_owner(self):
         """Ensure that the owner of a private device can delete the contact role."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         access_headers = create_token({"sub": user.subject})
@@ -634,15 +578,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_delete_private_device_contact_role_different_user(self):
         """Ensure delete for different user on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         access_headers = create_token(
@@ -661,9 +601,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_delete_private_device_contact_role_different_admin(self):
         """Ensure delete for different user (but admin) on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
@@ -748,7 +686,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -773,7 +711,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -799,7 +737,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -839,7 +777,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -853,9 +791,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_patch_internal_device_contact_role_anonymous(self):
         """Ensure that a contact role for an internal device can't be patched by anonymous."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         payload = {
             "data": {
                 "type": self.object_type,
@@ -872,9 +808,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_patch_interal_device_contact_role_logged_in(self):
         """Ensure that a contact role for internal device can be patched while no group_ids."""
-        device_contact_role = generate_device_contact_role(
-            internal=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(internal=True, public=False)
         payload = {
             "data": {
                 "type": self.object_type,
@@ -907,7 +841,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -934,7 +868,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -962,7 +896,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -1004,7 +938,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.patch(
@@ -1018,15 +952,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_patch_private_device_contact_role_anonymous(self):
         """Ensure patch for anonymous user & private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         payload = {
@@ -1045,15 +975,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_patch_private_device_contact_role_owner(self):
         """Ensure that the owner of a private device can patch the contact role."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         access_headers = create_token({"sub": user.subject})
@@ -1075,15 +1001,11 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_patch_private_device_contact_role_different_user(self):
         """Ensure patch for different user on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
-        db.session.add_all(
-            [user, device_contact_role, device_contact_role.device]
-        )
+        db.session.add_all([user, device_contact_role, device_contact_role.device])
         db.session.commit()
 
         access_headers = create_token(
@@ -1112,9 +1034,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
 
     def test_patch_private_device_contact_role_different_admin(self):
         """Ensure patch for different user (but admin) on private device."""
-        device_contact_role = generate_device_contact_role(
-            private=True, public=False
-        )
+        device_contact_role = generate_device_contact_role(private=True, public=False)
         contact = device_contact_role.contact
         user = User(contact=contact, subject=contact.email)
         device_contact_role.device.created_by = user
@@ -1262,7 +1182,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1304,7 +1224,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1347,7 +1267,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1403,7 +1323,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1516,7 +1436,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1558,7 +1478,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1601,7 +1521,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         }
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
@@ -1657,7 +1577,7 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             }
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             response = self.client.post(
