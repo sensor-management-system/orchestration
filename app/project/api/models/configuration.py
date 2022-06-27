@@ -110,12 +110,6 @@ class Configuration(
             "device_mount_actions": [
                 d.to_search_entry() for d in self.device_mount_actions
             ],
-            "platform_unmount_actions": [
-                p.to_search_entry() for p in self.platform_unmount_actions
-            ],
-            "device_unmount_actions": [
-                d.to_search_entry() for d in self.device_unmount_actions
-            ],
             "is_internal": self.is_internal,
             "is_public": self.is_public,
             "created_by_id": self.created_by_id,
@@ -228,7 +222,8 @@ class Configuration(
                     "platform_mount_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": type_text_full_searchable,
+                            "begin_description": type_text_full_searchable,
+                            "end_description": type_text_full_searchable,
                             "platform": {
                                 "type": "nested",
                                 "properties": Platform.get_search_index_properties(),
@@ -238,20 +233,13 @@ class Configuration(
                     "device_mount_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": type_text_full_searchable,
+                            "begin_description": type_text_full_searchable,
+                            "end_description": type_text_full_searchable,
                             "device": {
                                 "type": "nested",
                                 "properties": Device.get_search_index_properties(),
                             },
                         },
-                    },
-                    "platform_unmount_actions": {
-                        "type": "nested",
-                        "properties": {"description": type_text_full_searchable},
-                    },
-                    "device_unmount_actions": {
-                        "type": "nested",
-                        "properties": {"description": type_text_full_searchable},
                     },
                 }
             },

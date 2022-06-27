@@ -212,32 +212,6 @@ api.route(
     "platform_mount_action_detail",
     "/platform-mount-actions/<int:id>",
 )
-# DeviceUnmountAction
-api.route(
-    DeviceUnmountActionList,
-    "device_unmount_action_list",
-    "/device-unmount-actions",
-    "/configurations/<int:configuration_id>/device-unmount-actions",
-    "/devices/<int:device_id>/device-unmount-actions",
-)
-api.route(
-    DeviceUnmountActionDetail,
-    "device_unmount_action_detail",
-    "/device-unmount-actions/<int:id>",
-)
-# UnMountPlatformAction
-api.route(
-    PlatformUnmountActionList,
-    "platform_unmount_action_list",
-    "/platform-unmount-actions",
-    "/configurations/<int:configuration_id>/platform-unmount-actions",
-    "/platforms/<int:platform_id>/platform-unmount-actions",
-)
-api.route(
-    PlatformUnmountActionDetail,
-    "platform_unmount_action_detail",
-    "/platform-unmount-actions/<int:id>",
-)
 
 # DeviceCalibrationAction
 api.route(

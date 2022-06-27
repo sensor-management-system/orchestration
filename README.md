@@ -7,7 +7,7 @@
 [![openapi](https://img.shields.io/badge/Swagger-2.0-green.svg?style=?style=plastic&logo=openapi-initiative)](./app/project/static/swagger.json)
 [![licences](https://img.shields.io/badge/licenses-MIT-green.svg?style=?style=plastic&logo=)](#)
 
-![Data model](docs/images/alembic_version_aa89a10ad413.png)
+![Data model](docs/images/alembic_version_0740d341ea8e.png)
 
 RESTful API service in Python for managing sensor metadata using [flask](https://flask.palletsprojects.com/en/1.1.x/).
 

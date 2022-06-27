@@ -30,7 +30,7 @@ class TestMountPlatformPermissions(BaseTestCase):
         )
         platform_mount_action = PlatformMountAction(
             begin_date=fake.date(),
-            description="test mount platform action model",
+            begin_description="test mount platform action model",
             offset_x=fake.coordinate(),
             offset_y=fake.coordinate(),
             offset_z=fake.coordinate(),
@@ -38,7 +38,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             platform=platform,
         )
         platform_mount_action.configuration = configuration
-        platform_mount_action.contact = contact
+        platform_mount_action.begin_contact = contact
         db.session.add_all(
             [platform, contact, user, configuration, platform_mount_action]
         )
@@ -48,7 +48,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             .filter_by(id=platform_mount_action.id)
             .one()
         )
-        self.assertEqual(action.description, platform_mount_action.description)
+        self.assertEqual(action.begin_description, platform_mount_action.begin_description)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
@@ -66,7 +66,7 @@ class TestMountPlatformPermissions(BaseTestCase):
         )
         platform_mount_action = PlatformMountAction(
             begin_date=fake.date(),
-            description="test mount internal platform action model",
+            begin_description="test mount internal platform action model",
             offset_x=fake.coordinate(),
             offset_y=fake.coordinate(),
             offset_z=fake.coordinate(),
@@ -74,7 +74,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             platform=platform,
         )
         platform_mount_action.configuration = configuration
-        platform_mount_action.contact = contact
+        platform_mount_action.begin_contact = contact
         db.session.add_all(
             [platform, contact, user, configuration, platform_mount_action]
         )
@@ -84,7 +84,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             .filter_by(id=platform_mount_action.id)
             .one()
         )
-        self.assertEqual(action.description, platform_mount_action.description)
+        self.assertEqual(action.begin_description, platform_mount_action.begin_description)
 
         # Without a valid JWT -> Will not be listed.
         response = self.client.get(self.url)
@@ -110,7 +110,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             self.object_type, configuration, contact, parent_platform, platform
         )
         _ = super().add_object(
-            url=f"{self.url}?include=platform,contact,parent_platform,configuration",
+            url=f"{self.url}?include=platform,begin_contact,parent_platform,configuration",
             data_object=data,
             object_type=self.object_type,
         )
@@ -138,7 +138,7 @@ class TestMountPlatformPermissions(BaseTestCase):
         )
         mount_public_platform = PlatformMountAction(
             begin_date=fake.date(),
-            description="test mount public device action model",
+            begin_description="test mount public device action model",
             offset_x=fake.coordinate(),
             offset_y=fake.coordinate(),
             offset_z=fake.coordinate(),
@@ -146,11 +146,11 @@ class TestMountPlatformPermissions(BaseTestCase):
             platform=public_platform,
         )
         mount_public_platform.configuration = configuration
-        mount_public_platform.contact = contact
+        mount_public_platform.begin_contact = contact
 
         mount_internal_platform = PlatformMountAction(
             begin_date=fake.date(),
-            description="test mount internal device action model",
+            begin_description="test mount internal device action model",
             offset_x=fake.coordinate(),
             offset_y=fake.coordinate(),
             offset_z=fake.coordinate(),
@@ -158,7 +158,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             platform=internal_platform,
         )
         mount_internal_platform.configuration = configuration
-        mount_internal_platform.contact = contact
+        mount_internal_platform.begin_contact = contact
         db.session.add_all(
             [
                 public_platform,
@@ -215,7 +215,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
-                    f"{self.url}?include=platform,contact,parent_platform,configuration",
+                    f"{self.url}?include=platform,begin_contact,parent_platform,configuration",
                     data=json.dumps(data),
                     content_type="application/vnd.api+json",
                     headers=access_headers,
@@ -245,7 +245,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
-                    f"{self.url}?include=platform,contact,parent_platform,configuration",
+                    f"{self.url}?include=platform,begin_contact,parent_platform,configuration",
                     data=json.dumps(data),
                     content_type="application/vnd.api+json",
                     headers=access_headers,
@@ -274,7 +274,7 @@ class TestMountPlatformPermissions(BaseTestCase):
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
-                    f"{self.url}?include=platform,contact,parent_platform,configuration",
+                    f"{self.url}?include=platform,begin_contact,parent_platform,configuration",
                     data=json.dumps(data),
                     content_type="application/vnd.api+json",
                     headers=access_headers,
@@ -300,7 +300,7 @@ def mount_payload_data(
         "data": {
             "type": object_type,
             "attributes": {
-                "description": "Test PlatformMountAction",
+                "begin_description": "Test PlatformMountAction",
                 "begin_date": begin_date,
                 "offset_x": str(fake.coordinate()),
                 "offset_y": str(fake.coordinate()),
@@ -308,7 +308,7 @@ def mount_payload_data(
             },
             "relationships": {
                 "platform": {"data": {"type": "platform", "id": platform.id}},
-                "contact": {"data": {"type": "contact", "id": contact.id}},
+                "begin_contact": {"data": {"type": "contact", "id": contact.id}},
                 "parent_platform": {
                     "data": {"type": "platform", "id": parent_platform.id}
                 },

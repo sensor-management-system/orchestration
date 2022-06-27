@@ -33,17 +33,26 @@ class PlatformMountAction(db.Model, AuditMixin):
         backref=db.backref("outer_platform_mount_actions"),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
-    contact = db.relationship(
+    begin_description = db.Column(db.Text, nullable=True)
+    begin_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    begin_contact = db.relationship(
         "Contact",
         uselist=False,
-        foreign_keys=[contact_id],
+        foreign_keys=[begin_contact_id],
         backref=db.backref("platform_mount_actions"),
     )
     offset_x = db.Column(db.Float, default=0)
     offset_y = db.Column(db.Float, default=0)
     offset_z = db.Column(db.Float, default=0)
+    end_date = db.Column(db.DateTime, nullable=True)
+    end_description = db.Column(db.Text, nullable=True)
+    end_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=True)
+    end_contact = db.relationship(
+        "Contact",
+        uselist=False,
+        foreign_keys=[end_contact_id],
+        backref=db.backref("platform_unmount_actions"),
+    )
 
     def get_parent_search_entities(self):
         """Return the configuration as parent for the search."""
@@ -54,7 +63,8 @@ class PlatformMountAction(db.Model, AuditMixin):
     def to_search_entry(self):
         """Return a dict of search slots."""
         return {
-            "description": self.description,
+            "begin_description": self.begin_description,
+            "end_description": self.end_description,
             "platform": self.platform.to_search_entry(),
         }
 
@@ -96,18 +106,27 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         ),
     )
     begin_date = db.Column(db.DateTime, nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
-    contact = db.relationship(
+    begin_description = db.Column(db.Text, nullable=True)
+    begin_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    begin_contact = db.relationship(
         "Contact",
         uselist=False,
-        foreign_keys=[contact_id],
+        foreign_keys=[begin_contact_id],
         backref=db.backref("device_mount_actions"),
     )
     offset_x = db.Column(db.Float, default=0)
     offset_y = db.Column(db.Float, default=0)
     offset_z = db.Column(db.Float, default=0)
 
+    end_date = db.Column(db.DateTime, nullable=True)
+    end_description = db.Column(db.Text, nullable=True)
+    end_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=True)
+    end_contact = db.relationship(
+        "Contact",
+        uselist=False,
+        foreign_keys=[end_contact_id],
+        backref=db.backref("device_unmount_actions"),
+    )
     def get_parent_search_entities(self):
         """Return the configuration as parent for the search."""
         # We only want to include the mount for the search in the
@@ -117,7 +136,8 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     def to_search_entry(self):
         """Return a dict of search slots."""
         return {
-            "description": self.description,
+            "begin_description": self.begin_description,
+            "end_description": self.end_description,
             "device": self.device.to_search_entry(),
         }
 

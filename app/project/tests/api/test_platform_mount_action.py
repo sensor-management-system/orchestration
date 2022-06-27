@@ -1,4 +1,6 @@
 """Tests for the platform mount action api."""
+
+import datetime
 import json
 
 from project import base_url
@@ -52,20 +54,20 @@ class TestPlatformMountAction(BaseTestCase):
 
         action1 = PlatformMountAction(
             configuration=configuration1,
-            contact=contact,
+            begin_contact=contact,
             parent_platform=None,
             platform=platform1,
-            description="Some first action",
+            begin_description="Some first action",
             begin_date=fake.date_time(),
         )
         db.session.add(action1)
 
         action2 = PlatformMountAction(
             configuration=configuration2,
-            contact=contact,
+            begin_contact=contact,
             platform=platform2,
             parent_platform=None,
-            description="Some other action",
+            begin_description="Some other action",
             begin_date=fake.date_time(),
         )
         db.session.add(action2)
@@ -91,7 +93,7 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
         )
 
         # and test the second configuration
@@ -105,7 +107,7 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
         )
 
         # and for a non existing
@@ -154,20 +156,20 @@ class TestPlatformMountAction(BaseTestCase):
 
         action1 = PlatformMountAction(
             configuration=configuration1,
-            contact=contact,
+            begin_contact=contact,
             parent_platform=None,
             platform=platform1,
-            description="Some first action",
+            begin_description="Some first action",
             begin_date=fake.date_time(),
         )
         db.session.add(action1)
 
         action2 = PlatformMountAction(
             configuration=configuration2,
-            contact=contact,
+            begin_contact=contact,
             platform=platform2,
             parent_platform=None,
-            description="Some other action",
+            begin_description="Some other action",
             begin_date=fake.date_time(),
         )
         db.session.add(action2)
@@ -184,7 +186,7 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
         )
 
         # and test the second platform
@@ -198,7 +200,7 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
         )
 
         # and for a non existing
@@ -249,19 +251,19 @@ class TestPlatformMountAction(BaseTestCase):
 
         action1 = PlatformMountAction(
             configuration=configuration1,
-            contact=contact,
+            begin_contact=contact,
             parent_platform=platform3,
             platform=platform1,
-            description="Some first action",
+            begin_description="Some first action",
             begin_date=fake.date_time(),
         )
 
         action2 = PlatformMountAction(
             configuration=configuration2,
-            contact=contact,
+            begin_contact=contact,
             platform=platform2,
             parent_platform=platform4,
-            description="Some other action",
+            begin_description="Some other action",
             begin_date=fake.date_time(),
         )
         db.session.add_all(
@@ -290,7 +292,7 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
         )
 
         # and test the second platform
@@ -304,7 +306,7 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
         )
 
         # and for a non existing
@@ -333,8 +335,8 @@ class TestPlatformMountAction(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            mount_platform_action.description,
-            data["data"][0]["attributes"]["description"],
+            mount_platform_action.begin_description,
+            data["data"][0]["attributes"]["begin_description"],
         )
 
     def test_post_platfrom_mount_action(self):
@@ -352,27 +354,37 @@ class TestPlatformMountAction(BaseTestCase):
             is_internal=False,
         )
         userinfo = generate_userinfo_data()
-        contact = Contact(
+        begin_contact = Contact(
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
         )
+        end_contact = Contact(
+            given_name="F. " + userinfo["given_name"],
+            family_name="F. " + userinfo["family_name"],
+            email="f." + userinfo["email"],
+        )
         configuration = generate_configuration_model()
-        db.session.add_all([platform, parent_platform, contact, configuration])
+        db.session.add_all([platform, parent_platform, begin_contact, end_contact, configuration])
         db.session.commit()
+        begin_date = fake.future_datetime()
+        end_date = begin_date + datetime.timedelta(days=2)
         data = {
             "data": {
                 "type": self.object_type,
                 "attributes": {
-                    "description": "Test PlatformMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
+                    "begin_description": "Test PlatformMountAction",
+                    "begin_date": begin_date.__str__(),
                     "offset_x": str(fake.coordinate()),
                     "offset_y": str(fake.coordinate()),
                     "offset_z": str(fake.coordinate()),
+                    "end_date": end_date.__str__(),
+                    "end_description": "Test PlatformUnmountAction",
                 },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": begin_contact.id}},
+                    "end_contact": {"data": {"type": "contact", "id": end_contact.id}},
                     "parent_platform": {
                         "data": {"type": "platform", "id": parent_platform.id}
                     },
@@ -383,7 +395,7 @@ class TestPlatformMountAction(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=f"{self.url}?include=platform,contact,parent_platform,configuration",
+            url=f"{self.url}?include=platform,begin_contact,end_contact,parent_platform,configuration",
             data_object=data,
             object_type=self.object_type,
         )
@@ -395,7 +407,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {"description": "updated", },
+                "attributes": {"begin_description": "updated", },
             }
         }
         _ = super().update_object(
@@ -405,7 +417,7 @@ class TestPlatformMountAction(BaseTestCase):
         )
 
     def test_fail_delete_platform_mount_action(self):
-        """Delete PlatformMountAction."""
+        """Fail to delete PlatformMountAction when not logged in."""
         mount_platform_action = add_mount_platform_action_model()
         with self.client:
             response = self.client.delete(
@@ -413,6 +425,17 @@ class TestPlatformMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertNotEqual(response.status_code, 200)
+
+    def test_delete_platform_mount_action(self):
+        """Delete PlatformMountAction."""
+        mount_platform_action = add_mount_platform_action_model()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{mount_platform_action.id}",
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        self.assertEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

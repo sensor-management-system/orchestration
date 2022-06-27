@@ -251,7 +251,7 @@ class TestConfigurationsService(BaseTestCase):
             "data": {
                 "type": "device_mount_action",
                 "attributes": {
-                    "description": "Test DeviceMountAction",
+                    "begin_description": "Test DeviceMountAction",
                     "begin_date": fake.future_datetime().__str__(),
                     "offset_x": str(fake.coordinate()),
                     "offset_y": str(fake.coordinate()),
@@ -259,7 +259,7 @@ class TestConfigurationsService(BaseTestCase):
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
                     "parent_platform": {
                         "data": {"type": "platform", "id": device_parent_platform.id}
                     },
@@ -270,7 +270,7 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=f"{self.device_mount_url}?include=device,contact,parent_platform,configuration",
+            url=f"{self.device_mount_url}?include=device,begin_contact,parent_platform,configuration",
             data_object=device_mount_data,
             object_type="device_mount_action",
         )
@@ -279,7 +279,7 @@ class TestConfigurationsService(BaseTestCase):
             "data": {
                 "type": "platform_mount_action",
                 "attributes": {
-                    "description": "Test PlatformMountAction",
+                    "begin_description": "Test PlatformMountAction",
                     "begin_date": fake.future_datetime().__str__(),
                     "offset_x": str(fake.coordinate()),
                     "offset_y": str(fake.coordinate()),
@@ -287,7 +287,7 @@ class TestConfigurationsService(BaseTestCase):
                 },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
                     "parent_platform": {
                         "data": {"type": "platform", "id": parent_platform.id}
                     },
@@ -298,7 +298,7 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=f"{self.platform_mount_url}?include=platform,contact,parent_platform,configuration",
+            url=f"{self.platform_mount_url}?include=platform,begin_contact,parent_platform,configuration",
             data_object=platform_mount_data,
             object_type="platform_mount_action",
         )

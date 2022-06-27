@@ -57,10 +57,6 @@ from .device_software_update_action_resource import (  # noqa: F401
     DeviceSoftwareUpdateActionDetail,
     DeviceSoftwareUpdateActionList,
 )
-from .device_unmount_action_resources import (  # noqa: F401
-    DeviceUnmountActionDetail,
-    DeviceUnmountActionList,
-)
 from .generic_configuration_action_attachment_resources import (  # noqa: F401
     GenericConfigurationActionAttachmentDetail,
     GenericConfigurationActionAttachmentList,
@@ -103,10 +99,6 @@ from .platform_software_update_action_attachment_resources import (  # noqa: F40
 from .platform_software_update_action_resource import (  # noqa: F401
     PlatformSoftwareUpdateActionDetail,
     PlatformSoftwareUpdateActionList,
-)
-from .platform_unmount_action_resources import (  # noqa: F401
-    PlatformUnmountActionDetail,
-    PlatformUnmountActionList,
 )
 from .user_info import UserInfo  # noqa: F401
 from .user_resources import UserList, UserDetail  # noqa: F401

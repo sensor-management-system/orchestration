@@ -1,5 +1,6 @@
 """Tests for the device mount action api."""
 
+import datetime
 import json
 
 from project import base_url
@@ -38,8 +39,8 @@ class TestDeviceMountAction(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            mount_device_action.description,
-            data["data"][0]["attributes"]["description"],
+            mount_device_action.begin_description,
+            data["data"][0]["attributes"]["begin_description"],
         )
 
     def test_post_device_mount_action(self):
@@ -58,27 +59,37 @@ class TestDeviceMountAction(BaseTestCase):
             is_internal=False,
         )
 
-        contact = Contact(
+        begin_contact = Contact(
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
             email=userinfo["email"],
         )
+        end_contact = Contact(
+            given_name="C. " + userinfo["given_name"],
+            family_name="C. " + userinfo["family_name"],
+            email="c." + userinfo["email"],
+        )
         configuration = generate_configuration_model()
-        db.session.add_all([device, parent_platform, contact, configuration])
+        db.session.add_all([device, parent_platform, begin_contact, end_contact, configuration])
         db.session.commit()
+        begin_date = fake.future_datetime()
+        end_date = begin_date + datetime.timedelta(days=2)
         data = {
             "data": {
                 "type": self.object_type,
                 "attributes": {
-                    "description": "Test DeviceMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
+                    "begin_description": "Test DeviceMountAction",
+                    "begin_date": str(begin_date),
                     "offset_x": str(fake.coordinate()),
                     "offset_y": str(fake.coordinate()),
                     "offset_z": str(fake.coordinate()),
+                    "end_description": "Test DeviceUnMountAction",
+                    "end_date": str(end_date),
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": begin_contact.id}},
+                    "end_contact": {"data": {"type": "contact", "id": end_contact.id}},
                     "parent_platform": {
                         "data": {"type": "platform", "id": parent_platform.id}
                     },
@@ -89,7 +100,7 @@ class TestDeviceMountAction(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=f"{self.url}?include=device,contact,parent_platform,configuration",
+            url=f"{self.url}?include=device,begin_contact,end_contact,parent_platform,configuration",
             data_object=data,
             object_type=self.object_type,
         )
@@ -101,7 +112,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {"begin_description": "updated",},
             }
         }
         _ = super().update_object(
@@ -110,10 +121,13 @@ class TestDeviceMountAction(BaseTestCase):
             object_type=self.object_type,
         )
 
-    def test_fail_to_delete_device_mount_action_without_permission(self):
+    def test_delete_device_mount_action(self):
         """Delete DeviceMountAction should fail without permission."""
         mount_device_action = add_mount_device_action_model()
         access_headers = create_token()
+        # As long as there is no permission group for the configuration,
+        # an authentificated user is allowed to delete the action.
+        # (At least in our current implementation.)
         with self.client:
             response = self.client.delete(
                 f"{self.url}/{mount_device_action.id}",
@@ -156,19 +170,19 @@ class TestDeviceMountAction(BaseTestCase):
 
         action1 = DeviceMountAction(
             configuration=configuration1,
-            contact=contact,
+            begin_contact=contact,
             device=device1,
             parent_platform=None,
-            description="Some first action",
+            begin_description="Some first action",
             begin_date=fake.date_time(),
         )
         db.session.add(action1)
 
         action2 = DeviceMountAction(
             configuration=configuration2,
-            contact=contact,
+            begin_contact=contact,
             device=device2,
-            description="Some other action",
+            begin_description="Some other action",
             begin_date=fake.date_time(),
         )
         db.session.add(action2)
@@ -194,7 +208,7 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
         )
 
         # and test the second configuration
@@ -208,7 +222,7 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
         )
 
         # and for a non existing
@@ -257,19 +271,19 @@ class TestDeviceMountAction(BaseTestCase):
 
         action1 = DeviceMountAction(
             configuration=configuration1,
-            contact=contact,
+            begin_contact=contact,
             device=device1,
             parent_platform=None,
-            description="Some first action",
+            begin_description="Some first action",
             begin_date=fake.date_time(),
         )
         db.session.add(action1)
 
         action2 = DeviceMountAction(
             configuration=configuration2,
-            contact=contact,
+            begin_contact=contact,
             device=device2,
-            description="Some other action",
+            begin_description="Some other action",
             begin_date=fake.date_time(),
         )
         db.session.add(action2)
@@ -287,7 +301,7 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
         )
 
         # and test the second device
@@ -301,7 +315,7 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
         )
 
         # and for a non existing
@@ -359,10 +373,10 @@ class TestDeviceMountAction(BaseTestCase):
 
         action1 = DeviceMountAction(
             configuration=configuration1,
-            contact=contact,
+            begin_contact=contact,
             device=device1,
             parent_platform=platform1,
-            description="Some first action",
+            begin_description="Some first action",
             begin_date=fake.date_time(),
         )
         db.session.add(action1)
@@ -370,9 +384,9 @@ class TestDeviceMountAction(BaseTestCase):
         action2 = DeviceMountAction(
             configuration=configuration2,
             parent_platform=platform2,
-            contact=contact,
+            begin_contact=contact,
             device=device2,
-            description="Some other action",
+            begin_description="Some other action",
             begin_date=fake.date_time(),
         )
         db.session.add(action2)
@@ -390,7 +404,7 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
         )
 
         # and test the second platform
@@ -404,7 +418,7 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
         )
 
         # and for a non existing

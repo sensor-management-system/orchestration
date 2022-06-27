@@ -42,5 +42,4 @@ from .software_update_actions import (  # noqa: F401
     DeviceSoftwareUpdateAction,
     PlatformSoftwareUpdateAction,
 )
-from .unmount_actions import DeviceUnmountAction, PlatformUnmountAction  # noqa: F401
 from .user import User  # noqa: F401
