@@ -1,8 +1,8 @@
 from flask import g
 
+from ...extensions.instances import idl
 from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import MethodNotAllowed, UnauthorizedError
-from ..services.idl_services import Idl
 
 
 class UserInfo(ResourceList):
@@ -20,7 +20,7 @@ class UserInfo(ResourceList):
         """
         if not g.user:
             raise UnauthorizedError("Login required")
-        idl_groups = Idl().get_all_permission_groups_for_a_user(g.user.subject)
+        idl_groups = idl.get_all_permission_groups_for_a_user(g.user.subject)
         data = {
             "data": {
                 "type": "user",

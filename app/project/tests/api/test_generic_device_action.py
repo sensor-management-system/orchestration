@@ -6,14 +6,14 @@ from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, Device, GenericDeviceAction
-from project.api.services.idl_services import Idl
+from project.extensions.instances import idl
 from project.tests.base import (
     BaseTestCase,
+    create_token,
     fake,
     generate_userinfo_data,
     test_file_path,
 )
-from project.tests.base import create_token
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -46,7 +46,7 @@ class TestGenericDeviceAction(BaseTestCase):
         """Ensure POST a new generic device action can be added to the database."""
         data = self.make_generic_device_action_data()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             _ = super().add_object(
@@ -112,7 +112,7 @@ class TestGenericDeviceAction(BaseTestCase):
         """Ensure a generic_device_action can be updated."""
         generic_device_action_data = self.make_generic_device_action_data()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             generic_device_action = super().add_object(
@@ -156,7 +156,7 @@ class TestGenericDeviceAction(BaseTestCase):
         """Ensure a generic_device_action can be deleted."""
         data = self.make_generic_device_action_data()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             obj = super().add_object(

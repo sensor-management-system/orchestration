@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Any, Callable, TypeVar, Type, cast
+from typing import Any, Callable, List, Type, TypeVar, cast
 
 from flask import current_app
 
@@ -38,14 +38,14 @@ def to_class(c: Type[T], x: Any) -> dict:
 
 
 @dataclass
-class IdlUser:
+class UserAccount:
     id: str
     username: str
     administrated_permission_groups: List[str]
     membered_permission_groups: List[str]
 
     @staticmethod
-    def from_dict(obj: Any) -> "IdlUser":
+    def from_dict(obj: Any) -> "UserAccount":
         assert isinstance(obj, dict)
         id = from_str(obj.get("id"))
         username = from_str(obj.get("userName"))
@@ -63,10 +63,10 @@ class IdlUser:
             membered_permission_groups = from_list(
                 from_str, obj.get("memberedPermissionGroups")
             )
-        return IdlUser(
+        return UserAccount(
             id, username, administrated_permission_groups, membered_permission_groups
         )
 
 
-def idl_from_dict(s: dict) -> IdlUser:
-    return IdlUser.from_dict(s)
+def idl_from_dict(s: dict) -> UserAccount:
+    return UserAccount.from_dict(s)

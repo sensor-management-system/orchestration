@@ -5,12 +5,9 @@ from unittest.mock import patch
 from project import base_url
 from project.api.models import Configuration, User
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
+from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
-from project.tests.permissions import (
-    create_a_test_contact,
-    create_superuser_token,
-)
+from project.tests.permissions import create_a_test_contact, create_superuser_token
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -232,7 +229,7 @@ class TestConfigurationPermissions(BaseTestCase):
                 data["data"]["attributes"]["cfg_permission_group"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+                idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 configuration_data_changed = {
@@ -276,7 +273,7 @@ class TestConfigurationPermissions(BaseTestCase):
                 group_id_test_user_is_not_included,
             )
             with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+                idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 configuration_data_changed_forbidden = {
@@ -303,7 +300,7 @@ class TestConfigurationPermissions(BaseTestCase):
         access_headers = create_token()
         for configuration_data in configs:
             with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+                idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 with self.client:
@@ -363,7 +360,7 @@ class TestConfigurationPermissions(BaseTestCase):
                 data["data"]["attributes"]["cfg_permission_group"],
             )
             with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+                idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.configuration_url}/{data['data']['id']}"
@@ -399,7 +396,7 @@ class TestConfigurationPermissions(BaseTestCase):
             )
 
             with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+                idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.configuration_url}/{data['data']['id']}"
@@ -433,7 +430,7 @@ class TestConfigurationPermissions(BaseTestCase):
             )
 
             with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+                idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.configuration_url}/{data['data']['id']}"

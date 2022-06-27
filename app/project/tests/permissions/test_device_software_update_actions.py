@@ -4,10 +4,8 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import create_token
-from project.tests.base import fake
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_software_update_actions_model import (
     add_device_software_update_action_model,
 )
@@ -78,7 +76,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             self.object_type, device, contact
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -101,7 +99,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             self.object_type, device, contact
         )
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -123,12 +121,14 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_software_update_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {
+                    "description": "updated",
+                },
             }
         }
         url = f"{self.url}/{device_software_update_action.id}"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -150,12 +150,14 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_software_update_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {
+                    "description": "updated",
+                },
             }
         }
         url = f"{self.url}/{device_software_update_action.id}"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -174,7 +176,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         )
         url = f"{self.url}/{device_software_update_action.id}"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -192,7 +194,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         )
         url = f"{self.url}/{device_software_update_action.id}"
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
