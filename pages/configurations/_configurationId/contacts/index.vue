@@ -38,7 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="removeContact(item.id)"
             />
           </template>
@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -85,7 +85,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import BaseList from '@/components/shared/BaseList.vue'
@@ -106,6 +106,9 @@ import HintCard from '@/components/HintCard.vue'
   methods: mapActions('configurations', ['loadConfigurationContacts', 'removeConfigurationContact'])
 })
 export default class ConfigurationShowContactPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
 
   // vuex definition for typescript check

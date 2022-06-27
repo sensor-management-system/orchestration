@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          :disabled="!canModifyEntity(deviceToCopy)"
           :to="'/devices'"
           save-btn-text="Copy"
           @save="save"
@@ -118,6 +119,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          :disabled="!canModifyEntity(deviceToCopy)"
           :to="'/devices'"
           save-btn-text="Copy"
           @save="save"
@@ -129,13 +131,16 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { mapActions, mapState } from 'vuex'
+import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
+import { LoadDeviceAction, CopyDeviceAction, DevicesState } from '@/store/devices'
+
+import { Device } from '@/models/Device'
+
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { Device } from '@/models/Device'
 
 @Component({
   components: {
@@ -144,7 +149,10 @@ import { Device } from '@/models/Device'
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed: mapState('devices', ['device']),
+  computed: {
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
+    ...mapState('devices', ['device'])
+  },
   methods: {
     ...mapActions('devices', ['copyDevice', 'loadDevice']),
     ...mapActions('appbar', ['setDefaults', 'initDeviceCopyAppBar'])
@@ -166,20 +174,14 @@ export default class DeviceCopyPage extends Vue {
   private inventoryNumberPlaceholder: string | null = null
 
   // vuex definition for typescript check
-  device!: Device
+  device!: DevicesState['device']
   initDeviceCopyAppBar!: (id: string) => void
   setDefaults!: () => void
-  copyDevice!: ({ device, copyContacts, copyAttachments, copyMeasuredQuantities, copyCustomFields }:
-    {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean}) => string
-
-  loadDevice!: ({
-    deviceId,
-    includeContacts,
-    includeCustomFields,
-    includeDeviceProperties,
-    includeDeviceAttachments
-  }:
-    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean }) => void
+  canAccessEntity!: CanAccessEntityGetter
+  canModifyEntity!: CanModifyEntityGetter
+  userGroups!: UserGroupsGetter
+  loadDevice!: LoadDeviceAction
+  copyDevice!: CopyDeviceAction
 
   async created () {
     this.initDeviceCopyAppBar(this.deviceId)
@@ -192,7 +194,17 @@ export default class DeviceCopyPage extends Vue {
         includeDeviceProperties: true,
         includeDeviceAttachments: true
       })
-      this.deviceToCopy = this.getPreparedDeviceForCopy()
+
+      if (!this.device || !this.canAccessEntity(this.device)) {
+        this.$router.replace('/devices/')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to copy this device.')
+        return
+      }
+
+      const deviceCopy = this.getPreparedDeviceForCopy()
+      if (deviceCopy) {
+        this.deviceToCopy = deviceCopy
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading device failed')
     } finally {
@@ -212,7 +224,10 @@ export default class DeviceCopyPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  getPreparedDeviceForCopy (): any {
+  getPreparedDeviceForCopy (): Device | null {
+    if (!this.device) {
+      return null
+    }
     const deviceToEdit = Device.createFromObject(this.device)
     deviceToEdit.id = null
     if (deviceToEdit.persistentIdentifier) {
@@ -227,6 +242,7 @@ export default class DeviceCopyPage extends Vue {
       this.inventoryNumberPlaceholder = deviceToEdit.inventoryNumber
     }
     deviceToEdit.inventoryNumber = ''
+    deviceToEdit.permissionGroups = this.userGroups.filter(userGroup => this.device?.permissionGroups.filter(group => userGroup.equals(group)).length)
     return deviceToEdit
   }
 

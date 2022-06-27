@@ -44,6 +44,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -61,6 +62,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -70,14 +72,23 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import {
+  LoadDeviceCalibrationActionAction,
+  LoadAllDeviceActionsAction,
+  LoadDeviceAttachmentsAction,
+  LoadDeviceMeasuredQuantitiesAction,
+  UpdateDeviceCalibrationAction,
+  DevicesState
+} from '@/store/devices'
+
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 
 @Component({
   components: {
@@ -91,29 +102,42 @@ import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
   methods: mapActions('devices', ['loadDeviceCalibrationAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'loadDeviceMeasuredQuantities', 'updateDeviceCalibrationAction'])
 })
 export default class DeviceCalibrationActionEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()
   private isSaving = false
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceCalibrationAction!: (id: string) => void
-  loadDeviceAttachments!: (id: string) => void
-  loadDeviceMeasuredQuantities!: (id: string) => void
-  deviceCalibrationAction!: DeviceCalibrationAction
-  updateDeviceCalibrationAction!: ({
-    deviceId,
-    calibrationDeviceAction
-  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
+  deviceCalibrationAction!: DevicesState['deviceCalibrationAction']
+  deviceAttachments!: DevicesState['deviceAttachments']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
+  loadDeviceCalibrationAction!: LoadDeviceCalibrationActionAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+  updateDeviceCalibrationAction!: UpdateDeviceCalibrationAction
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
-  loadAllDeviceActions!: (id: string) => void
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 
-  async created () {
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadDeviceCalibrationAction(this.actionId)
-      await this.loadDeviceAttachments(this.deviceId)
-      await this.loadDeviceMeasuredQuantities(this.deviceId)
-      this.action = DeviceCalibrationAction.createFromObject(this.deviceCalibrationAction)
+      await Promise.all([
+        this.loadDeviceCalibrationAction(this.actionId),
+        this.loadDeviceAttachments(this.deviceId),
+        this.loadDeviceMeasuredQuantities(this.deviceId)
+      ])
+      if (this.deviceCalibrationAction) {
+        this.action = DeviceCalibrationAction.createFromObject(this.deviceCalibrationAction)
+      }
     } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
@@ -143,7 +167,7 @@ export default class DeviceCalibrationActionEditPage extends Vue {
       this.isLoading = true
       await this.updateDeviceCalibrationAction({
         deviceId: this.deviceId,
-        calibrationDeviceAction: this.action
+        calibrationAction: this.action
       })
       this.loadAllDeviceActions(this.deviceId)
       this.$router.push('/devices/' + this.deviceId + '/actions')

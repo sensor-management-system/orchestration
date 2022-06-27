@@ -30,9 +30,11 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit, Dispatch, Getter } from 'vuex'
+import { Commit, Dispatch, GetterTree, ActionTree } from 'vuex'
+
+import { RootState } from '@/store'
+
 import { Platform } from '@/models/Platform'
-import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
@@ -43,10 +45,12 @@ import { IActionType } from '@/models/ActionType'
 import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 import { IDateCompareable } from '@/modelUtils/Compareables'
-import { Api } from '@/services/Api'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { PlatformType } from '@/models/PlatformType'
+import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
+
+import { IncludedRelationships } from '@/services/sms/PlatformApi'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -63,7 +67,7 @@ const PAGE_SIZES = [
   100
 ]
 
-interface platformsState {
+export interface PlatformsState {
   platforms: Platform[],
   platform: Platform | null,
   platformContacts: Contact[],
@@ -76,9 +80,9 @@ interface platformsState {
   platformMountActions: PlatformMountActionWrapper[],
   platformUnmountActions: PlatformUnmountActionWrapper[],
   chosenKindOfPlatformAction: IOptionsForActionType | null,
-  selectedSearchManufacturers:Manufacturer[],
+  selectedSearchManufacturers: Manufacturer[],
   selectedSearchStates: Status[],
-  selectedSearchPlatformTypes:PlatformType[],
+  selectedSearchPlatformTypes: PlatformType[],
   onlyOwnPlatforms: boolean,
   searchText: string | null
   pageNumber: number,
@@ -86,7 +90,7 @@ interface platformsState {
   totalPages: number
 }
 
-const state = () => ({
+const state = (): PlatformsState => ({
   platforms: [],
   platform: null,
   platformContacts: [],
@@ -99,19 +103,22 @@ const state = () => ({
   chosenKindOfPlatformAction: null,
   platformGenericAction: null,
   platformSoftwareUpdateAction: null,
-  selectedSearchManufacturers:[],
-  selectedSearchStates:[],
-  selectedSearchPlatformTypes:[],
+  selectedSearchManufacturers: [],
+  selectedSearchStates: [],
+  selectedSearchPlatformTypes: [],
   onlyOwnPlatforms: false,
   searchText: null,
   totalPages: 1,
   pageNumber: 1,
-  pageSize: PAGE_SIZES[0],
+  pageSize: PAGE_SIZES[0]
 })
 
-const getters = {
-  searchParams: (state: platformsState) => (isLoggedIn:boolean)=>{
+export type SearchParamsGetter = (isLoggedIn: boolean) => IPlatformSearchParams
+export type ActionsGetter = (GenericAction | SoftwareUpdateAction | PlatformMountActionWrapper | PlatformUnmountActionWrapper)[]
+export type PageSizesGetter = number[]
 
+const getters: GetterTree<PlatformsState, RootState> = {
+  searchParams: (state: PlatformsState): SearchParamsGetter => (isLoggedIn: boolean): IPlatformSearchParams => {
     return {
       searchText: state.searchText,
       manufacturer: state.selectedSearchManufacturers,
@@ -120,7 +127,7 @@ const getters = {
       onlyOwnPlatforms: state.onlyOwnPlatforms && isLoggedIn
     }
   },
-  actions: (state: platformsState) => {
+  actions: (state: PlatformsState): ActionsGetter => {
     let actions = [
       ...state.platformGenericActions,
       ...state.platformSoftwareUpdateActions,
@@ -134,40 +141,74 @@ const getters = {
     })
     return actions
   },
-  pageSizes: () => {
+  pageSizes: (): number[] => {
     return PAGE_SIZES
   }
 }
 
-// @ts-ignore
-const actions: {
-  [key: string]: any;
-  $api: Api
-} = {
+export type SearchPlatformsPaginatedAction = () => Promise<void>
+export type SearchPlatformsAction = (searchtext: string) => Promise<void>
+export type LoadPlatformAction = (params: { platformId: string } & IncludedRelationships) => Promise<void>
+export type LoadPlatformContactsAction = (id: string) => Promise<void>
+export type LoadPlatformAttachmentsAction = (id: string) => Promise<void>
+export type LoadPlatformAttachmentAction = (id: string) => Promise<void>
+export type LoadAllPlatformActionsAction = (id: string) => Promise<void>
+export type LoadPlatformGenericActionsAction = (id: string) => Promise<void>
+export type LoadPlatformSoftwareUpdateActionsAction = (id: string) => Promise<void>
+export type LoadPlatformMountActionsAction = (id: string) => Promise<void>
+export type LoadPlatformUnmountActionsAction = (id: string) => Promise<void>
+export type LoadPlatformGenericActionAction = (actionId: string) => Promise<void>
+export type LoadPlatformSoftwareUpdateActionAction = (actionId: string) => Promise<void>
+export type AddPlatformContactAction = (params: {platformId: string, contactId: string}) => Promise<void>
+export type RemovePlatformContactAction = (params: {platformId: string, contactId: string}) => Promise<void>
+export type AddPlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
+export type UpdatePlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
+export type DeletePlatformAttachmentAction = (attachmentId: string) => Promise<void>
+export type AddPlatformGenericActionAction = (params: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
+export type UpdatePlatformGenericActionAction = (params: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
+export type DeletePlatformGenericActionAction = (genericPlatformActionId: string) => Promise<void>
+export type AddPlatformSoftwareUpdateActionAction = (params: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
+export type UpdatePlatformSoftwareUpdateActionAction = (params: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
+export type DeletePlatformSoftwareUpdateActionAction = (softwareUpdateActionId: string) => Promise<void>
+export type UpdatePlatformAction = (platform: Platform) => void
+export type SavePlatformAction = (platform: Platform) => Promise<Platform>
+export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}) => Promise<string>
+export type ExportAsCsvAction = () => Promise<Blob>
+export type DeletePlatformAction = (id: string) => Promise<void>
+export type SetPageNumberAction = (newPageNumber: number) => void
+export type SetPageSizeAction = (newPageSize: number) => void
+export type SetChosenKindOfPlatformActionAction = (newval: IOptionsForActionType | null) => void
+export type SetSelectedSearchManufacturersAction = (selectedSearchManufacturers: Manufacturer[]) => void
+export type SetSelectedSearchStatesAction = (selectedSearchStates: Status[]) => void
+export type SetSelectedSearchPlatformTypesAction = (selectedSearchPlatformTypes: PlatformType[]) => void
+export type SetOnlyOwnPlatformsAction = (onlyOwnPlatforms: boolean) => void
+export type SetSearchTextAction = (searchText: string | null) => void
+
+const actions: ActionTree<PlatformsState, RootState> = {
   async searchPlatformsPaginated ({
     commit,
     state,
     getters
-  }: { commit: Commit, state: platformsState, getters: any }) {
-
-    let searchParams = getters.searchParams(this.$auth.loggedIn)
-    console.log('searchParams',searchParams);
+  }: { commit: Commit, state: PlatformsState, getters: any }): Promise<void> {
+    const searchParams = getters.searchParams(this.$auth.loggedIn)
     let email = null
     if (searchParams.onlyOwnPlatforms) {
-      // @ts-ignore
       email = this.$auth.user!.email as string
     }
 
-
-
-    // @ts-ignore
     const { elements, totalCount } = await this.$api.platforms
       .setSearchText(searchParams.searchText)
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)
       .setSearchedPlatformTypes(searchParams.types)
       .setSearchedUserMail(email)
-      .searchPaginated(state.pageNumber, state.pageSize)
+      .searchPaginated(
+        state.pageNumber,
+        state.pageSize,
+        {
+          includeCreatedBy: true
+        }
+      )
     commit('setPlatforms', elements)
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
@@ -175,47 +216,58 @@ const actions: {
   },
   async searchPlatforms ({
     commit
-  }: { commit: Commit }, searchtext: string = '') {
-    // @ts-ignore
+  }: { commit: Commit }, searchtext: string = ''): Promise<void> {
     const platforms = await this.$api.platforms
       .setSearchText(searchtext)
       .searchAll()
     commit('setPlatforms', platforms)
   },
-  async loadPlatform ({ commit }: { commit: Commit }, { platformId, includeContacts, includePlatformAttachments }: {platformId: string, includeContacts: boolean, includePlatformAttachments: boolean}) {
+  async loadPlatform ({ commit }: { commit: Commit },
+    {
+      platformId,
+      includeContacts,
+      includePlatformAttachments,
+      includeCreatedBy,
+      includeUpdatedBy
+    }: { platformId: string } & IncludedRelationships
+  ): Promise<void> {
     const platform = await this.$api.platforms.findById(platformId, { // TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
       includeContacts,
-      includePlatformAttachments
+      includePlatformAttachments,
+      includeCreatedBy,
+      includeUpdatedBy
     })
     commit('setPlatform', platform)
   },
-  async loadPlatformContacts ({ commit }: { commit: Commit }, id: string) {
+  async loadPlatformContacts ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformContacts = await this.$api.platforms.findRelatedContacts(id)
     commit('setPlatformContacts', platformContacts)
   },
-  async loadPlatformAttachments ({ commit }: { commit: Commit }, id: string) {
+  async loadPlatformAttachments ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformAttachments = await this.$api.platforms.findRelatedPlatformAttachments(id)
     commit('setPlatformAttachments', platformAttachments)
   },
-  async loadPlatformAttachment ({ commit }: { commit: Commit }, id: string) {
+  async loadPlatformAttachment ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformAttachment = await this.$api.platformAttachments.findById(id)
     commit('setPlatformAttachment', platformAttachment)
   },
-  async loadAllPlatformActions ({ dispatch }: {dispatch: Dispatch}, id: string) {
-    await dispatch('loadPlatformGenericActions', id)
-    await dispatch('loadPlatformSoftwareUpdateActions', id)
-    await dispatch('loadPlatformMountActions', id)
-    await dispatch('loadPlatformUnmountActions', id)
+  async loadAllPlatformActions ({ dispatch }: {dispatch: Dispatch}, id: string): Promise<void> {
+    await Promise.all([
+      dispatch('loadPlatformGenericActions', id),
+      dispatch('loadPlatformSoftwareUpdateActions', id),
+      dispatch('loadPlatformMountActions', id),
+      dispatch('loadPlatformUnmountActions', id)
+    ])
   },
-  async loadPlatformGenericActions ({ commit }: { commit: Commit }, id: string) {
+  async loadPlatformGenericActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformGenericActions = await this.$api.platforms.findRelatedGenericActions(id)
     commit('setPlatformGenericActions', platformGenericActions)
   },
-  async loadPlatformSoftwareUpdateActions ({ commit }: { commit: Commit }, id: string) {
+  async loadPlatformSoftwareUpdateActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformSoftwareUpdateActions = await this.$api.platforms.findRelatedSoftwareUpdateActions(id)
     commit('setPlatformSoftwareUpdateActions', platformSoftwareUpdateActions)
   },
-  async loadPlatformMountActions ({ commit }: { commit: Commit }, id: string) {
+  async loadPlatformMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformMountActions = await this.$api.platforms.findRelatedMountActions(id)
 
     const wrappedPlatformMountActions = platformMountActions.map((action: PlatformMountAction) => {
@@ -224,7 +276,7 @@ const actions: {
 
     commit('setPlatformMountActions', wrappedPlatformMountActions)
   },
-  async loadPlatformUnmountActions ({ commit }: { commit: Commit }, id: string) {
+  async loadPlatformUnmountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformUnmountActions = await this.$api.platforms.findRelatedUnmountActions(id)
 
     const wrappedPlatformUnmountActions = platformUnmountActions.map((action: PlatformUnmountAction) => {
@@ -232,54 +284,54 @@ const actions: {
     })
     commit('setPlatformUnmountActions', wrappedPlatformUnmountActions)
   },
-  async loadPlatformGenericAction ({ commit }: { commit: Commit }, actionId: string) {
+  async loadPlatformGenericAction ({ commit }: { commit: Commit }, actionId: string): Promise<void> {
     const genericPlatformAction = await this.$api.genericPlatformActions.findById(actionId)
     commit('setPlatformGenericAction', genericPlatformAction)
   },
-  async loadPlatformSoftwareUpdateAction ({ commit }: { commit: Commit }, actionId: string) {
+  async loadPlatformSoftwareUpdateAction ({ commit }: { commit: Commit }, actionId: string): Promise<void> {
     const platformSoftwareUpdateAction = await this.$api.platformSoftwareUpdateActions.findById(actionId)
     commit('setPlatformSoftwareUpdateAction', platformSoftwareUpdateAction)
   },
-  addPlatformContact ({ _commit }: { _commit: Commit }, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
+  addPlatformContact (_: {}, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
     return this.$api.platforms.addContact(platformId, contactId)
   },
-  removePlatformContact ({ _commit }: { _commit: Commit }, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
+  removePlatformContact (_: {}, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
     return this.$api.platforms.removeContact(platformId, contactId)
   },
-  addPlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
+  addPlatformAttachment (_: {}, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
     return this.$api.platformAttachments.add(platformId, attachment)
   },
-  updatePlatformAttachment ({ _commit }: { _commit: Commit }, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
+  updatePlatformAttachment (_: {}, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
     return this.$api.platformAttachments.update(platformId, attachment)
   },
-  deletePlatformAttachment ({ _commit }: { _commit: Commit }, attachmentId: string): Promise<void> {
+  deletePlatformAttachment (_: {}, attachmentId: string): Promise<void> {
     return this.$api.platformAttachments.deleteById(attachmentId)
   },
-  addPlatformGenericAction ({ _commit }: { _commit: Commit }, { platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}): Promise<GenericAction> {
+  addPlatformGenericAction (_: {}, { platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}): Promise<GenericAction> {
     return this.$api.genericPlatformActions.add(platformId, genericPlatformAction)
   },
-  updatePlatformGenericAction ({ _commit }: { _commit: Commit }, { platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}): Promise<GenericAction> {
+  updatePlatformGenericAction (_: {}, { platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}): Promise<GenericAction> {
     return this.$api.genericPlatformActions.update(platformId, genericPlatformAction)
   },
-  deletePlatformGenericAction ({ _commit }: { _commit: Commit }, genericPlatformActionId: string): Promise<void> {
+  deletePlatformGenericAction (_: {}, genericPlatformActionId: string): Promise<void> {
     return this.$api.genericPlatformActions.deleteById(genericPlatformActionId)
   },
-  addPlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
+  addPlatformSoftwareUpdateAction (_: {}, { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
     return this.$api.platformSoftwareUpdateActions.add(platformId, softwareUpdateAction)
   },
-  updatePlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
+  updatePlatformSoftwareUpdateAction (_: {}, { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
     return this.$api.platformSoftwareUpdateActions.update(platformId, softwareUpdateAction)
   },
-  deletePlatformSoftwareUpdateAction ({ _commit }: { _commit: Commit }, softwareUpdateActionId: string): Promise<void> {
+  deletePlatformSoftwareUpdateAction (_: {}, softwareUpdateActionId: string): Promise<void> {
     return this.$api.platformSoftwareUpdateActions.deleteById(softwareUpdateActionId)
   },
-  updatePlatform ({ commit }: { commit: Commit }, platform: Platform) {
+  updatePlatform ({ commit }: { commit: Commit }, platform: Platform): void {
     commit('setPlatform', platform)
   },
-  savePlatform ({ _commit }: { _commit: Commit }, platform: Platform): Promise<Platform> {
+  savePlatform (_: {}, platform: Platform): Promise<Platform> {
     return this.$api.platforms.save(platform)
   },
-  async copyPlatform ({ dispatch, state }: { dispatch: Dispatch, state: platformsState }, { platform, copyContacts, copyAttachments }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}) {
+  async copyPlatform ({ dispatch, state }: { dispatch: Dispatch, state: PlatformsState }, { platform, copyContacts, copyAttachments }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}): Promise<string> {
     // Todo, prüfen ob man eventuell etwas vereinfachen kann
     const savedPlatform = await dispatch('savePlatform', platform)
     const savedPlatformId = savedPlatform.id!
@@ -308,7 +360,8 @@ const actions: {
     await Promise.all(related)
     return savedPlatformId
   },
-  async exportAsCsv ({ _commit }: { _commit: Commit}, searchParams: IPlatformSearchParams): Promise<Blob> {
+  async exportAsCsv ({ getters }: { getters: any }): Promise<Blob> {
+    const searchParams = getters.searchParams(this.$auth.loggedIn)
     let email = null
     if (searchParams.onlyOwnPlatforms) {
       // @ts-ignore
@@ -323,7 +376,7 @@ const actions: {
       .setSearchedUserMail(email)
       .searchMatchingAsCsvBlob()
   },
-  async deletePlatform ({ _commit }: { _commit: Commit }, id: string) {
+  async deletePlatform (_: {}, id: string): Promise<void> {
     await this.$api.platforms.deleteById(id)
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
@@ -335,86 +388,85 @@ const actions: {
   setChosenKindOfPlatformAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfPlatformAction', newval)
   },
-  setSelectedSearchManufacturers({ commit }: { commit: Commit },selectedSearchManufacturers:Manufacturer[]){
-    commit('setSelectedSearchManufacturers',selectedSearchManufacturers)
+  setSelectedSearchManufacturers ({ commit }: { commit: Commit }, selectedSearchManufacturers: Manufacturer[]) {
+    commit('setSelectedSearchManufacturers', selectedSearchManufacturers)
   },
-  setSelectedSearchStates({ commit }: { commit: Commit },selectedSearchStates:Status[]){
-    commit('setSelectedSearchStates',selectedSearchStates)
+  setSelectedSearchStates ({ commit }: { commit: Commit }, selectedSearchStates: Status[]) {
+    commit('setSelectedSearchStates', selectedSearchStates)
   },
-  setSelectedSearchPlatformTypes({ commit }: { commit: Commit },selectedSearchPlatformTypes:PlatformType[]){
-    commit('setSelectedSearchPlatformTypes',selectedSearchPlatformTypes)
+  setSelectedSearchPlatformTypes ({ commit }: { commit: Commit }, selectedSearchPlatformTypes: PlatformType[]) {
+    commit('setSelectedSearchPlatformTypes', selectedSearchPlatformTypes)
   },
-  setOnlyOwnPlatforms({ commit }: { commit: Commit },onlyOwnPlatforms:boolean){
-    commit('setOnlyOwnPlatforms',onlyOwnPlatforms)
+  setOnlyOwnPlatforms ({ commit }: { commit: Commit }, onlyOwnPlatforms: boolean) {
+    commit('setOnlyOwnPlatforms', onlyOwnPlatforms)
   },
-  setSearchText({ commit }: { commit: Commit },searchText:string|null){
-    commit('setSearchText',searchText)
-  },
+  setSearchText ({ commit }: { commit: Commit }, searchText: string|null) {
+    commit('setSearchText', searchText)
+  }
 
 }
 
 const mutations = {
-  setPlatforms (state: platformsState, platforms: Platform[]) {
+  setPlatforms (state: PlatformsState, platforms: Platform[]) {
     state.platforms = platforms
   },
-  setPlatform (state: platformsState, platform: Platform) {
+  setPlatform (state: PlatformsState, platform: Platform) {
     state.platform = platform
   },
-  setPageNumber (state: platformsState, newPageNumber: number) {
+  setPageNumber (state: PlatformsState, newPageNumber: number) {
     state.pageNumber = newPageNumber
   },
-  setPageSize (state: platformsState, newPageSize: number) {
+  setPageSize (state: PlatformsState, newPageSize: number) {
     state.pageSize = newPageSize
   },
-  setTotalPages (state: platformsState, count: number) {
+  setTotalPages (state: PlatformsState, count: number) {
     state.totalPages = count
   },
-  setPlatformContacts (state: platformsState, platformContacts: Contact[]) {
+  setPlatformContacts (state: PlatformsState, platformContacts: Contact[]) {
     state.platformContacts = platformContacts
   },
-  setPlatformAttachments (state: platformsState, platformAttachments: Attachment[]) {
+  setPlatformAttachments (state: PlatformsState, platformAttachments: Attachment[]) {
     state.platformAttachments = platformAttachments
   },
-  setPlatformAttachment (state: platformsState, platformAttachment: Attachment) {
+  setPlatformAttachment (state: PlatformsState, platformAttachment: Attachment) {
     state.platformAttachment = platformAttachment
   },
-  setPlatformGenericActions (state: platformsState, platformGenericActions: GenericAction[]) {
+  setPlatformGenericActions (state: PlatformsState, platformGenericActions: GenericAction[]) {
     state.platformGenericActions = platformGenericActions
   },
-  setPlatformSoftwareUpdateActions (state: platformsState, platformSoftwareUpdateActions: SoftwareUpdateAction[]) {
+  setPlatformSoftwareUpdateActions (state: PlatformsState, platformSoftwareUpdateActions: SoftwareUpdateAction[]) {
     state.platformSoftwareUpdateActions = platformSoftwareUpdateActions
   },
-  setPlatformMountActions (state: platformsState, platformMountActions: PlatformMountActionWrapper[]) {
+  setPlatformMountActions (state: PlatformsState, platformMountActions: PlatformMountActionWrapper[]) {
     state.platformMountActions = platformMountActions
   },
-  setPlatformUnmountActions (state: platformsState, platformUnmountActions: PlatformUnmountActionWrapper[]) {
+  setPlatformUnmountActions (state: PlatformsState, platformUnmountActions: PlatformUnmountActionWrapper[]) {
     state.platformUnmountActions = platformUnmountActions
   },
-  setChosenKindOfPlatformAction (state: platformsState, newVal: IOptionsForActionType | null) {
+  setChosenKindOfPlatformAction (state: PlatformsState, newVal: IOptionsForActionType | null) {
     state.chosenKindOfPlatformAction = newVal
   },
-  setPlatformGenericAction (state: platformsState, action: GenericAction) {
+  setPlatformGenericAction (state: PlatformsState, action: GenericAction) {
     state.platformGenericAction = action
   },
-  setPlatformSoftwareUpdateAction (state: platformsState, action: SoftwareUpdateAction) {
+  setPlatformSoftwareUpdateAction (state: PlatformsState, action: SoftwareUpdateAction) {
     state.platformSoftwareUpdateAction = action
   },
-  setSelectedSearchManufacturers(state:platformsState,selectedSearchManufacturers:Manufacturer[]){
-    state.selectedSearchManufacturers=selectedSearchManufacturers
+  setSelectedSearchManufacturers (state: PlatformsState, selectedSearchManufacturers: Manufacturer[]) {
+    state.selectedSearchManufacturers = selectedSearchManufacturers
   },
-  setSelectedSearchStates(state:platformsState,selectedSearchStates:Status[]){
-    state.selectedSearchStates=selectedSearchStates
+  setSelectedSearchStates (state: PlatformsState, selectedSearchStates: Status[]) {
+    state.selectedSearchStates = selectedSearchStates
   },
-  setSelectedSearchPlatformTypes(state:platformsState,selectedSearchPlatformTypes:PlatformType[]){
-    state.selectedSearchPlatformTypes=selectedSearchPlatformTypes
+  setSelectedSearchPlatformTypes (state: PlatformsState, selectedSearchPlatformTypes: PlatformType[]) {
+    state.selectedSearchPlatformTypes = selectedSearchPlatformTypes
   },
-  setOnlyOwnPlatforms(state:platformsState,onlyOwnPlatforms:boolean){
-    state.onlyOwnPlatforms=onlyOwnPlatforms
+  setOnlyOwnPlatforms (state: PlatformsState, onlyOwnPlatforms: boolean) {
+    state.onlyOwnPlatforms = onlyOwnPlatforms
   },
-  setSearchText(state:platformsState,searchText:string|null){
-    state.searchText=searchText
-  },
-
+  setSearchText (state: PlatformsState, searchText: string|null) {
+    state.searchText = searchText
+  }
 
 }
 

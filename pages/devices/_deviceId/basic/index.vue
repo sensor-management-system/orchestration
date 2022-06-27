@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -53,6 +53,7 @@ permissions and limitations under the Licence.
             :path="'/devices/copy/' + deviceId"
           />
           <DotMenuActionDelete
+            :readonly="!deletable"
             @click="initDeleteDialog"
           />
         </template>
@@ -65,7 +66,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -81,6 +82,7 @@ permissions and limitations under the Licence.
             :path="'/devices/copy/' + deviceId"
           />
           <DotMenuActionDelete
+            :readonly="!deletable"
             @click="initDeleteDialog"
           />
         </template>
@@ -97,16 +99,17 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { DeleteDeviceAction, DevicesState } from '@/store/devices'
+
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DeviceBasicData from '@/components/DeviceBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { Device } from '@/models/Device'
 
 @Component({
   components: {
@@ -121,13 +124,19 @@ import { Device } from '@/models/Device'
   methods: mapActions('devices', ['deleteDevice'])
 })
 export default class DeviceShowBasicPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
+  @InjectReactive()
+    deletable!: boolean
+
   private isSaving = false
 
   private showDeleteDialog: boolean = false
 
   // vuex definition for typescript check
-  device!: Device
-  deleteDevice!: (id: string) => void
+  device!: DevicesState['device']
+  deleteDevice!: DeleteDeviceAction
 
   get deviceId () {
     return this.$route.params.deviceId

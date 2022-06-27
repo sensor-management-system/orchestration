@@ -38,6 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -53,6 +54,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/devices/' + deviceId + '/actions'"
         @save="save"
@@ -62,10 +64,14 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { IOptionsForActionType } from '@/store/devices'
+import {
+  AddDeviceCalibrationAction,
+  LoadAllDeviceActionsAction,
+  DevicesState
+} from '@/store/devices'
 
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 
@@ -84,19 +90,25 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   methods: mapActions('devices', ['addDeviceCalibrationAction', 'loadAllDeviceActions'])
 })
 export default class NewDeviceCalibrationAction extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private deviceCalibrationAction: DeviceCalibrationAction = new DeviceCalibrationAction()
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  addDeviceCalibrationAction!: ({
-    deviceId,
-    calibrationDeviceAction
-  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
-
-  loadAllDeviceActions!: (id: string) => void
-  chosenKindOfDeviceAction!: IOptionsForActionType | null
+  deviceAttachments!: DevicesState['deviceAttachments']
+  deviceMeasuredQuantites!: DevicesState['deviceMeasuredQuantities']
+  chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
+  addDeviceCalibrationAction!: AddDeviceCalibrationAction
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
   created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
     if (this.chosenKindOfDeviceAction === null) {
       this.$router.push('/devices/' + this.deviceId + '/actions')
     }
@@ -119,7 +131,7 @@ export default class NewDeviceCalibrationAction extends Vue {
       this.isSaving = true
       await this.addDeviceCalibrationAction({
         deviceId: this.deviceId,
-        calibrationDeviceAction: this.deviceCalibrationAction
+        calibrationAction: this.deviceCalibrationAction
       })
       this.loadAllDeviceActions(this.deviceId)
       this.$router.push('/devices/' + this.deviceId + '/actions')

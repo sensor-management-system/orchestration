@@ -204,6 +204,10 @@ describe('DeviceSerializer', () => {
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/devices/46/relationships/created-user'
+              },
+              data: {
+                id: '123',
+                type: 'user'
               }
             },
             customfields: {
@@ -316,6 +320,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.persistentIdentifier = ''
       expectedDevice1.manufacturerUri = ''
       expectedDevice1.contacts = []
+      expectedDevice1.createdByUserId = '123'
 
       const expectedDevice2 = new Device()
       expectedDevice2.id = '44'

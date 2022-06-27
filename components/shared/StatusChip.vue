@@ -33,8 +33,8 @@ permissions and limitations under the Licence.
     v-if="value"
     :color="color"
     text-color="white"
-    x-small
-    class="mx-1"
+    small
+    class="mr-1 mb-1"
   >
     {{ value }}
   </v-chip>

@@ -117,10 +117,13 @@ permissions and limitations under the Licence.
           cols="4"
           class="flex-grow-1 flex-shrink-0"
         >
-          <page-size-select
-            v-model="size"
-            :items="pageSizeItems"
-          />
+          <v-subheader>
+            <page-size-select
+              v-model="size"
+              :items="pageSizeItems"
+              label="Items per page"
+            />
+          </v-subheader>
         </v-col>
       </v-row>
       <BaseList
@@ -131,9 +134,11 @@ permissions and limitations under the Licence.
             :key="item.id"
             :contact="item"
           >
-            <template #dot-menu-items>
+            <template
+              v-if="$auth.loggedIn"
+              #dot-menu-items
+            >
               <DotMenuActionDelete
-                :readonly="!$auth.loggedIn"
                 @click="initDeleteDialog(item)"
               />
             </template>
@@ -321,7 +326,7 @@ export default class SearchContactsPage extends Vue {
     }
   }
 
-  getPageFromUrl (): number | undefined {
+  getPageFromUrl (): number {
     if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
       return parseInt(this.$route.query.page) || 1
     }

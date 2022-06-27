@@ -66,7 +66,7 @@ export class User implements IUser {
     this._contact = newContact
   }
 
-  static createFromObjet (someObject: IUser): User {
+  static createFromObject (someObject: IUser): User {
     const newObject = new User()
 
     newObject.id = someObject.id

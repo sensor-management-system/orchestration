@@ -36,18 +36,33 @@ permissions and limitations under the Licence.
     />
     <v-card flat>
       <NuxtChild />
+      <modification-info
+        v-if="configuration"
+        v-model="configuration"
+      />
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { Component, ProvideReactive, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+
+import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+
+import { Configuration } from '@/models/Configuration'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ModificationInfo from '@/components/ModificationInfo.vue'
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ModificationInfo
+  },
+  computed: {
+    ...mapState('configurations', ['configuration']),
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity'])
   },
   methods: {
     ...mapActions('configurations', ['loadConfiguration']),
@@ -58,21 +73,44 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 export default class ConfigurationsIdPage extends Vue {
   private isLoading: boolean = false
 
+  @ProvideReactive()
+    editable: boolean = false
+
+  @ProvideReactive()
+    deletable: boolean = false
+
   // vuex definition for typescript check
+  configuration!: Configuration | null
   initConfigurationsConfigurationIdAppBar!: (id: string) => void
   setDefaults!: () => void
   loadConfiguration!: (id: string) => void
+  canAccessEntity!: CanAccessEntityGetter
+  canModifyEntity!: CanModifyEntityGetter
+  canDeleteEntity!: CanDeleteEntityGetter
 
   async created () {
     try {
       this.isLoading = true
       this.initConfigurationsConfigurationIdAppBar(this.configurationId)
       await this.loadConfiguration(this.configurationId)
+
+      if (!this.configuration) {
+        throw new Error('initialization of configuration failed')
+      }
+
+      if (!this.canAccessEntity(this.configuration)) {
+        this.$router.replace('/configurations/')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to access this configuration.')
+        return
+      }
+
+      this.editable = this.canModifyEntity(this.configuration)
+      this.deletable = this.canDeleteEntity(this.configuration)
+
       if (this.isBasePath()) {
         this.$router.replace('/configurations/' + this.configurationId + '/basic')
       }
     } catch (_e) {
-      console.log('_e',_e);
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     } finally {
       this.isLoading = false

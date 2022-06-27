@@ -35,6 +35,7 @@
  */
 import { Commit, Dispatch } from 'vuex/types'
 
+import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
@@ -63,8 +64,6 @@ import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
-import { DateTime } from 'luxon'
-import mock = jest.mock
 import { mockCurrentConfiguration, mockMountingActions } from '@/utils/mockHelper'
 
 export enum LocationTypes {
@@ -87,10 +86,10 @@ export interface configurationsState {
   configurationStates: string[]
   projects: Project[],
   configurationStaticLocationBeginActions: StaticLocationBeginAction[],
-  configurationStaticLocationEndActions:StaticLocationEndAction[],
+  configurationStaticLocationEndActions: StaticLocationEndAction[],
   configurationDynamicLocationBeginActions: DynamicLocationBeginAction[],
   configurationDynamicLocationEndActions: DynamicLocationEndAction[],
-  configurationMountingActions:[]
+  configurationMountingActions: []
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -102,14 +101,14 @@ const state = () => ({
   configurationContacts: [],
   configurationStates: [],
   projects: [],
-  configurationStaticLocationBeginActions:[],
-  configurationStaticLocationEndActions:[],
-  configurationDynamicLocationBeginActions:[],
-  configurationDynamicLocationEndActions:[],
-  configurationMountingActions:[],
+  configurationStaticLocationBeginActions: [],
+  configurationStaticLocationEndActions: [],
+  configurationDynamicLocationBeginActions: [],
+  configurationDynamicLocationEndActions: [],
+  configurationMountingActions: [],
   totalPages: 1,
   pageNumber: 1,
-  pageSize: PAGE_SIZES[0],
+  pageSize: PAGE_SIZES[0]
 })
 
 const getters = {
@@ -273,14 +272,20 @@ const actions: {
       .setSearchText(searchParams.searchText)
       .setSearchedProjects(searchParams.projects)
       .setSearchedStates(searchParams.states)
-      .searchPaginated(state.pageNumber, state.pageSize)
+      .searchPaginated(
+        state.pageNumber,
+        state.pageSize,
+        {
+          includeCreatedBy: true
+        }
+      )
     commit('setConfigurations', elements)
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
   async loadConfiguration ({ commit }: { commit: Commit }, id: string) {
-    const configuration = await this.$api.configurations.findById(id)
+    const configuration = await this.$api.configurations.findById(id, { includeCreatedBy: true, includeUpdatedBy: true })
     commit('setConfiguration', configuration)
   },
   async loadConfigurationContacts ({ commit }: { commit: Commit }, id: string) {
@@ -295,41 +300,40 @@ const actions: {
     const projects = await this.$api.projects.findAll()
     commit('setProjects', projects)
   },
-  async loadConfigurationStaticLocationBeginActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationStaticLocationBeginActions',await this.$api.configurations.findRelatedStaticLocationBeginActions(id))
+  async loadConfigurationStaticLocationBeginActions ({ commit }: { commit: Commit }, id: string) {
+    commit('setConfigurationStaticLocationBeginActions', await this.$api.configurations.findRelatedStaticLocationBeginActions(id))
   },
-  async loadConfigurationStaticLocationEndActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationStaticLocationEndActions',await this.$api.configurations.findRelatedStaticLocationEndActions(id))
+  async loadConfigurationStaticLocationEndActions ({ commit }: { commit: Commit }, id: string) {
+    commit('setConfigurationStaticLocationEndActions', await this.$api.configurations.findRelatedStaticLocationEndActions(id))
   },
-  async loadConfigurationDynamicLocationBeginActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationDynamicLocationBeginActions',await this.$api.configurations.findRelatedDynamicLocationBeginActions(id))
+  async loadConfigurationDynamicLocationBeginActions ({ commit }: { commit: Commit }, id: string) {
+    commit('setConfigurationDynamicLocationBeginActions', await this.$api.configurations.findRelatedDynamicLocationBeginActions(id))
   },
-  async loadConfigurationDynamicLocationEndActions({ commit }: { commit: Commit },id:string){
-    commit('setConfigurationDynamicLocationEndActions',await this.$api.configurations.findRelatedDynamicLocationEndActions(id))
+  async loadConfigurationDynamicLocationEndActions ({ commit }: { commit: Commit }, id: string) {
+    commit('setConfigurationDynamicLocationEndActions', await this.$api.configurations.findRelatedDynamicLocationEndActions(id))
   },
-  async loadMountingActions({commit}:{commit:Commit},id:string){
-    //Todo currently mock
+  async loadMountingActions ({ commit }: {commit: Commit}, id: string) {
+    // Todo currently mock
 
     // request to controller via $api
     // /backend/api/v1/controller/configurations/<configuration-id>/mounting-action-timepoints
 
-    //Todo import of mockHelper.ts
-    commit('setConfigurationMountingActions',mockMountingActions)
+    // Todo import of mockHelper.ts
+    commit('setConfigurationMountingActions', mockMountingActions)
   },
-  async getMountingConfigurationForDate({commit}:{commit:Commit},id:string,timepoint:DateTime){
-    //Todo currently mock
+  async getMountingConfigurationForDate ({ commit }: {commit: Commit}, id: string, timepoint: DateTime) {
+    // Todo currently mock
     // request to controller via $api
-    ///backend/api/v1/controller/configurations/<configuration-id>/mounting-actions?timepoint=<time-point>
+    /// backend/api/v1/controller/configurations/<configuration-id>/mounting-actions?timepoint=<time-point>
 
-    //Todo import of mockHelper.ts
-    return mockCurrentConfiguration;
-
+    // Todo import of mockHelper.ts
+    return mockCurrentConfiguration
   },
-  async loadLocationActions({dispatch}:{dispatch:Dispatch},id:string){
-    await dispatch('loadConfigurationStaticLocationBeginActions',id)
-    await dispatch('loadConfigurationStaticLocationEndActions',id)
-    await dispatch('loadConfigurationDynamicLocationBeginActions',id)
-    await dispatch('loadConfigurationDynamicLocationEndActions',id)
+  async loadLocationActions ({ dispatch }: {dispatch: Dispatch}, id: string) {
+    await dispatch('loadConfigurationStaticLocationBeginActions', id)
+    await dispatch('loadConfigurationStaticLocationEndActions', id)
+    await dispatch('loadConfigurationDynamicLocationBeginActions', id)
+    await dispatch('loadConfigurationDynamicLocationEndActions', id)
   },
   async deleteConfiguration ({ _commit }: { _commit: Commit }, id: string) {
     await this.$api.configurations.deleteById(id)
@@ -386,7 +390,7 @@ const actions: {
     configurationId,
     staticLocationBeginAction
   }: { configurationId: string, staticLocationBeginAction: StaticLocationBeginAction }) {
-    return this.$api.configurations.staticLocationBeginActionApi.add(configurationId,staticLocationBeginAction)
+    return this.$api.configurations.staticLocationBeginActionApi.add(configurationId, staticLocationBeginAction)
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
@@ -421,20 +425,20 @@ const mutations = {
   setProjects (state: configurationsState, projects: Project[]) {
     state.projects = projects
   },
-  setConfigurationStaticLocationBeginActions(state:configurationsState,staticLocationBeginActions:StaticLocationBeginAction[]){
-    state.configurationStaticLocationBeginActions=staticLocationBeginActions
+  setConfigurationStaticLocationBeginActions (state: configurationsState, staticLocationBeginActions: StaticLocationBeginAction[]) {
+    state.configurationStaticLocationBeginActions = staticLocationBeginActions
   },
-  setConfigurationStaticLocationEndActions(state:configurationsState,staticLocationEndActions:StaticLocationEndAction[]){
-    state.configurationStaticLocationEndActions=staticLocationEndActions
+  setConfigurationStaticLocationEndActions (state: configurationsState, staticLocationEndActions: StaticLocationEndAction[]) {
+    state.configurationStaticLocationEndActions = staticLocationEndActions
   },
-  setConfigurationDynamicLocationBeginActions(state:configurationsState,dynamicLocationBeginActions:DynamicLocationBeginAction[]){
-    state.configurationDynamicLocationBeginActions=dynamicLocationBeginActions
+  setConfigurationDynamicLocationBeginActions (state: configurationsState, dynamicLocationBeginActions: DynamicLocationBeginAction[]) {
+    state.configurationDynamicLocationBeginActions = dynamicLocationBeginActions
   },
-  setConfigurationDynamicLocationEndActions(state:configurationsState,dynamicLocationEndActions:DynamicLocationEndAction[]){
-    state.configurationDynamicLocationEndActions=dynamicLocationEndActions
+  setConfigurationDynamicLocationEndActions (state: configurationsState, dynamicLocationEndActions: DynamicLocationEndAction[]) {
+    state.configurationDynamicLocationEndActions = dynamicLocationEndActions
   },
-  setConfigurationMountingActions(state:configurationsState,configurationMountingActions:[]){
-    state.configurationMountingActions=configurationMountingActions
+  setConfigurationMountingActions (state: configurationsState, configurationMountingActions: []) {
+    state.configurationMountingActions = configurationMountingActions
   }
 }
 

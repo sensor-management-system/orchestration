@@ -74,7 +74,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
@@ -92,6 +92,9 @@ import { Configuration, IConfiguration } from '@/models/Configuration'
   methods: mapActions('configurations', ['saveConfiguration', 'loadConfiguration'])
 })
 export default class ConfigurationEditBasicPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private configurationCopy: Configuration = new Configuration()
   private isLoading: boolean = false
   private hasSaved: boolean = false
@@ -104,6 +107,12 @@ export default class ConfigurationEditBasicPage extends Vue {
   loadConfiguration!: (id: string) => void
 
   created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+      return
+    }
     this.configurationCopy = Configuration.createFromObject(this.configuration)
   }
 

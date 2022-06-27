@@ -36,17 +36,17 @@ permissions and limitations under the Licence.
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
-        :disabled="this.selectedAction !== null"
+        :disabled="selectedAction !== null"
         small
         nuxt
-        :to="'/configurations/' + configurationId + '/locations/static-location-begin-actions/new?timestamp=' + this.selectedDate.toISO()"
+        :to="'/configurations/' + configurationId + '/locations/static-location-begin-actions/new?timestamp=' + selectedDate.toISO()"
       >
         Start Static Location
       </v-btn>
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
-        :disabled="this.selectedAction !== null"
+        :disabled="selectedAction !== null"
         small
         nuxt
       >
@@ -123,14 +123,10 @@ import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 import { currentAsUtcDateSecondsAsZeros, stringToDate } from '@/utils/dateHelper'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
-import ConfigurationStaticLocationBeginActionData
-  from '@/components/configurations/ConfigurationStaticLocationBeginActionData.vue'
-import ConfigurationStaticLocationEndActionData
-  from '@/components/configurations/ConfigurationStaticLocationEndActionData.vue'
-import ConfigurationDynamicLocationBeginActionData
-  from '@/components/configurations/ConfigurationDynamicLocationBeginActionData.vue'
-import ConfigurationDynamicLocationEndActionData
-  from '@/components/configurations/ConfigurationDynamicLocationEndActionData.vue'
+import ConfigurationStaticLocationBeginActionData from '@/components/configurations/ConfigurationStaticLocationBeginActionData.vue'
+import ConfigurationStaticLocationEndActionData from '@/components/configurations/ConfigurationStaticLocationEndActionData.vue'
+import ConfigurationDynamicLocationBeginActionData from '@/components/configurations/ConfigurationDynamicLocationBeginActionData.vue'
+import ConfigurationDynamicLocationEndActionData from '@/components/configurations/ConfigurationDynamicLocationEndActionData.vue'
 
 @Component({
   components: { ConfigurationDynamicLocationEndActionData, ConfigurationDynamicLocationBeginActionData, ConfigurationStaticLocationEndActionData, ConfigurationStaticLocationBeginActionData, DateTimePicker },
@@ -140,11 +136,12 @@ export default class ConfigurationShowLocationPage extends Vue {
   private selectedDate = currentAsUtcDateSecondsAsZeros()
   private selectedAction: StaticLocationBeginAction|StaticLocationEndAction|DynamicLocationBeginAction|DynamicLocationEndAction|null = null
 
-  created(){
-    if(this.$route.query.timestamp){
-      this.selectedDate=stringToDate(this.$route.query.timestamp)
+  created () {
+    if (this.$route.query.timestamp) {
+      this.selectedDate = stringToDate(this.$route.query.timestamp)
     }
   }
+
   get configurationId (): string {
     return this.$route.params.configurationId
   }
@@ -154,9 +151,9 @@ export default class ConfigurationShowLocationPage extends Vue {
     this.updateUrlDate()
   }
 
-  updateUrlDate(newDate){
+  updateUrlDate (newDate) {
     this.$router.push({
-      query: {timestamp:this.selectedDate},
+      query: { timestamp: this.selectedDate },
       hash: this.$route.hash
     })
   }

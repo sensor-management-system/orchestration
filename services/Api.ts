@@ -29,7 +29,11 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import { AxiosRequestConfig } from 'axios'
+
+import { createAxios } from '@/utils/axiosHelper'
+
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { ContactApi } from '@/services/sms/ContactApi'
 import { DeviceApi } from '@/services/sms/DeviceApi'
@@ -143,52 +147,68 @@ export class Api {
     // For the sms we also want to send the id token, if we currently
     // have one in the store.
     this._contactApi = new ContactApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/contacts'
     )
     this._platformApi = new PlatformApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/platforms'
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/platforms',
+      // callback function to fetch permission groups
+      async (): Promise<PermissionGroup[]> => {
+        const api = new PermissionGroupApi(
+          createAxios(smsBaseUrl, smsConfig, getIdToken),
+          '/permission-groups'
+        )
+        return await api.findAll(true)
+      }
     )
     this._deviceApi = new DeviceApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/devices'
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/devices',
+      // callback function to fetch permission groups
+      async (): Promise<PermissionGroup[]> => {
+        const api = new PermissionGroupApi(
+          createAxios(smsBaseUrl, smsConfig, getIdToken),
+          '/permission-groups'
+        )
+        return await api.findAll(true)
+      }
     )
 
     const deviceMountActionApi = new DeviceMountActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-mount-actions'
     )
     const deviceUnmountActionApi = new DeviceUnmountActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-unmount-actions'
     )
     const platformMountActionApi = new PlatformMountActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-mount-actions'
     )
     const platformUnmountActionApi = new PlatformUnmountActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-unmount-actions'
     )
     this._staticLocationBeginActionApi = new StaticLocationBeginActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/static-location-begin-actions'
     )
     this._staticLocationEndActionApi = new StaticLocationEndActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/static-location-end-actions'
     )
     this._dynamicLocationBeginActionApi = new DynamicLocationBeginActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/dynamic-location-begin-actions'
     )
     this._dynamicLocationEndActionApi = new DynamicLocationEndActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/dynamic-location-end-actions'
     )
     this._configurationApi = new ConfigurationApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/configurations',
       deviceMountActionApi,
       deviceUnmountActionApi,
@@ -197,93 +217,101 @@ export class Api {
       this._staticLocationBeginActionApi,
       this._staticLocationEndActionApi,
       this._dynamicLocationBeginActionApi,
-      this._dynamicLocationEndActionApi
+      this._dynamicLocationEndActionApi,
+      // callback function to fetch permission groups
+      async (): Promise<PermissionGroup[]> => {
+        const api = new PermissionGroupApi(
+          createAxios(smsBaseUrl, smsConfig, getIdToken),
+          '/permission-groups'
+        )
+        return await api.findAll()
+      }
     )
     this._configurationStatesApi = new ConfigurationStatusApi()
 
     this._customfieldsApi = new CustomfieldsApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/customfields'
     )
 
     this._deviceAttachmentApi = new DeviceAttachmentApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-attachments'
     )
 
     this._platformAttachmentApi = new PlatformAttachmentApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-attachments'
     )
 
     this._devicePropertyApi = new DevicePropertyApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-properties'
     )
 
     this._genericDeviceActionAttachmentApi = new GenericDeviceActionAttachmentApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/generic-device-action-attachments'
     )
 
     this._genericDeviceActionApi = new GenericDeviceActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/generic-device-actions',
       this._genericDeviceActionAttachmentApi
     )
 
     this._genericPlatformActionAttachmentApi = new GenericPlatformActionAttachmentApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/generic-platform-action-attachments'
     )
 
     this._genericPlatformActionApi = new GenericPlatformActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/generic-platform-actions',
       this._genericPlatformActionAttachmentApi
     )
 
     this._deviceSoftwareUpdateActionAttachmentApi = new DeviceSoftwareUpdateActionAttachmentApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-software-update-action-attachments'
     )
 
     this._deviceSoftwareUpdateActionApi = new DeviceSoftwareUpdateActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-software-update-actions',
       this._deviceSoftwareUpdateActionAttachmentApi
     )
 
     this._platformSoftwareUpdateActionAttachmentApi = new PlatformSoftwareUpdateActionAttachmentApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-software-update-action-attachments'
     )
 
     this._platformSoftwareUpdateActionApi = new PlatformSoftwareUpdateActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-software-update-actions',
       this._platformSoftwareUpdateActionAttachmentApi
     )
 
     this._deviceCalibrationActionAttachmentApi = new DeviceCalibrationActionAttachmentApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-calibration-attachments'
     )
 
     this._devicePropertyCalibrationApi = new DeviceCalibrationDevicePropertyApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-property-calibrations'
     )
 
     this._deviceCalibrationActionApi = new DeviceCalibrationActionApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-calibration-actions',
       this._deviceCalibrationActionAttachmentApi,
       this._devicePropertyCalibrationApi
     )
 
     this._uploadApi = new UploadApi(
-      this.createAxios(smsBaseUrl, smsConfig, getIdToken),
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/upload'
     )
 
@@ -295,85 +323,59 @@ export class Api {
     }
 
     this._compartmentApi = new CompartmentApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/compartments/'
     )
     this._deviceTypeApi = new DeviceTypeApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/equipmenttypes/'
     )
     this._manufacturerApi = new ManufacturerApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/manufacturers/'
     )
     this._platformTypeApi = new PlatformTypeApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/platformtypes/'
     )
     this._propertyApi = new PropertyApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/measuredquantities/'
     )
     this._samplingMediaApi = new SamplingMediaApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/samplingmedia/'
     )
     this._statusApi = new StatusApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/equipmentstatus/'
     )
     this._unitApi = new UnitApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/units/'
     )
     this._measuredQuantityUnitApi = new MeasuredQuantityUnitApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/measuredquantityunits/'
     )
     this._actionTypeApi = new ActionTypeApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/actiontypes/'
     )
     this._softwareTypeApi = new SoftwareTypeApi(
-      this.createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig),
       '/softwaretypes/'
     )
 
     this._projectApi = new ProjectApi()
+
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
 
-    this._userInfoApi = new UserInfoApi(this.createAxios(smsBaseUrl,smsConfig,getIdToken),
+    this._userInfoApi = new UserInfoApi(createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/user-info'
-      )
-    this._permissionGroupApi = new PermissionGroupApi(this.createAxios(smsBaseUrl,smsConfig,getIdToken),'/permission-groups')
-  }
-
-  private createAxios (baseUrl: string | undefined, baseConfig: AxiosRequestConfig, getIdToken?: () => (string | null)): AxiosInstance {
-    const config = {
-      ...baseConfig,
-      baseURL: baseUrl
-    }
-    const instance = axios.create(config)
-
-    // If we have a function to query our id tokens on the time of the request
-    // we want to use it here.
-    if (getIdToken) {
-      instance.interceptors.request.use((config) => {
-        const idToken = getIdToken()
-        // But it can be that we are not logged in, so that our idToken is null.
-        // So in this case, we don't send the id token with the request.
-        if (idToken) {
-          // But once we have it, we want to send it with.
-          if (!config.headers) {
-            config.headers = {}
-          }
-          config.headers.Authorization = idToken
-        }
-        return config
-      })
-    }
-    return instance
+    )
+    this._permissionGroupApi = new PermissionGroupApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/permission-groups')
   }
 
   get devices (): DeviceApi {
@@ -504,7 +506,7 @@ export class Api {
     return this._epsgCodeApi
   }
 
-  get userInfoApi(): UserInfoApi {
+  get userInfoApi (): UserInfoApi {
     return this._userInfoApi
   }
 

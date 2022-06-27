@@ -38,6 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
@@ -53,6 +54,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
@@ -62,10 +64,14 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { IOptionsForActionType } from '@/store/platforms'
+import {
+  PlatformsState,
+  AddPlatformGenericActionAction,
+  LoadAllPlatformActionsAction
+} from '@/store/platforms'
 
 import { GenericAction } from '@/models/GenericAction'
 
@@ -80,17 +86,26 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('platforms', ['addPlatformGenericAction', 'loadAllPlatformActions'])
 })
 export default class NewGenericPlatformAction extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private genericPlatformAction: GenericAction = new GenericAction()
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  chosenKindOfPlatformAction!: IOptionsForActionType | null
-  addPlatformGenericAction!: ({ platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
-  loadAllPlatformActions!: (id: string) => void
+  platformAttachements!: PlatformsState['platformAttachments']
+  chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
+  addPlatformGenericAction!: AddPlatformGenericActionAction
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
 
   created () {
     if (this.chosenKindOfPlatformAction === null) {
       this.$router.push('/platforms/' + this.platformId + '/actions')
+    }
+    if (!this.editable) {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
     }
   }
 

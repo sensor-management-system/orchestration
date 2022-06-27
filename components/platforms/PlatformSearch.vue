@@ -1,3 +1,37 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020-2022
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
 <template>
   <div>
     <ProgressIndicator
@@ -118,9 +152,25 @@
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { Manufacturer } from '@/models/Manufacturer'
-import { Status } from '@/models/Status'
-import { PlatformType } from '@/models/PlatformType'
+import {
+  VocabularyState,
+  LoadManufacturersAction,
+  LoadPlatformtypesAction,
+  LoadEquipmentstatusAction
+} from '@/store/vocabulary'
+
+import {
+  PlatformsState,
+  SearchParamsGetter,
+  SearchPlatformsPaginatedAction,
+  SetPageNumberAction,
+  SetPageSizeAction,
+  SetSelectedSearchManufacturersAction,
+  SetSelectedSearchStatesAction,
+  SetSelectedSearchPlatformTypesAction,
+  SetOnlyOwnPlatformsAction,
+  SetSearchTextAction
+} from '@/store/platforms'
 
 import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
 
@@ -132,15 +182,16 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   components: { ProgressIndicator, PlatformTypeSelect, StatusSelect, ManufacturerSelect },
   computed: {
-    ...mapState('vocabulary',['platformtypes', 'manufacturers', 'equipmentstatus']),
-    ...mapState('platforms',['selectedSearchManufacturers','selectedSearchStates','selectedSearchPlatformTypes','onlyOwnPlatforms','searchText']),
-    ...mapGetters('platforms',['searchParams'])
+    ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus']),
+    ...mapState('platforms', ['selectedSearchManufacturers', 'selectedSearchStates', 'selectedSearchPlatformTypes', 'onlyOwnPlatforms', 'searchText']),
+    ...mapGetters('platforms', ['searchParams'])
   },
-  methods:{
-    ...mapActions('vocabulary',['loadEquipmentstatus', 'loadPlatformtypes', 'loadManufacturers']),
-    ...mapActions('platforms',[
+  methods: {
+    ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadPlatformtypes', 'loadManufacturers']),
+    ...mapActions('platforms', [
       'searchPlatformsPaginated',
       'setPageNumber',
+      'setPageSize',
       'setSelectedSearchManufacturers',
       'setSelectedSearchStates',
       'setSelectedSearchPlatformTypes',
@@ -150,58 +201,83 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class PlatformSearch extends Vue {
-  private activeTab=0
-  // private selectedSearchManufacturers: Manufacturer[] = []
-  // private selectedStates: Status[] = []
-  // private selectedPlatformTypes: PlatformType[] = []
-  // private selectOnlyOwnPlatforms: boolean = false
-
-  // private searchText: string | null = null
-
+  private activeTab = 0
   private isLoading = false
 
-  get selectedManufacturers(){
+  // vuex definition for typescript check
+  selectedSearchManufacturers!: PlatformsState['selectedSearchManufacturers']
+  selectedSearchStates!: PlatformsState['selectedSearchStates']
+  selectedSearchPlatformTypes!: PlatformsState['selectedSearchPlatformTypes']
+  onlyOwnPlatforms!: PlatformsState['onlyOwnPlatforms']
+  searchText!: PlatformsState['searchText']
+  setSelectedSearchManufacturers!: SetSelectedSearchManufacturersAction
+  setSelectedSearchStates!: SetSelectedSearchStatesAction
+  setSelectedSearchPlatformTypes!: SetSelectedSearchPlatformTypesAction
+  setOnlyOwnPlatforms!: SetOnlyOwnPlatformsAction
+  setSearchText!: SetSearchTextAction
+  loadEquipmentstatus!: LoadEquipmentstatusAction
+  loadPlatformtypes!: LoadPlatformtypesAction
+  loadManufacturers!: LoadManufacturersAction
+  setPageNumber!: SetPageNumberAction
+  setPageSize!: SetPageSizeAction
+  searchPlatformsPaginated!: SearchPlatformsPaginatedAction
+  searchParams!: SearchParamsGetter
+  equipmentstatus!: VocabularyState['equipmentstatus']
+  platformtypes!: VocabularyState['platformtypes']
+  manufacturers!: VocabularyState['manufacturers']
+
+  get selectedManufacturers () {
     return this.selectedSearchManufacturers
   }
-  set selectedManufacturers(newVal){
+
+  set selectedManufacturers (newVal) {
     this.setSelectedSearchManufacturers(newVal)
   }
-  get selectedStates(){
+
+  get selectedStates () {
     return this.selectedSearchStates
   }
-  set selectedStates(newVal){
+
+  set selectedStates (newVal) {
     this.setSelectedSearchStates(newVal)
   }
 
-  get selectedPlatformTypes(){
+  get selectedPlatformTypes () {
     return this.selectedSearchPlatformTypes
   }
-  set selectedPlatformTypes(newVal){
+
+  set selectedPlatformTypes (newVal) {
     this.setSelectedSearchPlatformTypes(newVal)
   }
 
-  get selectOnlyOwnPlatforms(){
+  get selectOnlyOwnPlatforms () {
     return this.onlyOwnPlatforms
   }
 
-  set selectOnlyOwnPlatforms(newVal){
+  set selectOnlyOwnPlatforms (newVal) {
     this.setOnlyOwnPlatforms(newVal)
   }
 
-  get searchedText(){
+  get searchedText () {
     return this.searchText
   }
-  set searchedText(newVal){
+
+  set searchedText (newVal) {
     this.setSearchText(newVal)
   }
 
-  async created(){
+  async created () {
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadEquipmentstatus()
-      await this.loadPlatformtypes()
-      await this.loadManufacturers()
-      await this.initSearchQueryParams()
+      await Promise.all([
+        this.loadEquipmentstatus(),
+        this.loadPlatformtypes(),
+        this.loadManufacturers()
+      ])
+      this.initSearchQueryParams()
       // await this.runInitialSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
@@ -220,7 +296,7 @@ export default class PlatformSearch extends Vue {
   //   }
   // }
 
-  basicSearch(){
+  basicSearch () {
     this.selectedManufacturers = []
     this.selectedStates = []
     this.selectedPlatformTypes = []
@@ -228,15 +304,18 @@ export default class PlatformSearch extends Vue {
     this.$emit('basic-search')
     this.runSearch()
   }
-  clearBasicSearch(){
+
+  clearBasicSearch () {
     this.searchedText = null
     this.$emit('clear-basic-search')
   }
-  extendedSearch(){
+
+  extendedSearch () {
     this.$emit('extended-search')
     this.runSearch()
   }
-  clearExtendedSearch(){
+
+  clearExtendedSearch () {
     this.clearBasicSearch()
     this.selectedManufacturers = []
     this.selectedStates = []
@@ -291,7 +370,6 @@ export default class PlatformSearch extends Vue {
       hash: this.$route.hash
     })
   }
-
 }
 </script>
 

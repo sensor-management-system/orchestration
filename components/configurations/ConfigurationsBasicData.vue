@@ -35,6 +35,17 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-row>
+      <v-col cols="12">
+        <label>Visibility / Permissions</label>
+        <VisibilityChip
+          v-model="value.visibility"
+        />
+        <PermissionGroupChips
+          :value="[value.permissionGroup]"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="3">
         <label>Label</label>
         {{ value.label }}
@@ -42,10 +53,6 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Status</label>
         {{ value.status }}
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>Project</label>
-        {{ value.projectName }}
       </v-col>
     </v-row>
     <v-row>
@@ -75,9 +82,13 @@ import { Configuration } from '@/models/Configuration'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 @Component({
   components: {
+    PermissionGroupChips,
+    VisibilityChip,
     DateTimePicker
   },
   filters: {

@@ -102,14 +102,6 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12" md="3">
-            <ProjectSelect
-              v-model="selectedProjects"
-              label="Select a project"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
           <v-col
             cols="5"
             align-self="center"
@@ -205,9 +197,12 @@ permissions and limitations under the Licence.
           <ConfigurationsListItem
             :configuration="item"
           >
-            <template #dot-menu-items>
+            <template
+              v-if="$auth.loggedIn"
+              #dot-menu-items
+            >
               <DotMenuActionDelete
-                :readonly="!$auth.loggedIn"
+                v-if="canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
               />
             </template>
@@ -233,8 +228,10 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { CanDeleteEntityGetter, CanAccessEntityGetter } from '@/store/permissions'
+
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
@@ -259,7 +256,8 @@ import { QueryParams } from '@/modelUtils/QueryParams'
   },
   computed: {
     ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'projects']),
-    ...mapGetters('configurations', ['pageSizes'])
+    ...mapGetters('configurations', ['pageSizes']),
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity'])
   },
   methods: {
     ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'loadProjects', 'deleteConfiguration']),
@@ -279,6 +277,8 @@ export default class SearchConfigurationsPage extends Vue {
   private configurationToDelete: Configuration | null = null
 
   // vuex definition for typescript check
+  canDeleteEntity!: CanDeleteEntityGetter
+  canAccessEntity!: CanAccessEntityGetter
   initConfigurationsIndexAppBar!: () => void
   setDefaults!: () => void
   loadConfigurationsStates!: () => void

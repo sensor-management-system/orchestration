@@ -59,11 +59,17 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
+
+import { PlatformActionTypeItemsGetter, LoadPlatformGenericActionTypesAction } from '@/store/vocabulary'
+import {
+  PlatformsState,
+  LoadPlatformAttachmentsAction,
+  SetChosenKindOfPlatformActionAction
+} from '@/store/platforms'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { IOptionsForActionType } from '@/store/platforms'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -81,20 +87,34 @@ const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
   }
 })
 export default class NewPlatformAction extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  loadPlatformGenericActionTypes!: () => void
-  loadPlatformAttachments!: (id: string) => void
-  chosenKindOfPlatformAction!: IOptionsForActionType | null
-  setChosenKindOfPlatformAction!: (newval: IOptionsForActionType | null) => void
+  platformActionTypeItems!: PlatformActionTypeItemsGetter
+  loadPlatformGenericActionTypes!: LoadPlatformGenericActionTypesAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
+  setChosenKindOfPlatformAction!: SetChosenKindOfPlatformActionAction
 
-  async created () {
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
       this.chosenKindOfAction = null
-      await this.loadPlatformGenericActionTypes()
-      await this.loadPlatformAttachments(this.platformId)
+      await Promise.all([
+        this.loadPlatformGenericActionTypes(),
+        this.loadPlatformAttachments(this.platformId)
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
     } finally {

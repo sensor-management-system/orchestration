@@ -38,6 +38,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          v-if="editable"
           :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
           :to="'/devices/' + deviceId + '/attachments'"
           @save="add"
@@ -105,7 +106,7 @@ permissions and limitations under the Licence.
           Cancel
         </v-btn>
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           color="accent"
           small
           data-role="add-attachment"
@@ -119,18 +120,22 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
-
+import { Component, Vue, mixins, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+
+import { AddDeviceAttachmentAction, LoadDeviceAttachmentsAction } from '@/store/devices'
+
 import UploadConfig from '@/config/uploads'
+
+import { IUploadResult } from '@/services/sms/UploadApi'
+
+import { Attachment } from '@/models/Attachment'
+
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
-
-import { Attachment } from '@/models/Attachment'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { IUploadResult } from '@/services/sms/UploadApi'
 
 @Component({
   components: { ProgressIndicator, SaveAndCancelButtons },
@@ -141,6 +146,9 @@ import { IUploadResult } from '@/services/sms/UploadApi'
   }
 })
 export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) {
+  @InjectReactive()
+    editable!: boolean
+
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
@@ -148,12 +156,16 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
 
   // vuex definition for typescript check
   uploadFile!: (file: File) => Promise<IUploadResult>
-  addDeviceAttachment!: ({
-    deviceId,
-    attachment
-  }: { deviceId: string, attachment: Attachment }) => Promise<void>
+  addDeviceAttachment!: AddDeviceAttachmentAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
 
-  loadDeviceAttachments!: (id: string) => void
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 
   /**
    * returns a list of MimeTypes, seperated by ,

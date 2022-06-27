@@ -73,9 +73,17 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import {
+  PlatformsState,
+  LoadPlatformGenericActionAction,
+  LoadAllPlatformActionsAction,
+  LoadPlatformAttachmentsAction,
+  UpdatePlatformGenericActionAction
+} from '@/store/platforms'
+
 import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
@@ -94,23 +102,39 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   methods: mapActions('platforms', ['loadPlatformGenericAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformGenericAction'])
 })
 export default class EditPlatformAction extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: GenericAction = new GenericAction()
   private isSaving = false
   private isLoading = false
 
   // vuex definition for typescript check
-  loadAllPlatformActions!: (id: string) => void
-  loadPlatformGenericAction!: (actionId: string) => void
-  loadPlatformAttachments!: (id: string) => void
-  platformGenericAction!: GenericAction
-  updatePlatformGenericAction!: ({ platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
+  platforms!: PlatformsState['platforms']
+  platformGenericAction!: PlatformsState['platformGenericAction']
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
+  loadPlatformGenericAction!: LoadPlatformGenericActionAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  updatePlatformGenericAction!: UpdatePlatformGenericActionAction
 
-  async created () {
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadPlatformGenericAction(this.actionId)
-      await this.loadPlatformAttachments(this.platformId)
-      this.action = GenericAction.createFromObject(this.platformGenericAction)
+      await Promise.all([
+        this.loadPlatformGenericAction(this.actionId),
+        this.loadPlatformAttachments(this.platformId)
+      ])
+      if (this.platformGenericAction) {
+        this.action = GenericAction.createFromObject(this.platformGenericAction)
+      }
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {

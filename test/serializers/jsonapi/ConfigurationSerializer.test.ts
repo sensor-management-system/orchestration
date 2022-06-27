@@ -60,6 +60,7 @@ import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
+import { Visibility } from '@/models/Visibility'
 
 describe('LocationType', () => {
   it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
@@ -172,6 +173,12 @@ describe('ConfigurationSerializer', () => {
                   id: '4444'
                 }
               ]
+            },
+            created_by: {
+              data: {
+                id: '123456',
+                type: 'user'
+              }
             }
             // no contacts, as we expect an empty case here
           },
@@ -778,8 +785,11 @@ describe('ConfigurationSerializer', () => {
         statusUri: '',
         statusName: '',
         contacts: [],
+        createdBy: null,
+        updatedBy: null,
         createdByUserId: null,
-        updatedByUserId: null
+        permissionGroups: [],
+        visibility: Visibility.Internal
       })
       const expectedPlatform2 = Platform.createFromObject({
         id: '38',
@@ -801,8 +811,11 @@ describe('ConfigurationSerializer', () => {
         statusUri: '',
         statusName: '',
         contacts: [],
+        createdBy: null,
+        updatedBy: null,
         createdByUserId: null,
-        updatedByUserId: null
+        permissionGroups: [],
+        visibility: Visibility.Internal
       })
       const expectedPlatform3 = Platform.createFromObject({
         id: '41',
@@ -824,8 +837,11 @@ describe('ConfigurationSerializer', () => {
         statusUri: '',
         statusName: '',
         contacts: [],
+        createdBy: null,
+        updatedBy: null,
         createdByUserId: null,
-        updatedByUserId: null
+        permissionGroups: [],
+        visibility: Visibility.Internal
       })
 
       const property1 = DeviceProperty.createFromObject({
@@ -894,8 +910,11 @@ describe('ConfigurationSerializer', () => {
         statusUri: '',
         statusName: '',
         contacts: [],
+        createdBy: null,
+        updatedBy: null,
         createdByUserId: null,
-        updatedByUserId: null
+        permissionGroups: [],
+        visibility: Visibility.Internal
       })
       const expectedDevice2 = Device.createFromObject({
         id: '40',
@@ -920,8 +939,11 @@ describe('ConfigurationSerializer', () => {
         statusUri: '',
         statusName: '',
         contacts: [],
+        createdBy: null,
+        updatedBy: null,
         createdByUserId: null,
-        updatedByUserId: null
+        permissionGroups: [],
+        visibility: Visibility.Internal
       })
 
       const expectedContact = new Contact()
@@ -1075,6 +1097,7 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.staticLocationEndActions = [expectedStaticLocationEndAction1]
       expectedConfiguration1.dynamicLocationBeginActions = [expectedDynamicLocationBeginAction1]
       expectedConfiguration1.dynamicLocationEndActions = [expectedDynamicLocationEndAction1]
+      expectedConfiguration1.createdByUserId = '123456'
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'

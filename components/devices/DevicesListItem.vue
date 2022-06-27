@@ -34,11 +34,18 @@ permissions and limitations under the Licence.
     expandable-color="grey lighten-5"
   >
     <template #header>
-      <div :class="'text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
+      <div :class="'mr-1 text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
         {{ getType() }}
       </div>
       <status-chip
         :value="getStatus()"
+      />
+      <visibility-chip
+        v-model="device.visibility"
+      />
+      <permission-group-chips
+        v-model="device.permissionGroups"
+        collapsible
       />
     </template>
     <template #dot-menu-items>
@@ -227,11 +234,15 @@ import { Status } from '@/models/Status'
 import { DeviceType } from '@/models/DeviceType'
 
 import StatusChip from '@/components/shared/StatusChip.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 @Component({
   components: {
     StatusChip,
+    VisibilityChip,
+    PermissionGroupChips,
     BaseExpandableListItem
   },
   computed: mapGetters('vocabulary', ['getDeviceTypeByUri', 'getEquipmentstatusByUri'])

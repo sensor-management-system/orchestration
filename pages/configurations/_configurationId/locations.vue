@@ -134,6 +134,9 @@ import { Component, Prop, Watch, mixins } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 import * as VueRouter from 'vue-router'
+import { mapActions } from 'vuex'
+
+import { LoadEpsgCodesAction, LoadElevationDataAction } from '@/store/vocabulary'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -154,33 +157,31 @@ import {
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { mapActions } from 'vuex'
 
 @Component({
   components: {
     DateTimePicker,
     ProgressIndicator
   },
-  methods:{
-    ...mapActions('vocabulary',['loadEpsgCodes','loadElevationData']),
-    ...mapActions('contacts',['loadAllContacts'])
+  methods: {
+    ...mapActions('vocabulary', ['loadEpsgCodes', 'loadElevationData']),
+    ...mapActions('contacts', ['loadAllContacts'])
   }
 })
 export default class ConfigurationLocations extends mixins(Rules) {
-
   // vuex definition for typescript check
-  loadEpsgCodes!:()=>void
-  loadElevationData!:()=>void
-  loadAllContacts!:()=>void
+  loadEpsgCodes!: LoadEpsgCodesAction
+  loadElevationData!: LoadElevationDataAction
+  loadAllContacts!: () => void
 
-  async created(){ //TODO Try catch + progress inidcator
+  async created () { // TODO Try catch + progress inidcator
     await this.loadEpsgCodes()
     await this.loadElevationData()
     await this.loadAllContacts()
     const test = await this.$api.configurations.findRelatedStaticLocationBeginActions(this.configurationId)
-    console.log('test',test);
-
+    console.log('test', test)
   }
+
   get configurationId () {
     return this.$route.params.configurationId
   }

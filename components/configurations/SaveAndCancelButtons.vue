@@ -45,6 +45,7 @@ permissions and limitations under the Licence.
     <v-btn
       color="accent"
       small
+      :disabled="disabled"
       @click="$emit('save')"
     >
       {{ saveBtnText }}
@@ -59,6 +60,7 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 export default class SaveAndCancelButtons extends Vue {
   @Prop({ default: false, type: String }) to!: string
   @Prop({ required: true, type: String }) saveBtnText!: string
+  @Prop({ default: false, type: Boolean }) disabled!: boolean
 }
 </script>
 

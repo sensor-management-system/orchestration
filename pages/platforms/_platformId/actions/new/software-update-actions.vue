@@ -38,6 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
@@ -52,6 +53,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Create"
         :to="'/platforms/' + platformId + '/actions'"
         @save="save"
@@ -61,10 +63,14 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { IOptionsForActionType } from '@/store/platforms'
+import {
+  PlatformsState,
+  AddPlatformSoftwareUpdateActionAction,
+  LoadAllPlatformActionsAction
+} from '@/store/platforms'
 
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
@@ -83,17 +89,26 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   methods: mapActions('platforms', ['addPlatformSoftwareUpdateAction', 'loadAllPlatformActions'])
 })
 export default class NewPlatformSoftwareUpdateActions extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  chosenKindOfPlatformAction!: IOptionsForActionType | null
-  addPlatformSoftwareUpdateAction!: ({ platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
-  loadAllPlatformActions!: (id: string) => void
+  platformAttachments!: PlatformsState['platformAttachments']
+  chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
+  addPlatformSoftwareUpdateAction!: AddPlatformSoftwareUpdateActionAction
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
 
   created () {
     if (this.chosenKindOfPlatformAction === null) {
       this.$router.push('/platforms/' + this.platformId + '/actions')
+    }
+    if (!this.editable) {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
     }
   }
 

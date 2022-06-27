@@ -44,6 +44,12 @@ declare module '@nuxt/types' {
   }
 }
 
+declare module 'vuex' {
+  interface Store<S> { // eslint-disable-line
+    $api: Api
+  }
+}
+
 const apiPlugin: Plugin = (context, inject) => {
   const getIdToken = (): string | null => {
     // @ts-ignore

@@ -40,6 +40,16 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+
+import { LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
+import {
+  LoadCompartmentsAction,
+  LoadSamplingMediaAction,
+  LoadPropertiesAction,
+  LoadUnitsAction,
+  LoadMeasuredQuantityUnitsAction
+} from '@/store/vocabulary'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -53,22 +63,24 @@ export default class DevicePropertiesPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceMeasuredQuantities!: (id: string) => void
-  loadCompartments!: () => void
-  loadSamplingMedia!: () => void
-  loadProperties!: () => void
-  loadUnits!: () => void
-  loadMeasuredQuantityUnits!: () => void
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+  loadCompartments!: LoadCompartmentsAction
+  loadSamplingMedia!: LoadSamplingMediaAction
+  loadProperties!: LoadPropertiesAction
+  loadUnits!: LoadUnitsAction
+  loadMeasuredQuantityUnits!: LoadMeasuredQuantityUnitsAction
 
-  async created () {
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadDeviceMeasuredQuantities(this.deviceId)
-      await this.loadCompartments()
-      await this.loadSamplingMedia()
-      await this.loadProperties()
-      await this.loadUnits()
-      await this.loadMeasuredQuantityUnits()
+      await Promise.all([
+        this.loadDeviceMeasuredQuantities(this.deviceId),
+        this.loadCompartments(),
+        this.loadSamplingMedia(),
+        this.loadProperties(),
+        this.loadUnits(),
+        this.loadMeasuredQuantityUnits()
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
     } finally {

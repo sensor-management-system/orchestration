@@ -41,6 +41,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          v-if="editable"
           save-btn-text="Add"
           :to="'/devices/' + deviceId + '/customfields'"
           @save="save"
@@ -48,7 +49,7 @@ permissions and limitations under the Licence.
       </v-card-actions>
       <v-card-text>
         <CustomFieldForm
-        ref="customFieldForm"
+          ref="customFieldForm"
           v-model="customField"
           :readonly="false"
         />
@@ -56,6 +57,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          v-if="editable"
           save-btn-text="Add"
           :to="'/devices/' + deviceId + '/customfields'"
           @save="save"
@@ -66,8 +68,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
+
+import { AddDeviceCustomFieldAction, LoadDeviceCustomFieldsAction } from '@/store/devices'
 
 import { CustomTextField } from '@/models/CustomTextField'
 
@@ -81,16 +85,24 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('devices', ['addDeviceCustomField', 'loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldAddPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
 
   private customField: CustomTextField = new CustomTextField()
 
   // vuex definition for typescript check
-  loadDeviceCustomFields!: (id: string) => void
-  addDeviceCustomField!: ({
-    deviceId,
-    deviceCustomField
-  }: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<void>
+  loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
+  addDeviceCustomField!: AddDeviceCustomFieldAction
+
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 
   get deviceId (): string {
     return this.$route.params.deviceId

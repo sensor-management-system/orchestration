@@ -45,6 +45,66 @@ permissions and limitations under the Licence.
         </template>
       </PlatformSearch>
     </div>
+    <!--    <v-tabs-items-->
+    <!--      v-model="activeTab"-->
+    <!--    >-->
+    <!--      <PlatformsBasicSearch-->
+    <!--        v-model="searchText"-->
+    <!--        @search="basicSearch"-->
+    <!--        @clear="clearBasicSearch"-->
+    <!--      />-->
+    <!--      <v-tab-item :eager="true">-->
+    <!--        <v-row>-->
+    <!--          <v-col cols="12" md="6">-->
+    <!--            <PlatformsBasicSearchField-->
+    <!--              v-model="searchText"-->
+    <!--              @start-search="extendedSearch"-->
+    <!--            />-->
+    <!--          </v-col>-->
+    <!--        </v-row>-->
+    <!--        <v-row>-->
+    <!--          <v-col cols="12" md="3">-->
+    <!--            <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />-->
+    <!--          </v-col>-->
+    <!--        </v-row>-->
+    <!--        <v-row>-->
+    <!--          <v-col cols="12" md="3">-->
+    <!--            <StatusSelect v-model="selectedSearchStates" label="Select a status" />-->
+    <!--          </v-col>-->
+    <!--        </v-row>-->
+    <!--        <v-row>-->
+    <!--          <v-col cols="12" md="3">-->
+    <!--            <PlatformTypeSelect v-model="selectedSearchPlatformTypes" label="Select a platform type" />-->
+    <!--          </v-col>-->
+    <!--        </v-row>-->
+    <!--        <v-row v-if="$auth.loggedIn">-->
+    <!--          <v-col cols="12" md="3">-->
+    <!--            <v-checkbox v-model="onlyOwnPlatforms" label="Only own platforms" />-->
+    <!--          </v-col>-->
+    <!--        </v-row>-->
+    <!--        <v-row>-->
+    <!--          <v-col-->
+    <!--            cols="12"-->
+    <!--            align-self="center"-->
+    <!--          >-->
+    <!--            <v-btn-->
+    <!--              color="primary"-->
+    <!--              small-->
+    <!--              @click="extendedSearch"-->
+    <!--            >-->
+    <!--              Search-->
+    <!--            </v-btn>-->
+    <!--            <v-btn-->
+    <!--              text-->
+    <!--              small-->
+    <!--              @click="clearExtendedSearch"-->
+    <!--            >-->
+    <!--              Clear-->
+    <!--            </v-btn>-->
+    <!--          </v-col>-->
+    <!--        </v-row>-->
+    <!--      </v-tab-item>-->
+    <!--    </v-tabs-items>-->
 
     <v-progress-circular
       v-if="loading"
@@ -160,13 +220,15 @@ permissions and limitations under the Licence.
             :key="item.id"
             :platform="item"
           >
-            <template #dot-menu-items>
+            <template
+              v-if="$auth.loggedIn"
+              #dot-menu-items
+            >
               <DotMenuActionCopy
-                :readonly="!$auth.loggedIn"
                 :path="'/platforms/copy/' + item.id"
               />
               <DotMenuActionDelete
-                :readonly="!$auth.loggedIn"
+                v-if="canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
               />
             </template>
@@ -195,7 +257,19 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { saveAs } from 'file-saver'
 
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
+
+import {
+  PlatformsState,
+  SearchPlatformsPaginatedAction,
+  SetPageNumberAction,
+  SetPageSizeAction,
+  ExportAsCsvAction,
+  DeletePlatformAction,
+  PageSizesGetter
+} from 'store/platforms'
+
+import { CanAccessEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
 
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
@@ -209,13 +283,9 @@ import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vu
 import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
-import { Manufacturer } from '@/models/Manufacturer'
 import { Platform } from '@/models/Platform'
-import { PlatformType } from '@/models/PlatformType'
-import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
 
 @Component({
@@ -233,10 +303,10 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     StatusSelect,
     PageSizeSelect
   },
-  middleware: ['permission'],
   computed: {
     ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages']),
-    ...mapGetters('platforms', ['pageSizes'])
+    ...mapGetters('platforms', ['pageSizes']),
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity'])
   },
   methods: {
     ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform']),
@@ -250,29 +320,29 @@ export default class SearchPlatformsPage extends Vue {
   private showDeleteDialog: boolean = false
 
   private platformToDelete: Platform | null = null
-
   // vuex definition for typescript check
   initPlatformsIndexAppBar!: () => void
   setDefaults!: () => void
-  pageNumber!: number
-  setPageNumber!: (newPageNumber: number) => void
-  pageSize!: number
-  setPageSize!: (newPageSize: number) => void
-  pageSizes!: number[]
-  searchPlatformsPaginated!: (searchParams: IPlatformSearchParams) => void
-  platforms!: Platform[]
-  exportAsCsv!: (searchParams: IPlatformSearchParams) => Promise<Blob>
-  deletePlatform!: (id: string) => void
-  platformtypes!: PlatformType[]
-  manufacturers!: Manufacturer[]
-  equipmentstatus!: Status[]
+  platforms!: PlatformsState['platforms']
+  pageNumber!: PlatformsState['pageNumber']
+  pageSize!: PlatformsState['pageSize']
+  totalPages!: PlatformsState['totalPages']
+  setPageNumber!: SetPageNumberAction
+  setPageSize!: SetPageSizeAction
+  pageSizes!: PageSizesGetter
+  searchPlatformsPaginated!: SearchPlatformsPaginatedAction
+  exportAsCsv!: ExportAsCsvAction
+  deletePlatform!: DeletePlatformAction
+  canAccessEntity!: CanAccessEntityGetter
+  canDeleteEntity!: CanDeleteEntityGetter
 
-  async created () {
+  created () {
+    this.initPlatformsIndexAppBar()
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.loading = true
-      await this.initPlatformsIndexAppBar()
-      this.page = this.getPageFromUrl()
-      this.size = this.getSizeFromUrl()
       await this.searchPlatformsPaginated()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
@@ -316,7 +386,7 @@ export default class SearchPlatformsPage extends Vue {
     if (this.platforms.length > 0) {
       try {
         this.processing = true
-        const blob = await this.exportAsCsv(this.searchParams)
+        const blob = await this.exportAsCsv()
         saveAs(blob, 'platforms.csv')
       } catch (e) {
         this.$store.commit('snackbar/setError', 'CSV export failed')
@@ -343,7 +413,7 @@ export default class SearchPlatformsPage extends Vue {
     try {
       this.loading = true
       await this.deletePlatform(this.platformToDelete.id)
-      this.runSearch()
+      this.searchPlatformsPaginated()
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')

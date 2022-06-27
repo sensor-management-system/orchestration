@@ -33,18 +33,15 @@
 // eslint-disable-next-line
 import { AxiosInstance, Method } from 'axios'
 
+import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
-import { DynamicLocation } from '@/models/Location'
 import { Project } from '@/models/Project'
-
-// eslint-disable-next-line
-import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 import {
   ConfigurationSerializer,
   configurationWithMetaToConfigurationByAddingDummyObjects,
-  configurationWithMetaToConfigurationByThrowingErrorOnMissing,
   configurationWithMetaToConfigurationByThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
@@ -58,15 +55,31 @@ import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActi
 import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
 import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationBeginActionSerializer } from '@/serializers/jsonapi/StaticLocationBeginActionSerializer'
-import { DateTime } from 'luxon'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
-import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
+
+export interface IncludedRelationships {
+  includeContacts?: boolean
+  includeCreatedBy?: boolean
+  includeUpdatedBy?: boolean
+}
+
+function getIncludeParams (includes: IncludedRelationships): string {
+  const listIncludedRelationships: string[] = []
+  if (includes.includeContacts) {
+    listIncludedRelationships.push('contacts')
+  }
+  if (includes.includeCreatedBy) {
+    listIncludedRelationships.push('created_by.contact')
+  }
+  if (includes.includeUpdatedBy) {
+    listIncludedRelationships.push('updated_by.contact')
+  }
+  return listIncludedRelationships.join(',')
+}
+
+export type ConfigurationPermissionFetchFunction = () => Promise<PermissionGroup[]>
 
 export class ConfigurationApi {
   private axiosApi: AxiosInstance
@@ -89,6 +102,7 @@ export class ConfigurationApi {
   private filterSettings: any[] = []
 
   private serializer: ConfigurationSerializer
+  private permissionFetcher: ConfigurationPermissionFetchFunction | undefined
 
   constructor (
     axiosInstance: AxiosInstance,
@@ -100,7 +114,8 @@ export class ConfigurationApi {
     staticLocationBeginActionApi: StaticLocationBeginActionApi,
     staticLocationEndActionApi: StaticLocationEndActionApi,
     dynamicLocationBeginActionApi: DynamicLocationBeginActionApi,
-    dynamicLocationEndActionApi: DynamicLocationEndActionApi
+    dynamicLocationEndActionApi: DynamicLocationEndActionApi,
+    permissionFetcher?: ConfigurationPermissionFetchFunction
   ) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
@@ -116,6 +131,10 @@ export class ConfigurationApi {
     this._dynamicLocationEndActionApi = dynamicLocationEndActionApi
 
     this.serializer = new ConfigurationSerializer()
+
+    if (permissionFetcher) {
+      this.permissionFetcher = permissionFetcher
+    }
   }
 
   get deviceMountActionApi (): DeviceMountActionApi {
@@ -197,8 +216,14 @@ export class ConfigurationApi {
     return result
   }
 
-  searchPaginated (pageNumber: number, pageSize: number) {
+  async searchPaginated (pageNumber: number, pageSize: number, includes: IncludedRelationships = {}) {
     this.prepareSearch()
+
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+
+    const include = getIncludeParams(includes)
 
     return this.axiosApi.get(
       this.basePath,
@@ -206,6 +231,7 @@ export class ConfigurationApi {
         params: {
           'page[size]': pageSize,
           'page[number]': pageNumber,
+          include,
           ...this.commonParams
         }
       }
@@ -276,39 +302,16 @@ export class ConfigurationApi {
     }
   }
 
-  findById (id: string): Promise<Configuration> {
+  async findById (id: string, includes: IncludedRelationships = {}): Promise<Configuration> {
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+
+    const include = getIncludeParams(includes)
+
     return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
-        include: [
-          // 'contacts',
-          // 'src_longitude',
-          // 'src_latitude',
-          // 'src_elevation',
-          // 'device_mount_actions',
-          // 'device_unmount_actions',
-          // 'platform_mount_actions',
-          // 'platform_unmount_actions',
-          // 'configuration_static_location_begin_actions',
-          // 'configuration_static_location_end_actions',
-          // 'configuration_dynamic_location_begin_actions',
-          // 'configuration_dynamic_location_end_actions',
-          // 'platform_mount_actions.platform',
-          // 'device_mount_actions.device',
-          // 'device_mount_actions.device.device_properties',
-          // 'device_mount_actions.contact',
-          // 'platform_mount_actions.contact',
-          // 'platform_unmount_actions.contact',
-          // 'device_unmount_actions.contact',
-          // 'configuration_static_location_begin_actions.contact',
-          // 'configuration_static_location_end_actions.contact',
-          // 'configuration_dynamic_location_begin_actions.contact',
-          // 'configuration_dynamic_location_end_actions.contact',
-          // 'configuration_dynamic_location_begin_actions.x_property',
-          // 'configuration_dynamic_location_begin_actions.y_property',
-          // 'configuration_dynamic_location_begin_actions.z_property'
-          // devices of the dynamic location properties must be
-          // part of mounted devices
-        ].join(',')
+        include
       }
     }).then((rawResponse) => {
       const rawData = rawResponse.data
@@ -555,77 +558,80 @@ export class ConfigurationApi {
     })
   }
 
-  findRelatedStaticLocationBeginActions(configurationId: string): Promise<StaticLocationBeginAction>{
+  findRelatedStaticLocationBeginActions (configurationId: string): Promise<StaticLocationBeginAction> {
     const url = this.basePath + '/' + configurationId + '/static-location-begin-actions'
     const params = {
       'page[size]': 10000
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any)=>{
+      return rawServerResponse.data.data.map((apiData: any) => {
         return {
-          id:apiData.id,
-          beginDate:DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
-          description:apiData.attributes.description,
-          epsgCode:apiData.attributes.epsg_code ?? '4326',
-          x:apiData.attributes.x,
-          y:apiData.attributes.y,
-          z:apiData.attributes.z,
-          elevationDatumName:apiData.attributes.elevation_datum_name ?? 'MSL',
-          elevationDatumUri:apiData.attributes.elevation_datum_uri ?? '',
+          id: apiData.id,
+          beginDate: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
+          description: apiData.attributes.description,
+          epsgCode: apiData.attributes.epsg_code ?? '4326',
+          x: apiData.attributes.x,
+          y: apiData.attributes.y,
+          z: apiData.attributes.z,
+          elevationDatumName: apiData.attributes.elevation_datum_name ?? 'MSL',
+          elevationDatumUri: apiData.attributes.elevation_datum_uri ?? ''
         }
       })
     })
   }
 
-  findRelatedStaticLocationEndActions(configurationId: string): Promise<StaticLocationEndAction>{
+  findRelatedStaticLocationEndActions (configurationId: string): Promise<StaticLocationEndAction> {
     const url = this.basePath + '/' + configurationId + '/static-location-end-actions'
     const params = {
       'page[size]': 10000
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any)=>{
+      return rawServerResponse.data.data.map((apiData: any) => {
         return {
-          id:apiData.id,
-          description:apiData.attributes.description,
-          endDate:apiData.attributes.end_data
+          id: apiData.id,
+          description: apiData.attributes.description,
+          endDate: apiData.attributes.end_data
         }
       })
     })
   }
-  findRelatedDynamicLocationBeginActions(configurationId: string): Promise<DynamicLocationBeginAction>{
+
+  findRelatedDynamicLocationBeginActions (configurationId: string): Promise<DynamicLocationBeginAction> {
     const url = this.basePath + '/' + configurationId + '/dynamic-location-begin-action'
     const params = {
       'page[size]': 10000
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any)=>{
+      return rawServerResponse.data.data.map((apiData: any) => {
         return {
-          id:apiData.id,
-          beginDate:DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
-          description:apiData.attributes.description,
-          epsgCode:apiData.attributes.epsg_code ?? '4326',
-          elevationDatumName:apiData.attributes.elevation_datum_name ?? 'MSL',
-          elevationDatumUri:apiData.attributes.elevation_datum_uri ?? '',
-          contactId:apiData.relationships.contact.data.id
+          id: apiData.id,
+          beginDate: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
+          description: apiData.attributes.description,
+          epsgCode: apiData.attributes.epsg_code ?? '4326',
+          elevationDatumName: apiData.attributes.elevation_datum_name ?? 'MSL',
+          elevationDatumUri: apiData.attributes.elevation_datum_uri ?? '',
+          contactId: apiData.relationships.contact.data.id
         }
       })
     })
   }
-  findRelatedDynamicLocationEndActions(configurationId: string): Promise<DynamicLocationEndAction>{
+
+  findRelatedDynamicLocationEndActions (configurationId: string): Promise<DynamicLocationEndAction> {
     const url = this.basePath + '/' + configurationId + '/dynamic-location-end-actions'
     const params = {
       'page[size]': 10000
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any)=>{
+      return rawServerResponse.data.data.map((apiData: any) => {
         return {
-          id:apiData.id,
-          description:apiData.attributes.description,
-          endDate:apiData.attributes.end_data
+          id: apiData.id,
+          description: apiData.attributes.description,
+          endDate: apiData.attributes.end_data
         }
       })
     })
   }
+
   // findRelatedDeviceMountActions(configurationId: string): Promise<DeviceMountAction>{
   //   const url = this.basePath + '/' + configurationId + '/device-mount-actions'
   //
@@ -732,7 +738,6 @@ export class ConfigurationApi {
   //     })
   //   })
   // }
-
 
   removeContact (configurationId: string, contactId: string): Promise<void> {
     const url = this.basePath + '/' + configurationId + '/relationships/contacts'

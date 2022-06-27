@@ -30,28 +30,30 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit } from 'vuex/types'
+import { Commit, GetterTree, ActionTree } from 'vuex'
+import { RootState } from '@/store'
+
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { PlatformType } from '@/models/PlatformType'
 import { DeviceType } from '@/models/DeviceType'
 import { ActionType } from '@/models/ActionType'
-import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 import { Compartment } from '@/models/Compartment'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
-import { Api } from '@/services/Api'
 import { EpsgCode } from '@/models/EpsgCode'
 import { ElevationDatum } from '@/models/ElevationDatum'
+
+import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 
-interface vocabularyState {
+export interface VocabularyState {
   manufacturers: Manufacturer[]
   equipmentstatus: Status[]
   devicetypes: DeviceType[]
@@ -63,11 +65,11 @@ interface vocabularyState {
   properties: Property[],
   units: Unit[],
   measuredQuantityUnits: MeasuredQuantityUnit[],
-  epsgCodes:EpsgCode[],
+  epsgCodes: EpsgCode[],
   elevationData: ElevationDatum[]
 }
 
-const state = () => ({
+const state = (): VocabularyState => ({
   manufacturers: [],
   equipmentstatus: [],
   devicetypes: [],
@@ -79,32 +81,40 @@ const state = () => ({
   properties: [],
   units: [],
   measuredQuantityUnits: [],
-  epsgCodes:[],
+  epsgCodes: [],
   elevationData: []
 })
 
-const getters = {
-  getPlatformTypeByUri: (state: vocabularyState) => (uri: string): PlatformType | undefined => {
+export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
+export type GetPlatformTypeByUriGetter = (uri: string) => PlatformType | undefined
+export type GetDeviceTypeByUriGetter = (uri: string) => DeviceType | undefined
+export type GetEquipmentstatusByUriGetter = (uri: string) => Status | undefined
+export type GetManufacturerByUriGetter = (uri: string) => Manufacturer | undefined
+export type PlatformActionTypeItemsGetter = ActionTypeItem[]
+export type DeviceActionTypeItemsGetter = ActionTypeItem[]
+
+const getters: GetterTree<VocabularyState, RootState> = {
+  getPlatformTypeByUri: (state: VocabularyState) => (uri: string): PlatformType | undefined => {
     return state.platformtypes.find((platformType: PlatformType) => {
       return platformType.uri === uri
     })
   },
-  getDeviceTypeByUri: (state: vocabularyState) => (uri: string): DeviceType | undefined => {
+  getDeviceTypeByUri: (state: VocabularyState) => (uri: string): DeviceType | undefined => {
     return state.devicetypes.find((deviceType: DeviceType) => {
       return deviceType.uri === uri
     })
   },
-  getEquipmentstatusByUri: (state: vocabularyState) => (uri: string): Status | undefined => {
+  getEquipmentstatusByUri: (state: VocabularyState) => (uri: string): Status | undefined => {
     return state.equipmentstatus.find((equipmentstatus: Status) => {
       return equipmentstatus.uri === uri
     })
   },
-  getManufacturerByUri: (state: vocabularyState) => (uri: string): Manufacturer | undefined => {
+  getManufacturerByUri: (state: VocabularyState) => (uri: string): Manufacturer | undefined => {
     return state.manufacturers.find((manufacturer: Manufacturer) => {
       return manufacturer.uri === uri
     })
   },
-  platformActionTypeItems: (state: vocabularyState) => {
+  platformActionTypeItems: (state: VocabularyState) => {
     return [
       {
         id: 'software_update',
@@ -122,7 +132,7 @@ const getters = {
       })
     ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
   },
-  deviceActionTypeItems: (state: vocabularyState) => {
+  deviceActionTypeItems: (state: VocabularyState) => {
     return [
       {
         id: 'device_calibration',
@@ -147,96 +157,107 @@ const getters = {
     ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
   }
 }
-// @ts-ignore
-const actions: {
-  [key: string]: any;
-  $api: Api
-} = {
-  async loadManufacturers ({ commit }: { commit: Commit }) {
+
+export type LoadManufacturersAction = () => Promise<void>
+export type LoadEquipmentstatusAction = () => Promise<void>
+export type LoadDevicetypesAction = () => Promise<void>
+export type LoadPlatformtypesAction = () => Promise<void>
+export type LoadPlatformGenericActionTypesAction = () => Promise<void>
+export type LoadDeviceGenericActionTypesAction = () => Promise<void>
+export type LoadCompartmentsAction = () => Promise<void>
+export type LoadSamplingMediaAction = () => Promise<void>
+export type LoadPropertiesAction = () => Promise<void>
+export type LoadUnitsAction = () => Promise<void>
+export type LoadMeasuredQuantityUnitsAction = () => Promise<void>
+export type LoadEpsgCodesAction = () => Promise<void>
+export type LoadElevationDataAction = () => Promise<void>
+
+const actions: ActionTree<VocabularyState, RootState> = {
+  async loadManufacturers ({ commit }: { commit: Commit }): Promise<void> {
     // @ts-ignore
     commit('setManufacturers', await this.$api.manufacturer.findAll())
   },
-  async loadEquipmentstatus ({ commit }: { commit: Commit }) {
+  async loadEquipmentstatus ({ commit }: { commit: Commit }): Promise<void> {
     // @ts-ignore
     commit('setEquipmentstatus', await this.$api.states.findAll())
   },
-  async loadDevicetypes ({ commit }: { commit: Commit }) {
+  async loadDevicetypes ({ commit }: { commit: Commit }): Promise<void> {
     // @ts-ignore
     commit('setDevicetypes', await this.$api.deviceTypes.findAll())
   },
-  async loadPlatformtypes ({ commit }: { commit: Commit }) {
+  async loadPlatformtypes ({ commit }: { commit: Commit }): Promise<void> {
     // @ts-ignore
     commit('setPlatformtypes', await this.$api.platformTypes.findAll())
   },
-  async loadPlatformGenericActionTypes ({ commit }: { commit: Commit }) { // TODO check api and maybe refactor
+  async loadPlatformGenericActionTypes ({ commit }: { commit: Commit }): Promise<void> { // TODO check api and maybe refactor
     commit('setPlatformGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_PLATFORM).build().findMatchingAsList()
     )
   },
-  async loadDeviceGenericActionTypes ({ commit }: { commit: Commit }) {
+  async loadDeviceGenericActionTypes ({ commit }: { commit: Commit }): Promise<void> {
     commit('setDeviceGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList())
   },
-  async loadCompartments ({ commit }: { commit: Commit }) {
+  async loadCompartments ({ commit }: { commit: Commit }): Promise<void> {
     commit('setCompartments', await this.$api.compartments.findAll())
   },
-  async loadSamplingMedia ({ commit }: { commit: Commit }) {
+  async loadSamplingMedia ({ commit }: { commit: Commit }): Promise<void> {
     commit('setSamplingMedia', await this.$api.samplingMedia.findAll())
   },
-  async loadProperties ({ commit }: { commit: Commit }) {
+  async loadProperties ({ commit }: { commit: Commit }): Promise<void> {
     commit('setProperties', await this.$api.properties.findAll())
   },
-  async loadUnits ({ commit }: { commit: Commit }) {
+  async loadUnits ({ commit }: { commit: Commit }): Promise<void> {
     commit('setUnits', await this.$api.units.findAll())
   },
-  async loadMeasuredQuantityUnits ({ commit }: { commit: Commit }) {
+  async loadMeasuredQuantityUnits ({ commit }: { commit: Commit }): Promise<void> {
     commit('setMeasuredQuantityUnits', await this.$api.measuredQuantityUnits.findAll())
   },
-  async loadEpsgCodes ({ commit }: { commit: Commit }) {
+  async loadEpsgCodes ({ commit }: { commit: Commit }): Promise<void> {
     commit('setEpsgCodes', await this.$api.epsgCodes.findAll())
   },
-  async loadElevationData ({ commit }: { commit: Commit }) {
+  async loadElevationData ({ commit }: { commit: Commit }): Promise<void> {
     commit('setElevationData', await this.$api.elevationData.findAll())
   }
 }
 
 const mutations = {
-  setManufacturers (state: vocabularyState, manufacturers: Manufacturer[]) {
+  setManufacturers (state: VocabularyState, manufacturers: Manufacturer[]) {
     state.manufacturers = manufacturers
   },
-  setEquipmentstatus (state: vocabularyState, equipmentstatus: Status[]) {
+  setEquipmentstatus (state: VocabularyState, equipmentstatus: Status[]) {
     state.equipmentstatus = equipmentstatus
   },
-  setDevicetypes (state: vocabularyState, devicetypes: DeviceType[]) {
+  setDevicetypes (state: VocabularyState, devicetypes: DeviceType[]) {
     state.devicetypes = devicetypes
   },
-  setPlatformtypes (state: vocabularyState, platformtypes: PlatformType[]) {
+  setPlatformtypes (state: VocabularyState, platformtypes: PlatformType[]) {
     state.platformtypes = platformtypes
   },
-  setPlatformGenericActionTypes (state: vocabularyState, platformGenericActionTypes: ActionType[]) {
+  setPlatformGenericActionTypes (state: VocabularyState, platformGenericActionTypes: ActionType[]) {
     state.platformGenericActionTypes = platformGenericActionTypes
   },
-  setDeviceGenericActionTypes (state: vocabularyState, deviceGenericACtionTypes: ActionType[]) {
+  setDeviceGenericActionTypes (state: VocabularyState, deviceGenericACtionTypes: ActionType[]) {
     state.deviceGenericActionTypes = deviceGenericACtionTypes
   },
-  setCompartments (state: vocabularyState, compartments: Compartment[]) {
+  setCompartments (state: VocabularyState, compartments: Compartment[]) {
     state.compartments = compartments
   },
-  setSamplingMedia (state: vocabularyState, samplingMedia: SamplingMedia[]) {
+  setSamplingMedia (state: VocabularyState, samplingMedia: SamplingMedia[]) {
     state.samplingMedia = samplingMedia
   },
-  setProperties (state: vocabularyState, properties: Property[]) {
+  setProperties (state: VocabularyState, properties: Property[]) {
     state.properties = properties
   },
-  setUnits (state: vocabularyState, units: Unit[]) {
+  setUnits (state: VocabularyState, units: Unit[]) {
     state.units = units
   },
-  setMeasuredQuantityUnits (state: vocabularyState, measuredQuantityUnits: MeasuredQuantityUnit[]) {
+  setMeasuredQuantityUnits (state: VocabularyState, measuredQuantityUnits: MeasuredQuantityUnit[]) {
     state.measuredQuantityUnits = measuredQuantityUnits
   },
-  setEpsgCodes(state:vocabularyState,epsgCodes:EpsgCode[]){
-    state.epsgCodes=epsgCodes
+  setEpsgCodes (state: VocabularyState, epsgCodes: EpsgCode[]) {
+    state.epsgCodes = epsgCodes
   },
-  setElevationData(state:vocabularyState,elevationData:ElevationDatum[]){
-    state.elevationData=elevationData
+  setElevationData (state: VocabularyState, elevationData: ElevationDatum[]) {
+    state.elevationData = elevationData
   }
 }
 

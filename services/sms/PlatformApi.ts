@@ -37,6 +37,7 @@ import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
@@ -58,15 +59,37 @@ import { PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/So
 import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
 import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformUnmountActionSerializer'
 
-interface IncludedRelationships {
+export interface IncludedRelationships {
   includeContacts?: boolean
   includePlatformAttachments?: boolean
+  includeCreatedBy?: boolean
+  includeUpdatedBy?: boolean
 }
+
+function getIncludeParams (includes: IncludedRelationships): string {
+  const listIncludedRelationships: string[] = []
+  if (includes.includeContacts) {
+    listIncludedRelationships.push('contacts')
+  }
+  if (includes.includePlatformAttachments) {
+    listIncludedRelationships.push('platform_attachments')
+  }
+  if (includes.includeCreatedBy) {
+    listIncludedRelationships.push('created_by.contact')
+  }
+  if (includes.includeUpdatedBy) {
+    listIncludedRelationships.push('updated_by.contact')
+  }
+  return listIncludedRelationships.join(',')
+}
+
+export type PlatformPermissionFetchFunction = () => Promise<PermissionGroup[]>
 
 export class PlatformApi {
   private axiosApi: AxiosInstance
   readonly basePath: string
   private serializer: PlatformSerializer
+  private permissionFetcher: PlatformPermissionFetchFunction | undefined
 
   private _searchedManufacturers: Manufacturer[] = []
   private _searchedStates: Status[] = []
@@ -75,10 +98,13 @@ export class PlatformApi {
   private _searchText: string | null = null
   private filterSettings: any[] = []
 
-  constructor (axiosInstance: AxiosInstance, basePath: string) {
+  constructor (axiosInstance: AxiosInstance, basePath: string, permissionFetcher?: PlatformPermissionFetchFunction) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
     this.serializer = new PlatformSerializer()
+    if (permissionFetcher) {
+      this.permissionFetcher = permissionFetcher
+    }
   }
 
   get searchedManufacturers (): Manufacturer[] {
@@ -137,8 +163,14 @@ export class PlatformApi {
     return result
   }
 
-  searchPaginated (pageNumber: number, pageSize: number) {
+  async searchPaginated (pageNumber: number, pageSize: number, includes: IncludedRelationships = {}) {
     this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+
+    const include = getIncludeParams(includes)
 
     return this.axiosApi.get(
       this.basePath,
@@ -146,6 +178,7 @@ export class PlatformApi {
         params: {
           'page[size]': pageSize,
           'page[number]': pageNumber,
+          include,
           ...this.commonParams
         }
       }
@@ -168,8 +201,12 @@ export class PlatformApi {
     })
   }
 
-  searchAll () {
+  async searchAll () {
     this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
     return this.axiosApi.get(
       this.basePath,
       {
@@ -285,26 +322,25 @@ export class PlatformApi {
     }
   }
 
-  findById (id: string, includes: IncludedRelationships): Promise<Platform> {
-    const listIncludedRelationships: string[] = []
-    if (includes.includeContacts) {
-      listIncludedRelationships.push('contacts')
-    }
-    if (includes.includePlatformAttachments) {
-      listIncludedRelationships.push('platform_attachments')
-    }
-    const include = listIncludedRelationships.join(',')
+  async findById (id: string, includes: IncludedRelationships): Promise<Platform> {
+    const include = getIncludeParams(includes)
 
-    return this.axiosApi.get(this.basePath + '/' + id, {
-      params: {
-        include
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+    const rawResponse = await this.axiosApi.get(
+      this.basePath + '/' + id,
+      {
+        params: {
+          include
+        }
       }
-    }).then((rawResponse) => {
-      const rawData = rawResponse.data
-      // As we ask the api to include all the contacts, we want to have them here
-      // if they are missing => throw an error
-      return platformWithMetaToPlatformThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
-    })
+    )
+    const rawData = rawResponse.data
+    // As we ask the api to include all the contacts, we want to have them here
+    // if they are missing => throw an error
+    return platformWithMetaToPlatformThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
   }
 
   deleteById (id: string): Promise<void> {

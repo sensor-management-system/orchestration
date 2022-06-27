@@ -51,7 +51,7 @@ export class UserInfoSerializer {
 
     if (attributes) {
       newEntry.active = attributes.active || false
-      newEntry.isSuperUser = attributes.isSuperUser || false
+      newEntry.isSuperUser = attributes.is_superuser || false
       if (Array.isArray(attributes?.member) && attributes?.member?.length) {
         newEntry.member = attributes.member.map(e => e.toString())
       }

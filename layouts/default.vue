@@ -319,6 +319,7 @@ permissions and limitations under the Licence.
 <script>
 
 import CookieLaw from 'vue-cookie-law'
+import { mapActions } from 'vuex'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
 
@@ -466,6 +467,7 @@ export default {
     })
   },
   methods: {
+    ...mapActions('permissions', ['clearUserInfo']),
     closeErrorSnackbar () {
       this.$store.commit('snackbar/clearError')
     },
@@ -491,8 +493,9 @@ export default {
           this.$store.commit('snackbar/setError', 'Login failed')
         })
     },
-    logout () {
-      this.$auth.logout()
+    async logout () {
+      await this.$auth.logout()
+      this.clearUserInfo()
     }
   }
 }

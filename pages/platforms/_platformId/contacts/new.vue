@@ -56,6 +56,7 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-btn
+          v-if="editable"
           small
           color="primary"
           :disabled="selectedContact == null"
@@ -87,12 +88,18 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import {
+  PlatformsState,
+  LoadPlatformContactsAction,
+  AddPlatformContactAction
+} from '@/store/platforms'
 
 import { Contact } from '@/models/Contact'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
@@ -109,22 +116,35 @@ import { Contact } from '@/models/Contact'
   }
 })
 export default class PlatformAddContactPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
 
   // vuex definition for typescript check
+  platformContacts!: PlatformsState['platformContacts']
   loadAllContacts!: () => void
-  loadPlatformContacts!: (id: string) => void
   contactsByDifference!: (contactsToSubtract: Contact[]) => Contact[]
-  platformContacts!: Contact[]
-  addPlatformContact!: ({ platformId, contactId }: {platformId: string, contactId: string}) => Promise<void>
+  loadPlatformContacts!: LoadPlatformContactsAction
+  addPlatformContact!: AddPlatformContactAction
 
-  async created () {
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/platforms/' + this.platformId + '/contacts', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadAllContacts()
-      await this.loadPlatformContacts(this.platformId)
+      await Promise.all([
+        this.loadAllContacts(),
+        this.loadPlatformContacts(this.platformId)
+      ])
 
       const redirectContactId = this.$route.query.contact
       if (redirectContactId) {

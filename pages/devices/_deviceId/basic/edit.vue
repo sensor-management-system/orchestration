@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/basic'"
         @save="save"
@@ -49,6 +50,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
+        v-if="editable"
         save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/basic'"
         @save="save"
@@ -65,17 +67,20 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
 import { mapActions, mapState } from 'vuex'
+
+import { DevicesState, LoadDeviceAction, SaveDeviceAction } from '@/store/devices'
+
+import { Device } from '@/models/Device'
+
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
-
-import { Device } from '@/models/Device'
 
 @Component({
   components: {
@@ -89,6 +94,9 @@ import { Device } from '@/models/Device'
   methods: mapActions('devices', ['saveDevice', 'loadDevice'])
 })
 export default class DeviceEditBasicPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private deviceCopy: Device = new Device()
   private isSaving: boolean = false
   private hasSaved: boolean = false
@@ -96,19 +104,20 @@ export default class DeviceEditBasicPage extends Vue {
   private to: RawLocation | null = null
 
   // vuex definition for typescript check
-  device!: Device
-  saveDevice!: (device: Device) => Promise<Device>
-  loadDevice!: ({
-    deviceId,
-    includeContacts,
-    includeCustomFields,
-    includeDeviceProperties,
-    includeDeviceAttachments
-  }:
-    { deviceId: string, includeContacts: boolean, includeCustomFields: boolean, includeDeviceProperties: boolean, includeDeviceAttachments: boolean }) => void
+  device!: DevicesState['device']
+  saveDevice!: SaveDeviceAction
+  loadDevice!: LoadDeviceAction
 
   created () {
-    this.deviceCopy = Device.createFromObject(this.device)
+    if (!this.editable) {
+      this.$router.replace('/devices/' + this.deviceId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+      return
+    }
+    if (this.device) {
+      this.deviceCopy = Device.createFromObject(this.device)
+    }
   }
 
   get deviceId () {

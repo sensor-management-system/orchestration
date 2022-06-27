@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
       dark
     />
     <v-card-actions
-      v-if="$auth.loggedIn"
+      v-if="editable"
     >
       <v-spacer />
       <v-btn
@@ -59,7 +59,7 @@ permissions and limitations under the Licence.
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
+              :readonly="!editable"
               @click="initDeleteDialog(item)"
             />
           </template>
@@ -71,7 +71,7 @@ permissions and limitations under the Licence.
     >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         :to="'/devices/' + deviceId + '/customfields/new'"
@@ -89,16 +89,18 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import { DeleteDeviceCustomFieldAction, DevicesState, LoadDeviceCustomFieldsAction } from '@/store/devices'
+
 import { CustomTextField } from '@/models/CustomTextField'
+
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesCustomFieldListItem from '@/components/devices/DevicesCustomFieldListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DevicesCustomFieldDeleteDialog from '@/components/devices/DevicesCustomFieldDeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
-
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -107,13 +109,17 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('devices', ['deleteDeviceCustomField', 'loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isSaving = false
   private showDeleteDialog = false
-  private customFieldToDelete: CustomTextField|null = null
+  private customFieldToDelete: CustomTextField | null = null
 
   // vuex definition for typescript check
-  loadDeviceCustomFields!: (id: string) => void
-  deleteDeviceCustomField!: (customField: string) => Promise<void>
+  deviceCustomFields!: DevicesState['deviceCustomFields']
+  loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
+  deleteDeviceCustomField!: DeleteDeviceCustomFieldAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
