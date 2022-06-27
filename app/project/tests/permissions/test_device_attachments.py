@@ -4,11 +4,8 @@ from unittest.mock import patch
 from project import base_url
 from project.api.models import DeviceAttachment
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import create_token
-from project.tests.base import fake
-from project.tests.base import query_result_to_list
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions import create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -33,17 +30,31 @@ class TesDeviceAttachment(BaseTestCase):
 
     def test_get_public_device_attachments(self):
         """Ensure that we can get a list of public device_attachments."""
-        device1 = create_a_test_device(public=True, private=False, internal=False,)
-        device2 = create_a_test_device(public=True, private=False, internal=False,)
+        device1 = create_a_test_device(
+            public=True,
+            private=False,
+            internal=False,
+        )
+        device2 = create_a_test_device(
+            public=True,
+            private=False,
+            internal=False,
+        )
 
         attachment1 = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device1,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device1,
         )
         attachment2 = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device1,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device1,
         )
         attachment3 = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device2,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device2,
         )
 
         db.session.add_all([attachment1, attachment2, attachment3])
@@ -51,7 +62,8 @@ class TesDeviceAttachment(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                self.url, content_type="application/vnd.api+json",
+                self.url,
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -60,14 +72,26 @@ class TesDeviceAttachment(BaseTestCase):
 
     def test_get_internal_device_attachments(self):
         """Ensure that we can get a list of internal device_attachments only with a valid jwt."""
-        device1 = create_a_test_device(public=False, private=False, internal=True,)
-        device2 = create_a_test_device(public=False, private=False, internal=True,)
+        device1 = create_a_test_device(
+            public=False,
+            private=False,
+            internal=True,
+        )
+        device2 = create_a_test_device(
+            public=False,
+            private=False,
+            internal=True,
+        )
 
         attachment1 = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device1,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device1,
         )
         attachment2 = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device2,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device2,
         )
 
         db.session.add_all([attachment1, attachment2])
@@ -75,7 +99,8 @@ class TesDeviceAttachment(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                self.url, content_type="application/vnd.api+json",
+                self.url,
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -93,13 +118,17 @@ class TesDeviceAttachment(BaseTestCase):
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
         count_device_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_device_attachments, 0)
         payload = prepare_device_attachment_payload(device)
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -112,7 +141,9 @@ class TesDeviceAttachment(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 201)
         device_attachments = query_result_to_list(
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,)
+            db.session.query(DeviceAttachment).filter_by(
+                device_id=device.id,
+            )
         )
         self.assertEqual(len(device_attachments), 1)
 
@@ -127,13 +158,17 @@ class TesDeviceAttachment(BaseTestCase):
         device = create_a_test_device([403])
         self.assertTrue(device.id is not None)
         count_device_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_device_attachments, 0)
         payload = prepare_device_attachment_payload(device)
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -150,12 +185,18 @@ class TesDeviceAttachment(BaseTestCase):
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
         count_device_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_device_attachments, 0)
         attachment = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device,
         )
         db.session.add(attachment)
         db.session.commit()
@@ -170,7 +211,7 @@ class TesDeviceAttachment(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -194,17 +235,23 @@ class TesDeviceAttachment(BaseTestCase):
         device = create_a_test_device(IDL_USER_ACCOUNT.administrated_permission_groups)
         self.assertTrue(device.id is not None)
         count_device_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_device_attachments, 0)
         attachment = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device,
         )
         db.session.add(attachment)
         db.session.commit()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -219,21 +266,27 @@ class TesDeviceAttachment(BaseTestCase):
 
     def test_delete_to_a_device_with_a_permission_group_as_a_member(self):
         """Delete Custom field attached to device with same group as user
-                (user is member)."""
+        (user is member)."""
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
         count_device_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_device_attachments, 0)
         attachment = DeviceAttachment(
-            label=fake.pystr(), url=fake.url(), device=device,
+            label=fake.pystr(),
+            url=fake.url(),
+            device=device,
         )
         db.session.add(attachment)
         db.session.commit()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:

@@ -5,14 +5,16 @@ from unittest.mock import patch
 from project import base_url
 from project.api.models import Platform, User
 from project.api.models.base_model import db
-from project.api.models.idl_user import IdlUser
-from project.api.services.idl_services import Idl
+from project.extensions.idl.models.user_account import UserAccount
+from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
-from project.tests.permissions import create_a_test_contact, create_superuser_token
+from project.tests.permissions import (
+    create_a_test_contact,
+    create_a_test_platform,
+    create_superuser_token,
+)
 
-from project.tests.permissions import create_a_test_platform
-
-IDL_USER_ACCOUNT = IdlUser(
+IDL_USER_ACCOUNT = UserAccount(
     id="1000",
     username="testuser@ufz.de",
     administrated_permission_groups=["1"],
@@ -68,7 +70,7 @@ class TestPlatformPermissions(BaseTestCase):
             is_internal=True,
             is_public=False,
             is_private=False,
-            group_ids=["12"]
+            group_ids=["12"],
         )
         db.session.add(internal_platform)
         db.session.commit()
@@ -89,14 +91,14 @@ class TestPlatformPermissions(BaseTestCase):
                     "is_public": False,
                     "is_internal": True,
                     "is_private": False,
-                    "group_ids": group_id_test_user_is_member_in_2
+                    "group_ids": group_id_test_user_is_member_in_2,
                 },
             }
         }
 
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -296,7 +298,7 @@ class TestPlatformPermissions(BaseTestCase):
 
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -311,7 +313,9 @@ class TestPlatformPermissions(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["group_ids"], group_id_test_user_is_member_in_2)
+        self.assertEqual(
+            data["data"]["attributes"]["group_ids"], group_id_test_user_is_member_in_2
+        )
 
     def test_get_an_internal_platforms_as_an_unregistered_user(self):
         """An unregistered user should not be able to
@@ -387,7 +391,7 @@ class TestPlatformPermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             for platform_data in platforms:
@@ -427,10 +431,7 @@ class TestPlatformPermissions(BaseTestCase):
     def test_patch_platform_user_not_in_any_permission_group(self):
         """Make sure that a user can only do changes in platforms, where he/she is involved."""
         public_platform = create_a_test_platform(
-            public=True,
-            private=False,
-            internal=False,
-            group_ids=["13"]
+            public=True, private=False, internal=False, group_ids=["13"]
         )
 
         db.session.add(public_platform)
@@ -438,7 +439,7 @@ class TestPlatformPermissions(BaseTestCase):
 
         self.assertEqual(public_platform.group_ids, ["13"])
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             platform_data_changed = {
@@ -467,7 +468,7 @@ class TestPlatformPermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             for platform_data in platforms:
@@ -502,7 +503,7 @@ class TestPlatformPermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
             for platform_data in platforms:
@@ -553,7 +554,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 201)
 
         with patch.object(
-                Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
 
@@ -588,7 +589,7 @@ class TestPlatformPermissions(BaseTestCase):
             )
 
             with patch.object(
-                    Idl, "get_all_permission_groups_for_a_user"
+                idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.platform_url}/{data['data']['id']}"

@@ -7,8 +7,8 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_property import DeviceProperty
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase, create_token, query_result_to_list, fake
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions.test_customfields import create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -56,7 +56,8 @@ class TestDevicePropertyServices(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                self.url, content_type="application/vnd.api+json",
+                self.url,
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -69,7 +70,8 @@ class TestDevicePropertyServices(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                self.url, content_type="application/vnd.api+json",
+                self.url,
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -88,7 +90,11 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertTrue(device.id is not None)
 
         count_device_properties = (
-            db.session.query(DeviceProperty).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceProperty)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
         self.assertEqual(count_device_properties, 0)
         payload = {
@@ -106,7 +112,7 @@ class TestDevicePropertyServices(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -118,7 +124,9 @@ class TestDevicePropertyServices(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 201)
         device_properties = query_result_to_list(
-            db.session.query(DeviceProperty).filter_by(device_id=device.id,)
+            db.session.query(DeviceProperty).filter_by(
+                device_id=device.id,
+            )
         )
         self.assertEqual(len(device_properties), 1)
 
@@ -156,7 +164,7 @@ class TestDevicePropertyServices(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -191,7 +199,7 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.add_all([device, device_property])
         db.session.commit()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:

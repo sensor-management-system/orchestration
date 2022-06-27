@@ -2,18 +2,19 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration
-from project.api.models import Contact, User
-from project.api.models import Platform
-from project.api.models import PlatformMountAction
-from project.api.models import PlatformUnmountAction
+from project.api.models import (
+    Configuration,
+    Contact,
+    Platform,
+    PlatformMountAction,
+    PlatformUnmountAction,
+    User,
+)
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
-from project.tests.base import generate_userinfo_data, create_token
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
-from project.tests.permissions import create_a_test_platform, create_a_test_contact
+from project.tests.permissions import create_a_test_contact, create_a_test_platform
 from project.tests.permissions.test_platform_mount_action import mount_payload_data
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -33,7 +34,9 @@ def platform_unmount_action_model(public=True, private=False, internal=False):
     )
     user = User(subject=mock_jwt["sub"], contact=contact)
     configuration = Configuration(
-        label=fake.pystr(), is_public=public, is_internal=internal,
+        label=fake.pystr(),
+        is_public=public,
+        is_internal=internal,
     )
     platform_mount_action = PlatformMountAction(
         begin_date=fake.date(),
@@ -109,13 +112,20 @@ class TestMountPlatformPermissions(BaseTestCase):
     def test_unmount_a_device_with_permission_group(self):
         """Ensure unmounting with a permission group will success."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        platform = create_a_test_platform(group_ids=group_id_test_user_is_member_in_2,)
+        platform = create_a_test_platform(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
         parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
         db.session.add_all(
-            [platform, parent_platform, contact, configuration,]
+            [
+                platform,
+                parent_platform,
+                contact,
+                configuration,
+            ]
         )
         db.session.commit()
         mount_data = mount_payload_data(
@@ -130,7 +140,7 @@ class TestMountPlatformPermissions(BaseTestCase):
 
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:

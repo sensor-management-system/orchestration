@@ -16,7 +16,7 @@ from .api.helpers.health_checks import (
 )
 from .api.models.base_model import db
 from .config import env
-from .extensions.instances import auth, well_known_url_config_loader
+from .extensions.instances import auth, idl, well_known_url_config_loader
 from .urls import api
 from .views.docs import docs_routes
 from .views.login import login_routes
@@ -61,6 +61,7 @@ def create_app():
 
     well_known_url_config_loader.init_app(app)
     auth.init_app(app)
+    idl.init_app(app)
 
     # shell context for flask cli
     @app.shell_context_processor

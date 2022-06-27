@@ -1,15 +1,15 @@
 """Utility functions to handle permissions."""
 
-from flask import request, g
+from flask import g, request
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import and_, or_
 
+from ...extensions.instances import idl
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
-from ..helpers.errors import ForbiddenError, UnauthorizedError, ConflictError
+from ..helpers.errors import ConflictError, ForbiddenError, UnauthorizedError
 from ..helpers.resource_mixin import add_created_by_id, decode_json_request_data
 from ..models import Configuration, Device, Platform
 from ..models.base_model import db
-from ..services.idl_services import Idl
 
 
 def is_user_in_a_group(groups_to_check):
@@ -23,7 +23,7 @@ def is_user_in_a_group(groups_to_check):
     """
     if not groups_to_check:
         return True
-    idl_groups = Idl().get_all_permission_groups_for_a_user(g.user.subject)
+    idl_groups = idl.get_all_permission_groups_for_a_user(g.user.subject)
     if not idl_groups:
         return []
     user_groups = (
@@ -42,7 +42,7 @@ def is_user_admin_in_a_group(groups_to_check):
     """
     if not groups_to_check:
         return True
-    idl_groups = Idl().get_all_permission_groups_for_a_user(g.user.subject)
+    idl_groups = idl.get_all_permission_groups_for_a_user(g.user.subject)
     if not idl_groups:
         return []
     user_groups = idl_groups.administrated_permission_groups
@@ -91,8 +91,14 @@ def get_query_with_permissions(model):
             user_id = g.user.id
             query = query.filter(
                 or_(
-                    and_(model.is_private, model.created_by_id == user_id,),
-                    or_(model.is_public, model.is_internal,),
+                    and_(
+                        model.is_private,
+                        model.created_by_id == user_id,
+                    ),
+                    or_(
+                        model.is_public,
+                        model.is_internal,
+                    ),
                 )
             )
     return query
@@ -132,21 +138,18 @@ def check_post_permission():
     Check if a user has the permission to assign a group to the object.
     Also forbidden private Object to be assigned to a group.
     """
+    if not g.user:
+        raise UnauthorizedError("Authentication required.")
     attributes = request.get_json()["data"]["attributes"]
     is_private = attributes["is_private"]
-    group_ids = (
-        attributes["group_ids"]
-        if "group_ids" in attributes
-        else []
-    )
+    group_ids = attributes["group_ids"] if "group_ids" in attributes else []
     if is_private:
         if group_ids:
             raise ConflictError("Private object can not be assigned to a group.")
     else:
-        current_user = open_id_connect.get_current_user()
         if not group_ids:
             raise ConflictError("Should be assigned to a group.")
-        if not current_user.is_superuser:
+        if not g.user.is_superuser:
             if not is_user_in_a_group(group_ids):
                 raise ConflictError(
                     "User is not part of this group to assign it to the object."

@@ -1,7 +1,7 @@
-from ..helpers.errors import MethodNotAllowed
-from ..models.permission_groups import permission_groups_to_list_of_jsonapi_dicts
-from ...api.services.idl_services import get_permission_groups
+from ...extensions.idl.models import permission_group
+from ...extensions.instances import idl
 from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import MethodNotAllowed
 
 
 class PermissionGroups(ResourceList):
@@ -15,7 +15,9 @@ class PermissionGroups(ResourceList):
 
         :return: list of Permission Groups.
         """
-        data = permission_groups_to_list_of_jsonapi_dicts(get_permission_groups())
+        data = permission_group.permission_groups_to_list_of_jsonapi_dicts(
+            idl.get_permission_groups()
+        )
         response = {"data": data}
         response.update({"meta": {"count": len(data)}})
         return response

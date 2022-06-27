@@ -7,9 +7,8 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.customfield import CustomField
 from project.api.models.device import Device
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase, create_token, query_result_to_list
-from project.tests.base import fake
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions import create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -18,7 +17,10 @@ def prepare_custom_field_payload(device):
     payload = {
         "data": {
             "type": "customfield",
-            "attributes": {"value": fake.pystr(), "key": fake.pystr(),},
+            "attributes": {
+                "value": fake.pystr(),
+                "key": fake.pystr(),
+            },
             "relationships": {
                 "device": {"data": {"type": "device", "id": str(device.id)}}
             },
@@ -52,13 +54,19 @@ class TestCustomFieldServices(BaseTestCase):
         db.session.commit()
 
         customfield1 = CustomField(
-            key="GFZ", value="https://www.gfz-potsdam.de", device=device1,
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            device=device1,
         )
         customfield2 = CustomField(
-            key="UFZ", value="https://www.ufz.de", device=device1,
+            key="UFZ",
+            value="https://www.ufz.de",
+            device=device1,
         )
         customfield3 = CustomField(
-            key="PIK", value="https://www.pik-potsdam.de", device=device2,
+            key="PIK",
+            value="https://www.pik-potsdam.de",
+            device=device2,
         )
 
         db.session.add(customfield1)
@@ -68,7 +76,8 @@ class TestCustomFieldServices(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                base_url + "/customfields", content_type="application/vnd.api+json",
+                base_url + "/customfields",
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -95,10 +104,14 @@ class TestCustomFieldServices(BaseTestCase):
         db.session.commit()
 
         customfield1 = CustomField(
-            key="GFZ", value="https://www.gfz-potsdam.de", device=device1,
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            device=device1,
         )
         customfield2 = CustomField(
-            key="UFZ", value="https://www.ufz.de", device=device1,
+            key="UFZ",
+            value="https://www.ufz.de",
+            device=device1,
         )
 
         db.session.add(customfield1)
@@ -107,7 +120,8 @@ class TestCustomFieldServices(BaseTestCase):
 
         with self.client:
             response = self.client.get(
-                self.url, content_type="application/vnd.api+json",
+                self.url,
+                content_type="application/vnd.api+json",
             )
             self.assertEqual(response.status_code, 200)
             payload = response.get_json()
@@ -125,13 +139,17 @@ class TestCustomFieldServices(BaseTestCase):
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
         count_customfields = (
-            db.session.query(CustomField).filter_by(device_id=device.id,).count()
+            db.session.query(CustomField)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_customfields, 0)
         payload = prepare_custom_field_payload(device)
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -146,7 +164,9 @@ class TestCustomFieldServices(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
         customfields = query_result_to_list(
-            db.session.query(CustomField).filter_by(device_id=device.id,)
+            db.session.query(CustomField).filter_by(
+                device_id=device.id,
+            )
         )
         self.assertEqual(len(customfields), 1)
 
@@ -161,13 +181,17 @@ class TestCustomFieldServices(BaseTestCase):
         device = create_a_test_device([66])
         self.assertTrue(device.id is not None)
         count_customfields = (
-            db.session.query(CustomField).filter_by(device_id=device.id,).count()
+            db.session.query(CustomField)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_customfields, 0)
         payload = prepare_custom_field_payload(device)
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -187,12 +211,18 @@ class TestCustomFieldServices(BaseTestCase):
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
         count_customfields = (
-            db.session.query(CustomField).filter_by(device_id=device.id,).count()
+            db.session.query(CustomField)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_customfields, 0)
         customfield = CustomField(
-            key="GFZ", value="https://www.gfz-potsdam.de", device=device,
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            device=device,
         )
         db.session.add(customfield)
         db.session.commit()
@@ -207,7 +237,7 @@ class TestCustomFieldServices(BaseTestCase):
             }
         }
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -232,17 +262,23 @@ class TestCustomFieldServices(BaseTestCase):
         device = create_a_test_device(IDL_USER_ACCOUNT.administrated_permission_groups)
         self.assertTrue(device.id is not None)
         count_customfields = (
-            db.session.query(CustomField).filter_by(device_id=device.id,).count()
+            db.session.query(CustomField)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_customfields, 0)
         customfield = CustomField(
-            key="GFZ", value="https://www.gfz-potsdam.de", device=device,
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            device=device,
         )
         db.session.add(customfield)
         db.session.commit()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -257,21 +293,27 @@ class TestCustomFieldServices(BaseTestCase):
 
     def test_delete_to_a_device_with_a_permission_group_as_a_member(self):
         """Delete Custom field attached to device with same group as user
-                (user is member)."""
+        (user is member)."""
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
         count_customfields = (
-            db.session.query(CustomField).filter_by(device_id=device.id,).count()
+            db.session.query(CustomField)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
 
         self.assertEqual(count_customfields, 0)
         customfield = CustomField(
-            key="GFZ", value="https://www.gfz-potsdam.de", device=device,
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            device=device,
         )
         db.session.add(customfield)
         db.session.commit()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:

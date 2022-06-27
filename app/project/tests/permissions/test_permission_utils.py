@@ -7,7 +7,7 @@ from project.api.auth.permission_utils import (
     allow_only_admin_in_a_permission_group_to_remove_it_from_an_object,
 )
 from project.api.helpers.errors import ConflictError, ServiceIsUnreachableError
-from project.api.services.idl_services import Idl
+from project.extensions.instances import idl
 from project.tests.base import BaseTestCase
 
 IDL_MOCKED_USER_ACCOUNT = [
@@ -24,27 +24,30 @@ class TestInstituteDecouplingLayerApi(BaseTestCase):
     def test_get_permission_groups_user_not_found(self):
         """Test an empty array from idl"""
         idl_empty_response = []
+        idl.cache_user_account.clear()
         with patch("requests.get") as mock_get:
             mock_get.return_value = Mock(ok=True)
             mock_get.return_value.json.return_value = idl_empty_response
 
-            response = Idl().get_all_permission_groups_for_a_user("noUser@ufz.de")
-            self.assertEqual(response, [])
+            response = idl.get_all_permission_groups_for_a_user("noUser@ufz.de")
+            self.assertEqual(response, None)
 
     @patch("requests.get")
     def test_get_permission_groups_time_out(self, mock_get):
         """Make sure that error raise (ServiceIsUnreachableError) if IDL not responding."""
+        idl.cache_user_account.clear()
         mock_get.side_effect = Timeout
         with self.assertRaises(ServiceIsUnreachableError):
-            _ = Idl().get_all_permission_groups_for_a_user("noUser@ufz.de")
+            _ = idl.get_all_permission_groups_for_a_user("noUser@ufz.de")
 
     def test_get_all_permission_groups(self):
         """Test data in User account"""
+        idl.cache_permission_groups.clear()
         with patch("requests.get") as mock_get:
             mock_get.return_value = Mock(ok=True)
             mock_get.return_value.json.return_value = IDL_MOCKED_USER_ACCOUNT
 
-            response = Idl().get_all_permission_groups_for_a_user(
+            response = idl.get_all_permission_groups_for_a_user(
                 IDL_MOCKED_USER_ACCOUNT[0]["userName"]
             )
 
@@ -61,10 +64,11 @@ class TestInstituteDecouplingLayerApi(BaseTestCase):
 
     def test_get_permission_with_HTTPError_from_idl(self):
         """Test HTTPError from idl """
+        idl.cache_user_account.clear()
         with patch("requests.get") as mock_get:
             mock_get.side_effect = HTTPError
             with self.assertRaises(ConflictError):
-                _ = Idl().get_all_permission_groups_for_a_user("noUser@ufz.de")
+                _ = idl.get_all_permission_groups_for_a_user("noUser@ufz.de")
 
 
 class TestAllowAdminInAPermissionGroupToRemoveItFromAnObject(BaseTestCase):

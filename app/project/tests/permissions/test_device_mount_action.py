@@ -3,23 +3,17 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration
-from project.api.models import Contact, User
-from project.api.models import DeviceMountAction
+from project.api.models import Configuration, Contact, Device, DeviceMountAction, User
 from project.api.models.base_model import db
-from project.api.services.idl_services import Idl
-from project.tests.base import BaseTestCase
-from project.tests.base import fake
-from project.tests.base import generate_userinfo_data, create_token
+from project.extensions.instances import idl
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.permissions import (
+    create_a_test_contact,
     create_a_test_device,
     create_a_test_platform,
-    create_a_test_contact,
 )
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
-
-from project.api.models import Device
 
 
 def payload_data(
@@ -70,7 +64,9 @@ class TestMountDevicePermissions(BaseTestCase):
         contact = create_a_test_contact(mock_jwt)
         user = User(subject=mock_jwt["sub"], contact=contact)
         configuration = Configuration(
-            label=fake.pystr(), is_public=True, is_internal=False,
+            label=fake.pystr(),
+            is_public=True,
+            is_internal=False,
         )
         device_mount_action = DeviceMountAction(
             begin_date=fake.date(),
@@ -106,7 +102,9 @@ class TestMountDevicePermissions(BaseTestCase):
         contact = create_a_test_contact(mock_jwt)
         user = User(subject=mock_jwt["sub"], contact=contact)
         configuration = Configuration(
-            label=fake.pystr(), is_public=True, is_internal=False,
+            label=fake.pystr(),
+            is_public=True,
+            is_internal=False,
         )
         device_mount_action = DeviceMountAction(
             begin_date=fake.date(),
@@ -149,7 +147,9 @@ class TestMountDevicePermissions(BaseTestCase):
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
         configuration = Configuration(
-            label=fake.pystr(), is_public=True, is_internal=False,
+            label=fake.pystr(),
+            is_public=True,
+            is_internal=False,
         )
         db.session.add_all([device, parent_platform, contact, configuration])
         db.session.commit()
@@ -181,7 +181,9 @@ class TestMountDevicePermissions(BaseTestCase):
         contact = create_a_test_contact(mock_jwt)
         user = User(subject=mock_jwt["sub"], contact=contact)
         configuration = Configuration(
-            label=fake.pystr(), is_public=True, is_internal=False,
+            label=fake.pystr(),
+            is_public=True,
+            is_internal=False,
         )
 
         mount_public_device = DeviceMountAction(
@@ -244,7 +246,9 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_post_action_as_not_a_group_member(self):
         """Ensure mounting a device in a group fails
         if it mounted as someone not member in the group."""
-        device = create_a_test_device(group_ids=[222],)
+        device = create_a_test_device(
+            group_ids=[222],
+        )
         parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
@@ -256,7 +260,7 @@ class TestMountDevicePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -272,7 +276,9 @@ class TestMountDevicePermissions(BaseTestCase):
         """Ensure mounting a device in a group success
         if it mounted from a group member."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
         parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
@@ -284,7 +290,7 @@ class TestMountDevicePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -299,7 +305,9 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_delete_action_as_a_group_member(self):
         """Ensure mounted device groups can be deleted."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
         parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
@@ -311,7 +319,7 @@ class TestMountDevicePermissions(BaseTestCase):
         )
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
@@ -388,7 +396,9 @@ class TestMountDevicePermissions(BaseTestCase):
     def test_mount_a_device_in_two_configuration_at_different_time(self):
         """Ensure mounting a device in more than one configuration at the different time will success."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-        device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
         parent_platform = create_a_test_platform()
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
@@ -439,7 +449,7 @@ class TestMountDevicePermissions(BaseTestCase):
 
         access_headers = create_token()
         with patch.object(
-            Idl, "get_all_permission_groups_for_a_user"
+            idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
