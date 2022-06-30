@@ -175,17 +175,16 @@ const actions = {
   },
   initContactsIndexAppBar ({ commit }: {commit: Commit}) {
     commit('setTitle', 'Contacts')
-    commit('setTabs', [])
+    commit('setTabs', ['Search'])
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
   initPlatformsIndexAppBar ({ commit }: {commit: Commit}) {
     commit('setTitle', 'Platforms')
-    // commit('setTabs', [ //todo remove
-    //   'Search',
-    //   'Extended Search'
-    // ])
-    commit('setTabs', [])
+    commit('setTabs', [
+      'Search',
+      'Extended Search'
+    ])
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },
