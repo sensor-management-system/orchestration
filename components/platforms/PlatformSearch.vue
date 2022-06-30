@@ -37,114 +37,108 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <v-card>
-      <v-container>
-        <v-tabs v-model="activeTab">
-          <v-tab>Search</v-tab>
-          <v-tab>Extended Search</v-tab>
-        </v-tabs>
-        <v-tabs-items
-          v-model="activeTab"
-        >
-          <v-tab-item :eager="true">
-            <v-row>
-              <v-col cols="12" md="5">
-                <v-text-field
-                  v-model="searchedText"
-                  label="Search term"
-                  hint="Please enter at least 3 characters"
-                  @keydown.enter="basicSearch"
-                />
-              </v-col>
-              <v-col
-                cols="5"
-                align-self="center"
+    <v-container>
+      <v-tabs-items
+        v-model="activeTab"
+      >
+        <v-tab-item :eager="true">
+          <v-row>
+            <v-col cols="12" md="5">
+              <v-text-field
+                v-model="searchedText"
+                label="Search term"
+                hint="Please enter at least 3 characters"
+                @keydown.enter="basicSearch"
+              />
+            </v-col>
+            <v-col
+              cols="5"
+              align-self="center"
+            >
+              <v-btn
+                color="primary"
+                small
+                @click="basicSearch"
               >
-                <v-btn
-                  color="primary"
-                  small
-                  @click="basicSearch"
-                >
-                  Search
-                </v-btn>
-                <v-btn
-                  text
-                  small
-                  @click="clearBasicSearch"
-                >
-                  Clear
-                </v-btn>
-              </v-col>
-              <v-col
-                align-self="center"
-                class="text-right"
+                Search
+              </v-btn>
+              <v-btn
+                text
+                small
+                @click="clearBasicSearch"
               >
-                <slot name="actions" />
-              </v-col>
-            </v-row>
-          </v-tab-item>
-          <v-tab-item :eager="true">
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="searchedText"
-                  label="Search term"
-                  hint="Please enter at least 3 characters"
-                  @keydown.enter="extendedSearch"
-                />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" md="3">
-                <ManufacturerSelect v-model="selectedManufacturers" label="Select a manufacturer" />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" md="3">
-                <StatusSelect v-model="selectedStates" label="Select a status" />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" md="3">
-                <PlatformTypeSelect v-model="selectedPlatformTypes" label="Select a platform type" />
-              </v-col>
-            </v-row>
-            <v-row v-if="$auth.loggedIn">
-              <v-col cols="12" md="3">
-                <v-checkbox v-model="selectOnlyOwnPlatforms" label="Only own platforms" />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="5"
-                align-self="center"
+                Clear
+              </v-btn>
+            </v-col>
+            <v-col
+              align-self="center"
+              class="text-right"
+            >
+              <slot name="actions" />
+            </v-col>
+          </v-row>
+        </v-tab-item>
+        <v-tab-item :eager="true">
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="searchedText"
+                label="Search term"
+                hint="Please enter at least 3 characters"
+                @keydown.enter="extendedSearch"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="3">
+              <ManufacturerSelect v-model="selectedManufacturers" label="Select a manufacturer" />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="3">
+              <StatusSelect v-model="selectedStates" label="Select a status" />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="3">
+              <PlatformTypeSelect v-model="selectedPlatformTypes" label="Select a platform type" />
+            </v-col>
+          </v-row>
+          <v-row v-if="$auth.loggedIn">
+            <v-col cols="12" md="3">
+              <v-checkbox v-model="selectOnlyOwnPlatforms" label="Only own platforms" />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col
+              cols="5"
+              align-self="center"
+            >
+              <v-btn
+                color="primary"
+                small
+                @click="extendedSearch"
               >
-                <v-btn
-                  color="primary"
-                  small
-                  @click="extendedSearch"
-                >
-                  Search
-                </v-btn>
-                <v-btn
-                  text
-                  small
-                  @click="clearExtendedSearch"
-                >
-                  Clear
-                </v-btn>
-              </v-col>
-              <v-col
-                align-self="center"
-                class="text-right"
+                Search
+              </v-btn>
+              <v-btn
+                text
+                small
+                @click="clearExtendedSearch"
               >
-                <slot name="actions" />
-              </v-col>
-            </v-row>
-          </v-tab-item>
-        </v-tabs-items>
-      </v-container>
-    </v-card>
+                Clear
+              </v-btn>
+            </v-col>
+            <v-col
+              align-self="center"
+              class="text-right"
+            >
+              <slot name="actions" />
+            </v-col>
+          </v-row>
+        </v-tab-item>
+      </v-tabs-items>
+    </v-container>
   </div>
 </template>
 
@@ -197,7 +191,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
       'setSelectedSearchPlatformTypes',
       'setOnlyOwnPlatforms',
       'setSearchText'
-    ])
+    ]),
+    ...mapActions('appbar', ['initPlatformsIndexAppBar', 'setDefaults'])
   }
 })
 export default class PlatformSearch extends Vue {
