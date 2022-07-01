@@ -10,10 +10,15 @@ api.route(PermissionGroups, "permission_group_list", "/permission-groups")
 
 # Platform
 api.route(
-    PlatformList, "platform_list", "/platforms", "/contacts/<int:contact_id>/platforms",
+    PlatformList,
+    "platform_list",
+    "/platforms",
+    "/contacts/<int:contact_id>/platforms",
 )
 api.route(
-    PlatformDetail, "platform_detail", "/platforms/<int:id>",
+    PlatformDetail,
+    "platform_detail",
+    "/platforms/<int:id>",
 )
 
 # Platform Attachment
@@ -42,14 +47,21 @@ api.route(
 )
 # Device
 api.route(
-    DeviceList, "device_list", "/devices", "/contacts/<int:id>/devices",
+    DeviceList,
+    "device_list",
+    "/devices",
+    "/contacts/<int:id>/devices",
 )
 api.route(
-    DeviceDetail, "device_detail", "/devices/<int:id>",
+    DeviceDetail,
+    "device_detail",
+    "/devices/<int:id>",
 )
 # Device Property
 api.route(
-    DevicePropertyDetail, "device_property_detail", "/device-properties/<int:id>",
+    DevicePropertyDetail,
+    "device_property_detail",
+    "/device-properties/<int:id>",
 )
 
 api.route(
@@ -67,7 +79,9 @@ api.route(
     "/devices/<int:device_id>/device-attachments",
 )
 api.route(
-    DeviceAttachmentDetail, "device_attachment_detail", "/device-attachments/<int:id>",
+    DeviceAttachmentDetail,
+    "device_attachment_detail",
+    "/device-attachments/<int:id>",
 )
 
 # CustomField
@@ -78,7 +92,9 @@ api.route(
     "/devices/<int:device_id>/customfields",
 )
 api.route(
-    CustomFieldDetail, "customfield_detail", "/customfields/<int:id>",
+    CustomFieldDetail,
+    "customfield_detail",
+    "/customfields/<int:id>",
 )
 
 # Contact
@@ -96,22 +112,51 @@ api.route(
     "/contacts/<int:id>",
     "/device-contact-roles/<int:id>/contact",
 )
+api.route(
+    ControllerConfigurationMountingActions,
+    "controller_configuration_mounting_actions",
+    "/controller/configurations/<int:configuration_id>/mounting-actions",
+)
+api.route(
+    ControllerConfigurationMountingActionTimepoints,
+    "controller_configuration_mounting_action_timepoints",
+    "/controller/configurations/<int:configuration_id>/mounting-action-timepoints",
+)
+api.route(
+    DeviceAvailabilities,
+    "device_availabilities",
+    "/controller/device-availabilities",
+)
+api.route(
+    PlatformAvailabilities,
+    "platform_availabilities",
+    "/controller/platform-availabilities",
+)
 # User Info
 api.route(
-    UserInfo, "user_info", "/user-info",
+    UserInfo,
+    "user_info",
+    "/user-info",
 )
 # Users
 api.route(
-    UserList, "user_list", "/users", "/contacts/<int:id>/users",
+    UserList,
+    "user_list",
+    "/users",
+    "/contacts/<int:id>/users",
 )
 api.route(UserDetail, "user_detail", "/users/<int:id>")
 
 # Configuration
 api.route(
-    ConfigurationList, "configuration_list", "/configurations",
+    ConfigurationList,
+    "configuration_list",
+    "/configurations",
 )
 api.route(
-    ConfigurationDetail, "configuration_detail", "/configurations/<int:id>",
+    ConfigurationDetail,
+    "configuration_detail",
+    "/configurations/<int:id>",
 )
 # GenericDeviceAction
 api.route(
