@@ -251,7 +251,8 @@ export default class PlatformCopyPage extends Vue {
       const savedPLatformId = await this.copyPlatform({
         platform: this.platformToCopy,
         copyContacts: this.copyContacts,
-        copyAttachments: this.copyAttachments
+        copyAttachments: this.copyAttachments,
+        originalPlatformId: this.platformId
       })
       this.$store.commit('snackbar/setSuccess', 'Platform copied')
       this.$router.push('/platforms/' + savedPLatformId)

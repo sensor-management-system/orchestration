@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -37,7 +37,7 @@ import { RootState } from '@/store'
 
 import { Device } from '@/models/Device'
 import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
@@ -76,7 +76,7 @@ const PAGE_SIZES = [
 export interface DevicesState {
   devices: Device[],
   device: Device | null,
-  deviceContacts: Contact[],
+  deviceContactRoles: ContactRole[],
   deviceAttachments: Attachment[],
   deviceAttachment: Attachment | null,
   deviceMeasuredQuantities: DeviceProperty[],
@@ -100,7 +100,7 @@ export interface DevicesState {
 const state = (): DevicesState => ({
   devices: [],
   device: null,
-  deviceContacts: [],
+  deviceContactRoles: [],
   deviceAttachments: [],
   deviceAttachment: null,
   deviceMeasuredQuantities: [],
@@ -148,7 +148,7 @@ const getters: GetterTree<DevicesState, RootState> = {
 export type LoadDeviceAction = (params: { deviceId: string } & IncludedRelationships) => Promise<void>
 export type SearchDevicesPaginatedAction = (searchParams: IDeviceSearchParams) => Promise<void>
 export type SearchDevicesAction = (id: string) => Promise<void>
-export type LoadDeviceContactsAction = (id: string) => Promise<void>
+export type LoadDeviceContactRolesAction = (id: string) => Promise<void>
 export type LoadDeviceAttachmentsAction = (id: string) => Promise<void>
 export type LoadDeviceAttachmentAction = (id: string) => Promise<void>
 export type LoadDeviceMeasuredQuantitiesAction = (id: string) => Promise<void>
@@ -182,10 +182,10 @@ export type UpdateDeviceCustomFieldAction = (params: { deviceId: string, deviceC
 export type DeleteDeviceMeasuredQuantityAction = (measuredQuantityId: string) => Promise<void>
 export type AddDeviceMeasuredQuantityAction = (params: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<DeviceProperty>
 export type UpdateDeviceMeasuredQuantityAction = (params: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<DeviceProperty>
-export type AddDeviceContactAction = (params: { deviceId: string, contactId: string }) => Promise<void>
-export type RemoveDeviceContactAction = (params: { deviceId: string, contactId: string }) => Promise<void>
+export type AddDeviceContactRoleAction = (params: { deviceId: string, contactRole: ContactRole }) => Promise<void>
+export type RemoveDeviceContactRoleAction = (params: { deviceContactRoleId: string }) => Promise<void>
 export type SaveDeviceAction = (device: Device) => Promise<Device>
-export type CopyDeviceAction = (params: {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean}) => Promise<string>
+export type CopyDeviceAction = (params: {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean, originalDeviceId: string}) => Promise<string>
 export type DeleteDeviceAction = (id: string) => Promise<void>
 export type ExportAsCsvAction = (searchParams: IDeviceSearchParams) => Promise<Blob>
 export type SetPageNumberAction = (newPageNumber: number) => void
@@ -251,9 +251,9 @@ const actions: ActionTree<DevicesState, RootState> = {
     })
     commit('setDevice', device)
   },
-  async loadDeviceContacts ({ commit }: { commit: Commit }, id: string): Promise<void> {
-    const deviceContacts = await this.$api.devices.findRelatedContacts(id)
-    commit('setDeviceContacts', deviceContacts)
+  async loadDeviceContactRoles ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const deviceContactRoles = await this.$api.devices.findRelatedContactRoles(id)
+    commit('setDeviceContactRoles', deviceContactRoles)
   },
   async loadDeviceAttachments ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const deviceAttachments = await this.$api.devices.findRelatedDeviceAttachments(id)
@@ -419,39 +419,43 @@ const actions: ActionTree<DevicesState, RootState> = {
   }: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }): Promise<DeviceProperty> {
     return this.$api.deviceProperties.update(deviceId, deviceMeasuredQuantity)
   },
-  addDeviceContact (_, {
+  addDeviceContactRole (_, {
     deviceId,
-    contactId
-  }: { deviceId: string, contactId: string }): Promise<void> {
-    return this.$api.devices.addContact(deviceId, contactId)
+    contactRole
+  }: { deviceId: string, contactRole: ContactRole }): Promise<string> {
+    return this.$api.devices.addContact(deviceId, contactRole)
   },
-  removeDeviceContact (_, {
-    deviceId,
-    contactId
-  }: { deviceId: string, contactId: string }): Promise<void> {
-    return this.$api.devices.removeContact(deviceId, contactId)
+  removeDeviceContactRole (_, {
+    deviceContactRoleId
+  }: { deviceContactRoleId: string }): Promise<void> {
+    return this.$api.devices.removeContact(deviceContactRoleId)
   },
   saveDevice (_, device: Device): Promise<Device> {
     return this.$api.devices.save(device)
   },
   async copyDevice (
-    { dispatch, state }: { dispatch: Dispatch, state: DevicesState},
-    { device, copyContacts, copyAttachments, copyMeasuredQuantities, copyCustomFields }:
-      {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean}
+    { dispatch }: { dispatch: Dispatch },
+    { device, copyContacts, copyAttachments, copyMeasuredQuantities, copyCustomFields, originalDeviceId }:
+      {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean, originalDeviceId: string}
   ): Promise<string> {
     const savedDevice = await dispatch('saveDevice', device)
     const savedDeviceId = savedDevice.id!
     const related: Promise<any>[] = []
 
     if (copyContacts) {
-      const contacts = device.contacts
-      await dispatch('loadDeviceContacts', savedDeviceId)
-      const contactsToSave = contacts.filter(c => state.deviceContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
+      // TODO: My basic idea was that the device is the old one. But it is not. It has no id. So what can I do about that?
+      const sourceContactRoles = await this.$api.devices.findRelatedContactRoles(originalDeviceId)
+      // The system creates the owner automatically when we create the device
+      const freshCreatedContactRoles = await this.$api.devices.findRelatedContactRoles(savedDeviceId)
+      const contactRolesToSave = sourceContactRoles.filter(c => freshCreatedContactRoles.findIndex((ec: ContactRole) => { return ec.contact!.id === c.contact!.id && ec.roleUri === c.roleUri }) === -1)
 
-      for (const contact of contactsToSave) {
-        if (contact.id) {
-          related.push(dispatch('addDeviceContact', { deviceId: savedDeviceId, contactId: contact.id }))
-        }
+      for (const contactRole of contactRolesToSave) {
+        const contactRoleToSave = ContactRole.createFromObject(contactRole)
+        contactRoleToSave.id = null
+        related.push(dispatch('addDeviceContactRole', {
+          deviceId: savedDeviceId,
+          contactRole: contactRoleToSave
+        }))
       }
     }
     if (copyAttachments) {
@@ -527,8 +531,8 @@ const mutations = {
   setTotalPages (state: DevicesState, count: number) {
     state.totalPages = count
   },
-  setDeviceContacts (state: DevicesState, contacts: Contact[]) {
-    state.deviceContacts = contacts
+  setDeviceContactRoles (state: DevicesState, contactRoles: ContactRole[]) {
+    state.deviceContactRoles = contactRoles
   },
   setDeviceAttachments (state: DevicesState, attachments: Attachment[]) {
     state.deviceAttachments = attachments

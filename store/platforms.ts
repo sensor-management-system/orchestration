@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -35,7 +35,7 @@ import { Commit, Dispatch, GetterTree, ActionTree } from 'vuex'
 import { RootState } from '@/store'
 
 import { Platform } from '@/models/Platform'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
@@ -70,7 +70,7 @@ const PAGE_SIZES = [
 export interface PlatformsState {
   platforms: Platform[],
   platform: Platform | null,
-  platformContacts: Contact[],
+  platformContactRoles: ContactRole[],
   platformAttachments: Attachment[],
   platformAttachment: Attachment|null,
   platformGenericActions: GenericAction[],
@@ -93,7 +93,7 @@ export interface PlatformsState {
 const state = (): PlatformsState => ({
   platforms: [],
   platform: null,
-  platformContacts: [],
+  platformContactRoles: [],
   platformAttachments: [],
   platformAttachment: null,
   platformGenericActions: [],
@@ -149,7 +149,7 @@ const getters: GetterTree<PlatformsState, RootState> = {
 export type SearchPlatformsPaginatedAction = () => Promise<void>
 export type SearchPlatformsAction = (searchtext: string) => Promise<void>
 export type LoadPlatformAction = (params: { platformId: string } & IncludedRelationships) => Promise<void>
-export type LoadPlatformContactsAction = (id: string) => Promise<void>
+export type LoadPlatformContactRolesAction = (id: string) => Promise<void>
 export type LoadPlatformAttachmentsAction = (id: string) => Promise<void>
 export type LoadPlatformAttachmentAction = (id: string) => Promise<void>
 export type LoadAllPlatformActionsAction = (id: string) => Promise<void>
@@ -159,8 +159,8 @@ export type LoadPlatformMountActionsAction = (id: string) => Promise<void>
 export type LoadPlatformUnmountActionsAction = (id: string) => Promise<void>
 export type LoadPlatformGenericActionAction = (actionId: string) => Promise<void>
 export type LoadPlatformSoftwareUpdateActionAction = (actionId: string) => Promise<void>
-export type AddPlatformContactAction = (params: {platformId: string, contactId: string}) => Promise<void>
-export type RemovePlatformContactAction = (params: {platformId: string, contactId: string}) => Promise<void>
+export type AddPlatformContactRoleAction = (params: {platformId: string,contactRole: ContactRole}) => Promise<void>
+export type RemovePlatformContactRoleAction = (params: {platformContactRoleId: string }) => Promise<void>
 export type AddPlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
 export type UpdatePlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
 export type DeletePlatformAttachmentAction = (attachmentId: string) => Promise<void>
@@ -239,9 +239,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
     })
     commit('setPlatform', platform)
   },
-  async loadPlatformContacts ({ commit }: { commit: Commit }, id: string): Promise<void> {
-    const platformContacts = await this.$api.platforms.findRelatedContacts(id)
-    commit('setPlatformContacts', platformContacts)
+  async loadPlatformContactRoles ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const platformContactRoles = await this.$api.platforms.findRelatedContactRoles(id)
+    commit('setPlatformContactRoles', platformContactRoles)
   },
   async loadPlatformAttachments ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const platformAttachments = await this.$api.platforms.findRelatedPlatformAttachments(id)
@@ -292,11 +292,11 @@ const actions: ActionTree<PlatformsState, RootState> = {
     const platformSoftwareUpdateAction = await this.$api.platformSoftwareUpdateActions.findById(actionId)
     commit('setPlatformSoftwareUpdateAction', platformSoftwareUpdateAction)
   },
-  addPlatformContact (_: {}, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
-    return this.$api.platforms.addContact(platformId, contactId)
+  addPlatformContactRole (_: {}, { platformId, contactRole }: {platformId: string, contactRole: ContactRole}): Promise<string> {
+    return this.$api.platforms.addContact(platformId, contactRole)
   },
-  removePlatformContact (_: {}, { platformId, contactId }: {platformId: string, contactId: string}): Promise<void> {
-    return this.$api.platforms.removeContact(platformId, contactId)
+  removePlatformContactRole (_: {}, { platformContactRoleId }: {platformContactRoleId: string}): Promise<void> {
+    return this.$api.platforms.removeContact(platformContactRoleId)
   },
   addPlatformAttachment (_: {}, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
     return this.$api.platformAttachments.add(platformId, attachment)
@@ -331,22 +331,24 @@ const actions: ActionTree<PlatformsState, RootState> = {
   savePlatform (_: {}, platform: Platform): Promise<Platform> {
     return this.$api.platforms.save(platform)
   },
-  async copyPlatform ({ dispatch, state }: { dispatch: Dispatch, state: PlatformsState }, { platform, copyContacts, copyAttachments }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}): Promise<string> {
+  async copyPlatform ({ dispatch }: { dispatch: Dispatch }, { platform, copyContacts, copyAttachments, originalPlatformId }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, originalPlatformId: string}): Promise<string> {
     // Todo, prüfen ob man eventuell etwas vereinfachen kann
     const savedPlatform = await dispatch('savePlatform', platform)
     const savedPlatformId = savedPlatform.id!
     const related: Promise<any>[] = []
     if (copyContacts) {
-      // hier erstmal die Umsetztung, wie es vorher in pages/platforms/copy/_platformId.vue
-      const contacts = platform.contacts
-      await dispatch('loadPlatformContacts', savedPlatformId)
-      const contactsToSave = contacts.filter(c => state.platformContacts.findIndex((ec: Contact) => { return ec.id === c.id }) === -1)
+      const sourceContactRoles = await this.$api.platforms.findRelatedContactRoles(originalPlatformId)
+      // The system creates the owner automatically when we create the device
+      const freshCreatedContactRoles = await this.$api.platforms.findRelatedContactRoles(savedPlatformId)
+      const contactRolesToSave = sourceContactRoles.filter(c => freshCreatedContactRoles.findIndex((ec: ContactRole) => { return ec.contact!.id === c.contact!.id && ec.roleName === c.roleName }) === -1)
 
-      for (const contact of contactsToSave) {
-        if (contact.id) {
-          // related.push(this.$api.platforms.addContact(savedPlatformId, contact.id))
-          related.push(dispatch('addPlatformContact', { platformId: savedPlatformId, contactId: contact.id }))
-        }
+      for (const contactRole of contactRolesToSave) {
+        const contactRoleToSave = ContactRole.createFromObject(contactRole)
+        contactRoleToSave.id = null
+        related.push(dispatch('addPlatformContactRole', {
+          platformId: savedPlatformId,
+          contactRole: contactRoleToSave
+        }))
       }
     }
     if (copyAttachments) {
@@ -422,8 +424,8 @@ const mutations = {
   setTotalPages (state: PlatformsState, count: number) {
     state.totalPages = count
   },
-  setPlatformContacts (state: PlatformsState, platformContacts: Contact[]) {
-    state.platformContacts = platformContacts
+  setPlatformContactRoles (state: PlatformsState, platformContactRoles: ContactRole[]) {
+    state.platformContactRoles = platformContactRoles
   },
   setPlatformAttachments (state: PlatformsState, platformAttachments: Attachment[]) {
     state.platformAttachments = platformAttachments

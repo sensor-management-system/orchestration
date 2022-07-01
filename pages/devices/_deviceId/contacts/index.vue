@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -46,28 +46,28 @@ permissions and limitations under the Licence.
         Assign contact
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="deviceContacts.length === 0">
+    <hint-card v-if="deviceContactRoles.length === 0">
       There are no contacts for this device.
     </hint-card>
     <BaseList
-      :list-items="deviceContacts"
+      :list-items="deviceContactRoles"
     >
       <template #list-item="{item}">
-        <contacts-list-item
+        <contact-role-list-item
           :key="item.id"
-          :contact="item"
+          :value="item"
+          :cv-contact-roles="cvContactRoles"
         >
-          <template #dot-menu-items>
+          <template v-if="editable" #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!$auth.loggedIn"
-              @click="removeContact(item.id)"
+              @click="removeContactRole(item.id)"
             />
           </template>
-        </contacts-list-item>
+        </contact-role-list-item>
       </template>
     </BaseList>
     <v-card-actions
-      v-if="deviceContacts.length>3"
+      v-if="deviceContactRoles.length>3"
     >
       <v-spacer />
       <v-btn
@@ -77,7 +77,7 @@ permissions and limitations under the Licence.
         nuxt
         :to="'/devices/' + deviceId + '/contacts/new'"
       >
-        Add contact
+        Assign contact
       </v-btn>
     </v-card-actions>
   </div>
@@ -87,24 +87,27 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { DevicesState, LoadDeviceContactsAction, RemoveDeviceContactAction } from '@/store/devices'
+import { LoadDeviceContactRolesAction, RemoveDeviceContactRoleAction } from '@/store/devices'
 
 import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import BaseList from '@/components/shared/BaseList.vue'
-import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
+import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 
 @Component({
   components: {
     DotMenuActionDelete,
-    ContactsListItem,
+    ContactRoleListItem,
     BaseList,
     ProgressIndicator,
     HintCard
   },
-  computed: mapState('devices', ['deviceContacts']),
-  methods: mapActions('devices', ['loadDeviceContacts', 'removeDeviceContact'])
+  computed: {
+    ...mapState('devices', ['deviceContactRoles']),
+    ...mapState('vocabulary', ['cvContactRoles'])
+  },
+  methods: mapActions('devices', ['loadDeviceContactRoles', 'removeDeviceContactRole'])
 })
 export default class DeviceShowContactPage extends Vue {
   @InjectReactive()
@@ -113,23 +116,21 @@ export default class DeviceShowContactPage extends Vue {
   private isSaving = false
 
   // vuex definition for typescript check
-  deviceContacts!: DevicesState['deviceContacts']
-  removeDeviceContact!: RemoveDeviceContactAction
-  loadDeviceContacts!: LoadDeviceContactsAction
+  removeDeviceContactRole!: RemoveDeviceContactRoleAction
+  loadDeviceContactRoles!: LoadDeviceContactRolesAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  async removeContact (contactId: string) {
+  async removeContactRole (contactRoleId: string) {
     try {
       this.isSaving = true
-      await this.removeDeviceContact({
-        deviceId: this.deviceId,
-        contactId
+      await this.removeDeviceContactRole({
+        deviceContactRoleId: contactRoleId
       })
       this.$store.commit('snackbar/setSuccess', 'Contact removed')
-      this.loadDeviceContacts(this.deviceId)
+      this.loadDeviceContactRoles(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {

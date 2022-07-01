@@ -43,7 +43,7 @@ const PAGE_SIZES = [
   100
 ]
 
-interface contactsState {
+export interface ContactsState {
   contacts: Contact[],
   contact: Contact | null,
   configurationContacts: Contact[],
@@ -62,10 +62,11 @@ const state = () => ({
 })
 
 const getters = {
-  searchContacts: (state: contactsState) => {
+  searchContacts: (state: ContactsState) => {
     return state.contacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
   },
-  contactsByDifference: (state: contactsState) => (contactsToSubtract: Contact[]) => {
+  // TODO: Do we need it in the future? We allow multiple contact roles per contact & device.
+  contactsByDifference: (state: ContactsState) => (contactsToSubtract: Contact[]) => {
     return state.contacts.filter((contact) => {
       return !contactsToSubtract.find((contactToSubtract) => {
         return contactToSubtract.id === contact.id
@@ -85,7 +86,7 @@ const actions: {
   async searchContactsPaginated ({
     commit,
     state
-  }: { commit: Commit, state: contactsState }, searchtext: string = '') {
+  }: { commit: Commit, state: ContactsState }, searchtext: string = '') {
     // @ts-ignore
     const { elements, totalCount } = await this.$api.contacts.searchPaginated(state.pageNumber, state.pageSize, searchtext)
     commit('setContacts', elements)
@@ -108,7 +109,7 @@ const actions: {
     const contacts = await this.$api.configurations.findRelatedContacts(id)
     commit('setConfigurationContacts', contacts)
   },
-  async addContactToConfiguration (_context: ActionContext<contactsState, contactsState>,
+  async addContactToConfiguration (_context: ActionContext<ContactsState, ContactsState>,
     {
       configurationId,
       contactId
@@ -116,7 +117,7 @@ const actions: {
     // @ts-ignore
     await this.$api.configurations.addContact(configurationId, contactId)
   },
-  async removeContactFromConfiguration (_context: ActionContext<contactsState, contactsState>,
+  async removeContactFromConfiguration (_context: ActionContext<ContactsState, ContactsState>,
     {
       configurationId,
       contactId
@@ -141,22 +142,22 @@ const actions: {
 }
 
 const mutations = {
-  setContacts (state: contactsState, contacts: Contact[]) {
+  setContacts (state: ContactsState, contacts: Contact[]) {
     state.contacts = contacts
   },
-  setContact (state: contactsState, contact: Contact) {
+  setContact (state: ContactsState, contact: Contact) {
     state.contact = contact
   },
-  setConfigurationContacts (state: contactsState, contacts: Contact[]) {
+  setConfigurationContacts (state: ContactsState, contacts: Contact[]) {
     state.configurationContacts = contacts
   },
-  setPageNumber (state: contactsState, newPageNumber: number) {
+  setPageNumber (state: ContactsState, newPageNumber: number) {
     state.pageNumber = newPageNumber
   },
-  setPageSize (state: contactsState, newPageSize: number) {
+  setPageSize (state: ContactsState, newPageSize: number) {
     state.pageSize = newPageSize
   },
-  setTotalPages (state: contactsState, count: number) {
+  setTotalPages (state: ContactsState, count: number) {
     state.totalPages = count
   }
 }

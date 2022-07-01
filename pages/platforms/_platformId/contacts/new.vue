@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020 - 2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -37,67 +37,91 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-row>
-      <v-col
-        cols="12"
-        md="5"
-      >
-        <v-autocomplete
-          v-model="selectedContact"
-          :items="allExceptSelected"
-          :item-text="(x) => x"
-          label="New contact"
-          return-object
-        />
-      </v-col>
-      <v-col
-        cols="12"
-        md="2"
-        align-self="center"
-      >
-        <v-btn
-          v-if="editable"
-          small
-          color="primary"
-          :disabled="selectedContact == null"
-          @click="addContact"
+    <v-form ref="contactRoleForm" @submit.prevent>
+      <v-row>
+        <v-col
+          cols="12"
+          md="5"
         >
-          Add
-        </v-btn>
-        <v-btn
-          small
-          text
-          nuxt
-          :to="'/platforms/' + platformId + '/contacts'"
+          <v-autocomplete
+            ref="assignContactSelection"
+            v-model="selectedContact"
+            :items="contacts"
+            :item-text="(x) => x"
+            :item-value="(x) => x.id"
+            label="Assign contact"
+            return-object
+            @change="validateForm"
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          md="5"
         >
-          Cancel
-        </v-btn>
-      </v-col>
-      <v-col align-self="center" class="text-right">
-        <v-btn
-          small
-          nuxt
-          color="accent"
-          :to="'/contacts/new?redirect=' + redirectUrl"
+          <v-autocomplete
+            ref="assignRoleSelection"
+            v-model="selectedRole"
+            :items="cvContactRoles"
+            :item-text="(x) => x"
+            :item-value="(x) => x.id"
+            label="Assign role"
+            return-object
+            :rules="[roleAndContactNotDuplicated]"
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          md="2"
+          align-self="center"
         >
-          New Contact
-        </v-btn>
-      </v-col>
-    </v-row>
+          <v-btn
+            v-if="editable"
+            small
+            color="primary"
+            :disabled="assignButtonDisabled"
+            @click="assignContact"
+          >
+            Assign
+          </v-btn>
+          <v-btn
+            small
+            text
+            nuxt
+            :to="'/platforms/' + platformId + '/contacts'"
+          >
+            Cancel
+          </v-btn>
+        </v-col>
+        <v-col align-self="center" class="text-right">
+          <v-btn
+            small
+            nuxt
+            color="accent"
+            :to="'/contacts/new?redirect=' + redirectUrl"
+          >
+            New Contact
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
+import { ContactsState } from '@/store/contacts'
 import {
   PlatformsState,
-  LoadPlatformContactsAction,
-  AddPlatformContactAction
+  LoadPlatformContactRolesAction,
+  AddPlatformContactRoleAction
 } from '@/store/platforms'
+import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
 import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
+import { CvContactRole } from '@/models/CvContactRole'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -107,12 +131,15 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   },
   middleware: ['auth'],
   computed: {
-    ...mapGetters('contacts', ['contactsByDifference']),
-    ...mapState('platforms', ['platformContacts'])
+    ...mapState('platforms', ['platformContactRoles']),
+    ...mapState('contacts', ['contacts']),
+    ...mapState('vocabulary', ['cvContactRoles'])
+
   },
   methods: {
     ...mapActions('contacts', ['loadAllContacts']),
-    ...mapActions('platforms', ['loadPlatformContacts', 'addPlatformContact'])
+    ...mapActions('platforms', ['loadPlatformContactRoles', 'addPlatformContactRole']),
+    ...mapActions('vocabulary', ['loadCvContactRoles'])
   }
 })
 export default class PlatformAddContactPage extends Vue {
@@ -120,15 +147,17 @@ export default class PlatformAddContactPage extends Vue {
     editable!: boolean
 
   private selectedContact: Contact | null = null
+  private selectedRole: CvContactRole | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
 
   // vuex definition for typescript check
-  platformContacts!: PlatformsState['platformContacts']
+  platformContactRoles!: PlatformsState['platformContactRoles']
+  contacts!: ContactsState['contacts']
   loadAllContacts!: () => void
-  contactsByDifference!: (contactsToSubtract: Contact[]) => Contact[]
-  loadPlatformContacts!: LoadPlatformContactsAction
-  addPlatformContact!: AddPlatformContactAction
+  loadPlatformContactRoles!: LoadPlatformContactRolesAction
+  addPlatformContactRole!: AddPlatformContactRoleAction
+  loadCvContactRoles!: LoadCvContactRolesAction
 
   created () {
     if (!this.editable) {
@@ -143,12 +172,13 @@ export default class PlatformAddContactPage extends Vue {
       this.isLoading = true
       await Promise.all([
         this.loadAllContacts(),
-        this.loadPlatformContacts(this.platformId)
+        this.loadCvContactRoles(),
+        this.loadPlatformContactRoles(this.platformId)
       ])
 
       const redirectContactId = this.$route.query.contact
       if (redirectContactId) {
-        this.selectedContact = this.allExceptSelected.find(contact => contact.id === redirectContactId) as Contact
+        this.selectedContact = this.contacts.find(contact => contact.id === redirectContactId) as Contact
       }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
@@ -165,8 +195,20 @@ export default class PlatformAddContactPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  get allExceptSelected (): Contact[] {
-    return this.contactsByDifference(this.platformContacts)
+  get assignButtonDisabled (): boolean {
+    return this.selectedContact == null || this.selectedRole == null
+  }
+
+  roleAndContactNotDuplicated (selectedRole: CvContactRole | null): boolean | string {
+    if (this.selectedContact == null || selectedRole == null) {
+      // if one of them are null, we don't need to validate further (the button is just disabled)
+      return true
+    }
+    const found = this.platformContactRoles.find(existingContact => existingContact?.contact?.id === this.selectedContact?.id && existingContact.roleUri === selectedRole.uri)
+    if (!found) {
+      return true
+    }
+    return this.selectedContact.toString() + ' is already deposited as ' + selectedRole.name
   }
 
   /**
@@ -176,15 +218,28 @@ export default class PlatformAddContactPage extends Vue {
     return encodeURI(this.$route.path)
   }
 
-  async addContact () {
-    if (this.selectedContact && this.selectedContact.id) {
+  validateForm (): boolean {
+    return (this.$refs.contactRoleForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  async assignContact () {
+    if (this.editable && this.selectedContact && this.selectedRole) {
+      if (!this.validateForm()) {
+        this.$store.commit('snackbar/setError', 'Please correct your input')
+        return
+      }
       try {
         this.isSaving = true
-        await this.addPlatformContact({
+        await this.addPlatformContactRole({
           platformId: this.platformId,
-          contactId: this.selectedContact.id
+          contactRole: ContactRole.createFromObject({
+            id: null,
+            contact: this.selectedContact,
+            roleName: this.selectedRole.name,
+            roleUri: this.selectedRole.uri
+          })
         })
-        this.loadPlatformContacts(this.platformId)
+        this.loadPlatformContactRoles(this.platformId)
         this.$store.commit('snackbar/setSuccess', 'New Contact added')
         this.$router.push('/platforms/' + this.platformId + '/contacts')
       } catch (e) {

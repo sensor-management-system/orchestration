@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020 - 2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -44,7 +44,8 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
-import { LoadPlatformContactsAction } from '@/store/platforms'
+import { LoadPlatformContactRolesAction } from '@/store/platforms'
+import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -52,18 +53,25 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: {
     ProgressIndicator
   },
-  methods: mapActions('platforms', ['loadPlatformContacts'])
+  methods: {
+    ...mapActions('platforms', ['loadPlatformContactRoles']),
+    ...mapActions('vocabulary', ['loadCvContactRoles'])
+  }
 })
 export default class PlatformContactsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadPlatformContacts!: LoadPlatformContactsAction
+  loadPlatformContactRoles!: LoadPlatformContactRolesAction
+  loadCvContactRoles!: LoadCvContactRolesAction
 
   async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadPlatformContacts(this.platformId)
+      await Promise.all([
+        this.loadPlatformContactRoles(this.platformId),
+        this.loadCvContactRoles()
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     } finally {

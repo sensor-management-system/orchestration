@@ -47,28 +47,28 @@ permissions and limitations under the Licence.
         Assign contact
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="configurationContacts.length === 0">
+    <hint-card v-if="configurationContactRoles.length === 0">
       There are no contacts for this configuration.
     </hint-card>
     <BaseList
-      :list-items="configurationContacts"
+      :list-items="configurationContactRoles"
     >
       <template #list-item="{item}">
-        <contacts-list-item
+        <contact-role-list-item
           :key="item.id"
-          :contact="item"
+          :value="item"
+          :cv-contact-roles="cvContactRoles"
         >
-          <template #dot-menu-items>
+          <template v-if="editable" #dot-menu-items>
             <DotMenuActionDelete
-              :readonly="!editable"
-              @click="removeContact(item.id)"
+              @click="removeContactRole(item.id)"
             />
           </template>
-        </contacts-list-item>
+        </contact-role-list-item>
       </template>
     </BaseList>
     <v-card-actions
-      v-if="configurationContacts.length>3"
+      v-if="configurationContactRoles.length>3"
     >
       <v-spacer />
       <v-btn
@@ -78,7 +78,7 @@ permissions and limitations under the Licence.
         nuxt
         :to="'/configurations/' + configurationId + '/contacts/new'"
       >
-        Add contact
+        Assign contact
       </v-btn>
     </v-card-actions>
   </div>
@@ -88,8 +88,10 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
+import { LoadConfigurationContactRolesAction, RemoveConfigurationContactRoleAction } from '@/store/configurations'
+
 import BaseList from '@/components/shared/BaseList.vue'
-import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
+import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import HintCard from '@/components/HintCard.vue'
@@ -99,11 +101,14 @@ import HintCard from '@/components/HintCard.vue'
     HintCard,
     ProgressIndicator,
     DotMenuActionDelete,
-    ContactsListItem,
+    ContactRoleListItem,
     BaseList
   },
-  computed: mapState('configurations', ['configurationContacts']),
-  methods: mapActions('configurations', ['loadConfigurationContacts', 'removeConfigurationContact'])
+  computed: {
+    ...mapState('configurations', ['configurationContactRoles']),
+    ...mapState('vocabulary', ['cvContactRoles'])
+  },
+  methods: mapActions('configurations', ['loadConfigurationContactRoles', 'removeConfigurationContactRole'])
 })
 export default class ConfigurationShowContactPage extends Vue {
   @InjectReactive()
@@ -112,24 +117,21 @@ export default class ConfigurationShowContactPage extends Vue {
   private isSaving = false
 
   // vuex definition for typescript check
-  loadConfigurationContacts!: (id: string) => void
-  removeConfigurationContact!: ({
-    configurationId,
-    contactId
-  }: { configurationId: string, contactId: string }) => void
+  loadConfigurationContactRoles!: LoadConfigurationContactRolesAction
+  removeConfigurationContactRole!: RemoveConfigurationContactRoleAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
   }
 
-  async removeContact (contactId: string) {
+  async removeContactRole (contactRoleId: string) {
     try {
       this.isSaving = true
-      await this.removeConfigurationContact({
-        configurationId: this.configurationId,
-        contactId
+      await this.removeConfigurationContactRole({
+        configurationContactRoleId: contactRoleId
       })
-      this.loadConfigurationContacts(this.configurationId)
+      this.$store.commit('snackbar/setSuccess', 'Contact removed')
+      this.loadConfigurationContactRoles(this.configurationId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {
