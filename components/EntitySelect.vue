@@ -42,7 +42,8 @@ permissions and limitations under the Licence.
     <v-chip
       v-for="element in value"
       :key="element.id"
-      class="ma-2"
+      class="mr-1 mb-1"
+      small
       :color="color"
       text-color="white"
       :close="!readonly"
@@ -198,7 +199,6 @@ export default class EntitySelect<E extends IStringId> extends Vue {
       /**
        * Update event
        * @event EntitySelect#input
-       * @type {E[]}
        */
       const selectedElements = [...this.value] as E[]
       selectedElements.splice(elementIndex, 1)

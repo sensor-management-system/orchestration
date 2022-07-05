@@ -33,6 +33,7 @@
 import { QueryParams } from '@/modelUtils/QueryParams'
 
 import { Project } from '@/models/Project'
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 export interface IConfigurationBasicSearchParams {
   searchText: string | null
@@ -41,6 +42,7 @@ export interface IConfigurationBasicSearchParams {
 export interface IConfigurationSearchParams extends IConfigurationBasicSearchParams {
   states: string[]
   projects: Project[]
+  permissionGroups: PermissionGroup[]
 }
 
 /**
@@ -50,13 +52,17 @@ export interface IConfigurationSearchParams extends IConfigurationBasicSearchPar
 export class ConfigurationSearchParamsSerializer {
   public states: string[] = []
   public projects: Project[] = []
+  public permissionGroups: PermissionGroup[] = []
 
-  constructor ({ states, projects }: {states?: string[], projects?: Project[]} = {}) {
+  constructor ({ states, projects, permissionGroups }: {states?: string[], projects?: Project[], permissionGroups?: PermissionGroup[]} = {}) {
     if (states) {
       this.states = states
     }
     if (projects) {
       this.projects = projects
+    }
+    if (permissionGroups) {
+      this.permissionGroups = permissionGroups
     }
   }
 
@@ -76,6 +82,9 @@ export class ConfigurationSearchParamsSerializer {
     }
     if (params.states) {
       result.states = params.states
+    }
+    if (params.permissionGroups) {
+      result.permissionGroups = params.permissionGroups.map(p => p.id)
     }
     return result
   }
@@ -105,10 +114,19 @@ export class ConfigurationSearchParamsSerializer {
       states = params.states.filter(state => typeof state === 'string') as string[]
     }
 
+    let permissionGroups: PermissionGroup[] = []
+    if (params.permissionGroups) {
+      if (!Array.isArray(params.permissionGroups)) {
+        params.permissionGroups = [params.permissionGroups]
+      }
+      permissionGroups = params.permissionGroups.map(paramId => this.permissionGroups.find(permissionGroup => permissionGroup.id === paramId)).filter(isNotUndefined) as PermissionGroup[]
+    }
+
     return {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
       projects,
-      states
+      states,
+      permissionGroups
     }
   }
 }

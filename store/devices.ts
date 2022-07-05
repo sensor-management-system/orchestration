@@ -211,6 +211,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)
       .setSearchedDeviceTypes(searchParams.types)
+      .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedUserMail(email)
       .searchPaginated(
         state.pageNumber,
@@ -497,6 +498,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)
       .setSearchedDeviceTypes(searchParams.types)
+      .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedUserMail(email)
       .searchMatchingAsCsvBlob()
   },

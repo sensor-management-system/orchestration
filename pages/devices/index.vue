@@ -85,7 +85,9 @@ permissions and limitations under the Licence.
         </v-row>
       </v-tab-item>
       <v-tab-item :eager="true">
-        <v-row>
+        <v-row
+          dense
+        >
           <v-col cols="12" md="6">
             <v-text-field
               v-model="searchText"
@@ -96,27 +98,45 @@ permissions and limitations under the Licence.
             />
           </v-col>
         </v-row>
-        <v-row>
-          <v-col cols="12" md="3">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
             <ManufacturerSelect v-model="selectedSearchManufacturers" label="Select a manufacturer" />
           </v-col>
         </v-row>
-        <v-row>
-          <v-col cols="12" md="3">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
             <StatusSelect v-model="selectedSearchStates" label="Select a status" />
           </v-col>
         </v-row>
-        <v-row>
-          <v-col cols="12" md="3">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
             <DeviceTypeSelect v-model="selectedSearchDeviceTypes" label="Select a device type" />
           </v-col>
         </v-row>
-        <v-row v-if="$auth.loggedIn">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <permission-group-search-select v-model="selectedSearchPermissionGroups" label="Select a permission group" />
+          </v-col>
+        </v-row>
+        <v-row
+          v-if="$auth.loggedIn"
+          dense
+        >
           <v-col cols="12" md="3">
             <v-checkbox v-model="onlyOwnDevices" label="Only own devices" />
           </v-col>
         </v-row>
-        <v-row>
+        <v-row
+          dense
+        >
           <v-col
             cols="5"
             align-self="center"
@@ -334,11 +354,17 @@ import {
   PageSizesGetter
 } from '@/store/devices'
 
-import { CanAccessEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+import {
+  PermissionsState,
+  CanAccessEntityGetter,
+  CanDeleteEntityGetter,
+  LoadPermissionGroupsAction
+} from '@/store/permissions'
 
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
+import { PermissionGroup } from '@/models/PermissionGroup'
 import { Status } from '@/models/Status'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
@@ -353,6 +379,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
+import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 
 @Component({
   components: {
@@ -364,10 +391,11 @@ import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
     DeviceTypeSelect,
     ManufacturerSelect,
     StatusSelect,
-    PageSizeSelect
+    PageSizeSelect,
+    PermissionGroupSearchSelect
   },
   computed: {
-    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity']),
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups']),
     ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
     ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages']),
     ...mapGetters('devices', ['pageSizes'])
@@ -375,7 +403,8 @@ import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
     ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice']),
-    ...mapActions('appbar', ['initDevicesIndexAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['initDevicesIndexAppBar', 'setDefaults']),
+    ...mapActions('permissions', ['loadPermissionGroups'])
   }
 })
 export default class SearchDevicesPage extends Vue {
@@ -385,6 +414,7 @@ export default class SearchDevicesPage extends Vue {
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
   private selectedSearchDeviceTypes: DeviceType[] = []
+  private selectedSearchPermissionGroups: PermissionGroup[] = []
   private onlyOwnDevices: boolean = false
   private searchText: string | null = null
 
@@ -397,11 +427,13 @@ export default class SearchDevicesPage extends Vue {
   totalPages!: DevicesState['totalPages']
   pageNumber!: DevicesState['pageNumber']
   pageSizes!: PageSizesGetter
+  permissionGroups!: PermissionsState['permissionGroups']
   initDevicesIndexAppBar!: () => void
   setDefaults!: () => void
   loadEquipmentstatus!: LoadEquipmentstatusAction
   loadDevicetypes!: LoadDevicetypesAction
   loadManufacturers!: LoadManufacturersAction
+  loadPermissionGroups!: LoadPermissionGroupsAction
   setPageNumber!: SetPageNumberAction
   setPageSize!: SetPageSizeAction
   searchDevicesPaginated!: SearchDevicesPaginatedAction
@@ -420,7 +452,8 @@ export default class SearchDevicesPage extends Vue {
       await Promise.all([
         this.loadEquipmentstatus(),
         this.loadDevicetypes(),
-        this.loadManufacturers()
+        this.loadManufacturers(),
+        this.loadPermissionGroups()
       ])
       this.initSearchQueryParams()
       await this.runInitialSearch()
@@ -476,6 +509,7 @@ export default class SearchDevicesPage extends Vue {
       manufacturer: this.selectedSearchManufacturers,
       states: this.selectedSearchStates,
       types: this.selectedSearchDeviceTypes,
+      permissionGroups: this.selectedSearchPermissionGroups,
       onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
     }
   }
@@ -484,7 +518,8 @@ export default class SearchDevicesPage extends Vue {
     return this.onlyOwnDevices === true ||
       !!this.selectedSearchStates.length ||
       !!this.selectedSearchDeviceTypes.length ||
-      !!this.selectedSearchManufacturers.length
+      !!this.selectedSearchManufacturers.length ||
+      !!this.selectedSearchPermissionGroups.length
   }
 
   async runInitialSearch (): Promise<void> {
@@ -500,6 +535,7 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchDeviceTypes = []
+    this.selectedSearchPermissionGroups = []
     this.onlyOwnDevices = false
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
@@ -521,6 +557,7 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchManufacturers = []
     this.selectedSearchStates = []
     this.selectedSearchDeviceTypes = []
+    this.selectedSearchPermissionGroups = []
     this.onlyOwnDevices = false
     this.initUrlQueryParams()
   }
@@ -584,7 +621,8 @@ export default class SearchDevicesPage extends Vue {
     const searchParamsObject = (new DeviceSearchParamsSerializer({
       states: this.equipmentstatus,
       deviceTypes: this.devicetypes,
-      manufacturer: this.manufacturers
+      manufacturer: this.manufacturers,
+      permissionGroups: this.permissionGroups
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
@@ -602,6 +640,9 @@ export default class SearchDevicesPage extends Vue {
     }
     if (searchParamsObject.states) {
       this.selectedSearchStates = searchParamsObject.states
+    }
+    if (searchParamsObject.permissionGroups) {
+      this.selectedSearchPermissionGroups = searchParamsObject.permissionGroups
     }
   }
 

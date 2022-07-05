@@ -171,6 +171,9 @@ const getters: GetterTree<PermissionsState, RootState> = {
       ]
     }
     return []
+  },
+  permissionGroups: (state: PermissionsState): PermissionGroup[] => {
+    return state.permissionGroups
   }
 }
 

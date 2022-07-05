@@ -34,6 +34,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
 
 import { Manufacturer } from '@/models/Manufacturer'
 import { DeviceType } from '@/models/DeviceType'
+import { PermissionGroup } from '@/models/PermissionGroup'
 import { Status } from '@/models/Status'
 
 export interface IDeviceSearchParams {
@@ -41,6 +42,7 @@ export interface IDeviceSearchParams {
   manufacturer: Manufacturer[]
   states: Status[]
   types: DeviceType[]
+  permissionGroups: PermissionGroup[]
   onlyOwnDevices: boolean
 }
 
@@ -52,8 +54,9 @@ export class DeviceSearchParamsSerializer {
   public states: Status[] = []
   public deviceTypes: DeviceType[] = []
   public manufacturer: Manufacturer[] = []
+  public permissionGroups: PermissionGroup[] = []
 
-  constructor ({ states, deviceTypes, manufacturer }: {states?: Status[], deviceTypes?: DeviceType[], manufacturer?: Manufacturer[]} = {}) {
+  constructor ({ states, deviceTypes, manufacturer, permissionGroups }: {states?: Status[], deviceTypes?: DeviceType[], manufacturer?: Manufacturer[], permissionGroups?: PermissionGroup[]} = {}) {
     if (states) {
       this.states = states
     }
@@ -62,6 +65,9 @@ export class DeviceSearchParamsSerializer {
     }
     if (manufacturer) {
       this.manufacturer = manufacturer
+    }
+    if (permissionGroups) {
+      this.permissionGroups = permissionGroups
     }
   }
 
@@ -87,6 +93,9 @@ export class DeviceSearchParamsSerializer {
     }
     if (params.states) {
       result.states = params.states.map(s => s.id)
+    }
+    if (params.permissionGroups) {
+      result.permissionGroups = params.permissionGroups.map(p => p.id)
     }
     return result
   }
@@ -124,11 +133,20 @@ export class DeviceSearchParamsSerializer {
       states = params.states.map(paramId => this.states.find(state => state.id === paramId)).filter(isNotUndefined) as Status[]
     }
 
+    let permissionGroups: PermissionGroup[] = []
+    if (params.permissionGroups) {
+      if (!Array.isArray(params.permissionGroups)) {
+        params.permissionGroups = [params.permissionGroups]
+      }
+      permissionGroups = params.permissionGroups.map(paramId => this.permissionGroups.find(permissionGroup => permissionGroup.id === paramId)).filter(isNotUndefined) as PermissionGroup[]
+    }
+
     return {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
       manufacturer,
       states,
       types,
+      permissionGroups,
       onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true'
     }
   }

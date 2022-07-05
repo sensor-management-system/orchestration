@@ -107,6 +107,7 @@ export class DeviceApi {
   private _searchedManufacturers: Manufacturer[] = []
   private _searchedStates: Status[] = []
   private _searchedDeviceTypes: DeviceType[] = []
+  private _searchedPermissionGroups: PermissionGroup[] = []
   private _searchedUserMail: string | null = null
   private _searchText: string | null = null
   private filterSettings: any[] = []
@@ -144,6 +145,15 @@ export class DeviceApi {
 
   setSearchedDeviceTypes (value: DeviceType[]) {
     this._searchedDeviceTypes = value
+    return this
+  }
+
+  get searchedPermissionGroups (): PermissionGroup[] {
+    return this._searchedPermissionGroups
+  }
+
+  setSearchedPermissionGroups (value: PermissionGroup[]) {
+    this._searchedPermissionGroups = value
     return this
   }
 
@@ -259,6 +269,7 @@ export class DeviceApi {
     this.prepareManufacturers()
     this.prepareStates()
     this.prepareTypes()
+    this.preparePermissionGroups()
     this.prepareMail()
   }
 
@@ -329,6 +340,20 @@ export class DeviceApi {
             val: this.searchedDeviceTypes.map((t: DeviceType) => t.uri)
           }
         ]
+      })
+    }
+  }
+
+  preparePermissionGroups () {
+    if (this.searchedPermissionGroups.length > 0) {
+      this.filterSettings.push({
+        or: this.searchedPermissionGroups.map((permissionGroup) => {
+          return {
+            name: 'group_ids',
+            op: 'any',
+            val: permissionGroup.id
+          }
+        })
       })
     }
   }

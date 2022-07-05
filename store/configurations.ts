@@ -272,6 +272,7 @@ const actions: {
       .setSearchText(searchParams.searchText)
       .setSearchedProjects(searchParams.projects)
       .setSearchedStates(searchParams.states)
+      .setSearchPermissionGroups(searchParams.permissionGroups)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,

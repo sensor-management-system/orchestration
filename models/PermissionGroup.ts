@@ -75,6 +75,10 @@ export class PermissionGroup implements IPermissionGroup {
     this._description = description
   }
 
+  toString (): string {
+    return this._name
+  }
+
   equals (group: PermissionGroup): boolean {
     return this.id === group.id
     // &&

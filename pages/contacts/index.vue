@@ -30,7 +30,9 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row>
+    <v-row
+      dense
+    >
       <v-col cols="12" md="5">
         <v-text-field
           v-model="searchText"
@@ -87,20 +89,22 @@ permissions and limitations under the Licence.
       </p>
     </div>
 
-    <div v-if="contacts.length>0">
-      <v-subheader>
-        <template v-if="contacts.length == 1">
-          1 contact found
-        </template>
-        <template v-else>
-          {{ contacts.length }} contacts found
-        </template>
-        <!-- No export to pdf due to data privacy reasons -->
-      </v-subheader>
-
+    <div
+      v-if="contacts.length > 0"
+    >
       <v-row
         no-gutters
+        class="mt-10"
       >
+        <v-subheader>
+          <template v-if="contacts.length == 1">
+            1 contact found
+          </template>
+          <template v-else>
+            {{ contacts.length }} contacts found
+          </template>
+          <v-spacer />
+        </v-subheader>
         <v-spacer />
         <v-col
           cols="4"
@@ -126,6 +130,7 @@ permissions and limitations under the Licence.
           </v-subheader>
         </v-col>
       </v-row>
+
       <BaseList
         :list-items="contacts"
       >
