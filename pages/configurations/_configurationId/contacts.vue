@@ -46,21 +46,30 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { mapActions } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { LoadCvContactRolesAction } from '@/store/vocabulary'
+import { LoadConfigurationContactRolesAction } from '@/store/configurations'
 
 @Component({
   components: { ProgressIndicator },
-  methods: mapActions('configurations', ['loadConfigurationContacts'])
+  methods: {
+    ...mapActions('configurations', ['loadConfigurationContactRoles']),
+    ...mapActions('vocabulary', ['loadCvContactRoles'])
+  }
 })
 export default class ContactTab extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadConfigurationContacts!: (id: string) => void
+  loadConfigurationContactRoles!: LoadConfigurationContactRolesAction
+  loadCvContactRoles!: LoadCvContactRolesAction
 
-  created () {
+  async fetch () {
     try {
       this.isLoading = true
-      this.loadConfigurationContacts(this.configurationId)
+      await Promise.all([
+        this.loadConfigurationContactRoles(this.configurationId),
+        this.loadCvContactRoles()
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     } finally {

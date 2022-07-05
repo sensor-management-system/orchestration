@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -41,24 +41,32 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
-import { LoadDeviceContactsAction } from '@/store/devices'
+import { LoadDeviceContactRolesAction } from '@/store/devices'
+import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
-  methods: mapActions('devices', ['loadDeviceContacts'])
+  methods: {
+    ...mapActions('devices', ['loadDeviceContactRoles']),
+    ...mapActions('vocabulary', ['loadCvContactRoles'])
+  }
 })
 export default class DeviceContactsPage extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadDeviceContacts!: LoadDeviceContactsAction
+  loadDeviceContactRoles!: LoadDeviceContactRolesAction
+  loadCvContactRoles!: LoadCvContactRolesAction
 
-  created () {
+  async fetch () {
     try {
       this.isLoading = true
-      this.loadDeviceContacts(this.deviceId)
+      await Promise.all([
+        this.loadDeviceContactRoles(this.deviceId),
+        this.loadCvContactRoles()
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     } finally {

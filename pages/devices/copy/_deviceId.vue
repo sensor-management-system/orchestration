@@ -259,7 +259,8 @@ export default class DeviceCopyPage extends Vue {
         copyContacts: this.copyContacts,
         copyAttachments: this.copyAttachments,
         copyMeasuredQuantities: this.copyMeasuredQuantities,
-        copyCustomFields: this.copyCustomFields
+        copyCustomFields: this.copyCustomFields,
+        originalDeviceId: this.deviceId
       })
       this.$store.commit('snackbar/setSuccess', 'Device copied')
       this.$router.push('/devices/' + savedDeviceId)

@@ -103,7 +103,7 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
   components: { ContacsDeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
   computed: mapState('contacts', ['contact']),
   methods: {
-    ...mapActions('contacts', ['deleteContact']),
+    ...mapActions('contacts', ['deleteContact', 'loadContact']),
     ...mapActions('appbar', ['initContactsContactIdIndexAppBar'])
   }
 })
@@ -114,8 +114,14 @@ export default class ContactIndexPage extends Vue {
   initContactsContactIdIndexAppBar!: (title: string) => void
   contact!: Contact
   deleteContact!: (id: string) => void
+  loadContact!: (id: string) => void
 
-  created () {
+  async created () {
+    // We load the contact in the upper context (that component that
+    // include this page here is a child)
+    // However, we can't be sure that this was already loaded
+    // so we need to load it here in order to show the right name
+    await this.loadContact(this.contactId)
     this.initContactsContactIdIndexAppBar(this.contact.toString())
   }
 

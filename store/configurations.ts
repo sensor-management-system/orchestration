@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -39,7 +39,7 @@ import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 import {
   DeviceMountTimelineAction,
   DeviceUnmountTimelineAction,
@@ -79,10 +79,10 @@ const PAGE_SIZES = [
   100
 ]
 
-export interface configurationsState {
+export interface ConfigurationsState {
   configurations: Configuration[]
   configuration: Configuration | null,
-  configurationContacts: Contact[]
+  configurationContactRoles: ContactRole[]
   configurationStates: string[]
   projects: Project[],
   configurationStaticLocationBeginActions: StaticLocationBeginAction[],
@@ -98,7 +98,7 @@ export interface configurationsState {
 const state = () => ({
   configurations: [],
   configuration: null,
-  configurationContacts: [],
+  configurationContactRoles: [],
   configurationStates: [],
   projects: [],
   configurationStaticLocationBeginActions: [],
@@ -112,10 +112,10 @@ const state = () => ({
 })
 
 const getters = {
-  projectNames: (state: configurationsState) => {
+  projectNames: (state: ConfigurationsState) => {
     return state.projects.map((p: Project) => p.name)
   },
-  timelineActions: (state: configurationsState) => { // Todo überlegen, ob das man das eventuell anders macht
+  timelineActions: (state: ConfigurationsState) => { // Todo überlegen, ob das man das eventuell anders macht
     const result: ITimelineAction[] = []
 
     if (state.configuration !== null) {
@@ -148,7 +148,7 @@ const getters = {
     }
     return result
   },
-  // mountingActionsDates: (state: configurationsState) => {
+  // mountingActionsDates: (state: ConfigurationsState) => {
   //   let result: IActionDateWithTextItem[] = []
   //
   //   if (state.configuration) {
@@ -191,7 +191,7 @@ const getters = {
   //   }
   //   return result
   // },
-  locationActionsDates: (state: configurationsState) => {
+  locationActionsDates: (state: ConfigurationsState) => {
     let result: IActionDateWithTextItem[] = []
 
     if (state.configuration) {
@@ -256,6 +256,10 @@ const getters = {
   }
 }
 
+export type LoadConfigurationContactRolesAction = (id: string) => Promise<void>
+export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
+export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
+
 // @ts-ignore
 const actions: {
   [key: string]: any;
@@ -264,7 +268,7 @@ const actions: {
   async searchConfigurationsPaginated ({
     commit,
     state
-  }: { commit: Commit, state: configurationsState }, searchParams: IConfigurationSearchParams) {
+  }: { commit: Commit, state: ConfigurationsState }, searchParams: IConfigurationSearchParams) {
     const {
       elements,
       totalCount
@@ -288,9 +292,9 @@ const actions: {
     const configuration = await this.$api.configurations.findById(id, { includeCreatedBy: true, includeUpdatedBy: true })
     commit('setConfiguration', configuration)
   },
-  async loadConfigurationContacts ({ commit }: { commit: Commit }, id: string) {
-    const configurationContacts = await this.$api.configurations.findRelatedContacts(id)
-    commit('setConfigurationContacts', configurationContacts)
+  async loadConfigurationContactRoles ({ commit }: { commit: Commit }, id: string) {
+    const configurationContactRoles = await this.$api.configurations.findRelatedContactRoles(id)
+    commit('setConfigurationContactRoles', configurationContactRoles)
   },
   async loadConfigurationsStates ({ commit }: { commit: Commit }) {
     const configurationStates = await this.$api.configurationStates.findAll()
@@ -341,17 +345,16 @@ const actions: {
   saveConfiguration ({ _commit }: { _commit: Commit }, configuration: Configuration): Promise<Configuration> {
     return this.$api.configurations.save(configuration)
   },
-  addConfigurationContact ({ _commit }: { _commit: Commit }, {
+  addConfigurationContactRole ({ _commit }: { _commit: Commit }, {
     configurationId,
-    contactId
-  }: { configurationId: string, contactId: string }): Promise<void> {
-    return this.$api.configurations.addContact(configurationId, contactId)
+    contactRole
+  }: { configurationId: string, contactRole: ContactRole }): Promise<string> {
+    return this.$api.configurations.addContact(configurationId, contactRole)
   },
-  removeConfigurationContact ({ _commit }: { _commit: Commit }, {
-    configurationId,
-    contactId
-  }: { configurationId: string, contactId: string }): Promise<void> {
-    return this.$api.configurations.removeContact(configurationId, contactId)
+  removeConfigurationContactRole ({ _commit }: { _commit: Commit }, {
+    configurationContactRoleId
+  }: { configurationContactRoleId: string }): Promise<void> {
+    return this.$api.configurations.removeContact(configurationContactRoleId)
   },
   addDeviceMountAction (
     { _commit }: { _commit: Commit },
@@ -401,43 +404,43 @@ const actions: {
 }
 
 const mutations = {
-  setConfigurations (state: configurationsState, configurations: Configuration[]) {
+  setConfigurations (state: ConfigurationsState, configurations: Configuration[]) {
     state.configurations = configurations
   },
-  setConfiguration (state: configurationsState, configuration: Configuration) {
+  setConfiguration (state: ConfigurationsState, configuration: Configuration) {
     state.configuration = configuration
   },
-  setConfigurationContacts (state: configurationsState, configurationContacts: Contact[]) {
-    state.configurationContacts = configurationContacts
+  setConfigurationContactRoles (state: ConfigurationsState, configurationContactRoles: ContactRole[]) {
+    state.configurationContactRoles = configurationContactRoles
   },
-  setConfigurationStates (state: configurationsState, configurationStates: string[]) {
+  setConfigurationStates (state: ConfigurationsState, configurationStates: string[]) {
     state.configurationStates = configurationStates
   },
-  setPageNumber (state: configurationsState, newPageNumber: number) {
+  setPageNumber (state: ConfigurationsState, newPageNumber: number) {
     state.pageNumber = newPageNumber
   },
-  setPageSize (state: configurationsState, newPageSize: number) {
+  setPageSize (state: ConfigurationsState, newPageSize: number) {
     state.pageSize = newPageSize
   },
-  setTotalPages (state: configurationsState, count: number) {
+  setTotalPages (state: ConfigurationsState, count: number) {
     state.totalPages = count
   },
-  setProjects (state: configurationsState, projects: Project[]) {
+  setProjects (state: ConfigurationsState, projects: Project[]) {
     state.projects = projects
   },
-  setConfigurationStaticLocationBeginActions (state: configurationsState, staticLocationBeginActions: StaticLocationBeginAction[]) {
+  setConfigurationStaticLocationBeginActions (state: ConfigurationsState, staticLocationBeginActions: StaticLocationBeginAction[]) {
     state.configurationStaticLocationBeginActions = staticLocationBeginActions
   },
-  setConfigurationStaticLocationEndActions (state: configurationsState, staticLocationEndActions: StaticLocationEndAction[]) {
+  setConfigurationStaticLocationEndActions (state: ConfigurationsState, staticLocationEndActions: StaticLocationEndAction[]) {
     state.configurationStaticLocationEndActions = staticLocationEndActions
   },
-  setConfigurationDynamicLocationBeginActions (state: configurationsState, dynamicLocationBeginActions: DynamicLocationBeginAction[]) {
+  setConfigurationDynamicLocationBeginActions (state: ConfigurationsState, dynamicLocationBeginActions: DynamicLocationBeginAction[]) {
     state.configurationDynamicLocationBeginActions = dynamicLocationBeginActions
   },
-  setConfigurationDynamicLocationEndActions (state: configurationsState, dynamicLocationEndActions: DynamicLocationEndAction[]) {
+  setConfigurationDynamicLocationEndActions (state: ConfigurationsState, dynamicLocationEndActions: DynamicLocationEndAction[]) {
     state.configurationDynamicLocationEndActions = dynamicLocationEndActions
   },
-  setConfigurationMountingActions (state: configurationsState, configurationMountingActions: []) {
+  setConfigurationMountingActions (state: ConfigurationsState, configurationMountingActions: []) {
     state.configurationMountingActions = configurationMountingActions
   }
 }

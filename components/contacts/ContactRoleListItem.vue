@@ -2,10 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2022
+- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -34,9 +36,9 @@ permissions and limitations under the Licence.
     expandable-color="grey lighten-5"
   >
     <template #header>
-      <div class="text-caption">
-        {{ contact.email }}
-      </div>
+      <p class="text-subtitle-1 mb-0">
+        <v-badge :content="roleName" inline />
+      </p>
     </template>
     <template #dot-menu-items>
       <slot name="dot-menu-items" />
@@ -164,25 +166,42 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
-
 import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import { CvContactRole } from '@/models/CvContactRole'
 
 @Component({
   components: {
     BaseExpandableListItem
   }
 })
-export default class ContactsListItem extends Vue {
+export default class ContactRoleListItem extends Vue {
   @Prop({
-    required: true,
-    type: Object
+    type: Object,
+    required: true
   })
-  private contact!: Contact
+  private readonly value!: ContactRole
+
+  @Prop({
+    type: Array,
+    required: true
+  })
+  private readonly cvContactRoles!: CvContactRole[]
+
+  // TODO Get also the cvRole entries
+
+  get contact (): Contact {
+    return this.value.contact!
+  }
+
+  get roleName (): string {
+    const idx = this.cvContactRoles.findIndex(cv => cv.uri === this.value.roleUri)
+    if (idx > -1) {
+      return this.cvContactRoles[idx].name
+    }
+    return this.value.roleName
+  }
 }
 </script>
-
-<style scoped>
-
-</style>

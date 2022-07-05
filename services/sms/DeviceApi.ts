@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,7 +32,7 @@
 import { AxiosInstance, Method } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
-import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
 import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
@@ -47,7 +47,7 @@ import { PermissionGroup } from '@/models/PermissionGroup'
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
 import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
 
-import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
@@ -393,34 +393,26 @@ export class DeviceApi {
   //   return new DeviceSearchBuilder(this.axiosApi, this.basePath, this.serializer)
   // }
 
-  findRelatedContacts (deviceId: string): Promise<Contact[]> {
-    const url = this.basePath + '/' + deviceId + '/contacts'
+  findRelatedContactRoles (deviceId: string): Promise<ContactRole[]> {
+    const url = this.basePath + '/' + deviceId + '/device-contact-roles'
     const params = {
-      'page[size]': 10000
+      'page[size]': 10000,
+      include: 'contact'
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new ContactSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new ContactRoleSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 
-  removeContact (deviceId: string, contactId: string): Promise<void> {
-    const url = this.basePath + '/' + deviceId + '/relationships/contacts'
-    const params = {
-      data: [{
-        type: 'contact',
-        id: contactId
-      }]
-    }
-    return this.axiosApi.delete(url, { data: params })
+  removeContact (deviceContactRoleId: string): Promise<void> {
+    const url = 'device-contact-roles/' + deviceContactRoleId
+    return this.axiosApi.delete(url)
   }
 
-  addContact (deviceId: string, contactId: string): Promise<void> {
-    const url = this.basePath + '/' + deviceId + '/relationships/contacts'
-    const data = [{
-      type: 'contact',
-      id: contactId
-    }]
-    return this.axiosApi.post(url, { data })
+  addContact (deviceId: string, contactRole: ContactRole): Promise<string> {
+    const url = 'device-contact-roles'
+    const data = new ContactRoleSerializer().convertModelToJsonApiData(contactRole, 'device_contact_role', 'device', deviceId)
+    return this.axiosApi.post(url, { data }).then(response => response.data.data.id)
   }
 
   findRelatedCustomFields (deviceId: string): Promise<CustomTextField[]> {

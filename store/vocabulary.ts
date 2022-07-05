@@ -45,6 +45,7 @@ import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { EpsgCode } from '@/models/EpsgCode'
 import { ElevationDatum } from '@/models/ElevationDatum'
+import { CvContactRole } from '@/models/CvContactRole'
 
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 
@@ -66,7 +67,8 @@ export interface VocabularyState {
   units: Unit[],
   measuredQuantityUnits: MeasuredQuantityUnit[],
   epsgCodes: EpsgCode[],
-  elevationData: ElevationDatum[]
+  elevationData: ElevationDatum[],
+  cvContactRoles: CvContactRole[],
 }
 
 const state = (): VocabularyState => ({
@@ -82,7 +84,8 @@ const state = (): VocabularyState => ({
   units: [],
   measuredQuantityUnits: [],
   epsgCodes: [],
-  elevationData: []
+  elevationData: [],
+  cvContactRoles: []
 })
 
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
@@ -171,6 +174,7 @@ export type LoadUnitsAction = () => Promise<void>
 export type LoadMeasuredQuantityUnitsAction = () => Promise<void>
 export type LoadEpsgCodesAction = () => Promise<void>
 export type LoadElevationDataAction = () => Promise<void>
+export type LoadCvContactRolesAction = () => Promise<void>
 
 const actions: ActionTree<VocabularyState, RootState> = {
   async loadManufacturers ({ commit }: { commit: Commit }): Promise<void> {
@@ -216,6 +220,9 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadElevationData ({ commit }: { commit: Commit }): Promise<void> {
     commit('setElevationData', await this.$api.elevationData.findAll())
+  },
+  async loadCvContactRoles ({ commit }: {commit: Commit }): Promise<void> {
+    commit('setCvContactRoles', await this.$api.cvContactRoles.findAll())
   }
 }
 
@@ -258,6 +265,9 @@ const mutations = {
   },
   setElevationData (state: VocabularyState, elevationData: ElevationDatum[]) {
     state.elevationData = elevationData
+  },
+  setCvContactRoles (state: VocabularyState, cvContactRoles: CvContactRole[]) {
+    state.cvContactRoles = cvContactRoles
   }
 }
 
