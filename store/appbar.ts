@@ -175,7 +175,6 @@ const actions = {
   },
   initContactsIndexAppBar ({ commit }: {commit: Commit}) {
     commit('setTitle', 'Contacts')
-    commit('setTabs', ['Search'])
     commit('setCancelBtnHidden', true)
     commit('setSaveBtnHidden', true)
   },

@@ -196,7 +196,6 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class PlatformSearch extends Vue {
-  private activeTab = 0
   private isLoading = false
 
   // vuex definition for typescript check
@@ -220,6 +219,10 @@ export default class PlatformSearch extends Vue {
   equipmentstatus!: VocabularyState['equipmentstatus']
   platformtypes!: VocabularyState['platformtypes']
   manufacturers!: VocabularyState['manufacturers']
+
+  get activeTab (): number | null {
+    return this.$store.state.appbar.activeTab
+  }
 
   get selectedManufacturers () {
     return this.selectedSearchManufacturers
