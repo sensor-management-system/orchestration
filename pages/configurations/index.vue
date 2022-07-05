@@ -34,7 +34,9 @@ permissions and limitations under the Licence.
       v-model="activeTab"
     >
       <v-tab-item :eager="true">
-        <v-row>
+        <v-row
+          dense
+        >
           <v-col cols="12" md="5">
             <v-text-field
               v-model="searchText"
@@ -80,7 +82,9 @@ permissions and limitations under the Licence.
         </v-row>
       </v-tab-item>
       <v-tab-item :eager="true">
-        <v-row>
+        <v-row
+          dense
+        >
           <v-col cols="12" md="6">
             <v-text-field
               v-model="searchText"
@@ -91,8 +95,10 @@ permissions and limitations under the Licence.
             />
           </v-col>
         </v-row>
-        <v-row>
-          <v-col cols="12" md="3">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
             <StringSelect
               v-model="selectedConfigurationStates"
               label="Select a status"
@@ -101,7 +107,16 @@ permissions and limitations under the Licence.
             />
           </v-col>
         </v-row>
-        <v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <permission-group-search-select v-model="selectedPermissionGroups" label="Select a permission group" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
           <v-col
             cols="5"
             align-self="center"
@@ -230,7 +245,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { CanDeleteEntityGetter, CanAccessEntityGetter } from '@/store/permissions'
+import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction } from '@/store/permissions'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
@@ -239,8 +254,10 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import StringSelect from '@/components/StringSelect.vue'
 import ProjectSelect from '@/components/ProjectSelect.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
+import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 
 import { Configuration } from '@/models/Configuration'
+import { PermissionGroup } from '@/models/PermissionGroup'
 import { Project } from '@/models/Project'
 import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { QueryParams } from '@/modelUtils/QueryParams'
@@ -252,17 +269,18 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ConfigurationsDeleteDialog,
     ConfigurationsListItem,
     BaseList,
-    PageSizeSelect
+    PageSizeSelect,
+    PermissionGroupSearchSelect
   },
   computed: {
     ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'projects']),
     ...mapGetters('configurations', ['pageSizes']),
-    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity'])
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups'])
   },
   methods: {
     ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'loadProjects', 'deleteConfiguration']),
-    ...mapActions('appbar', ['initConfigurationsIndexAppBar', 'setDefaults'])
-
+    ...mapActions('appbar', ['initConfigurationsIndexAppBar', 'setDefaults']),
+    ...mapActions('permissions', ['loadPermissionGroups'])
   }
 })
 // @ts-ignore
@@ -272,6 +290,7 @@ export default class SearchConfigurationsPage extends Vue {
   private searchText: string | null = null
   private selectedConfigurationStates: string[] = []
   private selectedProjects: Project[] = []
+  private selectedPermissionGroups: PermissionGroup[] = []
 
   private showDeleteDialog: boolean = false
   private configurationToDelete: Configuration | null = null
@@ -282,6 +301,7 @@ export default class SearchConfigurationsPage extends Vue {
   initConfigurationsIndexAppBar!: () => void
   setDefaults!: () => void
   loadConfigurationsStates!: () => void
+  loadPermissionGroups!: LoadPermissionGroupsAction
   pageNumber!: number
   setPageNumber!: (newPageNumber: number) => void
   pageSize!: number
@@ -298,6 +318,7 @@ export default class SearchConfigurationsPage extends Vue {
       this.loading = true
       await this.initConfigurationsIndexAppBar()
       await this.loadConfigurationsStates()
+      await this.loadPermissionGroups()
       await this.initSearchQueryParams()
       await this.runInitialSearch()
     } catch (e) {
@@ -350,7 +371,8 @@ export default class SearchConfigurationsPage extends Vue {
     return {
       searchText: this.searchText,
       states: this.selectedConfigurationStates,
-      projects: this.selectedProjects
+      projects: this.selectedProjects,
+      permissionGroups: this.selectedPermissionGroups
     }
   }
 
@@ -370,6 +392,7 @@ export default class SearchConfigurationsPage extends Vue {
   basicSearch () {
     this.selectedConfigurationStates = []
     this.selectedProjects = []
+    this.selectedPermissionGroups = []
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
@@ -388,6 +411,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.clearBasicSearch()
     this.selectedConfigurationStates = []
     this.selectedProjects = []
+    this.selectedPermissionGroups = []
     this.initUrlQueryParams()
   }
 
@@ -448,6 +472,9 @@ export default class SearchConfigurationsPage extends Vue {
     }
     if (searchParamsObject.projects) {
       this.selectedProjects = searchParamsObject.projects
+    }
+    if (searchParamsObject.permissionGroups) {
+      this.selectedPermissionGroups = searchParamsObject.permissionGroups
     }
   }
 

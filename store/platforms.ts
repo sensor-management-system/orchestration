@@ -51,6 +51,7 @@ import { PlatformType } from '@/models/PlatformType'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 
 import { IncludedRelationships } from '@/services/sms/PlatformApi'
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -83,6 +84,7 @@ export interface PlatformsState {
   selectedSearchManufacturers: Manufacturer[],
   selectedSearchStates: Status[],
   selectedSearchPlatformTypes: PlatformType[],
+  selectedSearchPermissionGroups: PermissionGroup[],
   onlyOwnPlatforms: boolean,
   searchText: string | null
   pageNumber: number,
@@ -106,6 +108,7 @@ const state = (): PlatformsState => ({
   selectedSearchManufacturers: [],
   selectedSearchStates: [],
   selectedSearchPlatformTypes: [],
+  selectedSearchPermissionGroups: [],
   onlyOwnPlatforms: false,
   searchText: null,
   totalPages: 1,
@@ -124,6 +127,7 @@ const getters: GetterTree<PlatformsState, RootState> = {
       manufacturer: state.selectedSearchManufacturers,
       states: state.selectedSearchStates,
       types: state.selectedSearchPlatformTypes,
+      permissionGroups: state.selectedSearchPermissionGroups,
       onlyOwnPlatforms: state.onlyOwnPlatforms && isLoggedIn
     }
   },
@@ -181,6 +185,7 @@ export type SetChosenKindOfPlatformActionAction = (newval: IOptionsForActionType
 export type SetSelectedSearchManufacturersAction = (selectedSearchManufacturers: Manufacturer[]) => void
 export type SetSelectedSearchStatesAction = (selectedSearchStates: Status[]) => void
 export type SetSelectedSearchPlatformTypesAction = (selectedSearchPlatformTypes: PlatformType[]) => void
+export type SetSelectedSearchPermissionGroupsAction = (selectedSearchPermissionGroups: PermissionGroup[]) => void
 export type SetOnlyOwnPlatformsAction = (onlyOwnPlatforms: boolean) => void
 export type SetSearchTextAction = (searchText: string | null) => void
 
@@ -201,6 +206,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)
       .setSearchedPlatformTypes(searchParams.types)
+      .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedUserMail(email)
       .searchPaginated(
         state.pageNumber,
@@ -375,6 +381,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)
       .setSearchedPlatformTypes(searchParams.types)
+      .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedUserMail(email)
       .searchMatchingAsCsvBlob()
   },
@@ -398,6 +405,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
   },
   setSelectedSearchPlatformTypes ({ commit }: { commit: Commit }, selectedSearchPlatformTypes: PlatformType[]) {
     commit('setSelectedSearchPlatformTypes', selectedSearchPlatformTypes)
+  },
+  setSelectedSearchPermissionGroups ({ commit }: { commit: Commit }, selectedSearchPermissionGroups: PermissionGroup[]) {
+    commit('setSelectedSearchPermissionGroups', selectedSearchPermissionGroups)
   },
   setOnlyOwnPlatforms ({ commit }: { commit: Commit }, onlyOwnPlatforms: boolean) {
     commit('setOnlyOwnPlatforms', onlyOwnPlatforms)
@@ -462,6 +472,9 @@ const mutations = {
   },
   setSelectedSearchPlatformTypes (state: PlatformsState, selectedSearchPlatformTypes: PlatformType[]) {
     state.selectedSearchPlatformTypes = selectedSearchPlatformTypes
+  },
+  setSelectedSearchPermissionGroups (state: PlatformsState, selectedSearchPermissionGroups: PermissionGroup[]) {
+    state.selectedSearchPermissionGroups = selectedSearchPermissionGroups
   },
   setOnlyOwnPlatforms (state: PlatformsState, onlyOwnPlatforms: boolean) {
     state.onlyOwnPlatforms = onlyOwnPlatforms

@@ -37,108 +37,128 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <v-container>
-      <v-tabs-items
-        v-model="activeTab"
-      >
-        <v-tab-item :eager="true">
-          <v-row>
-            <v-col cols="12" md="5">
-              <v-text-field
-                v-model="searchedText"
-                label="Search term"
-                hint="Please enter at least 3 characters"
-                @keydown.enter="basicSearch"
-              />
-            </v-col>
-            <v-col
-              cols="5"
-              align-self="center"
+    <v-tabs-items
+      v-model="activeTab"
+    >
+      <v-tab-item :eager="true">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="5">
+            <v-text-field
+              v-model="searchedText"
+              label="Search term"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="basicSearch"
+            />
+          </v-col>
+          <v-col
+            cols="5"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="basicSearch"
             >
-              <v-btn
-                color="primary"
-                small
-                @click="basicSearch"
-              >
-                Search
-              </v-btn>
-              <v-btn
-                text
-                small
-                @click="clearBasicSearch"
-              >
-                Clear
-              </v-btn>
-            </v-col>
-            <v-col
-              align-self="center"
-              class="text-right"
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearBasicSearch"
             >
-              <slot name="actions" />
-            </v-col>
-          </v-row>
-        </v-tab-item>
-        <v-tab-item :eager="true">
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="searchedText"
-                label="Search term"
-                hint="Please enter at least 3 characters"
-                @keydown.enter="extendedSearch"
-              />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <ManufacturerSelect v-model="selectedManufacturers" label="Select a manufacturer" />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <StatusSelect v-model="selectedStates" label="Select a status" />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="3">
-              <PlatformTypeSelect v-model="selectedPlatformTypes" label="Select a platform type" />
-            </v-col>
-          </v-row>
-          <v-row v-if="$auth.loggedIn">
-            <v-col cols="12" md="3">
-              <v-checkbox v-model="selectOnlyOwnPlatforms" label="Only own platforms" />
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col
-              cols="5"
-              align-self="center"
+              Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <slot name="actions" />
+          </v-col>
+        </v-row>
+      </v-tab-item>
+      <v-tab-item :eager="true">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchedText"
+              label="Search term"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="extendedSearch"
+            />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <ManufacturerSelect v-model="selectedManufacturers" label="Select a manufacturer" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <StatusSelect v-model="selectedStates" label="Select a status" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+          >
+          <v-col cols="12" md="12">
+            <PlatformTypeSelect v-model="selectedPlatformTypes" label="Select a platform type" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <permission-group-search-select v-model="selectedPermissionGroups" label="Select a permission group" />
+          </v-col>
+        </v-row>
+        <v-row
+          v-if="$auth.loggedIn"
+          dense
+        >
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="selectOnlyOwnPlatforms" label="Only own platforms" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col
+            cols="5"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="extendedSearch"
             >
-              <v-btn
-                color="primary"
-                small
-                @click="extendedSearch"
-              >
-                Search
-              </v-btn>
-              <v-btn
-                text
-                small
-                @click="clearExtendedSearch"
-              >
-                Clear
-              </v-btn>
-            </v-col>
-            <v-col
-              align-self="center"
-              class="text-right"
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearExtendedSearch"
             >
-              <slot name="actions" />
-            </v-col>
-          </v-row>
-        </v-tab-item>
-      </v-tabs-items>
-    </v-container>
+              Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <slot name="actions" />
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items>
   </div>
 </template>
 
@@ -162,6 +182,7 @@ import {
   SetSelectedSearchManufacturersAction,
   SetSelectedSearchStatesAction,
   SetSelectedSearchPlatformTypesAction,
+  SetSelectedSearchPermissionGroupsAction,
   SetOnlyOwnPlatformsAction,
   SetSearchTextAction
 } from '@/store/platforms'
@@ -171,14 +192,24 @@ import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParam
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
+import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permissions'
 
 @Component({
-  components: { ProgressIndicator, PlatformTypeSelect, StatusSelect, ManufacturerSelect },
+  components: { ProgressIndicator, PlatformTypeSelect, StatusSelect, ManufacturerSelect, PermissionGroupSearchSelect },
   computed: {
     ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus']),
-    ...mapState('platforms', ['selectedSearchManufacturers', 'selectedSearchStates', 'selectedSearchPlatformTypes', 'onlyOwnPlatforms', 'searchText']),
-    ...mapGetters('platforms', ['searchParams'])
+    ...mapState('platforms', [
+      'selectedSearchManufacturers',
+      'selectedSearchStates',
+      'selectedSearchPlatformTypes',
+      'selectedSearchPermissionGroups',
+      'onlyOwnPlatforms',
+      'searchText'
+    ]),
+    ...mapGetters('platforms', ['searchParams']),
+    ...mapGetters('permissions', ['permissionGroups'])
   },
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadPlatformtypes', 'loadManufacturers']),
@@ -189,9 +220,11 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
       'setSelectedSearchManufacturers',
       'setSelectedSearchStates',
       'setSelectedSearchPlatformTypes',
+      'setSelectedSearchPermissionGroups',
       'setOnlyOwnPlatforms',
       'setSearchText'
     ]),
+    ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('appbar', ['initPlatformsIndexAppBar', 'setDefaults'])
   }
 })
@@ -202,16 +235,19 @@ export default class PlatformSearch extends Vue {
   selectedSearchManufacturers!: PlatformsState['selectedSearchManufacturers']
   selectedSearchStates!: PlatformsState['selectedSearchStates']
   selectedSearchPlatformTypes!: PlatformsState['selectedSearchPlatformTypes']
+  selectedSearchPermissionGroups!: PlatformsState['selectedSearchPermissionGroups']
   onlyOwnPlatforms!: PlatformsState['onlyOwnPlatforms']
   searchText!: PlatformsState['searchText']
   setSelectedSearchManufacturers!: SetSelectedSearchManufacturersAction
   setSelectedSearchStates!: SetSelectedSearchStatesAction
   setSelectedSearchPlatformTypes!: SetSelectedSearchPlatformTypesAction
+  setSelectedSearchPermissionGroups!: SetSelectedSearchPermissionGroupsAction
   setOnlyOwnPlatforms!: SetOnlyOwnPlatformsAction
   setSearchText!: SetSearchTextAction
   loadEquipmentstatus!: LoadEquipmentstatusAction
   loadPlatformtypes!: LoadPlatformtypesAction
   loadManufacturers!: LoadManufacturersAction
+  loadPermissionGroups!: LoadPermissionGroupsAction
   setPageNumber!: SetPageNumberAction
   setPageSize!: SetPageSizeAction
   searchPlatformsPaginated!: SearchPlatformsPaginatedAction
@@ -219,6 +255,7 @@ export default class PlatformSearch extends Vue {
   equipmentstatus!: VocabularyState['equipmentstatus']
   platformtypes!: VocabularyState['platformtypes']
   manufacturers!: VocabularyState['manufacturers']
+  permissionGroups!: PermissionsState['permissionGroups']
 
   get activeTab (): number | null {
     return this.$store.state.appbar.activeTab
@@ -248,6 +285,14 @@ export default class PlatformSearch extends Vue {
     this.setSelectedSearchPlatformTypes(newVal)
   }
 
+  get selectedPermissionGroups () {
+    return this.selectedSearchPermissionGroups
+  }
+
+  set selectedPermissionGroups (newVal) {
+    this.setSelectedSearchPermissionGroups(newVal)
+  }
+
   get selectOnlyOwnPlatforms () {
     return this.onlyOwnPlatforms
   }
@@ -273,7 +318,8 @@ export default class PlatformSearch extends Vue {
       await Promise.all([
         this.loadEquipmentstatus(),
         this.loadPlatformtypes(),
-        this.loadManufacturers()
+        this.loadManufacturers(),
+        this.loadPermissionGroups()
       ])
       this.initSearchQueryParams()
       // await this.runInitialSearch()
@@ -318,6 +364,7 @@ export default class PlatformSearch extends Vue {
     this.selectedManufacturers = []
     this.selectedStates = []
     this.selectedPlatformTypes = []
+    this.selectedPermissionGroups = []
     this.selectOnlyOwnPlatforms = false
     this.$emit('clear-extended-search')
   }
@@ -341,7 +388,8 @@ export default class PlatformSearch extends Vue {
     const searchParamsObject = (new PlatformSearchParamsSerializer({
       states: this.equipmentstatus,
       platformTypes: this.platformtypes,
-      manufacturer: this.manufacturers
+      manufacturer: this.manufacturers,
+      permissionGroups: this.permissionGroups
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
@@ -359,6 +407,9 @@ export default class PlatformSearch extends Vue {
     }
     if (searchParamsObject.states) {
       this.selectedStates = searchParamsObject.states
+    }
+    if (searchParamsObject.permissionGroups) {
+      this.selectedPermissionGroups = searchParamsObject.permissionGroups
     }
   }
 

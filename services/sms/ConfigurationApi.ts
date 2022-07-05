@@ -97,6 +97,7 @@ export class ConfigurationApi {
 
   private _searchedProjects: Project[] = []
   private _searchedStates: string[] = []
+  private _searchPermissionGroups: PermissionGroup[] = []
   private _searchText: string | null = null
   private _searchedUserMail: string | null = null
   private filterSettings: any[] = []
@@ -187,6 +188,15 @@ export class ConfigurationApi {
     return this
   }
 
+  get searchedPermissionGroups (): PermissionGroup[] {
+    return this._searchPermissionGroups
+  }
+
+  setSearchPermissionGroups (value: PermissionGroup[]) {
+    this._searchPermissionGroups = value
+    return this
+  }
+
   get searchText (): string | null {
     return this._searchText
   }
@@ -256,6 +266,7 @@ export class ConfigurationApi {
     this.resetFilterSetting()
     this.prepareProjects()
     this.prepareStates()
+    this.preparePermissionGroups()
     this.prepareMail()
   }
 
@@ -288,6 +299,20 @@ export class ConfigurationApi {
         name: 'status',
         op: 'in_',
         val: this.searchedStates
+      })
+    }
+  }
+
+  preparePermissionGroups () {
+    if (this.searchedPermissionGroups.length > 0) {
+      this.filterSettings.push({
+        or: this.searchedPermissionGroups.map((permissionGroup) => {
+          return {
+            name: 'cfg_permission_group',
+            op: 'eq',
+            val: permissionGroup.id
+          }
+        })
       })
     }
   }
