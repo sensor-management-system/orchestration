@@ -369,9 +369,14 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   set size (newVal: number) {
+    const sizeChanged: boolean = this.size !== newVal
+
     this.setPageSize(newVal)
     this.setSizeInUrl(false)
-    this.searchPlatformsPaginated()
+
+    if (sizeChanged) {
+      this.searchPlatformsPaginated()
+    }
   }
 
   get pageSizeItems (): number[] {

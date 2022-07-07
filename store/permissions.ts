@@ -78,6 +78,7 @@ export type CanDeleteEntityGetter = (entity: PermissionHandable) => boolean
 export type MemberedPermissionGroupsGetter = PermissionGroup[]
 export type AdministradedPermissionGroupsGetter = PermissionGroup[]
 export type UserGroupsGetter = PermissionGroup[]
+export type PermissionGroupsGetter = PermissionGroup[]
 
 const getters: GetterTree<PermissionsState, RootState> = {
   canAccessEntity: (state: PermissionsState) => (entity: PermissionHandable): boolean => {
