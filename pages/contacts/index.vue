@@ -258,9 +258,14 @@ export default class SearchContactsPage extends Vue {
   }
 
   set size (newVal: number) {
+    const sizeChanged: boolean = this.size !== newVal
+
     this.setPageSize(newVal)
     this.setSizeInUrl(false)
-    this.runSearch()
+
+    if (sizeChanged) {
+      this.runSearch()
+    }
   }
 
   get pageSizeItems (): number[] {
