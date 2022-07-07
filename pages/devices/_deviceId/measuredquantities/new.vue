@@ -70,7 +70,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { AddDeviceMeasuredQuantityAction, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
@@ -119,14 +119,6 @@ export default class DevicePropertyAddPage extends Vue {
   addDeviceMeasuredQuantity!: AddDeviceMeasuredQuantityAction
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
-    }
-  }
-
   get deviceId (): string {
     return this.$route.params.deviceId
   }
@@ -150,6 +142,17 @@ export default class DevicePropertyAddPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
     }
   }
 }

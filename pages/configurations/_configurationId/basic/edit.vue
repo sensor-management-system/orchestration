@@ -74,7 +74,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
@@ -107,13 +107,9 @@ export default class ConfigurationEditBasicPage extends Vue {
   loadConfiguration!: (id: string) => void
 
   created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-      return
+    if (this.configuration) {
+      this.configurationCopy = Configuration.createFromObject(this.configuration)
     }
-    this.configurationCopy = Configuration.createFromObject(this.configuration)
   }
 
   get configurationId () {
@@ -156,6 +152,27 @@ export default class ConfigurationEditBasicPage extends Vue {
       }
     } else {
       return next()
+    }
+  }
+
+  @Watch('configuration', {
+    immediate: true,
+    deep: true
+  })
+  onConfigurationChanged (value: Configuration | null): void {
+    if (value) {
+      this.configurationCopy = Configuration.createFromObject(value)
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined): void {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/configurations/' + this.configurationId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
     }
   }
 }

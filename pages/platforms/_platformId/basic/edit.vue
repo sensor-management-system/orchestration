@@ -70,7 +70,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 import { mapActions, mapState } from 'vuex'
@@ -111,12 +111,6 @@ export default class PlatformEditBasicPage extends Vue {
   loadPlatform!: LoadPlatformAction
 
   created () {
-    if (!this.editable) {
-      this.$router.replace('/platforms/' + this.platformId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
-      })
-      return
-    }
     if (this.platform) {
       this.platformCopy = Platform.createFromObject(this.platform)
     }
@@ -167,6 +161,17 @@ export default class PlatformEditBasicPage extends Vue {
       }
     } else {
       return next()
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
     }
   }
 }

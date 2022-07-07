@@ -99,7 +99,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins, InjectReactive } from 'nuxt-property-decorator'
+import { Component, mixins, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
 
 import {
@@ -142,14 +142,6 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) 
   loadDeviceAttachment!: LoadDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
   updateDeviceAttachment!: UpdateDeviceAttachmentAction
-
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
-    }
-  }
 
   async fetch (): Promise<void> {
     try {
@@ -195,6 +187,17 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) 
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
     }
   }
 }

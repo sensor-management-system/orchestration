@@ -67,7 +67,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
@@ -109,12 +109,6 @@ export default class DeviceEditBasicPage extends Vue {
   loadDevice!: LoadDeviceAction
 
   created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
-      return
-    }
     if (this.device) {
       this.deviceCopy = Device.createFromObject(this.device)
     }
@@ -164,6 +158,17 @@ export default class DeviceEditBasicPage extends Vue {
       }
     } else {
       return next()
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
     }
   }
 }

@@ -37,78 +37,19 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <v-form ref="contactRoleForm" @submit.prevent>
-      <v-row>
-        <v-col
-          cols="12"
-          md="5"
-        >
-          <v-autocomplete
-            ref="assignContactSelection"
-            v-model="selectedContact"
-            :items="contacts"
-            :item-text="(x) => x"
-            :item-value="(x) => x.id"
-            label="Assign contact"
-            return-object
-            @change="validateForm"
-          />
-        </v-col>
-        <v-col
-          cols="12"
-          md="5"
-        >
-          <v-autocomplete
-            ref="assignRoleSelection"
-            v-model="selectedRole"
-            :items="cvContactRoles"
-            :item-text="(x) => x"
-            :item-value="(x) => x.id"
-            label="Assign role"
-            return-object
-            :rules="[roleAndContactNotDuplicated]"
-          />
-        </v-col>
-        <v-col
-          cols="12"
-          md="2"
-          align-self="center"
-        >
-          <v-btn
-            v-if="editable"
-            small
-            color="primary"
-            :disabled="assignButtonDisabled"
-            @click="assignContact"
-          >
-            Assign
-          </v-btn>
-          <v-btn
-            small
-            text
-            nuxt
-            :to="'/platforms/' + platformId + '/contacts'"
-          >
-            Cancel
-          </v-btn>
-        </v-col>
-        <v-col align-self="center" class="text-right">
-          <v-btn
-            small
-            nuxt
-            color="accent"
-            :to="'/contacts/new?redirect=' + redirectUrl"
-          >
-            New Contact
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-form>
+    <contact-role-assignment-form
+      :contacts="contacts"
+      :contact="selectedContact"
+      :cv-contact-roles="cvContactRoles"
+      :existing-contact-roles="platformContactRoles"
+      @cancel="$router.push('/platforms/' + platformId + '/contacts')"
+      @input="assignContact"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { ContactsState } from '@/store/contacts'
@@ -121,13 +62,14 @@ import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
 import { Contact } from '@/models/Contact'
 import { ContactRole } from '@/models/ContactRole'
-import { CvContactRole } from '@/models/CvContactRole'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ContactRoleAssignmentForm from '@/components/shared/ContactRoleAssignmentForm.vue'
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ContactRoleAssignmentForm
   },
   middleware: ['auth'],
   computed: {
@@ -147,34 +89,21 @@ export default class PlatformAddContactPage extends Vue {
     editable!: boolean
 
   private selectedContact: Contact | null = null
-  private selectedRole: CvContactRole | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
 
   // vuex definition for typescript check
   platformContactRoles!: PlatformsState['platformContactRoles']
   contacts!: ContactsState['contacts']
-  loadAllContacts!: () => void
+  loadAllContacts!: () => Promise<void>
   loadPlatformContactRoles!: LoadPlatformContactRolesAction
   addPlatformContactRole!: AddPlatformContactRoleAction
   loadCvContactRoles!: LoadCvContactRolesAction
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/platforms/' + this.platformId + '/contacts', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
-      })
-    }
-  }
-
   async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await Promise.all([
-        this.loadAllContacts(),
-        this.loadCvContactRoles(),
-        this.loadPlatformContactRoles(this.platformId)
-      ])
+      await this.loadAllContacts()
 
       const redirectContactId = this.$route.query.contact
       if (redirectContactId) {
@@ -195,49 +124,13 @@ export default class PlatformAddContactPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  get assignButtonDisabled (): boolean {
-    return this.selectedContact == null || this.selectedRole == null
-  }
-
-  roleAndContactNotDuplicated (selectedRole: CvContactRole | null): boolean | string {
-    if (this.selectedContact == null || selectedRole == null) {
-      // if one of them are null, we don't need to validate further (the button is just disabled)
-      return true
-    }
-    const found = this.platformContactRoles.find(existingContact => existingContact?.contact?.id === this.selectedContact?.id && existingContact.roleUri === selectedRole.uri)
-    if (!found) {
-      return true
-    }
-    return this.selectedContact.toString() + ' is already deposited as ' + selectedRole.name
-  }
-
-  /**
-   * the current URL is used to redirect the user back to this page after creating a new contact
-   */
-  get redirectUrl (): string {
-    return encodeURI(this.$route.path)
-  }
-
-  validateForm (): boolean {
-    return (this.$refs.contactRoleForm as Vue & { validate: () => boolean }).validate()
-  }
-
-  async assignContact () {
-    if (this.editable && this.selectedContact && this.selectedRole) {
-      if (!this.validateForm()) {
-        this.$store.commit('snackbar/setError', 'Please correct your input')
-        return
-      }
+  async assignContact (contactRole: ContactRole | null) {
+    if (this.editable && contactRole) {
       try {
         this.isSaving = true
         await this.addPlatformContactRole({
           platformId: this.platformId,
-          contactRole: ContactRole.createFromObject({
-            id: null,
-            contact: this.selectedContact,
-            roleName: this.selectedRole.name,
-            roleUri: this.selectedRole.uri
-          })
+          contactRole
         })
         this.loadPlatformContactRoles(this.platformId)
         this.$store.commit('snackbar/setSuccess', 'New Contact added')
@@ -247,6 +140,17 @@ export default class PlatformAddContactPage extends Vue {
       } finally {
         this.isSaving = false
       }
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/contacts', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
     }
   }
 }
