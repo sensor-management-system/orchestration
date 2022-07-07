@@ -68,7 +68,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 import { AddDeviceCustomFieldAction, LoadDeviceCustomFieldsAction } from '@/store/devices'
@@ -96,14 +96,6 @@ export default class DeviceCustomFieldAddPage extends Vue {
   loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
   addDeviceCustomField!: AddDeviceCustomFieldAction
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
-    }
-  }
-
   get deviceId (): string {
     return this.$route.params.deviceId
   }
@@ -127,6 +119,17 @@ export default class DeviceCustomFieldAddPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
     }
   }
 }

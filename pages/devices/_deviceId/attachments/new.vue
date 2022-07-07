@@ -120,7 +120,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, mixins, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 import { AddDeviceAttachmentAction, LoadDeviceAttachmentsAction } from '@/store/devices'
@@ -158,14 +158,6 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
   uploadFile!: (file: File) => Promise<IUploadResult>
   addDeviceAttachment!: AddDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
-
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
-    }
-  }
 
   /**
    * returns a list of MimeTypes, seperated by ,
@@ -223,6 +215,17 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules) 
       }
     }
     this.$store.commit('snackbar/setError', message)
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
   }
 }
 </script>

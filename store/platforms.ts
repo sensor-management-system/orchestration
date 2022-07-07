@@ -163,7 +163,7 @@ export type LoadPlatformMountActionsAction = (id: string) => Promise<void>
 export type LoadPlatformUnmountActionsAction = (id: string) => Promise<void>
 export type LoadPlatformGenericActionAction = (actionId: string) => Promise<void>
 export type LoadPlatformSoftwareUpdateActionAction = (actionId: string) => Promise<void>
-export type AddPlatformContactRoleAction = (params: {platformId: string,contactRole: ContactRole}) => Promise<void>
+export type AddPlatformContactRoleAction = (params: {platformId: string, contactRole: ContactRole}) => Promise<void>
 export type RemovePlatformContactRoleAction = (params: {platformContactRoleId: string }) => Promise<void>
 export type AddPlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
 export type UpdatePlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>

@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import {
@@ -120,11 +120,6 @@ export default class DevicePropertyEditPage extends Vue {
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
 
   async created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
-    }
     try {
       this.isLoading = true
       await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
@@ -164,6 +159,17 @@ export default class DevicePropertyEditPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
     }
   }
 }

@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/Contact'
@@ -93,8 +93,10 @@ export default class ContactEditPage extends Vue {
   loadContact!: (id: string) => void
 
   created () {
-    this.initContactsContactIdEditAppBar(this.contact.toString())
-    this.contactCopy = Contact.createFromObject(this.contact)
+    if (this.contact) {
+      this.initContactsContactIdEditAppBar(this.contact.toString())
+      this.contactCopy = Contact.createFromObject(this.contact)
+    }
   }
 
   get contactId () {
@@ -115,6 +117,16 @@ export default class ContactEditPage extends Vue {
       this.$store.commit('snackbar/setError', 'Saving of contact failed')
     } finally {
       this.isLoading = false
+    }
+  }
+
+  @Watch('contact', {
+    immediate: true,
+    deep: true
+  })
+  onContactChanged (value: Contact | null) {
+    if (value) {
+      this.contactCopy = Contact.createFromObject(value)
     }
   }
 }

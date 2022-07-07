@@ -59,7 +59,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { PlatformActionTypeItemsGetter, LoadPlatformGenericActionTypesAction } from '@/store/vocabulary'
@@ -98,14 +98,6 @@ export default class NewPlatformAction extends Vue {
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
   chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
   setChosenKindOfPlatformAction!: SetChosenKindOfPlatformActionAction
-
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
-      })
-    }
-  }
 
   async fetch (): Promise<void> {
     try {
@@ -152,6 +144,17 @@ export default class NewPlatformAction extends Vue {
 
     if (!this.chosenKindOfAction) {
       this.$router.push(`/platforms/${this.platformId}/actions/new`)
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
     }
   }
 }

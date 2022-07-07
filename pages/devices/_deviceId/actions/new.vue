@@ -55,7 +55,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
@@ -103,11 +103,6 @@ export default class ActionAddPage extends Vue {
   setChosenKindOfDeviceAction!: SetChosenKindOfDeviceActionAction
 
   async created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
-    }
     try {
       this.isLoading = true
       this.chosenKindOfAction = null
@@ -159,6 +154,17 @@ export default class ActionAddPage extends Vue {
     }
     if (!this.chosenKindOfAction) {
       this.$router.push(`/devices/${this.deviceId}/actions/new`)
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
     }
   }
 }

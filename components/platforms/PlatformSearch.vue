@@ -108,7 +108,7 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row
           dense
-          >
+        >
           <v-col cols="12" md="12">
             <PlatformTypeSelect v-model="selectedPlatformTypes" label="Select a platform type" />
           </v-col>

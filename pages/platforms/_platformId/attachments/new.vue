@@ -110,7 +110,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, mixins, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 import { AddPlatformAttachmentAction, LoadPlatformAttachmentsAction } from '@/store/platforms'
@@ -148,14 +148,6 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
   uploadFile!: (file: File) => Promise<IUploadResult>
   addPlatformAttachment!: AddPlatformAttachmentAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
-
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/platforms/' + this.platformId + '/attachments', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
-      })
-    }
-  }
 
   /**
    * returns a list of MimeTypes, seperated by ,
@@ -210,6 +202,17 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
       }
     }
     this.$store.commit('snackbar/setError', message)
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
   }
 }
 </script>
