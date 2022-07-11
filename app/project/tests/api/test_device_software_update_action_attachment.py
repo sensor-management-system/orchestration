@@ -44,6 +44,7 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
         userinfo = generate_userinfo_data()
         device = Device(
             short_name="Device 277",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -101,6 +102,7 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
         )
         device = Device(
             short_name="Device new 277",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

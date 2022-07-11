@@ -88,6 +88,7 @@ class TestingConfig(BaseConfig):
     # https://github.com/jarus/flask-testing/issues/21
     # AssertionError: Popped wrong request context
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    INSTITUTE = None
     SQLALCHEMY_ENGINE_OPTIONS = {
          "connect_args": {
             "options": "-c timezone=utc"

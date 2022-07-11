@@ -33,6 +33,7 @@ class TestPlatformPermissions(BaseTestCase):
         public_platform = Platform(
             id=15,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -50,6 +51,7 @@ class TestPlatformPermissions(BaseTestCase):
         private_platform = Platform(
             id=1,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -67,6 +69,7 @@ class TestPlatformPermissions(BaseTestCase):
         internal_platform = Platform(
             id=33,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_internal=True,
             is_public=False,
             is_private=False,
@@ -88,6 +91,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": True,
                     "is_private": False,
@@ -119,6 +123,7 @@ class TestPlatformPermissions(BaseTestCase):
         public_platform = Platform(
             id=15,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_private=False,
             is_internal=False,
             is_public=True,
@@ -127,6 +132,7 @@ class TestPlatformPermissions(BaseTestCase):
         internal_platform = Platform(
             id=33,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -134,6 +140,7 @@ class TestPlatformPermissions(BaseTestCase):
         private_platform = Platform(
             id=1,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_internal=False,
             is_private=True,
@@ -152,6 +159,7 @@ class TestPlatformPermissions(BaseTestCase):
         public_platform = Platform(
             id=15,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -160,6 +168,7 @@ class TestPlatformPermissions(BaseTestCase):
         internal_platform = Platform(
             id=33,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -167,6 +176,7 @@ class TestPlatformPermissions(BaseTestCase):
         private_platform = Platform(
             id=1,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_internal=False,
             is_private=True,
@@ -174,6 +184,7 @@ class TestPlatformPermissions(BaseTestCase):
         private_platform_1 = Platform(
             id=3,
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -222,6 +233,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": True,
                     "is_internal": True,
                     "is_private": False,
@@ -243,6 +255,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": True,
                     "is_private": True,
@@ -264,6 +277,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": True,
                     "is_internal": True,
                     "is_private": True,
@@ -288,6 +302,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": True,
                     "is_private": False,
@@ -321,6 +336,7 @@ class TestPlatformPermissions(BaseTestCase):
         """An unregistered user should not be able to view an internal Platform."""
         internal_platform = Platform(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -341,6 +357,7 @@ class TestPlatformPermissions(BaseTestCase):
 
         private_platform = Platform(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -364,6 +381,7 @@ class TestPlatformPermissions(BaseTestCase):
 
         private_platform = Platform(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -397,7 +415,6 @@ class TestPlatformPermissions(BaseTestCase):
                     )
 
                 data = json.loads(response.data.decode())
-
                 self.assertEqual(response.status_code, 201)
 
                 self.assertIn(
@@ -578,6 +595,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": False,
                     "is_private": True,
@@ -687,6 +705,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": True,
                     "is_private": False,
@@ -710,6 +729,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": True,
                     "is_internal": False,
                     "is_private": False,
@@ -733,6 +753,7 @@ class TestPlatformPermissions(BaseTestCase):
                 "type": "platform",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": False,
                     "is_private": True,
@@ -762,6 +783,7 @@ def preparation_of_public_and_internal_platform_data(group_ids):
             "type": "platform",
             "attributes": {
                 "short_name": fake.pystr(),
+                "manufacturer_name": fake.company(),
                 "is_public": True,
                 "is_internal": False,
                 "is_private": False,
@@ -774,6 +796,7 @@ def preparation_of_public_and_internal_platform_data(group_ids):
             "type": "platform",
             "attributes": {
                 "short_name": fake.pystr(),
+                "manufacturer_name": fake.company(),
                 "is_public": False,
                 "is_internal": True,
                 "is_private": False,

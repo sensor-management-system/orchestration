@@ -244,24 +244,28 @@ class TestConfigurationsService(BaseTestCase):
         """Ensure that we can delete a configuration and its included actions."""
         device = Device(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device_parent_platform = Platform(
             short_name="device parent platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform = Platform(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         parent_platform = Platform(
             short_name="platform parent-platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

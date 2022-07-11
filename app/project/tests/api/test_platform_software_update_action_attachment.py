@@ -45,6 +45,7 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         userinfo = generate_userinfo_data()
         platform = Platform(
             short_name="Platform 144",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -104,6 +105,7 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         )
         platform = Platform(
             short_name="Platform new 144",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

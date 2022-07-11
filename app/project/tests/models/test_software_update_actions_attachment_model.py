@@ -16,7 +16,7 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 def add_device_software_update_action_attachment():
     userinfo = generate_userinfo_data()
     d = Device(
-        short_name="Device 133", is_public=False, is_private=False, is_internal=True,
+        short_name="Device 133", manufacturer_name=fake.company(), is_public=False, is_private=False, is_internal=True,
     )
 
     c = Contact(
@@ -48,7 +48,7 @@ def add_device_software_update_action_attachment():
 def add_platform_software_update_action_attachment_model():
     userinfo = generate_userinfo_data()
     p = Platform(
-        short_name="Platform 144", is_public=False, is_private=False, is_internal=True,
+        short_name="Platform 144", manufacturer_name=fake.company(), is_public=False, is_private=False, is_internal=True,
     )
 
     c = Contact(

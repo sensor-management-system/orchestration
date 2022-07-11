@@ -19,6 +19,7 @@ def add_device_and_contact(group_ids):
     userinfo = generate_userinfo_data()
     device = Device(
         short_name=fake.pystr(),
+        manufacturer_name=fake.company(),
         is_public=False,
         is_private=False,
         is_internal=True,

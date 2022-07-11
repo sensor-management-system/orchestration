@@ -190,6 +190,7 @@ class TestPlatformRelationshipPermissions(BaseTestCase):
         contact = create_a_test_contact()
         public_platform = Platform(
             short_name="test",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
