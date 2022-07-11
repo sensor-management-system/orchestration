@@ -2,12 +2,10 @@
 import json
 import string
 
-
 import requests
 from flask import current_app
 from requests.auth import HTTPBasicAuth
 
-from .models import permission_group, user_account
 from ...api.helpers.errors import ConflictError, ServiceIsUnreachableError
 
 
