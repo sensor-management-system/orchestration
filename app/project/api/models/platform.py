@@ -26,7 +26,7 @@ class Platform(
     short_name = db.Column(db.String(256), nullable=False)
     long_name = db.Column(db.String(256), nullable=True)
     manufacturer_uri = db.Column(db.String(256), nullable=True)
-    manufacturer_name = db.Column(db.String(256), nullable=True)
+    manufacturer_name = db.Column(db.String(256), nullable=False)
     model = db.Column(db.String(256), nullable=True)
     platform_type_uri = db.Column(db.String(256), nullable=True)
     platform_type_name = db.Column(db.String(256), nullable=True)
@@ -37,6 +37,11 @@ class Platform(
     serial_number = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     update_description = db.Column(db.String(256), nullable=True)
+    # The type of the identifier depends on the provider being used to register the instrument PID.
+    # In the case of ePIC, the value of identifierType would be "Handle".
+    identifier_type = db.Column(db.String(256), nullable=True)
+    # The value of SchemaVersion is defined to be equal to the version number for each release version of the schema.
+    schema_version = db.Column(db.String(256), nullable=True)
     platform_attachments = db.relationship(
         "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
