@@ -2,10 +2,14 @@
 
 import os
 
+from flask import g, current_app
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
-from flask import g
 
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .base_resource import (
+    check_if_object_not_found,
+    delete_attachments_in_minio_by_url,
+    add_pid,
+)
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_updated_by_id
@@ -82,6 +86,11 @@ class DeviceList(ResourceList):
         )
         db.session.add(contact_role)
         db.session.commit()
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
+            source_object_url = f"{sms_frontend_url}/devices/{str(device.id)}"
+            add_pid(device, source_object_url)
 
         return result
 

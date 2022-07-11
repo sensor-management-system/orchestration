@@ -1,3 +1,4 @@
+from flask import current_app
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ..models import (
@@ -9,6 +10,7 @@ from ..models import (
 )
 from ..models.base_model import db
 from ...api import minio
+from ...extensions.instances import pid
 
 
 def add_contact_to_object(entity_with_contact_list):
@@ -31,6 +33,7 @@ def add_contact_to_object(entity_with_contact_list):
         db.session.add(entity_with_contact_list)
         db.session.commit()
     return contact_entry
+
 
 def delete_attachments_in_minio_by_url(url):
     """
@@ -87,3 +90,17 @@ def check_if_object_not_found(model_class, kwargs):
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
     else:
         return object_to_be_checked
+
+
+def add_pid(obj_, source_object_url):
+    """
+    Add PID to a created object.
+
+    :param obj_: the created object.
+    :param source_object_url: the url to the object.
+    """
+    obj_.persistent_identifier = pid.create_a_new_pid(source_object_url)
+    obj_.schema_version = current_app.config["SCHEMA_VERSION"]
+    obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
+    db.session.add(obj_)
+    db.session.commit()
