@@ -5,12 +5,12 @@ import os
 from flask import g, current_app, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
+from ...frj_csv_export.resource import ResourceList
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
+    add_pid,
 )
-
-from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
@@ -103,10 +103,10 @@ class DeviceList(ResourceList):
 
         save_to_db(device)
 
-        if current_app.config["INSTITUTE"] == "ufz":
-            sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
-            source_object_url = f"{sms_frontend_url}/devices/{str(device.id)}"
-            add_pid(device, source_object_url)
+        #if current_app.config["INSTITUTE"] == "ufz":
+        #    sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
+        #    source_object_url = f"{sms_frontend_url}/devices/{str(device.id)}"
+        #    add_pid(device, source_object_url)
 
         return result
 

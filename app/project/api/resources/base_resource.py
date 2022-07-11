@@ -15,6 +15,7 @@ from ..models import (
 )
 from ..models.base_model import db
 from ...api import minio
+from ...extensions.instances import pid
 
 
 def add_contact_to_object(entity_with_contact_list):

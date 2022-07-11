@@ -5,7 +5,7 @@ import os
 from flask import g, current_app, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url, add_pid
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
@@ -96,6 +96,11 @@ class PlatformList(ResourceList):
 
         save_to_db(platform)
 
+        #if current_app.config["INSTITUTE"] == "ufz":
+        #    sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
+        #    source_object_url = f"{sms_frontend_url}/platforms/{str(platform.id)}"
+        #    add_pid(platform, source_object_url)
+
         return result
 
     schema = PlatformSchema
@@ -123,15 +128,6 @@ class PlatformDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return a 404 response if the platform was not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
-
-    def before_patch(self, args, kwargs, data):
-        """
-        Run logic before the patch.
-
-        In this case we want to make sure that we update the updated_by_id
-        with the id of the user that run the request.
-        """
-        add_updated_by_id(data)
 
     def after_patch(self, result):
         """
@@ -177,6 +173,21 @@ class PlatformDetail(ResourceDetail):
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
+
+    schema = PlatformSchema
+    decorators = (token_required,)
+    data_layer = {
+        "session": db.session,
+        "model": Platform,
+    }
+    def before_patch(self, args, kwargs, data):
+        """
+        Run logic before the patch.
+
+        In this case we want to make sure that we update the updated_by_id
+        with the id of the user that run the request.
+        """
+        add_updated_by_id(data)
 
     schema = PlatformSchema
     decorators = (token_required,)
