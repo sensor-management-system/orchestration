@@ -170,18 +170,21 @@ class TestConfigurationsService(BaseTestCase):
         # in test_add_configuration_model
         platform1 = Platform(
             short_name="Platform 1",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform2 = Platform(
             short_name="Platform 2",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform3 = Platform(
             short_name="Platform 3",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
