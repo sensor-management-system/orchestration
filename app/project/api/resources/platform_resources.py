@@ -2,10 +2,11 @@
 
 import os
 
-from flask import g, request
+from flask import g, current_app, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
     get_query_with_permissions,
@@ -95,6 +96,11 @@ class PlatformList(ResourceList):
         platform.updated_by_id = g.user.id
 
         save_to_db(platform)
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
+            source_object_url = f"{sms_frontend_url}/platforms/{str(platform.id)}"
+            add_pid(platform, source_object_url)
 
         return result
 
