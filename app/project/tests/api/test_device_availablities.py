@@ -381,6 +381,7 @@ class TestDeviceAvailabilities(BaseTestCase):
         """Ensure that we don't show information about private devices."""
         private_device = Device(
             short_name="private device",
+            manufacturer_name=fake.company(),
             is_private=True,
         )
         db.session.add(private_device)

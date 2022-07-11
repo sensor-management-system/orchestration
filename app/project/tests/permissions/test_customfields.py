@@ -38,12 +38,14 @@ class TestCustomFieldServices(BaseTestCase):
         """Ensure that we can get a list of public customfields."""
         device1 = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         device2 = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -88,12 +90,14 @@ class TestCustomFieldServices(BaseTestCase):
         """Ensure that we can get a list of internal customfields only with a valid jwt."""
         device1 = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device2 = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

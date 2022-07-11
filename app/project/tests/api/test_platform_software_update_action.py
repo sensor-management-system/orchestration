@@ -41,6 +41,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         userinfo = generate_userinfo_data()
         platform = Platform(
             short_name="Platform 111",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -107,12 +108,12 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+            short_name="platform1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="platform2", is_public=True, is_private=False, is_internal=False,
+            short_name="platform2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 

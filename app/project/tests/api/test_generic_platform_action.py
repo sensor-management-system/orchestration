@@ -51,6 +51,7 @@ class TestGenericPlatformAction(BaseTestCase):
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platform = Platform(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -163,6 +164,7 @@ class TestGenericPlatformAction(BaseTestCase):
         """Ensure that I can prefilter by a specific platform."""
         platform1 = Platform(
             short_name="sample platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -170,6 +172,7 @@ class TestGenericPlatformAction(BaseTestCase):
         db.session.add(platform1)
         platform2 = Platform(
             short_name="sample platform II",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,

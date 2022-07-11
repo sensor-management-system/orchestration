@@ -21,6 +21,7 @@ class TestDevicePropertyServices(BaseTestCase):
         # First we need to make sure that we have a device
         device = Device(
             short_name="Very new device",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -112,12 +113,14 @@ class TestDevicePropertyServices(BaseTestCase):
         """Ensure that we can get a list of device properties."""
         device1 = Device(
             short_name="Just a device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         device2 = Device(
             short_name="Another device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -218,12 +221,14 @@ class TestDevicePropertyServices(BaseTestCase):
         """Ensure that we can update a device property."""
         device1 = Device(
             short_name="Just a device",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device2 = Device(
             short_name="Another device",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -273,6 +278,7 @@ class TestDevicePropertyServices(BaseTestCase):
         """Ensure that we can delete a device property."""
         device1 = Device(
             short_name="Just a device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -334,6 +340,7 @@ class TestDevicePropertyServices(BaseTestCase):
         """Make sure that a request will fail if property_name is None."""
         device = Device(
             short_name="New device",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

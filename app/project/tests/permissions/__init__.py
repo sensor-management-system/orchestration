@@ -42,6 +42,7 @@ def create_a_test_contact(userinfo=None):
 def create_a_test_device(group_ids=[], public=False, private=False, internal=True):
     device = Device(
         short_name=fake.pystr(),
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,
@@ -55,6 +56,7 @@ def create_a_test_device(group_ids=[], public=False, private=False, internal=Tru
 def create_a_test_platform(group_ids=[], public=False, private=False, internal=True, ):
     platform = Platform(
         short_name=fake.pystr(),
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,

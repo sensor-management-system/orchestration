@@ -44,6 +44,7 @@ class TestConfigurationDynamicLocationEndActionServices(BaseTestCase):
         """
         device = Device(
             short_name="Device 666",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,

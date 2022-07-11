@@ -12,6 +12,7 @@ from project.api.models.platform import Platform
 from project.api.models.user import User
 from project.tests.base import BaseTestCase, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
+from project.tests.base import fake
 
 
 def generate_platform_action_model(
@@ -19,6 +20,7 @@ def generate_platform_action_model(
 ):
     platform = Platform(
         short_name="short_name test",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,
@@ -51,6 +53,7 @@ def generate_device_action_model(
 ):
     d = Device(
         short_name="test device",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,

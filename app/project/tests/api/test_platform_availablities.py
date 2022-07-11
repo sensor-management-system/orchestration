@@ -36,6 +36,7 @@ class TestPlatformAvailabilities(BaseTestCase):
         """Mount a platform to enrich the test setup."""
         platform = Platform(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_internal=True,
         )
         platform_mount_action = PlatformMountAction(
@@ -379,6 +380,7 @@ class TestPlatformAvailabilities(BaseTestCase):
         """Ensure that we don't show information about private platforms."""
         private_platform = Platform(
             short_name="private platform",
+            manufacturer_name=fake.company(),
             is_private=True,
         )
         db.session.add(private_platform)

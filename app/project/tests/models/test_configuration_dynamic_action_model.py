@@ -15,7 +15,7 @@ def add_dynamic_location_begin_action_model(
     is_public=False, is_private=False, is_internal=True
 ):
     device = Device(
-        short_name="Device 555", is_public=is_public, is_private=is_private, is_internal=is_internal,
+        short_name="Device 555", manufacturer_name=fake.company(), is_public=is_public, is_private=is_private, is_internal=is_internal,
     )
     x_property = DeviceProperty(
         device=device,

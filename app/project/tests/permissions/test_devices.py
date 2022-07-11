@@ -73,6 +73,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": False,
                     "is_private": True,
@@ -187,6 +188,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": True,
                     "is_internal": True,
                     "is_private": False,
@@ -198,6 +200,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": True,
                     "is_private": True,
@@ -209,6 +212,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": True,
                     "is_internal": True,
                     "is_private": True,
@@ -254,6 +258,7 @@ class TestDevicePermissions(BaseTestCase):
                     "type": "device",
                     "attributes": {
                         "short_name": "Test device associated to a group",
+                        "manufacturer_name": fake.company(),
                         "is_public": False,
                         "is_internal": True,
                         "is_private": False,
@@ -283,6 +288,7 @@ class TestDevicePermissions(BaseTestCase):
 
         internal_sensor = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -305,6 +311,7 @@ class TestDevicePermissions(BaseTestCase):
 
         private_sensor = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -330,6 +337,7 @@ class TestDevicePermissions(BaseTestCase):
 
         private_sensor = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=True,
             is_internal=False,
@@ -431,6 +439,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": True,
                     "is_private": False,
@@ -455,6 +464,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": True,
                     "is_internal": False,
                     "is_private": False,
@@ -479,6 +489,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": False,
                     "is_private": True,
@@ -567,6 +578,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": False,
                     "is_internal": False,
                     "is_private": True,
@@ -603,6 +615,7 @@ class TestDevicePermissions(BaseTestCase):
                 "type": "device",
                 "attributes": {
                     "short_name": fake.pystr(),
+                    "manufacturer_name": fake.company(),
                     "is_public": True,
                     "is_internal": False,
                     "is_private": False,
@@ -646,6 +659,7 @@ def preparation_of_public_and_internal_device_data(group_ids):
             "type": "device",
             "attributes": {
                 "short_name": fake.pystr(),
+                "manufacturer_name": fake.company(),
                 "is_public": True,
                 "is_internal": False,
                 "is_private": False,
@@ -658,6 +672,7 @@ def preparation_of_public_and_internal_device_data(group_ids):
             "type": "device",
             "attributes": {
                 "short_name": fake.pystr(),
+                "manufacturer_name": fake.company(),
                 "is_public": False,
                 "is_internal": True,
                 "is_private": False,

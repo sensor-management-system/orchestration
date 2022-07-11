@@ -21,6 +21,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
         # First we need to make sure that we have a device
         device = Device(
             short_name="Very new device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -82,6 +83,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
         """Ensure that we don't add a device attachment with missing url."""
         device = Device(
             short_name="Very new device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -144,12 +146,14 @@ class TestDeviceAttachmentServices(BaseTestCase):
         """Ensure that we can get a list of device attachments."""
         device1 = Device(
             short_name="Just a device",
+            manufacturer_name=fake.pystr(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         device2 = Device(
             short_name="Another device",
+            manufacturer_name=fake.pystr(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -256,12 +260,14 @@ class TestDeviceAttachmentServices(BaseTestCase):
         """Ensure that we can update a device attachment."""
         device1 = Device(
             short_name="Just a device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device2 = Device(
             short_name="Another device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -357,6 +363,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
         """Ensure that we can not add a device attachment without a label."""
         device = Device(
             short_name="anew device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=True,
             is_internal=False,

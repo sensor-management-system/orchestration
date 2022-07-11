@@ -48,12 +48,14 @@ class TestDeviceMountAction(BaseTestCase):
         userinfo = generate_userinfo_data()
         device = Device(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         parent_platform = Platform(
             short_name="device parent platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -159,12 +161,12 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=True, is_private=False, is_internal=False,
+            short_name="device1", manufacturer_name=fake.company(),is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=True, is_private=False, is_internal=False,
+            short_name="device2", manufacturer_name=fake.company(),is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -260,12 +262,12 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=True, is_private=False, is_internal=False,
+            short_name="device1", manufacturer_name=fake.company(),is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=True, is_private=False, is_internal=False,
+            short_name="device2", manufacturer_name=fake.company(),is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -352,22 +354,22 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+            short_name="platform1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="platform2", is_public=True, is_private=False, is_internal=False,
+            short_name="platform2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 
         device1 = Device(
-            short_name="device1", is_public=True, is_private=False, is_internal=False,
+            short_name="device1", manufacturer_name=fake.company(),is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=True, is_private=False, is_internal=False,
+            short_name="device2", manufacturer_name=fake.company(),is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 

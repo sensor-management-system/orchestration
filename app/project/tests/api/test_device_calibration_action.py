@@ -46,7 +46,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         """Create DeviceCalibrationAction."""
         userinfo = generate_userinfo_data()
         device = Device(
-            short_name="Device 12", is_public=False, is_private=False, is_internal=True,
+            short_name="Device 12",manufacturer_name=fake.company(), is_public=False, is_private=False, is_internal=True,
         )
 
         contact = Contact(
@@ -110,6 +110,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         """Ensure that I can prefilter by a specific device."""
         device1 = Device(
             short_name="sample device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -117,6 +118,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         db.session.add(device1)
         device2 = Device(
             short_name="sample device II",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,

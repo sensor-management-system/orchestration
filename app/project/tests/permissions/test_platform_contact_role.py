@@ -21,6 +21,7 @@ def generate_platform(
         group_ids = []
     platform = Platform(
         short_name="short_name test",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,

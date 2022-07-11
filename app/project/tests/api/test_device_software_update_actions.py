@@ -37,7 +37,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         """Create DeviceSoftwareUpdateAction."""
         userinfo = generate_userinfo_data()
         device = Device(
-            short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+            short_name="Device 1", manufacturer_name=fake.company(), is_public=False, is_private=False, is_internal=True,
         )
 
         contact = Contact(
@@ -99,12 +99,12 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=True, is_private=False, is_internal=False,
+            short_name="device1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=True, is_private=False, is_internal=False,
+            short_name="device2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 

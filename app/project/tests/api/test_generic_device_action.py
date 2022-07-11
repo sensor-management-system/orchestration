@@ -65,6 +65,7 @@ class TestGenericDeviceAction(BaseTestCase):
 
         device = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -177,6 +178,7 @@ class TestGenericDeviceAction(BaseTestCase):
         """Ensure that I can prefilter by a specific device."""
         device1 = Device(
             short_name="sample device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -184,6 +186,7 @@ class TestGenericDeviceAction(BaseTestCase):
         db.session.add(device1)
         device2 = Device(
             short_name="sample device II",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,

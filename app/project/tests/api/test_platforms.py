@@ -90,6 +90,7 @@ class TestPlatformServices(BaseTestCase):
         # together with the platform itself.
 
         platform = Platform(short_name="platform",
+                            manufacturer_name=fake.company(),
                             is_public=True,
                             is_private=False,
                             is_internal=False,

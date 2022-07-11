@@ -11,9 +11,8 @@ from project.api.models.platform import Platform
 from project.tests.base import BaseTestCase, test_file_path
 from project.tests.base import create_token
 from project.tests.base import fake, generate_userinfo_data
-from project.tests.permissions import create_a_test_contact
-from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_generic_actions_models import generate_configuration_action_model
+from project.tests.permissions import create_a_test_contact
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -130,18 +129,21 @@ class TestConfigurationsService(BaseTestCase):
         # in test_add_configuration_model
         platform1 = Platform(
             short_name="Platform 1",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform2 = Platform(
             short_name="Platform 2",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform3 = Platform(
             short_name="Platform 3",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -152,13 +154,13 @@ class TestConfigurationsService(BaseTestCase):
         db.session.add(platform3)
 
         device1 = Device(
-            short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+            short_name="Device 1", manufacturer_name=fake.pystr(), is_public=False, is_private=False, is_internal=True,
         )
         device2 = Device(
-            short_name="Device 2", is_public=False, is_private=False, is_internal=True,
+            short_name="Device 2", manufacturer_name=fake.pystr(), is_public=False, is_private=False, is_internal=True,
         )
         device3 = Device(
-            short_name="Device 3", is_public=False, is_private=False, is_internal=True,
+            short_name="Device 3", manufacturer_name=fake.pystr(), is_public=False, is_private=False, is_internal=True,
         )
 
         db.session.add(device1)
@@ -200,24 +202,28 @@ class TestConfigurationsService(BaseTestCase):
         userinfo = generate_userinfo_data()
         device = Device(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device_parent_platform = Platform(
             short_name="device parent platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform = Platform(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         parent_platform = Platform(
             short_name="platform parent-platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -441,13 +447,12 @@ class TestConfigurationsService(BaseTestCase):
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
 
-
     def test_delete_configuration_with_generic_action(self):
         """Ensure a configuration with a generic action can be deleted"""
 
         configuration_action = generate_configuration_action_model()
         config_id = configuration_action.configuration_id
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}",)
+        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
 
     @staticmethod
     def add_a_contact():

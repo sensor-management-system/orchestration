@@ -44,6 +44,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         """
         device = Device(
             short_name="Device 555",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -140,6 +141,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
     def prepare_request_data_with_config(self, description):
         device = Device(
             short_name="Device 555",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -262,6 +264,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
     def prepare_request_data_with_x_property(self, description):
         device = Device(
             short_name="Device 575",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
