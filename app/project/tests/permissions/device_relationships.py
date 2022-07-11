@@ -7,6 +7,7 @@ from project.api.models import Device
 from project.api.models.base_model import db
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token
+from project.tests.base import fake
 from project.tests.permissions import create_a_test_contact, create_a_test_device
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 

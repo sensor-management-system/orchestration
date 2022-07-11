@@ -7,6 +7,7 @@ from project import base_url, db
 from project.api.models import Contact, Device, DeviceContactRole, User
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
+from project.tests.base import fake
 from project.tests.permissions.test_devices import IDL_USER_ACCOUNT
 
 
