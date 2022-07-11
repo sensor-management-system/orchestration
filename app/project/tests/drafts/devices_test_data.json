@@ -11,7 +11,7 @@
             "website": "http://device.website1.de",
             "is_public": false,
             "is_internal": false,
-            "is_private": true,
+            "is_private": true
         },
         {
             "description": "device_test2_description",
