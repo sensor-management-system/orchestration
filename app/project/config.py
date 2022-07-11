@@ -1,3 +1,5 @@
+import uuid
+
 from environs import Env
 
 env = Env()
@@ -45,14 +47,17 @@ class BaseConfig:
     PKCE_CLIENT_ID = env("PKCE_CLIENT_ID", "rdmsms-pkce-flow")
     SMS_BACKEND_URL = env("SMS_BACKEND_URL", "https://localhost.localdomain"
     )
-    SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain"
-    )
+    SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain")
+    SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain")
     # PID service
     PID_SERVICE_URL = env(
         "PID_SERVICE_URL", "http://vm04.pid.gwdg.de:8081/handles/21.T11998/"
     )
     PID_SERVICE_USER = env("PID_SERVICE_USER", None)
     PID_SERVICE_PASSWORD = env("PID_SERVICE_PASSWORD", None)
+    SCHEMA_VERSION = env("SCHEMA_VERSION", "0.1")
+    IDENTIFIER_TYPE = env("IDENTIFIER_TYPE", "Handler")
+    # SMS_SUFFIX = env("SMS_SUFFIX", str(uuid.uuid1()))
     PID_SUFFIX = env("PID_SUFFIX", "SMS")
     PID_PREFIX = env("PID_PREFIX", "STAGE-TEST")
 
