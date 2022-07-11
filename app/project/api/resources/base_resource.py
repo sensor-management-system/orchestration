@@ -1,4 +1,4 @@
-from flask import g
+from flask import current_app, g
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ..helpers.db import save_to_db
@@ -13,6 +13,7 @@ from ..models import (
 )
 from ..models.base_model import db
 from ...api import minio
+from ...extensions.instances import pid
 
 
 def add_contact_to_object(entity_with_contact_list):
@@ -131,3 +132,17 @@ def query_configuration_and_set_update_description_text(msg, result_id):
     """
     configuration = db.session.query(Configuration).filter_by(id=result_id).first()
     set_update_description_text_and_update_by_user(configuration, msg)
+
+
+def add_pid(obj_, source_object_url):
+    """
+    Add PID to a created object.
+
+    :param obj_: the created object.
+    :param source_object_url: the url to the object.
+    """
+    obj_.persistent_identifier = pid.create_a_new_pid(source_object_url)
+    obj_.schema_version = current_app.config["SCHEMA_VERSION"]
+    obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
+    db.session.add(obj_)
+    db.session.commit()
