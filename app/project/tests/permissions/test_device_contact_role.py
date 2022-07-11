@@ -21,6 +21,7 @@ def generate_device(
         group_ids = []
     device = Device(
         short_name="short_name test",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,

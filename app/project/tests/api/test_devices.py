@@ -132,6 +132,7 @@ class TestDeviceService(BaseTestCase):
 
         device = Device(
             short_name="device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -197,6 +198,7 @@ class TestDeviceService(BaseTestCase):
 
         device = Device(
             short_name="device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -254,6 +256,7 @@ class TestDeviceService(BaseTestCase):
         """Ensure that we can include customfields on getting a device."""
         device = Device(
             short_name="device",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,

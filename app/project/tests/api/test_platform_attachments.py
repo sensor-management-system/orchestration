@@ -20,6 +20,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         # First we need to make sure that we have a platform
         platform = Platform(
             short_name="Very new platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -85,6 +86,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         """Ensure that we don't add a platform attachment with missing url."""
         platform = Platform(
             short_name="Very new platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -151,12 +153,14 @@ class TestPlatformAttachmentServices(BaseTestCase):
         """Ensure that we can get a list of platform attachments."""
         platform1 = Platform(
             short_name="Just a platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         platform2 = Platform(
             short_name="Another platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -263,12 +267,14 @@ class TestPlatformAttachmentServices(BaseTestCase):
         """Ensure that we can update a platform attachment."""
         platform1 = Platform(
             short_name="Just a platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform2 = Platform(
             short_name="Another platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -329,6 +335,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         # First we need to make sure that we have a platform
         platform = Platform(
             short_name="Very new platform",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=True,
             is_internal=False,
