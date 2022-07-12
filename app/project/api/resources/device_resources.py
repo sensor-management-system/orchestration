@@ -23,6 +23,7 @@ from ...api.auth.permission_utils import (
     get_query_with_permissions,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
+from ...extensions.instances import pid
 from ...frj_csv_export.resource import ResourceList
 
 
@@ -130,6 +131,10 @@ class DeviceDetail(ResourceDetail):
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            pid_to_delete = device.persistent_identifier
+            pid.delete_a_pid(pid_to_delete)
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
