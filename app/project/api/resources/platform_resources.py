@@ -16,13 +16,13 @@ from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
+from ...extensions.instances import pid
 from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.contact_role import PlatformContactRole
 from ..models.platform import Platform
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class PlatformList(ResourceList):
@@ -173,6 +173,10 @@ class PlatformDetail(ResourceDetail):
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            pid_to_delete = platform.persistent_identifier
+            pid.delete_a_pid(pid_to_delete)
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result

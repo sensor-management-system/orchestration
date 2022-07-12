@@ -50,6 +50,42 @@ class Pid:
         """Get sms prefix."""
         return current_app.config["PID_PREFIX"]
 
+    def list_pids(self):
+        """
+        Retrieve the list of pids at once.
+
+        :return: a list of all pids.
+        """
+        header = {"Accept": "application/json"}
+        try:
+            response = requests.get(
+                self.pid_service_url,
+                auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
+                verify=False,
+                headers=header,
+            )
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            return repr(e)
+        except requests.exceptions.HTTPError as e:
+            return repr(e)
+        return response.json()
+
+    def search_after_a_pid(self, term):
+        """
+        search for a PID by using a term.
+
+        :return: a dict.
+        """
+        header = {"Accept": "application/json"}
+        response = requests.get(
+            self.pid_service_url,
+            auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
+            verify=False,
+            headers=header,
+            params={"URL": term},
+        )
+        return response.json()
+
     def create_a_new_pid(self, source_object_url: string) -> string:
         """
         Create a new PID.
