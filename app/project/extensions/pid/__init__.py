@@ -65,9 +65,9 @@ class Pid:
                 headers=header,
             )
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-            return repr(e)
+            raise ServiceIsUnreachableError(repr(e))
         except requests.exceptions.HTTPError as e:
-            return repr(e)
+            raise ConflictError(repr(e))
         return response.json()
 
     def search_after_a_pid(self, term):
