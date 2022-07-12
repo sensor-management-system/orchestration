@@ -92,7 +92,7 @@ def health_check_pid_handler():
     :return: boolean and a Message
     """
     try:
-        pid.list()
+        pid.list_pids()
         return True, "Handler server is ok"
     except requests.exceptions.HTTPError as e:
         logging.error("Error" + repr(e))
