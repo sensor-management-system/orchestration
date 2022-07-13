@@ -96,6 +96,7 @@ export class PlatformApi {
   private _searchedPlatformTypes: PlatformType[] = []
   private _searchedPermissionGroups: PermissionGroup[] = []
   private _searchedUserMail: string | null = null
+  private _searchedCreatorId: string | null = null
   private _searchText: string | null = null
   private filterSettings: any[] = []
 
@@ -159,6 +160,15 @@ export class PlatformApi {
 
   setSearchedUserMail (value: string | null) {
     this._searchedUserMail = value
+    return this
+  }
+
+  get searchedCreatorId (): string | null {
+    return this._searchedCreatorId
+  }
+
+  setSearchedCreatorId (value: string | null) {
+    this._searchedCreatorId = value
     return this
   }
 
@@ -260,14 +270,25 @@ export class PlatformApi {
     this.prepareTypes()
     this.preparePermissionGroups()
     this.prepareMail()
+    this.prepareCreator()
   }
 
   prepareMail () {
     if (this.searchedUserMail) {
       this.filterSettings.push({
-        name: 'contacts.email',
+        name: 'platform_contact_roles.contact.email',
         op: 'eq',
         val: this.searchedUserMail
+      })
+    }
+  }
+
+  prepareCreator () {
+    if (this.searchedCreatorId) {
+      this.filterSettings.push({
+        name: 'created_by_id',
+        op: 'eq',
+        val: this.searchedCreatorId
       })
     }
   }
