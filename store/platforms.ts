@@ -196,9 +196,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
     getters
   }: { commit: Commit, state: PlatformsState, getters: any }): Promise<void> {
     const searchParams = getters.searchParams(this.$auth.loggedIn)
-    let email = null
+    let userId = null
     if (searchParams.onlyOwnPlatforms) {
-      email = this.$auth.user!.email as string
+      userId = this.getters['permissions/userId']
     }
 
     const { elements, totalCount } = await this.$api.platforms
@@ -207,7 +207,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedStates(searchParams.states)
       .setSearchedPlatformTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
-      .setSearchedUserMail(email)
+      .setSearchedCreatorId(userId)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,
@@ -369,11 +369,10 @@ const actions: ActionTree<PlatformsState, RootState> = {
     return savedPlatformId
   },
   async exportAsCsv ({ getters }: { getters: any }): Promise<Blob> {
+    let userId = null
     const searchParams = getters.searchParams(this.$auth.loggedIn)
-    let email = null
     if (searchParams.onlyOwnPlatforms) {
-      // @ts-ignore
-      email = this.$auth.user!.email as string
+      userId = this.getters['permissions/userId']
     }
     // @ts-ignore
     return await this.$api.platforms
@@ -382,7 +381,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedStates(searchParams.states)
       .setSearchedPlatformTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
-      .setSearchedUserMail(email)
+      .setSearchedCreatorId(userId)
       .searchMatchingAsCsvBlob()
   },
   async deletePlatform (_: {}, id: string): Promise<void> {

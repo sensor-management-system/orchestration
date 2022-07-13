@@ -197,10 +197,9 @@ const actions: ActionTree<DevicesState, RootState> = {
     commit,
     state
   }: { commit: Commit, state: DevicesState }, searchParams: IDeviceSearchParams): Promise<void> {
-    let email = null
+    let userId = null
     if (searchParams.onlyOwnDevices) {
-      // @ts-ignore
-      email = this.$auth.user!.email as string
+      userId = this.getters['permissions/userId']
     }
 
     const {
@@ -212,7 +211,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedStates(searchParams.states)
       .setSearchedDeviceTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
-      .setSearchedUserMail(email)
+      .setSearchedCreatorId(userId)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,
@@ -491,10 +490,9 @@ const actions: ActionTree<DevicesState, RootState> = {
     await this.$api.devices.deleteById(id)
   },
   async exportAsCsv (_, searchParams: IDeviceSearchParams): Promise<Blob> {
-    let email = null
+    let userId = null
     if (searchParams.onlyOwnDevices) {
-      // @ts-ignore
-      email = this.$auth.user!.email as string
+      userId = this.getters['permissions/userId']
     }
     // @ts-ignore
     return await this.$api.devices
@@ -503,7 +501,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedStates(searchParams.states)
       .setSearchedDeviceTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
-      .setSearchedUserMail(email)
+      .setSearchedCreatorId(userId)
       .searchMatchingAsCsvBlob()
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
