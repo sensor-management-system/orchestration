@@ -438,7 +438,7 @@ export default {
     apiLink () {
       let link = ''
       if (this.$fullContext.env.smsBackendUrl) {
-        link = this.$fullContext.env.smsBackendUrl + '/swagger'
+        link = this.$fullContext.env.smsBackendUrl + '/openapi'
       }
       return link
     },
