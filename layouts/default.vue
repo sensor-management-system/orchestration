@@ -184,7 +184,7 @@ permissions and limitations under the Licence.
       </v-menu>
     </v-app-bar>
     <v-main>
-      <v-container>
+      <v-container :fluid="fullWidth" :class="fullWidth ? ['mx-0', 'px-0', 'pt-0']: []">
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
           <template #action="{ attrs }">
@@ -319,7 +319,7 @@ permissions and limitations under the Licence.
 <script>
 
 import CookieLaw from 'vue-cookie-law'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
 
@@ -348,6 +348,7 @@ export default {
     }
   },
   computed: {
+    ...mapState('defaultlayout', ['fullWidth']),
     browserTitle () {
       if (this.title === this.appBarTitle) {
         return this.title

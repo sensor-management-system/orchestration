@@ -3,15 +3,11 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
- * - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
- * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences
- *   (GFZ, https://www.gfz-potsdam.de)
- * - Helmholtz Centre for Environmental Research GmbH - UFZ
- *   (UFZ, https://www.ufz.de)
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for
+ *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -33,22 +29,40 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import colors from 'vuetify/lib/util/colors'
+
+import { Commit } from 'vuex'
+
+export interface IDefaultlayoutStore {
+  fullWidth: boolean
+}
+
+const state = (): IDefaultlayoutStore => {
+  return {
+    fullWidth: false
+  }
+}
+
+export type SetFullWidthAction = (fullWidth: boolean) => Promise<void>
+export type SetDefaultsAction = () => Promise<void>
+
+const mutations = {
+  setFullWidth (state: IDefaultlayoutStore, fullWidth: boolean): void {
+    state.fullWidth = fullWidth
+  }
+}
+
+const actions = {
+  setFullWidth ({ commit }: {commit: Commit }, fullWidth: boolean) {
+    commit('setFullWidth', fullWidth)
+  },
+  setDefaults ({ commit }: {commit: Commit }) {
+    commit('setFullWidth', false)
+  }
+}
 
 export default {
-  theme: {
-    dark: false,
-    themes: {
-      light: {
-        primary: colors.blue.darken2,
-        accent: colors.green.base,
-        secondary: colors.grey.darken3,
-        info: colors.teal.lighten1,
-        warning: colors.amber.base,
-        error: colors.deepOrange.accent4,
-        success: colors.green.accent3,
-        primary_text: colors.grey.darken4
-      }
-    }
-  }
+  namespaced: true,
+  state,
+  actions,
+  mutations
 }
