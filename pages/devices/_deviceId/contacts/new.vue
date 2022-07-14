@@ -49,7 +49,7 @@ permissions and limitations under the Licence.
 import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { ContactsState } from '@/store/contacts'
+import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
 import { LoadDeviceContactRolesAction, AddDeviceContactRoleAction, DevicesState } from '@/store/devices'
 import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
@@ -89,7 +89,7 @@ export default class DeviceAssignContactPage extends Vue {
   contacts!: ContactsState['contacts']
   loadDeviceContactRoles!: LoadDeviceContactRolesAction
   addDeviceContactRole!: AddDeviceContactRoleAction
-  loadAllContacts!: () => Promise<void>
+  loadAllContacts!: LoadAllContactsAction
   loadCvContactRoles!: LoadCvContactRolesAction
 
   async fetch (): Promise<void> {

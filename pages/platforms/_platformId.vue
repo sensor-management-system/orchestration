@@ -44,9 +44,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, ProvideReactive } from 'nuxt-property-decorator'
+import { Component, Vue, ProvideReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { PlatformsState, LoadPlatformAction } from '@/store/platforms'
 import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
 
@@ -64,7 +65,7 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform']),
-    ...mapActions('appbar', ['initPlatformsPlatformIdAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 export default class PlatformPage extends Vue {
@@ -80,13 +81,14 @@ export default class PlatformPage extends Vue {
   platform!: PlatformsState['platform']
   loadPlatform!: LoadPlatformAction
   initPlatformsPlatformIdAppBar!: (id: string) => void
-  setDefaults!: () => void
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   created () {
-    this.initPlatformsPlatformIdAppBar(this.platformId)
+    this.initializeAppBar()
   }
 
   async fetch () {
@@ -119,8 +121,29 @@ export default class PlatformPage extends Vue {
     }
   }
 
-  beforeDestroy () {
-    this.setDefaults()
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/platforms/' + this.platformId + '/basic',
+        name: 'Basic Data'
+      },
+      {
+        to: '/platforms/' + this.platformId + '/contacts',
+        name: 'Contacts'
+      },
+      {
+        to: '/platforms/' + this.platformId + '/attachments',
+        name: 'Attachments'
+      },
+      {
+        to: '/platforms/' + this.platformId + '/actions',
+        name: 'Actions'
+      }
+    ]
+    )
+    if (this.platform) {
+      this.setTitle(this.platform.shortName || 'Platform')
+    }
   }
 
   get platformId () {
@@ -129,6 +152,13 @@ export default class PlatformPage extends Vue {
 
   isBasePath () {
     return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
+  }
+
+  @Watch('platform', { immediate: true, deep: true })
+  onPlatformChanged (val: PlatformsState['platform']) {
+    if (val && val.id) {
+      this.setTitle(val.shortName)
+    }
   }
 }
 </script>

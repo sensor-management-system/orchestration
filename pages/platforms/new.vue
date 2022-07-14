@@ -68,6 +68,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { SavePlatformAction } from '@/store/platforms'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -85,7 +86,7 @@ import { Platform } from '@/models/Platform'
   middleware: ['auth'],
   methods: {
     ...mapActions('platforms', ['savePlatform']),
-    ...mapActions('appbar', ['setDefaults', 'initPlatformsNewAppBar'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 // @ts-ignore
@@ -94,16 +95,12 @@ export default class PlatformNewPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initPlatformsNewAppBar!: () => void
-  setDefaults!: () => void
   savePlatform!: SavePlatformAction
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   created () {
-    this.initPlatformsNewAppBar()
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
+    this.initializeAppBar()
   }
 
   async save () {
@@ -122,6 +119,28 @@ export default class PlatformNewPage extends Vue {
     } finally {
       this.isLoading = false
     }
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/platforms/new',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('New Platform')
   }
 }
 </script>

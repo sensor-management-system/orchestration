@@ -65,6 +65,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { SaveDeviceAction } from '@/store/devices'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
@@ -82,7 +83,7 @@ import { Device } from '@/models/Device'
   middleware: ['auth'],
   methods: {
     ...mapActions('devices', ['saveDevice']),
-    ...mapActions('appbar', ['initDevicesNewAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 // @ts-ignore
@@ -91,16 +92,12 @@ export default class DeviceNewPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initDevicesNewAppBar!: () => void
-  setDefaults!: () => void
   saveDevice!: SaveDeviceAction
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   created () {
-    this.initDevicesNewAppBar()
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
+    this.initializeAppBar()
   }
 
   async save () {
@@ -119,6 +116,36 @@ export default class DeviceNewPage extends Vue {
     } finally {
       this.isLoading = false
     }
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/devices/new/',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Measured Quantities',
+        disabled: true
+      },
+      {
+        name: 'Custom Fields',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('New Device')
   }
 }
 </script>

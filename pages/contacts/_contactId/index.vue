@@ -90,9 +90,10 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+
 import { mapActions, mapState } from 'vuex'
 
-import { Contact } from '@/models/Contact'
+import { ContactsState, LoadContactAction, DeleteContactAction } from '@/store/contacts'
 
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -103,18 +104,16 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
   components: { ContacsDeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
   computed: mapState('contacts', ['contact']),
   methods: {
-    ...mapActions('contacts', ['deleteContact', 'loadContact']),
-    ...mapActions('appbar', ['initContactsContactIdIndexAppBar'])
+    ...mapActions('contacts', ['deleteContact', 'loadContact'])
   }
 })
 export default class ContactIndexPage extends Vue {
   showDeleteDialog = false
 
   // vuex definition for typescript check
-  initContactsContactIdIndexAppBar!: (title: string) => void
-  contact!: Contact
-  deleteContact!: (id: string) => void
-  loadContact!: (id: string) => void
+  contact!: ContactsState['contact']
+  deleteContact!: DeleteContactAction
+  loadContact!: LoadContactAction
 
   async created () {
     // We load the contact in the upper context (that component that
@@ -122,7 +121,6 @@ export default class ContactIndexPage extends Vue {
     // However, we can't be sure that this was already loaded
     // so we need to load it here in order to show the right name
     await this.loadContact(this.contactId)
-    this.initContactsContactIdIndexAppBar(this.contact.toString())
   }
 
   get contactId () {

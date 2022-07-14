@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
 import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { ContactsState } from '@/store/contacts'
+import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
 import {
   PlatformsState,
   LoadPlatformContactRolesAction,
@@ -95,7 +95,7 @@ export default class PlatformAddContactPage extends Vue {
   // vuex definition for typescript check
   platformContactRoles!: PlatformsState['platformContactRoles']
   contacts!: ContactsState['contacts']
-  loadAllContacts!: () => Promise<void>
+  loadAllContacts!: LoadAllContactsAction
   loadPlatformContactRoles!: LoadPlatformContactRolesAction
   addPlatformContactRole!: AddPlatformContactRoleAction
   loadCvContactRoles!: LoadCvContactRolesAction

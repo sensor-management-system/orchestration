@@ -65,6 +65,10 @@ permissions and limitations under the Licence.
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { mapActions } from 'vuex'
+
+import { SetDefaultsAction, SetTitleAction } from '@/store/appbar'
+import { SaveContactAction } from '@/store/contacts'
+
 import { Rules } from '@/mixins/Rules'
 
 import { Contact } from '@/models/Contact'
@@ -82,7 +86,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   middleware: ['auth'],
   methods: {
     ...mapActions('contacts', ['saveContact']),
-    ...mapActions('appbar', ['initContactsNewAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setDefaults', 'setTitle'])
   }
 })
 export default class ContactNewPage extends mixins(Rules) {
@@ -92,8 +96,9 @@ export default class ContactNewPage extends mixins(Rules) {
 
   // vuex definition for typescript check
   initContactsNewAppBar!: () => void
-  setDefaults!: () => void
-  saveContact!: (contact: Contact) => Promise<Contact>
+  saveContact!: SaveContactAction
+  setDefaults!: SetDefaultsAction
+  setTitle!: SetTitleAction
 
   created () {
     /** this page accepts the query parameter 'redirect' as a html encoded URI
@@ -105,11 +110,11 @@ export default class ContactNewPage extends mixins(Rules) {
     if (backLink && !backLink.startsWith('http')) {
       this.redirect = backLink
     }
-    this.initContactsNewAppBar()
+    this.initializeAppBar()
   }
 
-  beforeDestroy () {
-    this.setDefaults()
+  initializeAppBar () {
+    this.setTitle('New Contact')
   }
 
   async save () {

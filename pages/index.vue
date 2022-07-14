@@ -127,7 +127,6 @@ permissions and limitations under the Licence.
   </v-container>
 </template>
 <script lang="ts">
-
 import { Vue, Component } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 import BasicOverviewCard from '@/components/overview/BasicOverviewCard.vue'
@@ -148,6 +147,7 @@ export default class OverviewIndex extends Vue {
 
   created () {
     this.setFullWidth(true)
+    this.$store.dispatch('appbar/setDefaults')
   }
 
   beforeDestroy () {

@@ -31,7 +31,8 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-tabs-items
-      v-model="activeTab"
+      :value="activeTab"
+      @input="setActiveTab"
     >
       <v-tab-item :eager="true">
         <v-row
@@ -245,6 +246,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
 import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction } from '@/store/permissions'
 
 import BaseList from '@/components/shared/BaseList.vue'
@@ -274,12 +276,13 @@ import { QueryParams } from '@/modelUtils/QueryParams'
   },
   computed: {
     ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'projects']),
+    ...mapState('appbar', ['activeTab']),
     ...mapGetters('configurations', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups'])
   },
   methods: {
     ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'loadProjects', 'deleteConfiguration']),
-    ...mapActions('appbar', ['initConfigurationsIndexAppBar', 'setDefaults']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
 })
@@ -299,7 +302,6 @@ export default class SearchConfigurationsPage extends Vue {
   canDeleteEntity!: CanDeleteEntityGetter
   canAccessEntity!: CanAccessEntityGetter
   initConfigurationsIndexAppBar!: () => void
-  setDefaults!: () => void
   loadConfigurationsStates!: () => void
   loadPermissionGroups!: LoadPermissionGroupsAction
   pageNumber!: number
@@ -312,11 +314,15 @@ export default class SearchConfigurationsPage extends Vue {
   deleteConfiguration!: (id: string) => void
   configurationStates!: string[]
   projects!: Project[]
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+  activeTab!: IAppbarState['activeTab']
+  setActiveTab!: SetActiveTabAction
 
   async created () {
     try {
       this.loading = true
-      await this.initConfigurationsIndexAppBar()
+      this.initializeAppBar()
       await this.loadConfigurationsStates()
       await this.loadPermissionGroups()
       await this.initSearchQueryParams()
@@ -326,10 +332,6 @@ export default class SearchConfigurationsPage extends Vue {
     } finally {
       this.loading = false
     }
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
   }
 
   get page () {
@@ -364,14 +366,6 @@ export default class SearchConfigurationsPage extends Vue {
     return Array.from(resultSet).sort((a, b) => a - b)
   }
 
-  get activeTab (): number | null {
-    return this.$store.state.appbar.activeTab
-  }
-
-  set activeTab (tab: number | null) {
-    this.$store.commit('appbar/setActiveTab', tab)
-  }
-
   get searchParams (): IConfigurationSearchParams {
     return {
       searchText: this.searchText,
@@ -387,7 +381,7 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   async runInitialSearch () {
-    this.activeTab = this.isExtendedSearch() ? 1 : 0
+    this.setActiveTab(this.isExtendedSearch() ? 1 : 0)
 
     this.page = this.getPageFromUrl()
     this.size = this.getSizeFromUrl()
@@ -532,6 +526,14 @@ export default class SearchConfigurationsPage extends Vue {
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      'Search',
+      'Extended Search'
+    ])
+    this.setTitle('Configurations')
   }
 }
 

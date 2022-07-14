@@ -29,10 +29,11 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit } from 'vuex'
+import { Commit, ActionTree } from 'vuex'
+import { RootState } from '@/store'
 import { TabItemConfiguration } from '@/models/TabItemConfiguration'
 
-export interface IAppbarStore {
+export interface IAppbarState {
   activeTab: null | number,
   cancelBtnDisabled: boolean,
   cancelBtnHidden: boolean,
@@ -45,9 +46,9 @@ export interface IAppbarStore {
 /**
  * The initial state of the AppbarTabsStore
  *
- * @return {IAppbarStore} the state object
+ * @return {IAppbarState} the state object
  */
-const state = (): IAppbarStore => {
+const state = (): IAppbarState => {
   return {
     activeTab: null,
     cancelBtnDisabled: false,
@@ -63,10 +64,10 @@ const mutations = {
   /**
    * Sets the title of the AppBar
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {string} title - the title of the AppBar
    */
-  setTitle (state: IAppbarStore, title: string): void {
+  setTitle (state: IAppbarState, title: string): void {
     state.title = title
   },
   /**
@@ -75,10 +76,10 @@ const mutations = {
    * When the tabs are set and are not empty, the active tab is set
    * automatically to the first tab
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {string[]} tabs - the tabs to set
    */
-  setTabs (state: IAppbarStore, tabs: TabItemConfiguration[]): void {
+  setTabs (state: IAppbarState, tabs: TabItemConfiguration[]): void {
     state.tabs = tabs
     state.activeTab = tabs.length > 0 ? 0 : null
   },
@@ -88,10 +89,10 @@ const mutations = {
    * When the tabs are empty or active is lt 0 or gt the length of the tabs,
    * active is set to null
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {null | number} active - the index of the active tab, null if none is selected
    */
-  setActiveTab (state: IAppbarStore, active: null | number): void {
+  setActiveTab (state: IAppbarState, active: null | number): void {
     // if the index of the active tab is out of range, set it to null
     if (!state.tabs.length || (active !== null && (active < 0 || active + 1 > state.tabs.length))) {
       active = null
@@ -101,37 +102,37 @@ const mutations = {
   /**
    * Hides or shows the save button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} hidden - whether to hide or show the save button
    */
-  setSaveBtnHidden (state: IAppbarStore, hidden: boolean): void {
+  setSaveBtnHidden (state: IAppbarState, hidden: boolean): void {
     state.saveBtnHidden = hidden
   },
   /**
    * Disables the save button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} disabled - whether to hide or show the save button
    */
-  setSaveBtnDisabled (state: IAppbarStore, disabled: boolean): void {
+  setSaveBtnDisabled (state: IAppbarState, disabled: boolean): void {
     state.saveBtnDisabled = disabled
   },
   /**
    * Hides or shows the cancel button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} hidden - whether to hide or show the cancel button
    */
-  setCancelBtnHidden (state: IAppbarStore, hidden: boolean): void {
+  setCancelBtnHidden (state: IAppbarState, hidden: boolean): void {
     state.cancelBtnHidden = hidden
   },
   /**
    * Disables the cancel button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} disabled - whether to hide or show the cancel button
    */
-  setCancelBtnDisabled (state: IAppbarStore, disabled: boolean): void {
+  setCancelBtnDisabled (state: IAppbarState, disabled: boolean): void {
     state.cancelBtnDisabled = disabled
   }
 }
@@ -141,307 +142,34 @@ type StoreContext = {
   dispatch: (action: string, payload: any) => void
 }
 
-const actions = {
+export type InitAction = (payload: Partial<IAppbarState>) => void
+export type SetDefaultsAction = () => void
+export type SetTitleAction = (title: string) => void
+export type SetTabsAction = (tabs: TabItemConfiguration[]) => void
+export type SetActiveTabAction = (active: null | number) => void
+export type SetSaveBtnHiddenAction = (hidden: boolean) => void
+export type SetSaveBtnDisabledAction = (disabled: boolean) => void
+export type SetCancelBtnHiddenAction = (hidden: boolean) => void
+export type SetCancelBtnDisabledAction = (disabled: boolean) => void
+
+const actions: ActionTree<IAppbarState, RootState> = {
   /**
    * initializes the Appbar
    *
    * calls the mutations for every property in the payload
    *
    * @param {StoreContext} context - the context of the store
-   * @param {Partial<IAppbarStore>} payload - the payload which must be a partial of IAppbarStore
+   * @param {Partial<IAppbarState>} payload - the payload which must be a partial of IAppbarStore
    */
-  init (context: StoreContext, payload: Partial<IAppbarStore>): void {
-    if (typeof payload.title !== 'undefined') {
-      context.commit('setTitle', payload.title)
-    }
-    if (typeof payload.tabs !== 'undefined') {
-      context.commit('setTabs', payload.tabs)
-    }
-    if (typeof payload.activeTab !== 'undefined') {
-      context.commit('setActiveTab', payload.activeTab)
-    }
-    if (typeof payload.saveBtnHidden !== 'undefined') {
-      context.commit('setSaveBtnHidden', payload.saveBtnHidden)
-    }
-    if (typeof payload.saveBtnDisabled !== 'undefined') {
-      context.commit('setSaveBtnDisabled', payload.saveBtnDisabled)
-    }
-    if (typeof payload.cancelBtnHidden !== 'undefined') {
-      context.commit('setCancelBtnHidden', payload.cancelBtnHidden)
-    }
-    if (typeof payload.cancelBtnDisabled !== 'undefined') {
-      context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled)
-    }
+  init (context: StoreContext, payload: Partial<IAppbarState>): void {
+    context.commit('setTitle', payload.title || '')
+    context.commit('setTabs', payload.tabs || [])
+    context.commit('setActiveTab', payload.activeTab || null)
+    context.commit('setSaveBtnHidden', payload.saveBtnHidden || true)
+    context.commit('setSaveBtnDisabled', payload.saveBtnDisabled || true)
+    context.commit('setCancelBtnHidden', payload.cancelBtnHidden || true)
+    context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled || true)
   },
-  initContactsIndexAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Contacts')
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initPlatformsIndexAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Platforms')
-    commit('setTabs', [
-      'Search',
-      'Extended Search'
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initDevicesIndexAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Devices')
-    commit('setTabs', [
-      'Search',
-      'Extended Search'
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initConfigurationsIndexAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Configurations')
-    commit('setTabs', [
-      'Search',
-      'Extended Search'
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initContactsNewAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Add Contact')
-    commit('setTabs', [])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initPlatformsNewAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Add Platform')
-    commit('setTabs', [
-      {
-        to: '/platforms/new',
-        name: 'Basic Data'
-      },
-      {
-        name: 'Contacts',
-        disabled: true
-      },
-      {
-        name: 'Attachments',
-        disabled: true
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initDevicesNewAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Add Device')
-    commit('setTabs', [
-      {
-        to: '/devices/new',
-        name: 'Basic Data'
-      },
-      {
-        name: 'Contacts',
-        disabled: true
-      },
-      {
-        name: 'Measured Quantities',
-        disabled: true
-      },
-      {
-        name: 'Custom Fields',
-        disabled: true
-      },
-      {
-        name: 'Attachments',
-        disabled: true
-      },
-      {
-        name: 'Actions',
-        disabled: true
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initConfigurationsNewAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Add Configuration')
-    commit('setTabs', [
-      {
-        to: '/configurations/new',
-        name: 'Basic Data'
-      },
-      {
-        name: 'Contacts',
-        disabled: true
-      },
-      {
-        name: 'Platforms and Devices',
-        disabled: true
-      },
-      {
-        name: 'Locations',
-        disabled: true
-      },
-      {
-        name: 'Actions',
-        disabled: true
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initContactsContactIdAppBar ({ commit }: {commit: Commit}) {
-    commit('setTitle', 'Show Contact')
-    commit('setTabs', [])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initPlatformsPlatformIdAppBar ({ commit }: {commit: Commit}, id: string) {
-    commit('setTitle', 'Show Platform')
-    commit('setTabs', [
-      {
-        to: '/platforms/' + id + '/basic',
-        name: 'Basic Data'
-      },
-      {
-        to: '/platforms/' + id + '/contacts',
-        name: 'Contacts'
-      },
-      {
-        to: '/platforms/' + id + '/attachments',
-        name: 'Attachments'
-      },
-      {
-        to: '/platforms/' + id + '/actions',
-        name: 'Actions'
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initDevicesDeviceIdAppBar ({ commit }: {commit: Commit}, id: string) {
-    commit('setTitle', 'Show Device')
-    commit('setTabs', [
-      {
-        to: '/devices/' + id + '/basic',
-        name: 'Basic Data'
-      },
-      {
-        to: '/devices/' + id + '/contacts',
-        name: 'Contacts'
-      },
-      {
-        to: '/devices/' + id + '/measuredquantities',
-        name: 'Measured Quantities'
-      },
-      {
-        to: '/devices/' + id + '/customfields',
-        name: 'Custom Fields'
-      },
-      {
-        to: '/devices/' + id + '/attachments',
-        name: 'Attachments'
-      },
-      {
-        to: '/devices/' + id + '/actions',
-        name: 'Actions'
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initConfigurationsConfigurationIdAppBar ({ commit }: {commit: Commit}, id: string) {
-    commit('setTitle', 'Show Configuration')
-    commit('setTabs', [
-      {
-        to: '/configurations/' + id + '/basic',
-        name: 'Basic Data'
-      },
-      {
-        to: '/configurations/' + id + '/contacts',
-        name: 'Contacts'
-      },
-      {
-        to: '/configurations/' + id + '/platforms-and-devices',
-        name: 'Platforms and Devices'
-      },
-      {
-        to: '/configurations/' + id + '/locations',
-        name: 'Locations'
-      },
-      {
-        to: '/configurations/' + id + '/actions',
-        name: 'Actions'
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initContactsContactIdIndexAppBar ({ commit }: {commit: Commit}, title: string) {
-    commit('setTitle', 'Show Contact: ' + title)
-    commit('setTabs', [])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initContactsContactIdEditAppBar ({ commit }: {commit: Commit}, title: string) {
-    commit('setTitle', 'Edit Contact: ' + title)
-    commit('setTabs', [])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initPlatformCopyAppBar ({ commit }: {commit: Commit}, id: string) {
-    commit('setTitle', 'Copy Platform')
-    commit('setTabs', [
-      {
-        to: '/platform/copy/' + id,
-        name: 'Basic Data'
-      },
-      {
-        name: 'Contacts',
-        disabled: true
-      },
-      {
-        name: 'Attachments',
-        disabled: true
-      },
-      {
-        name: 'Actions',
-        disabled: true
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-  initDeviceCopyAppBar ({ commit }: {commit: Commit}, id: string) {
-    commit('setTitle', 'Copy Device')
-    commit('setTabs', [
-      {
-        to: '/devices/copy/' + id,
-        name: 'Basic Data'
-      },
-      {
-        name: 'Contacts',
-        disabled: true
-      },
-      {
-        name: 'Measured Quantities',
-        disabled: true
-      },
-      {
-        name: 'Custom Fields',
-        disabled: true
-      },
-      {
-        name: 'Attachments',
-        disabled: true
-      },
-      {
-        name: 'Actions',
-        disabled: true
-      }
-    ])
-    commit('setCancelBtnHidden', true)
-    commit('setSaveBtnHidden', true)
-  },
-
   /**
    * sets the Appbar to its default settings
    *
@@ -449,6 +177,27 @@ const actions = {
    */
   setDefaults (context: StoreContext): void {
     context.dispatch('init', state())
+  },
+  setTitle ({ commit }: { commit: Commit }, title: string): void {
+    commit('setTitle', title)
+  },
+  setTabs ({ commit }: { commit: Commit }, tabs: TabItemConfiguration[]): void {
+    commit('setTabs', tabs)
+  },
+  setActiveTab ({ commit }: { commit: Commit }, active: null | number): void {
+    commit('setActiveTab', active)
+  },
+  setSaveBtnHidden ({ commit }: { commit: Commit }, hidden: boolean): void {
+    commit('setSaveBtnHidden', hidden)
+  },
+  setSaveBtnDisabled ({ commit }: { commit: Commit }, disabled: boolean): void {
+    commit('setSaveBtnDisabled', disabled)
+  },
+  setCancelBtnHidden ({ commit }: { commit: Commit }, hidden: boolean): void {
+    commit('setCancelBtnHidden', hidden)
+  },
+  setCancelBtnDisabled ({ commit }: { commit: Commit }, disabled: boolean): void {
+    commit('setCancelBtnDisabled', disabled)
   }
 }
 
