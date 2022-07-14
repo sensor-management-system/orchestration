@@ -89,7 +89,7 @@ export class ContactApi {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
-  save (contact: Contact) {
+  save (contact: Contact): Promise<Contact> {
     const data: any = this.serializer.convertModelToJsonApiData(contact)
     let method: Method = 'patch'
     let url = this.basePath

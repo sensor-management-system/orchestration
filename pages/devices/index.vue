@@ -31,7 +31,8 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-tabs-items
-      v-model="activeTab"
+      :value="activeTab"
+      @input="setActiveTab"
     >
       <v-tab-item :eager="true">
         <v-row
@@ -337,6 +338,8 @@ import { saveAs } from 'file-saver'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
+
 import {
   VocabularyState,
   LoadEquipmentstatusAction,
@@ -396,6 +399,7 @@ import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelec
   },
   computed: {
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups']),
+    ...mapState('appbar', ['activeTab']),
     ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
     ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages']),
     ...mapGetters('devices', ['pageSizes'])
@@ -403,7 +407,7 @@ import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelec
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
     ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice']),
-    ...mapActions('appbar', ['initDevicesIndexAppBar', 'setDefaults']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
 })
@@ -428,8 +432,6 @@ export default class SearchDevicesPage extends Vue {
   pageNumber!: DevicesState['pageNumber']
   pageSizes!: PageSizesGetter
   permissionGroups!: PermissionsState['permissionGroups']
-  initDevicesIndexAppBar!: () => void
-  setDefaults!: () => void
   loadEquipmentstatus!: LoadEquipmentstatusAction
   loadDevicetypes!: LoadDevicetypesAction
   loadManufacturers!: LoadManufacturersAction
@@ -444,9 +446,13 @@ export default class SearchDevicesPage extends Vue {
   equipmentstatus!: VocabularyState['equipmentstatus']
   canAccessEntity!: CanAccessEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+  activeTab!: IAppbarState['activeTab']
+  setActiveTab!: SetActiveTabAction
 
   async created () {
-    this.initDevicesIndexAppBar()
+    this.initializeAppBar()
     try {
       this.loading = true
       await Promise.all([
@@ -462,10 +468,6 @@ export default class SearchDevicesPage extends Vue {
     } finally {
       this.loading = false
     }
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
   }
 
   get page () {
@@ -500,14 +502,6 @@ export default class SearchDevicesPage extends Vue {
     return Array.from(resultSet).sort((a, b) => a - b)
   }
 
-  get activeTab (): number | null {
-    return this.$store.state.appbar.activeTab
-  }
-
-  set activeTab (tab: number | null) {
-    this.$store.commit('appbar/setActiveTab', tab)
-  }
-
   get searchParams () {
     return {
       searchText: this.searchText,
@@ -528,7 +522,7 @@ export default class SearchDevicesPage extends Vue {
   }
 
   async runInitialSearch (): Promise<void> {
-    this.activeTab = this.isExtendedSearch() ? 1 : 0
+    this.setActiveTab(this.isExtendedSearch() ? 1 : 0)
 
     this.page = this.getPageFromUrl()
     this.size = this.getSizeFromUrl()
@@ -700,6 +694,14 @@ export default class SearchDevicesPage extends Vue {
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      'Search',
+      'Extended Search'
+    ])
+    this.setTitle('Devices')
   }
 }
 

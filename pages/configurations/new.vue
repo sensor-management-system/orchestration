@@ -70,6 +70,9 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 
 import { mapActions } from 'vuex'
+
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+
 import { Configuration } from '@/models/Configuration'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -81,7 +84,7 @@ import ConfigurationsBasicDataForm from '@/components/configurations/Configurati
   middleware: ['auth'],
   methods: {
     ...mapActions('configurations', ['saveConfiguration']),
-    ...mapActions('appbar', ['initConfigurationsNewAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 export default class ConfigurationNewPage extends Vue {
@@ -90,15 +93,12 @@ export default class ConfigurationNewPage extends Vue {
 
   // vuex definition for typescript check
   initConfigurationsNewAppBar!: () => void
-  setDefaults!: () => void
   saveConfiguration!: (configuration: Configuration) => Promise<Configuration>
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   created () {
-    this.initConfigurationsNewAppBar()
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
+    this.initializeAppBar()
   }
 
   async save () {
@@ -117,6 +117,34 @@ export default class ConfigurationNewPage extends Vue {
     } finally {
       this.isLoading = false
     }
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/configurations/new',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Platforms and Devices',
+        disabled: true
+      },
+      {
+        name:
+        'Locations',
+        disabled: true
+      },
+      {
+        name:
+        'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('New Configuration')
   }
 }
 </script>

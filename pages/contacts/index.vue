@@ -182,14 +182,24 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import {
+  ContactsState,
+  PageSizesGetter,
+  SearchContactsPaginatedAction,
+  SetPageNumberAction,
+  SetPageSizeAction,
+  DeleteContactAction
+} from '@/store/contacts'
+
 import { Contact } from '@/models/Contact'
 
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
-
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
+
 import { QueryParams } from '@/modelUtils/QueryParams'
 
 @Component({
@@ -206,7 +216,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
   },
   methods: {
     ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'setPageSize', 'deleteContact']),
-    ...mapActions('appbar', ['initContactsIndexAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 export default class SearchContactsPage extends Vue {
@@ -217,20 +227,20 @@ export default class SearchContactsPage extends Vue {
   private contactToDelete: Contact | null = null
 
   // vuex definition for typescript check
-  initContactsIndexAppBar!: () => void
-  setDefaults!: () => void
-  pageNumber!: number
-  setPageNumber!: (newPageNumber: number) => void
-  pageSize!: number
-  setPageSize!: (newPageSize: number) => void
-  pageSizes!: number[]
-  searchContactsPaginated!: (searchtext: string) => void
-  deleteContact!: (id: string) => void
+  pageNumber!: ContactsState['pageNumber']
+  setPageNumber!: SetPageNumberAction
+  pageSize!: ContactsState['pageSize']
+  setPageSize!: SetPageSizeAction
+  pageSizes!: PageSizesGetter
+  searchContactsPaginated!: SearchContactsPaginatedAction
+  deleteContact!: DeleteContactAction
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   async created () {
     try {
       this.loading = true
-      await this.initContactsIndexAppBar()
+      this.initializeAppBar()
       this.initSearchQueryParams()
       this.runInitialSearch()
     } catch (e) {
@@ -238,10 +248,6 @@ export default class SearchContactsPage extends Vue {
     } finally {
       this.loading = false
     }
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
   }
 
   get page () {
@@ -381,6 +387,11 @@ export default class SearchContactsPage extends Vue {
       return parseInt(this.$route.query.size) ?? this.size
     }
     return this.size
+  }
+
+  initializeAppBar () {
+    this.setTitle('Contacts')
+    this.setTabs([])
   }
 
   setSizeInUrl (preserveHash: boolean = true): void {

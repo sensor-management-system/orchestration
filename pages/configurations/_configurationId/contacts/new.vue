@@ -51,7 +51,7 @@ import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { LoadConfigurationContactRolesAction, AddConfigurationContactRoleAction, ConfigurationsState } from '@/store/configurations'
-import { ContactsState } from '@/store/contacts'
+import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
 import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
 import { Contact } from '@/models/Contact'
@@ -89,7 +89,7 @@ export default class ConfigurationAssignContactPage extends Vue {
   configurationContactRoles!: ConfigurationsState['configurationContactRoles']
   contacts!: ContactsState['contacts']
   loadConfigurationContactRoles!: LoadConfigurationContactRolesAction
-  loadAllContacts!: () => Promise<void>
+  loadAllContacts!: LoadAllContactsAction
   loadCvContactRoles!: LoadCvContactRolesAction
   addConfigurationContactRole!: AddConfigurationContactRoleAction
 

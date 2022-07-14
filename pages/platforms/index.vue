@@ -259,6 +259,7 @@ import { saveAs } from 'file-saver'
 
 import { mapState, mapActions, mapGetters } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import {
   PlatformsState,
   SearchPlatformsPaginatedAction,
@@ -310,7 +311,7 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
   },
   methods: {
     ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform']),
-    ...mapActions('appbar', ['initPlatformsIndexAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
@@ -321,8 +322,6 @@ export default class SearchPlatformsPage extends Vue {
 
   private platformToDelete: Platform | null = null
   // vuex definition for typescript check
-  initPlatformsIndexAppBar!: () => void
-  setDefaults!: () => void
   platforms!: PlatformsState['platforms']
   pageNumber!: PlatformsState['pageNumber']
   pageSize!: PlatformsState['pageSize']
@@ -335,9 +334,11 @@ export default class SearchPlatformsPage extends Vue {
   deletePlatform!: DeletePlatformAction
   canAccessEntity!: CanAccessEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   created () {
-    this.initPlatformsIndexAppBar()
+    this.initializeAppBar()
   }
 
   async fetch (): Promise<void> {
@@ -349,10 +350,6 @@ export default class SearchPlatformsPage extends Vue {
     } finally {
       this.loading = false
     }
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
   }
 
   get page () {
@@ -470,6 +467,14 @@ export default class SearchPlatformsPage extends Vue {
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      'Search',
+      'Extended Search'
+    ])
+    this.setTitle('Platforms')
   }
 }
 

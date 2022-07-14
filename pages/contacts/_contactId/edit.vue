@@ -63,6 +63,10 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
 import { mapActions, mapState } from 'vuex'
+
+import { SetTitleAction } from '@/store/appbar'
+import { ContactsState, LoadContactAction, SaveContactAction } from '@/store/contacts'
+
 import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
@@ -79,7 +83,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   computed: mapState('contacts', ['contact']),
   methods: {
     ...mapActions('contacts', ['saveContact', 'loadContact']),
-    ...mapActions('appbar', ['initContactsContactIdEditAppBar'])
+    ...mapActions('appbar', ['setTitle'])
   }
 })
 export default class ContactEditPage extends Vue {
@@ -87,14 +91,13 @@ export default class ContactEditPage extends Vue {
   private contactCopy: Contact = new Contact()
 
   // vuex definition for typescript check
-  initContactsContactIdEditAppBar!: (title: string) => void
-  contact!: Contact
-  saveContact!: (contact: Contact) => Promise<Contact>
-  loadContact!: (id: string) => void
+  contact!: ContactsState['contact']
+  saveContact!: SaveContactAction
+  loadContact!: LoadContactAction
+  setTitle!: SetTitleAction
 
   created () {
     if (this.contact) {
-      this.initContactsContactIdEditAppBar(this.contact.toString())
       this.contactCopy = Contact.createFromObject(this.contact)
     }
   }

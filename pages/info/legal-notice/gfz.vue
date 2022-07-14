@@ -118,11 +118,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class GfzImprintPage extends Vue {
   created () {
-    this.$store.commit('appbar/setTitle', 'Legal Notice')
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.$store.dispatch('appbar/init', { title: 'Legal Notice' })
   }
 }
 </script>

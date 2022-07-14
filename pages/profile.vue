@@ -189,17 +189,7 @@ export default class ProfilePage extends Vue {
   private secondCol = 9
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-  }
-
-  mounted () {
-    this.$nextTick(() => {
-      this.$nuxt.$emit('AppBarContent:title', 'Profile')
-    })
-  }
-
-  beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
+    this.$store.dispatch('appbar/init', { title: 'Profile' })
   }
 
   get notExplicitPrintedClaims () {

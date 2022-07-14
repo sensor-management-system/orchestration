@@ -33,9 +33,10 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit, ActionContext } from 'vuex/types'
+import { Commit, GetterTree, ActionTree } from 'vuex/types'
+
+import { RootState } from '@/store'
 import { Contact } from '@/models/Contact'
-import { Api } from '@/services/Api'
 
 const PAGE_SIZES = [
   25,
@@ -52,91 +53,73 @@ export interface ContactsState {
   totalPages: number
 }
 
-const state = () => ({
+const state = (): ContactsState => ({
   contacts: [],
   contact: null,
   configurationContacts: [],
-  totalPages: 1,
   pageNumber: 1,
-  pageSize: PAGE_SIZES[0]
+  pageSize: PAGE_SIZES[0],
+  totalPages: 1
 })
 
-const getters = {
-  searchContacts: (state: ContactsState) => {
+export type SearchContactsGetter = Contact[]
+export type ContactsByDifferenceGetter = (contactsToSubtract: Contact[]) => Contact[]
+export type PageSizesGetter = number[]
+
+const getters: GetterTree<ContactsState, RootState> = {
+  searchContacts: (state: ContactsState): Contact[] => {
     return state.contacts.filter((c: Contact) => !state.configurationContacts.find((rc: Contact) => rc.id === c.id))
   },
   // TODO: Do we need it in the future? We allow multiple contact roles per contact & device.
-  contactsByDifference: (state: ContactsState) => (contactsToSubtract: Contact[]) => {
+  contactsByDifference: (state: ContactsState) => (contactsToSubtract: Contact[]): Contact[] => {
     return state.contacts.filter((contact) => {
       return !contactsToSubtract.find((contactToSubtract) => {
         return contactToSubtract.id === contact.id
       })
     })
   },
-  pageSizes: () => {
+  pageSizes: (): number[] => {
     return PAGE_SIZES
   }
 }
 
-// @ts-ignore
-const actions: {
-  [key: string]: any;
-  $api: Api
-} = {
+export type SearchContactsPaginatedAction = (searchText: string) => Promise<void>
+export type LoadContactAction = (id: string) => Promise<void>
+export type LoadAllContactsAction = () => Promise<void>
+export type SetPageNumberAction = (newPageNumber: number) => void
+export type SetPageSizeAction = (newPageSize: number) => void
+export type DeleteContactAction = (id: string) => Promise<void>
+export type SaveContactAction = (contact: Contact) => Promise<Contact>
+
+const actions: ActionTree<ContactsState, RootState> = {
   async searchContactsPaginated ({
     commit,
     state
-  }: { commit: Commit, state: ContactsState }, searchtext: string = '') {
-    // @ts-ignore
+  }: { commit: Commit, state: ContactsState }, searchtext: string = ''): Promise<void> {
     const { elements, totalCount } = await this.$api.contacts.searchPaginated(state.pageNumber, state.pageSize, searchtext)
     commit('setContacts', elements)
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-  async loadContact ({ commit }: { commit: Commit }, id: string) {
-    // @ts-ignore
+  async loadContact ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const contact = await this.$api.contacts.findById(id)
     commit('setContact', contact)
   },
-  async loadAllContacts ({ commit }: { commit: Commit }) {
-    // @ts-ignore
+  async loadAllContacts ({ commit }: { commit: Commit }): Promise<void> {
     const contacts = await this.$api.contacts.findAll()
     commit('setContacts', contacts)
   },
-  async loadConfigurationContacts ({ commit }: { commit: Commit }, id: string) {
-    // @ts-ignore
-    const contacts = await this.$api.configurations.findRelatedContacts(id)
-    commit('setConfigurationContacts', contacts)
-  },
-  async addContactToConfiguration (_context: ActionContext<ContactsState, ContactsState>,
-    {
-      configurationId,
-      contactId
-    }: { configurationId: string, contactId: string }) {
-    // @ts-ignore
-    await this.$api.configurations.addContact(configurationId, contactId)
-  },
-  async removeContactFromConfiguration (_context: ActionContext<ContactsState, ContactsState>,
-    {
-      configurationId,
-      contactId
-    }: { configurationId: string, contactId: string }) {
-    // @ts-ignore
-    await this.$api.configurations.removeContact(configurationId, contactId)
-  },
-  setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
+  setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number): void {
     commit('setPageNumber', newPageNumber)
   },
-  setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
+  setPageSize ({ commit }: { commit: Commit }, newPageSize: number): void {
     commit('setPageSize', newPageSize)
   },
-  async deleteContact ({ _commit }: { _commit: Commit }, id: string) {
-    // @ts-ignore
-    await this.$api.contacts.deleteById(id)
+  deleteContact (_context, id: string): Promise<void> {
+    return this.$api.contacts.deleteById(id)
   },
-  saveContact ({ _commit }: { _commit: Commit }, contact: Contact): Promise<Contact> {
-    // @ts-ignore
+  saveContact (_context, contact: Contact): Promise<Contact> {
     return this.$api.contacts.save(contact)
   }
 }

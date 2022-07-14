@@ -44,9 +44,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, ProvideReactive, Vue } from 'nuxt-property-decorator'
+import { Component, ProvideReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { DevicesState, LoadDeviceAction } from '@/store/devices'
 import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
 
@@ -64,7 +65,7 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   methods: {
     ...mapActions('devices', ['loadDevice']),
-    ...mapActions('appbar', ['initDevicesDeviceIdAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
 
   }
 })
@@ -79,15 +80,15 @@ export default class DevicePage extends Vue {
 
   // vuex definition for typescript check
   device!: DevicesState['device']
-  initDevicesDeviceIdAppBar!: (id: string) => void
-  setDefaults!: () => void
   loadDevice!: LoadDeviceAction
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   mounted () {
-    this.initDevicesDeviceIdAppBar(this.deviceId)
+    this.initializeAppBar()
   }
 
   async fetch (): Promise<void> {
@@ -122,16 +123,51 @@ export default class DevicePage extends Vue {
     }
   }
 
-  beforeDestroy () {
-    this.setDefaults()
-  }
-
   get deviceId () {
     return this.$route.params.deviceId
   }
 
   isBasePath () {
     return this.$route.path === '/devices/' + this.deviceId || this.$route.path === '/devices/' + this.deviceId + '/'
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/devices/' + this.deviceId + '/basic',
+        name: 'Basic Data'
+      },
+      {
+        to: '/devices/' + this.deviceId + '/contacts',
+        name: 'Contacts'
+      },
+      {
+        to: '/devices/' + this.deviceId + '/measuredquantities',
+        name: 'Measured Quantities'
+      },
+      {
+        to: '/devices/' + this.deviceId + '/customfields',
+        name: 'Custom Fields'
+      },
+      {
+        to: '/devices/' + this.deviceId + '/attachments',
+        name: 'Attachments'
+      },
+      {
+        to: '/devices/' + this.deviceId + '/actions',
+        name: 'Actions'
+      }
+    ])
+    if (this.device) {
+      this.setTitle(this.device.shortName)
+    }
+  }
+
+  @Watch('device', { immediate: true, deep: true })
+  onDeviceChanged (val: DevicesState['device']) {
+    if (val && val.id) {
+      this.setTitle(val.shortName)
+    }
   }
 }
 </script>

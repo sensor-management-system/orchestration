@@ -176,7 +176,7 @@ export type UpdatePlatformSoftwareUpdateActionAction = (params: {platformId: str
 export type DeletePlatformSoftwareUpdateActionAction = (softwareUpdateActionId: string) => Promise<void>
 export type UpdatePlatformAction = (platform: Platform) => void
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
-export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boolean, copyAttachments: boolean}) => Promise<string>
+export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, originalPlatformId: string}) => Promise<string>
 export type ExportAsCsvAction = () => Promise<Blob>
 export type DeletePlatformAction = (id: string) => Promise<void>
 export type SetPageNumberAction = (newPageNumber: number) => void

@@ -130,9 +130,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
 import { LoadDeviceAction, CopyDeviceAction, DevicesState } from '@/store/devices'
 
@@ -155,7 +156,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   },
   methods: {
     ...mapActions('devices', ['copyDevice', 'loadDevice']),
-    ...mapActions('appbar', ['setDefaults', 'initDeviceCopyAppBar'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 // @ts-ignore
@@ -175,16 +176,16 @@ export default class DeviceCopyPage extends Vue {
 
   // vuex definition for typescript check
   device!: DevicesState['device']
-  initDeviceCopyAppBar!: (id: string) => void
-  setDefaults!: () => void
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   userGroups!: UserGroupsGetter
   loadDevice!: LoadDeviceAction
   copyDevice!: CopyDeviceAction
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   async created () {
-    this.initDeviceCopyAppBar(this.deviceId)
+    this.initializeAppBar()
     try {
       this.isLoading = true
       await this.loadDevice({
@@ -210,10 +211,6 @@ export default class DeviceCopyPage extends Vue {
     } finally {
       this.isLoading = false
     }
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
   }
 
   get deviceId () {
@@ -268,6 +265,43 @@ export default class DeviceCopyPage extends Vue {
       this.$store.commit('snackbar/setError', 'Copy failed')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/devices/copy/' + this.deviceId,
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Measured Quantities',
+        disabled: true
+      },
+      {
+        name: 'Custom Fields',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('Copy Device')
+  }
+
+  @Watch('device', { immediate: true, deep: true })
+  onDeviceChanged (val: DevicesState['device']) {
+    if (val && val.id) {
+      this.setTitle('Copy ' + val.shortName)
     }
   }
 }

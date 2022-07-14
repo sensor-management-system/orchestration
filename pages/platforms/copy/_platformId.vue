@@ -119,9 +119,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
 import { PlatformsState, LoadPlatformAction, CopyPlatformAction } from '@/store/platforms'
 
@@ -144,7 +145,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform', 'copyPlatform']),
-    ...mapActions('appbar', ['setDefaults', 'initPlatformCopyAppBar'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 // @ts-ignore
@@ -164,14 +165,14 @@ export default class PlatformCopyPage extends Vue {
   platform!: PlatformsState['platform']
   loadPlatform!: LoadPlatformAction
   copyPlatform!: CopyPlatformAction
-  initPlatformCopyAppBar!: (id: string) => void
-  setDefaults!: () => void
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   userGroups!: UserGroupsGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   created () {
-    this.initPlatformCopyAppBar(this.platformId)
+    this.initializeAppBar()
   }
 
   async fetch (): Promise<void> {
@@ -198,10 +199,6 @@ export default class PlatformCopyPage extends Vue {
     } finally {
       this.isLoading = false
     }
-  }
-
-  beforeDestroy () {
-    this.setDefaults()
   }
 
   get platformId () {
@@ -260,6 +257,35 @@ export default class PlatformCopyPage extends Vue {
       this.$store.commit('snackbar/setError', 'Copy failed')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/platform/copy/' + this.platformId,
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('Copy Platform')
+  }
+
+  @Watch('platform', { immediate: true, deep: true })
+  onDeviceChanged (val: PlatformsState['platform']) {
+    if (val && val.id) {
+      this.setTitle('Copy ' + val.shortName)
     }
   }
 }

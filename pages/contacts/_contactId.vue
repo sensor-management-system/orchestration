@@ -37,30 +37,37 @@ permissions and limitations under the Licence.
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
+
+import { SetTitleAction } from '@/store/appbar'
+import { ContactsState, LoadContactAction } from '@/store/contacts'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator },
+  computed: {
+    ...mapState('contacts', ['contact'])
+  },
   methods: {
     ...mapActions('contacts', ['loadContact']),
-    ...mapActions('appbar', ['initContactsContactIdAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle'])
   }
 })
 export default class ContactShowPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  initContactsContactIdAppBar!: () => void
-  setDefaults!: () => void
-  loadContact!: (id: string) => void
+  contact!: ContactsState['contact']
+  loadContact!: LoadContactAction
+  setTitle!: SetTitleAction
 
   async created () {
     try {
       this.isLoading = true
-      this.initContactsContactIdAppBar()
+      this.initializeAppBar()
       await this.loadContact(this.contactId)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading contact failed')
@@ -69,12 +76,21 @@ export default class ContactShowPage extends Vue {
     }
   }
 
-  beforeDestroy () {
-    this.setDefaults()
-  }
-
   get contactId () {
     return this.$route.params.contactId
+  }
+
+  initializeAppBar () {
+    if (this.contact) {
+      this.setTitle(this.contact.toString())
+    }
+  }
+
+  @Watch('contact', { immediate: true, deep: true })
+  onContactChanged (val: ContactsState['contact'] | null): void {
+    if (val && val.id) {
+      this.setTitle(val?.toString())
+    }
   }
 }
 </script>

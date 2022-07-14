@@ -79,17 +79,24 @@ import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { RawLocation } from 'vue-router'
 
 import { mapActions, mapState } from 'vuex'
+
+import { SetTitleAction } from '@/store/appbar'
+
+import { Configuration, IConfiguration } from '@/models/Configuration'
+
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
-import { Configuration, IConfiguration } from '@/models/Configuration'
 @Component({
   components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons, NavigationGuardDialog },
   middleware: ['auth'],
   computed: mapState('configurations', ['configuration']),
-  methods: mapActions('configurations', ['saveConfiguration', 'loadConfiguration'])
+  methods: {
+    ...mapActions('configurations', ['saveConfiguration', 'loadConfiguration']),
+    ...mapActions('appbar', ['setTitle'])
+  }
 })
 export default class ConfigurationEditBasicPage extends Vue {
   @InjectReactive()
@@ -105,6 +112,7 @@ export default class ConfigurationEditBasicPage extends Vue {
   configuration!: IConfiguration
   saveConfiguration!: (configuration: Configuration) => void
   loadConfiguration!: (id: string) => void
+  setTitle!: SetTitleAction
 
   created () {
     if (this.configuration) {

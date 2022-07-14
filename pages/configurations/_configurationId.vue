@@ -45,9 +45,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, ProvideReactive, Vue } from 'nuxt-property-decorator'
+import { Component, ProvideReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
 
 import { Configuration } from '@/models/Configuration'
@@ -66,7 +67,7 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   methods: {
     ...mapActions('configurations', ['loadConfiguration']),
-    ...mapActions('appbar', ['initConfigurationsConfigurationIdAppBar', 'setDefaults'])
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 // @ts-ignore
@@ -81,17 +82,17 @@ export default class ConfigurationsIdPage extends Vue {
 
   // vuex definition for typescript check
   configuration!: Configuration | null
-  initConfigurationsConfigurationIdAppBar!: (id: string) => void
-  setDefaults!: () => void
   loadConfiguration!: (id: string) => void
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   async created () {
     try {
       this.isLoading = true
-      this.initConfigurationsConfigurationIdAppBar(this.configurationId)
+      this.initializeAppBar()
       await this.loadConfiguration(this.configurationId)
 
       if (!this.configuration) {
@@ -117,8 +118,30 @@ export default class ConfigurationsIdPage extends Vue {
     }
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/configurations/' + this.configurationId + '/basic',
+        name: 'Basic Data'
+      },
+      {
+        to: '/configurations/' + this.configurationId + '/contacts',
+        name: 'Contacts'
+      },
+      {
+        to: '/configurations/' + this.configurationId + '/platforms-and-devices',
+        name: 'Platforms and Devices'
+      },
+      {
+        to: '/configurations/' + this.configurationId + '/locations',
+        name: 'Locations'
+      },
+      {
+        to: '/configurations/' + this.configurationId + '/actions',
+        name: 'Actions'
+      }
+    ])
+    this.setTitle(this.configuration?.label || 'Configuration')
   }
 
   get configurationId () {
@@ -128,6 +151,13 @@ export default class ConfigurationsIdPage extends Vue {
   isBasePath () {
     return this.$route.path === '/configurations/' + this.configurationId ||
       this.$route.path === '/configurations/' + this.configurationId + '/'
+  }
+
+  @Watch('configuration', { immediate: true, deep: true })
+  onConfigurationChanged (val: Configuration): void {
+    if (val && val.id) {
+      this.setTitle(val.label || 'Configuration')
+    }
   }
 }
 </script>
