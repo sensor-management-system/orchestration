@@ -57,88 +57,26 @@ class PidList(ResourceList):
         SMS-0000-001C-2FE7-A-STAGE-TEST
 
         """
+        """List Pids, or search PIDS for a term in url."""
         if not g.user:
             raise UnauthorizedError("Authentication required.")
         limit = request.args["limit"] if "limit" in request.args.keys() else None
         page = request.args["page"] if "page" in request.args.keys() else None
         if "term" in request.args:
             term = request.args["term"]
-            response = pid.search(term, limit)
+            response = pid.search_after_a_pid(term, limit)
         else:
-            response = pid.list(limit, page)
+            response = pid.list_pids(limit, page)
         return response
 
     def post(self, *args, **kwargs):
-        """
-        Create a new PID with instrument data or with instrument instance.
-
-        - Instrument Data is a list of dictionaries, which should have all flowing attributes:
-            - type: required: The data type defines the syntax and semantics of the data in its data field.
-            - source_object_url: required: A landing page that the identifier resolves to.
-            - id: required: Unique string that identifies the instrument instance.
-            - identifier_type: required: Type of the identifier.
-            - schema_version: required: Version number of the PIDINST schema used in this record
-            - contact_email: required: contact_email name of the owner.
-            - given_name: required: given_name name of the owner.
-            - family_name: required: family_name name of the owner.
-            - manufacturer_uri: The instrument's manufacturer(s) or developer.
-             This may also be the owner for custom build instruments.
-            - manufacturer: required: Full name of the manufacturer.
-
-            :Example: of the Instrument data:
-            {
-            "instrument_data": {
-                "source_object_url":"https://localhost.localdomain/devices/1",
-                "type": "device",
-                "id": "1",
-                "identifier_type": "Handel",
-                "schema_version":"0.1",
-                "short_name":"TID1",
-                "contact_email":"alhajtah@ufz.de",
-                "given_name":"Kotyba",
-                "family_name":"Alhaj Taha",
-                "manufacturer_uri":"https://localhost.localdomain/cv/manufacturers/10000",
-                "manufacturer_name":"DIY"}
-            }
-        - instrument_instance is a dictionary which hast exactly three attributes to choose the
-        right entity from database.
-            - type: required: The type od the entity ∈ = {"device", "platform"}
-            - id: required: The id of the entity.
-            - source_uri: required: landing page of the entity.
-
-            :Example: of the Instrument instance:
-
-            {
-                "instrument_instance":{
-                    "type":"device",
-                    "id": "1",
-                    "source_object_uri": "https://localhost/devices/1"
-                }
-            }
-        """
+        """Create a new PID"""
         if not g.user:
             raise UnauthorizedError("Authentication required.")
-        if "instrument_data" in request.get_json():
-            request_data = request.get_json()["instrument_data"]
-            instrument_data = make_instrument_data_from_request(request_data)
-            if request_data["type"] == "device":
-                instrument = (
-                    db.session.query(Device).filter_by(id=request_data["id"]).first()
-                )
-            else:
-                instrument = (
-                    db.session.query(Platform).filter_by(id=request_data["id"]).first()
-                )
-        elif "instrument_instance" in request.get_json():
-            instrument_instance = request.get_json()["instrument_instance"]
-            instrument_data, instrument = make_instrument_data_from_instance(
-                instrument_instance
-            )
-        else:
-            raise BadRequestError("No instrument_data or instrument_instance.")
-
-        persistent_identifier = pid.create(instrument_data)
-        add_pid(instrument, persistent_identifier)
+        if "url" not in request.args.keys():
+            raise BadRequestError("No url.")
+        url = request.args["url"]
+        persistent_identifier = pid.create_a_new_pid(url)
         response = {"pid": persistent_identifier}
         return response
 
@@ -151,7 +89,7 @@ class PidDetail(ResourceDetail):
         if "pid" not in kwargs.keys():
             raise BadRequestError("No pid.")
         source_object_pid = kwargs["pid"]
-        response = pid.get(source_object_pid)
+        response = pid.get_a_pid(source_object_pid)
         return response
 
     def patch(self, *args, **kwargs):
@@ -162,7 +100,7 @@ class PidDetail(ResourceDetail):
             raise BadRequestError("No pid or url.")
         source_object_pid = kwargs["pid"]
         updated_url = request.args["url"]
-        return pid.update(source_object_pid, updated_url)
+        return pid.update_existing_pid(source_object_pid, updated_url)
 
     def delete(self, *args, **kwargs):
         """Delete a PID."""
@@ -326,3 +264,4 @@ def make_instrument_data_from_request(instrument_data: dict) -> list:
     except KeyError as e:
         raise BadRequestError(repr(e))
     return instrument_data
+        return pid.delete_a_pid(source_object_pid)

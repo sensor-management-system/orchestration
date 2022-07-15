@@ -9,7 +9,6 @@ from ...frj_csv_export.resource import ResourceList
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
-    add_pid,
 )
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db

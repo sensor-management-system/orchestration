@@ -50,10 +50,16 @@ class Pid:
         """Get sms prefix."""
         return current_app.config["PID_PREFIX"]
 
-    def list_pids(self):
+    def list_pids(self, limit=0, page=None):
         """
         Retrieve the list of pids at once.
 
+        :param limit: the maximum number of items to return. The default is 1000.
+        As a special case, if you specify limit=0, all items will be returned,
+        without limit.
+        :param page: When using limit parameter the returned data are displayed on multiple pages.
+        the number of the page to return. I.e., if you specify limit=100&page=3, items 201 through 300
+        will be returned
         :return: a list of all pids.
         """
         header = {"Accept": "application/json"}
@@ -63,6 +69,7 @@ class Pid:
                 auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
                 verify=False,
                 headers=header,
+                params={"limit": limit, "page": page},
             )
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             raise ServiceIsUnreachableError(repr(e))
@@ -70,11 +77,36 @@ class Pid:
             raise ConflictError(repr(e))
         return response.json()
 
-    def search_after_a_pid(self, term):
+    def get_a_pid(self, object_pid):
+        """
+        Retrieve the information at once for a PID.
+
+        :param object_pid: The pid
+        :return: pid description.
+        """
+        header = {"Content-Type": "application/json", "Accept": "application/json"}
+        try:
+            response = requests.get(
+                url=self.pid_service_url + object_pid,
+                auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
+                verify=False,
+                headers=header,
+            )
+            response.raise_for_status()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            raise ServiceIsUnreachableError(repr(e))
+        except requests.exceptions.HTTPError as e:
+            raise ConflictError(repr(e))
+        return response.json()
+
+    def search_after_a_pid(self, term=None, limit=0):
         """
         search for a PID by using a term.
 
-        :return: a dict.
+        :param limit: the limit of results
+        :param inst: a string to Search and get the list of PIDs registered by an institute.
+        :param term: a string to Search and get the PID of an object with the selected url.
+        :return: a list of match pids.
         """
         header = {"Accept": "application/json"}
         response = requests.get(
@@ -82,7 +114,7 @@ class Pid:
             auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
             verify=False,
             headers=header,
-            params={"URL": term},
+            params={"URL": f"*{term}*", "limit": limit},
         )
         return response.json()
 
@@ -321,11 +353,11 @@ class Pid:
         epic_pid = response.json()["epic-pid"]
         return epic_pid
 
-    def update(self, source_object_pid, instrument_data):
+    def update_existing_pid(self, source_object_pid, updated_url):
         """
         Update an existing PID.
 
-        :param instrument_data: data to update
+        :param updated_url:
         :param source_object_pid: The PID.
         :return:
         """
@@ -333,7 +365,7 @@ class Pid:
         try:
             response = requests.put(
                 url=self.pid_service_url + source_object_pid,
-                json=instrument_data,
+                data=json_data,
                 auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
                 verify=False,
                 headers=header,
@@ -345,7 +377,7 @@ class Pid:
             raise ConflictError(repr(e))
         return response.status_code  # 204
 
-    def delete(self, object_pid):
+    def delete_a_pid(self, object_pid):
         """
         Delete a PID.
 
