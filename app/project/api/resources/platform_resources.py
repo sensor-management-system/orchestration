@@ -13,7 +13,6 @@ from ...api.auth.permission_utils import (
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
 from ...frj_csv_export.resource import ResourceList
-from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
 from ...extensions.instances import pid
@@ -96,11 +95,6 @@ class PlatformList(ResourceList):
         platform.updated_by_id = g.user.id
 
         save_to_db(platform)
-
-        if current_app.config["INSTITUTE"] == "ufz":
-            sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
-            source_object_url = f"{sms_frontend_url}/platforms/{str(platform.id)}"
-            add_pid(platform, source_object_url)
 
         return result
 
