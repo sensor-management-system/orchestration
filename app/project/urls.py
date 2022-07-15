@@ -441,3 +441,14 @@ api.route(
     "configuration_contact_role_detail",
     "/configuration-contact-roles/<int:id>",
 )
+# PIDs
+api.route(
+    PidList,
+    "pid_list",
+    "/pids"
+)
+api.route(
+    PidDetail,
+    "pid_detail",
+    "/pids/<pid>"
+)

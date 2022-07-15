@@ -36,7 +36,6 @@ from .device_attachment_resources import (
     DeviceAttachmentList,
     DeviceAttachmentDetail,
 )  # noqa: F401
-from .mounting_availabilities import DeviceAvailabilities, PlatformAvailabilities  # noqa: F401
 from .device_calibration_action_attachment_resources import (  # noqa: F401
     DeviceCalibrationAttachmentDetail,
     DeviceCalibrationAttachmentList,
@@ -91,6 +90,8 @@ from .generic_platform_action_resources import (  # noqa: F401
     GenericPlatformActionDetail,
     GenericPlatformActionList,
 )
+from .mounting_availabilities import DeviceAvailabilities, PlatformAvailabilities  # noqa: F401
+from .pid_resources import PidList, PidDetail  # noqa: F401
 from .ping import Ping  # noqa: F401
 from .platform_attachment_resources import (
     PlatformAttachmentList,
