@@ -8,7 +8,6 @@ from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
-    add_pid,
 )
 
 from ...frj_csv_export.resource import ResourceList
@@ -103,12 +102,12 @@ class DeviceList(ResourceList):
         device.updated_by_id = g.user.id
 
         save_to_db(device)
-        
+
         if current_app.config["INSTITUTE"] == "ufz":
             sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
             source_object_url = f"{sms_frontend_url}/devices/{str(device.id)}"
             add_pid(device, source_object_url)
-            
+
         return result
 
     schema = DeviceSchema

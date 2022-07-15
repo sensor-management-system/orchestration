@@ -89,6 +89,7 @@ from .mounting_availabilities import (  # noqa: F401
     DeviceAvailabilities,
     PlatformAvailabilities,
 )
+from .pid_resources import PidList, PidDetail  # noqa: F401
 from .ping import Ping  # noqa: F401
 from .platform_attachment_resources import (  # noqa: F401
     PlatformAttachmentDetail,
