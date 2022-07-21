@@ -1,9 +1,17 @@
 """Tests for the devices."""
+import datetime
 import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration, Contact, Device, DeviceMountAction, User
+from project.api.models import (
+    Configuration,
+    Contact,
+    Device,
+    DeviceMountAction,
+    PlatformMountAction,
+    User,
+)
 from project.api.models.base_model import db
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
@@ -23,6 +31,7 @@ def payload_data(
     device,
     parent_platform,
     begin_date=fake.future_datetime().__str__(),
+    end_date=None,
 ):
     data = {
         "data": {
@@ -30,6 +39,7 @@ def payload_data(
             "attributes": {
                 "begin_description": "Test DeviceMountAction",
                 "begin_date": begin_date,
+                "end_date": end_date,
                 "offset_x": str(fake.coordinate()),
                 "offset_y": str(fake.coordinate()),
                 "offset_z": str(fake.coordinate()),
@@ -89,7 +99,9 @@ class TestMountDevicePermissions(BaseTestCase):
             .filter_by(id=device_mount_action.id)
             .one()
         )
-        self.assertEqual(action.begin_description, device_mount_action.begin_description)
+        self.assertEqual(
+            action.begin_description, device_mount_action.begin_description
+        )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
@@ -127,7 +139,9 @@ class TestMountDevicePermissions(BaseTestCase):
             .filter_by(id=device_mount_action.id)
             .one()
         )
-        self.assertEqual(action.begin_description, device_mount_action.begin_description)
+        self.assertEqual(
+            action.begin_description, device_mount_action.begin_description
+        )
 
         # Without a valid JWT -> Will not be listed.
         response = self.client.get(self.url)
@@ -151,7 +165,15 @@ class TestMountDevicePermissions(BaseTestCase):
             is_public=True,
             is_internal=False,
         )
-        db.session.add_all([device, parent_platform, contact, configuration])
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
         db.session.commit()
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
@@ -164,7 +186,6 @@ class TestMountDevicePermissions(BaseTestCase):
 
     def test_get_as_registered_user(self):
         """Ensure that a registered user can see public, internal."""
-
         public_device = Device(
             short_name=fake.pystr(),
             is_public=True,
@@ -283,7 +304,15 @@ class TestMountDevicePermissions(BaseTestCase):
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
-        db.session.add_all([device, parent_platform, contact, configuration])
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
         db.session.commit()
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
@@ -312,7 +341,15 @@ class TestMountDevicePermissions(BaseTestCase):
         mock_jwt = generate_userinfo_data()
         contact = create_a_test_contact(mock_jwt)
         configuration = generate_configuration_model()
-        db.session.add_all([device, parent_platform, contact, configuration])
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
         db.session.commit()
         data = payload_data(
             self.object_type, configuration, contact, device, parent_platform
@@ -337,62 +374,6 @@ class TestMountDevicePermissions(BaseTestCase):
                 )
                 self.assertEqual(delete_response_user_is_a_member.status_code, 200)
 
-    #def test_mount_a_device_in_two_configuration_at_same_time(self):
-    #    """Ensure mounting a device in more than one configuration at the same time won't success."""
-    #    group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
-    #    device = create_a_test_device(group_ids=group_id_test_user_is_member_in_2,)
-    #    parent_platform = create_a_test_platform()
-    #    mock_jwt = generate_userinfo_data()
-    #    contact = Contact(
-    #        given_name=mock_jwt["given_name"],
-    #        family_name=mock_jwt["family_name"],
-    #        email=mock_jwt["email"],
-    #    )
-    #    first_configuration = generate_configuration_model()
-    #    second_configuration = generate_configuration_model()
-    #    db.session.add_all(
-    #        [
-    #            device,
-    #            parent_platform,
-    #            contact,
-    #            first_configuration,
-    #            second_configuration,
-    #        ]
-    #    )
-    #    db.session.commit()
-    #    data = payload_data(
-    #        self.object_type, first_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
-    #    )
-    #    access_headers = create_token()
-    #    with patch.object(
-    #        Idl, "get_all_permission_groups_for_a_user"
-    #    ) as test_get_all_permission_groups_for_a_user:
-    #        test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-    #        with self.client:
-    #            response = self.client.post(
-    #                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-    #                data=json.dumps(data),
-    #                content_type="application/vnd.api+json",
-    #                headers=access_headers,
-    #            )
-    #        self.assertEqual(response.status_code, 201)
-    #    data_2 = payload_data(
-    #        self.object_type, second_configuration, contact, device, parent_platform, begin_date='2022-04-05 00:21:34'
-    #    )
-    #    access_headers = create_token()
-    #    with patch.object(
-    #        Idl, "get_all_permission_groups_for_a_user"
-    #    ) as test_get_all_permission_groups_for_a_user:
-    #        test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
-    #        with self.client:
-    #            response_2 = self.client.post(
-    #                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
-    #                data=json.dumps(data_2),
-    #                content_type="application/vnd.api+json",
-    #                headers=access_headers,
-    #            )
-    #    self.assertEqual(response_2.status_code, 409)
-
     def test_mount_a_device_in_two_configuration_at_different_time(self):
         """Ensure mounting a device in more than one configuration at the different time will success."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
@@ -404,6 +385,12 @@ class TestMountDevicePermissions(BaseTestCase):
         contact = create_a_test_contact(mock_jwt)
         first_configuration = generate_configuration_model()
         second_configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=first_configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=2022, month=1, day=1),
+        )
         db.session.add_all(
             [
                 device,
@@ -411,6 +398,7 @@ class TestMountDevicePermissions(BaseTestCase):
                 contact,
                 first_configuration,
                 second_configuration,
+                parent_platform_mount1,
             ]
         )
         db.session.commit()
@@ -423,8 +411,12 @@ class TestMountDevicePermissions(BaseTestCase):
             begin_date="2022-02-18 20:44:42",
         )
         mount_data["data"]["attributes"]["end_date"] = "2022-02-28 20:44:42"
-        mount_data["data"]["attributes"]["end_description"] = "test unmount device action"
-        mount_data["data"]["relationships"]["end_contact"] = {"data": {"type": "contact", "id": contact.id}}
+        mount_data["data"]["attributes"][
+            "end_description"
+        ] = "test unmount device action"
+        mount_data["data"]["relationships"]["end_contact"] = {
+            "data": {"type": "contact", "id": contact.id}
+        }
         mount_data_2 = payload_data(
             self.object_type,
             first_configuration,
@@ -455,3 +447,317 @@ class TestMountDevicePermissions(BaseTestCase):
                     headers=access_headers,
                 )
                 self.assertEqual(mount_response_2.status_code, 201)
+
+    def test_mount_a_device_in_two_configuration_at_same_time(self):
+        """Ensure mounting a device in more than one configuration at the same time won't success."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        first_configuration = generate_configuration_model()
+        second_configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=first_configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=2022, month=4, day=5),
+        )
+        db.session.add_all(
+            [
+                device,
+                parent_platform,
+                contact,
+                first_configuration,
+                second_configuration,
+                parent_platform_mount1,
+            ]
+        )
+        db.session.commit()
+        # Mount a Device Without unmount date
+        data = payload_data(
+            self.object_type,
+            first_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-04-05 00:21:34",
+        )
+        # Try to mount the previous device at the same time but in another configuration.
+        data_2 = payload_data(
+            self.object_type,
+            second_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-04-05 00:21:34",
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 201)
+            # This Should Fail as the Device is active in a configuration.
+            response_2 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data_2),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_2.status_code, 409)
+
+    def test_mount_a_device_with_time_interval_between_two_mount_actions(self):
+        """
+        Ensure mounting a device between two mount actions if
+        end_date M1 < Mount interval < begin_date of M2 will success.
+        """
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        first_configuration = generate_configuration_model()
+        second_configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=first_configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=2022, month=4, day=5),
+            end_date=datetime.datetime(year=2022, month=5, day=6),
+        )
+        parent_platform_mount2 = PlatformMountAction(
+            configuration=second_configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=2022, month=6, day=1),
+        )
+        db.session.add_all(
+            [
+                device,
+                parent_platform,
+                contact,
+                first_configuration,
+                second_configuration,
+                parent_platform_mount1,
+                parent_platform_mount2,
+            ]
+        )
+        db.session.commit()
+        # Mount a device in this intervall ["2022-04-05 00:21:34", "2022-05-05 00:21:34"]
+        data = payload_data(
+            self.object_type,
+            first_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-04-05 00:21:34",
+            end_date="2022-05-05 00:21:34",
+        )
+        # Mount the previous device in this intervall ["2022-07-05 00:21:34", None]
+        data_2 = payload_data(
+            self.object_type,
+            second_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-07-05 00:21:34",
+        )
+        # Mount the previous device in this intervall ["2022-06-05 00:21:34", "2022-06-28 00:21:34"]
+        data_3 = payload_data(
+            self.object_type,
+            second_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-06-05 00:21:34",
+            end_date="2022-06-28 00:21:34",
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 201)
+            # This should work as it there is no mount action after this one.
+            response_2 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data_2),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_2.status_code, 201)
+            # This should also work as it starts and end before the next mount action.
+            response_3 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data_3),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_3.status_code, 201)
+
+    def test_mount_a_device_with_time_interval_overlap_a_mount_actions(self):
+        """
+        Ensure mounting a device between two mount actions if
+        Mount interval overlap begin_date of M2 will Fail.
+        """
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = Contact(
+            given_name=mock_jwt["given_name"],
+            family_name=mock_jwt["family_name"],
+            email=mock_jwt["email"],
+        )
+        first_configuration = generate_configuration_model()
+        second_configuration = generate_configuration_model()
+        # In order to make sure that we can create a platform mount
+        # with a parent platform, we also must make sure that we
+        # have an active mount for this parent platform.
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=first_configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=2022, month=4, day=5),
+            end_date=datetime.datetime(year=2022, month=5, day=6),
+        )
+        parent_platform_mount2 = PlatformMountAction(
+            configuration=second_configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=2022, month=7, day=5),
+        )
+        db.session.add_all(
+            [
+                device,
+                parent_platform,
+                contact,
+                first_configuration,
+                second_configuration,
+                parent_platform_mount1,
+                parent_platform_mount2,
+            ]
+        )
+        db.session.commit()
+        # Mount a device in this intervall ["2022-04-05 00:21:34", "2022-05-05 00:21:34"]
+        data = payload_data(
+            self.object_type,
+            first_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-04-05 00:21:34",
+            end_date="2022-05-05 00:21:34",
+        )
+        # Mount the previous device in this intervall ["2022-07-05 00:21:34", None]
+        data_2 = payload_data(
+            self.object_type,
+            second_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-07-05 00:21:34",
+        )
+        # Mount the previous device in this intervall ["2022-06-05 00:21:34", None]
+        data_3 = payload_data(
+            self.object_type,
+            second_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-06-05 00:21:34",
+        )
+        # Mount the previous device in this intervall ["2022-06-05 00:21:34", "2022-08-05 00:21:34"]
+        data_4 = payload_data(
+            self.object_type,
+            second_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-06-05 00:21:34",
+            end_date="2022-08-05 00:21:34",
+        )
+        # Mount the previous device in this intervall ["2022-04-20 00:21:34", "2022-06-06 00:21:34"]
+        data_5 = payload_data(
+            self.object_type,
+            second_configuration,
+            contact,
+            device,
+            parent_platform,
+            begin_date="2022-04-20 00:21:34",
+            end_date="2022-06-06 00:21:34",
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 201)
+            # This should work as it there is no mount action after this one.
+            response_2 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data_2),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_2.status_code, 201)
+            # This should not work as it there is no unmount date before the next mount action.
+            response_3 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data_3),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_3.status_code, 409)
+            # This should not work as there is a conflict with the end_date.
+            response_4 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data_4),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_4.status_code, 409)
+            # This should not work as there is a conflict with the begin_date.
+            response_5 = self.client.post(
+                f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                data=json.dumps(data_5),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+            self.assertEqual(response_5.status_code, 409)

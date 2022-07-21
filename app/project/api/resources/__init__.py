@@ -31,6 +31,12 @@ from .configuration_static_location_end_actions_resources import (  # noqa: F401
     ConfigurationStaticLocationEndActionList,
 )
 from .contact_resources import ContactList, ContactDetail  # noqa: F401
+
+from .configuration_controllers import (  # noqa: F401
+    ControllerConfigurationMountingActions,
+    ControllerConfigurationMountingActionTimepoints,
+)
+
 from .customfield_resources import CustomFieldList, CustomFieldDetail  # noqa: F401
 from .device_attachment_resources import (
     DeviceAttachmentList,
