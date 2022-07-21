@@ -16,7 +16,7 @@ class PlatformMountActionSchema(Schema):
 
     id = fields.Integer(as_string=True)
     begin_date = fields.DateTime(required=True)
-    end_date = fields.DateTime(required=False)
+    end_date = fields.DateTime(allow_none=True)
     begin_description = fields.Str(allow_none=True)
     end_description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)
@@ -104,7 +104,7 @@ class DeviceMountActionSchema(Schema):
 
     id = fields.Integer(as_string=True)
     begin_date = fields.DateTime(required=True)
-    end_date = fields.DateTime(required=False)
+    end_date = fields.DateTime(allow_none=True)
     begin_description = fields.Str(allow_none=True)
     end_description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)

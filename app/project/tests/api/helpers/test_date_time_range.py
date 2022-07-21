@@ -138,3 +138,95 @@ class TestDateTimeRange(BaseTestCase):
 
         with self.assertRaises(ValueError):
             DateTimeRange(begin1, end1)
+
+    def test_covers(self):
+        """Test that one date time range covers another one."""
+        begin1 = datetime.datetime(year=2022, month=5, day=16)
+        end1 = datetime.datetime(year=2024, month=5, day=16)
+
+        begin2 = datetime.datetime(year=2023, month=5, day=16)
+        end2 = datetime.datetime(year=2023, month=7, day=16)
+
+        range1 = DateTimeRange(begin1, end1)
+        range2 = DateTimeRange(begin2, end2)
+
+        self.assertTrue(range1.covers(range2))
+        self.assertFalse(range2.covers(range1))
+
+    def test_covers_open_end_range1(self):
+        """Test that covers also works if the first range is open end."""
+        begin1 = datetime.datetime(year=2022, month=5, day=16)
+
+        begin2 = datetime.datetime(year=2023, month=5, day=16)
+        end2 = datetime.datetime(year=2023, month=7, day=16)
+
+        range1 = DateTimeRange(begin1, None)
+        range2 = DateTimeRange(begin2, end2)
+
+        self.assertTrue(range1.covers(range2))
+        self.assertFalse(range2.covers(range1))
+
+    def test_covers_open_end_both(self):
+        """Test that covers also works if both ranges are open end."""
+        begin1 = datetime.datetime(year=2022, month=5, day=16)
+        begin2 = datetime.datetime(year=2023, month=5, day=16)
+
+        range1 = DateTimeRange(begin1, None)
+        range2 = DateTimeRange(begin2, None)
+
+        self.assertTrue(range1.covers(range2))
+        self.assertFalse(range2.covers(range1))
+
+    def test_covers_self(self):
+        """Test that each range covers itself."""
+        begin1 = datetime.datetime(year=2022, month=5, day=16)
+        end1 = datetime.datetime(year=2024, month=5, day=16)
+
+        begin2 = datetime.datetime(year=2023, month=5, day=16)
+        end2 = datetime.datetime(year=2023, month=7, day=16)
+
+        range1 = DateTimeRange(begin1, end1)
+        range2 = DateTimeRange(begin2, end2)
+
+        self.assertTrue(range1.covers(range1))
+        self.assertTrue(range2.covers(range2))
+
+    def test_covers_only_partial(self):
+        """Test that one date time range doesn't cover another one completely."""
+        begin1 = datetime.datetime(year=2022, month=5, day=16)
+        end1 = datetime.datetime(year=2024, month=5, day=16)
+
+        begin2 = datetime.datetime(year=2023, month=5, day=16)
+        end2 = datetime.datetime(year=2025, month=7, day=16)
+
+        range1 = DateTimeRange(begin1, end1)
+        range2 = DateTimeRange(begin2, end2)
+
+        self.assertFalse(range1.covers(range2))
+        self.assertFalse(range2.covers(range1))
+
+    def test_covers_only_partial_open_end_range2(self):
+        """Test that one date time range doesn't cover another one with open end."""
+        begin1 = datetime.datetime(year=2022, month=5, day=16)
+        end1 = datetime.datetime(year=2024, month=5, day=16)
+
+        begin2 = datetime.datetime(year=2023, month=5, day=16)
+
+        range1 = DateTimeRange(begin1, end1)
+        range2 = DateTimeRange(begin2, None)
+
+        self.assertFalse(range1.covers(range2))
+        self.assertFalse(range2.covers(range1))
+
+    def test_in(self):
+        """Test that the `in` test gives the same result as covers."""
+        begin1 = datetime.datetime(year=2022, month=5, day=16)
+        end1 = datetime.datetime(year=2024, month=5, day=16)
+
+        begin2 = datetime.datetime(year=2023, month=5, day=16)
+        end2 = datetime.datetime(year=2023, month=7, day=16)
+
+        range1 = DateTimeRange(begin1, end1)
+        range2 = DateTimeRange(begin2, end2)
+
+        self.assertTrue(range1.covers(range2) == (range2 in range1))
