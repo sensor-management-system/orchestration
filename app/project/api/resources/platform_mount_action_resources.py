@@ -6,8 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
-from ..helpers.errors import MethodNotAllowed
-from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
+from ..helpers.mounting_checks import PlatformMountActionValidator
 from ..helpers.resource_mixin import (
     add_created_by_id,
     add_updated_by_id,
@@ -25,9 +24,11 @@ from ..token_checker import token_required
 class PlatformMountActionList(ResourceList):
     """List resource for platform mount actions (get, post)."""
 
+    validator = PlatformMountActionValidator()
+
     def before_post(self, args, kwargs, data=None):
         data_with_relationships = decode_json_request_data()
-        assert_object_is_free_to_be_mounted(data_with_relationships)
+        self.validator.validate_create(data_with_relationships)
 
     def before_create_object(self, data, *args, **kwargs):
         """Use jwt to add user id to dataset."""
@@ -100,13 +101,23 @@ class PlatformMountActionList(ResourceList):
 class PlatformMountActionDetail(ResourceDetail):
     """Detail resource for platform mount actions (get, delete, patch)."""
 
+    validator = PlatformMountActionValidator()
+
     def before_get(self, args, kwargs):
         """Return 404 Responses if PlatformMountAction not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     def before_patch(self, args, kwargs, data):
-        """Add updated by user id to the data."""
+        """
+        Do some checks if the wanted time-interval is available or not & some additional checks.
+        """
+        data_with_relationships = decode_json_request_data()
+        self.validator.validate_update(data_with_relationships, kwargs["id"])
         add_updated_by_id(data)
+
+    def before_delete(self, args, kwargs):
+        """Do some checks for possible orphans."""
+        self.validator.validate_delete(kwargs["id"])
 
     schema = PlatformMountActionSchema
     decorators = (token_required,)

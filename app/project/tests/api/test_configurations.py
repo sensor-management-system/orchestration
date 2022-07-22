@@ -2,16 +2,22 @@ import datetime
 import os
 
 from project import base_url
-from project.api.models import Contact
-from project.api.models import User
+from project.api.models import Contact, PlatformMountAction, User
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.device import Device
 from project.api.models.platform import Platform
-from project.tests.base import BaseTestCase, test_file_path
-from project.tests.base import create_token
-from project.tests.base import fake, generate_userinfo_data
-from project.tests.models.test_generic_actions_models import generate_configuration_action_model
+from project.tests.base import (
+    BaseTestCase,
+    create_token,
+    fake,
+    generate_userinfo_data,
+    test_file_path,
+)
+from project.tests.models.test_configurations_model import generate_configuration_model
+from project.tests.models.test_generic_actions_models import (
+    generate_configuration_action_model,
+)
 from project.tests.permissions import create_a_test_contact
 from project.tests.read_from_json import extract_data_from_json_file
 
@@ -74,8 +80,8 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-                input_calibration_date,
-                expected_output_calibration_date,
+            input_calibration_date,
+            expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -154,13 +160,25 @@ class TestConfigurationsService(BaseTestCase):
         db.session.add(platform3)
 
         device1 = Device(
-            short_name="Device 1", manufacturer_name=fake.pystr(), is_public=False, is_private=False, is_internal=True,
+            short_name="Device 1",
+            manufacturer_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         device2 = Device(
-            short_name="Device 2", manufacturer_name=fake.pystr(), is_public=False, is_private=False, is_internal=True,
+            short_name="Device 2",
+            manufacturer_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         device3 = Device(
-            short_name="Device 3", manufacturer_name=fake.pystr(), is_public=False, is_private=False, is_internal=True,
+            short_name="Device 3",
+            manufacturer_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
 
         db.session.add(device1)
@@ -168,7 +186,10 @@ class TestConfigurationsService(BaseTestCase):
         db.session.add(device3)
 
         config1 = Configuration(
-            label="Config1", location_type="static", is_public=False, is_internal=True,
+            label="Config1",
+            location_type="static",
+            is_public=False,
+            is_internal=True,
         )
         db.session.add(config1)
         db.session.commit()
@@ -183,7 +204,12 @@ class TestConfigurationsService(BaseTestCase):
                     "include",
                     "=",
                     ",".join(
-                        ["contacts", "src_longitude", "src_latitude", "src_elevation", ]
+                        [
+                            "contacts",
+                            "src_longitude",
+                            "src_latitude",
+                            "src_elevation",
+                        ]
                     ),
                 ]
             )
@@ -240,12 +266,28 @@ class TestConfigurationsService(BaseTestCase):
             is_internal=True,
             created_by=user,
         )
+        begin_date = fake.future_datetime()
+        # We need the parent platform mount; otherwise we get an 409.
+        device_parent_platform_mount = PlatformMountAction(
+            begin_date=begin_date,
+            configuration=configuration,
+            platform=device_parent_platform,
+            begin_contact=contact,
+        )
+        platform_parent_platform_mount = PlatformMountAction(
+            begin_date=begin_date,
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+        )
         db.session.add_all(
             [
                 device,
                 device_parent_platform,
                 platform,
                 parent_platform,
+                device_parent_platform_mount,
+                platform_parent_platform_mount,
                 contact,
                 configuration,
                 user,
@@ -258,7 +300,7 @@ class TestConfigurationsService(BaseTestCase):
                 "type": "device_mount_action",
                 "attributes": {
                     "begin_description": "Test DeviceMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
+                    "begin_date": str(begin_date),
                     "offset_x": str(fake.coordinate()),
                     "offset_y": str(fake.coordinate()),
                     "offset_z": str(fake.coordinate()),
@@ -286,7 +328,7 @@ class TestConfigurationsService(BaseTestCase):
                 "type": "platform_mount_action",
                 "attributes": {
                     "begin_description": "Test PlatformMountAction",
-                    "begin_date": fake.future_datetime().__str__(),
+                    "begin_date": str(begin_date),
                     "offset_x": str(fake.coordinate()),
                     "offset_y": str(fake.coordinate()),
                     "offset_z": str(fake.coordinate()),
@@ -452,7 +494,9 @@ class TestConfigurationsService(BaseTestCase):
 
         configuration_action = generate_configuration_action_model()
         config_id = configuration_action.configuration_id
-        _ = super().delete_object(url=f"{self.configurations_url}/{config_id}", )
+        _ = super().delete_object(
+            url=f"{self.configurations_url}/{config_id}",
+        )
 
     @staticmethod
     def add_a_contact():

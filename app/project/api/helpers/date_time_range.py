@@ -65,3 +65,17 @@ class DateTimeRange:
                 return True
 
         return False
+
+    def covers(self, other_range):
+        """Return true if the first range covers the other range completely."""
+        if self.begin_date <= other_range.begin_date:
+            if self.end_date is None:
+                return True
+            if other_range.end_date is None:
+                return False
+            return self.end_date >= other_range.end_date
+        return False
+
+    def __contains__(self, other_range):
+        """Use the covers method for the contains tests."""
+        return self.covers(other_range)

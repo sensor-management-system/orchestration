@@ -1,12 +1,12 @@
 """Resource classes for device mount actions."""
 
-from flask_rest_jsonapi import ResourceDetail, ResourceRelationship, ResourceList
+from flask_rest_jsonapi import ResourceDetail, ResourceList, ResourceRelationship
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
-from ..helpers.mounting_checks import assert_object_is_free_to_be_mounted
-from ..helpers.resource_mixin import decode_json_request_data
+from ..helpers.mounting_checks import DeviceMountActionValidator
+from ..helpers.resource_mixin import add_updated_by_id, decode_json_request_data
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.device import Device
@@ -20,9 +20,11 @@ from ..token_checker import token_required
 class DeviceMountActionList(ResourceList):
     """List resource for device mount actions (get, post)."""
 
+    validator = DeviceMountActionValidator()
+
     def before_post(self, args, kwargs, data=None):
         data_with_relationships = decode_json_request_data()
-        assert_object_is_free_to_be_mounted(data_with_relationships)
+        self.validator.validate_create(data_with_relationships)
 
     def query(self, view_kwargs):
         """
@@ -83,16 +85,30 @@ class DeviceMountActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
-        "methods": {"query": query, },
+        "methods": {"query": query},
     }
 
 
 class DeviceMountActionDetail(ResourceDetail):
     """Detail resource for device mount actions (get, delete, patch)."""
 
+    validator = DeviceMountActionValidator()
+
     def before_get(self, args, kwargs):
         """Return 404 Responses if DeviceMountAction not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def before_patch(self, args, kwargs, data=None):
+        """Do some checks (if the wanted time-interval is available or not for example)."""
+        # data with relationships is almost the same as data, but it reuses the structure
+        # of the request (attributes, relationships).
+        data_with_relationships = decode_json_request_data()
+        self.validator.validate_update(data_with_relationships, kwargs["id"])
+        add_updated_by_id(data)
+
+    def before_delete(self, args, kwargs):
+        """Do some checks for possible orphans."""
+        self.validator.validate_delete(kwargs["id"])
 
     schema = DeviceMountActionSchema
     decorators = (token_required,)

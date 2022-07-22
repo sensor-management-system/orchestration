@@ -3,11 +3,12 @@
 import datetime
 import json
 
+from dateutil.relativedelta import relativedelta
+
 from project import base_url
 from project.api.models import Configuration, Contact, Platform, PlatformMountAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data
-from project.tests.base import create_token
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import (
     add_mount_platform_action_model,
@@ -85,7 +86,7 @@ class TestPlatformMountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                    base_url + f"/configurations/{configuration1.id}/platform-mount-actions"
+                base_url + f"/configurations/{configuration1.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -93,13 +94,14 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
         )
 
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                    base_url + f"/configurations/{configuration2.id}/platform-mount-actions"
+                base_url + f"/configurations/{configuration2.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -107,14 +109,15 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
         )
 
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                    base_url
-                    + f"/configurations/{configuration2.id + 9999}/platform-mount-actions"
+                base_url
+                + f"/configurations/{configuration2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -145,12 +148,18 @@ class TestPlatformMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="platform1",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="Platform2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="Platform2",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform2)
 
@@ -178,7 +187,7 @@ class TestPlatformMountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                    base_url + f"/platforms/{platform1.id}/platform-mount-actions"
+                base_url + f"/platforms/{platform1.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -186,13 +195,14 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
         )
 
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                    base_url + f"/platforms/{platform2.id}/platform-mount-actions"
+                base_url + f"/platforms/{platform2.id}/platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -200,16 +210,18 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
         )
 
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                    base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
+                base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing, content_type="application/vnd.api+json",
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -284,7 +296,7 @@ class TestPlatformMountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                    base_url + f"/platforms/{platform3.id}/parent-platform-mount-actions"
+                base_url + f"/platforms/{platform3.id}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -292,13 +304,14 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["begin_description"], "Some first action"
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
         )
 
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                    base_url + f"/platforms/{platform4.id}/parent-platform-mount-actions"
+                base_url + f"/platforms/{platform4.id}/parent-platform-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -306,17 +319,19 @@ class TestPlatformMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["begin_description"], "Some other action"
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
         )
 
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                    base_url
-                    + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
+                base_url
+                + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing, content_type="application/vnd.api+json",
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -367,9 +382,24 @@ class TestPlatformMountAction(BaseTestCase):
             email="f." + userinfo["email"],
         )
         configuration = generate_configuration_model()
-        db.session.add_all([platform, parent_platform, begin_contact, end_contact, configuration])
-        db.session.commit()
         begin_date = fake.future_datetime()
+        p_platform_mount = PlatformMountAction(
+            configuration=configuration,
+            begin_contact=begin_contact,
+            begin_date=begin_date,
+            platform=parent_platform,
+        )
+        db.session.add_all(
+            [
+                platform,
+                parent_platform,
+                begin_contact,
+                end_contact,
+                configuration,
+                p_platform_mount,
+            ]
+        )
+        db.session.commit()
         end_date = begin_date + datetime.timedelta(days=2)
         data = {
             "data": {
@@ -385,7 +415,9 @@ class TestPlatformMountAction(BaseTestCase):
                 },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "begin_contact": {"data": {"type": "contact", "id": begin_contact.id}},
+                    "begin_contact": {
+                        "data": {"type": "contact", "id": begin_contact.id}
+                    },
                     "end_contact": {"data": {"type": "contact", "id": end_contact.id}},
                     "parent_platform": {
                         "data": {"type": "platform", "id": parent_platform.id}
@@ -402,14 +434,20 @@ class TestPlatformMountAction(BaseTestCase):
             object_type=self.object_type,
         )
 
-    def test_update_device_mount_action(self):
+    def test_update_platform_mount_action(self):
         """Update PlatformMountAction."""
         mount_platform_action = add_mount_platform_action_model()
+        # Don't deal with the constraints for a platform mount for this test.
+        mount_platform_action.parent_platform = None
+        db.session.add(mount_platform_action)
+        db.session.commit()
         mount_platform_action_updated = {
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {"begin_description": "updated", },
+                "attributes": {
+                    "begin_description": "updated",
+                },
             }
         }
         _ = super().update_object(
@@ -443,3 +481,341 @@ class TestPlatformMountAction(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_update_platform_mount_action_change_platform_id(self):
+        """Make sure platform id can not be changed if the platform doesn't exist."""
+        mount_platform_action = add_mount_platform_action_model()
+        # Don't deal with the constraints for a platform mount for this test.
+        mount_platform_action.parent_platform = None
+        db.session.add(mount_platform_action)
+        db.session.commit()
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_platform_action.id,
+                "attributes": {
+                    "begin_description": "updated",
+                },
+                "relationships": {
+                    "platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": mount_platform_action.platform.id + 10000,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{mount_platform_action.id}",
+                data=json.dumps(mount_platform_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_platform_mount_action_change_configuration_id(self):
+        """Make sure configuration id can not be changed if the config doesn't exist."""
+        mount_platform_action = add_mount_platform_action_model()
+        # Don't deal with the constraints for a platform mount for this test.
+        mount_platform_action.parent_platform = None
+        db.session.add(mount_platform_action)
+        db.session.commit()
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_platform_action.id,
+                "attributes": {
+                    "begin_description": "updated",
+                },
+                "relationships": {
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": mount_platform_action.configuration.id + 1,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{mount_platform_action.id}",
+                data=json.dumps(mount_platform_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        # New configuration id is not associated with an entry.
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_platform_mount_action_change_parent_platform_id(self):
+        """Make sure parent platform id can not be changed if the parent platform is not mounted before."""
+        mount_platform_action = add_mount_platform_action_model()
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_platform_action.id,
+                "attributes": {"begin_description": "updated"},
+                "relationships": {
+                    "parent_platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": mount_platform_action.parent_platform.id + 1,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{mount_platform_action.id}",
+                data=json.dumps(mount_platform_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
+
+    def test_update_platform_mount_action_add_parent_platform_id_if_there_is_no_parent(
+        self,
+    ):
+        """Make sure parent platform id con be add if it is None."""
+        p = Platform(
+            short_name=fake.linux_processor(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        userinfo = generate_userinfo_data()
+        c1 = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+
+        config = generate_configuration_model()
+        platform_mount_action = PlatformMountAction(
+            begin_date=fake.date(),
+            begin_description="test mount platform action model",
+            offset_x=fake.coordinate(),
+            offset_y=fake.coordinate(),
+            offset_z=fake.coordinate(),
+            platform=p,
+        )
+        platform_mount_action.configuration = config
+        platform_mount_action.begin_contact = c1
+
+        p_p = Platform(
+            short_name="platform parent platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        p_platform_mount_action = PlatformMountAction(
+            begin_date=platform_mount_action.begin_date,
+            begin_description="test mount platform action model",
+            offset_x=fake.coordinate(),
+            offset_y=fake.coordinate(),
+            offset_z=fake.coordinate(),
+            platform=p_p,
+        )
+        p_platform_mount_action.configuration = config
+        p_platform_mount_action.begin_contact = c1
+        db.session.add_all(
+            [p, c1, p_p, config, platform_mount_action, p_platform_mount_action]
+        )
+        db.session.commit()
+        self.assertEqual(platform_mount_action.parent_platform, None)
+
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": platform_mount_action.id,
+                "attributes": {"begin_description": "updated"},
+                "relationships": {
+                    "parent_platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": p_p.id,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{platform_mount_action.id}",
+                data=json.dumps(mount_platform_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_platform_mount_and_unmount_a_platform(self):
+        """Make sure platform con not be unmounted."""
+        mount_platform_action = add_mount_platform_action_model()
+        # Don't deal with the constraints for a platform mount for this test.
+        mount_platform_action.parent_platform = None
+        db.session.add(mount_platform_action)
+        db.session.commit()
+        end_date = mount_platform_action.begin_date + relativedelta(years=+1)
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_platform_action.id,
+                "attributes": {"end_date": end_date.isoformat()},
+                "relationships": {
+                    "end_contact": {
+                        "data": {
+                            "type": "contact",
+                            "id": mount_platform_action.begin_contact.id,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{mount_platform_action.id}",
+                data=json.dumps(mount_platform_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        self.assertEqual(data["attributes"]["end_date"], end_date.isoformat())
+
+    def test_update_platform_mount_and_change_the_time_intervall(self):
+        """Make sure platform con not be unmounted."""
+        p = Platform(
+            short_name=fake.linux_processor(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        userinfo = generate_userinfo_data()
+        c1 = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+
+        config = generate_configuration_model()
+        platform_mount_action_1 = PlatformMountAction(
+            begin_date="2022-06-08T07:25:00.782000",
+            end_date="2023-06-08T07:25:00.782000",
+            begin_description="test mount platform action model",
+            offset_x=fake.coordinate(),
+            offset_y=fake.coordinate(),
+            offset_z=fake.coordinate(),
+            platform=p,
+        )
+        platform_mount_action_1.configuration = config
+        platform_mount_action_1.begin_contact = c1
+        platform_mount_action_1.end_contact = c1
+
+        platform_mount_action_2 = PlatformMountAction(
+            begin_date="2024-06-08T07:25:00.782000",
+            begin_description="test mount platform action model",
+            offset_x=fake.coordinate(),
+            offset_y=fake.coordinate(),
+            offset_z=fake.coordinate(),
+            platform=p,
+        )
+        platform_mount_action_2.configuration = config
+        platform_mount_action_2.begin_contact = c1
+
+        p_p = Platform(
+            short_name="platform parent platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add_all(
+            [p, c1, p_p, config, platform_mount_action_1, platform_mount_action_2]
+        )
+        db.session.commit()
+        end_date = platform_mount_action_2.begin_date + relativedelta(years=+1)
+        # try to change it with an intervall, where the platform mounted.
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": platform_mount_action_2.id,
+                "attributes": {
+                    "begin_date": "2022-08-08T07:25:00.782000",
+                    "end_date": end_date.isoformat(),
+                },
+                "relationships": {
+                    "end_contact": {
+                        "data": {
+                            "type": "contact",
+                            "id": platform_mount_action_2.begin_contact.id,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{platform_mount_action_2.id}",
+                data=json.dumps(mount_platform_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
+
+        # This Should Work as we will deliver a valid time-interval
+        mount_platform_action_with_no_conflicts = {
+            "data": {
+                "type": self.object_type,
+                "id": platform_mount_action_2.id,
+                "attributes": {
+                    "begin_date": "2023-08-08T07:25:00.782000",
+                    "end_date": end_date.isoformat(),
+                },
+                "relationships": {
+                    "end_contact": {
+                        "data": {
+                            "type": "contact",
+                            "id": platform_mount_action_2.begin_contact.id,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{platform_mount_action_2.id}",
+                data=json.dumps(mount_platform_action_with_no_conflicts),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
+
+        # And also if we try to change the time-intervall with a conflict in
+        # end_date should not work
+        mount_platform_action_with_conflict_on_end_date = {
+            "data": {
+                "type": self.object_type,
+                "id": platform_mount_action_1.id,
+                "attributes": {
+                    "end_date": "2023-11-08T07:25:00.782000",
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{platform_mount_action_1.id}",
+                data=json.dumps(mount_platform_action_with_conflict_on_end_date),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
