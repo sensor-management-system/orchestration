@@ -141,7 +141,7 @@ def add_pid(obj_, source_object_url):
     :param obj_: the created object.
     :param source_object_url: the url to the object.
     """
-    obj_.persistent_identifier = pid.create_a_new_pid(source_object_url)
+    obj_.persistent_identifier = pid.create(source_object_url)
     obj_.schema_version = current_app.config["SCHEMA_VERSION"]
     obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
     db.session.add(obj_)
