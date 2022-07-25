@@ -134,7 +134,7 @@ class TestPlatformMountAction(BaseTestCase):
         configuration2 = Configuration(
             label="sample configuration II",
             is_public=True,
-            is_internal=False,
+            is_internal=False
         )
         db.session.add(configuration2)
 

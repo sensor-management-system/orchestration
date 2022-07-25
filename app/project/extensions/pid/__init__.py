@@ -50,7 +50,7 @@ class Pid:
         """Get sms prefix."""
         return current_app.config["PID_PREFIX"]
 
-    def list_pids(self, limit=0, page=None):
+    def list(self, limit=0, page=None):
         """
         Retrieve the list of pids at once.
 
@@ -77,7 +77,7 @@ class Pid:
             raise ConflictError(repr(e))
         return response.json()
 
-    def get_a_pid(self, object_pid):
+    def get(self, object_pid):
         """
         Retrieve the information at once for a PID.
 
@@ -99,12 +99,11 @@ class Pid:
             raise ConflictError(repr(e))
         return response.json()
 
-    def search_after_a_pid(self, term=None, limit=0):
+    def search(self, term=None, limit=0):
         """
         search for a PID by using a term.
 
         :param limit: the limit of results
-        :param inst: a string to Search and get the list of PIDs registered by an institute.
         :param term: a string to Search and get the PID of an object with the selected url.
         :return: a list of match pids.
         """
@@ -118,20 +117,19 @@ class Pid:
         )
         return response.json()
 
-    def create_a_new_pid(self, source_object_url: string) -> string:
+    def create(self, instrument_data) -> string:
         """
         Create a new PID.
 
-        :param source_object_url: the url for the source object.
+        :param instrument_data: the url for the source object.
         :return str: the pid of the object.
         """
 
-        json_data = json.dumps([{"type": "URL", "parsed_data": source_object_url}])
         header = {"Content-Type": "application/json", "Accept": "application/json"}
         try:
             response = requests.post(
                 url=self.pid_service_url,
-                data=json_data,
+                json=instrument_data,
                 auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
                 verify=False,
                 headers=header,
@@ -145,7 +143,7 @@ class Pid:
         epic_pid = response.json()["epic-pid"]
         return epic_pid
 
-    def update_existing_pid(self, source_object_pid, updated_url):
+    def update(self, source_object_pid, updated_url):
         """
         Update an existing PID.
 
@@ -170,7 +168,7 @@ class Pid:
             raise ConflictError(repr(e))
         return response.status_code  # 204
 
-    def delete_a_pid(self, object_pid):
+    def delete(self, object_pid):
         """
         Delete a PID.
 
