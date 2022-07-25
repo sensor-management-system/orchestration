@@ -157,6 +157,12 @@ class PlatformDetail(ResourceDetail):
         :return:
         """
         platform = db.session.query(Platform).filter_by(id=kwargs["id"]).first()
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            pid_to_delete = platform.persistent_identifier
+            if pid_to_delete and pid.get(pid_to_delete).status_code == 200:
+                pid.delete(pid_to_delete)
+
         if platform is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
         urls = [a.url for a in platform.platform_attachments]
@@ -168,9 +174,6 @@ class PlatformDetail(ResourceDetail):
         for url in urls:
             delete_attachments_in_minio_by_url(url)
 
-        if current_app.config["INSTITUTE"] == "ufz":
-            pid_to_delete = platform.persistent_identifier
-            pid.delete(pid_to_delete)
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
