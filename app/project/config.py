@@ -82,6 +82,7 @@ class TestingConfig(BaseConfig):
     # AssertionError: Popped wrong request context
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     INSTITUTE = None
+    PID_SERVICE_URL = None
 
 
 class ProductionConfig(BaseConfig):
