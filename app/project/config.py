@@ -1,5 +1,3 @@
-import uuid
-
 from environs import Env
 
 env = Env()
@@ -53,9 +51,6 @@ class BaseConfig:
     )
     PID_SERVICE_USER = env("PID_SERVICE_USER", None)
     PID_SERVICE_PASSWORD = env("PID_SERVICE_PASSWORD", None)
-    SCHEMA_VERSION = env("SCHEMA_VERSION", "0.1")
-    IDENTIFIER_TYPE = env("IDENTIFIER_TYPE", "Handler")
-    # SMS_SUFFIX = env("SMS_SUFFIX", str(uuid.uuid1()))
     PID_SUFFIX = env("PID_SUFFIX", "SMS")
     PID_PREFIX = env("PID_PREFIX", "STAGE-TEST")
 

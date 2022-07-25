@@ -44,12 +44,20 @@ class TestPlatformMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="Platform2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform2)
 
@@ -138,7 +146,7 @@ class TestPlatformMountAction(BaseTestCase):
             label="sample configuration II",
             location_type="static",
             is_public=True,
-            is_internal=False,
+            is_internal=False
         )
         db.session.add(configuration2)
 
@@ -149,17 +157,19 @@ class TestPlatformMountAction(BaseTestCase):
 
         platform1 = Platform(
             short_name="platform1",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
-            is_internal=False,
+            is_internal=False
         )
         db.session.add(platform1)
 
         platform2 = Platform(
             short_name="Platform2",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
-            is_internal=False,
+            is_internal=False
         )
         db.session.add(platform2)
 
@@ -220,8 +230,7 @@ class TestPlatformMountAction(BaseTestCase):
                 base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -246,19 +255,35 @@ class TestPlatformMountAction(BaseTestCase):
         )
 
         platform1 = Platform(
-            short_name="platform1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         platform2 = Platform(
-            short_name="Platform2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         platform3 = Platform(
-            short_name="platform3", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="platform3",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         platform4 = Platform(
-            short_name="Platform4", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="Platform4",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         action1 = PlatformMountAction(
@@ -330,8 +355,7 @@ class TestPlatformMountAction(BaseTestCase):
                 + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -445,9 +469,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
             }
         }
         _ = super().update_object(
@@ -493,9 +515,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "platform": {
                         "data": {
@@ -527,9 +547,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "configuration": {
                         "data": {
@@ -585,6 +603,7 @@ class TestPlatformMountAction(BaseTestCase):
         """Make sure parent platform id con be add if it is None."""
         p = Platform(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -610,6 +629,7 @@ class TestPlatformMountAction(BaseTestCase):
 
         p_p = Platform(
             short_name="platform parent platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -636,12 +656,7 @@ class TestPlatformMountAction(BaseTestCase):
                 "id": platform_mount_action.id,
                 "attributes": {"begin_description": "updated"},
                 "relationships": {
-                    "parent_platform": {
-                        "data": {
-                            "type": "platform",
-                            "id": p_p.id,
-                        }
-                    },
+                    "parent_platform": {"data": {"type": "platform", "id": p_p.id,}},
                 },
             }
         }
@@ -694,6 +709,7 @@ class TestPlatformMountAction(BaseTestCase):
         """Make sure platform con not be unmounted."""
         p = Platform(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -732,6 +748,7 @@ class TestPlatformMountAction(BaseTestCase):
 
         p_p = Platform(
             short_name="platform parent platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -805,9 +822,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": platform_mount_action_1.id,
-                "attributes": {
-                    "end_date": "2023-11-08T07:25:00.782000",
-                },
+                "attributes": {"end_date": "2023-11-08T07:25:00.782000",},
             }
         }
         access_headers = create_token()

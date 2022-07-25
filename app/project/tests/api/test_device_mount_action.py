@@ -140,9 +140,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
             }
         }
         _ = super().update_object(
@@ -189,12 +187,20 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device2)
 
@@ -230,7 +236,7 @@ class TestDeviceMountAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                    base_url + f"/configurations/{configuration1.id}/device-mount-actions"
+                base_url + f"/configurations/{configuration1.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -245,7 +251,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                    base_url + f"/configurations/{configuration2.id}/device-mount-actions"
+                base_url + f"/configurations/{configuration2.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -260,8 +266,8 @@ class TestDeviceMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                    base_url
-                    + f"/configurations/{configuration2.id + 9999}/device-mount-actions"
+                base_url
+                + f"/configurations/{configuration2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -292,12 +298,20 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device2)
 
@@ -325,7 +339,7 @@ class TestDeviceMountAction(BaseTestCase):
         # test only for the first device
         with self.client:
             url_get_for_device1 = (
-                    base_url + f"/devices/{device1.id}/device-mount-actions"
+                base_url + f"/devices/{device1.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_device1, content_type="application/vnd.api+json"
@@ -340,7 +354,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and test the second device
         with self.client:
             url_get_for_device2 = (
-                    base_url + f"/devices/{device2.id}/device-mount-actions"
+                base_url + f"/devices/{device2.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_device2, content_type="application/vnd.api+json"
@@ -355,7 +369,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_device = (
-                    base_url + f"/devices/{device2.id + 9999}/device-mount-actions"
+                base_url + f"/devices/{device2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_device,
@@ -386,24 +400,38 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", manufacturer_name=fake.company(), is_public=True, is_private=False,
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
             is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="platform2", manufacturer_name=fake.company(), is_public=True, is_private=False,
+            short_name="platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
             is_internal=False,
         )
         db.session.add(platform2)
 
         device1 = Device(
-            short_name="device1", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", manufacturer_name=fake.company(), is_public=True, is_private=False, is_internal=False,
+            short_name="device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device2)
 
@@ -432,7 +460,7 @@ class TestDeviceMountAction(BaseTestCase):
         # test only for the first platform
         with self.client:
             url_get_for_platform1 = (
-                    base_url + f"/platforms/{platform1.id}/device-mount-actions"
+                base_url + f"/platforms/{platform1.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform1, content_type="application/vnd.api+json"
@@ -447,7 +475,7 @@ class TestDeviceMountAction(BaseTestCase):
         # and test the second platform
         with self.client:
             url_get_for_platform2 = (
-                    base_url + f"/platforms/{platform2.id}/device-mount-actions"
+                base_url + f"/platforms/{platform2.id}/device-mount-actions"
             )
             response = self.client.get(
                 url_get_for_platform2, content_type="application/vnd.api+json"
@@ -462,11 +490,10 @@ class TestDeviceMountAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing = (
-                    base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
+                base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -485,9 +512,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "device": {
                         "data": {
@@ -519,9 +544,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "configuration": {
                         "data": {
@@ -573,11 +596,12 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_update_device_mount_action_add_parent_platform_id_if_there_is_no_parent(
-            self,
+        self,
     ):
         """Make sure parent platform id can be add if it is None."""
         d = Device(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -603,6 +627,7 @@ class TestDeviceMountAction(BaseTestCase):
 
         p_p = Platform(
             short_name="device parent platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -629,12 +654,7 @@ class TestDeviceMountAction(BaseTestCase):
                 "id": device_mount_action.id,
                 "attributes": {"begin_description": "updated"},
                 "relationships": {
-                    "parent_platform": {
-                        "data": {
-                            "type": "platform",
-                            "id": p_p.id,
-                        }
-                    },
+                    "parent_platform": {"data": {"type": "platform", "id": p_p.id,}},
                 },
             }
         }
@@ -688,6 +708,7 @@ class TestDeviceMountAction(BaseTestCase):
         """Make sure device con not be unmounted."""
         d = Device(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -726,6 +747,7 @@ class TestDeviceMountAction(BaseTestCase):
 
         p_p = Platform(
             short_name="device parent platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -799,9 +821,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_mount_action_1.id,
-                "attributes": {
-                    "end_date": "2023-11-08T07:25:00.782000",
-                },
+                "attributes": {"end_date": "2023-11-08T07:25:00.782000",},
             }
         }
         access_headers = create_token()

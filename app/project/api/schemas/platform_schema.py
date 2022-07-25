@@ -58,9 +58,9 @@ class PlatformSchema(Schema):
     )
     inventory_number = fields.Str(allow_none=True)
     serial_number = fields.Str(allow_none=True)
-    persistent_identifier = fields.Str(allow_none=True, dump_only=True)
-    schema_version = fields.Str(allow_none=True, dump_only=True)
-    identifier_type = fields.Str(allow_none=True, dump_only=True)
+    persistent_identifier = fields.Str(allow_none=True)
+    schema_version = fields.Str(allow_none=True)
+    identifier_type = fields.Str(allow_none=True)
     platform_attachments = Relationship(
         related_view="api.platform_attachment_list",
         related_view_kwargs={"id": "<id>"},
