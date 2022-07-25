@@ -81,6 +81,147 @@ class Pid:
         """
         Retrieve the information at once for a PID.
 
+        :example response.json:
+        [
+                {
+                    "idx": 1,
+                    "type": "URL",
+                    "parsed_data": "https://localhost.localdomain/devices/4/basic",
+                    "data": "aHR0cHM6Ly9sb2NhbGhvc3QubG9jYWxkb21haW4vZGV2aWNlcy80L2Jhc2lj",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 2,
+                    "type": "LandingPage",
+                    "parsed_data": "https://localhost.localdomain/devices/4/basic",
+                    "data": "aHR0cHM6Ly9sb2NhbGhvc3QubG9jYWxkb21haW4vZGV2aWNlcy80L2Jhc2lj",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 3,
+                    "type": "Identifier",
+                    "parsed_data": "4",
+                    "data": "NA==",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 4,
+                    "type": "IdentifierType",
+                    "parsed_data": "handler",
+                    "data": "aGFuZGxlcg==",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 5,
+                    "type": "SchemaVersion",
+                    "parsed_data": "1.0",
+                    "data": "MS4w",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 6,
+                    "type": "Name",
+                    "parsed_data": "TID1",
+                    "data": "VElEMQ==",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 7,
+                    "type": "Owner",
+                    "parsed_data": "kotyba.alhaj-taha@ufz.de",
+                    "data": "a290eWJhLmFsaGFqLXRhaGFAdWZ6LmRl",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 8,
+                    "type": "OwnerName",
+                    "parsed_data": "Kotyba Alhaj Taha",
+                    "data": "S290eWJhIEFsaGFqIFRhaGE=",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 9,
+                    "type": "Manufacturer",
+                    "parsed_data": "https://localhost.localdomain/cv/api/v1/manufacturers/22/",
+                    "data": "aHR0cHM6Ly9sb2NhbGhvc3QubG9jYWxkb21haW4vY3YvYXBpL3YxL21hbnVm\nYWN0dXJlcnMvMjIv",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 10,
+                    "type": "ManufacturerName",
+                    "parsed_data": "Ackermann KG",
+                    "data": "QWNrZXJtYW5uIEtH",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                },
+                {
+                    "idx": 100,
+                    "type": "HS_ADMIN",
+                    "parsed_data": {
+                        "adminId": "21.T11998/USER53",
+                        "adminIdIndex": 300,
+                        "perms": {
+                            "add_handle": true,
+                            "delete_handle": true,
+                            "add_derived_prefix": false,
+                            "delete_derived_prefix": false,
+                            "modify_value": true,
+                            "remove_value": true,
+                            "add_value": true,
+                            "modify_admin": true,
+                            "remove_admin": true,
+                            "add_admin": true,
+                            "read_value": true,
+                            "list_handles": false
+                        }
+                    },
+                    "data": "B/MAAAAQMjEuVDExOTk4L1VTRVI1MwAAASw=",
+                    "timestamp": "2022-07-25T12:27:12Z",
+                    "ttl_type": 0,
+                    "ttl": 86400,
+                    "refs": [],
+                    "privs": "rwr-"
+                }
+            ]
         :param object_pid: The pid
         :return: pid description.
         """
