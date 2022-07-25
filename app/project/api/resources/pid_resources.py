@@ -58,6 +58,42 @@ class PidList(ResourceList):
         SMS-0000-001C-2FE7-A-STAGE-TEST
 
         """
+        """List Pids, or search PIDS for a term in url.
+
+        :example for list:
+        http://vm04.pid.gwdg.de:8081/handles/21.T11998/
+        0-TEST
+        00-001M-0000-002E-A349-6
+        00-1735-0000-0001-11C9-7
+        00-1735-0000-0001-11CB-3
+        00-1735-0000-0001-3066-D
+        00-1735-0000-0001-306B-3
+        00-1735-0000-0001-307F-8
+        00-1735-0000-0001-3080-2
+        00-1735-0000-0001-3081-F
+        00-1735-0000-0001-3082-D
+        00-1735-0000-0001-3083-B
+        00-1735-0000-0001-3084-9
+        00-1735-0000-0001-3085-7
+        00-1735-0000-0001-3086-5
+        00-1735-0000-0001-3087-3
+        00-1735-0000-0001-3088-1
+
+        :example for search:
+        http://vm04.pid.gwdg.de:8081/handles/21.T11998/?URL=*localhost.localdomain*
+        Response.txt ->
+        0000-001C-2FAE-B-SMS
+        0000-001C-2FAF-A
+        01455944-00FF-11ED-BBC5-0242AC150006
+        F884FA14-0110-11ED-8398-0242AC150006
+        SMS-0000-001C-2FB1-6-TEST
+        SMS-0000-001C-2FB2-5-TEST
+        SMS-0000-001C-2FB3-4-TEST
+        SMS-0000-001C-2FB4-3-TEST
+        SMS-0000-001C-2FB5-2-TEST
+        SMS-0000-001C-2FE7-A-STAGE-TEST
+
+        """
         """List Pids, or search PIDS for a term in url."""
         if not g.user:
             raise UnauthorizedError("Authentication required.")
