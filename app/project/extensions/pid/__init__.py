@@ -92,12 +92,13 @@ class Pid:
                 verify=False,
                 headers=header,
             )
+
             response.raise_for_status()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             raise ServiceIsUnreachableError(repr(e))
         except requests.exceptions.HTTPError as e:
             raise ConflictError(repr(e))
-        return response.json()
+        return response
 
     def search(self, term=None, limit=0):
         """
