@@ -45,7 +45,6 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
 
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
@@ -55,7 +54,6 @@ import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActi
 import { DeviceSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
 
 import { DeviceMountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceMountActionSerializer'
-import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceUnmountActionSerializer'
 
 import {
   DeviceSerializer,
@@ -540,27 +538,14 @@ export class DeviceApi {
     const params = {
       'page[size]': 10000,
       include: [
-        'contact',
+        'begin_contact',
+        'end_contact',
         'parent_platform',
         'configuration'
       ].join(',')
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DeviceMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
-    })
-  }
-
-  findRelatedUnmountActions (deviceId: string): Promise<DeviceUnmountAction[]> {
-    const url = this.basePath + '/' + deviceId + '/device-unmount-actions'
-    const params = {
-      'page[size]': 10000,
-      include: [
-        'contact',
-        'configuration'
-      ].join(',')
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new DeviceUnmountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 }

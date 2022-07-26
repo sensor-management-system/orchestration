@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -51,14 +51,22 @@ describe('PlatformMountActionSerializer', () => {
               offset_x: 0,
               offset_y: 0,
               offset_z: 0,
-              description: 'Platform mount',
-              begin_date: '2020-01-01T12:00:00.000Z'
+              begin_description: 'Platform mount',
+              end_description: 'Platform unmount',
+              begin_date: '2020-01-01T12:00:00.000Z',
+              end_date: '2020-02-01T12:00:00.000Z'
             },
             relationships: {
-              contact: {
+              begin_contact: {
                 data: {
                   type: 'contact',
                   id: 'ct1'
+                }
+              },
+              end_contact: {
+                data: {
+                  type: 'contact',
+                  id: 'ct2'
                 }
               },
               configuration: {
@@ -76,11 +84,11 @@ describe('PlatformMountActionSerializer', () => {
               offset_x: 1,
               offset_y: 2,
               offset_z: 3,
-              description: 'Platform mount',
+              begin_description: 'Platform mount',
               begin_date: '2020-03-01T12:00:00.000Z'
             },
             relationships: {
-              contact: {
+              begin_contact: {
                 data: {
                   type: 'contact',
                   id: 'ct2'
@@ -211,8 +219,10 @@ describe('PlatformMountActionSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        date: DateTime.utc(2020, 1, 1, 12, 0, 0),
-        description: 'Platform mount'
+        beginDate: DateTime.utc(2020, 1, 1, 12, 0, 0),
+        endDate: DateTime.utc(2020, 2, 1, 12, 0, 0),
+        beginDescription: 'Platform mount',
+        endDescription: 'Platform unmount'
       })
 
       const expectedPm2 = PlatformMountActionBasicData.createFromObject({
@@ -220,16 +230,18 @@ describe('PlatformMountActionSerializer', () => {
         offsetX: 1,
         offsetY: 2,
         offsetZ: 3,
-        date: DateTime.utc(2020, 3, 1, 12, 0, 0),
-        description: 'Platform mount'
+        beginDate: DateTime.utc(2020, 3, 1, 12, 0, 0),
+        beginDescription: 'Platform mount',
+        endDate: null,
+        endDescription: ''
       })
 
       const expectedResult = [
         new PlatformMountAction(
-          expectedPm1, expectedCf1, expectedCt1, null
+          expectedPm1, expectedCf1, expectedCt1, expectedCt2, null
         ),
         new PlatformMountAction(
-          expectedPm2, expectedCf1, expectedCt2, expectedPt1
+          expectedPm2, expectedCf1, expectedCt2, null, expectedPt1
         )
       ]
 

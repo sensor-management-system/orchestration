@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,16 +31,16 @@
  */
 
 import { DateTime } from 'luxon'
-import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
 import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 import { IDateCompareable } from '@/modelUtils/Compareables'
 
 export class PlatformUnmountActionWrapper implements IActionCommonDetails, IDateCompareable {
-  inner: PlatformUnmountAction
+  inner: PlatformMountAction
 
-  constructor (inner: PlatformUnmountAction) {
+  constructor (inner: PlatformMountAction) {
     this.inner = inner
   }
 
@@ -49,11 +49,15 @@ export class PlatformUnmountActionWrapper implements IActionCommonDetails, IDate
   }
 
   get description (): string {
-    return this.inner.basicData.description
+    return this.inner.basicData.endDescription
   }
 
   get contact (): Contact {
-    return Contact.createFromObject(this.inner.contact)
+    // Fallback to use the begin contact if we don't have the end Contact
+    if (this.inner.endContact) {
+      return Contact.createFromObject(this.inner.endContact)
+    }
+    return Contact.createFromObject(this.inner.beginContact)
   }
 
   get attachments (): Attachment[] {
@@ -65,6 +69,6 @@ export class PlatformUnmountActionWrapper implements IActionCommonDetails, IDate
   }
 
   get date (): DateTime | null {
-    return this.inner.basicData.date
+    return this.inner.basicData.endDate
   }
 }

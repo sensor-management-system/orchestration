@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-card-subtitle class="pb-0">
       <v-row no-gutters>
         <v-col>
-          {{ value.basicData.date | dateToDateTimeString }}
+          {{ value.basicData.endDate | dateToDateTimeString }}
           <span class="text-caption text--secondary">(UTC)</span>
         </v-col>
         <v-col
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
         no-gutters
       >
         <v-col>
-          {{ value.contact.toString() }}
+          {{ value.endContact.toString() }}
         </v-col>
         <v-col
           align-self="end"
@@ -76,7 +76,7 @@ permissions and limitations under the Licence.
           class="grey lighten-5 text--primary pt-2"
         >
           <label>Description</label>
-          {{ value.basicData.description }}
+          {{ value.basicData.endDescription }}
         </v-card-text>
       </div>
     </v-expand-transition>
@@ -91,7 +91,7 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
-import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
 
 /**
  * A class component for Platform Unmount Action card
@@ -107,13 +107,13 @@ export default class PlatformUnmountActionCard extends Vue {
   private show: boolean = false
 
   /**
-   * a PlatformUnmountAction
+   * a PlatformMountAction
    */
   @Prop({
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: PlatformUnmountAction
+  readonly value!: PlatformMountAction
 }
 </script>

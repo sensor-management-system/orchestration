@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -46,8 +46,10 @@ export class PlatformMountActionBasicDataSerializer {
       offsetX: attributes?.offset_x || 0,
       offsetY: attributes?.offset_y || 0,
       offsetZ: attributes?.offset_z || 0,
-      description: attributes?.description || '',
-      date: DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' })
+      beginDescription: attributes?.begin_description || '',
+      endDescription: attributes?.end_description || '',
+      beginDate: DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' }),
+      endDate: attributes?.end_date ? DateTime.fromISO(attributes?.end_date, { zone: 'UTC' }) : null
     })
   }
 }
