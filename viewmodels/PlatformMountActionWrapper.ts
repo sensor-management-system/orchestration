@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -49,11 +49,11 @@ export class PlatformMountActionWrapper implements IActionCommonDetails, IDateCo
   }
 
   get description (): string {
-    return this.inner.basicData.description
+    return this.inner.basicData.beginDescription
   }
 
   get contact (): Contact {
-    return Contact.createFromObject(this.inner.contact)
+    return Contact.createFromObject(this.inner.beginContact)
   }
 
   get attachments (): Attachment[] {
@@ -65,6 +65,6 @@ export class PlatformMountActionWrapper implements IActionCommonDetails, IDateCo
   }
 
   get date (): DateTime | null {
-    return this.inner.basicData.date
+    return this.inner.basicData.beginDate
   }
 }

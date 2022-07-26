@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -38,24 +38,28 @@ import { PlatformBasicData } from '@/models/basic/PlatformBasicData'
 export interface IPlatformMountAction {
   basicData: PlatformMountActionBasicData
   configuration: ConfigurationBasicData
-  contact: ContactBasicData
+  beginContact: ContactBasicData
+  endContact: ContactBasicData | null
   parentPlatform: PlatformBasicData | null
 }
 
 export class PlatformMountAction implements IPlatformMountAction {
   private _basicData: PlatformMountActionBasicData
   private _configuration: ConfigurationBasicData
-  private _contact: ContactBasicData
+  private _beginContact: ContactBasicData
+  private _endContact: ContactBasicData | null
   private _parentPlatform: PlatformBasicData | null
 
   constructor (basicData: PlatformMountActionBasicData,
     configuration: ConfigurationBasicData,
-    contact: ContactBasicData,
+    beginContact: ContactBasicData,
+    endContact: ContactBasicData | null,
     parentPlatform: PlatformBasicData | null
   ) {
     this._basicData = basicData
     this._configuration = configuration
-    this._contact = contact
+    this._beginContact = beginContact
+    this._endContact = endContact
     this._parentPlatform = parentPlatform
   }
 
@@ -67,8 +71,12 @@ export class PlatformMountAction implements IPlatformMountAction {
     return this._configuration
   }
 
-  get contact (): ContactBasicData {
-    return this._contact
+  get beginContact (): ContactBasicData {
+    return this._beginContact
+  }
+
+  get endContact (): ContactBasicData | null {
+    return this._endContact
   }
 
   get parentPlatform (): PlatformBasicData | null {
@@ -79,7 +87,8 @@ export class PlatformMountAction implements IPlatformMountAction {
     return new PlatformMountAction(
       PlatformMountActionBasicData.createFromObject(otherAction.basicData),
       ConfigurationBasicData.createFromObject(otherAction.configuration),
-      ContactBasicData.createFromObject(otherAction.contact),
+      ContactBasicData.createFromObject(otherAction.beginContact),
+      otherAction.endContact == null ? null : ContactBasicData.createFromObject(otherAction.endContact),
       otherAction.parentPlatform === null ? null : PlatformBasicData.createFromObject(otherAction.parentPlatform)
     )
   }

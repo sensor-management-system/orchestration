@@ -42,7 +42,6 @@ import { PermissionGroup } from '@/models/PermissionGroup'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
 
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 
@@ -57,7 +56,6 @@ import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAtta
 import { GenericPlatformActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 import { PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
 import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
-import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformUnmountActionSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -481,27 +479,14 @@ export class PlatformApi {
     const params = {
       'page[size]': 10000,
       include: [
-        'contact',
+        'begin_contact',
+        'end_contact',
         'parent_platform',
         'configuration'
       ].join(',')
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new PlatformMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
-    })
-  }
-
-  findRelatedUnmountActions (platformId: string): Promise<PlatformUnmountAction[]> {
-    const url = this.basePath + '/' + platformId + '/platform-unmount-actions'
-    const params = {
-      'page[size]': 10000,
-      include: [
-        'contact',
-        'configuration'
-      ].join(',')
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new PlatformUnmountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 

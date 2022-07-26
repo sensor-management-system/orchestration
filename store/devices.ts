@@ -42,7 +42,6 @@ import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { IActionType } from '@/models/ActionType'
 import { DeviceProperty } from '@/models/DeviceProperty'
@@ -87,8 +86,7 @@ export interface DevicesState {
   deviceGenericAction: GenericAction | null,
   deviceSoftwareUpdateAction: SoftwareUpdateAction | null,
   deviceCalibrationAction: DeviceCalibrationAction | null,
-  deviceMountActions: DeviceMountActionWrapper[],
-  deviceUnmountActions: DeviceUnmountActionWrapper[],
+  deviceMountActions: DeviceMountAction[],
   chosenKindOfDeviceAction: IOptionsForActionType | null,
   deviceCustomFields: CustomTextField[],
   deviceCustomField: CustomTextField | null
@@ -112,7 +110,6 @@ const state = (): DevicesState => ({
   deviceCalibrationAction: null,
   deviceCalibrationActions: [],
   deviceMountActions: [],
-  deviceUnmountActions: [],
   chosenKindOfDeviceAction: null,
   deviceCustomFields: [],
   deviceCustomField: null,
@@ -126,13 +123,18 @@ export type PageSizesGetter = number[]
 
 const getters: GetterTree<DevicesState, RootState> = {
   actions: (state: DevicesState): (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[] => { // Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
-    let actions = [
+    let actions: (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[] = [
       ...state.deviceGenericActions,
       ...state.deviceSoftwareUpdateActions,
-      ...state.deviceMountActions,
-      ...state.deviceUnmountActions,
       ...state.deviceCalibrationActions
     ]
+    for (const deviceMountAction of state.deviceMountActions) {
+      actions.push(new DeviceMountActionWrapper(deviceMountAction))
+      if (deviceMountAction.basicData.endDate) {
+        actions.push(new DeviceUnmountActionWrapper(deviceMountAction))
+      }
+    }
+    // TODO: Extra deviceUnmountActionWrapper befüllen
     // sort the actions
     actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
       if (a.date === null || b.date === null) { return 0 }
@@ -161,7 +163,6 @@ export type LoadDeviceSoftwareUpdateActionAction = (actionId: string) => Promise
 export type LoadDeviceCalibrationActionsAction = (id: string) => Promise<void>
 export type LoadDeviceCalibrationActionAction = (actionId: string) => Promise<void>
 export type LoadDeviceMountActionsAction = (id: string) => Promise<void>
-export type LoadDeviceUnmountActionsAction = (id: string) => Promise<void>
 export type LoadDeviceCustomFieldsAction = (id: string) => Promise<void>
 export type LoadDeviceCustomFieldAction = (id: string) => Promise<void>
 export type AddDeviceSoftwareUpdateAction = (params: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
@@ -276,7 +277,6 @@ const actions: ActionTree<DevicesState, RootState> = {
       dispatch('loadDeviceGenericActions', id),
       dispatch('loadDeviceSoftwareUpdateActions', id),
       dispatch('loadDeviceMountActions', id),
-      dispatch('loadDeviceUnmountActions', id),
       dispatch('loadDeviceCalibrationActions', id)
     ])
   },
@@ -306,20 +306,7 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   async loadDeviceMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
-
-    const wrappedDeviceMountActions = deviceMountActions.map((action: DeviceMountAction) => {
-      return new DeviceMountActionWrapper(action)
-    })
-
-    commit('setDeviceMountActions', wrappedDeviceMountActions)
-  },
-  async loadDeviceUnmountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
-    const deviceUnmountActions = await this.$api.devices.findRelatedUnmountActions(id)
-
-    const wrappedDeviceUnmountActions = deviceUnmountActions.map((action: DeviceUnmountAction) => {
-      return new DeviceUnmountActionWrapper(action)
-    })
-    commit('setDeviceUnmountActions', wrappedDeviceUnmountActions)
+    commit('setDeviceMountActions', deviceMountActions)
   },
   async loadDeviceCustomFields ({ commit }: {commit: Commit}, id: string): Promise<void> {
     const deviceCustomFields = await this.$api.devices.findRelatedCustomFields(id)
@@ -558,11 +545,8 @@ const mutations = {
   setDeviceSoftwareUpdateAction (state: DevicesState, deviceSoftwareUpdateAction: SoftwareUpdateAction) {
     state.deviceSoftwareUpdateAction = deviceSoftwareUpdateAction
   },
-  setDeviceMountActions (state: DevicesState, deviceMountActions: DeviceMountActionWrapper[]) {
+  setDeviceMountActions (state: DevicesState, deviceMountActions: DeviceMountAction[]) {
     state.deviceMountActions = deviceMountActions
-  },
-  setDeviceUnmountActions (state: DevicesState, deviceUnmountActions: DeviceUnmountActionWrapper[]) {
-    state.deviceUnmountActions = deviceUnmountActions
   },
   setDeviceCalibrationActions (state: DevicesState, deviceCalibrationActions: DeviceCalibrationAction[]) {
     state.deviceCalibrationActions = deviceCalibrationActions

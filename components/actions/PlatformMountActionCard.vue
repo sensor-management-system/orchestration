@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
     <v-card-subtitle class="pb-0">
       <v-row no-gutters>
         <v-col>
-          {{ value.basicData.date | dateToDateTimeString }}
+          {{ value.basicData.beginDate | dateToDateTimeString }}
           <span class="text-caption text--secondary">(UTC)</span>
         </v-col>
         <v-col
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
         no-gutters
       >
         <v-col>
-          {{ value.contact.toString() }}
+          {{ value.beginContact.toString() }}
         </v-col>
         <v-col
           align-self="end"
@@ -90,7 +90,7 @@ permissions and limitations under the Licence.
             </v-col>
           </v-row>
           <label>Description</label>
-          {{ value.basicData.description }}
+          {{ value.basicData.beginDescription }}
         </v-card-text>
       </div>
     </v-expand-transition>

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -36,7 +36,8 @@ import { DeviceMountActionBasicData } from '@/models/basic/DeviceMountActionBasi
 
 import { DeviceMountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/DeviceMountActionBasicDataSerializer'
 
-const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
+const beginDate = DateTime.utc(2020, 1, 1, 12, 0, 0)
+const endDate = DateTime.utc(2020, 2, 1, 12, 0, 0)
 
 describe('DeviceMountActionBasicDataSerializer', () => {
   describe('#convertJsonApiDataToModel', () => {
@@ -47,8 +48,10 @@ describe('DeviceMountActionBasicDataSerializer', () => {
           offset_x: 0,
           offset_y: 0,
           offset_z: 0,
-          description: 'Device mount',
-          begin_date: '2020-01-01T12:00:00.000Z'
+          begin_description: 'Device mount',
+          begin_date: '2020-01-01T12:00:00.000Z',
+          end_description: 'Device unmount',
+          end_date: '2020-02-01T12:00:00.000Z'
         },
         id: '1'
       }
@@ -58,8 +61,10 @@ describe('DeviceMountActionBasicDataSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        date,
-        description: 'Device mount'
+        beginDate,
+        endDate,
+        beginDescription: 'Device mount',
+        endDescription: 'Device unmount'
       })
 
       const serializer = new DeviceMountActionBasicDataSerializer()

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -40,35 +40,43 @@ import { DateTime } from 'luxon'
  */
 export interface IPlatformMountActionBasicData {
   id: string
-  date: DateTime
+  beginDate: DateTime
+  endDate: DateTime | null
   offsetX: number
   offsetY: number
   offsetZ: number
-  description: string
+  beginDescription: string
+  endDescription: string
 }
 
 export class PlatformMountActionBasicData implements IPlatformMountActionBasicData {
   private _id: string = ''
-  private _date: DateTime
+  private _beginDate: DateTime
+  private _endDate: DateTime | null
   private _offsetX: number
   private _offsetY: number
   private _offsetZ: number
-  private _description: string
+  private _beginDescription: string
+  private _endDescription: string
 
   constructor (
     id: string,
-    date: DateTime,
+    beginDate: DateTime,
+    endDate: DateTime | null,
     offsetX: number,
     offsetY: number,
     offsetZ: number,
-    description: string
+    beginDescription: string,
+    endDescription: string
   ) {
     this._id = id
-    this._date = date
+    this._beginDate = beginDate
+    this._endDate = endDate
     this._offsetX = offsetX
     this._offsetY = offsetY
     this._offsetZ = offsetZ
-    this._description = description
+    this._beginDescription = beginDescription
+    this._endDescription = endDescription
   }
 
   get id (): string {
@@ -79,12 +87,20 @@ export class PlatformMountActionBasicData implements IPlatformMountActionBasicDa
     this._id = newId
   }
 
-  get date (): DateTime {
-    return this._date
+  get beginDate (): DateTime {
+    return this._beginDate
   }
 
-  set date (newDate: DateTime) {
-    this._date = newDate
+  set beginDate (newDate: DateTime) {
+    this._beginDate = newDate
+  }
+
+  get endDate (): DateTime | null {
+    return this._endDate
+  }
+
+  set endDate (newDate: DateTime | null) {
+    this._endDate = newDate
   }
 
   get offsetX (): number {
@@ -111,22 +127,32 @@ export class PlatformMountActionBasicData implements IPlatformMountActionBasicDa
     this._offsetZ = newOffsetZ
   }
 
-  get description (): string {
-    return this._description
+  get beginDescription (): string {
+    return this._beginDescription
   }
 
-  set description (newDescription: string) {
-    this._description = newDescription
+  set beginDescription (newDescription: string) {
+    this._beginDescription = newDescription
+  }
+
+  get endDescription (): string {
+    return this._endDescription
+  }
+
+  set endDescription (newDescription: string) {
+    this._endDescription = newDescription
   }
 
   static createFromObject (otherAction: IPlatformMountActionBasicData): PlatformMountActionBasicData {
     return new PlatformMountActionBasicData(
       otherAction.id,
-      otherAction.date,
+      otherAction.beginDate,
+      otherAction.endDate,
       otherAction.offsetX,
       otherAction.offsetY,
       otherAction.offsetZ,
-      otherAction.description
+      otherAction.beginDescription,
+      otherAction.endDescription
     )
   }
 }
