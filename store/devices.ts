@@ -324,15 +324,15 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   addDeviceGenericAction (_, {
     deviceId,
-    genericDeviceAction
-  }: { deviceId: string, genericDeviceAction: GenericAction }): Promise<GenericAction> {
-    return this.$api.genericDeviceActions.add(deviceId, genericDeviceAction)
+    genericAction
+  }: { deviceId: string, genericAction: GenericAction }): Promise<GenericAction> {
+    return this.$api.genericDeviceActions.add(deviceId, genericAction)
   },
   addDeviceCalibrationAction (_, {
     deviceId,
-    calibrationDeviceAction
-  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
-    return this.$api.deviceCalibrationActions.add(deviceId, calibrationDeviceAction)
+    calibrationAction
+  }: { deviceId: string, calibrationAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
+    return this.$api.deviceCalibrationActions.add(deviceId, calibrationAction)
   },
   updateDeviceSoftwareUpdateAction (_, {
     deviceId,
@@ -345,21 +345,21 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   updateDeviceGenericAction (_, {
     deviceId,
-    genericDeviceAction
-  }: { deviceId: string, genericDeviceAction: GenericAction }): Promise<GenericAction> {
-    return this.$api.genericDeviceActions.update(deviceId, genericDeviceAction)
+    genericAction
+  }: { deviceId: string, genericAction: GenericAction }): Promise<GenericAction> {
+    return this.$api.genericDeviceActions.update(deviceId, genericAction)
   },
-  deleteDeviceGenericAction (_, genericDeviceActionId: string): Promise<void> {
-    return this.$api.genericDeviceActions.deleteById(genericDeviceActionId)
+  deleteDeviceGenericAction (_, genericActionId: string): Promise<void> {
+    return this.$api.genericDeviceActions.deleteById(genericActionId)
   },
   updateDeviceCalibrationAction (_, {
     deviceId,
-    calibrationDeviceAction
-  }: { deviceId: string, calibrationDeviceAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
-    return this.$api.deviceCalibrationActions.update(deviceId, calibrationDeviceAction)
+    calibrationAction
+  }: { deviceId: string, calibrationAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
+    return this.$api.deviceCalibrationActions.update(deviceId, calibrationAction)
   },
-  deleteDeviceCalibrationAction (_, calibrationDeviceActionId: string): Promise<void> {
-    return this.$api.deviceCalibrationActions.deleteById(calibrationDeviceActionId)
+  deleteDeviceCalibrationAction (_, calibrationActionId: string): Promise<void> {
+    return this.$api.deviceCalibrationActions.deleteById(calibrationActionId)
   },
   deleteDeviceAttachment (_, attachmentId: string): Promise<void> {
     return this.$api.deviceAttachments.deleteById(attachmentId)
