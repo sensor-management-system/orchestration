@@ -15,7 +15,6 @@ from ..models import (
 )
 from ..models.base_model import db
 from ...api import minio
-from ...extensions.instances import pid
 
 
 def add_contact_to_object(entity_with_contact_list):
@@ -95,7 +94,6 @@ def check_if_object_not_found(model_class, kwargs):
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
     else:
         return object_to_be_checked
-
 
 def set_update_description_text_and_update_by_user(obj_, msg):
     obj_.update_description = msg

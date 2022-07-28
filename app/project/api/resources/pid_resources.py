@@ -11,7 +11,6 @@ from ..helpers.errors import (
 from ..models import (
     Device,
     Platform,
-    Configuration,
     DeviceContactRole,
     PlatformContactRole,
 )
@@ -110,14 +109,24 @@ class PidList(ResourceList):
         """
         Create a new PID with instrument data or with instrument instance.
 
-        - Instrument Data is a list if dictionaries, which should have those attributes:
+        - Instrument Data is a list of dictionaries, which should have all flowing attributes:
             - type: required: The data type defines the syntax and semantics of the data in its data field.
-            - parsed_data: required: The syntax and semantics of parsed data are identified by the field.
+            - source_object_url: required: A landing page that the identifier resolves to.
+            - id: required: Unique string that identifies the instrument instance.
+            - identifier_type: required: Type of the identifier.
+            - schema_version: required: Version number of the PIDINST schema used in this record
+            - contact_email: required: contact_email name of the owner.
+            - given_name: required: given_name name of the owner.
+            - family_name: required: family_name name of the owner.
+            - manufacturer_uri: The instrument's manufacturer(s) or developer.
+             This may also be the owner for custom build instruments.
+            - manufacturer: required: Full name of the manufacturer.
 
             :Example: of the Instrument data:
             {
             "instrument_data": {
                 "source_object_url":"https://localhost.localdomain/devices/1",
+                "type": "device",
                 "id": "1",
                 "identifier_type": "Handel",
                 "schema_version":"0.1",
@@ -144,19 +153,29 @@ class PidList(ResourceList):
                 }
             }
         """
-        # if not g.user:
-        #     raise UnauthorizedError("Authentication required.")
+        if not g.user:
+            raise UnauthorizedError("Authentication required.")
         if "instrument_data" in request.get_json():
             request_data = request.get_json()["instrument_data"]
             instrument_data = make_instrument_data_from_request(request_data)
-
+            if request_data["type"] == "device":
+                instrument = (
+                    db.session.query(Device).filter_by(id=request_data["id"]).first()
+                )
+            else:
+                instrument = (
+                    db.session.query(Platform).filter_by(id=request_data["id"]).first()
+                )
         elif "instrument_instance" in request.get_json():
             instrument_instance = request.get_json()["instrument_instance"]
-            instrument_data = make_instrument_data_from_instance(instrument_instance)
+            instrument_data, instrument = make_instrument_data_from_instance(
+                instrument_instance
+            )
         else:
             raise BadRequestError("No instrument_data or instrument_instance.")
 
         persistent_identifier = pid.create(instrument_data)
+        add_pid(instrument, persistent_identifier)
         response = {"pid": persistent_identifier}
         return response
 
@@ -192,7 +211,7 @@ class PidDetail(ResourceDetail):
         return pid.delete(source_object_pid)
 
 
-def make_instrument_data_from_instance(instrument_instance: dict) -> list:
+def make_instrument_data_from_instance(instrument_instance: dict) -> (list, object):
     """
     prepare the data toi be sent to the pid handler.
     The data is a list of dict, which has two attributes:
@@ -245,7 +264,7 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> list:
         ]
     except AttributeError as e:
         raise BadRequestError(repr(e))
-    return instrument_data
+    return instrument_data, instrument
 
 
 def make_instrument_data_from_request(instrument_data: dict) -> list:
@@ -267,7 +286,7 @@ def make_instrument_data_from_request(instrument_data: dict) -> list:
             },
             {"type": "Identifier", "parsed_data": str(instrument_data["id"])},
             {
-                "type": "identifierType",
+                "type": "IdentifierType",
                 "parsed_data": instrument_data["identifier_type"],
             },
             {
