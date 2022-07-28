@@ -1,3 +1,5 @@
+import datetime
+
 from flask import current_app, g
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
@@ -13,7 +15,6 @@ from ..models import (
 )
 from ..models.base_model import db
 from ...api import minio
-from ...extensions.instances import pid
 
 
 def add_contact_to_object(entity_with_contact_list):
@@ -134,15 +135,18 @@ def query_configuration_and_set_update_description_text(msg, result_id):
     set_update_description_text_and_update_by_user(configuration, msg)
 
 
-def add_pid(obj_, source_object_url):
+def add_pid(obj_, pid_string):
     """
-    Add PID to a created object.
+    Add PID to an existed object.
 
-    :param obj_: the created object.
-    :param source_object_url: the url to the object.
+    :param obj_: the existed object.
+    :param pid_string: pid of the entity.
     """
-    obj_.persistent_identifier = pid.create(source_object_url)
-    obj_.schema_version = current_app.config["SCHEMA_VERSION"]
-    obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
+    obj_.persistent_identifier = pid_string
+    # Set the datetime and user how did ask to
+    # add a pid to the entity
+    obj_.updated_at = datetime.datetime.utcnow()
+    obj_.updated_by = g.user
+
     db.session.add(obj_)
     db.session.commit()
