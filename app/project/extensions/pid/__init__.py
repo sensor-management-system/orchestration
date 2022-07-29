@@ -285,20 +285,19 @@ class Pid:
         epic_pid = response.json()["epic-pid"]
         return epic_pid
 
-    def update(self, source_object_pid, updated_url):
+    def update(self, source_object_pid, instrument_data):
         """
         Update an existing PID.
 
-        :param updated_url:
+        :param instrument_data: data to update
         :param source_object_pid: The PID.
         :return:
         """
-        json_data = json.dumps([{"type": "URL", "parsed_data": updated_url}])
         header = {"Content-Type": "application/json", "Accept": "application/json"}
         try:
             response = requests.put(
                 url=self.pid_service_url + source_object_pid,
-                data=json_data,
+                json=instrument_data,
                 auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
                 verify=False,
                 headers=header,
