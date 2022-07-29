@@ -104,7 +104,7 @@ class PidList(ResourceList):
         right entity from database.
             - type: required: The type od the entity ∈ = {"device", "platform"}
             - id: required: The id of the entity.
-            - source_uri: landing page of the entity.
+            - source_uri: required: landing page of the entity.
 
             :Example: of the Instrument instance:
 
