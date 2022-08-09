@@ -63,6 +63,18 @@ permissions and limitations under the Licence.
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
         >
+          <template #actions>
+            <v-btn
+              v-if="$auth.loggedIn"
+              :to="'/devices/'+deviceId+'/measuredquantities/'+item.id+'/edit'"
+              color="primary"
+              text
+              small
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
           <template #dot-menu-items>
             <DotMenuActionDelete
               :readonly="!$auth.loggedIn"

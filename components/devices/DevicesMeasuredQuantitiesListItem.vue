@@ -37,16 +37,7 @@ permissions and limitations under the Licence.
       <slot name="dot-menu-items" />
     </template>
     <template #actions>
-      <v-btn
-        v-if="$auth.loggedIn"
-        :to="'/devices/'+deviceId+'/measuredquantities/'+measuredQuantity.id+'/edit'"
-        color="primary"
-        text
-        small
-        @click.stop.prevent
-      >
-        Edit
-      </v-btn>
+      <slot name="actions"></slot>
     </template>
     <template #default>
       {{ computedTitle }}

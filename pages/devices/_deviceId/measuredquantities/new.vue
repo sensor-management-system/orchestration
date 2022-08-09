@@ -66,6 +66,23 @@ permissions and limitations under the Licence.
         />
       </v-card-actions>
     </v-card>
+    <v-subheader>Existing measured quantities</v-subheader>
+    <BaseList
+      :list-items="deviceMeasuredQuantities"
+    >
+      <template #list-item="{item,index}">
+        <DevicesMeasuredQuantitiesListItem
+          :measured-quantity="item"
+          :index="index"
+          :device-id="deviceId"
+          :compartments="compartments"
+          :sampling-medias="samplingMedia"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
+        />
+      </template>
+    </BaseList>
   </div>
 </template>
 
@@ -73,7 +90,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { AddDeviceMeasuredQuantityAction, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
+import { AddDeviceMeasuredQuantityAction, DevicesState, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
 import {
   LoadCompartmentsAction,
   LoadSamplingMediaAction,
@@ -88,11 +105,17 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import BaseList from '@/components/shared/BaseList.vue'
+import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
 
 @Component({
   middleware: ['auth'],
-  components: { ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
-  computed: mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+  components: { DevicesMeasuredQuantitiesListItem, BaseList, ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
+  computed: {
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('devices', ['deviceMeasuredQuantities'])
+  },
+
   methods: {
     ...mapActions('devices', ['addDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities']),
     ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits'])
@@ -111,6 +134,7 @@ export default class DevicePropertyAddPage extends Vue {
   properties!: VocabularyState['properties']
   units!: VocabularyState['units']
   measuredQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   loadCompartments!: LoadCompartmentsAction
   loadSamplingMedia!: LoadSamplingMediaAction
   loadProperties!: LoadPropertiesAction

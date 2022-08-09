@@ -68,6 +68,24 @@ permissions and limitations under the Licence.
         />
       </v-card-actions>
     </v-card>
+    <v-subheader>Existing measured quantities</v-subheader>
+    <BaseList
+      v-if="deviceMeasuredQuantity !== null"
+      :list-items="quantitiesExceptCurrent"
+    >
+      <template #list-item="{item,index}">
+        <DevicesMeasuredQuantitiesListItem
+          :measured-quantity="item"
+          :index="index"
+          :device-id="deviceId"
+          :compartments="compartments"
+          :sampling-medias="samplingMedia"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
+        />
+      </template>
+    </BaseList>
   </div>
 </template>
 
@@ -89,13 +107,16 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import BaseList from '@/components/shared/BaseList.vue'
 
 @Component({
-  components: { SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
+  components: { BaseList, DotMenuActionDelete, DevicesMeasuredQuantitiesListItem, SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
   middleware: ['auth'],
   computed: {
     ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
-    ...mapState('devices', ['deviceMeasuredQuantity'])
+    ...mapState('devices', ['deviceMeasuredQuantity','deviceMeasuredQuantities'])
   },
   methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity'])
 })
@@ -115,6 +136,7 @@ export default class DevicePropertyEditPage extends Vue {
   units!: VocabularyState['units']
   measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
   deviceMeasuredQuantity!: DevicesState['deviceMeasuredQuantity']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   loadDeviceMeasuredQuantity!: LoadDeviceMeasuredQuantityAction
   updateDeviceMeasuredQuantity!: UpdateDeviceMeasuredQuantityAction
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
@@ -145,6 +167,12 @@ export default class DevicePropertyEditPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
+  get quantitiesExceptCurrent(){
+    return this.deviceMeasuredQuantities.filter((measuredQuantity)=>{
+      return measuredQuantity.id !== this.deviceMeasuredQuantity!.id
+    })
+  }
+
   async save () {
     try {
       this.isSaving = true
@@ -167,7 +195,7 @@ export default class DevicePropertyEditPage extends Vue {
   })
   onEditableChanged (value: boolean, oldValue: boolean | undefined) {
     if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
+      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
         this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
       })
     }
