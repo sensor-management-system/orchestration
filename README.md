@@ -78,3 +78,5 @@ docker-compose up -d          # Start container in detached mode
 docker-compose logs --follow  # Watch output
 
 ```
+## How to add a new environment variable
+Have a look at the readme of the orchestration repository [Link](https://gitlab.hzdr.de/hub-terra/sms/orchestration/-/blob/main/README.md#how-to-add-new-environment-variables-to-the-project)
