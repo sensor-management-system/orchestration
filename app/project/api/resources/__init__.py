@@ -6,13 +6,12 @@ from .configuration_controllers import (  # noqa: F401
     ControllerConfigurationMountingActions,
     ControllerConfigurationMountingActionTimepoints,
 )
+from .configuration_location_action_controller import (
+    ControllerConfigurationLocationActionTimepoints
+)
 from .configuration_dynamic_location_begin_actions_resources import (  # noqa: F401
     ConfigurationDynamicLocationBeginActionDetail,
     ConfigurationDynamicLocationBeginActionList,
-)
-from .configuration_dynamic_location_end_actions_resources import (  # noqa: F401
-    ConfigurationDynamicLocationEndActionDetail,
-    ConfigurationDynamicLocationEndActionList,
 )
 from .configuration_resources import (  # noqa: F401
     ConfigurationList,
@@ -25,10 +24,6 @@ from .configuration_role_resources import (
 from .configuration_static_location_begin_actions_resources import (  # noqa: F401
     ConfigurationStaticLocationBeginActionDetail,
     ConfigurationStaticLocationBeginActionList,
-)
-from .configuration_static_location_end_actions_resources import (  # noqa: F401
-    ConfigurationStaticLocationEndActionDetail,
-    ConfigurationStaticLocationEndActionList,
 )
 from .contact_resources import ContactList, ContactDetail  # noqa: F401
 

@@ -7,9 +7,7 @@ from .configuration import Configuration  # noqa: F401
 from .configuration_attachment import ConfigurationAttachment  # noqa: F401
 from .configuration_location_actions import (  # noqa: F401
     ConfigurationDynamicLocationBeginAction,
-    ConfigurationDynamicLocationEndAction,
     ConfigurationStaticLocationBeginAction,
-    ConfigurationStaticLocationEndAction,
 )
 from .contact import Contact  # noqa: F401
 from .contact_role import (  # noqa: F401

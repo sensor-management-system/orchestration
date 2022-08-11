@@ -10,7 +10,6 @@ from sqlalchemy import and_, or_
 from ... import db
 from ..models import (
     ConfigurationDynamicLocationBeginAction,
-    ConfigurationDynamicLocationEndAction,
     DeviceMountAction,
     DeviceProperty,
     PlatformMountAction,
@@ -376,7 +375,7 @@ class DeviceMountActionValidator(AbstractMountActionValidator):
                 DeviceProperty.device_id == existing_mount.device_id
             )
         ]
-        begin_actions = (
+        dynamic_location_actions = (
             db.session.query(ConfigurationDynamicLocationBeginAction)
             .filter(
                 and_(
@@ -398,37 +397,18 @@ class DeviceMountActionValidator(AbstractMountActionValidator):
             .order_by(ConfigurationDynamicLocationBeginAction.begin_date)
             .all()
         )
-        end_actions = (
-            db.session.query(ConfigurationDynamicLocationEndAction)
-            .filter(
-                ConfigurationDynamicLocationEndAction.configuration_id
-                == existing_mount.configuration_id
-            )
-            .order_by(ConfigurationDynamicLocationEndAction.end_date)
-            .all()
-        )
-        # We now search the end actions for the begin actions.
-        end_action_by_begin_action_id = {}
-        for begin_action in begin_actions:
-            for end_action in end_actions:
-                # Due to the ordering we only need to handle the first entry.
-                if end_action.end_date > begin_action.begin_date:
-                    end_action_by_begin_action_id[begin_action.id] = end_action
-                    break
 
-        for begin_action in begin_actions:
-            end_date = None
-            if begin_action.id in end_action_by_begin_action_id.keys():
-                end_date = end_action_by_begin_action_id[begin_action.id].end_date
-            check_date_time_range = DateTimeRange(begin_action.begin_date, end_date)
+        for dynamic_location_action in dynamic_location_actions:
+            end_date = dynamic_location_action.end_date
+            check_date_time_range = DateTimeRange(dynamic_location_action.begin_date, end_date)
             if existing_date_time_range.overlaps_with(check_date_time_range):
                 if (
-                    begin_action.configuration_id != updated_configuration_id
+                    dynamic_location_action.configuration_id != updated_configuration_id
                     or object_id != existing_mount.device_id
                     or not expected_date_time_range.covers(check_date_time_range)
                 ):
 
-                    return begin_action
+                    return dynamic_location_action
 
         return None
 

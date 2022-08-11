@@ -351,57 +351,31 @@ api.route(
 api.route(
     ConfigurationStaticLocationBeginActionList,
     "configuration_static_location_begin_action_list",
-    "/static-location-begin-actions",
-    "/configurations/<int:configuration_id>/static-location-begin-actions",
+    "/static-location-actions",
+    "/configurations/<int:configuration_id>/static-location-actions",
 )
 api.route(
     ConfigurationStaticLocationBeginActionDetail,
     "configuration_static_location_begin_action_detail",
-    "/static-location-begin-actions/<int:id>",
-)
-# ConfigurationStaticLocationEndAction
-
-api.route(
-    ConfigurationStaticLocationEndActionList,
-    "configuration_static_location_end_action_list",
-    "/static-location-end-actions",
-    "/configurations/<int:configuration_id>/static-location-end-actions",
-)
-api.route(
-    ConfigurationStaticLocationEndActionDetail,
-    "configuration_static_location_end_action_detail",
-    "/static-location-end-actions/<int:id>",
+    "/static-location-actions/<int:id>",
 )
 # ConfigurationDynamicLocationBeginAction
 
 api.route(
     ConfigurationDynamicLocationBeginActionList,
     "configuration_dynamic_location_begin_action_list",
-    "/dynamic-location-begin-actions",
-    "/configurations/<int:configuration_id>/dynamic-location-begin-action",
-    "/device-properties/<int:x_property_id>/dynamic-location-begin-actions-x",
-    "/device-properties/<int:y_property_id>/dynamic-location-begin-actions-y",
-    "/device-properties/<int:z_property_id>/dynamic-location-begin-actions-z",
+    "/dynamic-location-actions",
+    "/configurations/<int:configuration_id>/dynamic-location-action",
+    "/device-properties/<int:x_property_id>/dynamic-location-actions-x",
+    "/device-properties/<int:y_property_id>/dynamic-location-actions-y",
+    "/device-properties/<int:z_property_id>/dynamic-location-actions-z",
 )
 api.route(
     ConfigurationDynamicLocationBeginActionDetail,
     "configuration_dynamic_location_begin_action_detail",
-    "/dynamic-location-begin-actions/<int:id>",
+    "/dynamic-location-actions/<int:id>",
 )
 
-# ConfigurationDynamicLocationEndAction
-
-api.route(
-    ConfigurationDynamicLocationEndActionList,
-    "configuration_dynamic_location_end_action_list",
-    "/dynamic-location-end-actions",
-    "/configurations/<int:configuration_id>/dynamic-location-end-actions",
-)
-api.route(
-    ConfigurationDynamicLocationEndActionDetail,
-    "configuration_dynamic_location_end_action_detail",
-    "/dynamic-location-end-actions/<int:id>",
-)
 # DeviceRoles
 api.route(
     DeviceRoleList,
@@ -440,4 +414,10 @@ api.route(
     ConfigurationRoleDetail,
     "configuration_contact_role_detail",
     "/configuration-contact-roles/<int:id>",
+)
+
+api.route(
+    ControllerConfigurationLocationActionTimepoints,
+    "controller_configuration_location_action_timepoints",
+    "/controller/configurations/<int:configuration_id>/location-action-timepoints",
 )

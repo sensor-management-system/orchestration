@@ -1,6 +1,5 @@
 from project.api.models import (
     ConfigurationDynamicLocationBeginAction,
-    ConfigurationDynamicLocationEndAction,
     Contact,
     Device,
     DeviceProperty,
@@ -15,7 +14,10 @@ def add_dynamic_location_begin_action_model(
     is_public=False, is_private=False, is_internal=True
 ):
     device = Device(
-        short_name="Device 555", is_public=is_public, is_private=is_private, is_internal=is_internal,
+        short_name="Device 555",
+        is_public=is_public,
+        is_private=is_private,
+        is_internal=is_internal,
     )
     x_property = DeviceProperty(
         device=device,
@@ -33,7 +35,9 @@ def add_dynamic_location_begin_action_model(
         sampling_media_uri=fake.uri(),
         sampling_media_name=fake.pystr(),
     )
-    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
+    config = generate_configuration_model(
+        is_public=is_public, is_private=is_private, is_internal=is_internal
+    )
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],
@@ -41,11 +45,14 @@ def add_dynamic_location_begin_action_model(
         email=userinfo["email"],
     )
     configuration_dynamic_location_begin_action = ConfigurationDynamicLocationBeginAction(
-        begin_date=fake.date(),
-        description="test configuration_dynamic_location_begin_action",
+        begin_date="2021-08-21T10:00:50.542Z",
+        end_date="2033-08-30T10:00:50.542Z",
+        begin_description="test configuration_dynamic_location_begin_action",
+        end_description="end",
         x_property=x_property,
         configuration=config,
-        contact=contact,
+        begin_contact=contact,
+        end_contact=contact,
     )
     db.session.add_all(
         [
@@ -60,25 +67,6 @@ def add_dynamic_location_begin_action_model(
     return configuration_dynamic_location_begin_action
 
 
-def add_dynamic_location_end_action_model(is_public=False, is_private=False, is_internal=True):
-    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
-    userinfo = generate_userinfo_data()
-    contact = Contact(
-        given_name=userinfo["given_name"],
-        family_name=userinfo["family_name"],
-        email=userinfo["email"],
-    )
-    configuration_dynamic_location_end_action = ConfigurationDynamicLocationEndAction(
-        end_date=fake.date(),
-        description="test configuration_dynamic_location_end_action",
-        configuration=config,
-        contact=contact,
-    )
-    db.session.add_all([config, contact, configuration_dynamic_location_end_action])
-    db.session.commit()
-    return configuration_dynamic_location_end_action
-
-
 class TestConfigurationDynamicLocationActionModel(BaseTestCase):
     """Tests for the ConfigurationDynamicLocationBeginAction &
     ConfigurationDynamicLocationEndAction Models."""
@@ -91,17 +79,6 @@ class TestConfigurationDynamicLocationActionModel(BaseTestCase):
         )
         self.assertTrue(configuration_dynamic_location_begin_action.id is not None)
         self.assertEqual(
-            configuration_dynamic_location_begin_action.description,
+            configuration_dynamic_location_begin_action.begin_description,
             "test configuration_dynamic_location_begin_action",
-        )
-
-    def test_add_configuration_dynamic_location_end_action_model(self):
-        """""Ensure Add configuration dynamic location end action model."""
-        configuration_dynamic_location_end_action = (
-            add_dynamic_location_end_action_model()
-        )
-        self.assertTrue(configuration_dynamic_location_end_action.id is not None)
-        self.assertEqual(
-            configuration_dynamic_location_end_action.description,
-            "test configuration_dynamic_location_end_action",
         )
