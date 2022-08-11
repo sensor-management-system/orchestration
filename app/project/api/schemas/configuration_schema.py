@@ -94,40 +94,24 @@ class ConfigurationSchema(Schema):
         type_="platform_mount_actions",
         id_field="id",
     )
-    configuration_static_location_begin_actions = Relationship(
+    configuration_static_location_actions = Relationship(
+        attribute="configuration_static_location_begin_actions",
         related_view="api.configuration_static_location_begin_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
         schema="ConfigurationStaticLocationBeginActionSchema",
-        type_="configuration_static_location_begin_action",
+        type_="configuration_static_location_action",
         id_field="id",
     )
-    configuration_static_location_end_actions = Relationship(
-        related_view="api.configuration_static_location_end_action_list",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        schema="ConfigurationStaticLocationEndActionSchema",
-        type_="configuration_static_location_end_action",
-        id_field="id",
-    )
-    configuration_dynamic_location_begin_actions = Relationship(
+    configuration_dynamic_location_actions = Relationship(
+        attribute="configuration_dynamic_location_begin_actions",
         related_view="api.configuration_dynamic_location_begin_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
         schema="ConfigurationDynamicLocationBeginActionSchema",
-        type_="configuration_dynamic_location_begin_action",
-        id_field="id",
-    )
-    configuration_dynamic_location_end_actions = Relationship(
-        related_view="api.configuration_dynamic_location_end_action_list",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        schema="ConfigurationDynamicLocationEndActionSchema",
-        type_="configuration_dynamic_location_end_action",
+        type_="configuration_dynamic_location_action",
         id_field="id",
     )
     created_by = Relationship(

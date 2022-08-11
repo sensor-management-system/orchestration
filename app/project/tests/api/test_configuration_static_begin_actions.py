@@ -12,9 +12,9 @@ from project.tests.models.test_configurations_model import generate_configuratio
 class TestConfigurationStaticLocationActionServices(BaseTestCase):
     """Tests for the ConfigurationStaticLocationAction endpoint."""
 
-    url = base_url + "/static-location-begin-actions"
+    url = base_url + "/static-location-actions"
     contact_url = base_url + "/contacts"
-    object_type = "configuration_static_location_begin_action"
+    object_type = "configuration_static_location_action"
 
     def test_get_configuration_static_location_action(self):
         """Ensure the List /configuration_static_location_action route behaves correctly."""
@@ -33,8 +33,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            static_location_begin_action.description,
-            data["data"][0]["attributes"]["description"],
+            static_location_begin_action.begin_description,
+            data["data"][0]["attributes"]["begin_description"],
         )
 
     def test_add_configuration_static_begin_location_action(self):
@@ -47,13 +47,13 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         )
 
         _ = super().add_object(
-            url=f"{self.url}?include=configuration,contact",
-            data_object=data,
-            object_type=self.object_type,
+            url=self.url, data_object=data, object_type=self.object_type,
         )
 
     def prepare_request_data(self, description):
-        config = generate_configuration_model(is_public=True, is_private=False, is_internal=False)
+        config = generate_configuration_model(
+            is_public=True, is_private=False, is_internal=False
+        )
         userinfo = generate_userinfo_data()
         contact = Contact(
             given_name=userinfo["given_name"],
@@ -66,8 +66,10 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "attributes": {
-                    "begin_date": fake.future_datetime().__str__(),
-                    "description": description,
+                    "begin_date": "2021-10-22T10:00:50.542Z",
+                    "end_date": "2026-09-22T10:00:50.542Z",
+                    "begin_description": description,
+                    "end_description": "end",
                     "x": str(fake.coordinate()),
                     "y": str(fake.coordinate()),
                     "z": str(fake.coordinate()),
@@ -76,7 +78,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
                     "elevation_datum_uri": fake.uri(),
                 },
                 "relationships": {
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "end_contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
                         "data": {"type": "configuration", "id": config.id}
                     },
@@ -107,9 +110,12 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": static_location_begin_action.id,
-                "attributes": {"description": "changed",},
+                "attributes": {
+                    "end_description": "changed",
+                    "end_date": "2023-10-22T10:00:50.542Z",
+                },
                 "relationships": {
-                    "contact": {
+                    "end_contact": {
                         "data": {"type": "contact", "id": contact["data"]["id"]}
                     },
                 },
@@ -117,7 +123,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         }
 
         _ = super().update_object(
-            url=f"{self.url}/{static_location_begin_action.id}?include=contact",
+            url=f"{self.url}/{static_location_begin_action.id}",
             data_object=new_data,
             object_type=self.object_type,
         )
@@ -134,16 +140,12 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         data1, config1 = self.prepare_request_data("test static_location_begin_action1")
 
         _ = super().add_object(
-            url=f"{self.url}?include=configuration,contact",
-            data_object=data1,
-            object_type=self.object_type,
+            url=self.url, data_object=data1, object_type=self.object_type,
         )
         data2, config2 = self.prepare_request_data("test static_location_begin_action2")
 
         _ = super().add_object(
-            url=f"{self.url}?include=configuration,contact",
-            data_object=data2,
-            object_type=self.object_type,
+            url=self.url, data_object=data2, object_type=self.object_type,
         )
 
         with self.client:
@@ -155,7 +157,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         # Test only for the first one
         with self.client:
             url_get_for_config1 = (
-                base_url + f"/configurations/{config1.id}/static-location-begin-actions"
+                base_url + f"/configurations/{config1.id}/static-location-actions"
             )
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
@@ -163,7 +165,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)
         self.assertEqual(
-            response.json["data"][0]["attributes"]["description"],
+            response.json["data"][0]["attributes"]["begin_description"],
             "test static_location_begin_action1",
         )
 

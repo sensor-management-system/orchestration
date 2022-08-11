@@ -160,6 +160,7 @@ def upgrade():
 
 
 def downgrade():
+    conn = op.get_bind()
     insert_query = text(
         """
     insert into device_unmount_action (
@@ -190,16 +191,16 @@ def downgrade():
     op.drop_constraint(None, "platform_mount_action", type_="foreignkey")
     op.drop_constraint(None, "device_mount_action", type_="foreignkey")
     op.drop_constraint(None, "device_mount_action", type_="foreignkey")
-    op.alter_colmn(
+    op.alter_column(
         "platform_mount_action", "begin_contact_id", new_column_name="contact_id"
     )
-    op.alter_colmn(
+    op.alter_column(
         "device_mount_action", "begin_contact_id", new_column_name="contact_id"
     )
-    op.alter_colmn(
+    op.alter_column(
         "platform_mount_action", "begin_description", new_column_name="description"
     )
-    op.alter_colmn(
+    op.alter_column(
         "device_mount_action", "begin_description", new_column_name="description"
     )
 

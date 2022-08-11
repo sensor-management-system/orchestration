@@ -15,7 +15,6 @@ from project.api.helpers.mounting_checks import (
 from project.api.models import (
     Configuration,
     ConfigurationDynamicLocationBeginAction,
-    ConfigurationDynamicLocationEndAction,
     Contact,
     Device,
     DeviceMountAction,
@@ -527,7 +526,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
         )
         dynamic_location_begin = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
-            contact=self.contact1,
+            begin_contact=self.contact1,
             begin_date=datetime.datetime(year=2022, month=1, day=1),
             x_property=x_coord,
         )
@@ -613,47 +612,35 @@ class TestDeviceMountActionValidator(BaseTestCase):
         )
         dynamic_location_begin1 = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
-            contact=self.contact1,
+            begin_contact=self.contact1,
             begin_date=datetime.datetime(year=2023, month=1, day=1),
             x_property=x_coord,
-        )
-        dynamic_location_end1 = ConfigurationDynamicLocationEndAction(
-            configuration=self.configuration1,
-            contact=self.contact1,
             end_date=datetime.datetime(year=2024, month=1, day=1),
+            end_contact=self.contact1,
         )
         dynamic_location_begin2 = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
-            contact=self.contact1,
+            begin_contact=self.contact1,
             begin_date=datetime.datetime(year=2024, month=2, day=1),
             y_property=x_coord,
-        )
-        dynamic_location_end2 = ConfigurationDynamicLocationEndAction(
-            configuration=self.configuration1,
-            contact=self.contact1,
             end_date=datetime.datetime(year=2025, month=1, day=1),
+            end_contact=self.contact1,
         )
         dynamic_location_begin3 = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
-            contact=self.contact1,
+            begin_contact=self.contact1,
             begin_date=datetime.datetime(year=2025, month=2, day=1),
             y_property=x_coord,
-        )
-        dynamic_location_end3 = ConfigurationDynamicLocationEndAction(
-            configuration=self.configuration1,
-            contact=self.contact1,
             end_date=datetime.datetime(year=2026, month=1, day=1),
+            end_contact=self.contact1,
         )
         db.session.add_all(
             [
                 x_coord,
                 existing_device_mount_action1,
                 dynamic_location_begin1,
-                dynamic_location_end1,
                 dynamic_location_begin2,
-                dynamic_location_end2,
                 dynamic_location_begin3,
-                dynamic_location_end3,
             ]
         )
         db.session.commit()
@@ -699,7 +686,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
         )
         dynamic_location_begin = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
-            contact=self.contact1,
+            begin_contact=self.contact1,
             begin_date=datetime.datetime(year=2022, month=1, day=1),
             x_property=x_coord,
         )

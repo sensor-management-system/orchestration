@@ -364,32 +364,51 @@ class TestConfigurationsService(BaseTestCase):
         configuration, contact, user = self.add_a_configuration_model()
         action_data = {
             "data": {
-                "type": "configuration_static_location_begin_action",
+                "type": "configuration_static_location_action",
                 "attributes": {
                     "x": 12.424163818359377,
                     "y": 51.40391771800119,
                     "z": None,
-                    "description": "",
+                    "begin_description": "",
                     "begin_date": "2021-10-22T09:28:40.275Z",
                     "epsg_code": "4326",
                     "elevation_datum_uri": "",
                     "elevation_datum_name": "MSL",
                 },
                 "relationships": {
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
                         "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
         }
-        url = base_url + "/static-location-begin-actions"
-        _ = super().add_object(
+        url = base_url + "/static-location-actions"
+        new_static_location_action_payload = super().add_object(
             url=url,
             data_object=action_data,
-            object_type="configuration_static_location_begin_action",
+            object_type="configuration_static_location_action",
         )
+        # We add a little test so that we can be sure that
+        # we include relationship data for the static locations.
         url_ = f"{self.configurations_url}/{configuration.id}"
+        with self.run_requests_as(user):
+            resp = self.client.get(url_)
+            self.assertEqual(resp.status_code, 200)
+            self.assertTrue(
+                "configuration_static_location_actions" in resp.json["data"]["relationships"].keys()
+            )
+            self.assertEqual(
+                resp.json["data"]["relationships"]["configuration_static_location_actions"]["data"],
+                [
+                    {
+                        "id": new_static_location_action_payload["data"]["id"],
+                        "type": "configuration_static_location_action",
+                    }
+                ],
+            )
+        # And we want to make sure that we can delete it together with
+        # the static location action.
         _ = self.delete_as_owner(contact, user, url_)
 
     def test_delete_configuration_with_static_end_location_action(self):
@@ -398,24 +417,27 @@ class TestConfigurationsService(BaseTestCase):
 
         action_data = {
             "data": {
-                "type": "configuration_static_location_end_action",
+                "type": "configuration_static_location_action",
                 "attributes": {
-                    "description": "stopped",
-                    "end_date": "2021-10-31T09:28:00.000Z",
+                    "begin_description": "start",
+                    "end_description": "stopped",
+                    "begin_date": "2021-09-20T09:28:00.000Z",
+                    "end_date": "2028-10-20T09:28:00.000Z",
                 },
                 "relationships": {
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "end_contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
                         "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
         }
-        url = base_url + "/static-location-end-actions"
+        url = base_url + "/static-location-actions"
         _ = super().add_object(
             url=url,
             data_object=action_data,
-            object_type="configuration_static_location_end_action",
+            object_type="configuration_static_location_action",
         )
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
@@ -426,29 +448,48 @@ class TestConfigurationsService(BaseTestCase):
 
         action_data = {
             "data": {
-                "type": "configuration_dynamic_location_begin_action",
+                "type": "configuration_dynamic_location_action",
                 "attributes": {
-                    "description": "dynamic",
+                    "begin_description": "dynamic",
                     "begin_date": "2021-10-22T10:00:50.542Z",
                     "epsg_code": "4326",
                     "elevation_datum_uri": "",
                     "elevation_datum_name": "MSL",
                 },
                 "relationships": {
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
                         "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
         }
-        url = base_url + "/dynamic-location-begin-actions"
-        _ = super().add_object(
+        url = base_url + "/dynamic-location-actions"
+        new_dynamic_location_action_payload = super().add_object(
             url=url,
             data_object=action_data,
-            object_type="configuration_dynamic_location_begin_action",
+            object_type="configuration_dynamic_location_action",
         )
+        # We add a little test so that we can be sure that
+        # we include relationship data for the dynamic locations.
         url = f"{self.configurations_url}/{configuration.id}"
+        with self.run_requests_as(user):
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertTrue(
+                "configuration_dynamic_location_actions" in resp.json["data"]["relationships"].keys()
+            )
+            self.assertEqual(
+                resp.json["data"]["relationships"]["configuration_dynamic_location_actions"]["data"],
+                [
+                    {
+                        "id": new_dynamic_location_action_payload["data"]["id"],
+                        "type": "configuration_dynamic_location_action",
+                    }
+                ],
+            )
+        # And we want to make sure that we can delete it together with
+        # the dynamic location action.
         _ = self.delete_as_owner(contact, user, url)
 
     def test_delete_configuration_with_dynamic_end_location_action(self):
@@ -457,24 +498,27 @@ class TestConfigurationsService(BaseTestCase):
 
         action_data = {
             "data": {
-                "type": "configuration_dynamic_location_end_action",
+                "type": "configuration_dynamic_location_action",
                 "attributes": {
-                    "description": "Stopped",
-                    "end_date": "2021-10-23T10:00:00.000Z",
+                    "begin_description": "start",
+                    "end_description": "Stopped",
+                    "begin_date": "2021-09-22T10:00:00.000Z",
+                    "end_date": "2023-10-23T10:00:00.000Z",
                 },
                 "relationships": {
-                    "contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "end_contact": {"data": {"type": "contact", "id": contact.id}},
                     "configuration": {
                         "data": {"type": "configuration", "id": configuration.id}
                     },
                 },
             }
         }
-        url = base_url + "/dynamic-location-end-actions"
+        url = base_url + "/dynamic-location-actions"
         _ = super().add_object(
             url=url,
             data_object=action_data,
-            object_type="configuration_dynamic_location_end_action",
+            object_type="configuration_dynamic_location_action",
         )
         url = f"{self.configurations_url}/{configuration.id}"
         _ = self.delete_as_owner(contact, user, url)
@@ -509,7 +553,7 @@ class TestConfigurationsService(BaseTestCase):
                     "project_name": "MOSES",
                     "status": "draft",
                     "start_date": "2021-10-22T09:31:00.000Z",
-                    "end_date": "2021-10-31T09:32:00.000Z",
+                    "end_date": "2025-10-18T09:32:00.000Z",
                 },
                 "type": "configuration",
             }
