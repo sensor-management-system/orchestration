@@ -365,7 +365,7 @@ api.route(
     ConfigurationDynamicLocationBeginActionList,
     "configuration_dynamic_location_begin_action_list",
     "/dynamic-location-actions",
-    "/configurations/<int:configuration_id>/dynamic-location-action",
+    "/configurations/<int:configuration_id>/dynamic-location-actions",
     "/device-properties/<int:x_property_id>/dynamic-location-actions-x",
     "/device-properties/<int:y_property_id>/dynamic-location-actions-y",
     "/device-properties/<int:z_property_id>/dynamic-location-actions-z",
