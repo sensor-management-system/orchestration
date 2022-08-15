@@ -1,15 +1,19 @@
 from flask import g, request
 
 from ...frj_csv_export.resource import ResourceList
-from ..helpers.errors import (
-    NotFoundError,
-    UnauthorizedError,
+from ..helpers.errors import NotFoundError, UnauthorizedError
+from ..models import (
+    Configuration,
+    ConfigurationDynamicLocationBeginAction,
+    ConfigurationStaticLocationBeginAction,
 )
-from ..models import Configuration, ConfigurationStaticLocationBeginAction, ConfigurationDynamicLocationBeginAction
 from ..models.base_model import db
-
-from ..schemas.configuration_static_location_actions_schema import ConfigurationStaticLocationBeginActionSchema
-from ..schemas.configuration_dynamic_location_actions_schema import ConfigurationDynamicLocationBeginActionSchema
+from ..schemas.configuration_dynamic_location_actions_schema import (
+    ConfigurationDynamicLocationBeginActionSchema,
+)
+from ..schemas.configuration_static_location_actions_schema import (
+    ConfigurationStaticLocationBeginActionSchema,
+)
 
 
 class ControllerConfigurationLocationActionTimepoints(ResourceList):
@@ -28,15 +32,24 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
             if not g.user:
                 raise UnauthorizedError("Authentication required.")
 
-        include_ends = request.args.get("include_ends", 'false') in ['true', "TRUE", "True"]
+        include_ends = request.args.get("include_ends", "false") in [
+            "true",
+            "TRUE",
+            "True",
+        ]
         static_location_schema = ConfigurationStaticLocationBeginActionSchema()
         dynamic_location_schema = ConfigurationDynamicLocationBeginActionSchema()
 
-        static_locations = db.session.query(ConfigurationStaticLocationBeginAction).filter(
+        static_locations = db.session.query(
+            ConfigurationStaticLocationBeginAction
+        ).filter(
             ConfigurationStaticLocationBeginAction.configuration_id == configuration_id,
         )
-        dynamic_locations = db.session.query(ConfigurationDynamicLocationBeginAction).filter(
-            ConfigurationDynamicLocationBeginAction.configuration_id == configuration_id,
+        dynamic_locations = db.session.query(
+            ConfigurationDynamicLocationBeginAction
+        ).filter(
+            ConfigurationDynamicLocationBeginAction.configuration_id
+            == configuration_id,
         )
 
         dates_with_labels = list()
@@ -44,16 +57,22 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
             dates_with_labels.append(
                 {
                     "timepoint": static_location.begin_date,
+                    "id": str(static_location.id),
                     "type": "configuration_static_location_begin",
-                    "attributes": static_location_schema.dump(static_location)["data"]["attributes"]
+                    "attributes": static_location_schema.dump(static_location)["data"][
+                        "attributes"
+                    ],
                 }
             )
             if include_ends and static_location.end_date:
                 dates_with_labels.append(
                     {
                         "timepoint": static_location.end_date,
+                        "id": str(static_location.id),
                         "type": "configuration_static_location_end",
-                        "attributes": static_location_schema.dump(static_location)["data"]["attributes"]
+                        "attributes": static_location_schema.dump(static_location)[
+                            "data"
+                        ]["attributes"],
                     }
                 )
 
@@ -61,16 +80,22 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
             dates_with_labels.append(
                 {
                     "timepoint": dynamic_location.begin_date,
+                    "id": str(dynamic_location.id),
                     "type": "configuration_dynamic_location_begin",
-                    "attributes": dynamic_location_schema.dump(dynamic_location)["data"]["attributes"]
+                    "attributes": dynamic_location_schema.dump(dynamic_location)[
+                        "data"
+                    ]["attributes"],
                 }
             )
             if include_ends and dynamic_location.end_date:
                 dates_with_labels.append(
                     {
                         "timepoint": dynamic_location.end_date,
+                        "id": str(dynamic_location.id),
                         "type": "configuration_dynamic_location_end",
-                        "attributes": dynamic_location_schema.dump(dynamic_location)["data"]["attributes"]
+                        "attributes": dynamic_location_schema.dump(dynamic_location)[
+                            "data"
+                        ]["attributes"],
                     }
                 )
         dates_with_labels.sort(key=lambda x: x["timepoint"])
