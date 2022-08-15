@@ -223,6 +223,7 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> (list, obje
                 "parsed_data": f"{role.contact.given_name} {role.contact.family_name}",
             },
             {"type": "Manufacturer", "parsed_data": instrument.manufacturer_uri},
+            {"type": "Description", "parsed_data": instrument.description if hasattr(instrument, 'description') else None},
             {"type": "ManufacturerName", "parsed_data": instrument.manufacturer_name},
         ]
     except AttributeError as e:
