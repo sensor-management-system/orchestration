@@ -254,7 +254,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         # Test only for the first one
         with self.client:
             url_get_for_config1 = (
-                base_url + f"/configurations/{config1.id}/dynamic-location-action"
+                base_url + f"/configurations/{config1.id}/dynamic-location-actions"
             )
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
