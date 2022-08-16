@@ -291,7 +291,7 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> (list, obje
 
 def make_instrument_data_from_request(instrument_data: dict) -> list:
     """
-    prepare the data toi be sent to the pid handler.
+    prepare the data to be sent to the pid handler.
     The data is a list of dict, which has two attributes:
          - type: required: The data type defines the syntax and semantics of the data in its data field.
          - parsed_data: required: The syntax and semantics of parsed data are identified by the field.
@@ -326,9 +326,38 @@ def make_instrument_data_from_request(instrument_data: dict) -> list:
                 "parsed_data": instrument_data["manufacturer_uri"],
             },
             {
+                "type": "Description",
+                "parsed_data": instrument_data["description"] if hasattr(instrument_data, 'description') else None
+            },
+            {
                 "type": "ManufacturerName",
                 "parsed_data": instrument_data["manufacturer_name"],
             },
+            {"type": "Model", "parsed_data": instrument_data["model"] if hasattr(instrument_data, 'model') else None},
+            {
+                "type": "Modelname",
+                "parsed_data": instrument_data["modelname"] if hasattr(instrument_data, 'modelname') else None
+            },
+            {
+                "type": "AlternateIdentifier",
+                "parsed_data": instrument_data["alternateidentifier"] if hasattr(instrument_data, 'alternateidentifier')
+                else None
+            },
+            {
+                "type": "InstrumentType",
+                "parsed_data": instrument_data["instrumenttype"] if hasattr(instrument_data, 'instrumenttype')
+                else None
+            },
+            {
+                "type": "InstrumentTypeName",
+                "parsed_data": instrument_data["instrumenttypename"] if hasattr(instrument_data, 'instrumenttypename')
+                else None
+            },
+            {
+                "type": "MeasuredVariable",
+                "parsed_data": instrument_data["measuredvariable"] if hasattr(instrument_data, "measuredvariable")
+                else None
+            }
         ]
     except KeyError as e:
         raise BadRequestError(repr(e))
