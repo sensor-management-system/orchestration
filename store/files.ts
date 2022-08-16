@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,46 +30,33 @@
  * permissions and limitations under the Licence.
  */
 
-/**
- * @file provides a mixin component for standard form validation rules
- * @author <marc.hanisch@gfz-potsdam.de>
- */
+import { GetterTree, ActionTree } from 'vuex'
+import { IUploadResult } from '@/services/sms/UploadApi'
 
-import { Vue, Component } from 'nuxt-property-decorator'
+import { RootState } from '@/store'
 
-import UploadConfig from '@/config/uploads'
+const UPLOAD_SIZE_LIMIT = 200 * 1024 * 1024
 
-/**
- * A mixin component for standard form validation rules for uploads
- * @extends Vue
- */
-@Component
-export class UploadRules extends Vue {
-  /**
-   * various rules for validating form inputs
-   *
-   */
-  private uploadRules: Object = {
-    maxSize: (f: File | null) => {
-      const uploadSizeLimit = this.$store.state.files.uploadSizeLimit
-      if (f !== null && f.size > uploadSizeLimit) {
-        return 'File is too large'
-      }
-      return true
-    },
-    mimeTypeAllowed: (f: File | null) => {
-      if (f === null) {
-        return true
-      }
-
-      const mimeTypeIndex = UploadConfig.allowedMimeTypes.indexOf(f.type)
-      if (mimeTypeIndex < 0) {
-        if (f.type) {
-          return '' + f.type + ' is not supported'
-        }
-        return 'Unsupported file type'
-      }
-      return true
-    }
+export interface IFilesState {
+  uploadSizeLimit: number
+}
+const state = (): IFilesState => ({
+  uploadSizeLimit: UPLOAD_SIZE_LIMIT
+})
+const getters: GetterTree<IFilesState, RootState> = {
+}
+const actions: ActionTree<IFilesState, RootState> = {
+  async uploadFile (_nonUsedContext, file: File): Promise<IUploadResult> {
+    return await this.$api.upload.file(file)
   }
+}
+const mutations = {
+}
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
 }
