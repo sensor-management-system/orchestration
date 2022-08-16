@@ -1,13 +1,10 @@
-/*
-Web client of the Sensor Management System software developed within
-the Helmholtz DataHub Initiative by GFZ and UFZ.
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -30,23 +27,53 @@ distributed under the Licence is distributed on an "AS IS" basis,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
-*/
+-->
+<template>
+  <div>
+    <v-icon v-if="value" color="green">
+      mdi-check
+    </v-icon>
+    <v-icon v-else color="red">
+      mdi-close
+    </v-icon>
+    {{ label }}
+  </div>
+</template>
 
-import { Middleware, Context } from '@nuxt/types'
+<script lang="ts">
+/**
+ * @file provides a component to show an info text
+ * @author <marc.hanisch@gfz-potsdam.de>
+ */
+import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-const institutePagesMiddleware: Middleware = function (context: Context) {
-  const institute = context.env.institute
-  if (context.route.path.match('^/info/legal-notice/?$')) {
-    context.redirect({ name: `info-legal-notice-${institute}` })
-  }
-  if (context.route.path.match('^/info/privacy-policy/?$')) {
-    context.redirect({ name: `info-privacy-policy-${institute}` })
-  }
-  if (context.route.path.match('^/info/terms-of-use/?$')) {
-    context.redirect({ name: `info-terms-of-use-${institute}` })
-  }
-  if (context.route.path.match('^/info/groups/?$')) {
-    context.redirect({ name: `info-groups-${institute}` })
-  }
+/**
+ * A class component to show an info text
+ * @extends Vue
+ */
+@Component
+// @ts-ignore
+export default class PermissionInfo extends Vue {
+  /**
+   * a list of projects
+   */
+  @Prop({
+    default: false,
+    required: true,
+    type: Boolean
+  })
+  // @ts-ignore
+  readonly value!: boolean
+
+  /**
+   * a label for the permission info
+   */
+  @Prop({
+    default: '',
+    required: true,
+    type: String
+  })
+  // @ts-ignore
+  readonly label!: string
 }
-export default institutePagesMiddleware
+</script>
