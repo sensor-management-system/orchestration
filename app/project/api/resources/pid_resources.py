@@ -260,8 +260,29 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> (list, obje
                 "parsed_data": f"{role.contact.given_name} {role.contact.family_name}",
             },
             {"type": "Manufacturer", "parsed_data": instrument.manufacturer_uri},
-            {"type": "Description", "parsed_data": instrument.description if hasattr(instrument, 'description') else None},
+            {
+                "type": "Description",
+                "parsed_data": instrument.description if hasattr(instrument, 'description') else None
+            },
             {"type": "ManufacturerName", "parsed_data": instrument.manufacturer_name},
+            {"type": "Model", "parsed_data": instrument.model if hasattr(instrument, 'model') else None},
+            {"type": "Modelname", "parsed_data": instrument.modelname if hasattr(instrument, 'modelname') else None},
+            {
+                "type": "AlternateIdentifier",
+                "parsed_data": instrument.alternateidentifier if hasattr(instrument,'alternateidentifier') else None
+            },
+            {
+                "type": "InstrumentType",
+                "parsed_data": instrument.instrumenttype if hasattr(instrument, 'instrumenttype') else None
+            },
+            {
+                "type": "InstrumentTypeName",
+                "parsed_data": instrument.instrumenttypename if hasattr(instrument, 'instrumenttypename') else None
+            },
+            {
+                "type": "MeasuredVariable",
+                "parsed_data": instrument.measuredvariable if hasattr(instrument, "measuredvariable") else None
+            }
         ]
     except AttributeError as e:
         raise BadRequestError(repr(e))
