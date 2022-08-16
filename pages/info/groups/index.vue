@@ -1,13 +1,10 @@
-/*
-Web client of the Sensor Management System software developed within
-the Helmholtz DataHub Initiative by GFZ and UFZ.
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -30,23 +27,7 @@ distributed under the Licence is distributed on an "AS IS" basis,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
-*/
-
-import { Middleware, Context } from '@nuxt/types'
-
-const institutePagesMiddleware: Middleware = function (context: Context) {
-  const institute = context.env.institute
-  if (context.route.path.match('^/info/legal-notice/?$')) {
-    context.redirect({ name: `info-legal-notice-${institute}` })
-  }
-  if (context.route.path.match('^/info/privacy-policy/?$')) {
-    context.redirect({ name: `info-privacy-policy-${institute}` })
-  }
-  if (context.route.path.match('^/info/terms-of-use/?$')) {
-    context.redirect({ name: `info-terms-of-use-${institute}` })
-  }
-  if (context.route.path.match('^/info/groups/?$')) {
-    context.redirect({ name: `info-groups-${institute}` })
-  }
-}
-export default institutePagesMiddleware
+-->
+<!-- empty, just here to create an index page with redirection via
+     the middleware when the nginx is asked to deliver the
+     /info/groups/ content. -->

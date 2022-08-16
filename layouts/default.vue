@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -89,6 +89,16 @@ permissions and limitations under the Licence.
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Contacts</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Group information -->
+        <v-list-item to="/info/groups" nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-account-group</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Groups</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
