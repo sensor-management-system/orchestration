@@ -114,11 +114,14 @@ class TestConfigurationsService(BaseTestCase):
             config_data = {
                 "data": {"type": "configuration", "attributes": config_json[0]}
             }
-            _ = super().add_object(
+            result_payload = super().add_object(
                 url=self.configurations_url,
                 data_object=config_data,
                 object_type=self.object_type,
             )
+            # Make sure that we have some fields that we want to have.
+            self.assertTrue("created_at" in result_payload["data"]["attributes"].keys())
+            self.assertTrue("updated_at" in result_payload["data"]["attributes"].keys())
 
             # clean up after each run
             self.tearDown()
