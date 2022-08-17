@@ -148,7 +148,7 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
       const propertyName = this.measuredQuantity.propertyName ?? ''
       const label = this.measuredQuantity.label ?? ''
       const unit = this.measuredQuantity.unitName ?? ''
-      return `#${this.measuredQuantity.id} - ${propertyName} ${label ? `- ${label}` : ''} ${unit ? `(${unit})` : ''}`
+      return `#${this.index + 1} - ${propertyName} ${label ? `- ${label}` : ''} ${unit ? `(${unit})` : ''}`
     }
     return ''
   }
