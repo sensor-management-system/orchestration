@@ -204,6 +204,7 @@ services:
       SMS_BACKEND_URL: /backend/api/v1
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
       PKCE_SCOPES: profile openid email eduperson_principal_name
+      INSTITUTE: gfz
     depends_on:
       - backend-db
     volumes:

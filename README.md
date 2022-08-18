@@ -137,3 +137,40 @@ For the minio the restore is different:
   and the option to also remove entries that are not in the backup.
 - There is currently no strategy to restore the metadata - we save them to keep track of the user uploads (if the user wasn't allowed
   to upload a file, we can check who was responsible for that)
+
+## How to add new environment variables to the project
+You have to look for many places. Keep in mind, that you always have look in the specific repository (e.g. `frontend` or `backend`) __and__ the orchestration repository 
+
+### Frontend
+#### In frontend repository
+##### Usage in code
+- Access environment variable via `process.env.YOUR_VARIABLE`
+- Variable can be used directly if it starts with "NUXT_ENV_" (see Nuxt doc on [environment variables](https://nuxtjs.org/docs/configuration-glossary/configuration-env/))
+- Otherwise add `nuxt.config.js` to `env:{...}`, you can then add via `process.env.YOUR_VARIABLE` (see Nuxt doc on topic [environment variables](https://nuxtjs.org/docs/configuration-glossary/configuration-env/))
+##### UFZ Dockerfile
+Add as new argument/variable to dockerfile
+- `docker/deployment/ufz/Dockerfile` 
+    ```
+    ARG YOUR_VARIABLE
+    ENV YOUR_VARIABLE $YOUR_VARIABLE
+    ```
+##### Institute-specific docker-compose.yaml(s)
+Extend the following yamls under `environment` with your variable
+- `docker-compose-gfz-local-with-staging-vm.yml`
+- `docker-compose-ufz-local.yml`
+##### In the CI/CD pipeline
+- In the `.gitlab-ci.yml` [Link](https://gitlab.hzdr.de/hub-terra/sms/frontend/-/blob/master/.gitlab-ci.yml) add your variable to the appropriate stages for GFZ (`build-deploy-static-files-gfz`) and UFZ (`build-deploy-image-ufz`)
+    - under `variables` add your new environment variable
+        -  __be careful__ if you write the value hard-coded or set it via CI/CD variable (see next point "Setting CI/CD in Gitlab")
+    - Under `script` add the line `--build-arg NUXT_ENV_[VARIABLE_NAME]=$[VARIABLE_NAME] \` and replace `[VARIABLE_NAME]` with your new variable
+###### Setting CI/CD variables in Gitlab
+- Go to the HZDR gitlab in the browser to the frontend repository, go to Settings > CI/CD
+    - URL: (https://gitlab.hzdr.de/hub-terra/sms/frontend/-/settings/ci_cd)
+    - Add under __Variables__ your variable with the appropriate value
+#### In the Orchestration repository
+##### Update env files
+- Extend `docker/env.template` with your environment variable
+- Extend `docker/env.dev` with your environment variable
+    - You use this when starting the services via the docker-compose.yml in the orchestration repository
+##### Extend docker-compose.yml
+- Extend the service `frontend` in the section `environment` with your new environment variable
