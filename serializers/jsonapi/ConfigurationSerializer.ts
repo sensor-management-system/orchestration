@@ -126,6 +126,9 @@ export class ConfigurationSerializer {
       configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
       configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
 
+      configuration.createdAt = attributes.created_at ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+      configuration.updatedAt = attributes.updated_at ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+
       if (attributes.is_internal) {
         configuration.visibility = Visibility.Internal
       }
