@@ -30,201 +30,116 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover
-    v-slot="{ hover }"
-  >
-    <v-card
-      :elevation="hover ? 6 : 2"
-      class="ma-2"
-    >
-      <v-card-text
-        @click.stop.prevent="show = !show"
+  <div>
+    <v-divider />
+    <v-container>
+      <v-row
+        dense
       >
-        <v-row
-          no-gutters
+        <v-col
+          cols="4"
+          class="font-weight-medium"
         >
-          <v-col class="text-subtitle-1">
-            {{ platform.shortName }}
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <v-btn
-              icon
-              @click.stop.prevent="show = !show"
-            >
-              <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-expand-transition>
-        <v-card
-          v-show="show"
-          flat
-          tile
-          color="grey lighten-5"
+          Type:
+        </v-col>
+        <v-col
+          cols="8"
+          class="nowrap-truncate"
         >
-          <v-container>
-            <v-card class="mb-2">
-              <v-card-text
-                @click.stop.prevent="showOverview = !showOverview"
-              >
-                <v-row
-                  no-gutters
-                >
-                  <v-col class="text-subtitle-1">
-                    Platform overview
-                  </v-col>
-                  <v-col
-                    align-self="end"
-                    class="text-right"
-                  >
-                    <v-btn
-                      icon
-                      @click.stop.prevent="showOverview = !showOverview"
-                    >
-                      <v-icon>{{ showOverview ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-              <v-expand-transition>
-                <v-card
-                  v-show="showOverview"
-                  flat
-                  tile
-                  color="grey lighten-5"
-                >
-                  <v-card-text>
-                    <v-row
-                      dense
-                    >
-                      <v-col
-                        cols="4"
-                        class="font-weight-medium"
-                      >
-                        Manufacturer:
-                      </v-col>
-                      <v-col
-                        cols="8"
-                        class="nowrap-truncate"
-                      >
-                        {{ getTextOrDefault(platform.manufacturerName) }}
-                      </v-col>
-                      <v-col
-                        cols="4"
-                        class="font-weight-medium"
-                      >
-                        Model:
-                      </v-col>
-                      <v-col
-                        cols="8"
-                        class="nowrap-truncate"
-                      >
-                        {{ getTextOrDefault(platform.model) }}
-                      </v-col>
-                    </v-row>
-                    <v-row
-                      dense
-                    >
-                      <v-col
-                        cols="4"
-                        class="font-weight-medium"
-                      >
-                        Serial number:
-                      </v-col>
-                      <v-col
-                        cols="8"
-                        class="nowrap-truncate"
-                      >
-                        {{ getTextOrDefault(platform.serialNumber) }}
-                      </v-col>
-                      <v-col
-                        cols="4"
-                        class="font-weight-medium"
-                      >
-                        Inventory number:
-                      </v-col>
-                      <v-col
-                        cols="8"
-                        class="nowrap-truncate"
-                      >
-                        {{ getTextOrDefault(platform.inventoryNumber) }}
-                      </v-col>
-                    </v-row>
-                    <v-row
-                      dense
-                    >
-                      <v-col
-                        cols="4"
-                        class="font-weight-medium"
-                      >
-                        Description:
-                      </v-col>
-                      <v-col
-                        cols="8"
-                        class="nowrap-truncate"
-                      >
-                        {{ getTextOrDefault(platform.description) }}
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col>
-                        <v-btn :href="'platforms/' + platform.id" target="_blank">
-                          <v-icon>
-                            mdi-open-in-new
-                          </v-icon>
-                          Open in new tab
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                </v-card>
-              </v-expand-transition>
-            </v-card>
-            <v-card>
-              <v-card-text
-                @click.stop.prevent="showMount = !showMount"
-              >
-                <v-row
-                  no-gutters
-                >
-                  <v-col class="text-subtitle-1">
-                    Mount
-                  </v-col>
-                  <v-col
-                    align-self="end"
-                    class="text-right"
-                  >
-                    <v-btn
-                      icon
-                      @click.stop.prevent="showMount = !showMount"
-                    >
-                      <v-icon>{{ showMount ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-              <v-expand-transition>
-                <v-card
-                  v-show="showMount"
-                  flat
-                  tile
-                  color="grey lighten-5"
-                >
-                  <v-card-text>
-                    <slot name="mount" />
-                  </v-card-text>
-                </v-card>
-              </v-expand-transition>
-            </v-card>
-          </v-container>
-        </v-card>
-      </v-expand-transition>
-    </v-card>
-  </v-hover>
+          {{ platform.platformTypeName | orDefault }}
+        </v-col>
+        <v-col
+          cols="4"
+          class="font-weight-medium"
+        >
+          Manufacturer:
+        </v-col>
+        <v-col
+          cols="8"
+          class="nowrap-truncate"
+        >
+          {{ platform.manufacturerName | orDefault }}
+        </v-col>
+        <v-col
+          cols="4"
+          class="font-weight-medium"
+        >
+          Model:
+        </v-col>
+        <v-col
+          cols="8"
+          class="nowrap-truncate"
+        >
+          {{ platform.model | orDefault }}
+        </v-col>
+      </v-row>
+      <v-row
+        dense
+      >
+        <v-col
+          cols="4"
+          class="font-weight-medium"
+        >
+          Serial number:
+        </v-col>
+        <v-col
+          cols="8"
+          class="nowrap-truncate"
+        >
+          {{ platform.serialNumber | orDefault }}
+        </v-col>
+        <v-col
+          cols="4"
+          class="font-weight-medium"
+        >
+          Inventory number:
+        </v-col>
+        <v-col
+          cols="8"
+          class="nowrap-truncate"
+        >
+          {{ platform.inventoryNumber | orDefault }}
+        </v-col>
+      </v-row>
+      <v-row
+        dense
+      >
+        <v-col
+          cols="4"
+          class="font-weight-medium"
+        >
+          Description:
+        </v-col>
+        <v-col
+          cols="8"
+          class="nowrap-truncate"
+          :title="platform.description.length > 25 ? platform.description : ''"
+        >
+          {{ platform.description | shortenRight(25, '...') | orDefault }}
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-btn :href="'platforms/' + platform.id" target="_blank" :disabled="false">
+            <v-icon>
+              mdi-open-in-new
+            </v-icon>
+            Open in new tab
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-divider class="my-4" />
+      <v-row>
+        <v-col class="text-subtitle-1 font-weight-medium">
+          Mount information
+        </v-col>
+      </v-row>      <v-row>
+        <v-col>
+          <slot name="mount" />
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -243,8 +158,6 @@ export default class PlatformMountListItem extends Vue {
   private show = false
   private showOverview = false
   private showMount = false
-
-  getTextOrDefault = (text: string): string => text || '-'
 }
 </script>
 

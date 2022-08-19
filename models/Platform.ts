@@ -3,9 +3,10 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -321,6 +322,10 @@ export class Platform implements IPlatform, IVisible {
     return this._visibility === Visibility.Public
   }
 
+  get type (): string {
+    return 'platform'
+  }
+
   static createEmpty (): Platform {
     return new Platform()
   }
@@ -356,7 +361,6 @@ export class Platform implements IPlatform, IVisible {
 
     newObject.createdBy = someObject.createdBy
     newObject.updatedBy = someObject.updatedBy
-
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)

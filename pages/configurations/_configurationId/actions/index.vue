@@ -59,6 +59,8 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapGetters } from 'vuex'
 
+import { TimelineActionsGetter } from '@/store/configurations'
+
 import HintCard from '@/components/HintCard.vue'
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
 
@@ -67,6 +69,7 @@ import ConfigurationsTimelineActionCard from '@/components/configurations/Config
   computed: mapGetters('configurations', ['timelineActions'])
 })
 export default class ConfigurationShowActionPage extends Vue {
+  timelineActions!: TimelineActionsGetter
 }
 </script>
 

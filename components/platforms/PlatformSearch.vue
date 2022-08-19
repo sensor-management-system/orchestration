@@ -224,7 +224,7 @@ import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permission
       'setOnlyOwnPlatforms',
       'setSearchText'
     ]),
-    ...mapActions('permissions', ['loadPermissionGroups']),
+    ...mapActions('permissions', ['loadPermissionGroups'])
   }
 })
 export default class PlatformSearch extends Vue {

@@ -52,21 +52,21 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="3">
         <label>Status</label>
-        {{ value.status }}
+        {{ value.status | orDefault }}
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
         <label>Start date</label>
         <span v-if="value.startDate">
-          {{ value.startDate | dateToDateTimeString }}
+          {{ value.startDate | dateToDateTimeString | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
       </v-col>
       <v-col cols="12" md="3">
         <label>End date</label>
         <span v-if="value.endDate">
-          {{ value.endDate | dateToDateTimeString }}
+          {{ value.endDate | dateToDateTimeString | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
       </v-col>

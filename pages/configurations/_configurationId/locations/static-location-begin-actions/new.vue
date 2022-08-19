@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 import { mapActions, mapState } from 'vuex'
@@ -74,10 +74,7 @@ import { VocabularyState } from '@/store/vocabulary'
 
 import { Rules } from '@/mixins/Rules'
 
-import { Contact } from '@/models/Contact'
 import { Configuration } from '@/models/Configuration'
-import { ElevationDatum } from '@/models/ElevationDatum'
-import { EpsgCode } from '@/models/EpsgCode'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 
@@ -113,6 +110,9 @@ export default class StaticLocationBeginActionNew extends mixins(Rules) {
   // vuex definition for typescript check
   epsgCodes!: VocabularyState['epsgCodes']
   elevationData!: VocabularyState['elevationData']
+  loadConfiguration!: (id: string) => void
+  addStaticLocationBeginAction!: ({ configurationId, staticLocationBeginAction }: {configurationId: string, staticLocationBeginAction: StaticLocationBeginAction}) => Promise<string>
+  value!: Configuration
 
   created () {
     if (this.value) {

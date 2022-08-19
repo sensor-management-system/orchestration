@@ -351,6 +351,10 @@ export class Device implements IDevice, IVisible {
     return this._visibility === Visibility.Public
   }
 
+  get type (): string {
+    return 'device'
+  }
+
   static createFromObject (someObject: IDevice): Device {
     const newObject = new Device()
 

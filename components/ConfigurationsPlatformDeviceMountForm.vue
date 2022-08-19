@@ -29,90 +29,131 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-form
-    ref="mountForm"
-    @submit.prevent
-  >
-    <v-row>
-      <v-col
-        cols="12"
-        md="3"
-      >
-        <v-text-field
-          v-model.number="offsetX"
-          label="Offset (x)"
-          type="number"
-          step="any"
-          :disabled="readonly"
-          required
-          :rules="[rules.numericRequired]"
-          class="m-annotated"
-          @wheel.prevent
-        />
-      </v-col>
-      <v-col
-        cols="12"
-        md="3"
-      >
-        <v-text-field
-          v-model.number="offsetY"
-          label="Offset (y)"
-          type="number"
-          step="any"
-          :disabled="readonly"
-          required
-          :rules="[rules.numericRequired]"
-          class="m-annotated"
-          @wheel.prevent
-        />
-      </v-col>
-      <v-col
-        cols="12"
-        md="3"
-      >
-        <v-text-field
-          v-model.number="offsetZ"
-          label="Offset (z)"
-          type="number"
-          step="any"
-          :disabled="readonly"
-          required
-          :rules="[rules.numericRequired]"
-          class="m-annotated"
-          @wheel.prevent
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
-        <v-autocomplete
-          v-model="contact"
-          :items="contacts"
-          label="Contact"
-          :disabled="readonly"
-          required
-          :rules="[rules.required]"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="12">
-        <v-textarea
-          v-model="description"
-          label="Description"
-          rows="3"
-          :disabled="readonly"
-        />
-      </v-col>
-    </v-row>
-    <v-btn
-      :disabled="readonly"
-      :data-role="dataRoleBtn"
-      @click="add"
+  <span>
+    <v-form
+      ref="mountForm"
+      @submit.prevent
     >
-      mount
-    </v-btn>
-  </v-form>
+      <v-container>
+        <v-row class="pb-0">
+          <v-col
+            cols="12"
+            md="3"
+          >
+            <v-text-field
+              v-model.number="offsetX"
+              data-role="textfield-offset-x"
+              label="Offset (x)"
+              type="number"
+              step="any"
+              :disabled="readonly"
+              required
+              :rules="[rules.numericRequired]"
+              class="m-annotated"
+              @wheel.prevent
+              @input="add"
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            md="3"
+          >
+            <v-text-field
+              v-model.number="offsetY"
+              data-role="textfield-offset-y"
+              label="Offset (y)"
+              type="number"
+              step="any"
+              :disabled="readonly"
+              required
+              :rules="[rules.numericRequired]"
+              class="m-annotated"
+              @wheel.prevent
+              @input="add"
+            />
+          </v-col>
+          <v-col
+            cols="12"
+            md="3"
+          >
+            <v-text-field
+              v-model.number="offsetZ"
+              data-role="textfield-offset-z"
+              label="Offset (z)"
+              type="number"
+              step="any"
+              :disabled="readonly"
+              required
+              :rules="[rules.numericRequired]"
+              class="m-annotated"
+              @wheel.prevent
+              @input="add"
+            />
+          </v-col>
+        </v-row>
+        <v-row class="mt-0 pt-0">
+          <v-col>
+            <span class="text-caption">Offsets are relative to parent platform/root</span>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <span>
+              <v-autocomplete
+                v-model="beginContact"
+                data-role="select-begin-contact"
+                :items="contacts"
+                label="Begin Contact"
+                :disabled="readonly"
+                required
+                :rules="[rules.required]"
+                class="required"
+                @input="add"
+              />
+            </span>
+          </v-col>
+          <v-col v-if="withUnmount">
+            <span>
+
+              <v-autocomplete
+                v-model="endContact"
+                data-role="select-end-contact"
+                :items="contacts"
+                label="End Contact"
+                :disabled="readonly"
+                required
+                :rules="[rules.required]"
+                class="required"
+                @input="add"
+              />
+            </span>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-textarea
+              v-model="beginDescription"
+              data-role="textarea-begin-description"
+              label="Begin Description"
+              rows="3"
+              :disabled="readonly"
+              @input="add"
+            />
+          </v-col>
+          <v-col v-if="withUnmount">
+            <v-textarea
+              v-model="endDescription"
+              data-role="textarea-end-description"
+              label="End Description"
+              rows="3"
+              :disabled="readonly"
+              @input="add"
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-form>
+  </span>
 </template>
 <script lang="ts">
 
@@ -121,22 +162,25 @@ import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
 
 import { Contact } from '@/models/Contact'
+import { Platform } from '@/models/Platform'
+import { Device } from '@/models/Device'
 
 @Component
-export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) {
+export default class ConfigurationsPlatformDeviceMountForm extends mixins(Rules) {
   private offsetX: number = 0.0
   private offsetY: number = 0.0
   private offsetZ: number = 0.0
 
-  private contact: Contact | null = null
-  private description = ''
+  private beginContact: Contact | null = null
+  private beginDescription = ''
+  private endContact: Contact | null = null
+  private endDescription = ''
 
   @Prop({
-    default: () => '',
     required: true,
-    type: String
+    type: Object
   })
-  readonly dataRoleBtn!: string
+  readonly entity!: Platform | Device
 
   @Prop({
     default: () => false,
@@ -144,6 +188,12 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
   })
   // @ts-ignore
   readonly readonly: boolean
+
+  @Prop({
+    default: () => false,
+    type: Boolean
+  })
+  readonly withUnmount!: boolean
 
   @Prop({
     default: () => [],
@@ -158,7 +208,9 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
   readonly currentUserMail: string | null
 
   created () {
-    this.contact = this.currentUserAsMountContact
+    this.beginContact = this.currentUserAsMountContact
+    this.endContact = this.withUnmount ? this.currentUserAsMountContact : null
+    this.add()
   }
 
   get currentUserAsMountContact (): Contact | null {
@@ -171,14 +223,25 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
     return null
   }
 
+  get entityType (): string {
+    return this.entity.type
+  }
+
+  get entityIDString (): string {
+    return `${this.entityType}-${this.entity?.id}`
+  }
+
   add () {
     if (this.validateForm()) {
       this.$emit('add', {
+        entity: this.entity,
         offsetX: this.offsetX,
         offsetY: this.offsetY,
         offsetZ: this.offsetZ,
-        contact: this.contact,
-        description: this.description
+        beginContact: this.beginContact,
+        beginDescription: this.beginDescription,
+        endContact: this.endContact,
+        endDescription: this.endDescription
       })
     } else {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
@@ -186,12 +249,18 @@ export default class ConfigurationPlatformDeviceMountForm extends mixins(Rules) 
   }
 
   validateForm (): boolean {
-    return (this.$refs.mountForm as Vue & { validate: () => boolean }).validate()
+    if (this.$refs.mountForm !== undefined) {
+      return (this.$refs.mountForm as Vue & { validate: () => boolean }).validate()
+    } else {
+      return true
+    }
   }
 }
 </script>
 
 <style scoped>
+/* @import "@/assets/styles/_forms.scss"; */
+
 /* the m-annotated class is to add the unit (meters) to the fields */
 .m-annotated::after {
   content: " m";

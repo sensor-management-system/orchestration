@@ -40,8 +40,6 @@ import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
@@ -87,9 +85,9 @@ export interface IMountTimelineAction {
   key: string
   color: string
   icon: string
-  date: DateTime
+  date: DateTime | null
   title: string
-  contact: Contact
+  contact: Contact | null
   mountInfo: IMountInfo | null
   description: string
 }
@@ -117,6 +115,7 @@ export interface IDynamicLocationTimelineAction {
 }
 
 export type ITimelineAction = IMountTimelineAction | IStaticLocationTimelineAction | IDynamicLocationTimelineAction
+
 export class PlatformMountTimelineAction implements IMountTimelineAction {
   private mountAction: PlatformMountAction
 
@@ -137,7 +136,7 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime {
-    return this.mountAction.date
+    return this.mountAction.beginDate
   }
 
   get title (): string {
@@ -145,7 +144,7 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
   }
 
   get contact (): Contact {
-    return this.mountAction.contact
+    return this.mountAction.beginContact
   }
 
   get mountInfo (): IMountInfo {
@@ -158,7 +157,7 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.mountAction.description
+    return this.mountAction.beginDescription
   }
 }
 
@@ -182,7 +181,7 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime {
-    return this.mountAction.date
+    return this.mountAction.beginDate
   }
 
   get title (): string {
@@ -190,7 +189,7 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
   }
 
   get contact (): Contact {
-    return this.mountAction.contact
+    return this.mountAction.beginContact
   }
 
   get mountInfo (): IMountInfo {
@@ -203,19 +202,19 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.mountAction.description
+    return this.mountAction.beginDescription
   }
 }
 
 export class PlatformUnmountTimelineAction implements IMountTimelineAction {
-  private unmountAction: PlatformUnmountAction
+  private mountAction: PlatformMountAction
 
-  constructor (unmountAction: PlatformUnmountAction) {
-    this.unmountAction = unmountAction
+  constructor (mountAction: PlatformMountAction) {
+    this.mountAction = mountAction
   }
 
   get key (): string {
-    return 'Platform-unmount-action-' + this.unmountAction.id
+    return 'Platform-unmount-action-' + this.mountAction.id
   }
 
   get color (): string {
@@ -226,16 +225,16 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
     return 'mdi-rocket'
   }
 
-  get date (): DateTime {
-    return this.unmountAction.date
+  get date (): DateTime | null {
+    return this.mountAction.endDate
   }
 
   get title (): string {
-    return this.unmountAction.platform.shortName + ' unmounted'
+    return this.mountAction.platform.shortName + ' unmounted'
   }
 
-  get contact (): Contact {
-    return this.unmountAction.contact
+  get contact (): Contact | null {
+    return this.mountAction.endContact
   }
 
   get mountInfo (): null {
@@ -243,19 +242,19 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.unmountAction.description
+    return this.mountAction.endDescription || ''
   }
 }
 
 export class DeviceUnmountTimelineAction implements IMountTimelineAction {
-  private unmountAction: DeviceUnmountAction
+  private mountAction: DeviceMountAction
 
-  constructor (unmountAction: DeviceUnmountAction) {
-    this.unmountAction = unmountAction
+  constructor (mountAction: DeviceMountAction) {
+    this.mountAction = mountAction
   }
 
   get key (): string {
-    return 'Device-unmount-action-' + this.unmountAction.device.id + this.unmountAction.date.toString()
+    return 'Device-unmount-action-' + this.mountAction.id
   }
 
   get color (): string {
@@ -266,16 +265,16 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
     return 'mdi-network'
   }
 
-  get date (): DateTime {
-    return this.unmountAction.date
+  get date (): DateTime | null {
+    return this.mountAction.endDate
   }
 
   get title (): string {
-    return this.unmountAction.device.shortName + ' unmounted'
+    return this.mountAction.device.shortName + ' unmounted'
   }
 
-  get contact (): Contact {
-    return this.unmountAction.contact
+  get contact (): Contact | null {
+    return this.mountAction.endContact
   }
 
   get mountInfo (): null {
@@ -283,7 +282,7 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.unmountAction.description
+    return this.mountAction.endDescription || ''
   }
 }
 

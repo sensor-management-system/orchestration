@@ -46,7 +46,6 @@ export interface IDynamicLocationBeginAction {
   z: DeviceProperty | null
   elevationDatumName: string
   elevationDatumUri: string
-
 }
 
 export class DynamicLocationBeginAction implements IDynamicLocationBeginAction {
@@ -60,6 +59,7 @@ export class DynamicLocationBeginAction implements IDynamicLocationBeginAction {
   private _epsgCode: string = '4326'
   private _elevationDatumName: string = 'MSL'
   private _elevationDatumUri: string = ''
+  readonly _type: string = 'dynamicStart'
 
   get id (): string {
     return this._id
@@ -139,6 +139,10 @@ export class DynamicLocationBeginAction implements IDynamicLocationBeginAction {
 
   set elevationDatumUri (newUri: string) {
     this._elevationDatumUri = newUri
+  }
+
+  get type (): string {
+    return this._type
   }
 
   static createFromObject (someObject: IDynamicLocationBeginAction): DynamicLocationBeginAction {

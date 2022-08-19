@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
         <v-row
           no-gutters
         >
-          <v-col class="text-subtitle-1">
+          <v-col cols="8" class="text-subtitle-1">
             <slot />
           </v-col>
           <v-col

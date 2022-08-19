@@ -3,9 +3,10 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -31,35 +32,51 @@
  */
 
 import { DateTime } from 'luxon'
+import { Device } from '@/models/Device'
+import { Platform } from '@/models/Platform'
 
-import { PlatformUnmountActionBasicData } from '@/models/basic/PlatformUnmountActionBasicData'
+export interface IConfigurationMountingAction {
+  attributes: Device | Platform,
+  timepoint: DateTime,
+  type: string
+}
 
-import { PlatformUnmountActionBasicDataSerializer } from '@/serializers/jsonapi/basic/PlatformUnmountActionBasicDataSerializer'
+export class ConfigurationMountingAction implements IConfigurationMountingAction {
+  private _attributes: Device | Platform
+  private _timepoint: DateTime
+  private _type: string
 
-const date = DateTime.utc(2020, 1, 1, 12, 0, 0)
+  constructor (
+    attributes: Device | Platform,
+    timepoint: DateTime,
+    type: string
+  ) {
+    this._attributes = attributes
+    this._timepoint = timepoint
+    this._type = type
+  }
 
-describe('PlatformUnmountActionBasicDataSerializer', () => {
-  describe('#convertJsonApiDataToModel', () => {
-    it('should covnert a single json api data object to a platform unmount action', () => {
-      const jsonApiData: any = {
-        type: 'platform_unmount_action',
-        attributes: {
-          description: 'Platform unmount',
-          end_date: '2020-01-01T12:00:00.000Z'
-        },
-        id: '1'
-      }
+  get attributes (): Device | Platform {
+    return this._attributes
+  }
 
-      const expectedPlatformUnmountAction = PlatformUnmountActionBasicData.createFromObject({
-        id: '1',
-        date,
-        description: 'Platform unmount'
-      })
+  set attributes (newAttribute: Device | Platform) {
+    this._attributes = newAttribute
+  }
 
-      const serializer = new PlatformUnmountActionBasicDataSerializer()
-      const platformUnmountAction = serializer.convertJsonApiDataToModel(jsonApiData)
+  get timepoint (): DateTime {
+    return this._timepoint
+  }
 
-      expect(platformUnmountAction).toEqual(expectedPlatformUnmountAction)
-    })
-  })
-})
+  set timepoint (newTimepoint: DateTime) {
+    this._timepoint = newTimepoint
+  }
+
+  get type (): string {
+    return this._type
+  }
+
+  set type (newType: string) {
+    this._type = newType
+  }
+}

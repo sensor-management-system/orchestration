@@ -78,9 +78,9 @@ describe('ConfigurationsSelectedItemUnmountForm', () => {
     const wrapper: any = createWrapper()
 
     await wrapper.get('button[data-role="remove-node"]').trigger('click')
-    expect(wrapper.emitted('remove')).toBeTruthy()
-    expect(wrapper.emitted('remove').length).toBe(1)
-    const addPayload = wrapper.emitted('remove')[0]
+    expect(wrapper.emitted('unmount')).toBeTruthy()
+    expect(wrapper.emitted('unmount').length).toBe(1)
+    const addPayload = wrapper.emitted('unmount')[0]
     expect(addPayload.length).toEqual(1)
     const addPayloadContent = addPayload[0]
     expect(addPayloadContent.contact).toEqual(contact)

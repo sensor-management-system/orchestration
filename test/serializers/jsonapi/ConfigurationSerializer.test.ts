@@ -33,12 +33,6 @@ import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
-import { Device } from '@/models/Device'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
-import { Platform } from '@/models/Platform'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
 import {
@@ -60,7 +54,6 @@ import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
-import { Visibility } from '@/models/Visibility'
 
 describe('LocationType', () => {
   it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
@@ -97,50 +90,6 @@ describe('ConfigurationSerializer', () => {
               }
             },
             src_elevation: {
-            },
-            platform_mount_actions: {
-              data: [
-                {
-                  type: 'platform_mount_action',
-                  id: '1'
-                },
-                {
-                  type: 'platform_mount_action',
-                  id: '2'
-                },
-                {
-                  type: 'platform_mount_action',
-                  id: '3'
-                }
-              ]
-            },
-            platform_unmount_actions: {
-              data: [
-                {
-                  type: 'platform_unmount_action',
-                  id: '1'
-                }
-              ]
-            },
-            device_mount_actions: {
-              data: [
-                {
-                  type: 'device_mount_action',
-                  id: '1'
-                },
-                {
-                  type: 'device_mount_action',
-                  id: '2'
-                }
-              ]
-            },
-            device_unmount_actions: {
-              data: [
-                {
-                  type: 'device_unmount_action',
-                  id: '1'
-                }
-              ]
             },
             configuration_static_location_begin_actions: {
               data: [
@@ -214,546 +163,222 @@ describe('ConfigurationSerializer', () => {
           relationships: {},
           id: '4'
         }],
-        included: [{
-          type: 'platform_mount_action',
-          id: '1',
-          attributes: {
-            offset_x: 1.0,
-            offset_y: 2.0,
-            offset_z: 3.0,
-            description: '',
-            begin_date: '2020-01-01T13:49:48.000000+00:00'
-          },
-          relationships: {
-            platform: {
-              data: {
-                type: 'platform',
-                id: '37'
-              }
+        included: [
+          {
+            type: 'configuration_static_location_begin_action',
+            id: '1111',
+            attributes: {
+              description: 'start static action',
+              x: 1.0,
+              y: 2.0,
+              z: 3.0,
+              epsg_code: '4326',
+              elevation_datum_name: 'MSL',
+              elevation_datum_uri: 'some/uri',
+              begin_date: '2021-01-01T17:49:48.000000+00:00'
             },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
+            relationships: {
+              contact: {
+                data: {
+                  type: 'contact',
+                  id: '1'
+                }
+              },
+              configuration: {
+                data: {
+                  type: 'configuration',
+                  id: '1'
+                }
               }
             }
-          }
-        },
-        {
-          type: 'platform_mount_action',
-          id: '2',
-          attributes: {
-            offset_x: 4.0,
-            offset_y: 5.0,
-            offset_z: 6.0,
-            description: '',
-            begin_date: '2020-01-01T14:49:48.000000+00:00'
           },
-          relationships: {
-            platform: {
-              data: {
-                type: 'platform',
-                id: '38'
-              }
+          {
+            type: 'configuration_static_location_end_action',
+            id: '2222',
+            attributes: {
+              description: 'stop static action',
+              end_date: '2021-01-02T17:49:48.000000+00:00'
             },
-            parent_platform: {
-              data: {
-                type: 'platform',
-                id: '37'
-              }
-            },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
+            relationships: {
+              contact: {
+                data: {
+                  type: 'contact',
+                  id: '1'
+                }
+              },
+              configuration: {
+                data: {
+                  type: 'configuration',
+                  id: '1'
+                }
               }
             }
-          }
-        },
-        {
-          type: 'platform_mount_action',
-          id: '3',
-          attributes: {
-            offset_x: 13.0,
-            offset_y: 14.0,
-            offset_z: 15.0,
-            description: 'mount',
-            begin_date: '2020-01-01T15:49:48.000000+00:00'
           },
-          relationships: {
-            platform: {
-              data: {
-                type: 'platform',
-                id: '41'
-              }
+          {
+            type: 'configuration_dynamic_location_begin_action',
+            id: '3333',
+            attributes: {
+              description: 'start static action',
+              epsg_code: '4326',
+              elevation_datum_name: 'MSL',
+              elevation_datum_uri: 'some/uri',
+              begin_date: '2021-01-03T17:49:48.000000+00:00'
             },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
+            relationships: {
+              contact: {
+                data: {
+                  type: 'contact',
+                  id: '1'
+                }
+              },
+              configuration: {
+                data: {
+                  type: 'configuration',
+                  id: '1'
+                }
+              },
+              x_property: {
+                data: {
+                  type: 'device_property',
+                  id: '100'
+                }
+              },
+              y_property: {
+                data: {
+                  type: 'device_property',
+                  id: '101'
+                }
+              },
+              z_property: {
+                data: {
+                  type: 'device_property',
+                  id: null
+                }
               }
             }
-          }
-        },
-        {
-          type: 'platform_unmount_action',
-          id: '1',
-          attributes: {
-            end_date: '2021-01-01T15:49:48.000000+00:00',
-            description: 'unmount'
           },
-          relationships: {
-            platform: {
-              data: {
-                type: 'platform',
-                id: '41'
-              }
+          {
+            type: 'configuration_dynamic_location_end_action',
+            id: '4444',
+            attributes: {
+              description: 'stop dynamic action',
+              end_date: '2021-01-04T17:49:48.000000+00:00'
             },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
+            relationships: {
+              contact: {
+                data: {
+                  type: 'contact',
+                  id: '1'
+                }
+              },
+              configuration: {
+                data: {
+                  type: 'configuration',
+                  id: '1'
+                }
               }
             }
-          }
-        },
-        {
-          type: 'device_mount_action',
-          id: '1',
-          attributes: {
-            offset_x: 7.0,
-            offset_y: 8.0,
-            offset_z: 9.0,
-            description: '',
-            begin_date: '2020-01-01T16:49:48.000000+00:00'
           },
-          relationships: {
-            device: {
-              data: {
-                type: 'device',
-                id: '39'
-              }
+          {
+            type: 'device_property',
+            id: '100',
+            attributes: {
+              sampling_media_name: 'Air',
+              sampling_media_uri: 'medium/air',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -273,
+              measuring_range_max: 100,
+              label: 'air_temperature',
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
             },
-            parent_platform: {
-              data: {
-                type: 'platform',
-                id: '38'
-              }
-            },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
+            relationships: {
+              device: {
+                data: {
+                  type: 'device',
+                  // just an example device included already for the
+                  // mount actions
+                  id: '39'
+                }
               }
             }
-          }
-        },
-        {
-          type: 'device_mount_action',
-          id: '2',
-          attributes: {
-            offset_x: 10.0,
-            offset_y: 11.0,
-            offset_z: 12.0,
-            description: 'device mount',
-            begin_date: '2020-01-01T17:49:48.000000+00:00'
           },
-          relationships: {
-            device: {
-              data: {
-                type: 'device',
-                id: '40'
-              }
+          {
+            type: 'device_property',
+            id: '101',
+            attributes: {
+              sampling_media_name: 'Water',
+              sampling_media_uri: 'medium/water',
+              compartment_name: 'C1',
+              compartment_uri: 'compartment/c1',
+              property_name: 'Temperature',
+              property_uri: 'property/temperature',
+              unit_name: 'degree',
+              unit_uri: 'unit/degree',
+              failure_value: -999,
+              measuring_range_min: -10,
+              measuring_range_max: 100,
+              label: 'water_temperature',
+              accuracy: 0.1,
+              resolution: 0.05,
+              resolution_unit_name: 'TemperatureRes',
+              resolution_unit_uri: 'property/res/temperature'
             },
-            parent_platform: {
-              data: {
-                type: 'platform',
-                id: '38'
-              }
-            },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
+            relationships: {
+              device: {
+                data: {
+                  type: 'device',
+                  // just an example device included already for the
+                  // mount actions
+                  id: '39'
+                }
               }
             }
-          }
-        },
-        {
-          type: 'device_unmount_action',
-          id: '1',
-          attributes: {
-            description: 'device unmount',
-            end_date: '2021-01-01T17:49:48.000000+00:00'
           },
-          relationships: {
-            device: {
-              data: {
-                type: 'device',
-                id: '40'
-              }
-            },
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
-              }
+          {
+            type: 'contact',
+            id: '1',
+            attributes: {
+              given_name: 'Max',
+              family_name: 'Mustermann',
+              email: 'max@mustermann.xyz',
+              website: ''
             }
-          }
-        },
-        {
-          type: 'configuration_static_location_begin_action',
-          id: '1111',
-          attributes: {
-            description: 'start static action',
-            x: 1.0,
-            y: 2.0,
-            z: 3.0,
-            epsg_code: '4326',
-            elevation_datum_name: 'MSL',
-            elevation_datum_uri: 'some/uri',
-            begin_date: '2021-01-01T17:49:48.000000+00:00'
           },
-          relationships: {
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
+          {
+            type: 'device',
+            id: '39',
+            attributes: {
+              inventory_number: '',
+              short_name: 'Adcon wind vane',
+              device_type_uri: '',
+              created_at: '2020-08-28T13:49:48.799090+00:00',
+              manufacturer_name: 'OTT Hydromet GmbH',
+              dual_use: false,
+              description: '',
+              device_type_name: '',
+              updated_at: '2020-08-29T13:49:48.799090+00:00',
+              manufacturer_uri: '',
+              long_name: 'Adcon wind vane',
+              serial_number: '',
+              persistent_identifier: null,
+              model: 'Wind Vane',
+              website: 'www.adcon.com',
+              status_uri: '',
+              status_name: ''
             },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
-              }
+            relationships: {
+              // nothing more to make the test case not too complex
             }
-          }
-        },
-        {
-          type: 'configuration_static_location_end_action',
-          id: '2222',
-          attributes: {
-            description: 'stop static action',
-            end_date: '2021-01-02T17:49:48.000000+00:00'
-          },
-          relationships: {
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
-              }
-            }
-          }
-        },
-        {
-          type: 'configuration_dynamic_location_begin_action',
-          id: '3333',
-          attributes: {
-            description: 'start static action',
-            epsg_code: '4326',
-            elevation_datum_name: 'MSL',
-            elevation_datum_uri: 'some/uri',
-            begin_date: '2021-01-03T17:49:48.000000+00:00'
-          },
-          relationships: {
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
-              }
-            },
-            x_property: {
-              data: {
-                type: 'device_property',
-                id: '100'
-              }
-            },
-            y_property: {
-              data: {
-                type: 'device_property',
-                id: '101'
-              }
-            },
-            z_property: {
-              data: {
-                type: 'device_property',
-                id: null
-              }
-            }
-          }
-        },
-        {
-          type: 'configuration_dynamic_location_end_action',
-          id: '4444',
-          attributes: {
-            description: 'stop dynamic action',
-            end_date: '2021-01-04T17:49:48.000000+00:00'
-          },
-          relationships: {
-            contact: {
-              data: {
-                type: 'contact',
-                id: '1'
-              }
-            },
-            configuration: {
-              data: {
-                type: 'configuration',
-                id: '1'
-              }
-            }
-          }
-        },
-        {
-          type: 'device_property',
-          id: '100',
-          attributes: {
-            sampling_media_name: 'Air',
-            sampling_media_uri: 'medium/air',
-            compartment_name: 'C1',
-            compartment_uri: 'compartment/c1',
-            property_name: 'Temperature',
-            property_uri: 'property/temperature',
-            unit_name: 'degree',
-            unit_uri: 'unit/degree',
-            failure_value: -999,
-            measuring_range_min: -273,
-            measuring_range_max: 100,
-            label: 'air_temperature',
-            accuracy: 0.1,
-            resolution: 0.05,
-            resolution_unit_name: 'TemperatureRes',
-            resolution_unit_uri: 'property/res/temperature'
-          },
-          relationships: {
-            device: {
-              data: {
-                type: 'device',
-                // just an example device included already for the
-                // mount actions
-                id: '39'
-              }
-            }
-          }
-        },
-        {
-          type: 'device_property',
-          id: '101',
-          attributes: {
-            sampling_media_name: 'Water',
-            sampling_media_uri: 'medium/water',
-            compartment_name: 'C1',
-            compartment_uri: 'compartment/c1',
-            property_name: 'Temperature',
-            property_uri: 'property/temperature',
-            unit_name: 'degree',
-            unit_uri: 'unit/degree',
-            failure_value: -999,
-            measuring_range_min: -10,
-            measuring_range_max: 100,
-            label: 'water_temperature',
-            accuracy: 0.1,
-            resolution: 0.05,
-            resolution_unit_name: 'TemperatureRes',
-            resolution_unit_uri: 'property/res/temperature'
-          },
-          relationships: {
-            device: {
-              data: {
-                type: 'device',
-                // just an example device included already for the
-                // mount actions
-                id: '39'
-              }
-            }
-          }
-        },
-        {
-          type: 'contact',
-          id: '1',
-          attributes: {
-            given_name: 'Max',
-            family_name: 'Mustermann',
-            email: 'max@mustermann.xyz',
-            website: ''
-          }
-        },
-        {
-          type: 'platform',
-          id: '37',
-          attributes: {
-            inventory_number: '',
-            platform_type_uri: 'type/station',
-            short_name: 'boeken_BF1',
-            created_at: '2020-08-28T13:48:35.740944+00:00',
-            manufacturer_name: '',
-            description: 'Boeken BF1',
-            updated_at: '2020-08-29T13:48:35.740944+00:00',
-            long_name: 'Boeken BF1',
-            manufacturer_uri: '',
-            platform_type_name: 'Station',
-            serial_number: '',
-            persistent_identifier: null,
-            model: '',
-            website: '',
-            status_uri: '',
-            status_name: ''
-          },
-          relationships: {
-            // nothing more to make the test case not too complex
-          }
-        },
-        {
-          type: 'platform',
-          id: '38',
-          attributes: {
-            inventory_number: '',
-            platform_type_uri: 'type/station',
-            short_name: 'boeken_BF12',
-            created_at: '2020-09-28T13:48:35.740944+00:00',
-            manufacturer_name: '',
-            description: 'Boeken BF2',
-            updated_at: '2020-09-29T13:48:35.740944+00:00',
-            long_name: 'Boeken BF2',
-            manufacturer_uri: '',
-            platform_type_name: 'Station',
-            serial_number: '',
-            persistent_identifier: null,
-            model: '',
-            website: '',
-            status_uri: '',
-            status_name: ''
-          },
-          relationships: {
-            // nothing more to make the test case not too complex
-          }
-        },
-        {
-          type: 'platform',
-          id: '41',
-          attributes: {
-            inventory_number: '',
-            platform_type_uri: 'type/station',
-            short_name: 'boeken_BF123',
-            created_at: '2020-09-29T13:48:35.740944+00:00',
-            manufacturer_name: '',
-            description: 'Boeken BF3',
-            updated_at: '2020-09-30T13:48:35.740944+00:00',
-            long_name: 'Boeken BF3',
-            manufacturer_uri: '',
-            platform_type_name: 'Station',
-            serial_number: '',
-            persistent_identifier: null,
-            model: '',
-            website: '',
-            status_uri: '',
-            status_name: ''
-          }
-        }, {
-          type: 'device',
-          id: '39',
-          attributes: {
-            inventory_number: '',
-            short_name: 'Adcon wind vane',
-            device_type_uri: '',
-            created_at: '2020-08-28T13:49:48.799090+00:00',
-            manufacturer_name: 'OTT Hydromet GmbH',
-            dual_use: false,
-            description: '',
-            device_type_name: '',
-            updated_at: '2020-08-29T13:49:48.799090+00:00',
-            manufacturer_uri: '',
-            long_name: 'Adcon wind vane',
-            serial_number: '',
-            persistent_identifier: null,
-            model: 'Wind Vane',
-            website: 'www.adcon.com',
-            status_uri: '',
-            status_name: ''
-          },
-          relationships: {
-            // nothing more to make the test case not too complex
-          }
-        }, {
-          type: 'device',
-          id: '40',
-          attributes: {
-            inventory_number: '',
-            short_name: 'Adcon leafwetness',
-            device_type_uri: '',
-            created_at: '2020-08-29T13:49:48.799090+00:00',
-            manufacturer_name: 'OTT Hydromet GmbH',
-            dual_use: false,
-            description: '',
-            device_type_name: '',
-            updated_at: '2020-09-29T13:49:48.799090+00:00',
-            manufacturer_uri: '',
-            long_name: 'Adcon leafwetness',
-            serial_number: '',
-            persistent_identifier: null,
-            model: 'Leaf Wetness',
-            website: 'http://www.adcon.com',
-            status_uri: '',
-            status_name: ''
-          },
-          relationships: {
-            // nothing more to make the test case not too complex
-          }
-        }],
+          }],
         meta: {
           count: 2
         },
@@ -761,88 +386,6 @@ describe('ConfigurationSerializer', () => {
           version: '1.0'
         }
       }
-
-      const expectedPlatform1 = Platform.createFromObject({
-        id: '37',
-        inventoryNumber: '',
-        platformTypeUri: 'type/station',
-        shortName: 'boeken_BF1',
-        createdAt: DateTime.utc(
-          2020, 8, 28, 13, 48, 35, 740 // no sub milliseconds
-        ),
-        manufacturerName: '',
-        attachments: [],
-        description: 'Boeken BF1',
-        updatedAt: DateTime.utc(
-          2020, 8, 29, 13, 48, 35, 740),
-        longName: 'Boeken BF1',
-        manufacturerUri: '',
-        platformTypeName: 'Station',
-        serialNumber: '',
-        persistentIdentifier: '',
-        model: '',
-        website: '',
-        statusUri: '',
-        statusName: '',
-        contacts: [],
-        createdBy: null,
-        updatedBy: null,
-        createdByUserId: null,
-        permissionGroups: [],
-        visibility: Visibility.Internal
-      })
-      const expectedPlatform2 = Platform.createFromObject({
-        id: '38',
-        inventoryNumber: '',
-        platformTypeUri: 'type/station',
-        shortName: 'boeken_BF12',
-        createdAt: DateTime.utc(2020, 9, 28, 13, 48, 35, 740),
-        manufacturerName: '',
-        attachments: [],
-        description: 'Boeken BF2',
-        updatedAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
-        longName: 'Boeken BF2',
-        manufacturerUri: '',
-        platformTypeName: 'Station',
-        serialNumber: '',
-        persistentIdentifier: '',
-        model: '',
-        website: '',
-        statusUri: '',
-        statusName: '',
-        contacts: [],
-        createdBy: null,
-        updatedBy: null,
-        createdByUserId: null,
-        permissionGroups: [],
-        visibility: Visibility.Internal
-      })
-      const expectedPlatform3 = Platform.createFromObject({
-        id: '41',
-        inventoryNumber: '',
-        platformTypeUri: 'type/station',
-        shortName: 'boeken_BF123',
-        createdAt: DateTime.utc(2020, 9, 29, 13, 48, 35, 740),
-        manufacturerName: '',
-        attachments: [],
-        description: 'Boeken BF3',
-        updatedAt: DateTime.utc(2020, 9, 30, 13, 48, 35, 740),
-        longName: 'Boeken BF3',
-        manufacturerUri: '',
-        platformTypeName: 'Station',
-        serialNumber: '',
-        persistentIdentifier: '',
-        model: '',
-        website: '',
-        statusUri: '',
-        statusName: '',
-        contacts: [],
-        createdBy: null,
-        updatedBy: null,
-        createdByUserId: null,
-        permissionGroups: [],
-        visibility: Visibility.Internal
-      })
 
       const property1 = DeviceProperty.createFromObject({
         id: '100',
@@ -887,147 +430,12 @@ describe('ConfigurationSerializer', () => {
         resolutionUnitUri: 'property/res/temperature'
       })
 
-      const expectedDevice1 = Device.createFromObject({
-        id: '39',
-        properties: [property1, property2],
-        inventoryNumber: '',
-        shortName: 'Adcon wind vane',
-        customFields: [],
-        deviceTypeUri: '',
-        createdAt: DateTime.utc(2020, 8, 28, 13, 49, 48, 799),
-        manufacturerName: 'OTT Hydromet GmbH',
-        attachments: [],
-        dualUse: false,
-        description: '',
-        deviceTypeName: '',
-        updatedAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
-        manufacturerUri: '',
-        longName: 'Adcon wind vane',
-        serialNumber: '',
-        persistentIdentifier: '',
-        model: 'Wind Vane',
-        website: 'www.adcon.com',
-        statusUri: '',
-        statusName: '',
-        contacts: [],
-        createdBy: null,
-        updatedBy: null,
-        createdByUserId: null,
-        permissionGroups: [],
-        visibility: Visibility.Internal
-      })
-      const expectedDevice2 = Device.createFromObject({
-        id: '40',
-        properties: [],
-        inventoryNumber: '',
-        shortName: 'Adcon leafwetness',
-        customFields: [],
-        deviceTypeUri: '',
-        createdAt: DateTime.utc(2020, 8, 29, 13, 49, 48, 799),
-        manufacturerName: 'OTT Hydromet GmbH',
-        attachments: [],
-        dualUse: false,
-        description: '',
-        deviceTypeName: '',
-        updatedAt: DateTime.utc(2020, 9, 29, 13, 49, 48, 799),
-        manufacturerUri: '',
-        longName: 'Adcon leafwetness',
-        serialNumber: '',
-        persistentIdentifier: '',
-        model: 'Leaf Wetness',
-        website: 'http://www.adcon.com',
-        statusUri: '',
-        statusName: '',
-        contacts: [],
-        createdBy: null,
-        updatedBy: null,
-        createdByUserId: null,
-        permissionGroups: [],
-        visibility: Visibility.Internal
-      })
-
       const expectedContact = new Contact()
       expectedContact.id = '1'
       expectedContact.givenName = 'Max'
       expectedContact.familyName = 'Mustermann'
       expectedContact.email = 'max@mustermann.xyz'
       expectedContact.website = ''
-
-      const expectedPlatformMountAction1 = PlatformMountAction.createFromObject({
-        id: '1',
-        offsetX: 1.0,
-        offsetY: 2.0,
-        offsetZ: 3.0,
-        description: '',
-        platform: expectedPlatform1,
-        parentPlatform: null,
-        contact: expectedContact,
-        date: DateTime.utc(2020, 1, 1, 13, 49, 48)
-      })
-
-      const expectedPlatformMountAction2 = PlatformMountAction.createFromObject({
-        id: '2',
-        offsetX: 4.0,
-        offsetY: 5.0,
-        offsetZ: 6.0,
-        description: '',
-        platform: expectedPlatform2,
-        parentPlatform: expectedPlatform1,
-        contact: expectedContact,
-        date: DateTime.utc(2020, 1, 1, 14, 49, 48)
-      })
-
-      const expectedPlatformMountAction3 = PlatformMountAction.createFromObject({
-        id: '3',
-        offsetX: 13.0,
-        offsetY: 14.0,
-        offsetZ: 15.0,
-        description: 'mount',
-        platform: expectedPlatform3,
-        parentPlatform: null,
-        contact: expectedContact,
-        date: DateTime.utc(2020, 1, 1, 15, 49, 48)
-      })
-
-      const expectedPlatformUnmountAction1 = PlatformUnmountAction.createFromObject({
-        id: '1',
-        platform: expectedPlatform3,
-        contact: expectedContact,
-        description: 'unmount',
-        date: DateTime.utc(2021, 1, 1, 15, 49, 48)
-      })
-
-      const expectedDeviceMountAction1 = DeviceMountAction.createFromObject({
-        id: '1',
-        offsetX: 7.0,
-        offsetY: 8.0,
-        offsetZ: 9.0,
-        description: '',
-        device: expectedDevice1,
-        parentPlatform: expectedPlatform2,
-        contact: expectedContact,
-        date: DateTime.utc(2020, 1, 1, 16, 49, 48)
-      })
-
-      const expectedDeviceMountAction2 = DeviceMountAction.createFromObject({
-        id: '2',
-        offsetX: 10.0,
-        offsetY: 11.0,
-        offsetZ: 12.0,
-        description: 'device mount',
-        device: expectedDevice2,
-        parentPlatform: expectedPlatform2,
-        contact: expectedContact,
-        date: DateTime.utc(2020, 1, 1, 17, 49, 48)
-      })
-
-      const expectedDeviceUnmountAction1 = DeviceUnmountAction.createFromObject({
-        id: '1',
-        device: expectedDevice2,
-        date: DateTime.utc(2021, 1, 1, 17, 49, 48),
-        description: 'device unmount',
-        contact: expectedContact
-      })
 
       const expectedStaticLocationBeginAction1 = StaticLocationBeginAction.createFromObject({
         id: '1111',
@@ -1082,17 +490,6 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.projectName = 'Tereno NO'
       expectedConfiguration1.label = 'Tereno NO Boeken'
       expectedConfiguration1.status = 'draft'
-      expectedConfiguration1.platformMountActions = [
-        expectedPlatformMountAction1,
-        expectedPlatformMountAction2,
-        expectedPlatformMountAction3
-      ]
-      expectedConfiguration1.platformUnmountActions = [expectedPlatformUnmountAction1]
-      expectedConfiguration1.deviceMountActions = [
-        expectedDeviceMountAction1,
-        expectedDeviceMountAction2
-      ]
-      expectedConfiguration1.deviceUnmountActions = [expectedDeviceUnmountAction1]
       expectedConfiguration1.staticLocationBeginActions = [expectedStaticLocationBeginAction1]
       expectedConfiguration1.staticLocationEndActions = [expectedStaticLocationEndAction1]
       expectedConfiguration1.dynamicLocationBeginActions = [expectedDynamicLocationBeginAction1]
@@ -1125,15 +522,7 @@ describe('ConfigurationSerializer', () => {
       expect(configurations.length).toEqual(4)
 
       expect(configurations[0]).toEqual(expectedConfiguration1)
-      expect(configurations[0].deviceMountActions.length).toEqual(2)
-      expect(configurations[0].platformMountActions.length).toEqual(3)
-      expect(configurations[0].deviceUnmountActions.length).toEqual(1)
-      expect(configurations[0].platformUnmountActions.length).toEqual(1)
       expect(configurations[1]).toEqual(expectedConfiguration2)
-      expect(configurations[1].deviceMountActions.length).toEqual(0)
-      expect(configurations[1].platformMountActions.length).toEqual(0)
-      expect(configurations[1].deviceUnmountActions.length).toEqual(0)
-      expect(configurations[1].platformUnmountActions.length).toEqual(0)
       expect(configurations[2]).toEqual(expectedConfiguration3)
       expect(configurations[3]).toEqual(expectedConfiguration4)
 

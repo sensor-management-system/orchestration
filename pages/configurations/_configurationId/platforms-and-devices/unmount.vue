@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020, 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -36,6 +37,9 @@ permissions and limitations under the Licence.
       :dark="isSaving"
     />
     <v-card-actions>
+      <v-card-title class="pl-0">
+        Unmount devices or platforms
+      </v-card-title>
       <v-spacer />
       <v-btn
         v-if="$auth.loggedIn"
@@ -58,9 +62,9 @@ permissions and limitations under the Licence.
       <v-col>
         <v-select
           v-model="selectedDate"
-          :item-value="(x) => x.date"
+          :item-value="(x) => x.value"
           :item-text="(x) => x.text"
-          :items="mountingActionsDates"
+          :items="mountActionDateItems"
           label="Dates defined by actions"
           hint="The referenced time zone is UTC."
           persistent-hint
@@ -73,25 +77,29 @@ permissions and limitations under the Licence.
           <v-container>
             <v-card-title>Mounted devices and platforms</v-card-title>
             <ConfigurationsTreeView
-              v-if="configuration"
-              ref="treeView"
+              v-if="configuration && tree"
+              ref="unmountTreeView"
               v-model="selectedNode"
-              :items="tree"
+              :tree="tree"
             />
           </v-container>
         </v-card>
       </v-col>
       <v-col>
         <v-slide-x-reverse-transition>
-          <div v-show="selectedNode">
+          <div v-show="selectedNode && !selectedNode.isConfiguration()">
             <v-card>
               <v-card-title>Submit unmount form</v-card-title>
+              <v-card-subtitle v-if="!nodeCanBeUnmounted(selectedNode)" class="error--text">
+                The selected node still has active children. Please unmount them first.
+              </v-card-subtitle>
               <v-container>
                 <ConfigurationsSelectedItemUnmountForm
                   v-if="selectedNode"
                   :node="selectedNode"
                   :contacts="contacts"
                   :current-user-mail="currentUserMail"
+                  :readonly="!nodeCanBeUnmounted(selectedNode)"
                   @unmount="unmount"
                 />
               </v-container>
@@ -104,23 +112,27 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
-import { Device } from '@/models/Device'
+import {
+  UpdateDeviceMountActionAction,
+  UpdatePlatformMountActionAction,
+  ConfigurationsState,
+  LoadMountingConfigurationForDateAction
+} from '@/store/configurations'
+
 import { Contact } from '@/models/Contact'
-import { Platform } from '@/models/Platform'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
-import { Configuration } from '@/models/Configuration'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
 
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
-import { PlatformNode } from '@/viewmodels/PlatformNode'
+import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
-
-import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
+import { PlatformNode } from '@/viewmodels/PlatformNode'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
@@ -131,62 +143,72 @@ import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSe
   components: { ProgressIndicator, ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
   middleware: ['auth'],
   computed: {
-    ...mapGetters('configurations', ['mountingActionsDates']),
-    ...mapState('configurations', ['configuration']),
-    ...mapState('contacts', ['contacts'])
+    ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate']),
+    ...mapState('contacts', ['contacts']),
+    ...mapGetters('configurations', ['mountActionDateItems'])
   },
   methods: {
-    ...mapActions('contacts', ['loadAllContacts']),
-    ...mapActions('configurations', ['addDeviceUnMountAction', 'addPlatformUnMountAction', 'loadConfiguration'])
+    ...mapActions('configurations', [
+      'loadMountingConfigurationForDate',
+      'updateDeviceMountAction',
+      'updatePlatformMountAction'
+    ])
   }
 })
 export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
   private selectedDate = DateTime.utc()
   private selectedNode: ConfigurationsTreeNode | null = null
+  private tree: ConfigurationsTree = ConfigurationsTree.fromArray([])
 
   private isSaving = false
   private isLoading = false
 
   // vuex definition for typescript check
-  loadAllContacts!: () => void
-  configuration!: Configuration
-  addDeviceUnMountAction!: ({
-    configurationId,
-    deviceUnMountAction
-  }: { configurationId: string, deviceUnMountAction: DeviceUnmountAction }) => Promise<string>
+  configuration!: ConfigurationsState['configuration']
+  configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
+  updateDeviceMountAction!: UpdateDeviceMountActionAction
+  updatePlatformMountAction!: UpdatePlatformMountActionAction
+  loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
 
-  addPlatformUnMountAction!: ({
-    configurationId,
-    platformUnMountAction
-  }: { configurationId: string, platformUnMountAction: PlatformUnmountAction }) => Promise<string>
-
-  loadConfiguration!: (id: string) => void
-
-  async created () {
+  async fetch () {
     try {
       this.isLoading = true
-      await this.loadAllContacts()
+      await this.loadTree()
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
+      this.$store.commit('snackbar/setError', 'Failed to fetch resources')
     } finally {
       this.isLoading = false
     }
   }
 
-  get configurationId (): string {
-    return this.$route.params.configurationId
-  }
-
-  get tree () {
-    const selectedNodeId = this.selectedNode?.id
-    const tree = buildConfigurationTree(this.configuration, this.selectedDate)
-    if (selectedNodeId) {
-      const node = tree.getById(selectedNodeId)
-      if (node) {
-        this.selectedNode = node
+  async loadTree () {
+    await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+    if (this.configuration) {
+      // construct the configuration as the root node of the tree
+      const rootNode = new ConfigurationNode(this.configuration)
+      // as we don't want to alter the Vuex state, we create a new Tree here
+      if (this.configurationMountingActionsForDate) {
+        rootNode.children = ConfigurationsTree.createFromObject(this.configurationMountingActionsForDate).toArray()
+        this.tree = ConfigurationsTree.fromArray([rootNode])
       }
     }
-    return tree.toArray()
+  }
+
+  nodeCanBeUnmounted (node: ConfigurationNode | null): boolean {
+    if (node === null) {
+      return true
+    }
+    if (node.isConfiguration()) {
+      return false
+    }
+    if (node.isPlatform() && node.children.length > 0) {
+      return false
+    }
+    return true
+  }
+
+  get configurationId (): string {
+    return this.$route.params.configurationId
   }
 
   get isInProgress (): boolean {
@@ -200,66 +222,74 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     return null
   }
 
-  unmount ({ contact, description }: {contact: Contact, description: string}) {
+  async unmount ({ contact, description }: {contact: Contact, description: string}) {
     if (!this.selectedNode || !this.selectedDate) {
       return
     }
-
-    if (this.selectedNode.isDevice()) {
-      this.unmountDevice((this.selectedNode as DeviceNode).unpack().device, contact, description)
-    }
-    if (this.selectedNode.isPlatform()) {
-      this.unmountPlatform((this.selectedNode as PlatformNode).unpack().platform, contact, description)
-    }
-  }
-
-  async unmountDevice (device: Device, contact: Contact, description: string) {
-    const newDeviceUnmountAction = DeviceUnmountAction.createFromObject({
-      id: '',
-      device,
-      date: this.selectedDate,
-      contact,
-      description
-    })
-
     try {
       this.isSaving = true
-      await this.addDeviceUnMountAction({
-        configurationId: this.configurationId,
-        deviceUnMountAction: newDeviceUnmountAction
-      })
-      this.loadConfiguration(this.configurationId)
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
-      this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
+      if (this.selectedNode.isDevice()) {
+        await this.unmountDevice((this.selectedNode as DeviceNode).unpack(), contact, description)
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      } else if (this.selectedNode.isPlatform()) {
+        await this.unmountPlatform((this.selectedNode as PlatformNode).unpack(), contact, description)
+        this.$store.commit('snackbar/setSuccess', 'Save successful')
+      }
+      this.selectedNode = null
+      await this.loadTree()
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to add device unmount action')
+      this.$store.commit('snackbar/setError', 'Failed to unmount node')
     } finally {
       this.isSaving = false
     }
   }
 
-  async unmountPlatform (platform: Platform, contact: Contact, description: string) {
-    const newPlatformUnmountAction = PlatformUnmountAction.createFromObject({
-      id: '',
-      platform,
-      date: this.selectedDate,
-      contact,
-      description
+  async unmountDevice (mountAction: DeviceMountAction, endContact: Contact, endDescription: string) {
+    const mountActionWithEndDate = DeviceMountAction.createFromObject({
+      id: mountAction.id,
+      device: mountAction.device,
+      parentPlatform: mountAction.parentPlatform,
+      offsetX: mountAction.offsetX,
+      offsetY: mountAction.offsetX,
+      offsetZ: mountAction.offsetX,
+      beginDate: mountAction.beginDate,
+      beginContact: mountAction.beginContact,
+      beginDescription: mountAction.beginDescription,
+      endDate: this.selectedDate,
+      endContact,
+      endDescription
     })
+    await this.updateDeviceMountAction({ configurationId: this.configurationId, deviceMountAction: mountActionWithEndDate })
+  }
 
+  async unmountPlatform (mountAction: PlatformMountAction, endContact: Contact, endDescription: string) {
+    // TODO: validate child nodes
+    const mountActionWithEndDate = PlatformMountAction.createFromObject({
+      id: mountAction.id,
+      platform: mountAction.platform,
+      parentPlatform: mountAction.parentPlatform,
+      offsetX: mountAction.offsetX,
+      offsetY: mountAction.offsetX,
+      offsetZ: mountAction.offsetX,
+      beginDate: mountAction.beginDate,
+      beginContact: mountAction.beginContact,
+      beginDescription: mountAction.beginDescription,
+      endDate: this.selectedDate,
+      endContact,
+      endDescription
+    })
+    await this.updatePlatformMountAction({ configurationId: this.configurationId, platformMountAction: mountActionWithEndDate })
+  }
+
+  @Watch('selectedDate')
+  async onPropertyChanged (_value: DateTime, _oldValue: DateTime) {
     try {
-      this.isSaving = true
-      await this.addPlatformUnMountAction({
-        configurationId: this.configurationId,
-        platformUnMountAction: newPlatformUnmountAction
-      })
-      this.loadConfiguration(this.configurationId)
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
-      this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to add device unmount action')
+      this.isLoading = true
+      await this.loadTree()
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
     } finally {
-      this.isSaving = true
+      this.isLoading = false
     }
   }
 }

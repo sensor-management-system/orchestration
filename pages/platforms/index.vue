@@ -259,7 +259,6 @@ import { saveAs } from 'file-saver'
 
 import { mapState, mapActions, mapGetters } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import {
   PlatformsState,
   SearchPlatformsPaginatedAction,
@@ -269,6 +268,7 @@ import {
   DeletePlatformAction,
   PageSizesGetter
 } from 'store/platforms'
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 
 import { CanAccessEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
 

@@ -34,11 +34,8 @@
 import { AxiosInstance, Method } from 'axios'
 
 import { DateTime } from 'luxon'
-import { Configuration } from '@/models/Configuration'
-import { ContactRole } from '@/models/ContactRole'
-import { Project } from '@/models/Project'
-import { PermissionGroup } from '@/models/PermissionGroup'
 
+import { MountingActionsControllerApi } from './MountingActionsControllerApi'
 import {
   ConfigurationSerializer,
   configurationWithMetaToConfigurationByAddingDummyObjects,
@@ -46,18 +43,31 @@ import {
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
+import { MountingActionsSerializer } from '@/serializers/custom/MountingActionsSerializer'
+import { DeviceMountActionSerializer } from '@/serializers/jsonapi/DeviceMountActionSerializer'
+import { PlatformMountActionSerializer } from '@/serializers/jsonapi/PlatformMountActionSerializer'
+
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
-import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
-import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
 import { StaticLocationBeginActionApi } from '@/services/sms/StaticLocationBeginActionApi'
 import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActionApi'
 import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
 import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
+
+import { Configuration } from '@/models/Configuration'
+import { ContactRole } from '@/models/ContactRole'
+import { Project } from '@/models/Project'
+import { PermissionGroup } from '@/models/PermissionGroup'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
+import { DynamicLocation } from '@/models/Location'
+import { Contact } from '@/models/Contact'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -86,14 +96,13 @@ export class ConfigurationApi {
   readonly basePath: string
 
   private _deviceMountActionApi: DeviceMountActionApi
-  private _deviceUnmountActionApi: DeviceUnmountActionApi
   private _platformMountActionApi: PlatformMountActionApi
-  private _platformUnmountActionApi: PlatformUnmountActionApi
 
   private _staticLocationBeginActionApi: StaticLocationBeginActionApi
   private _staticLocationEndActionApi: StaticLocationEndActionApi
   private _dynamicLocationBeginActionApi: DynamicLocationBeginActionApi
   private _dynamicLocationEndActionApi: DynamicLocationEndActionApi
+  private _mountingActionsControllerApi: MountingActionsControllerApi
 
   private _searchedProjects: Project[] = []
   private _searchedStates: string[] = []
@@ -103,35 +112,35 @@ export class ConfigurationApi {
   private filterSettings: any[] = []
 
   private serializer: ConfigurationSerializer
+  private mountingActionsSerializer: MountingActionsSerializer
   private permissionFetcher: ConfigurationPermissionFetchFunction | undefined
 
   constructor (
     axiosInstance: AxiosInstance,
     basePath: string,
     deviceMountActionApi: DeviceMountActionApi,
-    deviceUnmountActionApi: DeviceUnmountActionApi,
     platformMountActionApi: PlatformMountActionApi,
-    platformUnmountActionApi: PlatformUnmountActionApi,
     staticLocationBeginActionApi: StaticLocationBeginActionApi,
     staticLocationEndActionApi: StaticLocationEndActionApi,
     dynamicLocationBeginActionApi: DynamicLocationBeginActionApi,
     dynamicLocationEndActionApi: DynamicLocationEndActionApi,
+    mountingActionsControllerApi: MountingActionsControllerApi,
     permissionFetcher?: ConfigurationPermissionFetchFunction
   ) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
 
     this._deviceMountActionApi = deviceMountActionApi
-    this._deviceUnmountActionApi = deviceUnmountActionApi
     this._platformMountActionApi = platformMountActionApi
-    this._platformUnmountActionApi = platformUnmountActionApi
 
     this._staticLocationBeginActionApi = staticLocationBeginActionApi
     this._staticLocationEndActionApi = staticLocationEndActionApi
     this._dynamicLocationBeginActionApi = dynamicLocationBeginActionApi
     this._dynamicLocationEndActionApi = dynamicLocationEndActionApi
+    this._mountingActionsControllerApi = mountingActionsControllerApi
 
     this.serializer = new ConfigurationSerializer()
+    this.mountingActionsSerializer = new MountingActionsSerializer()
 
     if (permissionFetcher) {
       this.permissionFetcher = permissionFetcher
@@ -142,16 +151,8 @@ export class ConfigurationApi {
     return this._deviceMountActionApi
   }
 
-  get deviceUnmountActionApi (): DeviceUnmountActionApi {
-    return this._deviceUnmountActionApi
-  }
-
   get platformMountActionApi (): PlatformMountActionApi {
     return this._platformMountActionApi
-  }
-
-  get platformUnmountActionApi (): PlatformUnmountActionApi {
-    return this._platformUnmountActionApi
   }
 
   get staticLocationBeginActionApi (): StaticLocationBeginActionApi {
@@ -168,6 +169,10 @@ export class ConfigurationApi {
 
   get dynamicLocationEndActionApi (): DynamicLocationEndActionApi {
     return this._dynamicLocationEndActionApi
+  }
+
+  get mountingActionsControllerApi (): MountingActionsControllerApi {
+    return this._mountingActionsControllerApi
   }
 
   get searchedProjects (): Project[] {
@@ -354,76 +359,66 @@ export class ConfigurationApi {
     const data: any = this.serializer.convertModelToJsonApiData(configuration)
     let method: Method = 'patch'
     let url = this.basePath
-    // const relationshipsToDelete: string[] = []
-    // let platformMountActionIdsToDelete: Set<string> = new Set()
-    // let platformMountActionIdsToUpdate: Set<string> = new Set()
-    // let platformUnmountActionIdsToDelete: Set<string> = new Set()
-    // let platformUnmountActionIdsToUpdate: Set<string> = new Set()
-    // let deviceMountActionIdsToDelete: Set<string> = new Set()
-    // let deviceMountActionIdsToUpdate: Set<string> = new Set()
-    // let deviceUnmountActionIdsToDelete: Set<string> = new Set()
-    // let deviceUnmountActionIdsToUpdate: Set<string> = new Set()
-    // let staticLocationBeginActionIdsToDelete: Set<string> = new Set()
-    // let staticLocationBeginActionIdsToUpdate: Set<string> = new Set()
-    // let staticLocationEndActionIdsToDelete: Set<string> = new Set()
-    // let staticLocationEndActionIdsToUpdate: Set<string> = new Set()
-    // let dynamicLocationBeginActionIdsToDelete: Set<string> = new Set()
-    // let dynamicLocationBeginActionIdsToUpdate: Set<string> = new Set()
-    // let dynamicLocationEndActionIdsToDelete: Set<string> = new Set()
-    // let dynamicLocationEndActionIdsToUpdate: Set<string> = new Set()
+    const relationshipsToDelete: string[] = []
+    let platformMountActionIdsToDelete: Set<string> = new Set()
+    let platformMountActionIdsToUpdate: Set<string> = new Set()
+    let deviceMountActionIdsToDelete: Set<string> = new Set()
+    let deviceMountActionIdsToUpdate: Set<string> = new Set()
+    let staticLocationBeginActionIdsToDelete: Set<string> = new Set()
+    let staticLocationBeginActionIdsToUpdate: Set<string> = new Set()
+    let staticLocationEndActionIdsToDelete: Set<string> = new Set()
+    let staticLocationEndActionIdsToUpdate: Set<string> = new Set()
+    let dynamicLocationBeginActionIdsToDelete: Set<string> = new Set()
+    let dynamicLocationBeginActionIdsToUpdate: Set<string> = new Set()
+    let dynamicLocationEndActionIdsToDelete: Set<string> = new Set()
+    let dynamicLocationEndActionIdsToUpdate: Set<string> = new Set()
 
     // step 1
     // load existing config to check current setting of the configuration
 
-    // if (configuration.id) {
-    //   const existingConfig = await this.findById(configuration.id)
-    //   if (existingConfig.location instanceof DynamicLocation) {
-    //     if (configuration.location instanceof DynamicLocation) {
-    //       if (configuration.location.elevation == null && existingConfig.location.elevation !== null) {
-    //         relationshipsToDelete.push('src-elevation')
-    //       }
-    //       if (configuration.location.latitude == null && existingConfig.location.latitude !== null) {
-    //         relationshipsToDelete.push('src-latitude')
-    //       }
-    //       if (configuration.location.longitude == null && existingConfig.location.longitude !== null) {
-    //         relationshipsToDelete.push('src-longitude')
-    //       }
-    //     } else {
-    //       relationshipsToDelete.push('src-elevation')
-    //       relationshipsToDelete.push('src-latitude')
-    //       relationshipsToDelete.push('src-longitude')
-    //     }
-    //   }
-    //   const newPlatformMountActionIds = new Set(configuration.platformMountActions.map(x => x.id))
-    //   platformMountActionIdsToDelete = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => !newPlatformMountActionIds.has(x)))
-    //   platformMountActionIdsToUpdate = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => newPlatformMountActionIds.has(x)))
-    //   const newPlatformUnmountActionIds = new Set(configuration.platformUnmountActions.map(x => x.id))
-    //   platformUnmountActionIdsToDelete = new Set(existingConfig.platformUnmountActions.map(x => x.id).filter(x => !newPlatformUnmountActionIds.has(x)))
-    //   platformUnmountActionIdsToUpdate = new Set(existingConfig.platformUnmountActions.map(x => x.id).filter(x => newPlatformUnmountActionIds.has(x)))
-    //
-    //   const newDeviceMountActionIds = new Set(configuration.deviceMountActions.map(x => x.id))
-    //   deviceMountActionIdsToDelete = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => !newDeviceMountActionIds.has(x)))
-    //   deviceMountActionIdsToUpdate = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => newDeviceMountActionIds.has(x)))
-    //   const newDeviceUnmountActionIds = new Set(configuration.deviceUnmountActions.map(x => x.id))
-    //   deviceUnmountActionIdsToDelete = new Set(existingConfig.deviceUnmountActions.map(x => x.id).filter(x => !newDeviceUnmountActionIds.has(x)))
-    //   deviceUnmountActionIdsToUpdate = new Set(existingConfig.deviceUnmountActions.map(x => x.id).filter(x => newDeviceUnmountActionIds.has(x)))
-    //
-    //   const newStaticLocationBeginActionIds = new Set(configuration.staticLocationBeginActions.map(x => x.id))
-    //   staticLocationBeginActionIdsToDelete = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => !newStaticLocationBeginActionIds.has(x)))
-    //   staticLocationBeginActionIdsToUpdate = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => newStaticLocationBeginActionIds.has(x)))
-    //
-    //   const newStaticLocationEndActionIds = new Set(configuration.staticLocationEndActions.map(x => x.id))
-    //   staticLocationEndActionIdsToDelete = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => !newStaticLocationEndActionIds.has(x)))
-    //   staticLocationEndActionIdsToUpdate = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => newStaticLocationEndActionIds.has(x)))
-    //
-    //   const newDynamicLocationBeginActionIds = new Set(configuration.dynamicLocationBeginActions.map(x => x.id))
-    //   dynamicLocationBeginActionIdsToDelete = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => !newDynamicLocationBeginActionIds.has(x)))
-    //   dynamicLocationBeginActionIdsToUpdate = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => newDynamicLocationBeginActionIds.has(x)))
-    //
-    //   const newDynamicLocationEndActionIds = new Set(configuration.dynamicLocationEndActions.map(x => x.id))
-    //   dynamicLocationEndActionIdsToDelete = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => !newDynamicLocationEndActionIds.has(x)))
-    //   dynamicLocationEndActionIdsToUpdate = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => newDynamicLocationEndActionIds.has(x)))
-    // }
+    if (configuration.id) {
+      const existingConfig = await this.findById(configuration.id)
+      if (existingConfig.location instanceof DynamicLocation) {
+        if (configuration.location instanceof DynamicLocation) {
+          if (configuration.location.elevation == null && existingConfig.location.elevation !== null) {
+            relationshipsToDelete.push('src-elevation')
+          }
+          if (configuration.location.latitude == null && existingConfig.location.latitude !== null) {
+            relationshipsToDelete.push('src-latitude')
+          }
+          if (configuration.location.longitude == null && existingConfig.location.longitude !== null) {
+            relationshipsToDelete.push('src-longitude')
+          }
+        } else {
+          relationshipsToDelete.push('src-elevation')
+          relationshipsToDelete.push('src-latitude')
+          relationshipsToDelete.push('src-longitude')
+        }
+      }
+      const newPlatformMountActionIds = new Set(configuration.platformMountActions.map(x => x.id))
+      platformMountActionIdsToDelete = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => !newPlatformMountActionIds.has(x)))
+      platformMountActionIdsToUpdate = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => newPlatformMountActionIds.has(x)))
+
+      const newDeviceMountActionIds = new Set(configuration.deviceMountActions.map(x => x.id))
+      deviceMountActionIdsToDelete = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => !newDeviceMountActionIds.has(x)))
+      deviceMountActionIdsToUpdate = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => newDeviceMountActionIds.has(x)))
+
+      const newStaticLocationBeginActionIds = new Set(configuration.staticLocationBeginActions.map(x => x.id))
+      staticLocationBeginActionIdsToDelete = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => !newStaticLocationBeginActionIds.has(x)))
+      staticLocationBeginActionIdsToUpdate = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => newStaticLocationBeginActionIds.has(x)))
+
+      const newStaticLocationEndActionIds = new Set(configuration.staticLocationEndActions.map(x => x.id))
+      staticLocationEndActionIdsToDelete = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => !newStaticLocationEndActionIds.has(x)))
+      staticLocationEndActionIdsToUpdate = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => newStaticLocationEndActionIds.has(x)))
+
+      const newDynamicLocationBeginActionIds = new Set(configuration.dynamicLocationBeginActions.map(x => x.id))
+      dynamicLocationBeginActionIdsToDelete = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => !newDynamicLocationBeginActionIds.has(x)))
+      dynamicLocationBeginActionIdsToUpdate = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => newDynamicLocationBeginActionIds.has(x)))
+
+      const newDynamicLocationEndActionIds = new Set(configuration.dynamicLocationEndActions.map(x => x.id))
+      dynamicLocationEndActionIdsToDelete = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => !newDynamicLocationEndActionIds.has(x)))
+      dynamicLocationEndActionIdsToUpdate = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => newDynamicLocationEndActionIds.has(x)))
+    }
 
     if (!configuration.id) {
       method = 'post'
@@ -437,95 +432,75 @@ export class ConfigurationApi {
         data
       }
     })
-    // const configurationId = serverAnswer.data.data.id
-    // const promisesDelete = []
-    // for (const deviceMountActionId of deviceMountActionIdsToDelete) {
-    //   promisesDelete.push(this._deviceMountActionApi.deleteById(deviceMountActionId))
-    // }
-    // for (const deviceUnmontActionId of deviceUnmountActionIdsToDelete) {
-    //   promisesDelete.push(this._deviceUnmountActionApi.deleteById(deviceUnmontActionId))
-    // }
-    // for (const platformMountActionId of platformMountActionIdsToDelete) {
-    //   promisesDelete.push(this._platformMountActionApi.deleteById(platformMountActionId))
-    // }
-    // for (const platformUnmountActionId of platformUnmountActionIdsToDelete) {
-    //   promisesDelete.push(this._platformUnmountActionApi.deleteById(platformUnmountActionId))
-    // }
-    // for (const staticLocationBeginActionId of staticLocationBeginActionIdsToDelete) {
-    //   promisesDelete.push(this._staticLocationBeginActionApi.deleteById(staticLocationBeginActionId))
-    // }
-    // for (const staticLocationEndActionId of staticLocationEndActionIdsToDelete) {
-    //   promisesDelete.push(this._staticLocationEndActionApi.deleteById(staticLocationEndActionId))
-    // }
-    // for (const dynamicLocationBeginActionId of dynamicLocationBeginActionIdsToDelete) {
-    //   promisesDelete.push(this._dynamicLocationBeginActionApi.deleteById(dynamicLocationBeginActionId))
-    // }
-    // for (const dynamicLocationEndActionId of dynamicLocationEndActionIdsToDelete) {
-    //   promisesDelete.push(this._dynamicLocationEndActionApi.deleteById(dynamicLocationEndActionId))
-    // }
-    // relationshipsToDelete.forEach(relationship => promisesDelete.push(this.tryToDeleteRelationship(relationship, configurationId)))
-    //
-    // await Promise.all(promisesDelete)
-    //
-    // // now we need to add the new ones
-    // const promisesSave = []
-    // for (const platformMountAction of configuration.platformMountActions) {
-    //   if (!platformMountAction.id) {
-    //     promisesSave.push(this._platformMountActionApi.add(configurationId, platformMountAction))
-    //   } else if (platformMountActionIdsToUpdate.has(platformMountAction.id)) {
-    //     promisesSave.push(this._platformMountActionApi.update(configurationId, platformMountAction))
-    //   }
-    // }
-    // for (const platformUnmountAction of configuration.platformUnmountActions) {
-    //   if (!platformUnmountAction.id) {
-    //     promisesSave.push(this._platformUnmountActionApi.add(configurationId, platformUnmountAction))
-    //   } else if (platformUnmountActionIdsToUpdate.has(platformUnmountAction.id)) {
-    //     promisesSave.push(this._platformUnmountActionApi.update(configurationId, platformUnmountAction))
-    //   }
-    // }
-    // for (const deviceMountAction of configuration.deviceMountActions) {
-    //   if (!deviceMountAction.id) {
-    //     promisesSave.push(this._deviceMountActionApi.add(configurationId, deviceMountAction))
-    //   } else if (deviceMountActionIdsToUpdate.has(deviceMountAction.id)) {
-    //     promisesSave.push(this._deviceMountActionApi.update(configurationId, deviceMountAction))
-    //   }
-    // }
-    // for (const deviceUnmountAction of configuration.deviceUnmountActions) {
-    //   if (!deviceUnmountAction.id) {
-    //     promisesSave.push(this._deviceUnmountActionApi.add(configurationId, deviceUnmountAction))
-    //   } else if (deviceUnmountActionIdsToUpdate.has(deviceUnmountAction.id)) {
-    //     promisesSave.push(this._deviceUnmountActionApi.update(configurationId, deviceUnmountAction))
-    //   }
-    // }
-    // for (const staticLocationBeginAction of configuration.staticLocationBeginActions) {
-    //   if (!staticLocationBeginAction.id) {
-    //     promisesSave.push(this._staticLocationBeginActionApi.add(configurationId, staticLocationBeginAction))
-    //   } else if (staticLocationBeginActionIdsToUpdate.has(staticLocationBeginAction.id)) {
-    //     promisesSave.push(this._staticLocationBeginActionApi.update(configurationId, staticLocationBeginAction))
-    //   }
-    // }
-    // for (const staticLocationEndAction of configuration.staticLocationEndActions) {
-    //   if (!staticLocationEndAction.id) {
-    //     promisesSave.push(this._staticLocationEndActionApi.add(configurationId, staticLocationEndAction))
-    //   } else if (staticLocationEndActionIdsToUpdate.has(staticLocationEndAction.id)) {
-    //     promisesSave.push(this._staticLocationEndActionApi.update(configurationId, staticLocationEndAction))
-    //   }
-    // }
-    // for (const dynamicLocationBeginAction of configuration.dynamicLocationBeginActions) {
-    //   if (!dynamicLocationBeginAction.id) {
-    //     promisesSave.push(this._dynamicLocationBeginActionApi.add(configurationId, dynamicLocationBeginAction))
-    //   } else if (dynamicLocationBeginActionIdsToUpdate.has(dynamicLocationBeginAction.id)) {
-    //     promisesSave.push(this._dynamicLocationBeginActionApi.update(configurationId, dynamicLocationBeginAction))
-    //   }
-    // }
-    // for (const dynamicLocationEndAction of configuration.dynamicLocationEndActions) {
-    //   if (!dynamicLocationEndAction.id) {
-    //     promisesSave.push(this._dynamicLocationEndActionApi.add(configurationId, dynamicLocationEndAction))
-    //   } else if (dynamicLocationEndActionIdsToUpdate.has(dynamicLocationEndAction.id)) {
-    //     promisesSave.push(this._dynamicLocationEndActionApi.update(configurationId, dynamicLocationEndAction))
-    //   }
-    // }
-    // await Promise.all(promisesSave)
+    const configurationId = serverAnswer.data.data.id
+    const promisesDelete = []
+    for (const deviceMountActionId of deviceMountActionIdsToDelete) {
+      promisesDelete.push(this._deviceMountActionApi.deleteById(deviceMountActionId))
+    }
+    for (const platformMountActionId of platformMountActionIdsToDelete) {
+      promisesDelete.push(this._platformMountActionApi.deleteById(platformMountActionId))
+    }
+    for (const staticLocationBeginActionId of staticLocationBeginActionIdsToDelete) {
+      promisesDelete.push(this._staticLocationBeginActionApi.deleteById(staticLocationBeginActionId))
+    }
+    for (const staticLocationEndActionId of staticLocationEndActionIdsToDelete) {
+      promisesDelete.push(this._staticLocationEndActionApi.deleteById(staticLocationEndActionId))
+    }
+    for (const dynamicLocationBeginActionId of dynamicLocationBeginActionIdsToDelete) {
+      promisesDelete.push(this._dynamicLocationBeginActionApi.deleteById(dynamicLocationBeginActionId))
+    }
+    for (const dynamicLocationEndActionId of dynamicLocationEndActionIdsToDelete) {
+      promisesDelete.push(this._dynamicLocationEndActionApi.deleteById(dynamicLocationEndActionId))
+    }
+    relationshipsToDelete.forEach(relationship => promisesDelete.push(this.tryToDeleteRelationship(relationship, configurationId)))
+
+    await Promise.all(promisesDelete)
+
+    // now we need to add the new ones
+    const promisesSave = []
+    for (const platformMountAction of configuration.platformMountActions) {
+      if (!platformMountAction.id) {
+        promisesSave.push(this._platformMountActionApi.add(configurationId, platformMountAction))
+      } else if (platformMountActionIdsToUpdate.has(platformMountAction.id)) {
+        promisesSave.push(this._platformMountActionApi.update(configurationId, platformMountAction))
+      }
+    }
+    for (const deviceMountAction of configuration.deviceMountActions) {
+      if (!deviceMountAction.id) {
+        promisesSave.push(this._deviceMountActionApi.add(configurationId, deviceMountAction))
+      } else if (deviceMountActionIdsToUpdate.has(deviceMountAction.id)) {
+        promisesSave.push(this._deviceMountActionApi.update(configurationId, deviceMountAction))
+      }
+    }
+    for (const staticLocationBeginAction of configuration.staticLocationBeginActions) {
+      if (!staticLocationBeginAction.id) {
+        promisesSave.push(this._staticLocationBeginActionApi.add(configurationId, staticLocationBeginAction))
+      } else if (staticLocationBeginActionIdsToUpdate.has(staticLocationBeginAction.id)) {
+        promisesSave.push(this._staticLocationBeginActionApi.update(configurationId, staticLocationBeginAction))
+      }
+    }
+    for (const staticLocationEndAction of configuration.staticLocationEndActions) {
+      if (!staticLocationEndAction.id) {
+        promisesSave.push(this._staticLocationEndActionApi.add(configurationId, staticLocationEndAction))
+      } else if (staticLocationEndActionIdsToUpdate.has(staticLocationEndAction.id)) {
+        promisesSave.push(this._staticLocationEndActionApi.update(configurationId, staticLocationEndAction))
+      }
+    }
+    for (const dynamicLocationBeginAction of configuration.dynamicLocationBeginActions) {
+      if (!dynamicLocationBeginAction.id) {
+        promisesSave.push(this._dynamicLocationBeginActionApi.add(configurationId, dynamicLocationBeginAction))
+      } else if (dynamicLocationBeginActionIdsToUpdate.has(dynamicLocationBeginAction.id)) {
+        promisesSave.push(this._dynamicLocationBeginActionApi.update(configurationId, dynamicLocationBeginAction))
+      }
+    }
+    for (const dynamicLocationEndAction of configuration.dynamicLocationEndActions) {
+      if (!dynamicLocationEndAction.id) {
+        promisesSave.push(this._dynamicLocationEndActionApi.add(configurationId, dynamicLocationEndAction))
+      } else if (dynamicLocationEndActionIdsToUpdate.has(dynamicLocationEndAction.id)) {
+        promisesSave.push(this._dynamicLocationEndActionApi.update(configurationId, dynamicLocationEndAction))
+      }
+    }
+    await Promise.all(promisesSave)
 
     return this.findById(serverAnswer.data.data.id)
   }
@@ -658,112 +633,25 @@ export class ConfigurationApi {
     })
   }
 
-  // findRelatedDeviceMountActions(configurationId: string): Promise<DeviceMountAction>{
-  //   const url = this.basePath + '/' + configurationId + '/device-mount-actions'
-  //
-  //
-  //   const params = {
-  //     'page[size]': 10000,
-  //     include:'device,contact,parent_platform'
-  //   }
-  //   return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-  //
-  //     const included = rawServerResponse.data.included
-  //
-  //     let includedContacts = included.filter((element:any) => element.type==='contact')
-  //     let includedDevices = included.filter((element:any) => element.type==='device')
-  //     // let includedContacts = included.filter((element:any) => element.type==='')
-  //
-  //     console.log('includedContacts',includedContacts);
-  //     console.log('includedDevices',includedDevices);
-  //
-  //     return rawServerResponse.data.data.map((apiData: any)=>{
-  //       let contactId = apiData.relationships.contact.data?.id
-  //       let deviceId = apiData.relationships.device.data?.id
-  //       let parentPlatformId = apiData.relationships.parent_platform.data?.id
-  //
-  //       let deviceData = includedDevices.find((element:any)=> element.id === deviceId)
-  //       let contactData = includedContacts.find((element:any)=> element.id === contactId)
-  //       //Todo parent platform
-  //       let deviceWithMeta= new DeviceSerializer().convertJsonApiDataToModel(deviceData,[])
-  //
-  //       return {
-  //         id: apiData.id,
-  //         offsetX: apiData.attributes.offset_x,
-  //         offsetY: apiData.attributes.offset_y,
-  //         offsetZ: apiData.attributes.offset_z,
-  //         description: apiData.attributes.description,
-  //         date: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
-  //         device:deviceWithMeta.device
-  //       }
-  //     })
-  //   })
-  // }
-  // findRelatedPlatformMountActions(configurationId: string): Promise<PlatformMountAction>{
-  //   const url = this.basePath + '/' + configurationId + '/platform-mount-actions'
-  //   const params = {
-  //     'page[size]': 10000,
-  //     include:'platform,contact,parent_platform'
-  //   }
-  //   return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-  //     const included = rawServerResponse.data.included
-  //     let includedContacts = included.filter((element:any) => element.type==='contact')
-  //     let includedPlatforms = included.filter((element:any) => element.type==='platform')
-  //
-  //     return rawServerResponse.data.data.map((apiData: any)=>{
-  //
-  //       let contactId = apiData.relationships.contact.data?.id
-  //       let platformId = apiData.relationships.platform.data?.id
-  //       let parentPlatformId = apiData.relationships.parent_platform.data?.id
-  //
-  //       let platformData = includedPlatforms.find((element:any)=> element.id === platformId)
-  //       let contactData = includedContacts.find((element:any)=> element.id === contactId)
-  //       //Todo parent platform
-  //       let paltformWithMeta= new PlatformSerializer().convertJsonApiDataToModel(platformData,[])
-  //
-  //
-  //       return {
-  //         id: apiData.id,
-  //         offsetX: apiData.attributes.offset_x,
-  //         offsetY: apiData.attributes.offset_y,
-  //         offsetZ: apiData.attributes.offset_z,
-  //         description: apiData.attributes.description,
-  //         date: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
-  //         platform:paltformWithMeta.platform
-  //       }
-  //     })
-  //   })
-  // }
-  // findRelatedDeviceUnmountActions(configurationId: string): Promise<PlatformMountAction>{
-  //   const url = this.basePath + '/' + configurationId + '/device-unmount-actions'
-  //   const params = {
-  //     'page[size]': 10000
-  //   }
-  //   return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-  //     return rawServerResponse.data.data.map((apiData: any)=>{
-  //       return {
-  //         id: apiData.id,
-  //         description: apiData.attributes.description,
-  //         date: DateTime.fromISO(apiData.attributes.end_date, { zone: 'UTC' }),
-  //       }
-  //     })
-  //   })
-  // }
-  // findRelatedPlatformUnmountActions(configurationId: string): Promise<PlatformMountAction>{
-  //   const url = this.basePath + '/' + configurationId + '/platform-unmount-actions'
-  //   const params = {
-  //     'page[size]': 10000
-  //   }
-  //   return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-  //     return rawServerResponse.data.data.map((apiData: any)=>{
-  //       return {
-  //         id: apiData.id,
-  //         description: apiData.attributes.description,
-  //         date: DateTime.fromISO(apiData.attributes.end_date, { zone: 'UTC' }),
-  //       }
-  //     })
-  //   })
-  // }
+  async findMountingActions (configurationId: string): Promise<ConfigurationMountingAction[]> {
+    const response = await this.mountingActionsControllerApi.findMountingActions(configurationId)
+    return response
+  }
+
+  async findMountingActionsByDate (configurationId: string, timepoint: DateTime, contacts: Contact[]): Promise<ConfigurationsTree> {
+    const response = await this.mountingActionsControllerApi.findMountingActionsByDate(configurationId, timepoint, contacts)
+    return response
+  }
+
+  async findRelatedDeviceMountActions (configurationId: string): Promise<DeviceMountAction[]> {
+    const response = await this.deviceMountActionApi.getRelatedActions(configurationId)
+    return new DeviceMountActionSerializer().convertJsonApiObjectListToModelList(response)
+  }
+
+  async findRelatedPlatformMountActions (configurationId: string): Promise<PlatformMountAction[]> {
+    const response = await this.platformMountActionApi.getRelatedActions(configurationId)
+    return new PlatformMountActionSerializer().convertJsonApiObjectListToModelList(response)
+  }
 
   removeContact (configurationContactRoleId: string): Promise<void> {
     const url = 'configuration-contact-roles/' + configurationContactRoleId

@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
     :value="valueAsDateTimeString"
     :label="label"
     :rules="textInputRules"
-    hint="The referenced time zone is UTC."
+    :hint="hint"
     persistent-hint
     :class="{ 'required': required }"
     v-bind="$attrs"
@@ -123,6 +123,7 @@ const DEFAULT_TIME_FORMAT = 'HH:mm'
 export default class DateTimePicker extends Vue {
   @Prop({ type: Object, default: null }) value!: DateTime | null
   @Prop({ type: String, required: true }) label!: string
+  @Prop({ type: String, required: false }) hint!: string
 
   @Prop({ type: Number, default: DEFAULT_DIALOG_WIDTH }) dialogWidth?: number
 
@@ -149,6 +150,8 @@ export default class DateTimePicker extends Vue {
 
   private datePickerValue: string = ''
   private timePickerValue: string = ''
+
+  private textListRules = []
 
   created () {
     this.usesDate = this.useDate
@@ -205,7 +208,7 @@ export default class DateTimePicker extends Vue {
 
   setTextInputByValue (datetimeValue: DateTime | null) {
     if (datetimeValue) {
-      this.textInput = datetimeValue.setZone('UTC').toFormat(this.currentFormat)
+      this.textInput = datetimeValue.toUTC().toFormat(this.currentFormat)
     } else {
       this.textInput = ''
     }
@@ -265,7 +268,8 @@ export default class DateTimePicker extends Vue {
   }
 
   parseToCurrentFormat () {
-    return DateTime.fromFormat(this.textInput, this.currentFormat, this.optsZone)
+    const currentFormatTime = DateTime.fromFormat(this.textInput, this.currentFormat, this.optsZone)
+    return currentFormatTime
   }
 
   updateByTextfield (newTextValue: string) {

@@ -63,10 +63,6 @@ export class PlatformBasicDataSerializer {
       result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
 
-      // TODO
-      // result.createdBy = attributes.created_by
-      // result.updatedBy = attributes.updated_by
-
       result.inventoryNumber = attributes.inventory_number || ''
       result.serialNumber = attributes.serial_number || ''
       result.persistentIdentifier = attributes.persistent_identifier || ''

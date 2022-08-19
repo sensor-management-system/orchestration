@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -31,6 +32,9 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -58,14 +62,13 @@ permissions and limitations under the Licence.
           v-model="selectedDate"
           placeholder="e.g. 2000-01-31 12:00"
           label="Configuration at date"
+          hint=""
         />
       </v-col>
       <v-col>
         <v-select
           v-model="selectedDate"
-          :item-value="(x) => x.timepoint"
-          :item-text="(x) => x.label"
-          :items="configurationMountingActions"
+          :items="mountActionDateItems"
           label="Dates defined by actions"
           hint="The referenced time zone is UTC."
           persistent-hint
@@ -75,68 +78,30 @@ permissions and limitations under the Licence.
     <v-row justify="center">
       <v-col cols="12" md="6">
         <v-card>
-          <v-container>
-            <v-card-title>Mounted devices and platforms</v-card-title>
-            <v-treeview
-              :items="tree"
-              :active.sync="selectListSingelton"
-              item-key="action.id"
-              item-text="entity.attributes.short_name"
-              activatable
-              hoverable
-              rounded
-              return-object
-            >
-              <template #label="{item}">
-                <div v-if="item.action.type==='device_mount_action'">
-                  Mount - {{ item.entity.attributes.short_name }}
-                </div>
-                <div v-if="item.action.type==='platform_mount_action'">
-                  Mount - {{ item.entity.attributes.short_name }}
-                </div>
-                <div
-                  v-if="item.action.type==='device_unmount_action'"
-                  style="text-decoration: line-through"
-                >
-                  UnMount - {{ item.entity.attributes.short_name }}
-                </div>
-                <div
-                  v-if="item.action.type==='platform_unmount_action'"
-                  style="text-decoration: line-through"
-                >
-                  UnMount - {{ item.entity.attributes.short_name }}
-                </div>
-              </template>
-              <template #prepend="{ item }">
-                <v-icon v-if="item.entity.type==='platform'">
-                  mdi-rocket-outline
-                </v-icon>
-                <v-icon v-else>
-                  mdi-network-outline
-                </v-icon>
-              </template>
-            </v-treeview>
-            <!--            <ConfigurationsTreeView-->
-            <!--              v-if="configuration"-->
-            <!--              ref="treeView"-->
-            <!--              v-model="selectedNode"-->
-            <!--              :items="tree"-->
-            <!--            />-->
-          </v-container>
+          <v-card-title class="primary white--text">
+            Mounted devices and platforms
+          </v-card-title>
+          <v-card-text>
+            <ConfigurationsTreeView
+              v-if="configuration && tree"
+              ref="treeView"
+              v-model="selectedNode"
+              :tree="tree"
+            />
+          </v-card-text>
         </v-card>
       </v-col>
-      <v-col>
+      <v-col cols="12" md="6">
         <v-slide-x-reverse-transition>
-          <div v-show="selectedNode">
-            <v-card-title>Selected node information</v-card-title>
-            <pre>
-              {{ selectedNode }}
-            </pre>
-            <!--            <ConfigurationsTreeNodeDetail-->
-            <!--              v-if="selectedNode"-->
-            <!--              :node="selectedNode"-->
-            <!--            />-->
-          </div>
+          <v-card v-if="selectedNode">
+            <configurations-tree-title :selected-node="selectedNode" />
+            <v-card-text>
+              <ConfigurationsTreeNodeDetail
+                v-if="selectedNode"
+                :node="selectedNode"
+              />
+            </v-card-text>
+          </v-card>
         </v-slide-x-reverse-transition>
       </v-col>
     </v-row>
@@ -145,60 +110,83 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
-import { Configuration } from '@/models/Configuration'
+import { LoadMountingActionsAction, LoadMountingConfigurationForDateAction, ConfigurationsState } from '@/store/configurations'
+
+import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
+
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsTreeNodeDetail from '@/components/configurations/ConfigurationsTreeNodeDetail.vue'
+import ConfigurationsTreeTitle from '@/components/configurations/ConfigurationsTreeTitle.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeView, DateTimePicker },
+  components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeTitle, ConfigurationsTreeView, DateTimePicker, ProgressIndicator },
   computed: {
-    ...mapState('configurations', ['configuration', 'configurationMountingActions'])
+    ...mapState('configurations', ['configuration', 'configurationMountingActions', 'configurationMountingActionsForDate']),
+    ...mapGetters('configurations', ['mountActionDateItems'])
   },
-  methods: mapActions('configurations', ['getMountingConfigurationForDate'])
+  methods: mapActions('configurations', ['loadMountingActions', 'loadMountingConfigurationForDate'])
 })
 export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
-  // private selectedNode: ConfigurationsTreeNode | null = null
-  private selectedDate = DateTime.utc()
-  private selectListSingelton = []
-  private tree = []
+  private selectedNode: ConfigurationsTreeNode | null = null
+  private selectedDate: DateTime = DateTime.utc()
+  private tree: ConfigurationsTree = ConfigurationsTree.fromArray([])
+
+  private isLoading: boolean = false
+
   // vuex definition for typescript check
-  configuration!: Configuration
-  getMountingConfigurationForDate!: (id: string, timepoint: DateTime) => []
+  configuration!: ConfigurationsState['configuration']
+  loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
+  loadMountingActions!: LoadMountingActionsAction
+  configurationMountingActionsForDate!: ConfigurationsTree
+  configurationMountingActions!: ConfigurationMountingAction[]
 
   async created () {
-    this.tree = await this.getMountingConfigurationForDate(this.configurationId, this.selectedDate)
+    try {
+      this.isLoading = true
+      await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+      this.createTreeWithConfigAsRootNode()
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
+    } finally {
+      this.isLoading = false
+    }
+  }
+
+  createTreeWithConfigAsRootNode () {
+    if (this.configuration) {
+      // construct the configuration as the root node of the tree
+      const rootNode = new ConfigurationNode(this.configuration)
+      rootNode.children = this.configurationMountingActionsForDate.toArray()
+      this.tree = ConfigurationsTree.fromArray([rootNode])
+    }
   }
 
   get configurationId (): string {
     return this.$route.params.configurationId
   }
 
-  get selectedNode () {
-    return this.selectListSingelton[0] ?? null
-  }
-
   @Watch('selectedDate')
-  async onPropertyChanged (_value: string, _oldValue: string) {
-    this.tree = await this.getMountingConfigurationForDate(this.configurationId, this.selectedDate)
+  async onPropertyChanged (_value: DateTime, _oldValue: DateTime) {
+    try {
+      this.isLoading = true
+      await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+      this.createTreeWithConfigAsRootNode()
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
+    } finally {
+      this.isLoading = false
+    }
   }
-  // get tree () {
-  //
-  //   // const selectedNodeId = this.selectedNode?.id
-  //   // const tree = buildConfigurationTree(this.configuration, this.selectedDate)
-  //   // if (selectedNodeId) {
-  //   //   const node = tree.getById(selectedNodeId)
-  //   //   if (node) {
-  //   //     this.selectedNode = node
-  //   //   }
-  //   // }
-  //   // return tree.toArray()
-  // }
 }
 </script>
 

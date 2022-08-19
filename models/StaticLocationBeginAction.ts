@@ -45,7 +45,6 @@ export interface IStaticLocationBeginAction {
   z: number | null
   elevationDatumName: string
   elevationDatumUri: string
-
 }
 
 export class StaticLocationBeginAction implements IStaticLocationBeginAction {
@@ -59,6 +58,7 @@ export class StaticLocationBeginAction implements IStaticLocationBeginAction {
   private _epsgCode: string = '4326'
   private _elevationDatumName: string = 'MSL'
   private _elevationDatumUri: string = ''
+  readonly _type: string = 'staticStart'
 
   get id (): string {
     return this._id
@@ -138,6 +138,10 @@ export class StaticLocationBeginAction implements IStaticLocationBeginAction {
 
   set elevationDatumUri (newUri: string) {
     this._elevationDatumUri = newUri
+  }
+
+  get type (): string {
+    return this._type
   }
 
   static createFromObject (someObject: IStaticLocationBeginAction): StaticLocationBeginAction {

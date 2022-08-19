@@ -31,6 +31,7 @@
  */
 import { AxiosInstance, Method } from 'axios'
 
+import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { ContactRole } from '@/models/ContactRole'
 import { Platform } from '@/models/Platform'
@@ -56,6 +57,8 @@ import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAtta
 import { GenericPlatformActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 import { PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
 import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
+import { Availability } from '@/models/Availability'
+import { AvailabilitySerializer } from '@/serializers/controller/AvailabilitySerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -499,5 +502,17 @@ export class PlatformApi {
     const url = 'platform-contact-roles'
     const data = new ContactRoleSerializer().convertModelToJsonApiData(contactRole, 'platform_contact_role', 'platform', platformId)
     return this.axiosApi.post(url, { data }).then(response => response.data.data.id)
+  }
+
+  checkAvailability (ids: (string | null)[], from: DateTime, to: DateTime | null): Promise<Availability[]> {
+    const url = '/controller/platform-availabilities'
+    const params = {
+      ids: ids ? ids.join(',') : '',
+      from: from.toISO(),
+      to: to ? to.toISO() : ''
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new AvailabilitySerializer().convertJsonApiObjectListToModelList(rawServerResponse)
+    })
   }
 }

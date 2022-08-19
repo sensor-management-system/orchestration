@@ -171,8 +171,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-
 import { timeStampToUTCDateTime } from '@/utils/dateHelper'
 
 @Component({

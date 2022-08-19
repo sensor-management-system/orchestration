@@ -34,10 +34,12 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { LocationType } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { IPermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
+import { dateToString } from '@/utils/dateHelper'
 
 export default {
   validateInputForStartDate (configuration: Configuration): (v: string) => (boolean | string) {
@@ -64,6 +66,30 @@ export default {
         return true
       }
       if (configuration.endDate >= configuration.startDate) {
+        return true
+      }
+      return 'End date must not be before start date'
+    }
+  },
+
+  validateMountingTimeRange (mountEndDate: DateTime | null, parentEndDate: DateTime | null): (v: string) => (boolean | string) {
+    return (v) => {
+      if (v === null || v === '' || parentEndDate === null) {
+        return true
+      }
+      if (mountEndDate && mountEndDate <= parentEndDate) {
+        return true
+      }
+      return `End date must be before parent platform end date (${dateToString(parentEndDate)})`
+    }
+  },
+
+  validateMountingDates (startDate: DateTime, endDate: DateTime | null): (v: string) => (boolean | string) {
+    return (v) => {
+      if (v === null || v === '' || endDate === null) {
+        return true
+      }
+      if (startDate && startDate <= endDate) {
         return true
       }
       return 'End date must not be before start date'

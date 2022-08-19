@@ -47,18 +47,17 @@ export class PlatformNode implements IConfigurationsTreeNode<PlatformMountAction
   private node: PlatformMountAction
   private tree: ConfigurationsTree = new ConfigurationsTree()
   private _disabled: boolean = false
+  private _id: string | null = ''
 
   static readonly ID_PREFIX = 'PlatformNode-'
 
   constructor (node: PlatformMountAction) {
     this.node = node
+    this._id = PlatformNode.ID_PREFIX + node.platform.id
   }
 
   get id (): string | null {
-    if (!this.node.platform.id) {
-      return null
-    }
-    return PlatformNode.ID_PREFIX + this.node.platform.id
+    return this._id
   }
 
   get elementId (): string | null {
@@ -107,6 +106,10 @@ export class PlatformNode implements IConfigurationsTreeNode<PlatformMountAction
   }
 
   isDevice (): boolean {
+    return false
+  }
+
+  isConfiguration (): boolean {
     return false
   }
 

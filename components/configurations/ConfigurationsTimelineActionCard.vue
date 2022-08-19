@@ -34,7 +34,9 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-expansion-panels>
-    <v-expansion-panel>
+    <v-expansion-panel
+      v-if="action"
+    >
       <v-expansion-panel-header class="py-0 pl-0">
         <v-container class="pa-0">
           <v-row no-gutters>

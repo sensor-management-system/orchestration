@@ -130,33 +130,32 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch, mixins } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 
-import { DateTime } from 'luxon'
-import * as VueRouter from 'vue-router'
 import { mapActions } from 'vuex'
 
 import { LoadEpsgCodesAction, LoadElevationDataAction } from '@/store/vocabulary'
 
 import { Rules } from '@/mixins/Rules'
 
-import { Contact } from '@/models/Contact'
-import { Configuration } from '@/models/Configuration'
-import { ElevationDatum } from '@/models/ElevationDatum'
-import { EpsgCode } from '@/models/EpsgCode'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
+// import { Contact } from '@/models/Contact'
+// import { Configuration } from '@/models/Configuration'
+// import { ElevationDatum } from '@/models/ElevationDatum'
+// import { EpsgCode } from '@/models/EpsgCode'
+// import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
+// import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 
-import { IActionDateWithTextItem } from '@/utils/configurationInterfaces'
-import ConfigurationHelper from '@/utils/configurationHelper'
-import Validator from '@/utils/validator'
+// import { IActionDateWithTextItem } from '@/utils/configurationInterfaces'
+// import ConfigurationHelper from '@/utils/configurationHelper'
+// import Validator from '@/utils/validator'
 
-import {
-  getCurrentlyActiveLocationAction
-} from '@/utils/locationHelper'
+// import {
+//   getCurrentlyActiveLocationAction
+// } from '@/utils/locationHelper'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 
 @Component({
   components: {
@@ -174,12 +173,15 @@ export default class ConfigurationLocations extends mixins(Rules) {
   loadElevationData!: LoadElevationDataAction
   loadAllContacts!: () => void
 
+  test: StaticLocationBeginAction = new StaticLocationBeginAction()
+
   async created () { // TODO Try catch + progress inidcator
     await this.loadEpsgCodes()
     await this.loadElevationData()
     await this.loadAllContacts()
     const test = await this.$api.configurations.findRelatedStaticLocationBeginActions(this.configurationId)
-    console.log('test', test)
+    // console.log('test', test)
+    this.test = test
   }
 
   get configurationId () {

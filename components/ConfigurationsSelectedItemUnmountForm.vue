@@ -41,7 +41,7 @@ permissions and limitations under the Licence.
             :items="contacts"
             label="Contact"
             required
-            :readonly="readonly"
+            :disabled="readonly"
             :rules="[rules.required]"
           />
         </v-col>
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
             v-model="description"
             label="Description"
             rows="3"
-            :readonly="readonly"
+            :disabled="readonly"
           />
         </v-col>
       </v-row>
