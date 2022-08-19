@@ -762,13 +762,15 @@ class TestDeviceMountActionValidator(BaseTestCase):
             }
         }
 
-        time_range = (
-            DeviceMountActionValidator()._extract_updated_begin_and_end_dates(
-                payload_dict, existing_device_mount_action1
-            )
+        time_range = DeviceMountActionValidator()._extract_updated_begin_and_end_dates(
+            payload_dict, existing_device_mount_action1
         )
-        self.assertEqual(time_range.begin_date, datetime.datetime(year=2024, month=1, day=1))
-        self.assertEqual(time_range.end_date, datetime.datetime(year=2026, month=1, day=1))
+        self.assertEqual(
+            time_range.begin_date, datetime.datetime(year=2024, month=1, day=1)
+        )
+        self.assertEqual(
+            time_range.end_date, datetime.datetime(year=2026, month=1, day=1)
+        )
 
     def test_extract_updated_begin_and_end_dates_none_end_date_from_payload(self):
         """Ensure we can extract the none end date from the payload."""
@@ -786,12 +788,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             }
         }
 
-        time_range = (
-            DeviceMountActionValidator()._extract_updated_begin_and_end_dates(
-                payload_dict, existing_device_mount_action1
-            )
+        time_range = DeviceMountActionValidator()._extract_updated_begin_and_end_dates(
+            payload_dict, existing_device_mount_action1
         )
-        self.assertEqual(time_range.begin_date, datetime.datetime(year=2024, month=1, day=1))
+        self.assertEqual(
+            time_range.begin_date, datetime.datetime(year=2024, month=1, day=1)
+        )
         self.assertEqual(time_range.end_date, None)
 
 
@@ -1333,6 +1335,79 @@ class TestPlatformMountActionValidator(BaseTestCase):
             ]
             for information in expected_information:
                 self.assertIn(information, str_exception)
+
+    def test_validate_update_pass_example(self):
+        """
+        Test that the validation passes for an example.
+
+        This example was made by Tim.
+        """
+        db.drop_all()
+        db.create_all()
+        db.session.commit()
+
+        contact = Contact(given_name="T", family_name="E", email="t.e@ufz.de")
+        device = Device(short_name="dummy device")
+        platform = Platform(short_name="dummy platform")
+        configuration = Configuration(label="dummy config")
+
+        platform_mount = PlatformMountAction(
+            platform=platform,
+            configuration=configuration,
+            begin_contact=contact,
+            end_contact=None,
+            begin_date=datetime.datetime(
+                year=2022, month=8, day=19, hour=9, minute=8, second=57
+            ),
+            begin_description="",
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+        )
+        device_mount = DeviceMountAction(
+            parent_platform=platform,
+            configuration=configuration,
+            device=device,
+            begin_contact=contact,
+            end_contact=contact,
+            begin_date=datetime.datetime(
+                year=2022, month=8, day=19, hour=9, minute=9, second=17
+            ),
+            end_date=datetime.datetime(
+                year=2022, month=8, day=19, hour=9, minute=9, second=35
+            ),
+            begin_description="",
+            end_description="",
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+        )
+        db.session.add_all(
+            [contact, device, platform, configuration, platform_mount, device_mount]
+        )
+        db.session.commit()
+
+        payload_dict = {
+            "type": "platform_mount_action",
+            "attributes": {
+                "offset_x": 0,
+                "offset_y": 0,
+                "offset_z": 0,
+                "begin_description": "",
+                "end_description": "",
+                "begin_date": "2022-08-19T09:08:57.658Z",
+                "end_date": "2022-08-19T09:10:20.530Z",
+            },
+            "relationships": {
+                "platform": {"data": {"type": "platform", "id": str(platform.id)}},
+                "begin_contact": {"data": {"type": "contact", "id": str(contact.id)}},
+                "configuration": {
+                    "data": {"type": "configuration", "id": str(configuration.id)}
+                },
+                "end_contact": {"data": {"type": "contact", "id": str(contact.id)}},
+            },
+        }
+        PlatformMountActionValidator().validate_update(payload_dict, platform_mount.id)
 
     def test_validate_delete_non_existing_id(self):
         """

@@ -18,6 +18,38 @@ from .date_time_range import DateTimeRange
 from .errors import BadRequestError, ConflictError, NotFoundError
 
 
+def str_equal(id1, id2):
+    """
+    Check equalitiy, but check as strings.
+
+    This is intended to work for integer ids or string ids.
+    They should be considered as equal if they are the same
+    except the type.
+
+    Extra handling for None values is also incldued.
+    """
+    str_id1 = str(id1) if id1 is not None else None
+    str_id2 = str(id2) if id2 is not None else None
+    return str_id1 == str_id2
+
+
+def not_str_equal(id1, id2):
+    """
+    Negate the str_equal.
+
+    Only return true if values are different.
+
+    Examples:
+      not_str_equal(1, 1) => false
+      not_str_equal(1, "1") => false
+      not_str_equal(None, "1") => True
+      not_str_equal(1, 2) => True
+      not_str_equal("1", "2") => True
+      not_str_equal(None, None) => False
+    """
+    return not str_equal(id1, id2)
+
+
 class AbstractMountActionValidator(abc.ABC):
     """
     Abstract base class to validate requested changes for mount actions.
@@ -178,7 +210,7 @@ class AbstractMountActionValidator(abc.ABC):
         )
         for mount_action in existing_mount_actions:
             # We can ignore the existing mount that we want to update.
-            if mount_action.id != ignore_id:
+            if not_str_equal(mount_action.id, ignore_id):
                 existing_date_time_range = DateTimeRange(
                     mount_action.begin_date, mount_action.end_date
                 )
@@ -400,11 +432,16 @@ class DeviceMountActionValidator(AbstractMountActionValidator):
 
         for dynamic_location_action in dynamic_location_actions:
             end_date = dynamic_location_action.end_date
-            check_date_time_range = DateTimeRange(dynamic_location_action.begin_date, end_date)
+            check_date_time_range = DateTimeRange(
+                dynamic_location_action.begin_date, end_date
+            )
             if existing_date_time_range.overlaps_with(check_date_time_range):
                 if (
-                    dynamic_location_action.configuration_id != updated_configuration_id
-                    or object_id != existing_mount.device_id
+                    not_str_equal(
+                        dynamic_location_action.configuration_id,
+                        updated_configuration_id,
+                    )
+                    or not_str_equal(object_id, existing_mount.device_id)
                     or not expected_date_time_range.covers(check_date_time_range)
                 ):
 
@@ -478,7 +515,6 @@ class PlatformMountActionValidator(AbstractMountActionValidator):
         expected_date_time_range,
         updated_configuration_id,
     ):
-
         child_platform_mount_actions = db.session.query(PlatformMountAction).filter(
             and_(
                 PlatformMountAction.parent_platform_id == existing_mount.platform_id,
@@ -505,11 +541,13 @@ class PlatformMountActionValidator(AbstractMountActionValidator):
                     # Did we changed the platform of our current mount?
                     # In that case the child mounts would point to the
                     # wrong parent_platform_id
-                    mount_action.parent_platform_id != object_id
+                    not_str_equal(mount_action.parent_platform_id, object_id)
                     # Or did we changed the configuration?
                     # If so, we will have all entries with that
                     # parent_platform_id be orphanized
-                    or mount_action.configuration_id != updated_configuration_id
+                    or not_str_equal(
+                        mount_action.configuration_id, updated_configuration_id
+                    )
                     # Or is just the time range of the child mount
                     # no longer covered?
                     or not expected_date_time_range.covers(existing_date_time_range)
