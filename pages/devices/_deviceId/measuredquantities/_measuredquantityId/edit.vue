@@ -116,7 +116,7 @@ import BaseList from '@/components/shared/BaseList.vue'
   middleware: ['auth'],
   computed: {
     ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
-    ...mapState('devices', ['deviceMeasuredQuantity','deviceMeasuredQuantities'])
+    ...mapState('devices', ['deviceMeasuredQuantity', 'deviceMeasuredQuantities'])
   },
   methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity'])
 })
@@ -167,8 +167,8 @@ export default class DevicePropertyEditPage extends Vue {
     return this.isLoading || this.isSaving
   }
 
-  get quantitiesExceptCurrent(){
-    return this.deviceMeasuredQuantities.filter((measuredQuantity)=>{
+  get quantitiesExceptCurrent () {
+    return this.deviceMeasuredQuantities.filter((measuredQuantity) => {
       return measuredQuantity.id !== this.deviceMeasuredQuantity!.id
     })
   }
