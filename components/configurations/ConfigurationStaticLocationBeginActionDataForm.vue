@@ -214,28 +214,28 @@ export default class ConfigurationStaticLocationBeginActionDataForm extends mixi
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly earliestDateInclusive!: DateTime | null
 
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly latestDateInclusive!: DateTime | null
 
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly earliestDateExclusive!: DateTime | null
 
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly latestDateExclusive!: DateTime | null
 

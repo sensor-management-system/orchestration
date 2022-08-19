@@ -123,28 +123,28 @@ export default class ConfigurationDynamicLocationEndActionDataForm extends mixin
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly earliestDateInclusive!: DateTime | null
 
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly latestDateInclusive!: DateTime | null
 
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly earliestDateExclusive!: DateTime | null
 
   @Prop({
     required: false,
     default: null,
-    type: DateTime
+    type: Object
   })
   readonly latestDateExclusive!: DateTime | null
 

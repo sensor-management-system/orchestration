@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
       <slot name="dot-menu-items" />
     </template>
     <template #actions>
-      <slot name="actions"></slot>
+      <slot name="actions" />
     </template>
     <template #default>
       {{ computedTitle }}
