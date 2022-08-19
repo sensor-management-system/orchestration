@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
   <base-expandable-list-item
     expandable-color="grey lighten-5"
   >
-    <template #header>
+    <template v-if="!hideHeader" #header>
       <div :class="'mr-1 text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
         {{ getType() }}
       </div>
@@ -253,6 +253,12 @@ export default class DevicesListItem extends Vue {
     type: Object
   })
   private device!: Device
+
+  @Prop({
+    type: Boolean,
+    default: false
+  })
+  private hideHeader!: boolean
 
   public readonly NO_TYPE: string = 'Unknown type'
 

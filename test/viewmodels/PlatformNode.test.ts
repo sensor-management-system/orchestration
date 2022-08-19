@@ -50,9 +50,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a platform mount action',
+      endDescription: ''
     })
 
     const node = new PlatformNode(platformMountAction)
@@ -70,9 +73,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a platform mount action',
+      endDescription: ''
     })
 
     const firstNode = new PlatformNode(firstPlatformMountAction)
@@ -93,9 +99,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a platform mount action',
+      endDescription: ''
     })
 
     const node = new PlatformNode(platformMountAction)
@@ -112,9 +121,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a platform mount action',
+      endDescription: ''
     })
     const firstNode = new PlatformNode(firstPlatformMountAction)
 
@@ -126,9 +138,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'a second platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'a second platform mount action',
+      endDescription: ''
     })
     const secondNode = new PlatformNode(secondPlatformMountAction)
 
@@ -149,9 +164,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a platform mount action',
+      endDescription: ''
     })
     const firstNode = new PlatformNode(firstPlatformMountAction)
 
@@ -163,9 +181,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'a second platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'a second platform mount action',
+      endDescription: ''
     })
     const secondNode = new PlatformNode(secondPlatformMountAction)
 
@@ -186,9 +207,12 @@ describe('PlatformNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a platform mount action',
+      endDescription: ''
     })
     const node = new PlatformNode(platformMountAction)
     const name = node.name
@@ -208,9 +232,12 @@ describe('PlatformNode', () => {
       offsetX: 1,
       offsetY: 2,
       offsetZ: 3,
-      contact,
-      date,
-      description: 'just a platform mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a platform mount action',
+      endDescription: ''
     })
     const node = new PlatformNode(platformMountAction)
     const name = node.name

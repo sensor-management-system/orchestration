@@ -46,6 +46,7 @@ export class StaticLocationEndAction implements IStaticLocationEndAction {
   private _endDate: DateTime | null = null
   private _description: string = ''
   private _contact: Contact | null = null
+  readonly _type: string = 'staticEnd'
 
   get id (): string {
     return this._id
@@ -77,6 +78,10 @@ export class StaticLocationEndAction implements IStaticLocationEndAction {
 
   set contact (newContact: Contact | null) {
     this._contact = newContact
+  }
+
+  get type (): string {
+    return this._type
   }
 
   static createFromObject (someObject: IStaticLocationEndAction): StaticLocationEndAction {

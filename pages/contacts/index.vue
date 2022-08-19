@@ -242,7 +242,7 @@ export default class SearchContactsPage extends Vue {
       this.loading = true
       this.initializeAppBar()
       this.initSearchQueryParams()
-      this.runInitialSearch()
+      await this.runInitialSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {

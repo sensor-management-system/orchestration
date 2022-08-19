@@ -31,6 +31,7 @@
  */
 import { AxiosInstance, Method } from 'axios'
 
+import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { ContactRole } from '@/models/ContactRole'
 import { CustomTextField } from '@/models/CustomTextField'
@@ -61,6 +62,8 @@ import {
   deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
 import { DeviceCalibrationActionSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionSerializer'
+import { AvailabilitySerializer } from '@/serializers/controller/AvailabilitySerializer'
+import { Availability } from '@/models/Availability'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -546,6 +549,18 @@ export class DeviceApi {
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DeviceMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  checkAvailability (ids: (string | null)[], from: DateTime, to: DateTime | null): Promise<Availability[]> {
+    const url = '/controller/device-availabilities'
+    const params = {
+      ids: ids.join(','),
+      from: from.toISO(),
+      to: to ? to.toISO() : ''
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new AvailabilitySerializer().convertJsonApiObjectListToModelList(rawServerResponse)
     })
   }
 }

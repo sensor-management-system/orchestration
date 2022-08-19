@@ -34,9 +34,7 @@ import { DateTime } from 'luxon'
 import { IContact, Contact } from '@/models/Contact'
 import { IMountActions } from '@/models/IMountActions'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocation } from '@/models/Location'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
@@ -84,9 +82,7 @@ export class Configuration implements IConfiguration, IVisible {
   private _location: IStationaryLocation | IDynamicLocation | null = null
   private _contacts: IContact[] = [] as IContact[]
   private _deviceMountActions: DeviceMountAction[] = []
-  private _deviceUnmountActions: DeviceUnmountAction[] = []
   private _platformMountActions: PlatformMountAction[] = []
-  private _platformUnmountActions: PlatformUnmountAction[] = []
   private _staticLocationBeginActions: StaticLocationBeginAction[] = []
   private _staticLocationEndActions: StaticLocationEndAction[] = []
   private _dynamicLocationBeginActions: DynamicLocationBeginAction[] = []
@@ -179,28 +175,12 @@ export class Configuration implements IConfiguration, IVisible {
     this._deviceMountActions = newDeviceMountActions
   }
 
-  get deviceUnmountActions (): DeviceUnmountAction[] {
-    return this._deviceUnmountActions
-  }
-
-  set deviceUnmountActions (newDeviceUnmountActions: DeviceUnmountAction[]) {
-    this._deviceUnmountActions = newDeviceUnmountActions
-  }
-
   get platformMountActions (): PlatformMountAction[] {
     return this._platformMountActions
   }
 
   set platformMountActions (newPlatformMountActions: PlatformMountAction[]) {
     this._platformMountActions = newPlatformMountActions
-  }
-
-  get platformUnmountActions (): PlatformUnmountAction[] {
-    return this._platformUnmountActions
-  }
-
-  set platformUnmountActions (newPlatformUnmountActions: PlatformUnmountAction[]) {
-    this._platformUnmountActions = newPlatformUnmountActions
   }
 
   get staticLocationBeginActions (): StaticLocationBeginAction[] {
@@ -299,6 +279,10 @@ export class Configuration implements IConfiguration, IVisible {
     return this._visibility === Visibility.Public
   }
 
+  get type (): string {
+    return 'configuration'
+  }
+
   static createFromObject (someObject: IConfiguration): Configuration {
     const newObject = new Configuration()
 
@@ -323,9 +307,7 @@ export class Configuration implements IConfiguration, IVisible {
     }
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.deviceMountActions = someObject.deviceMountActions.map(DeviceMountAction.createFromObject)
-    newObject.deviceUnmountActions = someObject.deviceUnmountActions.map(DeviceUnmountAction.createFromObject)
     newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
-    newObject.platformUnmountActions = someObject.platformUnmountActions.map(PlatformUnmountAction.createFromObject)
     newObject.staticLocationBeginActions = someObject.staticLocationBeginActions.map(StaticLocationBeginAction.createFromObject)
     newObject.staticLocationEndActions = someObject.staticLocationEndActions.map(StaticLocationEndAction.createFromObject)
     newObject.dynamicLocationBeginActions = someObject.dynamicLocationBeginActions.map(DynamicLocationBeginAction.createFromObject)

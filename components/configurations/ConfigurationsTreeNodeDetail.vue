@@ -36,9 +36,7 @@ permissions and limitations under the Licence.
       :platform="node.unpack().platform"
     >
       <template #mount>
-        <ConfigurationsPlatformDeviceMountData
-          :mount-action="node.unpack()"
-        />
+        <base-mount-info :mount-action="node.unpack()" />
       </template>
     </PlatformMountListItem>
 
@@ -47,11 +45,15 @@ permissions and limitations under the Licence.
       :device="node.unpack().device"
     >
       <template #mount>
-        <ConfigurationsPlatformDeviceMountData
-          :mount-action="node.unpack()"
-        />
+        <base-mount-info :mount-action="node.unpack()" />
       </template>
     </DevicesMountListItem>
+    <template v-if="node.isConfiguration()">
+      <div>
+        <v-divider class="pb-4" />
+        <configurations-basic-data :value="node.unpack()" />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -63,10 +65,11 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 import PlatformMountListItem from '@/components/platforms/PlatformMountListItem.vue'
 import DevicesMountListItem from '@/components/devices/DevicesMountListItem.vue'
-import ConfigurationsPlatformDeviceMountData from '@/components/ConfigurationsPlatformDeviceMountData.vue'
+import ConfigurationsBasicData from '@/components/configurations/ConfigurationsBasicData.vue'
+import BaseMountInfo from '@/components/shared/BaseMountInfo.vue'
 
 @Component({
-  components: { ConfigurationsPlatformDeviceMountData, DevicesMountListItem, PlatformMountListItem }
+  components: { DevicesMountListItem, PlatformMountListItem, BaseMountInfo, ConfigurationsBasicData }
 })
 export default class ConfigurationsTreeNodeDetail extends Vue {
   @Prop({

@@ -33,9 +33,12 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { Commit, Dispatch } from 'vuex/types'
+import { Commit, Dispatch, GetterTree, ActionTree } from 'vuex/types'
 
 import { DateTime } from 'luxon'
+
+import { RootState } from '@/store'
+
 import { Configuration } from '@/models/Configuration'
 import { Project } from '@/models/Project'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
@@ -53,24 +56,32 @@ import {
   StaticLocationEndTimelineAction
 } from '@/utils/configurationInterfaces'
 
-import { byDateOldestLast } from '@/modelUtils/mountHelpers'
+import { byDateOldestLast, IWithDate } from '@/modelUtils/mountHelpers'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
-import { Api } from '@/services/Api'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
-import { mockCurrentConfiguration, mockMountingActions } from '@/utils/mockHelper'
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
+// import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+// import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+// import { mockCurrentConfiguration, mockMountingActions } from '@/utils/mockHelper'
 
 export enum LocationTypes {
   staticStart = 'staticStart',
   staticEnd = 'staticEnd',
   dynamicStart = 'dynamicStart',
   dynamicEnd = 'dynamicEnd',
+}
+
+export enum MountingTypes {
+  device_mount = 'device_mount',
+  platform_mount = 'platform_mount',
+  device_unmount = 'device_unmount',
+  platform_unmount = 'platform_unmount'
 }
 
 const PAGE_SIZES = [
@@ -81,21 +92,24 @@ const PAGE_SIZES = [
 
 export interface ConfigurationsState {
   configurations: Configuration[]
-  configuration: Configuration | null,
+  configuration: Configuration | null
   configurationContactRoles: ContactRole[]
   configurationStates: string[]
-  projects: Project[],
-  configurationStaticLocationBeginActions: StaticLocationBeginAction[],
-  configurationStaticLocationEndActions: StaticLocationEndAction[],
-  configurationDynamicLocationBeginActions: DynamicLocationBeginAction[],
-  configurationDynamicLocationEndActions: DynamicLocationEndAction[],
-  configurationMountingActions: []
+  projects: Project[]
+  configurationStaticLocationBeginActions: StaticLocationBeginAction[]
+  configurationStaticLocationEndActions: StaticLocationEndAction[]
+  configurationDynamicLocationBeginActions: DynamicLocationBeginAction[]
+  configurationDynamicLocationEndActions: DynamicLocationEndAction[]
+  configurationMountingActions: ConfigurationMountingAction[]
+  configurationMountingActionsForDate: ConfigurationsTree | null
+  configurationDeviceMountActions: DeviceMountAction[]
+  configurationPlatformMountActions: PlatformMountAction[]
   totalPages: number
   pageNumber: number
   pageSize: number
 }
 
-const state = () => ({
+const state = (): ConfigurationsState => ({
   configurations: [],
   configuration: null,
   configurationContactRoles: [],
@@ -106,31 +120,54 @@ const state = () => ({
   configurationDynamicLocationBeginActions: [],
   configurationDynamicLocationEndActions: [],
   configurationMountingActions: [],
+  configurationMountingActionsForDate: null,
+  configurationDeviceMountActions: [],
+  configurationPlatformMountActions: [],
   totalPages: 1,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0]
 })
 
-const getters = {
+export type TimelineActionsGetter = ITimelineAction[]
+
+function formatMountActionString (value: ConfigurationMountingAction): string {
+  const date = value.timepoint.toLocaleString(DateTime.DATETIME_SHORT)
+
+  const formatAction = (entity: string, name: string, action: string, timepoint: string): string => `${entity} ${name} ${action} at ${timepoint}`
+  switch (value.type) {
+    case MountingTypes.device_mount:
+      return formatAction('Device', value.attributes.shortName, 'mounted', date)
+    case MountingTypes.platform_mount:
+      return formatAction('Platform', value.attributes.shortName, 'mounted', date)
+    case MountingTypes.device_unmount:
+      return formatAction('Device', value.attributes.shortName, 'unmounted', date)
+    case MountingTypes.platform_unmount:
+      return formatAction('Platform', value.attributes.shortName, 'unmounted', date)
+    default:
+      return ''
+  }
+}
+
+const getters: GetterTree<ConfigurationsState, RootState> = {
   projectNames: (state: ConfigurationsState) => {
     return state.projects.map((p: Project) => p.name)
   },
-  timelineActions: (state: ConfigurationsState) => { // Todo überlegen, ob das man das eventuell anders macht
+  timelineActions: (state: ConfigurationsState): ITimelineAction[] => { // Todo überlegen, ob das man das eventuell anders macht
     const result: ITimelineAction[] = []
 
     if (state.configuration !== null) {
       const devices = state.configuration.deviceMountActions.map(a => a.device)
-      for (const platformMountAction of state.configuration.platformMountActions) {
+      for (const platformMountAction of state.configurationPlatformMountActions) {
         result.push(new PlatformMountTimelineAction(platformMountAction))
+        if (platformMountAction.endDate !== null) {
+          result.push(new PlatformUnmountTimelineAction(platformMountAction))
+        }
       }
-      for (const deviceMountAction of state.configuration.deviceMountActions) {
+      for (const deviceMountAction of state.configurationDeviceMountActions) {
         result.push(new DeviceMountTimelineAction(deviceMountAction))
-      }
-      for (const platformUnmountAction of state.configuration.platformUnmountActions) {
-        result.push(new PlatformUnmountTimelineAction(platformUnmountAction))
-      }
-      for (const deviceUnmountAction of state.configuration.deviceUnmountActions) {
-        result.push(new DeviceUnmountTimelineAction(deviceUnmountAction))
+        if (deviceMountAction.endDate !== null) {
+          result.push(new DeviceUnmountTimelineAction(deviceMountAction))
+        }
       }
       for (const action of state.configuration.staticLocationBeginActions) {
         result.push(new StaticLocationBeginTimelineAction(action))
@@ -144,53 +181,16 @@ const getters = {
       for (const action of state.configuration.dynamicLocationEndActions) {
         result.push(new DynamicLocationEndTimelineAction(action))
       }
-      result.sort(byDateOldestLast)
+      (result as IWithDate[]).sort(byDateOldestLast)
     }
     return result
   },
-  // mountingActionsDates: (state: ConfigurationsState) => {
-  //   let result: IActionDateWithTextItem[] = []
-  //
-  //   if (state.configuration) {
-  //     const datesWithTexts: IActionDateWithTextItem[] = []
-  //     for (const platformMountAction of state.configurationPlatformMountActions) {
-  //       datesWithTexts.push({
-  //         date: platformMountAction.date,
-  //         text: dateToDateTimeStringHHMM(platformMountAction.date) + ' - ' + 'Mount ' + platformMountAction.platform.shortName
-  //       })
-  //     }
-  //     for (const platformUnmountAction of state.configurationPlatformUnmountActions) {
-  //       datesWithTexts.push({
-  //         date: platformUnmountAction.date,
-  //         text: dateToDateTimeStringHHMM(platformUnmountAction.date) + ' - ' + 'Unmount ' + platformUnmountAction.platform.shortName
-  //       })
-  //     }
-  //     for (const deviceMountAction of state.configurationDeviceMountActions) {
-  //       datesWithTexts.push({
-  //         date: deviceMountAction.date,
-  //         text: dateToDateTimeStringHHMM(deviceMountAction.date) + ' - ' + 'Mount ' + deviceMountAction.device.shortName
-  //       })
-  //     }
-  //     for (const deviceUnmountAction of state.configurationDeviceUnmountActions) {
-  //       datesWithTexts.push({
-  //         date: deviceUnmountAction.date,
-  //         text: dateToDateTimeStringHHMM(deviceUnmountAction.date) + ' - ' + 'Unmount ' + deviceUnmountAction.device.shortName
-  //       })
-  //     }
-  //     datesWithTexts.sort((a, b) => {
-  //       if (a.date < b.date) {
-  //         return -1
-  //       }
-  //       if (a.date > b.date) {
-  //         return 1
-  //       }
-  //       return 0
-  //     })
-  //     // Todo: Anmerknug: ich hab das grouping nicht eingebaut
-  //     result = datesWithTexts
-  //   }
-  //   return result
-  // },
+  mountActionDateItems: (state: ConfigurationsState) => {
+    return state.configurationMountingActions.map(item => ({
+      text: formatMountActionString(item),
+      value: item.timepoint
+    })).reverse()
+  },
   locationActionsDates: (state: ConfigurationsState) => {
     let result: IActionDateWithTextItem[] = []
 
@@ -256,15 +256,22 @@ const getters = {
   }
 }
 
-export type LoadConfigurationContactRolesAction = (id: string) => Promise<void>
-export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
-export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
+type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 
-// @ts-ignore
-const actions: {
-  [key: string]: any;
-  $api: Api
-} = {
+export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
+export type AddDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
+export type AddPlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
+export type LoadConfigurationAction = IdParamReturnsVoidPromiseAction
+export type LoadConfigurationContactRolesAction = IdParamReturnsVoidPromiseAction
+export type LoadDeviceMountActionsAction = IdParamReturnsVoidPromiseAction
+export type LoadMountingActionsAction = IdParamReturnsVoidPromiseAction
+export type LoadMountingConfigurationForDateAction = (params: { id: string, timepoint: DateTime }) => Promise<void>
+export type LoadPlatformMountActionsAction = IdParamReturnsVoidPromiseAction
+export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
+export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
+export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
+
+const actions: ActionTree<ConfigurationsState, RootState> = {
   async searchConfigurationsPaginated ({
     commit,
     state
@@ -289,8 +296,11 @@ const actions: {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
   },
-  async loadConfiguration ({ commit }: { commit: Commit }, id: string) {
-    const configuration = await this.$api.configurations.findById(id, { includeCreatedBy: true, includeUpdatedBy: true })
+  async loadConfiguration ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const configuration = await this.$api.configurations.findById(id, {
+      includeCreatedBy: true,
+      includeUpdatedBy: true
+    })
     commit('setConfiguration', configuration)
   },
   async loadConfigurationContactRoles ({ commit }: { commit: Commit }, id: string) {
@@ -317,48 +327,58 @@ const actions: {
   async loadConfigurationDynamicLocationEndActions ({ commit }: { commit: Commit }, id: string) {
     commit('setConfigurationDynamicLocationEndActions', await this.$api.configurations.findRelatedDynamicLocationEndActions(id))
   },
-  async loadMountingActions ({ commit }: {commit: Commit}, id: string) {
-    // Todo currently mock
-
-    // request to controller via $api
-    // /backend/api/v1/controller/configurations/<configuration-id>/mounting-action-timepoints
-
-    // Todo import of mockHelper.ts
-    commit('setConfigurationMountingActions', mockMountingActions)
+  async loadDeviceMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    commit('setConfigurationDeviceMountActions', await this.$api.configurations.findRelatedDeviceMountActions(id))
   },
-  async getMountingConfigurationForDate ({ commit }: {commit: Commit}, id: string, timepoint: DateTime) {
-    // Todo currently mock
-    // request to controller via $api
-    /// backend/api/v1/controller/configurations/<configuration-id>/mounting-actions?timepoint=<time-point>
-
-    // Todo import of mockHelper.ts
-    return mockCurrentConfiguration
+  async loadPlatformMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    commit('setConfigurationPlatformMountActions', await this.$api.configurations.findRelatedPlatformMountActions(id))
   },
-  async loadLocationActions ({ dispatch }: {dispatch: Dispatch}, id: string) {
+  async loadMountingActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    commit('setConfigurationMountingActions', await this.$api.configurations.findMountingActions(id))
+  },
+  async loadMountingConfigurationForDate ({
+    commit,
+    dispatch
+  }: { commit: Commit, dispatch: Dispatch }, {
+    id,
+    timepoint
+  }: {
+    id: string;
+    timepoint: DateTime;
+  }): Promise<void> {
+    await dispatch('contacts/loadAllContacts', null, { root: true })
+    const contacts = this.getters['contacts/searchContacts']
+    const mountingActionsByDate = await this.$api.configurations.findMountingActionsByDate(id, timepoint, contacts)
+
+    commit('setConfigurationMountingActionsForDate', mountingActionsByDate)
+
+    // return mockCurrentConfiguration
+  },
+  async loadLocationActions ({ dispatch }: { dispatch: Dispatch }, id: string) {
     await dispatch('loadConfigurationStaticLocationBeginActions', id)
     await dispatch('loadConfigurationStaticLocationEndActions', id)
     await dispatch('loadConfigurationDynamicLocationBeginActions', id)
     await dispatch('loadConfigurationDynamicLocationEndActions', id)
   },
-  async deleteConfiguration ({ _commit }: { _commit: Commit }, id: string) {
+  async deleteConfiguration (_context, id: string) {
     await this.$api.configurations.deleteById(id)
   },
-  saveConfiguration ({ _commit }: { _commit: Commit }, configuration: Configuration): Promise<Configuration> {
+  saveConfiguration (_context, configuration: Configuration): Promise<Configuration> {
     return this.$api.configurations.save(configuration)
   },
-  addConfigurationContactRole ({ _commit }: { _commit: Commit }, {
+  addConfigurationContactRole (_context, {
     configurationId,
     contactRole
   }: { configurationId: string, contactRole: ContactRole }): Promise<string> {
     return this.$api.configurations.addContact(configurationId, contactRole)
   },
-  removeConfigurationContactRole ({ _commit }: { _commit: Commit }, {
+  removeConfigurationContactRole (_context, {
     configurationContactRoleId
   }: { configurationContactRoleId: string }): Promise<void> {
     return this.$api.configurations.removeContact(configurationContactRoleId)
   },
   addDeviceMountAction (
-    { _commit }: { _commit: Commit },
+    _context,
     {
       configurationId,
       deviceMountAction
@@ -366,15 +386,7 @@ const actions: {
   ): Promise<string> {
     return this.$api.configurations.deviceMountActionApi.add(configurationId, deviceMountAction)
   },
-  addDeviceUnMountAction ({ _commit }: { _commit: Commit },
-    {
-      configurationId,
-      deviceUnMountAction
-    }: { configurationId: string, deviceUnMountAction: DeviceUnmountAction }
-  ) {
-    return this.$api.configurations.deviceUnmountActionApi.add(configurationId, deviceUnMountAction)
-  },
-  addPlatformMountAction ({ _commit }: { _commit: Commit },
+  addPlatformMountAction (_context,
     {
       configurationId,
       platformMountAction
@@ -382,15 +394,24 @@ const actions: {
   ): Promise<string> {
     return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
   },
-  addPlatformUnMountAction ({ _commit }: { _commit: Commit },
+  updateDeviceMountAction (
+    _context,
     {
       configurationId,
-      platformUnMountAction
-    }: { configurationId: string, platformUnMountAction: PlatformUnmountAction }
-  ) {
-    return this.$api.configurations.platformUnmountActionApi.add(configurationId, platformUnMountAction)
+      deviceMountAction
+    }: { configurationId: string, deviceMountAction: DeviceMountAction }
+  ): Promise<string> {
+    return this.$api.configurations.deviceMountActionApi.update(configurationId, deviceMountAction)
   },
-  addStaticLocationBeginAction ({ _commit }: { _commit: Commit }, {
+  updatePlatformMountAction (_context,
+    {
+      configurationId,
+      platformMountAction
+    }: { configurationId: string, platformMountAction: PlatformMountAction }
+  ): Promise<string> {
+    return this.$api.configurations.platformMountActionApi.update(configurationId, platformMountAction)
+  },
+  addStaticLocationBeginAction (_context, {
     configurationId,
     staticLocationBeginAction
   }: { configurationId: string, staticLocationBeginAction: StaticLocationBeginAction }) {
@@ -443,6 +464,15 @@ const mutations = {
   },
   setConfigurationMountingActions (state: ConfigurationsState, configurationMountingActions: []) {
     state.configurationMountingActions = configurationMountingActions
+  },
+  setConfigurationMountingActionsForDate (state: ConfigurationsState, configurationMountingActionsForDate: ConfigurationsTree) {
+    state.configurationMountingActionsForDate = configurationMountingActionsForDate
+  },
+  setConfigurationDeviceMountActions (state: ConfigurationsState, configurationDeviceMountActions: []) {
+    state.configurationDeviceMountActions = configurationDeviceMountActions
+  },
+  setConfigurationPlatformMountActions (state: ConfigurationsState, configurationPlatformMountActions: []) {
+    state.configurationPlatformMountActions = configurationPlatformMountActions
   }
 }
 

@@ -112,7 +112,6 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapGetters } from 'vuex'
 
 import { DateTime } from 'luxon'
-
 import { LocationTypes } from '@/store/configurations'
 
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
@@ -138,7 +137,7 @@ export default class ConfigurationShowLocationPage extends Vue {
 
   created () {
     if (this.$route.query.timestamp) {
-      this.selectedDate = stringToDate(this.$route.query.timestamp)
+      this.selectedDate = stringToDate(this.$route.query.timestamp as string)
     }
   }
 
@@ -146,14 +145,14 @@ export default class ConfigurationShowLocationPage extends Vue {
     return this.$route.params.configurationId
   }
 
-  updateDate (val) {
-    this.selectedDate = val.date
+  updateDate (val: DateTime) {
+    this.selectedDate = val
     this.updateUrlDate()
   }
 
-  updateUrlDate (newDate) {
+  updateUrlDate () {
     this.$router.push({
-      query: { timestamp: this.selectedDate },
+      query: { timestamp: this.selectedDate as unknown as string },
       hash: this.$route.hash
     })
   }

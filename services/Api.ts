@@ -73,12 +73,11 @@ import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
 import { ProjectApi } from '@/services/project/ProjectApi'
 
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
-import { DeviceUnmountActionApi } from '@/services/sms/DeviceUnmountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
-import { PlatformUnmountActionApi } from '@/services/sms/PlatformUnmountActionApi'
 import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
 import { DeviceCalibrationActionAttachmentApi } from '@/services/sms/DeviceCalibrationActionAttachmentApi'
 import { DeviceCalibrationDevicePropertyApi } from '@/services/sms/DeviceCalibrationDevicePropertyApi'
+import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
 
 import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
 import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
@@ -112,6 +111,7 @@ export class Api {
   private readonly _staticLocationEndActionApi: StaticLocationEndActionApi
   private readonly _dynamicLocationBeginActionApi: DynamicLocationBeginActionApi
   private readonly _dynamicLocationEndActionApi: DynamicLocationEndActionApi
+  private readonly _mountingActionsControllerApi: MountingActionsControllerApi
   private readonly _uploadApi: UploadApi
 
   private readonly _manufacturerApi: ManufacturerApi
@@ -181,17 +181,9 @@ export class Api {
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-mount-actions'
     )
-    const deviceUnmountActionApi = new DeviceUnmountActionApi(
-      createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/device-unmount-actions'
-    )
     const platformMountActionApi = new PlatformMountActionApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-mount-actions'
-    )
-    const platformUnmountActionApi = new PlatformUnmountActionApi(
-      createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/platform-unmount-actions'
     )
     this._staticLocationBeginActionApi = new StaticLocationBeginActionApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
@@ -209,17 +201,20 @@ export class Api {
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/dynamic-location-end-actions'
     )
+    this._mountingActionsControllerApi = new MountingActionsControllerApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/controller/configurations'
+    )
     this._configurationApi = new ConfigurationApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/configurations',
       deviceMountActionApi,
-      deviceUnmountActionApi,
       platformMountActionApi,
-      platformUnmountActionApi,
       this._staticLocationBeginActionApi,
       this._staticLocationEndActionApi,
       this._dynamicLocationBeginActionApi,
       this._dynamicLocationEndActionApi,
+      this._mountingActionsControllerApi,
       // callback function to fetch permission groups
       async (): Promise<PermissionGroup[]> => {
         const api = new PermissionGroupApi(

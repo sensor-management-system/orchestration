@@ -32,24 +32,16 @@
 
 import { DateTime } from 'luxon'
 
-import { Contact } from '@/models/Contact'
-import { Device } from '@/models/Device'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { IMountActions } from '@/models/IMountActions'
-import { Platform } from '@/models/Platform'
 
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
-import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 
-import { dateTimesEqual } from '@/utils/dateHelper'
-
-interface IWithDate {
+export interface IWithDate {
   date: DateTime
 }
 
@@ -71,38 +63,24 @@ export function byDateOldestLast (a: IWithDate, b: IWithDate): number {
   return 0
 }
 
-export function getActivePlatforms (
+function getActivePlatforms (
   mountActions: IMountActions,
   dateTime: DateTime
 ): {[idx: string]: PlatformMountAction} {
-  const latestMountUnmountActionByPlatformId: {[idx: string]: PlatformMountAction | PlatformUnmountAction} = {}
+  const latestMountActions: {[idx: string]: PlatformMountAction} = {}
   for (const platformMountAction of mountActions.platformMountActions) {
     const platformId = platformMountAction.platform.id
     if (platformId) {
-      if (dateTime >= platformMountAction.date) {
-        const latestDate = latestMountUnmountActionByPlatformId[platformId]?.date
-        if (!latestDate || latestDate < platformMountAction.date) {
-          latestMountUnmountActionByPlatformId[platformId] = platformMountAction
-        }
-      }
-    }
-  }
-  for (const platformUnmountAction of mountActions.platformUnmountActions) {
-    const platformId = platformUnmountAction.platform.id
-    if (platformId) {
-      if (dateTime >= platformUnmountAction.date) {
-        const latestDate = latestMountUnmountActionByPlatformId[platformId]?.date
-        if (!latestDate || latestDate < platformUnmountAction.date) {
-          latestMountUnmountActionByPlatformId[platformId] = platformUnmountAction
-        }
+      if (dateTime >= platformMountAction.beginDate && (!platformMountAction.endDate || dateTime <= platformMountAction.endDate)) {
+        latestMountActions[platformId] = platformMountAction
       }
     }
   }
 
   const activePlatforms: {[idx: string]: PlatformMountAction} = {}
 
-  for (const platformId of Object.keys(latestMountUnmountActionByPlatformId)) {
-    const lastEntry = latestMountUnmountActionByPlatformId[platformId]
+  for (const platformId of Object.keys(latestMountActions)) {
+    const lastEntry = latestMountActions[platformId]
     if (lastEntry.isMountAction) {
       activePlatforms[platformId] = lastEntry as PlatformMountAction
     }
@@ -110,38 +88,24 @@ export function getActivePlatforms (
   return activePlatforms
 }
 
-export function getActiveDevices (
+function getActiveDevices (
   mountActions: IMountActions,
   dateTime: DateTime
 ): {[idx: string]: DeviceMountAction} {
-  const latestMountUnmountActionByDeviceId: {[idx: string]: DeviceMountAction | DeviceUnmountAction} = {}
+  const latestMountActions: {[idx: string]: DeviceMountAction} = {}
 
   for (const deviceMountAction of mountActions.deviceMountActions) {
     const deviceId = deviceMountAction.device.id
     if (deviceId) {
-      if (dateTime >= deviceMountAction.date) {
-        const latestDate = latestMountUnmountActionByDeviceId[deviceId]?.date
-        if (!latestDate || latestDate < deviceMountAction.date) {
-          latestMountUnmountActionByDeviceId[deviceId] = deviceMountAction
-        }
-      }
-    }
-  }
-  for (const deviceUnmountAction of mountActions.deviceUnmountActions) {
-    const deviceId = deviceUnmountAction.device.id
-    if (deviceId) {
-      if (dateTime >= deviceUnmountAction.date) {
-        const latestDate = latestMountUnmountActionByDeviceId[deviceId]?.date
-        if (!latestDate || latestDate < deviceUnmountAction.date) {
-          latestMountUnmountActionByDeviceId[deviceId] = deviceUnmountAction
-        }
+      if (dateTime >= deviceMountAction.beginDate && (!deviceMountAction.endDate || dateTime <= deviceMountAction.endDate)) {
+        latestMountActions[deviceId] = deviceMountAction
       }
     }
   }
   const activeDevices: {[idx: string]: DeviceMountAction} = {}
 
-  for (const deviceId of Object.keys(latestMountUnmountActionByDeviceId)) {
-    const lastEntry = latestMountUnmountActionByDeviceId[deviceId]
+  for (const deviceId of Object.keys(latestMountActions)) {
+    const lastEntry = latestMountActions[deviceId]
     if (lastEntry.isMountAction) {
       activeDevices[deviceId] = lastEntry as DeviceMountAction
     }
@@ -207,267 +171,4 @@ export function buildConfigurationTree (
   }
 
   return tree
-}
-
-export function mountPlatform (
-  mountActions: IMountActions,
-  platform: Platform,
-  offsetX: number,
-  offsetY: number,
-  offsetZ: number,
-  contact: Contact,
-  description: string,
-  parentNode: ConfigurationsTreeNode | null,
-  date: DateTime
-): IMountActions {
-  if (!parentNode) {
-    mountActions.platformMountActions.push(
-      PlatformMountAction.createFromObject({
-        id: '',
-        platform,
-        parentPlatform: null,
-        date,
-        offsetX,
-        offsetY,
-        offsetZ,
-        contact,
-        description
-      })
-    )
-    return mountActions
-  }
-
-  if (!parentNode.canHaveChildren()) {
-    throw new Error('selected node-type cannot have children')
-  }
-
-  const parentPlatform = (parentNode as PlatformNode).unpack().platform
-  mountActions.platformMountActions.push(PlatformMountAction.createFromObject({
-    id: '',
-    platform,
-    parentPlatform,
-    date,
-    offsetX,
-    offsetY,
-    offsetZ,
-    contact,
-    description
-  }))
-  return mountActions
-}
-
-export function mountDevice (
-  mountActions: IMountActions,
-  device: Device,
-  offsetX: number,
-  offsetY: number,
-  offsetZ: number,
-  contact: Contact,
-  description: string,
-  parentNode: ConfigurationsTreeNode | null,
-  date: DateTime
-): IMountActions {
-  if (!parentNode) {
-    mountActions.deviceMountActions.push(DeviceMountAction.createFromObject({
-      id: '',
-      device,
-      parentPlatform: null,
-      date,
-      offsetX,
-      offsetY,
-      offsetZ,
-      contact,
-      description
-    }))
-    return mountActions
-  }
-
-  if (!parentNode.canHaveChildren()) {
-    throw new Error('selected node-type cannot have children')
-  }
-
-  const platform = (parentNode as PlatformNode).unpack().platform
-  mountActions.deviceMountActions.push(DeviceMountAction.createFromObject({
-    id: '',
-    device,
-    parentPlatform: platform,
-    date,
-    offsetX,
-    offsetY,
-    offsetZ,
-    contact,
-    description
-  }))
-  return mountActions
-}
-
-export function unmount (
-  mountActions: IMountActions,
-  node: ConfigurationsTreeNode,
-  date: DateTime,
-  contact: Contact,
-  description: string
-): IMountActions {
-  let platformIdsToRemoveActions = new Set<string>()
-  let deviceIdsToRemoveActions = new Set<string>()
-
-  if (node.isDevice()) {
-    // if we just remove a device it is easy
-    // we just want to remove it as it is
-    const deviceNode = node as DeviceNode
-    const deviceMountAction = deviceNode.unpack()
-    const device = deviceMountAction.device
-    const deviceId = device.id
-    if (deviceId) {
-      deviceIdsToRemoveActions.add(deviceId)
-    }
-  } else {
-    // if we have a platform however, then the stuff is going to be
-    // complex:
-    // - we need to remove all the stuff that is currently active
-    // - and we need to remove all the stuff that will be active in the
-    //   future and effects this platform - even those that only
-    //   will be mounted & unmounted in the future
-    //
-    // So we will check all of our childs
-    // and in that case we can't rely on the tree
-    const platformsByDirectParentPlatformId = extractDirectPlatformsByParentPlatformId(mountActions)
-    const devicesByDirectParentPlatformId = extractDirectDevicesByParentPlatformId(mountActions)
-
-    const platformsByHierarchyParentPlatformId: {[idx: string]: Set<string>} = {}
-    const devicesByHierarchyParentPlatformId: {[idx: string]: Set<string>} = {}
-
-    for (const parentPlatformId of Object.keys(devicesByDirectParentPlatformId)) {
-      devicesByDirectParentPlatformId[parentPlatformId].forEach((deviceId: string) => {
-        if (!devicesByHierarchyParentPlatformId[parentPlatformId]) {
-          devicesByHierarchyParentPlatformId[parentPlatformId] = new Set()
-        }
-        devicesByHierarchyParentPlatformId[parentPlatformId].add(deviceId)
-      })
-    }
-
-    for (const parentPlatformId of Object.keys(platformsByDirectParentPlatformId)) {
-      const subListsToCheck = [platformsByDirectParentPlatformId[parentPlatformId]]
-      while (subListsToCheck.length > 0) {
-        for (const list of subListsToCheck[0]) {
-          for (const childPlatformId of list) {
-            if (!platformsByHierarchyParentPlatformId[parentPlatformId]) {
-              platformsByHierarchyParentPlatformId[parentPlatformId] = new Set()
-            }
-            platformsByHierarchyParentPlatformId[parentPlatformId].add(childPlatformId)
-            if (platformsByDirectParentPlatformId[childPlatformId]) {
-              subListsToCheck.push(platformsByDirectParentPlatformId[childPlatformId])
-            }
-            if (devicesByDirectParentPlatformId[childPlatformId]) {
-              for (const childDeviceId of devicesByDirectParentPlatformId[childPlatformId]) {
-                if (!devicesByHierarchyParentPlatformId[parentPlatformId]) {
-                  devicesByHierarchyParentPlatformId[parentPlatformId] = new Set()
-                }
-                devicesByHierarchyParentPlatformId[parentPlatformId].add(childDeviceId)
-              }
-            }
-          }
-        }
-        subListsToCheck.shift()
-      }
-    }
-    const platformNode = node as PlatformNode
-    const platformMountAction = platformNode.unpack()
-    const platform = platformMountAction.platform
-    const platformId = platform.id
-    if (platformId) {
-      deviceIdsToRemoveActions = devicesByHierarchyParentPlatformId[platformId] || new Set()
-      platformIdsToRemoveActions = platformsByHierarchyParentPlatformId[platformId] || new Set()
-      platformIdsToRemoveActions.add(platformId)
-    }
-  }
-
-  const activeDevices = getActiveDevices(mountActions, date)
-  const activePlatforms = getActivePlatforms(mountActions, date)
-
-  mountActions.platformMountActions = mountActions.platformMountActions.filter((pma: PlatformMountAction) => {
-    return !(pma.date >= date && pma.platform.id && platformIdsToRemoveActions.has(pma.platform.id))
-  })
-  mountActions.platformUnmountActions = mountActions.platformUnmountActions.filter((pua: PlatformUnmountAction) => {
-    return !(pua.date >= date && pua.platform.id && platformIdsToRemoveActions.has(pua.platform.id))
-  })
-  mountActions.deviceMountActions = mountActions.deviceMountActions.filter((dma: DeviceMountAction) => {
-    return !(dma.date >= date && dma.device.id && deviceIdsToRemoveActions.has(dma.device.id))
-  })
-  mountActions.deviceUnmountActions = mountActions.deviceUnmountActions.filter((dua: DeviceUnmountAction) => {
-    return !(dua.date >= date && dua.device.id && deviceIdsToRemoveActions.has(dua.device.id))
-  })
-
-  // for those entries that are currently active, we want to
-  // add anmount actions
-  platformIdsToRemoveActions.forEach((platformId: string) => {
-    const activeEntry = activePlatforms[platformId]
-    if (activeEntry && !dateTimesEqual(activeEntry.date, date)) {
-      // if it is the very same date as the mount, then we don't want to
-      // add an unmount
-      // we just remove the mount - which is already done in the filtering
-      const platformUnmountAction = PlatformUnmountAction.createFromObject({
-        id: '',
-        platform: activeEntry.platform,
-        contact,
-        date,
-        description
-      })
-      mountActions.platformUnmountActions.push(platformUnmountAction)
-    }
-  })
-  deviceIdsToRemoveActions.forEach((deviceId: string) => {
-    const activeEntry = activeDevices[deviceId]
-    if (activeEntry && !dateTimesEqual(activeEntry.date, date)) {
-      const deviceUnmountAction = DeviceUnmountAction.createFromObject({
-        id: '',
-        device: activeEntry.device,
-        contact,
-        date,
-        description
-      })
-      mountActions.deviceUnmountActions.push(deviceUnmountAction)
-    }
-  })
-
-  return mountActions
-}
-
-export function extractDirectPlatformsByParentPlatformId (mountActions: IMountActions): {[idx: string]: Set<string>} {
-  const platformsByDirectParentPlatformId: {[idx: string]: Set<string>} = {}
-
-  for (const platformMountAction of mountActions.platformMountActions) {
-    if (platformMountAction.parentPlatform) {
-      const platformId = platformMountAction.platform.id
-      const parentPlatform = platformMountAction.parentPlatform
-      const parentPlatformId = parentPlatform.id
-      if (platformId && parentPlatformId) {
-        if (!platformsByDirectParentPlatformId[parentPlatformId]) {
-          platformsByDirectParentPlatformId[parentPlatformId] = new Set()
-        }
-        platformsByDirectParentPlatformId[parentPlatformId].add(platformId)
-      }
-    }
-  }
-
-  return platformsByDirectParentPlatformId
-}
-
-export function extractDirectDevicesByParentPlatformId (mountActions: IMountActions): {[idx: string]: Set<string>} {
-  const devicesByDirectParentPlatformId: {[idx: string]: Set<string>} = {}
-
-  for (const deviceMountAction of mountActions.deviceMountActions) {
-    if (deviceMountAction.parentPlatform) {
-      const deviceId = deviceMountAction.device.id
-      const parentPlatform = deviceMountAction.parentPlatform
-      const parentPlatformId = parentPlatform.id
-      if (deviceId && parentPlatformId) {
-        if (!devicesByDirectParentPlatformId[parentPlatformId]) {
-          devicesByDirectParentPlatformId[parentPlatformId] = new Set()
-        }
-        devicesByDirectParentPlatformId[parentPlatformId].add(deviceId)
-      }
-    }
-  }
-  return devicesByDirectParentPlatformId
 }

@@ -33,17 +33,61 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild />
+  <div>
+    <ProgressIndicator
+      v-model="isLoading"
+    />
+    <NuxtChild />
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
 
-@Component({})
+import {
+  LoadDeviceMountActionsAction,
+  LoadPlatformMountActionsAction
+} from '@/store/configurations'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+@Component({
+  components: {
+    ProgressIndicator
+  },
+  methods: mapActions('configurations', [
+    'loadDeviceMountActions',
+    'loadPlatformMountActions'
+  ])
+})
 export default class ConfigurationActions extends Vue {
+  private isLoading = false
+
+  loadDeviceMountActions!: LoadDeviceMountActionsAction
+  loadPlatformMountActions!: LoadPlatformMountActionsAction
+
   head () {
     return {
       titleTemplate: 'Actions - %s'
+    }
+  }
+
+  get configurationId (): string {
+    return this.$route.params.configurationId
+  }
+
+  async fetch () {
+    try {
+      this.isLoading = true
+      await Promise.all([
+        this.loadDeviceMountActions(this.configurationId),
+        this.loadPlatformMountActions(this.configurationId)
+      ])
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch actions')
+    } finally {
+      this.isLoading = false
     }
   }
 }

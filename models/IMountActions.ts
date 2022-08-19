@@ -31,13 +31,9 @@
  */
 
 import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
 
 export interface IMountActions {
   platformMountActions: PlatformMountAction[]
-  platformUnmountActions: PlatformUnmountAction[]
   deviceMountActions: DeviceMountAction[]
-  deviceUnmountActions: DeviceUnmountAction[]
 }

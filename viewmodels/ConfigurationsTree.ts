@@ -38,6 +38,7 @@
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
+import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 
 /**
  * a class to iterate over the direct children of a ConfigurationsTree
@@ -96,9 +97,9 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   }
 
   /**
-   * returns an Array of ConfigurationsTreeNode
+   * returns an (nested) Array of ConfigurationsTreeNodes
    *
-   * @return {ConfigurationsTreeNode[]} an Array of ConfigurationsTreeNodes
+   * @return {ConfigurationsTreeNode[]} an (nested) Array of ConfigurationsTreeNodes
    */
   toArray (): ConfigurationsTreeNode[] {
     return this.tree
@@ -109,6 +110,9 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
       someObject.toArray().map((e) => {
         if (e.isPlatform()) {
           return PlatformNode.createFromObject(e as PlatformNode)
+        }
+        if (e.isConfiguration()) {
+          return ConfigurationNode.createFromObject(e as ConfigurationNode)
         }
         return DeviceNode.createFromObject(e as DeviceNode)
       })
@@ -315,18 +319,15 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   }
 
   /**
-   * returns a list with all the device nodes in the tree.
-   * @returns {DeviceNode[]} the flat list of all the device nodes in the hierarchy
+   * returns a flat list with all the nodes in the tree.
+   * @returns {ConfigurationTreeNode[]} the flat list of all the nodes in the hierarchy
    */
-  getAllDeviceNodesAsList (): DeviceNode[] {
-    const result: DeviceNode[] = []
+  getAllNodesAsList (): ConfigurationsTreeNode[] {
+    const result: ConfigurationsTreeNode[] = []
     const visitAndAddToResult = (node: ConfigurationsTreeNode) => {
-      if (node.isDevice()) {
-        const deviceNode = node as DeviceNode
-        result.push(deviceNode)
-      } else if (node.isPlatform()) {
-        const platformNode = node as PlatformNode
-        for (const innerNode of platformNode.children) {
+      result.push(node)
+      if (node.canHaveChildren() && 'children' in node) {
+        for (const innerNode of node.children) {
           visitAndAddToResult(innerNode)
         }
       }
@@ -334,6 +335,24 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
     for (const node of this) {
       visitAndAddToResult(node)
     }
+    return result
+  }
+
+  /**
+   * returns a list with all the device nodes in the tree.
+   * @returns {DeviceNode[]} the flat list of all the device nodes in the hierarchy
+   */
+  getAllDeviceNodesAsList (): DeviceNode[] {
+    const result: DeviceNode[] = this.getAllNodesAsList().filter(i => i.isDevice()) as DeviceNode[]
+    return result
+  }
+
+  /**
+   * returns a list with all the platform nodes in the tree.
+   * @returns {PlatformNode[]} the flat list of all the platform nodes in the hierarchy
+   */
+  getAllPlatformNodesAsList (): PlatformNode[] {
+    const result: PlatformNode[] = this.getAllNodesAsList().filter(i => i.isPlatform()) as PlatformNode[]
     return result
   }
 

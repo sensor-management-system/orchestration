@@ -40,14 +40,11 @@ import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityWithOptionalId,
   IJsonApiEntityWithoutDetails,
-  IJsonApiEntityWithOptionalAttributes
+  IJsonApiEntityWithOptionalAttributes,
+  IJsonApiRelationships
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
-import { PlatformMountActionSerializer } from '@/serializers/jsonapi/PlatformMountActionSerializer'
-import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/PlatformUnmountActionSerializer'
-import { DeviceMountActionSerializer } from '@/serializers/jsonapi/DeviceMountActionSerializer'
-import { DeviceUnmountActionSerializer } from '@/serializers/jsonapi/DeviceUnmountActionSerializer'
 import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
 import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
@@ -78,10 +75,6 @@ export class ConfigurationSerializer {
   private deviceSerializer: DeviceSerializer = new DeviceSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
   private platformSerializer: PlatformSerializer = new PlatformSerializer()
-  private platformMountActionSerializer: PlatformMountActionSerializer = new PlatformMountActionSerializer()
-  private platformUnmountActionSerializer: PlatformUnmountActionSerializer = new PlatformUnmountActionSerializer()
-  private deviceMountActionSerializer: DeviceMountActionSerializer = new DeviceMountActionSerializer()
-  private deviceUnmountActionSerializer: DeviceUnmountActionSerializer = new DeviceUnmountActionSerializer()
   private staticLocationBeginActionSerializer: StaticLocationBeginActionSerializer = new StaticLocationBeginActionSerializer()
   private staticLocationEndActionSerializer: StaticLocationEndActionSerializer = new StaticLocationEndActionSerializer()
   private dynamicLocationBeginActionSerializer: DynamicLocationBeginActionSerializer = new DynamicLocationBeginActionSerializer()
@@ -244,34 +237,25 @@ export class ConfigurationSerializer {
       allPossibleDevices[deviceId] = device
     }
 
-    // if (relationships) {
-    //   // seems to be necessary as the pure if clause isn't recognized by typescript to avoid undefined type
-    //   const rs = relationships as IJsonApiRelationships
-    //   configuration.platformMountActions = this.platformMountActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts, allPossiblePlatforms
-    //   )
-    //   configuration.platformUnmountActions = this.platformUnmountActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts, allPossiblePlatforms
-    //   )
-    //   configuration.deviceMountActions = this.deviceMountActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts, allPossibleDevices, allPossiblePlatforms
-    //   )
-    //   configuration.deviceUnmountActions = this.deviceUnmountActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts, allPossibleDevices
-    //   )
-    //   configuration.staticLocationBeginActions = this.staticLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts
-    //   )
-    //   configuration.staticLocationEndActions = this.staticLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts
-    //   )
-    //   configuration.dynamicLocationBeginActions = this.dynamicLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts, devicePropertyLookupById
-    //   )
-    //   configuration.dynamicLocationEndActions = this.dynamicLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
-    //     rs, included, allPossibleContacts
-    //   )
-    // }
+    if (relationships) {
+      // included mount actions are not processed any more, they can be loaded
+      // seperately
+
+      // seems to be necessary as the pure if clause isn't recognized by typescript to avoid undefined type
+      const rs = relationships as IJsonApiRelationships
+      configuration.staticLocationBeginActions = this.staticLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts
+      )
+      configuration.staticLocationEndActions = this.staticLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts
+      )
+      configuration.dynamicLocationBeginActions = this.dynamicLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts, devicePropertyLookupById
+      )
+      configuration.dynamicLocationEndActions = this.dynamicLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
+        rs, included, allPossibleContacts
+      )
+    }
 
     // just pick the contact from the relationships that is referenced by the created_by user
     if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {

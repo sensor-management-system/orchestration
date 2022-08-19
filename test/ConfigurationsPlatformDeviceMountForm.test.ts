@@ -39,58 +39,239 @@ import { mount, createLocalVue } from '@vue/test-utils'
 import ConfigurationsPlatformDeviceMountForm from '@/components/ConfigurationsPlatformDeviceMountForm.vue'
 
 import { Contact } from '@/models/Contact'
-
-const contact = new Contact()
-contact.email = 'aa@bb.cc'
+import { Platform } from '@/models/Platform'
 
 Vue.use(Vuetify)
 
 describe('ConfigurationsPlatformDeviceMountForm', () => {
-  const createWrapper = () => {
-    const localVue = createLocalVue()
-    const vuetify = new Vuetify()
+  const localVue = createLocalVue()
+  let vuetify = new Vuetify()
+
+  beforeEach(() => {
+    vuetify = new Vuetify()
+  })
+
+  const createWrapper = (propsData?: any) => {
+    const platform1 = new Platform()
+    platform1.id = '1'
+    platform1.shortName = 'Platform 1'
+
+    const contact1 = new Contact()
+    contact1.id = '1'
+    contact1.givenName = 'Max'
+    contact1.familyName = 'Mustermann'
+    contact1.email = 'max@mustermann.mail'
+
+    const contact2 = new Contact()
+    contact2.id = '2'
+    contact2.givenName = 'Eva'
+    contact2.familyName = 'Musterfrau'
+    contact2.email = 'eva@musterfrau.mail'
 
     return mount(ConfigurationsPlatformDeviceMountForm, {
       localVue,
       vuetify,
       propsData: {
-        dataRoleBtn: 'add-device',
+        entity: platform1,
         readonly: false,
-        contacts: [contact],
-        currentUserMail: 'aa@bb.cc'
+        withUnmount: false,
+        contacts: [contact1, contact2],
+        currentUserMail: 'max@mustermann.mail',
+        ...propsData
       },
       data () {
         return {
-          offsetX: 1,
-          offsetY: 2,
-          offsetZ: 3,
-          contact,
-          description: 'mount description'
+          offsetX: 0,
+          offsetY: 0,
+          offsetZ: 0,
+          beginContact: contact1,
+          endContact: null,
+          beginDescription: '',
+          endDescription: ''
         }
       },
       mocks: {
         $auth: {
           user: {
-            email: 'aa@bb.cc'
+            email: 'max@mustermann.mail'
           }
         }
       }
     })
   }
 
-  it('should trigger an add event when the button is clicked', async () => {
-    const wrapper: any = createWrapper()
+  it('should display endContact and endDescription fields when an end date is given', () => {
+    const wrapper: any = createWrapper({ withUnmount: true })
+    expect(wrapper.findComponent('[data-role="select-end-contact"]').exists()).toBe(true)
+    expect(wrapper.findComponent('[data-role="textarea-end-description"]').exists()).toBe(true)
+  })
 
-    await wrapper.get('button[data-role="add-device"]').trigger('click')
+  it('should trigger an add event on creation', () => {
+    const wrapper: any = createWrapper()
     expect(wrapper.emitted('add')).toBeTruthy()
     expect(wrapper.emitted('add').length).toBe(1)
-    const addPayload = wrapper.emitted('add')[0]
+  })
+
+  it('should trigger an event when the value of offset-x changes', async () => {
+    const wrapper: any = createWrapper()
+    const newValue = 1
+    const component = await wrapper.findComponent('[data-role="textfield-offset-x"]')
+    await component.setValue(newValue)
+    expect(wrapper.vm.offsetX).toBeCloseTo(newValue)
+    expect(wrapper.emitted('add')).toBeTruthy()
+    expect(wrapper.emitted('add').length).toBe(2)
+    const addPayload = wrapper.emitted('add')[1]
     expect(addPayload.length).toEqual(1)
     const addPayloadContent = addPayload[0]
-    expect(addPayloadContent.offsetX).toEqual(1)
-    expect(addPayloadContent.offsetY).toEqual(2)
-    expect(addPayloadContent.offsetZ).toEqual(3)
-    expect(addPayloadContent.contact).toEqual(contact)
-    expect(addPayloadContent.description).toEqual('mount description')
+    expect(addPayloadContent.offsetX).toBeCloseTo(newValue)
   })
+
+  it('should trigger an event when the value of offset-y changes', async () => {
+    const wrapper: any = createWrapper()
+    const newValue = 2
+    const component = await wrapper.findComponent('[data-role="textfield-offset-y"]')
+    await component.setValue(newValue)
+    expect(wrapper.vm.offsetY).toBeCloseTo(newValue)
+    expect(wrapper.emitted('add')).toBeTruthy()
+    expect(wrapper.emitted('add').length).toBe(2)
+    const addPayload = wrapper.emitted('add')[1]
+    expect(addPayload.length).toEqual(1)
+    const addPayloadContent = addPayload[0]
+    expect(addPayloadContent.offsetY).toBeCloseTo(newValue)
+  })
+
+  it('should trigger an event when the value of offset-z changes', async () => {
+    const wrapper: any = createWrapper()
+    const newValue = 3
+    const component = await wrapper.findComponent('[data-role="textfield-offset-z"]')
+    await component.setValue(newValue)
+    expect(wrapper.vm.offsetZ).toBeCloseTo(newValue)
+    expect(wrapper.emitted('add')).toBeTruthy()
+    expect(wrapper.emitted('add').length).toBe(2)
+    const addPayload = wrapper.emitted('add')[1]
+    expect(addPayload.length).toEqual(1)
+    const addPayloadContent = addPayload[0]
+    expect(addPayloadContent.offsetZ).toBeCloseTo(newValue)
+  })
+
+  // I don't know how to test the autocomplete field. nothing works...
+
+  // it('should trigger an event when the value of beginContact changes', async () => {
+  //   const wrapper: any = createWrapper()
+  //   const contacts = wrapper.props().contacts
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   const contact2 = new Contact()
+  //   contact2.id = '2'
+  //   contact2.givenName = 'Eva'
+  //   contact2.familyName = 'Musterfrau'
+  //   contact2.email = 'eva@musterfrau.mail'
+  //   const newValue = contact2
+  //   const component = await wrapper.find('[data-role="select-begin-contact"]')
+  //   console.log(component)
+
+  //   const input = component.find('input')
+  //   console.log('input:', input)
+  //   await input.setValue(newValue)
+  //   await input.trigger('change')
+
+  //   // console.log('component.data:', component.data)
+
+  //   // component.setData({ value: newValue })
+  //   // console.log(component.data)
+
+  //   await component.trigger('change')
+  //   // await component.trigger('input')
+  //   // await wrapper.vm.add()
+
+  //   await wrapper.vm.$nextTick()
+
+  //   // expect(wrapper.vm.beginContact).toEqual(contact2)
+
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(2)
+  //   const addPayload = wrapper.emitted('add')[1]
+  //   expect(addPayload.length).toEqual(1)
+  //   console.log('addPayload:', addPayload)
+
+  //   const addPayloadContent = addPayload[0]
+  //   expect(addPayloadContent.beginContact).toEqual(newValue)
+  // })
+
+  // it('should trigger an add event when an input changes', () => {
+  //   const wrapper: any = createWrapper({ withUnmount: true })
+  //   const contacts = wrapper.props().contacts
+  //   const contact1 = wrapper.vm.beginContact
+  //   const contact2 = wrapper.props().contacts[1]
+
+  //   let addPayload, addPayloadContent
+
+  //   wrapper.findComponent('[data-role="textfield-offset-x"]').setValue('1')
+  //   expect(wrapper.vm.offsetX).toBeCloseTo(1)
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   addPayload = wrapper.emitted('add')[0]
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayloadContent = addPayload[0]
+  //   // expect(addPayloadContent.offsetX).toBe(1)
+
+  //   wrapper.findComponent('[data-role="textfield-offset-y"]').setValue('2')
+  //   expect(wrapper.vm.offsetY).toBeCloseTo(2)
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   addPayload = wrapper.emitted('add')[0]
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayloadContent = addPayload[0]
+  //   // expect(addPayloadContent.offsetY).toBe(2)
+
+  //   wrapper.findComponent('[data-role="textfield-offset-z"]').setValue('3')
+  //   expect(wrapper.vm.offsetZ).toBeCloseTo(3)
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   addPayload = wrapper.emitted('add')[0]
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayloadContent = addPayload[0]
+  //   // expect(addPayloadContent.offsetZ).toBe(3)
+  //   console.log('before begin change const', contact1._email, contact2._email)
+  //   console.log('before begin change array', contacts[0]._email, contacts[1]._email)
+  //   console.log('before begin change vm', wrapper.vm.beginContact, wrapper.vm.endContact)
+
+  //   wrapper.findComponent('[data-role="select-begin-contact"]').setValue(contact1)
+  //   expect(wrapper.vm.beginContact).toEqual(contacts[0])
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   addPayload = wrapper.emitted('add')[0]
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayloadContent = addPayload[0]
+  //   // expect(addPayloadContent.beginContact).toBe(contacts[0])
+
+  //   wrapper.findComponent('[data-role="select-end-contact"]').setValue(contact2)
+  //   expect(wrapper.vm.endContact).toEqual(contact2)
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   addPayload = wrapper.emitted('add')[0]
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayloadContent = addPayload[0]
+  //   expect(addPayloadContent.endContact).toBe(wrapper.vm.endContact)
+
+  //   // TODO: figure out why these tests dont work
+  //   wrapper.find('[data-role="textarea-begin-description"]').setValue('begin description')
+  //   expect(wrapper.vm.beginDescription).toBe('begin description')
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   addPayload = wrapper.emitted('add')[0]
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayloadContent = addPayload[0]
+  //   // expect(addPayloadContent.beginDescription).toBe(wrapper.vm.beginDescription)
+
+  //   wrapper.findComponent('[data-role="textarea-end-description"]').setValue('end description')
+  //   expect(wrapper.vm.endDescription).toBe('end description')
+  //   expect(wrapper.emitted('add')).toBeTruthy()
+  //   expect(wrapper.emitted('add').length).toBe(1)
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayload = wrapper.emitted('add')[0]
+  //   expect(addPayload.length).toEqual(1)
+  //   addPayloadContent = addPayload[0]
+  //   // expect(addPayloadContent.endDescription).toBe(wrapper.vm.endDescription)
+  // })
 })

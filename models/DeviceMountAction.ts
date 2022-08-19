@@ -40,45 +40,57 @@ export interface IDeviceMountAction {
   id: string
   device: Device
   parentPlatform: Platform | null
-  date: DateTime
+  beginDate: DateTime
+  endDate: DateTime | null
   offsetX: number
   offsetY: number
   offsetZ: number
-  contact: Contact
-  description: string
+  beginContact: Contact
+  endContact: Contact | null
+  beginDescription: string
+  endDescription: string | null
 }
 
 export class DeviceMountAction implements IDeviceMountAction {
   private _id: string = ''
   private _device: Device
   private _parentPlatform: Platform | null
-  private _date: DateTime
+  private _beginDate: DateTime
+  private _endDate: DateTime | null
   private _offsetX: number
   private _offsetY: number
   private _offsetZ: number
-  private _contact: Contact
-  private _description: string
+  private _beginContact: Contact
+  private _endContact: Contact | null
+  private _beginDescription: string
+  private _endDescription: string | null
 
   constructor (
     id: string,
     device: Device,
     parentPlatform: Platform | null,
-    date: DateTime,
+    beginDate: DateTime,
+    endDate: DateTime | null,
     offsetX: number,
     offsetY: number,
     offsetZ: number,
-    contact: Contact,
-    description: string
+    beginContact: Contact,
+    endContact: Contact | null,
+    beginDescription: string,
+    endDescription: string | null
   ) {
     this._id = id
     this._device = device
     this._parentPlatform = parentPlatform
-    this._date = date
+    this._beginDate = beginDate
+    this._endDate = endDate
     this._offsetX = offsetX
     this._offsetY = offsetY
     this._offsetZ = offsetZ
-    this._contact = contact
-    this._description = description
+    this._beginContact = beginContact
+    this._endContact = endContact
+    this._beginDescription = beginDescription
+    this._endDescription = endDescription
   }
 
   get id (): string {
@@ -97,12 +109,20 @@ export class DeviceMountAction implements IDeviceMountAction {
     return this._parentPlatform
   }
 
-  get date (): DateTime {
-    return this._date
+  get beginDate (): DateTime {
+    return this._beginDate
   }
 
-  set date (newDate: DateTime) {
-    this._date = newDate
+  set beginDate (newDate: DateTime) {
+    this._beginDate = newDate
+  }
+
+  get endDate (): DateTime | null {
+    return this._endDate
+  }
+
+  set endDate (newDate: DateTime | null) {
+    this._endDate = newDate
   }
 
   get offsetX (): number {
@@ -133,20 +153,36 @@ export class DeviceMountAction implements IDeviceMountAction {
     return true
   }
 
-  get contact (): Contact {
-    return this._contact
+  get beginContact (): Contact {
+    return this._beginContact
   }
 
-  set contact (newContact: Contact) {
-    this._contact = newContact
+  set beginContact (newContact: Contact) {
+    this._beginContact = newContact
   }
 
-  get description (): string {
-    return this._description
+  get endContact (): Contact | null {
+    return this._endContact
   }
 
-  set description (newDescription: string) {
-    this._description = newDescription
+  set endContact (newContact: Contact | null) {
+    this._endContact = newContact
+  }
+
+  get beginDescription (): string {
+    return this._beginDescription
+  }
+
+  set beginDescription (newDescription: string) {
+    this._beginDescription = newDescription
+  }
+
+  set endDescription (newDescription: string | null) {
+    this._endDescription = newDescription
+  }
+
+  get endDescription (): string | null {
+    return this._endDescription
   }
 
   static createFromObject (otherAction: IDeviceMountAction): DeviceMountAction {
@@ -154,12 +190,15 @@ export class DeviceMountAction implements IDeviceMountAction {
       otherAction.id,
       Device.createFromObject(otherAction.device),
       otherAction.parentPlatform === null ? null : Platform.createFromObject(otherAction.parentPlatform),
-      otherAction.date,
+      otherAction.beginDate,
+      otherAction.endDate === null ? null : otherAction.endDate,
       otherAction.offsetX,
       otherAction.offsetY,
       otherAction.offsetZ,
-      Contact.createFromObject(otherAction.contact),
-      otherAction.description
+      Contact.createFromObject(otherAction.beginContact),
+      otherAction.endContact === null ? null : Contact.createFromObject(otherAction.endContact),
+      otherAction.beginDescription,
+      otherAction.endDescription === null ? null : otherAction.endDescription
     )
   }
 }

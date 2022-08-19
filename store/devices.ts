@@ -33,6 +33,7 @@
 
 import { Commit, Dispatch, GetterTree, ActionTree } from 'vuex'
 
+import { DateTime } from 'luxon'
 import { RootState } from '@/store'
 
 import { Device } from '@/models/Device'
@@ -51,6 +52,7 @@ import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
 import { IDateCompareable } from '@/modelUtils/Compareables'
 
 import { IncludedRelationships } from '@/services/sms/DeviceApi'
+import { Availability } from '@/models/Availability'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -92,7 +94,8 @@ export interface DevicesState {
   deviceCustomField: CustomTextField | null
   pageNumber: number,
   pageSize: number,
-  totalPages: number
+  totalPages: number,
+  deviceAvailabilities: Availability[]
 }
 
 const state = (): DevicesState => ({
@@ -115,7 +118,8 @@ const state = (): DevicesState => ({
   deviceCustomField: null,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0],
-  totalPages: 1
+  totalPages: 1,
+  deviceAvailabilities: []
 })
 
 export type ActionsGetter = (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[]
@@ -165,6 +169,7 @@ export type LoadDeviceCalibrationActionAction = (actionId: string) => Promise<vo
 export type LoadDeviceMountActionsAction = (id: string) => Promise<void>
 export type LoadDeviceCustomFieldsAction = (id: string) => Promise<void>
 export type LoadDeviceCustomFieldAction = (id: string) => Promise<void>
+export type LoadDeviceAvailabilitiesAction = (params: {ids: (string | null)[], from: DateTime, until: DateTime | null}) => Promise<void>
 export type AddDeviceSoftwareUpdateAction = (params: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
 export type AddDeviceGenericAction = (params: { deviceId: string, genericAction: GenericAction }) => Promise<GenericAction>
 export type AddDeviceCalibrationAction = (params: { deviceId: string, calibrationAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
@@ -315,6 +320,18 @@ const actions: ActionTree<DevicesState, RootState> = {
   async loadDeviceCustomField ({ commit }: {commit: Commit}, id: string): Promise<void> {
     const deviceCustomField = await this.$api.customfields.findById(id)
     commit('setDeviceCustomField', deviceCustomField)
+  },
+  async loadDeviceAvailabilities ({ commit }: {commit: Commit}, {
+    ids,
+    from,
+    until
+  }: {
+    ids: (string|null)[];
+    from: DateTime;
+    until: DateTime | null
+  }): Promise<void> {
+    const deviceAvailabilities = await this.$api.devices.checkAvailability(ids, from, until)
+    commit('setDeviceAvailabilities', deviceAvailabilities)
   },
   addDeviceSoftwareUpdateAction (_, {
     deviceId,
@@ -562,6 +579,9 @@ const mutations = {
   },
   setDeviceCustomField (state: DevicesState, deviceCustomField: CustomTextField) {
     state.deviceCustomField = deviceCustomField
+  },
+  setDeviceAvailabilities (state: DevicesState, deviceAvailabilities: Availability[]) {
+    state.deviceAvailabilities = deviceAvailabilities
   }
 }
 

@@ -37,14 +37,29 @@ permissions and limitations under the Licence.
       hoverable
       rounded
       open-all
+      :open.sync="openNodes"
       return-object
     >
+      <template #label="{item}">
+        <div v-if="item.isDevice()">
+          Device - {{ item.unpack().device.shortName }}
+        </div>
+        <div v-if="item.isPlatform()">
+          Platform - {{ item.unpack().platform.shortName }}
+        </div>
+        <div v-if="item.isConfiguration()">
+          Configuration - {{ getConfigurationLabel(item.unpack()) }}
+        </div>
+      </template>
       <template #prepend="{ item }">
         <v-icon v-if="item.isPlatform()">
           mdi-rocket-outline
         </v-icon>
-        <v-icon v-else>
+        <v-icon v-if="item.isDevice()">
           mdi-network-outline
+        </v-icon>
+        <v-icon v-if="item.isConfiguration()">
+          mdi-file-cog
         </v-icon>
       </template>
     </v-treeview>
@@ -56,36 +71,65 @@ permissions and limitations under the Licence.
  * @file provides a component to display platforms and devices in a tree
  * @author <marc.hanisch@gfz-potsdam.de>
  */
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 
+import { Configuration } from '@/models/Configuration'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+
+import { dateToString } from '@/utils/dateHelper'
 
 /**
  * A class component to display platforms and devices in a tree
  * @extends Vue
  */
-@Component
-// @ts-ignore
+@Component({
+  computed: {
+  }
+})
 export default class ConfigurationsTreeView extends Vue {
+  private openNodes: ConfigurationsTreeNode[] = []
+
+  /**
+   * the selected node
+   */
   @Prop({
     required: true
   })
-  // @ts-ignore
-  readonly value: ConfigurationsTreeNode | null
+  readonly value!: ConfigurationsTreeNode | null
 
   /**
    * the tree
    */
   @Prop({
     required: true,
-    type: Array
+    type: Object
   })
-  // @ts-ignore
-  readonly items!: ConfigurationsTree[]
+  readonly tree!: ConfigurationsTree
+
+  created (): void {
+    this.initializeOpenNodes()
+  }
+
+  initializeOpenNodes (): void {
+    if (this.tree) {
+      this.openNodes = this.tree.getAllNodesAsList().filter(i => i.canHaveChildren() && 'children' in i && i.children.length > 0)
+    } else {
+      this.openNodes = []
+    }
+  }
 
   /**
-   * returns a list of selected notes
+   * returns the tree as a flat array of nodes
+   *
+   * @return {ConfigurationsTreeNode[]} an Array of nodes
+   */
+  get items (): ConfigurationsTreeNode[] {
+    return this.tree.toArray()
+  }
+
+  /**
+   * returns a list of selected nodes
    *
    * notice that in this component the selection of only one node is supported
    * so this method returns an array with 0 or 1 items
@@ -111,5 +155,31 @@ export default class ConfigurationsTreeView extends Vue {
     const node: ConfigurationsTreeNode | null = nodesArray[0] ?? null
     this.$emit('input', node)
   }
+
+  getConfigurationLabel (config: Configuration): string {
+    let label = config.label
+    if (config.startDate) {
+      label += ' (' + dateToString(config.startDate)
+      if (config.endDate) {
+        label += ' - ' + dateToString(config.endDate)
+      }
+      label += ')'
+    }
+    return label
+  }
+
+  @Watch('tree', {
+    immediate: true,
+    deep: true
+  })
+  onTreeChanged () {
+    this.initializeOpenNodes()
+  }
 }
 </script>
+
+<style scoped>
+.disabled {
+  text-decoration: line-through;
+}
+</style>

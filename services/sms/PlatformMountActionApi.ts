@@ -71,4 +71,19 @@ export class PlatformMountActionApi {
     // once it is necessary
     return response.data.id
   }
+
+  async getRelatedActions (configurationId: string) {
+    const url = '/configurations/' + configurationId + '/platform-mount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'begin_contact',
+        'end_contact',
+        'parent_platform',
+        'platform'
+      ].join(',')
+    }
+    const response = await this.axiosApi.get(url, { params })
+    return response.data
+  }
 }

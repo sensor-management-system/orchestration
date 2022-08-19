@@ -56,7 +56,7 @@ const contact = new Contact()
 const date = DateTime.utc(2020, 2, 3, 0, 0, 0, 0)
 
 describe('ConfigurationsTreeView', () => {
-  const createWrapper = (value: ConfigurationsTree, selected: ConfigurationsTreeNode|null = null) => {
+  const createWrapper = (tree: ConfigurationsTree, value: ConfigurationsTreeNode | null = null) => {
     const localVue = createLocalVue()
     const vuetify = new Vuetify()
 
@@ -65,7 +65,7 @@ describe('ConfigurationsTreeView', () => {
       vuetify,
       propsData: {
         value,
-        selected
+        tree
       }
     })
   }
@@ -84,9 +84,12 @@ describe('ConfigurationsTreeView', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'Platform mount',
+      endDescription: ''
     }))
     node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -95,9 +98,12 @@ describe('ConfigurationsTreeView', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'Device mount',
+      endDescription: ''
     })))
 
     const tree = ConfigurationsTree.fromArray([node])
@@ -120,9 +126,12 @@ describe('ConfigurationsTreeView', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'Platform mount',
+      endDescription: ''
     }))
     node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -131,9 +140,12 @@ describe('ConfigurationsTreeView', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'Device mount',
+      endDescription: ''
     })))
 
     const tree = ConfigurationsTree.fromArray([node])
@@ -141,10 +153,10 @@ describe('ConfigurationsTreeView', () => {
     const wrapper: any = createWrapper(tree, node as ConfigurationsTreeNode)
     // the used v-treeview requires an array of node ids
     expect(wrapper.vm.selectedNodeSingletonList).toHaveLength(1)
-    expect(wrapper.vm.selectedNodeSingletonList[0]).toEqual(node.id)
+    expect(wrapper.vm.selectedNodeSingletonList[0]).toEqual(node)
   })
 
-  it('should trigger a select event when a node is selected', () => {
+  it('should trigger an input event when a node is selected', () => {
     const platform = new Platform()
     platform.id = '1'
     platform.shortName = 'a platform'
@@ -158,9 +170,12 @@ describe('ConfigurationsTreeView', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'Platform mount',
+      endDescription: ''
     }))
     node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -169,19 +184,22 @@ describe('ConfigurationsTreeView', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'Device mount',
+      endDescription: ''
     })))
 
     const tree = ConfigurationsTree.fromArray([node])
 
     const wrapper: any = createWrapper(tree)
     // the used v-treeview requires an array of node ids
-    wrapper.vm.selectedNodeSingletonList = [node.id]
+    wrapper.vm.selectedNodeSingletonList = [node]
 
-    expect(wrapper.emitted().select).toBeTruthy()
-    expect(wrapper.emitted().select.length).toBe(1)
-    expect(wrapper.emitted().select[0]).toEqual([node])
+    expect(wrapper.emitted().input).toBeTruthy()
+    expect(wrapper.emitted().input.length).toBe(1)
+    expect(wrapper.emitted().input[0]).toEqual([node])
   })
 })

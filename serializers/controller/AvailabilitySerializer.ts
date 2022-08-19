@@ -3,9 +3,10 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -29,22 +30,29 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-
-import { DateTime } from 'luxon'
-import { PlatformUnmountActionBasicData } from '@/models/basic/PlatformUnmountActionBasicData'
+import { Availability } from '@/models/Availability'
 
 import {
-  IJsonApiEntityWithOptionalAttributes
+  IJsonApiEntityListEnvelope,
+  IJsonApiAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
+import { stringToDate } from '@/utils/dateHelper'
 
-export class PlatformUnmountActionBasicDataSerializer {
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): PlatformUnmountActionBasicData {
-    const attributes = jsonApiData.attributes
+export class AvailabilitySerializer {
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Availability[] {
+    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel.bind(this))
+  }
 
-    return PlatformUnmountActionBasicData.createFromObject({
-      id: jsonApiData.id || '',
-      description: attributes?.description || '',
-      date: DateTime.fromISO(attributes?.end_date, { zone: 'UTC' })
-    })
+  convertJsonApiDataToModel (jsonApiData: IJsonApiAttributes): Availability {
+    const newAvailability = new Availability()
+    newAvailability.id = jsonApiData.id
+    newAvailability.available = jsonApiData.available
+    if (!jsonApiData.available) {
+      newAvailability.beginDate = stringToDate(jsonApiData.begin_date)
+      newAvailability.endDate = stringToDate(jsonApiData.end_date)
+      newAvailability.configurationID = jsonApiData.configuration
+    }
+
+    return Availability.createFromObject(newAvailability)
   }
 }

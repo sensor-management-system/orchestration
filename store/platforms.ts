@@ -32,6 +32,7 @@
  */
 import { Commit, Dispatch, GetterTree, ActionTree } from 'vuex'
 
+import { DateTime } from 'luxon'
 import { RootState } from '@/store'
 
 import { Platform } from '@/models/Platform'
@@ -51,6 +52,7 @@ import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 
 import { IncludedRelationships } from '@/services/sms/PlatformApi'
 import { PermissionGroup } from '@/models/PermissionGroup'
+import { Availability } from '@/models/Availability'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -87,7 +89,8 @@ export interface PlatformsState {
   searchText: string | null
   pageNumber: number,
   pageSize: number,
-  totalPages: number
+  totalPages: number,
+  platformAvailabilities: Availability[]
 }
 
 const state = (): PlatformsState => ({
@@ -110,7 +113,8 @@ const state = (): PlatformsState => ({
   searchText: null,
   totalPages: 1,
   pageNumber: 1,
-  pageSize: PAGE_SIZES[0]
+  pageSize: PAGE_SIZES[0],
+  platformAvailabilities: []
 })
 
 export type SearchParamsGetter = (isLoggedIn: boolean) => IPlatformSearchParams
@@ -163,6 +167,8 @@ export type LoadPlatformSoftwareUpdateActionsAction = (id: string) => Promise<vo
 export type LoadPlatformMountActionsAction = (id: string) => Promise<void>
 export type LoadPlatformGenericActionAction = (actionId: string) => Promise<void>
 export type LoadPlatformSoftwareUpdateActionAction = (actionId: string) => Promise<void>
+export type LoadPlatformAvailabilitiesAction = (params: {ids: (string | null)[], from: DateTime, until: DateTime | null}) => Promise<void>
+
 export type AddPlatformContactRoleAction = (params: {platformId: string, contactRole: ContactRole}) => Promise<void>
 export type RemovePlatformContactRoleAction = (params: {platformContactRoleId: string }) => Promise<void>
 export type AddPlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
@@ -283,6 +289,18 @@ const actions: ActionTree<PlatformsState, RootState> = {
   async loadPlatformSoftwareUpdateAction ({ commit }: { commit: Commit }, actionId: string): Promise<void> {
     const platformSoftwareUpdateAction = await this.$api.platformSoftwareUpdateActions.findById(actionId)
     commit('setPlatformSoftwareUpdateAction', platformSoftwareUpdateAction)
+  },
+  async loadPlatformAvailabilities ({ commit }: {commit: Commit}, {
+    ids,
+    from,
+    until
+  }: {
+    ids: (string|null)[];
+    from: DateTime;
+    until: DateTime | null
+  }): Promise<void> {
+    const platformAvailabilities = await this.$api.platforms.checkAvailability(ids, from, until)
+    commit('setPlatformAvailabilities', platformAvailabilities)
   },
   addPlatformContactRole (_: {}, { platformId, contactRole }: {platformId: string, contactRole: ContactRole}): Promise<string> {
     return this.$api.platforms.addContact(platformId, contactRole)
@@ -463,6 +481,9 @@ const mutations = {
   },
   setSearchText (state: PlatformsState, searchText: string|null) {
     state.searchText = searchText
+  },
+  setPlatformAvailabilities (state: PlatformsState, platformAvailabilities: Availability[]) {
+    state.platformAvailabilities = platformAvailabilities
   }
 
 }

@@ -46,6 +46,7 @@ export class DynamicLocationEndAction implements IDynamicLocationEndAction {
   private _endDate: DateTime | null = null
   private _description: string = ''
   private _contact: Contact | null = null
+  readonly _type: string = 'dynamicEnd'
 
   get id (): string {
     return this._id
@@ -77,6 +78,10 @@ export class DynamicLocationEndAction implements IDynamicLocationEndAction {
 
   set contact (newContact: Contact | null) {
     this._contact = newContact
+  }
+
+  get type (): string {
+    return this._type
   }
 
   static createFromObject (someObject: IDynamicLocationEndAction): DynamicLocationEndAction {

@@ -33,7 +33,7 @@ permissions and limitations under the Licence.
   <base-expandable-list-item
     expandable-color="grey lighten-5"
   >
-    <template #header>
+    <template v-if="!hideHeader" #header>
       <div :class="'mr-1 text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
         {{ getType() }}
       </div>
@@ -255,6 +255,12 @@ export default class PlatformsListItem extends Vue {
     type: Object
   })
   private platform!: Platform
+
+  @Prop({
+    type: Boolean,
+    default: false
+  })
+  private hideHeader!: boolean
 
   public readonly NO_TYPE: string = 'Unknown type'
 

@@ -3,9 +3,10 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -31,68 +32,31 @@
  */
 import { DateTime } from 'luxon'
 
-import { IJsonApiRelationships, IJsonApiEntityWithOptionalAttributes, IJsonApiEntityWithoutDetailsDataDictList, IJsonApiEntityWithoutDetails, IJsonApiEntityWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiRelationships,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityListEnvelope
+} from '@/serializers/jsonapi/JsonApiTypes'
+
+import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
+import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
+import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
 
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Platform } from '@/models/Platform'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
 
 export class DeviceMountActionSerializer {
-  convertJsonApiRelationshipsModelList (
-    relationships: IJsonApiRelationships,
-    included: IJsonApiEntityWithOptionalAttributes[],
-    possibleContacts: {[key: string]: Contact},
-    possibleDevices: {[key: string]: Device},
-    possiblePlatforms: {[key: string]: Platform}
-  ): DeviceMountAction[] {
-    const deviceMountActionIds = []
-    if (relationships.device_mount_actions) {
-      const deviceMountActionObject = relationships.device_mount_actions as IJsonApiEntityWithoutDetailsDataDictList
-      if (deviceMountActionObject.data && deviceMountActionObject.data.length > 0) {
-        for (const relationShipDeviceMountActionData of deviceMountActionObject.data) {
-          const deviceMountActionId = relationShipDeviceMountActionData.id
-          deviceMountActionIds.push(deviceMountActionId)
-        }
-      }
-    }
+  private contactSerializer: ContactSerializer
+  private deviceSerializer: DeviceSerializer
+  private platformSerializer: PlatformSerializer
 
-    const result = []
-    if (included && included.length > 0) {
-      for (const includedEntry of included) {
-        if (includedEntry.type === 'device_mount_action') {
-          if (deviceMountActionIds.includes(includedEntry.id) && includedEntry.relationships) {
-            if (includedEntry.attributes) {
-              const deviceRelationshipData = includedEntry.relationships.device.data as IJsonApiEntityWithoutDetails
-              const device = possibleDevices[deviceRelationshipData.id]
-              let parentPlatform = null
-              if (includedEntry.relationships.parent_platform &&
-                includedEntry.relationships.parent_platform.data &&
-                (includedEntry.relationships.parent_platform.data as IJsonApiEntityWithoutDetails).id
-              ) {
-                const parentPlatformRelationshipData = includedEntry.relationships.parent_platform.data as IJsonApiEntityWithoutDetails
-                parentPlatform = possiblePlatforms[parentPlatformRelationshipData.id]
-              }
-              const contactRelationshipData = includedEntry.relationships.contact.data as IJsonApiEntityWithoutDetails
-              const deviceMountAction = DeviceMountAction.createFromObject({
-                id: includedEntry.id || '',
-                offsetX: includedEntry.attributes.offset_x,
-                offsetY: includedEntry.attributes.offset_y,
-                offsetZ: includedEntry.attributes.offset_z,
-                description: includedEntry.attributes.description,
-                date: DateTime.fromISO(includedEntry.attributes.begin_date, { zone: 'UTC' }),
-                device,
-                parentPlatform,
-                contact: possibleContacts[contactRelationshipData.id]
-              })
-              result.push(deviceMountAction)
-            }
-          }
-        }
-      }
-    }
-
-    return result
+  constructor () {
+    this.contactSerializer = new ContactSerializer()
+    this.deviceSerializer = new DeviceSerializer()
+    this.platformSerializer = new PlatformSerializer()
   }
 
   convertModelToJsonApiData (configurationId: string, deviceMountAction: DeviceMountAction): IJsonApiEntityWithOptionalId {
@@ -102,8 +66,10 @@ export class DeviceMountActionSerializer {
         offset_x: deviceMountAction.offsetX,
         offset_y: deviceMountAction.offsetY,
         offset_z: deviceMountAction.offsetZ,
-        description: deviceMountAction.description,
-        begin_date: deviceMountAction.date.setZone('UTC').toISO()
+        begin_description: deviceMountAction.beginDescription,
+        end_description: deviceMountAction.endDescription,
+        begin_date: deviceMountAction.beginDate.setZone('UTC').toISO(),
+        end_date: deviceMountAction.endDate ? deviceMountAction.endDate.setZone('UTC').toISO() : null
       },
       relationships: {
         device: {
@@ -112,17 +78,27 @@ export class DeviceMountActionSerializer {
             id: deviceMountAction.device.id
           }
         },
-        contact: {
+        begin_contact: {
           data: {
             type: 'contact',
-            id: deviceMountAction.contact.id
+            id: deviceMountAction.beginContact.id
           }
         },
+
         configuration: {
           data: {
             type: 'configuration',
             id: configurationId
           }
+        }
+      }
+
+    }
+    if (deviceMountAction.endContact) {
+      data.relationships.end_contact = {
+        data: {
+          type: 'contact',
+          id: deviceMountAction.endContact ? deviceMountAction.endContact.id : null
         }
       }
     }
@@ -141,5 +117,93 @@ export class DeviceMountActionSerializer {
     }
 
     return data
+  }
+
+  convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): DeviceMountAction[] {
+    const data = jsonApiObjectList.data
+
+    const contactLookup: {[idx: string]: Contact} = {}
+    const platformLookup: {[idx: string]: Platform} = {}
+    const deviceLookup: {[idx: string]: Device} = {}
+
+    for (const included of jsonApiObjectList.included || []) {
+      if (included.type === 'contact') {
+        const contact = this.contactSerializer.convertJsonApiDataToModel(included)
+        if (contact.id !== null) {
+          contactLookup[contact.id] = contact
+        }
+      } else if (included.type === 'platform') {
+        const platform = this.platformSerializer.convertJsonApiDataToModel(included, [])
+        if (platform.platform.id !== null) {
+          platformLookup[platform.platform.id] = platform.platform
+        }
+      } else if (included.type === 'device') {
+        const device = this.deviceSerializer.convertJsonApiDataToModel(included, [])
+        if (device.device.id !== null) {
+          deviceLookup[device.device.id] = device.device
+        }
+      }
+    }
+
+    const result = []
+
+    for (const deviceMountActionPayload of data) {
+      const attributes = deviceMountActionPayload.attributes
+
+      const relationships = deviceMountActionPayload.relationships as IJsonApiRelationships
+
+      // device is mandatory
+      const deviceRelationship = relationships.device as IJsonApiRelationships
+      const deviceData = deviceRelationship.data as IJsonApiEntityWithoutDetails
+      const deviceId = deviceData.id
+      const device = deviceLookup[deviceId]
+
+      // beginContact is mandatory
+      const beginContactRelationship = relationships.begin_contact as IJsonApiRelationships
+      const beginContactData = beginContactRelationship.data as IJsonApiEntityWithoutDetails
+      const beginContactId = beginContactData.id
+      const beginContact = contactLookup[beginContactId]
+
+      let endContactId = null
+      if (relationships.end_contact && relationships.end_contact.data) {
+        const endContactData = relationships.end_contact.data as IJsonApiEntityWithoutDetails
+        endContactId = endContactData.id
+      }
+      let endContact = null
+      if (endContactId !== null && contactLookup[endContactId]) {
+        endContact = contactLookup[endContactId]
+      }
+
+      let parentPlatformId = null
+      if (relationships.parent_platform && relationships.parent_platform.data) {
+        const parentPlatformData = relationships.parent_platform.data as IJsonApiEntityWithoutDetails
+        parentPlatformId = parentPlatformData.id
+      }
+      let parentPlatform = null
+      if (parentPlatformId !== null && platformLookup[parentPlatformId]) {
+        parentPlatform = platformLookup[parentPlatformId]
+      }
+
+      const deviceMountAction = new DeviceMountAction(
+        deviceMountActionPayload.id || '',
+        device,
+        parentPlatform,
+        DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' }),
+        attributes?.end_date ? DateTime.fromISO(attributes?.end_date, { zone: 'UTC' }) : null,
+        attributes?.offset_x || 0,
+        attributes?.offset_y || 0,
+        attributes?.offset_z || 0,
+        beginContact,
+        endContact,
+        attributes?.begin_description || '',
+        attributes?.end_description || ''
+      )
+
+      result.push(
+        deviceMountAction
+      )
+    }
+
+    return result
   }
 }
