@@ -69,6 +69,7 @@ class PlatformMountActionSchema(Schema):
         schema="ContactSchema",
         type_="contact",
         id_field="id",
+        allow_none=True,
     )
     created_by = Relationship(
         related_view="api.user_detail",
@@ -157,6 +158,7 @@ class DeviceMountActionSchema(Schema):
         schema="ContactSchema",
         type_="contact",
         id_field="id",
+        allow_none=True,
     )
     created_by = Relationship(
         related_view="api.user_detail",

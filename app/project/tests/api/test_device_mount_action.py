@@ -705,6 +705,41 @@ class TestDeviceMountAction(BaseTestCase):
         data = response.json["data"]
         self.assertEqual(data["attributes"]["end_date"], end_date.isoformat())
 
+    def test_update_device_mount_and_unmount_set_end_contact_to_none(self):
+        """Make sure end contact can be reset to none."""
+        mount_device_action = add_mount_device_action_model()
+        contact = Contact(given_name="d", family_name="u", email="du@localhost")
+        mount_device_action.end_contact = contact
+        # Make sure we don't have to deal with the parent platform mount
+        # at this moment.
+        mount_device_action.parent_platform = None
+        db.session.add_all([mount_device_action, contact])
+        db.session.commit()
+        end_date = mount_device_action.begin_date + relativedelta(years=+1)
+        mount_device_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_device_action.id,
+                "attributes": {"end_date": end_date.isoformat()},
+                "relationships": {
+                    "end_contact": {
+                        "data": None,
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{mount_device_action.id}",
+                data=json.dumps(mount_device_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        self.assertEqual(data["attributes"]["end_date"], end_date.isoformat())
+
     def test_update_device_mount_and_change_the_time_intervall(self):
         """Make sure device con not be unmounted."""
         d = Device(

@@ -40,6 +40,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         schema="ContactSchema",
         type_="contact",
         id_field="id",
+        allow_none=True,
     )
     configuration = Relationship(
         related_view="api.configuration_detail",

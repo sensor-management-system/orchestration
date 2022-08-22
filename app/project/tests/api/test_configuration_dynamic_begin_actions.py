@@ -135,7 +135,9 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=self.url, data_object=data, object_type=self.object_type,
+            url=self.url,
+            data_object=data,
+            object_type=self.object_type,
         )
 
     def prepare_request_data_with_config(self, description):
@@ -217,12 +219,62 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             object_type=self.object_type,
         )
 
+    def test_update_configuration_dynamic_begin_location_action_set_end_contact_to_none(
+        self,
+    ):
+        """Ensure that we can reset the end_contact if necessary."""
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model()
+        userinfo = generate_userinfo_data()
+        contact_data = {
+            "data": {
+                "type": "contact",
+                "attributes": {
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
+                    "website": fake.url(),
+                },
+            }
+        }
+        contact_result = super().add_object(
+            url=self.contact_url, data_object=contact_data, object_type="contact"
+        )
+        contact = (
+            db.session.query(Contact).filter_by(id=contact_result["data"]["id"]).one()
+        )
+        dynamic_location_begin_action.end_contact = contact
+        db.session.add_all([dynamic_location_begin_action, contact])
+        db.session.commit()
+        new_data = {
+            "data": {
+                "type": self.object_type,
+                "id": dynamic_location_begin_action.id,
+                "attributes": {
+                    "end_description": "stopped",
+                    "end_date": "2021-10-22T10:00:50.542Z",
+                },
+                "relationships": {
+                    "end_contact": {
+                        "data": None,
+                    },
+                },
+            }
+        }
+
+        _ = super().update_object(
+            url=f"{self.url}/{dynamic_location_begin_action.id}",
+            data_object=new_data,
+            object_type=self.object_type,
+        )
+
     def test_delete_configuration_dynamic_begin_location_action(self):
         """Ensure a configuration_dynamic_begin_location_action can be deleted"""
 
         static_location_begin_action = add_dynamic_location_begin_action_model()
 
-        _ = super().delete_object(url=f"{self.url}/{static_location_begin_action.id}",)
+        _ = super().delete_object(
+            url=f"{self.url}/{static_location_begin_action.id}",
+        )
 
     def test_filtered_by_configuration(self):
         """Ensure that filter by a specific configuration works."""
