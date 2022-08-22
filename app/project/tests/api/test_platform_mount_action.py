@@ -472,6 +472,35 @@ class TestPlatformMountAction(BaseTestCase):
             object_type=self.object_type,
         )
 
+    def test_update_platform_mount_action_set_end_contact_to_none(self):
+        """Ensure we can set the end contact back to none."""
+        mount_platform_action = add_mount_platform_action_model()
+        contact = Contact(given_name="d", family_name="u", email="du@localhost")
+        mount_platform_action.end_contact = contact
+        # Don't deal with the constraints for a platform mount for this test.
+        mount_platform_action.parent_platform = None
+        db.session.add_all([mount_platform_action, contact])
+        db.session.commit()
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_platform_action.id,
+                "attributes": {
+                    "begin_description": "updated",
+                },
+                "relationships": {
+                    "end_contact": {
+                        "data": None,
+                    }
+                },
+            }
+        }
+        _ = super().update_object(
+            url=f"{self.url}/{mount_platform_action.id}",
+            data_object=mount_platform_action_updated,
+            object_type=self.object_type,
+        )
+
     def test_fail_delete_platform_mount_action(self):
         """Fail to delete PlatformMountAction when not logged in."""
         mount_platform_action = add_mount_platform_action_model()

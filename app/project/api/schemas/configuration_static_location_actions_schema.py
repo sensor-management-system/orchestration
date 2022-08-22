@@ -43,6 +43,7 @@ class ConfigurationStaticLocationBeginActionSchema(Schema):
         schema="ContactSchema",
         type_="contact",
         id_field="id",
+        allow_none=True,
     )
 
     configuration = Relationship(
