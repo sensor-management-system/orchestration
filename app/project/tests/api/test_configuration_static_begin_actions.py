@@ -1,7 +1,7 @@
 import json
 
 from project import base_url, db
-from project.api.models import Contact
+from project.api.models import Configuration, Contact
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configuration_static_action_model import (
     add_static_location_begin_action_model,
@@ -46,10 +46,20 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             "test configuration_static_location_begin_action"
         )
 
-        _ = super().add_object(
+        result = super().add_object(
             url=self.url,
             data_object=data,
             object_type=self.object_type,
+        )
+
+        configuration_id = result["data"]["relationships"]["configuration"]["data"][
+            "id"
+        ]
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(
+            configuration.update_description, "create;static location action"
         )
 
     def prepare_request_data(self, description):
@@ -124,10 +134,19 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             }
         }
 
-        _ = super().update_object(
+        result = super().update_object(
             url=f"{self.url}/{static_location_begin_action.id}",
             data_object=new_data,
             object_type=self.object_type,
+        )
+        configuration_id = result["data"]["relationships"]["configuration"]["data"][
+            "id"
+        ]
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(
+            configuration.update_description, "update;static location action"
         )
 
     def test_update_configuration_static_begin_location_action_set_end_contact_to_none(
@@ -183,11 +202,17 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
 
     def test_delete_configuration_static_begin_location_action(self):
         """Ensure a configuration_static_begin_location_action can be deleted"""
-
         static_location_begin_action = add_static_location_begin_action_model()
+        configuration_id = static_location_begin_action.configuration_id
 
         _ = super().delete_object(
             url=f"{self.url}/{static_location_begin_action.id}",
+        )
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(
+            configuration.update_description, "delete;static location action"
         )
 
     def test_filtered_by_configuration(self):

@@ -24,7 +24,7 @@ class AuditMixin:
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # define 'updated at' to be populated with datetime.utcnow()
-    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     @declared_attr
     def created_by_id(self):

@@ -3,8 +3,7 @@ import json
 import os
 from unittest.mock import patch
 
-from project import base_url
-from project.api.helpers.errors import UnauthorizedError
+from project import base_url, idl
 from project.api.models.base_model import db
 from project.api.models.customfield import CustomField
 from project.api.models.device import Device
@@ -12,6 +11,7 @@ from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device_property import DeviceProperty
 from project.tests.base import (
     BaseTestCase,
+    create_token,
     fake,
     generate_userinfo_data,
     test_file_path,
@@ -25,6 +25,8 @@ from project.tests.models.test_generic_actions_models import (
 from project.tests.models.test_software_update_actions_model import (
     add_device_software_update_action_model,
 )
+from project.tests.models.test_user_model import add_user
+from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -35,6 +37,7 @@ class TestDeviceService(BaseTestCase):
     contact_url = base_url + "/contacts"
     object_type = "device"
     json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
+    properties_url = base_url + "/device-properties"
 
     def test_get_devices(self):
         """Ensure the GET /devices route behaves correctly."""
@@ -318,3 +321,194 @@ class TestDeviceService(BaseTestCase):
         _ = super().delete_object(
             url=f"{self.device_url}/{device_id}",
         )
+
+    def test_update_description_after_creation(self):
+        """Make sure that update description field is set after post."""
+        devices_json = extract_data_from_json_file(self.json_data_url, "devices")
+
+        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
+        result = super().add_object(
+            url=self.device_url, data_object=device_data, object_type=self.object_type
+        )
+        result_id = result["data"]["id"]
+        device = db.session.query(Device).filter_by(id=result_id).first()
+
+        msg = "create;basic data"
+        self.assertEqual(msg, device.update_description)
+
+    def test_update_description_after_update(self):
+        """Make sure that update description field is updated after patch."""
+        devices_json = extract_data_from_json_file(self.json_data_url, "devices")
+
+        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
+        result = super().add_object(
+            url=self.device_url, data_object=device_data, object_type=self.object_type
+        )
+        result_id = result["data"]["id"]
+
+        user = add_user()
+        user.is_superuser = True
+        db.session.add(user)
+        db.session.commit()
+
+        with self.run_requests_as(user):
+            with self.client:
+                resp = self.client.patch(
+                    self.device_url + "/" + result_id,
+                    json={
+                        "data": {
+                            "id": result_id,
+                            "type": "device",
+                            "attributes": {
+                                "long_name": "updated long name",
+                            },
+                        }
+                    },
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+                self.assertEqual(resp.status_code, 200)
+
+        device = db.session.query(Device).filter_by(id=result_id).first()
+
+        msg = "update;basic data"
+        self.assertEqual(msg, device.update_description)
+
+    def test_update_description_after_adding_a_measured_quantity(self):
+        """Make sure that update description field is set after post of a measured quantity."""
+        user = add_user()
+        device = Device(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+            created_by=user,
+            updated_by=user,
+        )
+        db.session.add(device)
+        db.session.commit()
+
+        # Now as it is saved we can be sure that has an id
+        self.assertTrue(device.id is not None)
+
+        count_device_properties = (
+            db.session.query(DeviceProperty)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
+        )
+        # However, this new device for sure has no properties
+        self.assertEqual(count_device_properties, 0)
+
+        # Now we can write the request to add a device property
+        payload = {
+            "data": {
+                "type": "device_property",
+                "attributes": {
+                    "label": "device property1",
+                    "property_name": "device property name",
+                    "compartment_name": "climate",
+                    "sampling_media_name": "air",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        with self.client:
+            url_post = base_url + "/device-properties"
+            # You may want to look up self.add_object in the BaseTestCase
+            # and compare if something doesn't work anymore
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        # We expect that it worked and that we have a new entry
+        self.assertEqual(response.status_code, 201)
+        result_id = response.json["data"]["id"]
+        result_device = db.session.query(Device).filter_by(id=result_id).first()
+
+        msg = "create;measured quantity"
+        self.assertEqual(msg, result_device.update_description)
+        self.assertNotEqual(user.id, result_device.updated_by_id)
+
+    def test_update_description_after_deleting_a_measured_quantity(self):
+        """Make sure that update description field is set after deleting a measured quantity."""
+        user = add_user()
+        device = Device(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
+            created_by=user,
+            updated_by=user,
+        )
+        device_property = DeviceProperty(
+            label="device property1",
+            property_name="Test1",
+            device=device,
+        )
+        db.session.add_all([device, device_property])
+        db.session.commit()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.delete(
+                    self.properties_url + "/" + str(device_property.id),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 200)
+        result_device = db.session.query(Device).filter_by(id=device.id).first()
+        msg = "delete;measured quantity"
+        self.assertEqual(msg, result_device.update_description)
+        self.assertNotEqual(user.id, result_device.updated_by_id)
+
+    def test_update_description_after_updating_a_measured_quantity(self):
+        """Make sure that update description field is set after updating a measured quantity."""
+        user = add_user()
+        device = Device(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
+            created_by=user,
+            updated_by=user,
+        )
+        device_property = DeviceProperty(
+            label="device property1",
+            property_name="Test1",
+            device=device,
+        )
+        db.session.add_all([device, device_property])
+        db.session.commit()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.patch(
+                    self.properties_url + "/" + str(device_property.id),
+                    json={
+                        "data": {
+                            "id": str(device_property.id),
+                            "type": "device_property",
+                            "attributes": {"label": "updated label"},
+                        }
+                    },
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 200)
+        result_device = db.session.query(Device).filter_by(id=device.id).first()
+        msg = "update;measured quantity"
+        self.assertEqual(msg, result_device.update_description)
+        self.assertNotEqual(user.id, result_device.updated_by_id)

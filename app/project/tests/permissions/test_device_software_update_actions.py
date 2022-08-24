@@ -4,6 +4,8 @@ import json
 from unittest.mock import patch
 
 from project import base_url
+from project import db
+from project.api.models import DeviceSoftwareUpdateAction
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_software_update_actions_model import (
@@ -89,6 +91,13 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                 )
 
         self.assertEqual(response.status_code, 201)
+        result_id = response.json["data"]["id"]
+        result_action = (
+            db.session.query(DeviceSoftwareUpdateAction).filter_by(id=result_id).first()
+        )
+
+        msg = "create;software update action"
+        self.assertEqual(msg, result_action.device.update_description)
 
     def test_post_action__user_not_in_the_permission_group(self):
         """Post to device,with permission Group different from the user group."""
@@ -121,9 +130,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_software_update_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         url = f"{self.url}/{device_software_update_action.id}"
@@ -150,9 +157,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_software_update_action.id,
-                "attributes": {
-                    "description": "updated",
-                },
+                "attributes": {"description": "updated",},
             }
         }
         url = f"{self.url}/{device_software_update_action.id}"

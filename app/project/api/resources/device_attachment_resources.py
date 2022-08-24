@@ -1,10 +1,8 @@
 """Module for the device attachment list resource."""
-from flask_rest_jsonapi import ResourceDetail, JsonApiException
-from flask_rest_jsonapi import ResourceList
+from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
@@ -12,6 +10,12 @@ from ..models.device import Device
 from ..models.device_attachment import DeviceAttachment
 from ..schemas.device_attachment_schema import DeviceAttachmentSchema
 from ..token_checker import token_required
+from .base_resource import (
+    check_if_object_not_found,
+    delete_attachments_in_minio_by_url,
+    query_device_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class DeviceAttachmentList(ResourceList):
@@ -37,11 +41,27 @@ class DeviceAttachmentList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceAttachment.device_id == device_id)
         return query_
+
+    def after_post(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
+        msg = "create;attachment"
+        query_device_and_set_update_description_text(msg, result_id)
+
+        return result
 
     schema = DeviceAttachmentSchema
     decorators = (token_required,)
@@ -63,12 +83,37 @@ class DeviceAttachmentDetail(ResourceDetail):
     """
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if DeviceAttachment not found"""
+        """Return 404 Responses if DeviceAttachment not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def after_patch(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["device"]["data"]["id"]
+        msg = "update;attachment"
+        query_device_and_set_update_description_text(msg, result_id)
+        return result
+
+    def before_delete(self, args, kwargs):
+        """Set the update description for the device if we delete the attachment."""
+        device_attachment = (
+            db.session.query(DeviceAttachment).filter_by(id=kwargs["id"]).one_or_none()
+        )
+        if device_attachment is None:
+            raise ObjectNotFound("Object not found!")
+        device = device_attachment.get_parent()
+        msg = "delete;attachment"
+        set_update_description_text_and_update_by_user(device, msg)
 
     def delete(self, *args, **kwargs):
         """
-        Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
+        Try to delete an object through sqlalchemy.
+
+        If this could not be done give a ConflictError.
         :param args: args from the resource view
         :param kwargs: kwargs from the resource view
         :return:

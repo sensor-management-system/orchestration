@@ -4,14 +4,18 @@ from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
-from .base_resource import check_if_object_not_found
+from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models import Platform
 from ..models.base_model import db
 from ..models.contact_role import PlatformContactRole
 from ..schemas.role import PlatformRoleSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import (
+    check_if_object_not_found,
+    query_platform_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class PlatformRoleList(ResourceList):
@@ -42,6 +46,19 @@ class PlatformRoleList(ResourceList):
             query_ = query_.filter(PlatformContactRole.platform_id == platform_id)
         return query_
 
+    def after_post(self, result):
+        """
+        Add update description to related platform.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["platform"]["data"]["id"]
+        msg = "create;contact"
+        query_platform_and_set_update_description_text(msg, result_id)
+
+        return result
+
     schema = PlatformRoleSchema
     decorators = (token_required,)
     data_layer = {
@@ -62,6 +79,30 @@ class PlatformRoleDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if role not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def after_patch(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["platform"]["data"]["id"]
+        msg = "update;contact"
+        query_platform_and_set_update_description_text(msg, result_id)
+        return result
+
+    def before_delete(self, args, kwargs):
+        contact_role = (
+            db.session.query(PlatformContactRole)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
+        )
+        if contact_role is None:
+            raise ObjectNotFound("Object not found!")
+        platform = contact_role.get_parent()
+        msg = "delete;contact"
+        set_update_description_text_and_update_by_user(platform, msg)
 
     schema = PlatformRoleSchema
     decorators = (token_required,)

@@ -6,9 +6,7 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_property import DeviceProperty
-from project.tests.base import BaseTestCase, query_result_to_list
-from project.tests.base import create_token
-from project.tests.base import fake
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
 class TestDevicePropertyServices(BaseTestCase):
@@ -32,7 +30,11 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertTrue(device.id is not None)
 
         count_device_properties = (
-            db.session.query(DeviceProperty).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceProperty)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
         # However, this new device for sure has no properties
         self.assertEqual(count_device_properties, 0)
@@ -66,7 +68,9 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         # And we want to inspect our property list
         device_properties = query_result_to_list(
-            db.session.query(DeviceProperty).filter_by(device_id=device.id,)
+            db.session.query(DeviceProperty).filter_by(
+                device_id=device.id,
+            )
         )
         # We now have one property
         self.assertEqual(len(device_properties), 1)
@@ -80,6 +84,8 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(
             str(device_property.device_id), response.get_json()["data"]["id"]
         )
+        msg = "create;measured quantity"
+        self.assertEqual(msg, device_property.device.update_description)
 
     def test_post_device_property_api_missing_device(self):
         """Ensure that we don't add a device property with missing device."""
@@ -128,13 +134,19 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.commit()
 
         device_property1 = DeviceProperty(
-            label="device property1", property_name="device_property1", device=device1,
+            label="device property1",
+            property_name="device_property1",
+            device=device1,
         )
         device_property2 = DeviceProperty(
-            label="device property2", property_name="device_property2", device=device1,
+            label="device property2",
+            property_name="device_property2",
+            device=device1,
         )
         device_property3 = DeviceProperty(
-            label="device property3", property_name="device_property3", device=device2,
+            label="device property3",
+            property_name="device_property3",
+            device=device2,
         )
 
         db.session.add(device_property1)
@@ -175,7 +187,8 @@ class TestDevicePropertyServices(BaseTestCase):
                         "related"
                     ]
                     resp_device = self.client.get(
-                        device_link, content_type="application/vnd.api+json",
+                        device_link,
+                        content_type="application/vnd.api+json",
                     )
                     self.assertEqual(resp_device.status_code, 200)
                     self.assertEqual(
@@ -234,7 +247,9 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.commit()
 
         device_property1 = DeviceProperty(
-            label="property 1", property_name="device_property1", device=device1,
+            label="property 1",
+            property_name="device_property1",
+            device=device1,
         )
         db.session.add(device_property1)
         db.session.commit()
@@ -268,6 +283,8 @@ class TestDevicePropertyServices(BaseTestCase):
         )
         self.assertEqual(device_property_reloaded.label, "property 2")
         self.assertEqual(device_property_reloaded.device_id, device2.id)
+        msg = "update;measured quantity"
+        self.assertEqual(msg, device_property_reloaded.device.update_description)
 
     def test_delete_device_property_api(self):
         """Ensure that we can delete a device property."""
@@ -280,7 +297,9 @@ class TestDevicePropertyServices(BaseTestCase):
         db.session.add(device1)
         db.session.commit()
         device_property1 = DeviceProperty(
-            label="property 1", property_name="device_property1", device=device1,
+            label="property 1",
+            property_name="device_property1",
+            device=device1,
         )
         db.session.add(device_property1)
         db.session.commit()
@@ -343,7 +362,11 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertTrue(device.id is not None)
 
         count_device_properties = (
-            db.session.query(DeviceProperty).filter_by(device_id=device.id, ).count()
+            db.session.query(DeviceProperty)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
         self.assertEqual(count_device_properties, 0)
 

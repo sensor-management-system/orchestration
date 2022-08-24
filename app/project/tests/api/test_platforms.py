@@ -17,6 +17,7 @@ from project.tests.models.test_generic_action_attachment_model import (
 from project.tests.models.test_software_update_actions_model import (
     add_platform_software_update_action_model,
 )
+from project.tests.models.test_user_model import add_user
 from project.tests.read_from_json import extract_data_from_json_file
 
 
@@ -89,11 +90,12 @@ class TestPlatformServices(BaseTestCase):
         # and want to make sure that we can query the attachments
         # together with the platform itself.
 
-        platform = Platform(short_name="platform",
-                            is_public=True,
-                            is_private=False,
-                            is_internal=False,
-                            )
+        platform = Platform(
+            short_name="platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
         db.session.add(platform)
 
         attachment1 = PlatformAttachment(
@@ -162,11 +164,71 @@ class TestPlatformServices(BaseTestCase):
 
         platform_software_update_action = add_platform_software_update_action_model()
         platform_id = platform_software_update_action.platform_id
-        _ = super().delete_object(url=f"{self.platform_url}/{platform_id}",)
+        _ = super().delete_object(
+            url=f"{self.platform_url}/{platform_id}",
+        )
 
     def test_delete_platform_with_a_generic_action(self):
         """Ensure a platform with generic action can be deleted"""
 
         platform_software_update_action = add_generic_platform_action_attachment_model()
         platform_id = platform_software_update_action.platform_id
-        _ = super().delete_object(url=f"{self.platform_url}/{platform_id}",)
+        _ = super().delete_object(
+            url=f"{self.platform_url}/{platform_id}",
+        )
+
+    def test_update_description_after_creation(self):
+        """Make sure that update description field is set after post."""
+        platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
+
+        platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
+
+        result = super().add_object(
+            url=self.platform_url,
+            data_object=platform_data,
+            object_type=self.object_type,
+        )
+        result_id = result["data"]["id"]
+        platform = db.session.query(Platform).filter_by(id=result_id).first()
+
+        msg = "create;basic data"
+        self.assertEqual(msg, platform.update_description)
+
+    def test_update_description_after_update(self):
+        """Make sure that update description field is updated after patch."""
+        platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
+
+        platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
+
+        result = super().add_object(
+            url=self.platform_url,
+            data_object=platform_data,
+            object_type=self.object_type,
+        )
+        result_id = result["data"]["id"]
+
+        user = add_user()
+        user.is_superuser = True
+        db.session.add(user)
+        db.session.commit()
+
+        with self.run_requests_as(user):
+            with self.client:
+                resp = self.client.patch(
+                    self.platform_url + "/" + result_id,
+                    json={
+                        "data": {
+                            "id": result_id,
+                            "type": "platform",
+                            "attributes": {
+                                "long_name": "updated long name",
+                            },
+                        }
+                    },
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+                self.assertEqual(resp.status_code, 200)
+        platform = db.session.query(Platform).filter_by(id=result_id).first()
+
+        msg = "update;basic data"
+        self.assertEqual(msg, platform.update_description)

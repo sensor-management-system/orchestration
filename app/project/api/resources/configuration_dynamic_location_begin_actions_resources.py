@@ -23,7 +23,11 @@ from ..schemas.configuration_dynamic_location_actions_schema import (
     ConfigurationDynamicLocationBeginActionSchema,
 )
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found
+from .base_resource import (
+    check_if_object_not_found,
+    query_configuration_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class ConfigurationDynamicLocationBeginActionList(ResourceList):
@@ -112,6 +116,19 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
     def before_post(self, args, kwargs, data=None):
         check_post_permission_for_configuration_related_objects()
 
+    def after_post(self, result):
+        """
+        Add update description to related platform.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "create;dynamic location action"
+        query_configuration_and_set_update_description_text(msg, result_id)
+
+        return result
+
     schema = ConfigurationDynamicLocationBeginActionSchema
     decorators = (token_required,)
     data_layer = {
@@ -140,10 +157,32 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
         )
         add_updated_by_id(data)
 
+    def after_patch(self, result):
+        """
+        Add update description to related configuration.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "update;dynamic location action"
+        query_configuration_and_set_update_description_text(msg, result_id)
+        return result
+
     def before_delete(self, args, kwargs):
         check_deletion_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
+        location_action = (
+            db.session.query(ConfigurationDynamicLocationBeginAction)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
+        )
+        if location_action is None:
+            raise ObjectNotFound("Object not found!")
+        configuration = location_action.get_parent()
+        msg = "delete;dynamic location action"
+        set_update_description_text_and_update_by_user(configuration, msg)
 
     schema = ConfigurationDynamicLocationBeginActionSchema
     decorators = (token_required,)

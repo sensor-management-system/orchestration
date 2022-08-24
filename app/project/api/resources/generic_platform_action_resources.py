@@ -6,14 +6,17 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
-from ..helpers.errors import MethodNotAllowed
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.generic_actions import GenericPlatformAction
 from ..models.platform import Platform
 from ..schemas.generic_actions_schema import GenericPlatformActionSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found
+from .base_resource import (
+    check_if_object_not_found,
+    query_platform_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class GenericPlatformActionList(ResourceList):
@@ -46,6 +49,19 @@ class GenericPlatformActionList(ResourceList):
                 query_ = query_.filter(GenericPlatformAction.platform_id == platform_id)
         return query_
 
+    def after_post(self, result):
+        """
+        Add update description to related platform.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["platform"]["data"]["id"]
+        msg = "create;action"
+        query_platform_and_set_update_description_text(msg, result_id)
+
+        return result
+
     schema = GenericPlatformActionSchema
     decorators = (token_required,)
     data_layer = {
@@ -68,6 +84,30 @@ class GenericPlatformActionDetail(ResourceDetail):
     def before_patch(self, args, kwargs, data):
         """Add updated by user id to the data."""
         add_updated_by_id(data)
+
+    def after_patch(self, result):
+        """
+        Add update description to related platform.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["platform"]["data"]["id"]
+        msg = "update;action"
+        query_platform_and_set_update_description_text(msg, result_id)
+        return result
+
+    def before_delete(self, args, kwargs):
+        action = (
+            db.session.query(GenericPlatformAction)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
+        )
+        if action is None:
+            raise ObjectNotFound("Object not found!")
+        platform = action.get_parent()
+        msg = "delete;action"
+        set_update_description_text_and_update_by_user(platform, msg)
 
     schema = GenericPlatformActionSchema
     decorators = (token_required,)

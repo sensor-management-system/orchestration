@@ -37,7 +37,10 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         """Create DeviceSoftwareUpdateAction."""
         userinfo = generate_userinfo_data()
         device = Device(
-            short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+            short_name="Device 1",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
 
         contact = Contact(
@@ -64,11 +67,14 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
+        result = super().add_object(
             url=f"{self.url}?include=device,contact",
             data_object=data,
             object_type=self.object_type,
         )
+        device_id = result["data"]["relationships"]["device"]["data"]["id"]
+        device = db.session.query(Device).filter_by(id=device_id).first()
+        self.assertEqual(device.update_description, "create;software update action")
 
     def test_update_device_software_update_action(self):
         """Update DeviceSoftwareUpdateAction."""
@@ -77,19 +83,29 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_software_update_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {
+                    "description": "updated",
+                },
             }
         }
-        _ = super().update_object(
+        result = super().update_object(
             url=f"{self.url}/{device_software_update_action.id}",
             data_object=device_software_update_action_updated,
             object_type=self.object_type,
         )
+        device_id = result["data"]["relationships"]["device"]["data"]["id"]
+        device = db.session.query(Device).filter_by(id=device_id).first()
+        self.assertEqual(device.update_description, "update;software update action")
 
     def test_delete_device_software_update_action(self):
         """Delete DeviceSoftwareUpdateAction."""
         device_software_update_action = add_device_software_update_action_model()
-        _ = super().delete_object(url=f"{self.url}/{device_software_update_action.id}",)
+        device_id = device_software_update_action.device_id
+        _ = super().delete_object(
+            url=f"{self.url}/{device_software_update_action.id}",
+        )
+        device = db.session.query(Device).filter_by(id=device_id).first()
+        self.assertEqual(device.update_description, "delete;software update action")
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific devices."""
@@ -99,12 +115,18 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1", is_public=True, is_private=False, is_internal=False,
+            short_name="device1",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2", is_public=True, is_private=False, is_internal=False,
+            short_name="device2",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(device2)
 

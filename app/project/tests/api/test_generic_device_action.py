@@ -49,11 +49,14 @@ class TestGenericDeviceAction(BaseTestCase):
             idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups:
             test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
-            _ = super().add_object(
+            result = super().add_object(
                 url=f"{self.url}?include=device,contact",
                 data_object=data,
                 object_type=self.object_type,
             )
+            device_id = result["data"]["relationships"]["device"]["data"]["id"]
+            device = db.session.query(Device).filter_by(id=device_id).first()
+            self.assertEqual(device.update_description, "create;action")
 
     def make_generic_device_action_data(self):
         """
@@ -146,11 +149,14 @@ class TestGenericDeviceAction(BaseTestCase):
                     },
                 }
             }
-            _ = super().update_object(
+            result = super().update_object(
                 url=f"{self.url}/{generic_device_action['data']['id']}?include=device,contact",
                 data_object=new_data,
                 object_type=self.object_type,
             )
+            device_id = result["data"]["relationships"]["device"]["data"]["id"]
+            device = db.session.query(Device).filter_by(id=device_id).first()
+            self.assertEqual(device.update_description, "update;action")
 
     def test_delete_generic_device_action(self):
         """Ensure a generic_device_action can be deleted."""
@@ -164,6 +170,7 @@ class TestGenericDeviceAction(BaseTestCase):
                 data_object=data,
                 object_type=self.object_type,
             )
+            device_id = obj["data"]["relationships"]["device"]["data"]["id"]
             access_headers = create_token()
             with self.client:
                 response = self.client.delete(
@@ -172,6 +179,8 @@ class TestGenericDeviceAction(BaseTestCase):
                     headers=access_headers,
                 )
             self.assertEqual(response.status_code, 200)
+            device = db.session.query(Device).filter_by(id=device_id).first()
+            self.assertEqual(device.update_description, "delete;action")
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""

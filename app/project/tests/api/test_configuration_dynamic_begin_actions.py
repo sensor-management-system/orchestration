@@ -1,7 +1,7 @@
 import json
 
 from project import base_url, db
-from project.api.models import Contact, Device, DeviceProperty
+from project.api.models import Configuration, Contact, Device, DeviceProperty
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configuration_dynamic_action_model import (
     add_dynamic_location_begin_action_model,
@@ -25,7 +25,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
 
     def test_get_device_calibration_action_collection(self):
         """Test retrieve a collection of configuration_dynamic_location_action objects."""
-        static_location_begin_action = add_dynamic_location_begin_action_model(
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model(
             is_public=True, is_private=False, is_internal=False
         )
         with self.client:
@@ -33,13 +33,13 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            static_location_begin_action.begin_description,
+            dynamic_location_begin_action.begin_description,
             data["data"][0]["attributes"]["begin_description"],
         )
 
     def test_add_configuration_dynamic_begin_location_action(self):
         """
-        Ensure POST a new configuration static location begin action
+        Ensure POST a new configuration dynamic location begin action
         can be added to the database.
         """
         device = Device(
@@ -134,10 +134,19 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
+        result = super().add_object(
             url=self.url,
             data_object=data,
             object_type=self.object_type,
+        )
+        configuration_id = result["data"]["relationships"]["configuration"]["data"][
+            "id"
+        ]
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(
+            configuration.update_description, "create;dynamic location action"
         )
 
     def prepare_request_data_with_config(self, description):
@@ -181,7 +190,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
 
     def test_update_configuration_dynamic_begin_location_action(self):
         """Ensure a configuration_dynamic_begin_location_action can be updated."""
-        static_location_begin_action = add_dynamic_location_begin_action_model()
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model()
         userinfo = generate_userinfo_data()
         contact_data = {
             "data": {
@@ -200,7 +209,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         new_data = {
             "data": {
                 "type": self.object_type,
-                "id": static_location_begin_action.id,
+                "id": dynamic_location_begin_action.id,
                 "attributes": {
                     "end_description": "stopped",
                     "end_date": "2021-10-22T10:00:50.542Z",
@@ -213,10 +222,19 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             }
         }
 
-        _ = super().update_object(
-            url=f"{self.url}/{static_location_begin_action.id}",
+        result = super().update_object(
+            url=f"{self.url}/{dynamic_location_begin_action.id}",
             data_object=new_data,
             object_type=self.object_type,
+        )
+        configuration_id = result["data"]["relationships"]["configuration"]["data"][
+            "id"
+        ]
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(
+            configuration.update_description, "update;dynamic location action"
         )
 
     def test_update_configuration_dynamic_begin_location_action_set_end_contact_to_none(
@@ -270,10 +288,17 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
     def test_delete_configuration_dynamic_begin_location_action(self):
         """Ensure a configuration_dynamic_begin_location_action can be deleted"""
 
-        static_location_begin_action = add_dynamic_location_begin_action_model()
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model()
+        configuration_id = dynamic_location_begin_action.configuration_id
 
         _ = super().delete_object(
-            url=f"{self.url}/{static_location_begin_action.id}",
+            url=f"{self.url}/{dynamic_location_begin_action.id}",
+        )
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(
+            configuration.update_description, "delete;dynamic location action"
         )
 
     def test_filtered_by_configuration(self):

@@ -32,6 +32,7 @@ class ConfigurationSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     is_internal = fields.Boolean(allow_none=True)
     is_public = fields.Boolean(allow_none=True)
+    update_description = fields.Str(dump_only=True)
     src_longitude = Relationship(
         attribute="src_longitude",
         related_view="api.device_property_detail",

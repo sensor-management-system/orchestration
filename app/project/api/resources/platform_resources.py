@@ -5,21 +5,23 @@ import os
 from flask import g
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
+
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..helpers.db import save_to_db
+from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_updated_by_id
+from ..models.base_model import db
+from ..models.contact_role import PlatformContactRole
+from ..models.platform import Platform
+from ..schemas.platform_schema import PlatformSchema
+from ..token_checker import token_required
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
     get_query_with_permissions,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
-from ..helpers.errors import ConflictError
 from ...frj_csv_export.resource import ResourceList
-from ..helpers.resource_mixin import add_updated_by_id
-from ..models.contact_role import PlatformContactRole
-from ..models.platform import Platform
-from ..models.base_model import db
-from ..schemas.platform_schema import PlatformSchema
-from ..token_checker import token_required
 
 
 class PlatformList(ResourceList):
@@ -80,8 +82,13 @@ class PlatformList(ResourceList):
             role_name=role_name,
             role_uri=role_uri,
         )
-        db.session.add(contact_role)
-        db.session.commit()
+        save_to_db(contact_role)
+
+        msg = "create;basic data"
+        platform.update_description = msg
+        platform.updated_by_id = g.user.id
+
+        save_to_db(platform)
 
         return result
 
@@ -109,6 +116,24 @@ class PlatformDetail(ResourceDetail):
         """Return 404 Responses if platform not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
+    def before_patch(self, args, kwargs, data):
+        """
+        Run logic before the patch.
+
+        In this case we want to make sure that we update the updated_by_id
+        with the id of the user that run the request.
+        """
+        add_updated_by_id(data)
+
+    def after_patch(self, result):
+        result_id = result["data"]["id"]
+        platform = db.session.query(Platform).filter_by(id=result_id).first()
+        msg = "update;basic data"
+        platform.update_description = msg
+        save_to_db(platform)
+
+        return result
+
     def delete(self, *args, **kwargs):
         """
         Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
@@ -130,15 +155,6 @@ class PlatformDetail(ResourceDetail):
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
-
-    def before_patch(self, args, kwargs, data):
-        """
-        Run logic before the patch.
-
-        In this case we want to make sure that we update the updated_by_id
-        with the id of the user that run the request.
-        """
-        add_updated_by_id(data)
 
     schema = PlatformSchema
     decorators = (token_required,)

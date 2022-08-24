@@ -38,7 +38,7 @@ api.route(
     ConfigurationAttachmentList,
     "configuration_attachment_list",
     "/configuration-attachments",
-    "/configuration/<int:configuration_id>/configuration-attachments",
+    "/configurations/<int:configuration_id>/configuration-attachments",
 )
 api.route(
     ConfigurationAttachmentDetail,

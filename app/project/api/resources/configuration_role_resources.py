@@ -4,7 +4,11 @@ from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
-from .base_resource import check_if_object_not_found
+from .base_resource import (
+    check_if_object_not_found,
+    set_update_description_text_and_update_by_user,
+    query_configuration_and_set_update_description_text,
+)
 from ..auth.permission_utils import (
     check_deletion_permission_for_configuration_related_objects,
     check_patch_permission_for_configuration_related_objects,
@@ -52,6 +56,19 @@ class ConfigurationRoleList(ResourceList):
         """Run some checks to ensure we are allows to post."""
         check_post_permission_for_configuration_related_objects()
 
+    def after_post(self, result):
+        """
+        Add update description to related platform.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "create;contact"
+        query_configuration_and_set_update_description_text(msg, result_id)
+
+        return result
+
     schema = ConfigurationRoleSchema
     decorators = (token_required,)
     data_layer = {
@@ -86,11 +103,33 @@ class ConfigurationRoleDetail(ResourceDetail):
             kwargs, self._data_layer.model
         )
 
+    def after_patch(self, result):
+        """
+        Add update description to related configuration.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "update;contact"
+        query_configuration_and_set_update_description_text(msg, result_id)
+        return result
+
     def before_delete(self, args, kwargs):
         """Check that we are allowed to delete."""
         check_deletion_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
+        contact_role = (
+            db.session.query(ConfigurationContactRole)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
+        )
+        if contact_role is None:
+            raise ObjectNotFound("Object not found!")
+        configuration = contact_role.get_parent()
+        msg = "delete;contact"
+        set_update_description_text_and_update_by_user(configuration, msg)
 
     schema = ConfigurationRoleSchema
     decorators = (token_required,)

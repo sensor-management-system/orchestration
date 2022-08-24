@@ -290,6 +290,8 @@ class TestCustomFieldServices(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+        reloaded_device = db.session.query(Device).filter_by(id=device.id).first()
+        self.assertEqual(reloaded_device.update_description, "delete;custom field")
 
     def test_delete_to_a_device_with_a_permission_group_as_a_member(self):
         """Delete Custom field attached to device with same group as user

@@ -40,6 +40,7 @@ class PlatformSchema(Schema):
     is_private = fields.Boolean(allow_none=True)
     is_internal = fields.Boolean(allow_none=True)
     is_public = fields.Boolean(allow_none=True)
+    update_description = fields.Str(dump_only=True)
     created_by = Relationship(
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},

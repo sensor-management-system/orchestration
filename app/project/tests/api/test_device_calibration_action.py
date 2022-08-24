@@ -72,11 +72,17 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
+        response = super().add_object(
             url=f"{self.url}?include=device,contact",
             data_object=data,
             object_type=self.object_type,
         )
+
+        result_id = response["data"]["id"]
+        result_action = db.session.query(DeviceCalibrationAction).filter_by(id=result_id).first()
+
+        msg = "create;calibration action"
+        self.assertEqual(msg, result_action.device.update_description)
 
     def test_update_device_calibration_action(self):
         """Update DeviceCalibration."""
@@ -88,15 +94,21 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 "attributes": {"description": "updated",},
             }
         }
-        _ = super().update_object(
+        response = super().update_object(
             url=f"{self.url}/{device_calibration_action.id}",
             data_object=device_calibration_action_updated,
             object_type=self.object_type,
         )
+        result_id = response["data"]["id"]
+        result_action = db.session.query(DeviceCalibrationAction).filter_by(id=result_id).first()
+
+        msg = "update;calibration action"
+        self.assertEqual(msg, result_action.device.update_description)
 
     def test_delete_device_calibration_action(self):
         """Delete DeviceCalibrationAction."""
         device_calibration_action = add_device_calibration_action()
+        result_id = device_calibration_action.device.id
         access_headers = create_token()
         with self.client:
             response = self.client.delete(
@@ -106,6 +118,10 @@ class TestDeviceCalibrationAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 200)
 
+        device = db.session.query(Device).filter_by(id=result_id).first()
+
+        msg = "delete;calibration action"
+        self.assertEqual(msg, device.update_description)
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
         device1 = Device(

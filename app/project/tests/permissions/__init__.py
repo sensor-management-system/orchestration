@@ -1,15 +1,13 @@
-from project.api.models import Contact, User, Device
+from project.api.models import Configuration, Contact, Device, Platform, User
 from project.api.models.base_model import db
-from project.tests.base import create_token
-from project.tests.base import fake
-from project.tests.base import generate_userinfo_data
-
-from project.api.models import Platform
+from project.tests.base import create_token, fake, generate_userinfo_data
 
 
 def create_superuser_token():
     contact = Contact(
-        given_name="Test", family_name="User", email="test-superuser@ufz.de",
+        given_name="Test",
+        family_name="User",
+        email="test-superuser@ufz.de",
     )
     user = User(subject="superuser@test.test", contact=contact, is_superuser=True)
     db.session.add_all([contact, user])
@@ -52,7 +50,12 @@ def create_a_test_device(group_ids=[], public=False, private=False, internal=Tru
     return device
 
 
-def create_a_test_platform(group_ids=[], public=False, private=False, internal=True, ):
+def create_a_test_platform(
+    group_ids=[],
+    public=False,
+    private=False,
+    internal=True,
+):
     platform = Platform(
         short_name=fake.pystr(),
         is_public=public,
@@ -63,3 +66,15 @@ def create_a_test_platform(group_ids=[], public=False, private=False, internal=T
     db.session.add(platform)
     db.session.commit()
     return platform
+
+
+def create_a_test_configuration(cfg_permission_group=None, public=False, internal=True):
+    configuration = Configuration(
+        label=fake.pystr(),
+        is_public=public,
+        is_internal=internal,
+        cfg_permission_group=cfg_permission_group,
+    )
+    db.session.add(configuration)
+    db.session.commit()
+    return configuration

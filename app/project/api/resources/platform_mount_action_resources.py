@@ -16,7 +16,11 @@ from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.mount_actions import PlatformMountAction
 from ..models.platform import Platform
-from ..resources.base_resource import check_if_object_not_found
+from ..resources.base_resource import (
+    check_if_object_not_found,
+    query_configuration_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
 from ..token_checker import token_required
 
@@ -86,15 +90,25 @@ class PlatformMountActionList(ResourceList):
                 )
         return query_
 
+    def after_post(self, result):
+        """
+        Add update description to related platform.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "create;platform mount action"
+        query_configuration_and_set_update_description_text(msg, result_id)
+
+        return result
+
     schema = PlatformMountActionSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformMountAction,
-        "methods": {
-            "before_create_object": before_create_object,
-            "query": query,
-        },
+        "methods": {"before_create_object": before_create_object, "query": query,},
     }
 
 
@@ -115,9 +129,29 @@ class PlatformMountActionDetail(ResourceDetail):
         self.validator.validate_update(data_with_relationships, kwargs["id"])
         add_updated_by_id(data)
 
+    def after_patch(self, result):
+        """
+        Add update description to related configuration.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "update;platform mount action"
+        query_configuration_and_set_update_description_text(msg, result_id)
+        return result
+
     def before_delete(self, args, kwargs):
         """Do some checks for possible orphans."""
         self.validator.validate_delete(kwargs["id"])
+        mount_action = (
+            db.session.query(PlatformMountAction).filter_by(id=kwargs["id"]).one_or_none()
+        )
+        if mount_action is None:
+            raise ObjectNotFound("Object not found!")
+        configuration = mount_action.configuration
+        msg = "delete;platform mount action"
+        set_update_description_text_and_update_by_user(configuration, msg)
 
     schema = PlatformMountActionSchema
     decorators = (token_required,)

@@ -19,6 +19,7 @@ def add_created_by_id(data):
     so that a user can't be None. Due to that created_by_id can't be None also.
     """
     data["created_by_id"] = g.user.id
+    add_updated_by_id(data)
 
 
 def add_updated_by_id(data):

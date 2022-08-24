@@ -1,11 +1,15 @@
+from flask import g
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
+from ..helpers.db import save_to_db
 from ..models import (
     ConfigurationAttachment,
     Contact,
     DeviceAttachment,
     PlatformAttachment,
     User,
+    Device,
+    Platform, Configuration,
 )
 from ..models.base_model import db
 from ...api import minio
@@ -31,6 +35,7 @@ def add_contact_to_object(entity_with_contact_list):
         db.session.add(entity_with_contact_list)
         db.session.commit()
     return contact_entry
+
 
 def delete_attachments_in_minio_by_url(url):
     """
@@ -87,3 +92,42 @@ def check_if_object_not_found(model_class, kwargs):
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
     else:
         return object_to_be_checked
+
+
+def set_update_description_text_and_update_by_user(obj_, msg):
+    obj_.update_description = msg
+    obj_.updated_by_id = g.user.id
+    save_to_db(obj_)
+
+
+def query_device_and_set_update_description_text(msg, result_id):
+    """
+    Get the device and add update_description text to it.
+
+    :param msg: a text of what did change.
+    :param result_id: the id of the object
+    """
+    device = db.session.query(Device).filter_by(id=result_id).first()
+    set_update_description_text_and_update_by_user(device, msg)
+
+
+def query_platform_and_set_update_description_text(msg, result_id):
+    """
+    Get the platform and add update_description text to it.
+
+    :param msg: a text of what did change.
+    :param result_id: the id of the object
+    """
+    platform = db.session.query(Platform).filter_by(id=result_id).first()
+    set_update_description_text_and_update_by_user(platform, msg)
+
+
+def query_configuration_and_set_update_description_text(msg, result_id):
+    """
+    Get the configuration and add update_description text to it.
+
+    :param msg: a text of what did change.
+    :param result_id: the id of the object
+    """
+    configuration = db.session.query(Configuration).filter_by(id=result_id).first()
+    set_update_description_text_and_update_by_user(configuration, msg)

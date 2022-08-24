@@ -2,11 +2,12 @@
 
 import os
 
-from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask import g
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
@@ -80,9 +81,13 @@ class DeviceList(ResourceList):
             role_name=role_name,
             role_uri=role_uri,
         )
-        db.session.add(contact_role)
-        db.session.commit()
+        save_to_db(contact_role)
 
+        msg = "create;basic data"
+        device.update_description = msg
+        device.updated_by_id = g.user.id
+        
+        save_to_db(device)
         return result
 
     schema = DeviceSchema
@@ -134,6 +139,16 @@ class DeviceDetail(ResourceDetail):
         In Flask those data should be stored in the `g` object.
         """
         add_updated_by_id(data)
+
+    def after_patch(self, result):
+        result_id = result["data"]["id"]
+        device = db.session.query(Device).filter_by(id=result_id).first()
+        msg = "update;basic data"
+        device.update_description = msg
+
+        save_to_db(device)
+
+        return result
 
     schema = DeviceSchema
     decorators = (token_required,)

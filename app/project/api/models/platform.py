@@ -30,6 +30,7 @@ class Platform(
     inventory_number = db.Column(db.String(256), nullable=True)
     serial_number = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
+    update_description = db.Column(db.String(256), nullable=True)
     platform_attachments = db.relationship(
         "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
