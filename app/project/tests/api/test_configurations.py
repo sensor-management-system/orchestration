@@ -399,10 +399,13 @@ class TestConfigurationsService(BaseTestCase):
             resp = self.client.get(url_)
             self.assertEqual(resp.status_code, 200)
             self.assertTrue(
-                "configuration_static_location_actions" in resp.json["data"]["relationships"].keys()
+                "configuration_static_location_actions"
+                in resp.json["data"]["relationships"].keys()
             )
             self.assertEqual(
-                resp.json["data"]["relationships"]["configuration_static_location_actions"]["data"],
+                resp.json["data"]["relationships"][
+                    "configuration_static_location_actions"
+                ]["data"],
                 [
                     {
                         "id": new_static_location_action_payload["data"]["id"],
@@ -480,10 +483,13 @@ class TestConfigurationsService(BaseTestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertTrue(
-                "configuration_dynamic_location_actions" in resp.json["data"]["relationships"].keys()
+                "configuration_dynamic_location_actions"
+                in resp.json["data"]["relationships"].keys()
             )
             self.assertEqual(
-                resp.json["data"]["relationships"]["configuration_dynamic_location_actions"]["data"],
+                resp.json["data"]["relationships"][
+                    "configuration_dynamic_location_actions"
+                ]["data"],
                 [
                     {
                         "id": new_dynamic_location_action_payload["data"]["id"],
@@ -587,3 +593,61 @@ class TestConfigurationsService(BaseTestCase):
         db.session.add_all([contact, user, configuration])
         db.session.commit()
         return configuration, contact, user
+
+    def test_update_description_after_creation(self):
+        """Make sure that update description field is set by creating a cfg."""
+        config_json = extract_data_from_json_file(self.json_data_url, "configuration")
+
+        config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
+        result = super().add_object(
+            url=self.configurations_url,
+            data_object=config_data,
+            object_type=self.object_type,
+        )
+        result_id = result["data"]["id"]
+        cfg = db.session.query(Configuration).filter_by(id=result_id).first()
+
+        msg = "create;basic data"
+        self.assertEqual(msg, cfg.update_description)
+
+    def test_update_description_after_update_basic_data(self):
+        """Make sure that the update desription field is updated with a patch."""
+        config_json = extract_data_from_json_file(self.json_data_url, "configuration")
+
+        config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
+        result = super().add_object(
+            url=self.configurations_url,
+            data_object=config_data,
+            object_type=self.object_type,
+        )
+        result_id = result["data"]["id"]
+
+        contact = create_a_test_contact()
+
+        user = User(subject=fake.email(), contact=contact, is_superuser=True)
+        db.session.add_all([user, contact])
+        db.session.commit()
+
+        with self.run_requests_as(user):
+            with self.client:
+                resp = self.client.patch(
+                    self.configurations_url + "/" + result_id,
+                    json={
+                        "data": {
+                            "id": result_id,
+                            "type": "configuration",
+                            "attributes": {
+                                "label": "updated label",
+                            },
+                        }
+                    },
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+                self.assertEqual(resp.status_code, 200)
+
+        config = db.session.query(Configuration).filter_by(id=result_id).first()
+
+        # We don't test for now that we have the updated value in the
+        # payload, we just test that we have the entry updated in the db
+        # for the next queries.
+        self.assertEqual(config.update_description, "update;basic data")

@@ -1,16 +1,19 @@
 """Module for the device property list resource."""
-from flask_rest_jsonapi import ResourceDetail
-from flask_rest_jsonapi import ResourceList
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import check_if_object_not_found
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_property import DeviceProperty
 from ..schemas.device_property_schema import DevicePropertySchema
 from ..token_checker import token_required
+from .base_resource import (
+    check_if_object_not_found,
+    query_device_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class DevicePropertyList(ResourceList):
@@ -36,11 +39,27 @@ class DevicePropertyList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceProperty.device_id == device_id)
         return query_
+
+    def after_post(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
+        msg = "create;measured quantity"
+        query_device_and_set_update_description_text(msg, result_id)
+
+        return result
 
     schema = DevicePropertySchema
     decorators = (token_required,)
@@ -63,6 +82,28 @@ class DevicePropertyDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if DeviceProperty not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def after_patch(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["device"]["data"]["id"]
+        msg = "update;measured quantity"
+        query_device_and_set_update_description_text(msg, result_id)
+        return result
+
+    def before_delete(self, args, kwargs):
+        device_property = (
+            db.session.query(DeviceProperty).filter_by(id=kwargs["id"]).one_or_none()
+        )
+        if device_property is None:
+            raise ObjectNotFound("Object not found!")
+        device = device_property.get_parent()
+        msg = "delete;measured quantity"
+        set_update_description_text_and_update_by_user(device, msg)
 
     schema = DevicePropertySchema
     decorators = (token_required,)

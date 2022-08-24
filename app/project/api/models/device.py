@@ -31,6 +31,7 @@ class Device(
     device_type_name = db.Column(db.String(256), nullable=True)
     status_uri = db.Column(db.String(256), nullable=True)
     status_name = db.Column(db.String(256), nullable=True)
+    update_description = db.Column(db.String(256), nullable=True)
     customfields = db.relationship(
         "CustomField", cascade="save-update, merge, delete, delete-orphan"
     )

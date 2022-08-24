@@ -6,9 +6,7 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_attachment import DeviceAttachment
-from project.tests.base import BaseTestCase, query_result_to_list, fake
-from project.tests.base import BaseTestCase, create_token, query_result_to_list
-from project.tests.base import fake
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
 class TestDeviceAttachmentServices(BaseTestCase):
@@ -32,7 +30,11 @@ class TestDeviceAttachmentServices(BaseTestCase):
         self.assertTrue(device.id is not None)
 
         count_device_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
         # However, this new device for sure has no attachments
         self.assertEqual(count_device_attachments, 0)
@@ -64,7 +66,9 @@ class TestDeviceAttachmentServices(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         # And we want to inspect our attachment list
         device_attachments = query_result_to_list(
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,)
+            db.session.query(DeviceAttachment).filter_by(
+                device_id=device.id,
+            )
         )
         # We now have one attachment
         self.assertEqual(len(device_attachments), 1)
@@ -77,6 +81,8 @@ class TestDeviceAttachmentServices(BaseTestCase):
         self.assertEqual(
             str(device_attachment.device_id), response.get_json()["data"]["id"]
         )
+        msg = "create;attachment"
+        self.assertEqual(msg, device_attachment.device.update_description)
 
     def test_post_device_attachment_api_missing_url(self):
         """Ensure that we don't add a device attachment with missing url."""
@@ -93,7 +99,10 @@ class TestDeviceAttachmentServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "device_attachment",
-                "attributes": {"url": None, "label": "GFZ Homepage",},
+                "attributes": {
+                    "url": None,
+                    "label": "GFZ Homepage",
+                },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device.id)}}
                 },
@@ -111,7 +120,11 @@ class TestDeviceAttachmentServices(BaseTestCase):
         # 422 => unprocessable entity
         self.assertEqual(response.status_code, 422)
         count_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
         self.assertEqual(count_attachments, 0)
 
@@ -121,7 +134,10 @@ class TestDeviceAttachmentServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "device_attachment",
-                "attributes": {"url": "GFZ", "label": "GFZ Homepage",},
+                "attributes": {
+                    "url": "GFZ",
+                    "label": "GFZ Homepage",
+                },
                 "relationships": {"device": {"data": {"type": "device", "id": None}}},
             }
         }
@@ -134,6 +150,8 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
+        # 404 as we don't find the device the moment we want to update
+        # its update description
         self.assertEqual(response.status_code, 404)
         count_device_attachments_after = db.session.query(DeviceAttachment).count()
         self.assertEqual(
@@ -160,13 +178,19 @@ class TestDeviceAttachmentServices(BaseTestCase):
         db.session.commit()
 
         device_attachment1 = DeviceAttachment(
-            label="GFZ", url="https://www.gfz-potsdam.de", device=device1,
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            device=device1,
         )
         device_attachment2 = DeviceAttachment(
-            label="UFZ", url="https://www.ufz.de", device=device1,
+            label="UFZ",
+            url="https://www.ufz.de",
+            device=device1,
         )
         device_attachment3 = DeviceAttachment(
-            label="PIK", url="https://www.pik-potsdam.de", device=device2,
+            label="PIK",
+            url="https://www.pik-potsdam.de",
+            device=device2,
         )
 
         db.session.add(device_attachment1)
@@ -213,7 +237,8 @@ class TestDeviceAttachmentServices(BaseTestCase):
                         "related"
                     ]
                     resp_device = self.client.get(
-                        device_link, content_type="application/vnd.api+json",
+                        device_link,
+                        content_type="application/vnd.api+json",
                     )
                     self.assertEqual(resp_device.status_code, 200)
                     self.assertEqual(
@@ -272,7 +297,9 @@ class TestDeviceAttachmentServices(BaseTestCase):
         db.session.commit()
 
         device_attachment1 = DeviceAttachment(
-            label="GFZ", url="https://www.gfz-potsdam.de", device=device1,
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            device=device1,
         )
         db.session.add(device_attachment1)
         db.session.commit()
@@ -281,7 +308,10 @@ class TestDeviceAttachmentServices(BaseTestCase):
             "data": {
                 "type": "device_attachment",
                 "id": str(device_attachment1.id),
-                "attributes": {"label": "UFZ", "url": "https://www.ufz.de",},
+                "attributes": {
+                    "label": "UFZ",
+                    "url": "https://www.ufz.de",
+                },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device2.id)}}
                 },
@@ -304,49 +334,8 @@ class TestDeviceAttachmentServices(BaseTestCase):
         self.assertEqual(device_attachment_reloaded.url, "https://www.ufz.de")
         self.assertEqual(device_attachment_reloaded.label, "UFZ")
         self.assertEqual(device_attachment_reloaded.device_id, device2.id)
-
-    # def test_delete_device_attachment_api(self):
-    #     """Ensure that we can delete a device attachment."""
-    #     device1 = Device(
-    #         short_name="Just a device",
-    #         is_public=False,
-    #         is_private=False,
-    #         is_internal=True,
-    #     )
-    #     db.session.add(device1)
-    #     db.session.commit()
-    #     device_attachment1 = DeviceAttachment(
-    #         label="GFZ", url="https://www.gfz-potsdam.de", device=device1,
-    #     )
-    #     db.session.add(device_attachment1)
-    #     db.session.commit()
-    #
-    #     with self.client:
-    #         response = self.client.get(
-    #             base_url + "/devices/" + str(device1.id) + "/device-attachments",
-    #             content_type="application/vnd.api+json",
-    #             headers=create_token()
-    #         )
-    #         self.assertEqual(response.status_code, 200)
-    #         self.assertEqual(len(response.get_json()["data"]), 1)
-    #
-    #         response = self.client.delete(
-    #             base_url + "/device-attachments/" + str(device_attachment1.id), headers=create_token(),
-    #         )
-    #         # I would expect a 204 (no content), but 200 is good as well
-    #         self.assertTrue(response.status_code in [200, 204])
-    #
-    #         response = self.client.get(
-    #             base_url + "/devices/" + str(device1.id) + "/device-attachments",
-    #             content_type="application/vnd.api+json",
-    #         )
-    #         self.assertEqual(response.status_code, 200)
-    #         self.assertEqual(len(response.get_json()["data"]), 0)
-    #
-    #     count_device_attachments = (
-    #         db.session.query(DeviceAttachment).filter_by(device_id=device1.id,).count()
-    #     )
-    #     self.assertEqual(count_device_attachments, 0)
+        msg = "update;attachment"
+        self.assertEqual(msg, device_attachment_reloaded.device.update_description)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
@@ -366,7 +355,11 @@ class TestDeviceAttachmentServices(BaseTestCase):
         self.assertTrue(device.id is not None)
 
         count_device_attachments = (
-            db.session.query(DeviceAttachment).filter_by(device_id=device.id,).count()
+            db.session.query(DeviceAttachment)
+            .filter_by(
+                device_id=device.id,
+            )
+            .count()
         )
         self.assertEqual(count_device_attachments, 0)
 

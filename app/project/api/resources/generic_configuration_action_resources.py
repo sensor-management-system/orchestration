@@ -12,12 +12,15 @@ from ..auth.permission_utils import (
     check_post_permission_for_configuration_related_objects,
     get_query_with_permissions_for_configuration_related_objects,
 )
-from ..helpers.errors import MethodNotAllowed
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.generic_actions import GenericConfigurationAction
-from ..resources.base_resource import check_if_object_not_found
+from ..resources.base_resource import (
+    check_if_object_not_found,
+    query_configuration_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
 from ..token_checker import token_required
 
@@ -59,6 +62,19 @@ class GenericConfigurationActionList(ResourceList):
     def before_post(self, args, kwargs, data=None):
         check_post_permission_for_configuration_related_objects()
 
+    def after_post(self, result):
+        """
+        Add update description to related configuration.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "create;action"
+        query_configuration_and_set_update_description_text(msg, result_id)
+
+        return result
+
     schema = GenericConfigurationActionSchema
     decorators = (token_required,)
     data_layer = {
@@ -84,10 +100,32 @@ class GenericConfigurationActionDetail(ResourceDetail):
         )
         add_updated_by_id(data)
 
+    def after_patch(self, result):
+        """
+        Add update description to related configuration.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "update;action"
+        query_configuration_and_set_update_description_text(msg, result_id)
+        return result
+
     def before_delete(self, args, kwargs):
         check_deletion_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
+        action = (
+            db.session.query(GenericConfigurationAction)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
+        )
+        if action is None:
+            raise ObjectNotFound("Object not found!")
+        configuration = action.get_parent()
+        msg = "delete;action"
+        set_update_description_text_and_update_by_user(configuration, msg)
 
     schema = GenericConfigurationActionSchema
     decorators = (token_required,)

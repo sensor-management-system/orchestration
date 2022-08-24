@@ -210,3 +210,6 @@ class TestDevicePropertyServices(BaseTestCase):
                 )
 
             self.assertEqual(response.status_code, 200)
+        device_reloaded = db.session.query(Device).filter_by(id=device.id).first()
+        msg = "delete;measured quantity"
+        self.assertEqual(msg, device_reloaded.update_description)

@@ -1,19 +1,27 @@
 """Module for the configuration attachments list resource."""
 from flask_rest_jsonapi import ResourceDetail, ResourceList, ResourceRelationship
-from flask_rest_jsonapi.exceptions import ObjectNotFound, JsonApiException
+from flask_rest_jsonapi.exceptions import JsonApiException, ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
-from ..auth.permission_utils import check_permissions_for_configuration_related_objects, \
-    get_query_with_permissions_for_configuration_related_objects, \
-    check_post_permission_for_configuration_related_objects, check_patch_permission_for_configuration_related_objects, \
-    check_deletion_permission_for_configuration_related_objects
+from ..auth.permission_utils import (
+    check_deletion_permission_for_configuration_related_objects,
+    check_patch_permission_for_configuration_related_objects,
+    check_permissions_for_configuration_related_objects,
+    check_post_permission_for_configuration_related_objects,
+    get_query_with_permissions_for_configuration_related_objects,
+)
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import decode_json_request_data
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
 from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
 from ..token_checker import token_required
+from .base_resource import (
+    check_if_object_not_found,
+    delete_attachments_in_minio_by_url,
+    query_configuration_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class ConfigurationAttachmentList(ResourceList):
@@ -25,7 +33,9 @@ class ConfigurationAttachmentList(ResourceList):
         """
         Query the entries from the database.
         """
-        query_ = get_query_with_permissions_for_configuration_related_objects(self.model)
+        query_ = get_query_with_permissions_for_configuration_related_objects(
+            self.model
+        )
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -33,7 +43,9 @@ class ConfigurationAttachmentList(ResourceList):
                 self.session.query(Configuration).filter_by(id=configuration_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "Configuration: {} not found".format(configuration_id),
                 )
             else:
@@ -45,12 +57,27 @@ class ConfigurationAttachmentList(ResourceList):
     def before_post(self, args, kwargs, data=None):
         check_post_permission_for_configuration_related_objects()
 
+    def after_post(self, result):
+        """
+        Add update description to related configuraiton.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "create;attachment"
+        query_configuration_and_set_update_description_text(msg, result_id)
+
+        return result
+
     schema = ConfigurationAttachmentSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationAttachment,
-        "methods": {"query": query,},
+        "methods": {
+            "query": query,
+        },
     }
 
 
@@ -62,17 +89,41 @@ class ConfigurationAttachmentDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if ConfigurationAttachment not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
-        check_permissions_for_configuration_related_objects(self._data_layer.model, kwargs["id"])
+        check_permissions_for_configuration_related_objects(
+            self._data_layer.model, kwargs["id"]
+        )
 
     def before_patch(self, args, kwargs, data=None):
         check_patch_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
 
+    def after_patch(self, result):
+        """
+        Add update description to related configuration.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
+        msg = "update;attachment"
+        query_configuration_and_set_update_description_text(msg, result_id)
+        return result
+
     def before_delete(self, args, kwargs):
         check_deletion_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
+        configuration_attachment = (
+            db.session.query(ConfigurationAttachment)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
+        )
+        if configuration_attachment is None:
+            raise ObjectNotFound("Object not found!")
+        configuration = configuration_attachment.get_parent()
+        msg = "delete;attachment"
+        set_update_description_text_and_update_by_user(configuration, msg)
 
     def delete(self, *args, **kwargs):
         """

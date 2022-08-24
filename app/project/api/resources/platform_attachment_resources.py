@@ -1,17 +1,20 @@
 """Module for the platform attachment list resource."""
-from flask_rest_jsonapi import ResourceDetail, JsonApiException
-from flask_rest_jsonapi import ResourceList
+from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from .base_resource import delete_attachments_in_minio_by_url, check_if_object_not_found
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
+from ..auth.permission_utils import \
+    get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.platform_attachment import PlatformAttachment
 from ..schemas.platform_attachment_schema import PlatformAttachmentSchema
 from ..token_checker import token_required
+from .base_resource import (check_if_object_not_found,
+                            delete_attachments_in_minio_by_url,
+                            query_platform_and_set_update_description_text,
+                            set_update_description_text_and_update_by_user)
 
 
 class PlatformAttachmentList(ResourceList):
@@ -43,6 +46,20 @@ class PlatformAttachmentList(ResourceList):
                 query_ = query_.filter(PlatformAttachment.platform_id == platform_id)
         return query_
 
+    def after_post(self, result):
+        """
+        Add update description to related platform.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["platform"]["data"]["id"]
+        msg = "create;attachment"
+        query_platform_and_set_update_description_text(msg, result_id)
+
+        return result
+
+
     schema = PlatformAttachmentSchema
     decorators = (token_required,)
     data_layer = {
@@ -65,6 +82,27 @@ class PlatformAttachmentDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if PlatformAttachment not found"""
         check_if_object_not_found(self._data_layer.model, kwargs)
+    def after_patch(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["platform"]["data"]["id"]
+        msg = "update;attachment"
+        query_platform_and_set_update_description_text(msg, result_id)
+        return result
+
+    def before_delete(self, args, kwargs):
+        device_attachment = (
+            db.session.query(PlatformAttachment).filter_by(id=kwargs["id"]).one_or_none()
+        )
+        if device_attachment is None:
+            raise ObjectNotFound("Object not found!")
+        platform = device_attachment.get_parent()
+        msg = "delete;attachment"
+        set_update_description_text_and_update_by_user(platform, msg)
 
     def delete(self, *args, **kwargs):
         """

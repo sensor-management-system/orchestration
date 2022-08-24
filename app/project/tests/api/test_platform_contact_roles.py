@@ -4,11 +4,7 @@ from project import base_url
 from project.api.models import Contact, Platform
 from project.api.models.base_model import db
 from project.api.models.contact_role import PlatformContactRole
-from project.tests.base import (
-    BaseTestCase,
-    generate_userinfo_data,
-    fake,
-)
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
 def add_a_contact():
@@ -30,15 +26,15 @@ def add_a_platform():
     return platform
 
 
-def add_platform_contact_roles():
+def add_platform_contact_role():
     contact = add_a_contact()
     platform = add_a_platform()
-    platform_contact_roles = PlatformContactRole(
+    platform_contact_role = PlatformContactRole(
         role_name=fake.pystr(), role_uri=fake.url(), platform=platform, contact=contact
     )
-    db.session.add(platform_contact_roles)
+    db.session.add(platform_contact_role)
     db.session.commit()
-    return platform_contact_roles
+    return platform_contact_role
 
 
 class TestPlatformContactRolesServices(BaseTestCase):
@@ -49,28 +45,28 @@ class TestPlatformContactRolesServices(BaseTestCase):
     url = base_url + "/platform-contact-roles"
     object_type = "platform_contact_role"
 
-    def test_get_platform_contact_roles(self):
+    def test_get_platform_contact_role(self):
         """Ensure the /platform-contact-roles route behaves correctly."""
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"], [])
 
-    def test_get_collection_of_platform_contact_roles(self):
+    def test_get_collection_of_platform_contact_role(self):
         """Ensure platform-contact-roles get collection behaves correctly."""
 
-        platform_contact_roles = add_platform_contact_roles()
+        platform_contact_role = add_platform_contact_role()
 
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            platform_contact_roles.role_name, data["data"][0]["attributes"]["role_name"]
+            platform_contact_role.role_name, data["data"][0]["attributes"]["role_name"]
         )
 
     def test_post_a_platform_contact_role(self):
-        """Ensure post a platform_contact_roles behaves correctly."""
+        """Ensure post a platform_contact_role behaves correctly."""
         contact = add_a_contact()
         platform = add_a_platform()
         attributes = {
@@ -89,29 +85,44 @@ class TestPlatformContactRolesServices(BaseTestCase):
             }
         }
         url = f"{self.url}?include=platform,contact"
-        super().add_object(url=url, data_object=data, object_type=self.object_type)
+        result = super().add_object(
+            url=url, data_object=data, object_type=self.object_type
+        )
+        platform_id = result["data"]["relationships"]["platform"]["data"]["id"]
+        platform = db.session.query(Platform).filter_by(id=platform_id).first()
+        self.assertEqual(platform.update_description, "create;contact")
 
     def test_update_a_contact_role(self):
-        """Ensure update platform_contact_roles behaves correctly."""
-        platform_contact_roles = add_platform_contact_roles()
+        """Ensure update platform_contact_role behaves correctly."""
+        platform_contact_role = add_platform_contact_role()
         contact_updated = {
             "data": {
                 "type": self.object_type,
-                "id": platform_contact_roles.id,
-                "attributes": {"role_name": "updated",},
+                "id": platform_contact_role.id,
+                "attributes": {
+                    "role_name": "updated",
+                },
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{platform_contact_roles.id}",
+        result = super().update_object(
+            url=f"{self.url}/{platform_contact_role.id}",
             data_object=contact_updated,
             object_type=self.object_type,
         )
+        platform_id = result["data"]["relationships"]["platform"]["data"]["id"]
+        platform = db.session.query(Platform).filter_by(id=platform_id).first()
+        self.assertEqual(platform.update_description, "update;contact")
 
     def test_delete_a_contact_role(self):
-        """Ensure remove platform_contact_roles behaves correctly."""
+        """Ensure remove platform_contact_role behaves correctly."""
 
-        platform_contact_roles = add_platform_contact_roles()
-        _ = super().delete_object(url=f"{self.url}/{platform_contact_roles.id}",)
+        platform_contact_role = add_platform_contact_role()
+        platform_id = platform_contact_role.platform_id
+        _ = super().delete_object(
+            url=f"{self.url}/{platform_contact_role.id}",
+        )
+        platform = db.session.query(Platform).filter_by(id=platform_id).first()
+        self.assertEqual(platform.update_description, "delete;contact")
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

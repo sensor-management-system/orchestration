@@ -379,6 +379,9 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             self.url + f"/{device_contact_role.id}", headers=access_headers
         )
         self.assertEqual(response.status_code, 200)
+        msg = "delete;contact"
+        device_reloaded = db.session.query(Device).filter_by(id=device_contact_role.device.id).first()
+        self.assertEqual(msg, device_reloaded.update_description)
 
     def test_delete_public_device_contact_role_member_in_group(self):
         """Ensure that contact role for public device can be deleted by members."""

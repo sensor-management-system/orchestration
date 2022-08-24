@@ -44,18 +44,12 @@ class TestPlatformMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="Platform2",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 
@@ -154,18 +148,12 @@ class TestPlatformMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="Platform2",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 
@@ -226,8 +214,7 @@ class TestPlatformMountAction(BaseTestCase):
                 base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -252,31 +239,19 @@ class TestPlatformMountAction(BaseTestCase):
         )
 
         platform1 = Platform(
-            short_name="platform1",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
         )
 
         platform2 = Platform(
-            short_name="Platform2",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
         )
 
         platform3 = Platform(
-            short_name="platform3",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="platform3", is_public=True, is_private=False, is_internal=False,
         )
 
         platform4 = Platform(
-            short_name="Platform4",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="Platform4", is_public=True, is_private=False, is_internal=False,
         )
 
         action1 = PlatformMountAction(
@@ -348,8 +323,7 @@ class TestPlatformMountAction(BaseTestCase):
                 + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -444,10 +418,19 @@ class TestPlatformMountAction(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
+        response = super().add_object(
             url=f"{self.url}?include=platform,begin_contact,end_contact,parent_platform,configuration",
             data_object=data,
             object_type=self.object_type,
+        )
+        result_id = response["data"]["id"]
+        result_platform_mount_action = (
+            db.session.query(PlatformMountAction).filter_by(id=result_id).first()
+        )
+
+        msg = "create;platform mount action"
+        self.assertEqual(
+            msg, result_platform_mount_action.configuration.update_description
         )
 
     def test_update_platform_mount_action(self):
@@ -461,15 +444,22 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
             }
         }
-        _ = super().update_object(
+        response = super().update_object(
             url=f"{self.url}/{mount_platform_action.id}",
             data_object=mount_platform_action_updated,
             object_type=self.object_type,
+        )
+        result_id = response["data"]["id"]
+        result_platform_mount_action = (
+            db.session.query(PlatformMountAction).filter_by(id=result_id).first()
+        )
+
+        msg = "update;platform mount action"
+        self.assertEqual(
+            msg, result_platform_mount_action.configuration.update_description
         )
 
     def test_update_platform_mount_action_set_end_contact_to_none(self):
@@ -514,6 +504,7 @@ class TestPlatformMountAction(BaseTestCase):
     def test_delete_platform_mount_action(self):
         """Delete PlatformMountAction."""
         mount_platform_action = add_mount_platform_action_model()
+        related_configuration_id = mount_platform_action.configuration.id
         with self.client:
             response = self.client.delete(
                 f"{self.url}/{mount_platform_action.id}",
@@ -521,6 +512,13 @@ class TestPlatformMountAction(BaseTestCase):
                 headers=create_token(),
             )
         self.assertEqual(response.status_code, 200)
+        related_configuration = (
+            db.session.query(Configuration)
+            .filter_by(id=related_configuration_id)
+            .first()
+        )
+        msg = "delete;platform mount action"
+        self.assertEqual(msg, related_configuration.update_description)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
@@ -538,9 +536,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "platform": {
                         "data": {
@@ -572,9 +568,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "configuration": {
                         "data": {
@@ -681,12 +675,7 @@ class TestPlatformMountAction(BaseTestCase):
                 "id": platform_mount_action.id,
                 "attributes": {"begin_description": "updated"},
                 "relationships": {
-                    "parent_platform": {
-                        "data": {
-                            "type": "platform",
-                            "id": p_p.id,
-                        }
-                    },
+                    "parent_platform": {"data": {"type": "platform", "id": p_p.id,}},
                 },
             }
         }
@@ -850,9 +839,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": platform_mount_action_1.id,
-                "attributes": {
-                    "end_date": "2023-11-08T07:25:00.782000",
-                },
+                "attributes": {"end_date": "2023-11-08T07:25:00.782000",},
             }
         }
         access_headers = create_token()

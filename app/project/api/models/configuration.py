@@ -22,7 +22,7 @@ class Configuration(
     project_name = db.Column(db.String(256), nullable=True)
     label = db.Column(db.String(256), nullable=True)
     status = db.Column(db.String(256), nullable=True, default="draft")
-
+    update_description = db.Column(db.String(256), nullable=True)
     longitude_src_device_property_id = db.Column(
         db.Integer, db.ForeignKey("device_property.id"), nullable=True
     )

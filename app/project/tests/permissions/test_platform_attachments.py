@@ -2,10 +2,11 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import PlatformAttachment
+from project.api.models import Platform, PlatformAttachment
 from project.api.models.base_model import db
 from project.extensions.instances import idl
-from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
+from project.tests.base import (BaseTestCase, create_token, fake,
+                                query_result_to_list)
 from project.tests.permissions import create_a_test_platform
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -300,3 +301,8 @@ class TesPlatformAttachment(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+        # and we want to make sure that we have an updated update
+        # description for the platform
+        reloaded_platform = db.session.query(Platform).filter_by(id=platform.id).first()
+        self.assertEqual(reloaded_platform.update_description, "delete;attachment")

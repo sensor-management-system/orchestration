@@ -12,7 +12,11 @@ from ..models.calibration_actions import DeviceCalibrationAction
 from ..models.device import Device
 from ..schemas.calibration_actions_schema import DeviceCalibrationActionSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found
+from .base_resource import (
+    check_if_object_not_found,
+    query_device_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class DeviceCalibrationActionList(ResourceList):
@@ -36,14 +40,24 @@ class DeviceCalibrationActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {
-                        "parameter": "id",
-                    },
-                    "Device: {} not found".format(device_id),
+                    {"parameter": "id",}, "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceCalibrationAction.device_id == device_id)
         return query_
+
+    def after_post(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
+        msg = "create;calibration action"
+        query_device_and_set_update_description_text(msg, result_id)
+
+        return result
 
     schema = DeviceCalibrationActionSchema
     decorators = (token_required,)
@@ -64,6 +78,30 @@ class DeviceCalibrationActionDetail(ResourceDetail):
     def before_patch(self, args, kwargs, data):
         """Add updated by user id to the data."""
         add_updated_by_id(data)
+
+    def after_patch(self, result):
+        """
+        Add update description to related device.
+
+        :param result:
+        :return:
+        """
+        result_id = result["data"]["relationships"]["device"]["data"]["id"]
+        msg = "update;calibration action"
+        query_device_and_set_update_description_text(msg, result_id)
+        return result
+
+    def before_delete(self, args, kwargs):
+        action = (
+            db.session.query(DeviceCalibrationAction)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
+        )
+        if action is None:
+            raise ObjectNotFound("Object not found!")
+        device = action.get_parent()
+        msg = "delete;calibration action"
+        set_update_description_text_and_update_by_user(device, msg)
 
     schema = DeviceCalibrationActionSchema
     decorators = (token_required,)

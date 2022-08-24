@@ -3,10 +3,8 @@
 import os
 
 from flask import g
-from sqlalchemy import or_
-
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
-from ...frj_csv_export.resource import ResourceList
+from sqlalchemy import or_
 
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from ..auth.permission_utils import (
@@ -20,13 +18,15 @@ from ..datalayers.esalchemy import (
     OrFilter,
     TermEqualsExactStringFilter,
 )
+from ..helpers.db import save_to_db
+from ..helpers.errors import ConflictError, ForbiddenError, UnauthorizedError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..helpers.errors import ConflictError, ForbiddenError, UnauthorizedError
 from ..token_checker import token_required
+from ...frj_csv_export.resource import ResourceList
 
 
 class ConfigurationList(ResourceList):
@@ -48,12 +48,7 @@ class ConfigurationList(ResourceList):
             query = query.filter_by(is_public=True)
         else:
             if not g.user.is_superuser:
-                query = query.filter(
-                    or_(
-                        self.model.is_public,
-                        self.model.is_internal,
-                    )
-                )
+                query = query.filter(or_(self.model.is_public, self.model.is_internal,))
         return query
 
     def es_query(self, view_kwargs):
@@ -111,7 +106,12 @@ class ConfigurationList(ResourceList):
             role_uri=role_uri,
         )
         db.session.add(contact_role)
-        db.session.commit()
+
+        msg = "create;basic data"
+        configuration.update_description = msg
+        configuration.updated_by_id = g.user.id
+
+        save_to_db(configuration)
 
         return result
 
@@ -157,6 +157,15 @@ class ConfigurationDetail(ResourceDetail):
                         "User is not part of any group to edit this object."
                     )
         add_updated_by_id(data)
+
+    def after_patch(self, result):
+        result_id = result["data"]["id"]
+        configuration = db.session.query(Configuration).filter_by(id=result_id).first()
+        msg = "update;basic data"
+        configuration.update_description = msg
+
+        save_to_db(configuration)
+        return result
 
     def before_delete(self, args, kwargs):
         """Checks for permission"""

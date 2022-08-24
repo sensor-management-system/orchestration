@@ -122,11 +122,16 @@ class TestDeviceMountAction(BaseTestCase):
                 },
             }
         }
-        _ = super().add_object(
+        response = super().add_object(
             url=f"{self.url}?include=device,begin_contact,end_contact,parent_platform,configuration",
             data_object=data,
             object_type=self.object_type,
         )
+        result_id = response["data"]["id"]
+        result_device_mount_action = db.session.query(DeviceMountAction).filter_by(id=result_id).first()
+
+        msg = "create;device mount action"
+        self.assertEqual(msg, result_device_mount_action.configuration.update_description)
 
     def test_update_device_mount_action(self):
         """Update DeviceMountAction."""
@@ -139,21 +144,25 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated"},
             }
         }
-        _ = super().update_object(
+        response = super().update_object(
             url=f"{self.url}/{mount_device_action.id}",
             data_object=mount_device_action_updated,
             object_type=self.object_type,
         )
+        result_id = response["data"]["id"]
+        result_device_mount_action = db.session.query(DeviceMountAction).filter_by(id=result_id).first()
+
+        msg = "update;device mount action"
+        self.assertEqual(msg, result_device_mount_action.configuration.update_description)
 
     def test_delete_device_mount_action(self):
         """Delete DeviceMountAction should fail without permission."""
         mount_device_action = add_mount_device_action_model()
         access_headers = create_token()
+        related_configuration_id = mount_device_action.configuration.id
         # As long as there is no permission group for the configuration,
         # an authentificated user is allowed to delete the action.
         # (At least in our current implementation.)
@@ -164,6 +173,10 @@ class TestDeviceMountAction(BaseTestCase):
                 headers=access_headers,
             )
         self.assertEqual(response.status_code, 200)
+
+        related_configuration = db.session.query(Configuration).filter_by(id=related_configuration_id).first()
+        msg = "delete;device mount action"
+        self.assertEqual(msg, related_configuration.update_description)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
@@ -188,18 +201,12 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -297,18 +304,12 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         device1 = Device(
-            short_name="device1",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -397,34 +398,22 @@ class TestDeviceMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="platform1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="platform2",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="platform2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(platform2)
 
         device1 = Device(
-            short_name="device1",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="device1", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device1)
 
         device2 = Device(
-            short_name="device2",
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+            short_name="device2", is_public=True, is_private=False, is_internal=False,
         )
         db.session.add(device2)
 
@@ -486,8 +475,7 @@ class TestDeviceMountAction(BaseTestCase):
                 base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing,
-                content_type="application/vnd.api+json",
+                url_get_for_non_existing, content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -506,9 +494,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "device": {
                         "data": {
@@ -540,9 +526,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "configuration": {
                         "data": {
@@ -650,12 +634,7 @@ class TestDeviceMountAction(BaseTestCase):
                 "id": device_mount_action.id,
                 "attributes": {"begin_description": "updated"},
                 "relationships": {
-                    "parent_platform": {
-                        "data": {
-                            "type": "platform",
-                            "id": p_p.id,
-                        }
-                    },
+                    "parent_platform": {"data": {"type": "platform", "id": p_p.id,}},
                 },
             }
         }
@@ -855,9 +834,7 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_mount_action_1.id,
-                "attributes": {
-                    "end_date": "2023-11-08T07:25:00.782000",
-                },
+                "attributes": {"end_date": "2023-11-08T07:25:00.782000",},
             }
         }
         access_headers = create_token()

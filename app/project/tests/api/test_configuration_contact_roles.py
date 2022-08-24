@@ -30,15 +30,15 @@ def add_a_configuration():
     return configuration
 
 
-def add_configuration_contact_roles():
+def add_configuration_contact_role():
     contact = add_a_contact()
     configuration = add_a_configuration()
-    configuration_contact_roles = ConfigurationContactRole(
+    configuration_contact_role = ConfigurationContactRole(
         role_name=fake.pystr(), role_uri=fake.url(), configuration=configuration, contact=contact
     )
-    db.session.add(configuration_contact_roles)
+    db.session.add(configuration_contact_role)
     db.session.commit()
-    return configuration_contact_roles
+    return configuration_contact_role
 
 
 class TestConfigurationContactRolesServices(BaseTestCase):
@@ -49,28 +49,28 @@ class TestConfigurationContactRolesServices(BaseTestCase):
     url = base_url + "/configuration-contact-roles"
     object_type = "configuration_contact_role"
 
-    def test_get_configuration_contact_roles(self):
+    def test_get_configuration_contact_role(self):
         """Ensure the /configuration-contact-roles route behaves correctly."""
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"], [])
 
-    def test_get_collection_of_configuration_contact_roles(self):
+    def test_get_collection_of_configuration_contact_role(self):
         """Ensure configuration-contact-roles get collection behaves correctly."""
 
-        configuration_contact_roles = add_configuration_contact_roles()
+        configuration_contact_role = add_configuration_contact_role()
 
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            configuration_contact_roles.role_name, data["data"][0]["attributes"]["role_name"]
+            configuration_contact_role.role_name, data["data"][0]["attributes"]["role_name"]
         )
 
     def test_post_a_configuration_contact_role(self):
-        """Ensure post a configuration_contact_roles behaves correctly."""
+        """Ensure post a configuration_contact_role behaves correctly."""
         contact = add_a_contact()
         configuration = add_a_configuration()
         attributes = {
@@ -89,29 +89,43 @@ class TestConfigurationContactRolesServices(BaseTestCase):
             }
         }
         url = f"{self.url}?include=configuration,contact"
-        super().add_object(url=url, data_object=data, object_type=self.object_type)
+        result= super().add_object(url=url, data_object=data, object_type=self.object_type)
+        configuration_id = result["data"]["relationships"]["configuration"]["data"]["id"]
+        configuration = db.session.query(Configuration).filter_by(id=configuration_id).first()
+        self.assertEqual(configuration.update_description, "create;contact")
 
     def test_update_a_contact_role(self):
-        """Ensure update configuration_contact_roles behaves correctly."""
-        configuration_contact_roles = add_configuration_contact_roles()
+        """Ensure update configuration_contact_role behaves correctly."""
+        configuration_contact_role = add_configuration_contact_role()
         contact_updated = {
             "data": {
                 "type": self.object_type,
-                "id": configuration_contact_roles.id,
+                "id": configuration_contact_role.id,
                 "attributes": {"role_name": "updated",},
             }
         }
-        _ = super().update_object(
-            url=f"{self.url}/{configuration_contact_roles.id}",
+        result = super().update_object(
+            url=f"{self.url}/{configuration_contact_role.id}",
             data_object=contact_updated,
             object_type=self.object_type,
         )
+        configuration_id = result["data"]["relationships"]["configuration"]["data"]["id"]
+        configuration = db.session.query(Configuration).filter_by(id=configuration_id).first()
+        self.assertEqual(configuration.update_description, "update;contact")
 
     def test_delete_a_contact(self):
-        """Ensure remove configuration_contact_roles behaves correctly."""
+        """Ensure remove configuration_contact_role behaves correctly."""
 
-        configuration_contact_roles = add_configuration_contact_roles()
-        _ = super().delete_object(url=f"{self.url}/{configuration_contact_roles.id}",)
+        configuration_contact_role = add_configuration_contact_role()
+        configuration_id = configuration_contact_role.configuration_id
+
+        _ = super().delete_object(url=f"{self.url}/{configuration_contact_role.id}",)
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(
+            configuration.update_description, "delete;contact"
+        )
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

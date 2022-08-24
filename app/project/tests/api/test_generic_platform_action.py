@@ -106,6 +106,11 @@ class TestGenericPlatformAction(BaseTestCase):
                 data_object=generic_platform_action_data,
                 object_type=self.object_type,
             )
+            platform_id = generic_platform_action["data"]["relationships"]["platform"][
+                "data"
+            ]["id"]
+            platform = db.session.query(Platform).filter_by(id=platform_id).first()
+            self.assertEqual(platform.update_description, "create;action")
             userinfo = generate_userinfo_data()
             contact = Contact(
                 given_name=userinfo["given_name"],
@@ -132,11 +137,14 @@ class TestGenericPlatformAction(BaseTestCase):
                     },
                 }
             }
-            _ = super().update_object(
+            result = super().update_object(
                 url=f"{self.url}/{generic_platform_action['data']['id']}?include=platform,contact",
                 data_object=new_data,
                 object_type=self.object_type,
             )
+            platform_id = result["data"]["relationships"]["platform"]["data"]["id"]
+            platform = db.session.query(Platform).filter_by(id=platform_id).first()
+            self.assertEqual(platform.update_description, "update;action")
 
     def test_delete_generic_platform_action(self):
         """Ensure a generic_platform_action can be deleted."""
@@ -150,6 +158,7 @@ class TestGenericPlatformAction(BaseTestCase):
                 data_object=generic_platform_action_data,
                 object_type=self.object_type,
             )
+            platform_id = obj["data"]["relationships"]["platform"]["data"]["id"]
             access_headers = create_token()
             with self.client:
                 response = self.client.delete(
@@ -158,6 +167,8 @@ class TestGenericPlatformAction(BaseTestCase):
                     headers=access_headers,
                 )
             self.assertEqual(response.status_code, 200)
+            platform = db.session.query(Platform).filter_by(id=platform_id).first()
+            self.assertEqual(platform.update_description, "delete;action")
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
