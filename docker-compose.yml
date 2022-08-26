@@ -191,6 +191,7 @@ services:
       NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME: ${NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME}
       NUXT_ENV_OIDC_LOGIN_PARAMS: ${NUXT_ENV_OIDC_LOGIN_PARAMS}
       INSTITUTE: ${INSTITUTE:-ufz}
+      IDL_SYNC_URL: ${IDL_SYNC_URL}
     volumes:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw
