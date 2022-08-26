@@ -25,14 +25,12 @@ class TestPlatformMountAction(BaseTestCase):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
             label="sample configuration",
-            location_type="static",
             is_public=True,
             is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II",
-            location_type="static",
             is_public=True,
             is_internal=False,
         )
@@ -129,14 +127,12 @@ class TestPlatformMountAction(BaseTestCase):
         """Ensure that I can prefilter by a specific platform."""
         configuration1 = Configuration(
             label="sample configuration",
-            location_type="static",
             is_public=True,
             is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
             label="sample configuration II",
-            location_type="static",
             is_public=True,
             is_internal=False,
         )
@@ -222,14 +218,12 @@ class TestPlatformMountAction(BaseTestCase):
         """Ensure filter by a specific parent platform works well."""
         configuration1 = Configuration(
             label="sample configuration",
-            location_type="static",
             is_public=True,
             is_internal=False,
         )
 
         configuration2 = Configuration(
             label="sample configuration II",
-            location_type="static",
             is_public=True,
             is_internal=False,
         )

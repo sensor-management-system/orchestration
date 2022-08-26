@@ -43,8 +43,7 @@ def generate_configuration_model(
     configuration = Configuration(
         label="Config1",
         is_public=is_public,
-        is_internal=is_internal,
-        location_type="static"
+        is_internal=is_internal
     )
     db.session.add_all(
         [
@@ -69,4 +68,4 @@ class TestConfigurationsModel(BaseTestCase):
         generate_configuration_model()
 
         c = db.session.query(Configuration).filter_by(label="Config1").first()
-        self.assertEqual("static", c.location_type)
+        self.assertEqual("Config1", c.label)

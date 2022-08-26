@@ -14,41 +14,15 @@ class Configuration(
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     start_date = db.Column(db.DateTime, nullable=True)
     end_date = db.Column(db.DateTime, nullable=True)
-    location_type = db.Column(db.String(256), nullable=True)
-    longitude = db.Column(db.Float(), nullable=True)
-    latitude = db.Column(db.Float(), nullable=True)
-    elevation = db.Column(db.Float(), nullable=True)
-    project_uri = db.Column(db.String(256), nullable=True)
-    project_name = db.Column(db.String(256), nullable=True)
     label = db.Column(db.String(256), nullable=True)
     status = db.Column(db.String(256), nullable=True, default="draft")
-    update_description = db.Column(db.String(256), nullable=True)
-    longitude_src_device_property_id = db.Column(
-        db.Integer, db.ForeignKey("device_property.id"), nullable=True
-    )
-    src_longitude = db.relationship(
-        "DeviceProperty", uselist=False, foreign_keys=[longitude_src_device_property_id]
-    )
-
-    latitude_src_device_property_id = db.Column(
-        db.Integer, db.ForeignKey("device_property.id"), nullable=True
-    )
-    src_latitude = db.relationship(
-        "DeviceProperty", uselist=False, foreign_keys=[latitude_src_device_property_id]
-    )
-
-    elevation_src_device_property_id = db.Column(
-        db.Integer, db.ForeignKey("device_property.id"), nullable=True
-    )
-    src_elevation = db.relationship(
-        "DeviceProperty", uselist=False, foreign_keys=[elevation_src_device_property_id]
-    )
-    configuration_attachments = db.relationship(
-        "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
-    )
     cfg_permission_group = db.Column(db.String, nullable=True)
     is_internal = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=False)
+    update_description = db.Column(db.String(256), nullable=True)
+    configuration_attachments = db.relationship(
+        "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
+    )
 
     def validate(self):
         """
@@ -75,9 +49,6 @@ class Configuration(
         return {
             "label": self.label,
             "status": self.status,
-            "location_type": self.location_type,
-            "project_uri": self.project_uri,
-            "project_name": self.project_name,
             "cfg_permission_group": self.cfg_permission_group,
             "configuration_contact_roles": [
                 ccr.to_search_entry() for ccr in self.configuration_contact_roles
@@ -105,7 +76,8 @@ class Configuration(
             "is_internal": self.is_internal,
             "is_public": self.is_public,
             "created_by_id": self.created_by_id,
-            # start & end dates?
+            "start_date": self.start_date,
+            "end_date": self.end_date
         }
 
     @staticmethod
@@ -124,32 +96,22 @@ class Configuration(
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = (
-            ElasticSearchIndexTypes.keyword_and_full_searchable(
-                analyzer="ngram_analyzer"
-            )
+        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
+            analyzer="ngram_analyzer"
         )
 
         return {
             "aliases": {},
             "mappings": {
                 "properties": {
-                    "is_internal": {
-                        "type": "boolean",
-                    },
-                    "is_public": {
-                        "type": "boolean",
-                    },
-                    "created_by_id": {
-                        "type": "integer",
-                    },
+                    "is_internal": {"type": "boolean",},
+                    "is_public": {"type": "boolean",},
+                    "created_by_id": {"type": "integer",},
                     "label": type_keyword_and_full_searchable,
                     "status": type_keyword_and_full_searchable,
-                    "location_type": type_keyword_and_full_searchable,
-                    "project_name": type_keyword_and_full_searchable,
-                    # The uri just for an keyword filter.
-                    "project_uri": type_keyword,
                     "cfg_permission_group": type_keyword,
+                    "start_date": {"type": "date"},
+                    "end_date": {"type": "date"},
                     "platforms": {
                         "type": "nested",
                         "properties": Platform.get_search_index_properties(),
@@ -169,7 +131,6 @@ class Configuration(
                             },
                         },
                     },
-                    "firmware_versions": type_keyword_and_full_searchable,
                     "attachments": {
                         "type": "nested",
                         "properties": {
@@ -189,15 +150,11 @@ class Configuration(
                     },
                     "configuration_static_location_actions": {
                         "type": "nested",
-                        "properties": {
-                            "description": type_text_full_searchable,
-                        },
+                        "properties": {"description": type_text_full_searchable,},
                     },
                     "configuration_dynamic_location_actions": {
                         "type": "nested",
-                        "properties": {
-                            "description": type_text_full_searchable,
-                        },
+                        "properties": {"description": type_text_full_searchable,},
                     },
                     "platform_mount_actions": {
                         "type": "nested",

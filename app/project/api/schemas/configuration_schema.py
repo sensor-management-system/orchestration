@@ -19,12 +19,6 @@ class ConfigurationSchema(Schema):
     id = fields.Integer(as_string=True)
     start_date = fields.DateTime(allow_none=True)
     end_date = fields.DateTime(allow_none=True)
-    location_type = fields.String(allow_none=True)
-    longitude = fields.Float(allow_none=True)
-    latitude = fields.Float(allow_none=True)
-    elevation = fields.Float(allow_none=True)
-    project_uri = fields.String(allow_none=True)
-    project_name = fields.String(allow_none=True)
     label = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
     cfg_permission_group = fields.String(required=True)
@@ -32,34 +26,9 @@ class ConfigurationSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     is_internal = fields.Boolean(allow_none=True)
     is_public = fields.Boolean(allow_none=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
     update_description = fields.Str(dump_only=True)
-    src_longitude = Relationship(
-        attribute="src_longitude",
-        related_view="api.device_property_detail",
-        related_view_kwargs={"id": "<longitude_src_device_property_id>"},
-        include_resource_linkage=True,
-        type_="device_property",
-        schema="DevicePropertySchema",
-    )
-
-    src_latitude = Relationship(
-        attribute="src_latitude",
-        related_view="api.device_property_detail",
-        related_view_kwargs={"id": "<latitude_src_device_property_id>"},
-        include_resource_linkage=True,
-        type_="device_property",
-        schema="DevicePropertySchema",
-    )
-
-    src_elevation = Relationship(
-        attribute="src_elevation",
-        related_view="api.device_property_detail",
-        related_view_kwargs={"id": "<elevation_src_device_property_id>"},
-        include_resource_linkage=True,
-        type_="device_property",
-        schema="DevicePropertySchema",
-    )
-
     contacts = Relationship(
         attribute="contacts",
         related_view="api.contact_list",
@@ -156,26 +125,11 @@ class ConfigurationToNestedDictSerializer:
             return {
                 "label": configuration.label,
                 "status": configuration.status,
-                "location_type": configuration.location_type,
-                "project_uri": configuration.project_uri,
-                "project_name": configuration.project_name,
                 "contacts": [
                     ContactSchema().dict_serializer(c) for c in configuration.contacts
                 ],
                 "start_date": configuration.start_date,
                 "end_date": configuration.end_date,
-                "longitude": configuration.longitude,
-                "src_longitude": InnerDevicePropertySchema().dict_serializer(
-                    configuration.src_longitude
-                ),
-                "latitude": configuration.latitude,
-                "src_latitude": InnerDevicePropertySchema().dict_serializer(
-                    configuration.src_latitude
-                ),
-                "elevation": configuration.elevation,
-                "src_elevation": InnerDevicePropertySchema().dict_serializer(
-                    configuration.src_elevation
-                ),
             }
 
 
