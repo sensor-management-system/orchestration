@@ -35,8 +35,6 @@ export interface IConfigurationBasicData {
   id: string
   startDate: DateTime | null
   endDate: DateTime | null
-  projectUri: string
-  projectName: string
   label: string
   status: string
 }
@@ -45,8 +43,6 @@ export class ConfigurationBasicData implements IConfigurationBasicData {
   private _id: string = ''
   private _startDate: DateTime | null = null
   private _endDate: DateTime | null = null
-  private _projectUri: string = ''
-  private _projectName: string = ''
   private _label: string = ''
   private _status: string = ''
 
@@ -74,22 +70,6 @@ export class ConfigurationBasicData implements IConfigurationBasicData {
     this._endDate = date
   }
 
-  get projectName (): string {
-    return this._projectName
-  }
-
-  set projectName (newProjectName: string) {
-    this._projectName = newProjectName
-  }
-
-  get projectUri (): string {
-    return this._projectUri
-  }
-
-  set projectUri (newProjectUri: string) {
-    this._projectUri = newProjectUri
-  }
-
   get label (): string {
     return this._label
   }
@@ -112,9 +92,6 @@ export class ConfigurationBasicData implements IConfigurationBasicData {
     newObject.id = someObject.id
     newObject.startDate = someObject.startDate
     newObject.endDate = someObject.endDate
-
-    newObject.projectName = someObject.projectName
-    newObject.projectUri = someObject.projectUri
 
     newObject.label = someObject.label
     newObject.status = someObject.status

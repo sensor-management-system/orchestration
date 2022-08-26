@@ -104,18 +104,11 @@ export default class ConfigurationsBasicDataForm extends Vue {
   })
   readonly value!: Configuration
 
-  readonly LOCATION_TYPE_STATIONARY = 'Stationary'
-  readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
-
   async mounted () {
-    await Promise.all([
-      this.$store.dispatch('configurations/loadProjects'),
-      this.$store.dispatch('configurations/loadConfigurationsStates')
-    ])
+    await this.$store.dispatch('configurations/loadConfigurationsStates')
   }
 
   get configurationStates () { return this.$store.state.configurations.configurationStates }
-  get projectNames () { return this.$store.getters['configurations/projectNames'] }
   // @ts-ignore
   update (key: string, value: any) {
     // @ts-ignore

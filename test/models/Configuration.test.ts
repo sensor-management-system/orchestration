@@ -34,28 +34,6 @@ import { DateTime } from 'luxon'
 import { Configuration } from '@/models/Configuration'
 
 describe('Configuration', () => {
-  describe('#projectName', () => {
-    it('should be an empty string by default', () => {
-      const configuration = new Configuration()
-      expect(configuration.projectName).toEqual('')
-    })
-    it('should be possible to set it', () => {
-      const configuration = new Configuration()
-      configuration.projectName = 'abc'
-      expect(configuration.projectName).toEqual('abc')
-    })
-  })
-  describe('#projectUri', () => {
-    it('should be an empty string by default', () => {
-      const configuration = new Configuration()
-      expect(configuration.projectUri).toEqual('')
-    })
-    it('should be possible to set it', () => {
-      const configuration = new Configuration()
-      configuration.projectUri = 'project/abc'
-      expect(configuration.projectUri).toEqual('project/abc')
-    })
-  })
   describe('#label', () => {
     it('should be an empty string by default', () => {
       const configuration = new Configuration()
@@ -79,10 +57,8 @@ describe('Configuration', () => {
     })
   })
   describe('createFromObject', () => {
-    it('should be possible to set projectName, -uri, label & status with it', () => {
+    it('should be possible to set label & status with it', () => {
       const configurationToCopyFrom = new Configuration()
-      configurationToCopyFrom.projectName = 'Tereno NO'
-      configurationToCopyFrom.projectUri = 'projects/tereno-no'
       configurationToCopyFrom.label = 'Boeken'
       configurationToCopyFrom.status = 'draft'
 
@@ -91,8 +67,6 @@ describe('Configuration', () => {
 
       const result = Configuration.createFromObject(configurationToCopyFrom)
 
-      expect(result.projectName).toEqual('Tereno NO')
-      expect(result.projectUri).toEqual('projects/tereno-no')
       expect(result.label).toEqual('Boeken')
       expect(result.status).toEqual('draft')
       expect(result.startDate).toBeNull()
@@ -100,8 +74,6 @@ describe('Configuration', () => {
     })
     it('should also copy the start and end dates', () => {
       const configurationToCopyFrom = new Configuration()
-      configurationToCopyFrom.projectName = 'Tereno NO'
-      configurationToCopyFrom.projectUri = 'projects/tereno-no'
       configurationToCopyFrom.label = 'Boeken'
       configurationToCopyFrom.status = 'draft'
 

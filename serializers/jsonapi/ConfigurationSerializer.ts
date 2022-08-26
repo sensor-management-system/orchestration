@@ -54,7 +54,6 @@ import { DynamicLocationBeginActionSerializer } from '@/serializers/jsonapi/Dyna
 import { DynamicLocationEndActionSerializer } from '@/serializers/jsonapi/DynamicLocationEndActionSerializer'
 import { PermissionGroupSerializer } from '@/serializers/jsonapi/PermissionGroupSerializer'
 
-import { DynamicLocation, StationaryLocation, LocationType } from '@/models/Location'
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
@@ -112,8 +111,6 @@ export class ConfigurationSerializer {
     configuration.id = jsonApiData.id.toString()
     if (attributes) {
       configuration.label = attributes.label || ''
-      configuration.projectUri = attributes.project_uri || ''
-      configuration.projectName = attributes.project_name || ''
       configuration.status = attributes.status || ''
 
       configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
@@ -163,37 +160,6 @@ export class ConfigurationSerializer {
           }
         }
       }
-    }
-
-    if (attributes && attributes.location_type === LocationType.Stationary) {
-      const location = new StationaryLocation()
-      if (attributes.longitude != null) { // allow 0 as real values as well
-        location.longitude = attributes.longitude
-      }
-      if (attributes.latitude != null) { // allow 0 as real values as well
-        location.latitude = attributes.latitude
-      }
-      if (attributes.elevation != null) {
-        location.elevation = attributes.elevation
-      }
-      configuration.location = location
-    } else if (attributes && attributes.location_type === LocationType.Dynamic) {
-      const location = new DynamicLocation()
-      const toCheck = [
-        { key: 'src_latitude', setFunction (value: DeviceProperty) { location.latitude = value } },
-        { key: 'src_longitude', setFunction (value: DeviceProperty) { location.longitude = value } },
-        { key: 'src_elevation', setFunction (value: DeviceProperty) { location.elevation = value } }
-      ]
-      for (const check of toCheck) {
-        if (relationships && relationships[check.key] && relationships[check.key].data) {
-          const data = relationships[check.key].data as IJsonApiEntityWithoutDetails
-          const id = data.id
-          if (id != null && devicePropertyLookupById[id]) {
-            check.setFunction(devicePropertyLookupById[id])
-          }
-        }
-      }
-      configuration.location = location
     }
 
     let missingDataForContactIds: string[] = []
@@ -301,55 +267,18 @@ export class ConfigurationSerializer {
   convertModelToJsonApiData (configuration: Configuration): IJsonApiEntityWithOptionalId {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
 
-    let locationAttributes = {}
-    const locationRelationships: {[idx: string]: any} = {}
-
-    const location = configuration.location
-    if (location instanceof StationaryLocation) {
-      locationAttributes = {
-        location_type: LocationType.Stationary,
-        longitude: location.longitude,
-        latitude: location.latitude,
-        elevation: location.elevation
-      }
-    } else if (location instanceof DynamicLocation) {
-      locationAttributes = {
-        location_type: LocationType.Dynamic
-      }
-      const toAdd = [
-        { key: 'src_latitude', value: location.latitude },
-        { key: 'src_longitude', value: location.longitude },
-        { key: 'src_elevation', value: location.elevation }
-      ]
-      for (const check of toAdd) {
-        const key = check.key
-        if (check.value != null) {
-          locationRelationships[key] = {
-            data: {
-              id: check.value.id,
-              type: 'device_property'
-            }
-          }
-        }
-      }
-    }
-
     const result: IJsonApiEntityWithOptionalId = {
       attributes: {
         label: configuration.label,
-        project_uri: configuration.projectUri,
-        project_name: configuration.projectName,
         status: configuration.status,
         start_date: configuration.startDate != null ? configuration.startDate.setZone('UTC').toISO() : null,
         end_date: configuration.endDate != null ? configuration.endDate.setZone('UTC').toISO() : null,
         is_internal: configuration.isInternal,
         is_public: configuration.isPublic,
-        cfg_permission_group: configuration.permissionGroup?.id,
-        ...locationAttributes
+        cfg_permission_group: configuration.permissionGroup?.id
       },
       relationships: {
-        ...contacts,
-        ...locationRelationships
+        ...contacts
       },
       type: 'configuration'
     }

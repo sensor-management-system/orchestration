@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -145,8 +145,6 @@ describe('#addNewMountAction', () => {
       label: 'test config',
       startDate: null,
       endDate: null,
-      projectName: '',
-      projectUri: '',
       staticLocationBeginActions: [],
       staticLocationEndActions: [],
       dynamicLocationBeginActions: [],
@@ -155,7 +153,6 @@ describe('#addNewMountAction', () => {
       deviceMountActions: [deviceMountAction1],
       contacts: [],
       status: '',
-      location: null,
       permissionGroup: null,
       visibility: Visibility.Internal,
       createdAt: null,

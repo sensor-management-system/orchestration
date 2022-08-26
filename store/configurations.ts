@@ -40,7 +40,6 @@ import { DateTime } from 'luxon'
 import { RootState } from '@/store'
 
 import { Configuration } from '@/models/Configuration'
-import { Project } from '@/models/Project'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { ContactRole } from '@/models/ContactRole'
 import {
@@ -95,7 +94,6 @@ export interface ConfigurationsState {
   configuration: Configuration | null
   configurationContactRoles: ContactRole[]
   configurationStates: string[]
-  projects: Project[]
   configurationStaticLocationBeginActions: StaticLocationBeginAction[]
   configurationStaticLocationEndActions: StaticLocationEndAction[]
   configurationDynamicLocationBeginActions: DynamicLocationBeginAction[]
@@ -114,7 +112,6 @@ const state = (): ConfigurationsState => ({
   configuration: null,
   configurationContactRoles: [],
   configurationStates: [],
-  projects: [],
   configurationStaticLocationBeginActions: [],
   configurationStaticLocationEndActions: [],
   configurationDynamicLocationBeginActions: [],
@@ -149,9 +146,6 @@ function formatMountActionString (value: ConfigurationMountingAction): string {
 }
 
 const getters: GetterTree<ConfigurationsState, RootState> = {
-  projectNames: (state: ConfigurationsState) => {
-    return state.projects.map((p: Project) => p.name)
-  },
   timelineActions: (state: ConfigurationsState): ITimelineAction[] => { // Todo überlegen, ob das man das eventuell anders macht
     const result: ITimelineAction[] = []
 
@@ -281,7 +275,6 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
       totalCount
     } = await this.$api.configurations
       .setSearchText(searchParams.searchText)
-      .setSearchedProjects(searchParams.projects)
       .setSearchedStates(searchParams.states)
       .setSearchPermissionGroups(searchParams.permissionGroups)
       .searchPaginated(
@@ -310,10 +303,6 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async loadConfigurationsStates ({ commit }: { commit: Commit }) {
     const configurationStates = await this.$api.configurationStates.findAll()
     commit('setConfigurationStates', configurationStates)
-  },
-  async loadProjects ({ commit }: { commit: Commit }) {
-    const projects = await this.$api.projects.findAll()
-    commit('setProjects', projects)
   },
   async loadConfigurationStaticLocationBeginActions ({ commit }: { commit: Commit }, id: string) {
     commit('setConfigurationStaticLocationBeginActions', await this.$api.configurations.findRelatedStaticLocationBeginActions(id))
@@ -446,9 +435,6 @@ const mutations = {
   },
   setTotalPages (state: ConfigurationsState, count: number) {
     state.totalPages = count
-  },
-  setProjects (state: ConfigurationsState, projects: Project[]) {
-    state.projects = projects
   },
   setConfigurationStaticLocationBeginActions (state: ConfigurationsState, staticLocationBeginActions: StaticLocationBeginAction[]) {
     state.configurationStaticLocationBeginActions = staticLocationBeginActions

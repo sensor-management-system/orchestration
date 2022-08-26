@@ -35,7 +35,6 @@ import { IContact, Contact } from '@/models/Contact'
 import { IMountActions } from '@/models/IMountActions'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { IStationaryLocation, IDynamicLocation, StationaryLocation, DynamicLocation } from '@/models/Location'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
@@ -47,11 +46,8 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   id: string
   startDate: DateTime | null
   endDate: DateTime | null
-  projectUri: string
-  projectName: string
   label: string
   status: string
-  location: IStationaryLocation | IDynamicLocation | null
   contacts: IContact[]
   staticLocationBeginActions: StaticLocationBeginAction[]
   staticLocationEndActions: StaticLocationEndAction[]
@@ -75,11 +71,8 @@ export class Configuration implements IConfiguration, IVisible {
   private _id: string = ''
   private _startDate: DateTime | null = null
   private _endDate: DateTime | null = null
-  private _projectUri: string = ''
-  private _projectName: string = ''
   private _label: string = ''
   private _status: string = ''
-  private _location: IStationaryLocation | IDynamicLocation | null = null
   private _contacts: IContact[] = [] as IContact[]
   private _deviceMountActions: DeviceMountAction[] = []
   private _platformMountActions: PlatformMountAction[] = []
@@ -119,22 +112,6 @@ export class Configuration implements IConfiguration, IVisible {
     this._endDate = date
   }
 
-  get projectName (): string {
-    return this._projectName
-  }
-
-  set projectName (newProjectName: string) {
-    this._projectName = newProjectName
-  }
-
-  get projectUri (): string {
-    return this._projectUri
-  }
-
-  set projectUri (newProjectUri: string) {
-    this._projectUri = newProjectUri
-  }
-
   get label (): string {
     return this._label
   }
@@ -149,14 +126,6 @@ export class Configuration implements IConfiguration, IVisible {
 
   set status (newStatus: string) {
     this._status = newStatus
-  }
-
-  get location (): IStationaryLocation | IDynamicLocation | null {
-    return this._location
-  }
-
-  set location (location: IStationaryLocation | IDynamicLocation | null) {
-    this._location = location
   }
 
   get contacts (): IContact[] {
@@ -291,20 +260,9 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.startDate = someObject.startDate
     newObject.endDate = someObject.endDate
 
-    newObject.projectName = someObject.projectName
-    newObject.projectUri = someObject.projectUri
-
     newObject.label = someObject.label
     newObject.status = someObject.status
 
-    switch (true) {
-      case someObject.location instanceof StationaryLocation:
-        newObject.location = StationaryLocation.createFromObject(someObject.location as StationaryLocation)
-        break
-      case someObject.location instanceof DynamicLocation:
-        newObject.location = DynamicLocation.createFromObject(someObject.location as DynamicLocation)
-        break
-    }
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.deviceMountActions = someObject.deviceMountActions.map(DeviceMountAction.createFromObject)
     newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
