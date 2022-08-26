@@ -107,7 +107,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import { Configuration } from '@/models/Configuration'
 import { Visibility } from '@/models/Visibility'
@@ -125,10 +125,9 @@ import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
     DateTimePicker
   },
   computed: {
-    ...mapState('configurations', ['configurationStates']),
-    ...mapGetters('configurations', ['projectNames'])
+    ...mapState('configurations', ['configurationStates'])
   },
-  methods: mapActions('configurations', ['loadConfigurationsStates', 'loadProjects'])
+  methods: mapActions('configurations', ['loadConfigurationsStates'])
 })
 export default class ConfigurationsBasicDataForm extends Vue {
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
@@ -139,26 +138,17 @@ export default class ConfigurationsBasicDataForm extends Vue {
   })
   readonly value!: Configuration
 
-  readonly LOCATION_TYPE_STATIONARY = 'Stationary'
-  readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
-
   private entityName: string = 'configuration'
 
   // vuex definition for typescript check
   loadConfigurationsStates!: () => void
-  loadProjects!: () => void
 
   async created () {
     await this.loadConfigurationsStates()
-    await this.loadProjects()
   }
 
   get configurationStates () {
     return this.$store.state.configurations.configurationStates
-  }
-
-  get projectNames () {
-    return this.$store.getters['configurations/projectNames']
   }
 
   update (

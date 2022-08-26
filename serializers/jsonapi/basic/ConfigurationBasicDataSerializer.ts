@@ -45,8 +45,6 @@ export class ConfigurationBasicDataSerializer {
     configuration.id = jsonApiData.id.toString()
     if (attributes) {
       configuration.label = attributes.label || ''
-      configuration.projectUri = attributes.project_uri || ''
-      configuration.projectName = attributes.project_name || ''
       configuration.status = attributes.status || ''
 
       configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null

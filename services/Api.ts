@@ -70,8 +70,6 @@ import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
 import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
 import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
 
-import { ProjectApi } from '@/services/project/ProjectApi'
-
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
 import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
@@ -127,7 +125,6 @@ export class Api {
   private readonly _softwareTypeApi: SoftwareTypeApi
   private readonly _cvContactRoleApi: CvContactRoleApi
 
-  private readonly _projectApi: ProjectApi
   private readonly _elevationDatumApi: ElevationDatumApi
   private readonly _epsgCodeApi: EpsgCodeApi
 
@@ -368,8 +365,6 @@ export class Api {
       '/contactroles/'
     )
 
-    this._projectApi = new ProjectApi()
-
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
 
@@ -497,10 +492,6 @@ export class Api {
 
   get cvContactRoles (): CvContactRoleApi {
     return this._cvContactRoleApi
-  }
-
-  get projects (): ProjectApi {
-    return this._projectApi
   }
 
   get elevationData (): ElevationDatumApi {

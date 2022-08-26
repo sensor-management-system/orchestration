@@ -32,7 +32,6 @@
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 
-import { Project } from '@/models/Project'
 import { PermissionGroup } from '@/models/PermissionGroup'
 
 export interface IConfigurationBasicSearchParams {
@@ -41,7 +40,6 @@ export interface IConfigurationBasicSearchParams {
 
 export interface IConfigurationSearchParams extends IConfigurationBasicSearchParams {
   states: string[]
-  projects: Project[]
   permissionGroups: PermissionGroup[]
 }
 
@@ -51,15 +49,11 @@ export interface IConfigurationSearchParams extends IConfigurationBasicSearchPar
  */
 export class ConfigurationSearchParamsSerializer {
   public states: string[] = []
-  public projects: Project[] = []
   public permissionGroups: PermissionGroup[] = []
 
-  constructor ({ states, projects, permissionGroups }: {states?: string[], projects?: Project[], permissionGroups?: PermissionGroup[]} = {}) {
+  constructor ({ states, permissionGroups }: {states?: string[], permissionGroups?: PermissionGroup[]} = {}) {
     if (states) {
       this.states = states
-    }
-    if (projects) {
-      this.projects = projects
     }
     if (permissionGroups) {
       this.permissionGroups = permissionGroups
@@ -76,9 +70,6 @@ export class ConfigurationSearchParamsSerializer {
     const result: QueryParams = {}
     if (params.searchText) {
       result.searchText = params.searchText
-    }
-    if (params.projects) {
-      result.projects = params.projects.map(m => m.id)
     }
     if (params.states) {
       result.states = params.states
@@ -98,14 +89,6 @@ export class ConfigurationSearchParamsSerializer {
   toSearchParams (params: QueryParams): IConfigurationSearchParams {
     const isNotUndefined = (value: any) => typeof value !== 'undefined'
 
-    let projects: Project[] = []
-    if (params.projects) {
-      if (!Array.isArray(params.projects)) {
-        params.projects = [params.projects]
-      }
-      projects = params.projects.map(paramId => this.projects.find(project => project.id === paramId)).filter(isNotUndefined) as Project[]
-    }
-
     let states: string[] = []
     if (params.states) {
       if (!Array.isArray(params.states)) {
@@ -124,7 +107,6 @@ export class ConfigurationSearchParamsSerializer {
 
     return {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
-      projects,
       states,
       permissionGroups
     }

@@ -33,10 +33,8 @@ import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
-import { StationaryLocation, DynamicLocation, LocationType } from '@/models/Location'
 
 import {
-  IJsonApiEntityWithoutDetailsDataDict,
   IJsonApiEntityWithoutDetailsDataDictList
 } from '@/serializers/jsonapi/JsonApiTypes'
 
@@ -55,12 +53,6 @@ import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 
-describe('LocationType', () => {
-  it('should be fixed what values can be given - and those should be consistent with the serializer', () => {
-    expect(LocationType.Stationary).toEqual('Stationary')
-    expect(LocationType.Dynamic).toEqual('Dynamic')
-  })
-})
 describe('ConfigurationSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
     it('should convert a json api object with multiple entries to a configuration model list', () => {
@@ -70,9 +62,6 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: LocationType.Dynamic,
-            project_uri: 'projects/Tereno-NO',
-            project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
             status: 'draft'
           },
@@ -136,9 +125,6 @@ describe('ConfigurationSerializer', () => {
           type: 'configuration',
           attributes: {
             // no start and no end date
-            location_type: LocationType.Dynamic,
-            // no fields for longitude, latitude & elevation,
-            // no fields for project_uri or project_name
             // no field for label
             status: 'draft'
           },
@@ -155,10 +141,7 @@ describe('ConfigurationSerializer', () => {
         }, {
           type: 'configuration',
           attributes: {
-            location_type: LocationType.Stationary,
-            longitude: 13.0,
-            latitude: 52.0,
-            elevation: 100.0
+            // no label, no start nor end
           },
           relationships: {},
           id: '4'
@@ -479,15 +462,8 @@ describe('ConfigurationSerializer', () => {
 
       const expectedConfiguration1 = new Configuration()
       expectedConfiguration1.id = '1'
-      expectedConfiguration1.location = DynamicLocation.createFromObject({
-        longitude: property1,
-        latitude: property2,
-        elevation: null
-      })
       expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration1.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
-      expectedConfiguration1.projectUri = 'projects/Tereno-NO'
-      expectedConfiguration1.projectName = 'Tereno NO'
       expectedConfiguration1.label = 'Tereno NO Boeken'
       expectedConfiguration1.status = 'draft'
       expectedConfiguration1.staticLocationBeginActions = [expectedStaticLocationBeginAction1]
@@ -498,7 +474,6 @@ describe('ConfigurationSerializer', () => {
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
-      expectedConfiguration2.location = new DynamicLocation()
       expectedConfiguration2.status = 'draft'
 
       const expectedConfiguration3 = new Configuration()
@@ -506,11 +481,6 @@ describe('ConfigurationSerializer', () => {
 
       const expectedConfiguration4 = new Configuration()
       expectedConfiguration4.id = '4'
-      expectedConfiguration4.location = StationaryLocation.createFromObject({
-        longitude: 13.0,
-        latitude: 52.0,
-        elevation: 100.0
-      })
 
       const serializer = new ConfigurationSerializer()
       const configurationsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
@@ -546,12 +516,6 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: LocationType.Stationary,
-            longitude: 13.0,
-            latitude: 52.0,
-            elevation: 100.0,
-            project_uri: 'projects/Tereno-NO',
-            project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
             status: 'draft'
           },
@@ -566,15 +530,8 @@ describe('ConfigurationSerializer', () => {
       }
       const expectedConfiguration = new Configuration()
       expectedConfiguration.id = '1'
-      expectedConfiguration.location = StationaryLocation.createFromObject({
-        longitude: 13.0,
-        latitude: 52.0,
-        elevation: 100.0
-      })
       expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
-      expectedConfiguration.projectUri = 'projects/Tereno-NO'
-      expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
 
@@ -592,12 +549,6 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
-            location_type: LocationType.Stationary,
-            longitude: 13.0,
-            latitude: 52.0,
-            elevation: 100.0,
-            project_uri: 'projects/Tereno-NO',
-            project_name: 'Tereno NO',
             label: 'Tereno NO Boeken',
             status: 'draft'
           },
@@ -639,15 +590,8 @@ describe('ConfigurationSerializer', () => {
       }
       const expectedConfiguration = new Configuration()
       expectedConfiguration.id = '1'
-      expectedConfiguration.location = StationaryLocation.createFromObject({
-        longitude: 13.0,
-        latitude: 52.0,
-        elevation: 100.0
-      })
       expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
-      expectedConfiguration.projectUri = 'projects/Tereno-NO'
-      expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
       expectedConfiguration.contacts = [
@@ -681,12 +625,6 @@ describe('ConfigurationSerializer', () => {
         attributes: {
           start_date: '2020-08-28T13:49:48.015620+00:00',
           end_date: '2020-08-29T13:49:48.015620+00:00',
-          location_type: LocationType.Stationary,
-          longitude: 13.0,
-          latitude: 52.0,
-          elevation: 100.0,
-          project_uri: 'projects/Tereno-NO',
-          project_name: 'Tereno NO',
           label: 'Tereno NO Boeken',
           status: 'draft'
         },
@@ -700,56 +638,8 @@ describe('ConfigurationSerializer', () => {
 
       const expectedConfiguration = new Configuration()
       expectedConfiguration.id = '1'
-      expectedConfiguration.location = StationaryLocation.createFromObject({
-        longitude: 13.0,
-        latitude: 52.0,
-        elevation: 100.0
-      })
       expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
-      expectedConfiguration.projectUri = 'projects/Tereno-NO'
-      expectedConfiguration.projectName = 'Tereno NO'
-      expectedConfiguration.label = 'Tereno NO Boeken'
-      expectedConfiguration.status = 'draft'
-
-      const included: any[] = []
-
-      const serializer = new ConfigurationSerializer()
-      const configurationWithMeta = serializer.convertJsonApiDataToModel(jsonApiData, included)
-      const configuration = configurationWithMeta.configuration
-
-      expect(configuration).toEqual(expectedConfiguration)
-      expect(configurationWithMeta.missing.contacts.ids).toEqual([])
-    })
-    it('should convert a json api data to a configuration model without lat&lon', () => {
-      const jsonApiData: any = {
-        attributes: {
-          start_date: '2020-08-28T13:49:48.015620+00:00',
-          end_date: '2020-08-29T13:49:48.015620+00:00',
-          location_type: LocationType.Stationary,
-          longitude: null,
-          latitude: null,
-          elevation: null,
-          project_uri: 'projects/Tereno-NO',
-          project_name: 'Tereno NO',
-          label: 'Tereno NO Boeken',
-          status: 'draft'
-        },
-        relationships: {
-          contacts: {
-            data: [] // no contacts in this case
-          }
-        },
-        id: '1'
-      }
-
-      const expectedConfiguration = new Configuration()
-      expectedConfiguration.id = '1'
-      expectedConfiguration.location = new StationaryLocation()
-      expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
-      expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
-      expectedConfiguration.projectUri = 'projects/Tereno-NO'
-      expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
 
@@ -768,13 +658,6 @@ describe('ConfigurationSerializer', () => {
       const configuration = new Configuration()
       expect(configuration.id).toEqual('')
       configuration.label = 'ABC'
-      configuration.projectUri = 'projects/tereno-no'
-      configuration.projectName = 'TERENO NO'
-      configuration.location = StationaryLocation.createFromObject({
-        longitude: 12.0,
-        latitude: 51.0,
-        elevation: 60.0
-      })
       configuration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       configuration.endDate = DateTime.utc(2021, 8, 28, 13, 49, 48, 15)
       configuration.contacts = [
@@ -806,18 +689,6 @@ describe('ConfigurationSerializer', () => {
 
       expect(attributes).toHaveProperty('label')
       expect(attributes.label).toEqual('ABC')
-      expect(attributes).toHaveProperty('project_uri')
-      expect(attributes.project_uri).toEqual('projects/tereno-no')
-      expect(attributes).toHaveProperty('project_name')
-      expect(attributes.project_name).toEqual('TERENO NO')
-      expect(attributes).toHaveProperty('location_type')
-      expect(attributes.location_type).toEqual(LocationType.Stationary)
-      expect(attributes).toHaveProperty('longitude')
-      expect(attributes.longitude).toEqual(12.0)
-      expect(attributes).toHaveProperty('latitude')
-      expect(attributes.latitude).toEqual(51.0)
-      expect(attributes).toHaveProperty('elevation')
-      expect(attributes.elevation).toEqual(60.0)
       expect(attributes).toHaveProperty('start_date')
       expect(attributes.start_date).toEqual('2020-08-28T13:49:48.015Z')
       expect(attributes).toHaveProperty('end_date')
@@ -856,115 +727,6 @@ describe('ConfigurationSerializer', () => {
 
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('1')
-    })
-    it('should also work with a dynamic location type', () => {
-      const configuration = new Configuration()
-      expect(configuration.id).toEqual('')
-
-      const property1 = DeviceProperty.createFromObject({
-        id: '100',
-        samplingMediaName: 'Air',
-        samplingMediaUri: 'medium/air',
-        compartmentName: 'C1',
-        compartmentUri: 'compartment/c1',
-        propertyName: 'Temperature',
-        propertyUri: 'property/temperature',
-        unitName: 'degree',
-        unitUri: 'unit/degree',
-        failureValue: -999,
-        measuringRange: MeasuringRange.createFromObject({
-          min: -273,
-          max: 100
-        }),
-        label: 'air_temperature',
-        accuracy: 0.1,
-        resolution: 0.05,
-        resolutionUnitName: 'TemperatureRes',
-        resolutionUnitUri: 'property/res/temperature'
-      })
-      const property2 = DeviceProperty.createFromObject({
-        id: '101',
-        samplingMediaName: 'Water',
-        samplingMediaUri: 'medium/water',
-        compartmentName: 'C1',
-        compartmentUri: 'compartment/c1',
-        propertyName: 'Temperature',
-        propertyUri: 'property/temperature',
-        unitName: 'degree',
-        unitUri: 'unit/degree',
-        failureValue: -999,
-        measuringRange: MeasuringRange.createFromObject({
-          min: -10,
-          max: 100
-        }),
-        label: 'water_temperature',
-        accuracy: 0.1,
-        resolution: 0.05,
-        resolutionUnitName: 'TemperatureRes',
-        resolutionUnitUri: 'property/res/temperature'
-      })
-
-      configuration.location = new DynamicLocation()
-      configuration.location.latitude = property1
-      configuration.location.longitude = property2
-      configuration.location.elevation = null
-
-      const serializer = new ConfigurationSerializer()
-
-      const jsonApiData = serializer.convertModelToJsonApiData(configuration)
-
-      expect(typeof jsonApiData).toEqual('object')
-
-      expect(jsonApiData).not.toHaveProperty('id')
-      expect(jsonApiData.type).toEqual('configuration')
-      expect(jsonApiData).toHaveProperty('attributes')
-      const attributes = jsonApiData.attributes
-
-      expect(attributes).toHaveProperty('location_type')
-      expect(attributes.location_type).toEqual(LocationType.Dynamic)
-      expect(jsonApiData).toHaveProperty('relationships')
-      const relationships = jsonApiData.relationships
-      expect(relationships).toHaveProperty('src_longitude')
-      const lonSrcProperty = relationships?.src_longitude as IJsonApiEntityWithoutDetailsDataDict
-      expect(lonSrcProperty).toHaveProperty('data')
-      expect(lonSrcProperty.data).toHaveProperty('id')
-      expect(lonSrcProperty.data.id).toEqual('101')
-      expect(lonSrcProperty.data).toHaveProperty('type')
-      expect(lonSrcProperty.data.type).toEqual('device_property')
-      expect(relationships).toHaveProperty('src_latitude')
-      const latSrcProperty = relationships?.src_latitude as IJsonApiEntityWithoutDetailsDataDict
-      expect(latSrcProperty).toHaveProperty('data')
-      expect(latSrcProperty.data).toHaveProperty('id')
-      expect(latSrcProperty.data.id).toEqual('100')
-      expect(latSrcProperty.data).toHaveProperty('type')
-      expect(latSrcProperty.data.type).toEqual('device_property')
-      // TODO check how it must look like to delete them later...
-      expect(relationships).not.toHaveProperty('src_elevation')
-    })
-    it('should also work with an empty stationary location type', () => {
-      const configuration = new Configuration()
-      expect(configuration.id).toEqual('')
-      configuration.location = new StationaryLocation()
-
-      const serializer = new ConfigurationSerializer()
-
-      const jsonApiData = serializer.convertModelToJsonApiData(configuration)
-
-      expect(typeof jsonApiData).toEqual('object')
-
-      expect(jsonApiData).not.toHaveProperty('id')
-      expect(jsonApiData.type).toEqual('configuration')
-      expect(jsonApiData).toHaveProperty('attributes')
-      const attributes = jsonApiData.attributes
-
-      expect(attributes).toHaveProperty('location_type')
-      expect(attributes.location_type).toEqual(LocationType.Stationary)
-      expect(attributes).toHaveProperty('longitude')
-      expect(attributes.longitude).toEqual(null)
-      expect(attributes).toHaveProperty('latitude')
-      expect(attributes.latitude).toEqual(null)
-      expect(attributes).toHaveProperty('elevation')
-      expect(attributes.elevation).toEqual(null)
     })
   })
   // in earlier versions, the test to serialize the configuration hierarchy

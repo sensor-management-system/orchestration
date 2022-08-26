@@ -247,25 +247,22 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
-import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction } from '@/store/permissions'
+import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState } from '@/store/permissions'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import StringSelect from '@/components/StringSelect.vue'
-import ProjectSelect from '@/components/ProjectSelect.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 
 import { Configuration } from '@/models/Configuration'
 import { PermissionGroup } from '@/models/PermissionGroup'
-import { Project } from '@/models/Project'
 import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { QueryParams } from '@/modelUtils/QueryParams'
 @Component({
   components: {
-    ProjectSelect,
     StringSelect,
     DotMenuActionDelete,
     ConfigurationsDeleteDialog,
@@ -275,13 +272,13 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     PermissionGroupSearchSelect
   },
   computed: {
-    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'projects']),
+    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates']),
     ...mapState('appbar', ['activeTab']),
     ...mapGetters('configurations', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups'])
   },
   methods: {
-    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'loadProjects', 'deleteConfiguration']),
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
@@ -292,7 +289,6 @@ export default class SearchConfigurationsPage extends Vue {
 
   private searchText: string | null = null
   private selectedConfigurationStates: string[] = []
-  private selectedProjects: Project[] = []
   private selectedPermissionGroups: PermissionGroup[] = []
 
   private showDeleteDialog: boolean = false
@@ -313,18 +309,17 @@ export default class SearchConfigurationsPage extends Vue {
   configurations!: Configuration[]
   deleteConfiguration!: (id: string) => void
   configurationStates!: string[]
-  projects!: Project[]
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   activeTab!: IAppbarState['activeTab']
   setActiveTab!: SetActiveTabAction
+  permissionGroups!: PermissionsState['permissionGroups']
 
   async created () {
     try {
       this.loading = true
       this.initializeAppBar()
-      await this.loadConfigurationsStates()
-      await this.loadPermissionGroups()
+      await Promise.all([this.loadConfigurationsStates(), this.loadPermissionGroups()])
       await this.initSearchQueryParams()
       await this.runInitialSearch()
     } catch (e) {
@@ -370,13 +365,12 @@ export default class SearchConfigurationsPage extends Vue {
     return {
       searchText: this.searchText,
       states: this.selectedConfigurationStates,
-      projects: this.selectedProjects,
       permissionGroups: this.selectedPermissionGroups
     }
   }
 
   isExtendedSearch (): boolean {
-    return !!this.selectedProjects.length ||
+    return !!this.selectedPermissionGroups.length ||
       !!this.selectedConfigurationStates.length
   }
 
@@ -390,7 +384,6 @@ export default class SearchConfigurationsPage extends Vue {
 
   basicSearch () {
     this.selectedConfigurationStates = []
-    this.selectedProjects = []
     this.selectedPermissionGroups = []
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
@@ -409,7 +402,6 @@ export default class SearchConfigurationsPage extends Vue {
   clearExtendedSearch () {
     this.clearBasicSearch()
     this.selectedConfigurationStates = []
-    this.selectedProjects = []
     this.selectedPermissionGroups = []
     this.initUrlQueryParams()
   }
@@ -459,7 +451,7 @@ export default class SearchConfigurationsPage extends Vue {
   initSearchQueryParams (): void {
     const searchParamsObject = (new ConfigurationSearchParamsSerializer({
       states: this.configurationStates,
-      projects: this.projects
+      permissionGroups: this.permissionGroups
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
@@ -468,9 +460,6 @@ export default class SearchConfigurationsPage extends Vue {
     }
     if (searchParamsObject.states) {
       this.selectedConfigurationStates = searchParamsObject.states
-    }
-    if (searchParamsObject.projects) {
-      this.selectedProjects = searchParamsObject.projects
     }
     if (searchParamsObject.permissionGroups) {
       this.selectedPermissionGroups = searchParamsObject.permissionGroups

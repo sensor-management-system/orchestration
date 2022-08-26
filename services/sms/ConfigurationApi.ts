@@ -56,13 +56,11 @@ import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndAc
 
 import { Configuration } from '@/models/Configuration'
 import { ContactRole } from '@/models/ContactRole'
-import { Project } from '@/models/Project'
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
 import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
 import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
 import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
-import { DynamicLocation } from '@/models/Location'
 import { Contact } from '@/models/Contact'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
@@ -104,7 +102,6 @@ export class ConfigurationApi {
   private _dynamicLocationEndActionApi: DynamicLocationEndActionApi
   private _mountingActionsControllerApi: MountingActionsControllerApi
 
-  private _searchedProjects: Project[] = []
   private _searchedStates: string[] = []
   private _searchPermissionGroups: PermissionGroup[] = []
   private _searchText: string | null = null
@@ -173,15 +170,6 @@ export class ConfigurationApi {
 
   get mountingActionsControllerApi (): MountingActionsControllerApi {
     return this._mountingActionsControllerApi
-  }
-
-  get searchedProjects (): Project[] {
-    return this._searchedProjects
-  }
-
-  setSearchedProjects (value: Project[]) {
-    this._searchedProjects = value
-    return this
   }
 
   get searchedStates (): string[] {
@@ -269,7 +257,6 @@ export class ConfigurationApi {
 
   prepareSearch () {
     this.resetFilterSetting()
-    this.prepareProjects()
     this.prepareStates()
     this.preparePermissionGroups()
     this.prepareMail()
@@ -277,25 +264,6 @@ export class ConfigurationApi {
 
   resetFilterSetting () {
     this.filterSettings = []
-  }
-
-  prepareProjects () {
-    if (this.searchedProjects.length > 0) {
-      this.filterSettings.push({
-        or: [
-          {
-            name: 'project_name',
-            op: 'in_',
-            val: this.searchedProjects.map((p: Project) => p.name)
-          },
-          {
-            name: 'project_uri',
-            op: 'in_',
-            val: this.searchedProjects.map((p: Project) => p.uri)
-          }
-        ]
-      })
-    }
   }
 
   prepareStates () {
@@ -378,23 +346,6 @@ export class ConfigurationApi {
 
     if (configuration.id) {
       const existingConfig = await this.findById(configuration.id)
-      if (existingConfig.location instanceof DynamicLocation) {
-        if (configuration.location instanceof DynamicLocation) {
-          if (configuration.location.elevation == null && existingConfig.location.elevation !== null) {
-            relationshipsToDelete.push('src-elevation')
-          }
-          if (configuration.location.latitude == null && existingConfig.location.latitude !== null) {
-            relationshipsToDelete.push('src-latitude')
-          }
-          if (configuration.location.longitude == null && existingConfig.location.longitude !== null) {
-            relationshipsToDelete.push('src-longitude')
-          }
-        } else {
-          relationshipsToDelete.push('src-elevation')
-          relationshipsToDelete.push('src-latitude')
-          relationshipsToDelete.push('src-longitude')
-        }
-      }
       const newPlatformMountActionIds = new Set(configuration.platformMountActions.map(x => x.id))
       platformMountActionIdsToDelete = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => !newPlatformMountActionIds.has(x)))
       platformMountActionIdsToUpdate = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => newPlatformMountActionIds.has(x)))
