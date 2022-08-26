@@ -183,10 +183,7 @@ class TestConfigurationsService(BaseTestCase):
         db.session.add(device3)
 
         config1 = Configuration(
-            label="Config1",
-            location_type="static",
-            is_public=False,
-            is_internal=True,
+            label="Config1", is_public=False, is_internal=True,
         )
         db.session.add(config1)
         db.session.commit()
@@ -201,12 +198,7 @@ class TestConfigurationsService(BaseTestCase):
                     "include",
                     "=",
                     ",".join(
-                        [
-                            "contacts",
-                            "src_longitude",
-                            "src_latitude",
-                            "src_elevation",
-                        ]
+                        ["contacts" ]
                     ),
                 ]
             )

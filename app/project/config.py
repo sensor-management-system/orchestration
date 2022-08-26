@@ -44,7 +44,10 @@ class BaseConfig:
     PKCE_SCOPES = env("PKCE_SCOPES", "openid profile email auth_context")
     PKCE_CLIENT_ID = env("PKCE_CLIENT_ID", "rdmsms-pkce-flow")
     SMS_BACKEND_URL = env(
-        "SMS_BACKEND_URL", "https://localhost.localdomain"
+        "SMS_BACKEND_URL", "https://localhost.localdomain/backend/api/v1"
+    )
+    SMS_FRONTEND_URL = env(
+        "SMS_FRONTEND_URL", "https://localhost.localdomain"
     )
 
 
