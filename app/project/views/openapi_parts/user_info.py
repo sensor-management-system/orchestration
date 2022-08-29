@@ -36,6 +36,7 @@ components = {
                                             "member": {"type": "array"},
                                             "active": {"type": "boolean"},
                                             "is_superuser": {"type": "boolean"},
+                                            "apikey": {"type": "string"},
                                         },
                                     },
                                 },
@@ -47,6 +48,7 @@ components = {
                                         "member": ["12345", "998"],
                                         "active": True,
                                         "is_superuser": False,
+                                        "apikey": "123456...",
                                     },
                                 },
                             }

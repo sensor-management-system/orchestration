@@ -1,4 +1,6 @@
-from ....api.models import User, Contact
+"""Mixin classes that may be used for multiple authentification mechanisms."""
+
+from ....api.models import Contact, User
 from ....api.models.base_model import db
 
 
@@ -10,9 +12,10 @@ class CreateNewUserByUserinfoMixin:
     create new users in case there is the very first request.
     If we find existing ones, we can go on with those.
     """
+
     @staticmethod
     def get_user_or_create_new(identity, attributes):
-
+        """Return an existing user or create a new one."""
         # We check if we find a user for this identity entry.
         found_user = db.session.query(User).filter_by(subject=identity).one_or_none()
         if found_user:
@@ -38,7 +41,8 @@ class CreateNewUserByUserinfoMixin:
                 active=True,
             )
             db.session.add(contact)
-        user = User(subject=identity, contact=contact, active=True)
+        apikey = User.generate_new_apikey()
+        user = User(subject=identity, contact=contact, active=True, apikey=apikey)
         db.session.add(user)
         db.session.commit()
         return user
