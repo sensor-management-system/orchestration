@@ -2798,7 +2798,8 @@
   "security": [
     {
       "oauth2": [
-      ]
+      ],
+      "ApiKeyAuth": []
     }
   ],
   "servers": [{% for server in servers %}
@@ -4558,8 +4559,13 @@
             }
           }
         }
-      }
+      },
       {% endif %}
+      "ApiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "X-APIKEY"
+      }
     },
     "schemas": {
       "DevicePropertyCalibrations": {
