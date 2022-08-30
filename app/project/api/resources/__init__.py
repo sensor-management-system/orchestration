@@ -6,38 +6,31 @@ from .configuration_controllers import (  # noqa: F401
     ControllerConfigurationMountingActions,
     ControllerConfigurationMountingActionTimepoints,
 )
-from .configuration_location_action_controller import (
-    ControllerConfigurationLocationActionTimepoints
-)
 from .configuration_dynamic_location_begin_actions_resources import (  # noqa: F401
     ConfigurationDynamicLocationBeginActionDetail,
     ConfigurationDynamicLocationBeginActionList,
 )
-from .configuration_resources import (  # noqa: F401
-    ConfigurationList,
-    ConfigurationDetail,
+from .configuration_location_action_controller import (  # noqa: F401
+    ControllerConfigurationLocationActionTimepoints,
 )
-from .configuration_role_resources import (
-    ConfigurationRoleList,
+from .configuration_resources import (  # noqa: F401
+    ConfigurationDetail,
+    ConfigurationList,
+)
+from .configuration_role_resources import (  # noqa: F401
     ConfigurationRoleDetail,
-)  # noqa: F401
+    ConfigurationRoleList,
+)
 from .configuration_static_location_begin_actions_resources import (  # noqa: F401
     ConfigurationStaticLocationBeginActionDetail,
     ConfigurationStaticLocationBeginActionList,
 )
-from .contact_resources import ContactList, ContactDetail  # noqa: F401
-
-from .configuration_controllers import (  # noqa: F401
-    ControllerConfigurationMountingActions,
-    ControllerConfigurationMountingActionTimepoints,
-)
-
-from .customfield_resources import CustomFieldList, CustomFieldDetail  # noqa: F401
-from .device_attachment_resources import (
-    DeviceAttachmentList,
+from .contact_resources import ContactDetail, ContactList  # noqa: F401
+from .customfield_resources import CustomFieldDetail, CustomFieldList  # noqa: F401
+from .device_attachment_resources import (  # noqa: F401
     DeviceAttachmentDetail,
-)  # noqa: F401
-from .mounting_availabilities import DeviceAvailabilities, PlatformAvailabilities  # noqa: F401
+    DeviceAttachmentList,
+)
 from .device_calibration_action_attachment_resources import (  # noqa: F401
     DeviceCalibrationAttachmentDetail,
     DeviceCalibrationAttachmentList,
@@ -55,11 +48,11 @@ from .device_property_calibration_resources import (  # noqa: F401
     DevicePropertyCalibrationList,
 )
 from .device_property_resources import (  # noqa: F401
-    DevicePropertyList,
     DevicePropertyDetail,
+    DevicePropertyList,
 )
-from .device_resources import DeviceList, DeviceDetail  # noqa: F401
-from .device_role_resources import DeviceRoleList, DeviceRoleDetail  # noqa: F401
+from .device_resources import DeviceDetail, DeviceList  # noqa: F401
+from .device_role_resources import DeviceRoleDetail, DeviceRoleList  # noqa: F401
 from .device_software_update_action_attachment_resources import (  # noqa: F401
     DeviceSoftwareUpdateActionAttachmentDetail,
     DeviceSoftwareUpdateActionAttachmentList,
@@ -92,17 +85,21 @@ from .generic_platform_action_resources import (  # noqa: F401
     GenericPlatformActionDetail,
     GenericPlatformActionList,
 )
+from .mounting_availabilities import (  # noqa: F401
+    DeviceAvailabilities,
+    PlatformAvailabilities,
+)
 from .ping import Ping  # noqa: F401
-from .platform_attachment_resources import (
-    PlatformAttachmentList,
+from .platform_attachment_resources import (  # noqa: F401
     PlatformAttachmentDetail,
-)  # noqa: F401
+    PlatformAttachmentList,
+)
 from .platform_mount_action_resources import (  # noqa: F401
     PlatformMountActionDetail,
     PlatformMountActionList,
 )
-from .platform_resources import PlatformList, PlatformDetail  # noqa: F401
-from .platform_role_resources import PlatformRoleList, PlatformRoleDetail  # noqa: F401
+from .platform_resources import PlatformDetail, PlatformList  # noqa: F401
+from .platform_role_resources import PlatformRoleDetail, PlatformRoleList  # noqa: F401
 from .platform_software_update_action_attachment_resources import (  # noqa: F401
     PlatformSoftwareUpdateActionAttachmentDetail,
     PlatformSoftwareUpdateActionAttachmentList,
@@ -112,4 +109,5 @@ from .platform_software_update_action_resource import (  # noqa: F401
     PlatformSoftwareUpdateActionList,
 )
 from .user_info import UserInfo  # noqa: F401
-from .user_resources import UserList, UserDetail  # noqa: F401
+from .user_modification import RevokeApikey  # noqa: F401
+from .user_resources import UserDetail, UserList  # noqa: F401

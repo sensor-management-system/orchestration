@@ -146,6 +146,8 @@ api.route(
     "/contacts/<int:id>/users",
 )
 api.route(UserDetail, "user_detail", "/users/<int:id>")
+# User modifications
+api.route(RevokeApikey, "revoke_apikey", "/revoke-apikey")
 
 # Configuration
 api.route(
