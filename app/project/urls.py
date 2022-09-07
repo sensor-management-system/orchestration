@@ -423,3 +423,6 @@ api.route(
     "controller_configuration_location_action_timepoints",
     "/controller/configurations/<int:configuration_id>/location-action-timepoints",
 )
+
+# Usage statistics
+api.route(UsageStatistics, "usage_statistics", "/usage-statistics")
