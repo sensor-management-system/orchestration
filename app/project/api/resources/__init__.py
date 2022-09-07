@@ -108,6 +108,7 @@ from .platform_software_update_action_resource import (  # noqa: F401
     PlatformSoftwareUpdateActionDetail,
     PlatformSoftwareUpdateActionList,
 )
+from .usage_statistics import UsageStatistics  # noqa: F401
 from .user_info import UserInfo  # noqa: F401
 from .user_modification import RevokeApikey  # noqa: F401
 from .user_resources import UserDetail, UserList  # noqa: F401
