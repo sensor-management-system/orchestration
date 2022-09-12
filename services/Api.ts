@@ -76,6 +76,7 @@ import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionAp
 import { DeviceCalibrationActionAttachmentApi } from '@/services/sms/DeviceCalibrationActionAttachmentApi'
 import { DeviceCalibrationDevicePropertyApi } from '@/services/sms/DeviceCalibrationDevicePropertyApi'
 import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
+import { StatisticsApi } from '@/services/sms/StatisticsApi'
 
 import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
 import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
@@ -111,6 +112,7 @@ export class Api {
   private readonly _dynamicLocationEndActionApi: DynamicLocationEndActionApi
   private readonly _mountingActionsControllerApi: MountingActionsControllerApi
   private readonly _uploadApi: UploadApi
+  private readonly _statisticsApi: StatisticsApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -308,6 +310,8 @@ export class Api {
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/upload'
     )
+
+    this._statisticsApi = new StatisticsApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '')
 
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
@@ -508,5 +512,9 @@ export class Api {
 
   get permissionGroupApi (): PermissionGroupApi {
     return this._permissionGroupApi
+  }
+
+  get statisticsApi (): StatisticsApi {
+    return this._statisticsApi
   }
 }

@@ -83,7 +83,7 @@ permissions and limitations under the Licence.
         </v-list-item>
 
         <!-- Contacts -->
-        <v-list-item to="/contacts" nuxt>
+        <v-list-item v-if="isLoggedIn" to="/contacts" nuxt>
           <v-list-item-action>
             <v-icon>mdi-account-multiple</v-icon>
           </v-list-item-action>
@@ -467,6 +467,9 @@ export default {
           break
       }
       return align + ' pr-2'
+    },
+    isLoggedIn () {
+      return this.$auth.loggedIn
     }
   },
   created () {
