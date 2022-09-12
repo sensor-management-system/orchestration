@@ -70,6 +70,7 @@ describe('#addNewMountAction', () => {
       description: '',
       createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
       updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
+      updateDescription: '',
       createdBy: null,
       updatedBy: null,
       createdByUserId: null,
@@ -95,6 +96,7 @@ describe('#addNewMountAction', () => {
       model: '',
       createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
       updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
+      updateDescription: '',
       description: '',
       dualUse: false,
       properties: [],
@@ -157,6 +159,7 @@ describe('#addNewMountAction', () => {
       visibility: Visibility.Internal,
       createdAt: null,
       updatedAt: null,
+      updateDescription: '',
       createdBy: null,
       updatedBy: null,
       createdByUserId: null

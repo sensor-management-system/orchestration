@@ -119,6 +119,7 @@ export class DeviceSerializer {
       result.website = attributes.website || ''
       result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+      result.updateDescription = attributes.update_description || ''
       if (attributes.is_private) {
         result.visibility = Visibility.Private
       }
@@ -250,6 +251,7 @@ export class DeviceSerializer {
         // createdBy
         // modifiedAt
         // modifiedBy
+        // updateDescription
       }
     }
 

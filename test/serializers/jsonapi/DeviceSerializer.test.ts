@@ -67,6 +67,7 @@ const createTestDevice = () => {
   device.dualUse = true
   device.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
   device.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
+  device.updateDescription = ''
 
   device.customFields = [
     CustomTextField.createFromObject({

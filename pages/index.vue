@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2020
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -123,6 +123,14 @@ permissions and limitations under the Licence.
           </v-card>
         </v-col>
       </v-row>
+
+      <v-row v-if="isLoggedIn" justify="center" align="stretch">
+        <v-col cols="12">
+          <recent-activity-overview-card
+            :amount-of-recents="5"
+          />
+        </v-col>
+      </v-row>
     </v-container>
   </v-container>
 </template>
@@ -130,12 +138,13 @@ permissions and limitations under the Licence.
 import { Vue, Component } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 import BasicOverviewCard from '@/components/overview/BasicOverviewCard.vue'
+import RecentActivityOverviewCard from '@/components/overview/RecentActivityOverviewCard.vue'
 
 import { SetFullWidthAction, SetDefaultsAction } from '@/store/defaultlayout'
 
 @Component({
   components: {
-    BasicOverviewCard
+    BasicOverviewCard, RecentActivityOverviewCard
   },
   methods: {
     ...mapActions('defaultlayout', ['setFullWidth', 'setDefaults'])

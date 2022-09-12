@@ -81,6 +81,8 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
 
   createdBy: IContact | null
   updatedBy: IContact | null
+  updateDescription: string
+
   visibility: Visibility
 }
 
@@ -118,6 +120,7 @@ export class Device implements IDevice, IVisible {
 
   private _createdBy: IContact | null = null
   private _updatedBy: IContact | null = null
+  private _updateDescription: string = ''
 
   private _createdByUserId: string | null = null
 
@@ -267,6 +270,14 @@ export class Device implements IDevice, IVisible {
     this._updatedAt = newUpdatedAt
   }
 
+  get updateDescription (): string {
+    return this._updateDescription
+  }
+
+  set updateDescription (newDescription: string) {
+    this._updateDescription = newDescription
+  }
+
   get contacts (): Contact[] {
     return this._contacts
   }
@@ -381,6 +392,7 @@ export class Device implements IDevice, IVisible {
 
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
+    newObject.updateDescription = someObject.updateDescription
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)

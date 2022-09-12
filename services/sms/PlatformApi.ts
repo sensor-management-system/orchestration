@@ -245,6 +245,33 @@ export class PlatformApi {
     })
   }
 
+  async searchRecentlyUpdated (amount: number) {
+    this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          'page[size]': amount,
+          'page[number]': 1,
+          sort: '-updated_at',
+          include: 'updated_by.contact'
+        }
+      }
+
+    ).then((rawResponse: any) => {
+      const rawData = rawResponse.data
+      // We don't ask the api to load the contacts, so we just add dummy objects
+      // to stay with the relationships
+      return this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
+    })
+  }
+
   searchMatchingAsCsvBlob (): Promise<Blob> {
     this.prepareSearch()
 

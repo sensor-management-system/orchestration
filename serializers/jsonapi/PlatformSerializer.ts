@@ -102,6 +102,7 @@ export class PlatformSerializer {
       result.website = attributes.website || ''
       result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+      result.updateDescription = attributes.update_description || ''
 
       result.inventoryNumber = attributes.inventory_number || ''
       result.serialNumber = attributes.serial_number || ''
@@ -219,6 +220,7 @@ export class PlatformSerializer {
         // modifiedBy
         // created_by: platform.createdBy,
         // updated_by: platform.updatedBy,
+        // update_description: platform.updateDescription,
         inventory_number: platform.inventoryNumber,
         serial_number: platform.serialNumber,
         // as the persistent_identifier must be unique, we sent null in case
