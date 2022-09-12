@@ -45,17 +45,40 @@ permissions and limitations under the Licence.
       <v-row
         align="center"
         justify="center"
+        class="mb-0 pb-0"
         no-gutters
       >
         <v-col
           class="text-left"
           cols="8"
         >
-          <h1 class="text-h5 mb-4">
+          <h1 class="text-h5">
             Welcome to the<br>
             <span class="text-h4 font-weight-bold">Sensor Management System</span>
           </h1>
         </v-col>
+      </v-row>
+      <v-row justify="space-around" align-content="start" class="mt-0">
+        <v-spacer />
+        <v-col class="d-flex flex-column align-center">
+          <div class="counter-number">
+            {{ stats.devices }}
+          </div>
+          <div>Devices</div>
+        </v-col>
+        <v-col class="d-flex flex-column align-center">
+          <div class="counter-number">
+            {{ stats.platforms }}
+          </div>
+          <div>Platforms</div>
+        </v-col>
+        <v-col class="d-flex flex-column align-center">
+          <div class="counter-number">
+            {{ stats.configurations }}
+          </div>
+          <div>Configurations</div>
+        </v-col>
+        <v-spacer />
       </v-row>
     </v-parallax>
     <v-container class="mt-n14 px-12">
@@ -138,6 +161,7 @@ permissions and limitations under the Licence.
 import { Vue, Component } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 import BasicOverviewCard from '@/components/overview/BasicOverviewCard.vue'
+import { StatisticsCount } from '@/models/Statistics'
 import RecentActivityOverviewCard from '@/components/overview/RecentActivityOverviewCard.vue'
 
 import { SetFullWidthAction, SetDefaultsAction } from '@/store/defaultlayout'
@@ -154,9 +178,21 @@ export default class OverviewIndex extends Vue {
   setFullWidth!: SetFullWidthAction
   setDefaults!: SetDefaultsAction
 
+  private stats = new StatisticsCount()
+
   created () {
     this.setFullWidth(true)
     this.$store.dispatch('appbar/setDefaults')
+    this.getUsageStatistics()
+  }
+
+  async getUsageStatistics (): Promise<void> {
+    try {
+      const result = await this.$api.statisticsApi.getCounts()
+      this.stats = result
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Failed to load usage statistics')
+    }
   }
 
   beforeDestroy () {
@@ -193,5 +229,10 @@ Metainformation is recorded here, such as the type of device, the measured varia
 <style>
 #parallax-bg .v-parallax__content {
   background: linear-gradient(45deg, #1e1e1e , transparent);
+}
+.counter-number {
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #F9BA2E;
 }
 </style>
