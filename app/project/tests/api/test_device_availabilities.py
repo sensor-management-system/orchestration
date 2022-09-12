@@ -222,9 +222,9 @@ class TestDeviceAvailabilities(BaseTestCase):
             )
         self.assertEqual(response.status_code, 405)
 
-    def test_device_with_multiple_mounting_action(self):
-        """Ensure get a platform with multiple mounting action."""
-        device, _ = self.mount_a_device(
+    def test_device_with_multiple_mounting_actions(self):
+        """Ensure get a platform with multiple mounting actions."""
+        device, device_mount_action_1 = self.mount_a_device(
             begin_date=datetime.datetime(2020, 1, 1, 0, 0, 0),
             end_date=datetime.datetime(2021, 1, 30, 0, 0, 0),
         )
@@ -263,9 +263,10 @@ class TestDeviceAvailabilities(BaseTestCase):
         )
         expected_output = [
             {
-                "id": "1",
+                "id": str(device.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(device_mount_action_2.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2022-01-01T00:00:00",
                 "end_date": "2025-01-01T00:00:00",
             }
@@ -292,16 +293,18 @@ class TestDeviceAvailabilities(BaseTestCase):
         )
         expected_output = [
             {
-                "id": "1",
+                "id": str(device.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(device_mount_action_1.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2020-01-01T00:00:00",
                 "end_date": "2021-01-30T00:00:00",
             },
             {
-                "id": "1",
+                "id": str(device.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(device_mount_action_2.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2022-01-01T00:00:00",
                 "end_date": "2025-01-01T00:00:00",
             },
@@ -345,11 +348,11 @@ class TestDeviceAvailabilities(BaseTestCase):
         data = response.json
         self.assertEqual(len(data), 1)
 
-        expected_output = [{"id": "1", "available": True}]
+        expected_output = [{"id": str(available_device.id), "available": True}]
         self.assertEqual(expected_output, data)
 
         # With more than one id
-        available_device_1, _ = self.mount_a_device(
+        available_device_2, device_mount_action_2 = self.mount_a_device(
             begin_date=datetime.datetime(2022, 3, 1, 0, 0, 0),
             end_date=datetime.datetime(2022, 12, 30, 0, 0, 0),
         )
@@ -359,7 +362,7 @@ class TestDeviceAvailabilities(BaseTestCase):
                 query_string={
                     "from": fake.date_time_this_month(),
                     "to": datetime.datetime(2025, 12, 1, 0, 0, 0),
-                    "ids": f"{available_device.id},{available_device_1.id}",
+                    "ids": f"{available_device.id},{available_device_2.id}",
                 },
             )
         self.assertEqual(response.status_code, 200)
@@ -367,17 +370,18 @@ class TestDeviceAvailabilities(BaseTestCase):
         self.assertEqual(len(data), 2)
         expected_output = [
             {
-                "id": "6",
+                "id": str(available_device_2.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(device_mount_action_2.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2022-03-01T00:00:00",
                 "end_date": "2022-12-30T00:00:00",
             },
-            {"id": "1", "available": True},
+            {"id": str(available_device.id), "available": True},
         ]
         self.assertEqual(expected_output, data)
 
-    def test_dont_show_private_device(self):
+    def test_dont_show_private_devices(self):
         """Ensure that we don't show information about private devices."""
         private_device = Device(
             short_name="private device",

@@ -220,9 +220,9 @@ class TestPlatformAvailabilities(BaseTestCase):
             )
         self.assertEqual(response.status_code, 405)
 
-    def test_platform_with_multiple_mounting_action(self):
-        """Ensure get a platform with multiple mounting action."""
-        platform, _ = self.mount_a_platform(
+    def test_platform_with_multiple_mounting_actions(self):
+        """Ensure get a platform with multiple mounting actions."""
+        platform, platform_mount_action_1 = self.mount_a_platform(
             begin_date=datetime.datetime(2021, 1, 1, 0, 0, 0),
             end_date=datetime.datetime(2022, 1, 30, 0, 0, 0),
         )
@@ -261,9 +261,10 @@ class TestPlatformAvailabilities(BaseTestCase):
         )
         expected_output = [
             {
-                "id": "1",
+                "id": str(platform.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(platform_mount_action_2.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2023-01-01T00:00:00",
                 "end_date": "2026-01-01T00:00:00",
             }
@@ -290,16 +291,18 @@ class TestPlatformAvailabilities(BaseTestCase):
         )
         expected_output = [
             {
-                "id": "1",
+                "id": str(platform.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(platform_mount_action_1.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2021-01-01T00:00:00",
                 "end_date": "2022-01-30T00:00:00",
             },
             {
-                "id": "1",
+                "id": str(platform.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(platform_mount_action_2.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2023-01-01T00:00:00",
                 "end_date": "2026-01-01T00:00:00",
             },
@@ -309,7 +312,7 @@ class TestPlatformAvailabilities(BaseTestCase):
 
     def test_filter_one_or_multiple_platforms(self):
         """Test that we can filter for specific platforms."""
-        available_platform, _ = self.mount_a_platform(
+        available_platform, platform_mount_action_1 = self.mount_a_platform(
             begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0),
             end_date=datetime.datetime(2022, 1, 30, 0, 0, 0),
         )
@@ -343,11 +346,11 @@ class TestPlatformAvailabilities(BaseTestCase):
         data = response.json
         self.assertEqual(len(data), 1)
 
-        expected_output = [{"id": "1", "available": True}]
+        expected_output = [{"id": str(available_platform.id), "available": True}]
         self.assertEqual(expected_output, data)
 
         # With more than one id
-        available_platform_1, _ = self.mount_a_platform(
+        available_platform_2, platform_mount_action_2 = self.mount_a_platform(
             begin_date=datetime.datetime(2022, 3, 1, 0, 0, 0),
             end_date=datetime.datetime(2022, 12, 30, 0, 0, 0),
         )
@@ -357,7 +360,7 @@ class TestPlatformAvailabilities(BaseTestCase):
                 query_string={
                     "from": fake.date_time_this_month(),
                     "to": datetime.datetime(2025, 12, 1, 0, 0, 0),
-                    "ids": f"{available_platform.id},{available_platform_1.id}",
+                    "ids": f"{available_platform.id},{available_platform_2.id}",
                 },
             )
         self.assertEqual(response.status_code, 200)
@@ -365,13 +368,14 @@ class TestPlatformAvailabilities(BaseTestCase):
         self.assertEqual(len(data), 2)
         expected_output = [
             {
-                "id": "6",
+                "id": str(available_platform_2.id),
                 "available": False,
-                "configuration": "1",
+                "mount": str(platform_mount_action_2.id),
+                "configuration": str(self.configuration.id),
                 "begin_date": "2022-03-01T00:00:00",
                 "end_date": "2022-12-30T00:00:00",
             },
-            {"id": "1", "available": True},
+            {"id": str(available_platform.id), "available": True},
         ]
         self.assertEqual(expected_output, data)
 

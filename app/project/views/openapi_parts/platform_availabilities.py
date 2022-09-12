@@ -24,20 +24,22 @@ components = {
                             "data": {
                                 "example": [
                                     {
-                                        "id": 1,
+                                        "id": "1",
                                         "available": False,
-                                        "configuration": 3,
+                                        "mount": "123",
+                                        "configuration": "3",
                                         "begin_date": "2021-01-31T10:00:00Z",
                                         "end_date": "2021-02-28T10:00:00Z",
                                     },
                                     {
-                                        "id": 2,
+                                        "id": "2",
                                         "available": False,
-                                        "configuration": 3,
+                                        "mount": "124",
+                                        "configuration": "3",
                                         "begin_date": "2021-01-31T10:00:00Z",
                                         "end_date": "2021-02-28T10:00:00Z",
                                     },
-                                    {"id": 3, "available": True},
+                                    {"id": "3", "available": True},
                                 ]
                             }
                         }
