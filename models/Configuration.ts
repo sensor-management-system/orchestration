@@ -55,6 +55,7 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   dynamicLocationEndActions: DynamicLocationEndAction[]
   createdAt: DateTime | null
   updatedAt: DateTime | null
+  updateDescription: string
   createdBy: IContact | null
   updatedBy: IContact | null
   /*
@@ -83,6 +84,7 @@ export class Configuration implements IConfiguration, IVisible {
   private _permissionGroup: IPermissionGroup | null = null
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
+  private _updateDescription: string = ''
   private _createdBy: IContact | null = null
   private _updatedBy: IContact | null = null
   private _createdByUserId: string | null = null
@@ -208,6 +210,14 @@ export class Configuration implements IConfiguration, IVisible {
     this._updatedAt = newUpdatedAt
   }
 
+  get updateDescription (): string {
+    return this._updateDescription
+  }
+
+  set updateDescription (newDescription: string) {
+    this._updateDescription = newDescription
+  }
+
   get createdBy (): IContact | null {
     return this._createdBy
   }
@@ -275,6 +285,7 @@ export class Configuration implements IConfiguration, IVisible {
 
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
+    newObject.updateDescription = someObject.updateDescription
     newObject.createdBy = someObject.createdBy ? Contact.createFromObject(someObject.createdBy) : null
     newObject.updatedBy = someObject.updatedBy ? Contact.createFromObject(someObject.updatedBy) : null
     newObject.createdByUserId = someObject.createdByUserId

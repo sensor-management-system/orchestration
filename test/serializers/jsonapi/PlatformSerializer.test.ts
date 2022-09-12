@@ -59,6 +59,7 @@ const createTestPlatform = () => {
   platform.website = 'http://gfz-potsdam.de'
   platform.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
   platform.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
+  platform.updateDescription = ''
 
   platform.attachments = [
     Attachment.createFromObject({

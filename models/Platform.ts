@@ -66,6 +66,7 @@ export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationI
 
   createdBy: IContact | null
   updatedBy: IContact | null
+  updateDescription: string
 
   /*
     You may wonder why there is an extra createdByUserId entry here.
@@ -109,6 +110,7 @@ export class Platform implements IPlatform, IVisible {
 
   private _createdBy: IContact | null = null
   private _updatedBy: IContact | null = null
+  private _updateDescription: string = ''
 
   private _createdByUserId: string | null = null
 
@@ -262,6 +264,14 @@ export class Platform implements IPlatform, IVisible {
     this._updatedAt = newUpdatedAt
   }
 
+  get updateDescription (): string {
+    return this._updateDescription
+  }
+
+  set updateDescription (newDescription: string) {
+    this._updateDescription = newDescription
+  }
+
   get createdBy (): IContact | null {
     return this._createdBy
   }
@@ -358,6 +368,7 @@ export class Platform implements IPlatform, IVisible {
 
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
+    newObject.updateDescription = someObject.updateDescription
 
     newObject.createdBy = someObject.createdBy
     newObject.updatedBy = someObject.updatedBy
