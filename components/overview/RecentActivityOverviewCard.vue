@@ -171,6 +171,8 @@ export default class RecentActivityOverviewCard extends Vue {
     let entityText = ''
     if (description.action.toLowerCase() === 'create' && description.field.toLowerCase() === 'basic data') {
       entityText = `${description.action}d a new ${entity.type}`
+    } else if (description.action === '') {
+      entityText = `updated the ${entity.type}`
     } else {
       entityText = `${description.action}d the ${entity.type}'s "${description.field.toLowerCase()}"`
     }
@@ -183,8 +185,19 @@ export default class RecentActivityOverviewCard extends Vue {
       action: '',
       field: ''
     }
-    descriptionObject.action = description.split(';')[0]
-    descriptionObject.field = description.split(';')[1]
+    const splitted = description.split(';')
+    let action: string
+    let field: string
+    if (splitted.length > 1) {
+      action = splitted[0]
+      field = splitted[1]
+    } else {
+      action = ''
+      field = ''
+    }
+    descriptionObject.action = action
+    descriptionObject.field = field
+
     return descriptionObject
   }
 
