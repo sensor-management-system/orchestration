@@ -29,7 +29,28 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div />
+  <div>
+    <v-card flat>
+      <v-card-title>Help</v-card-title>
+      <v-card-text>
+        <p>
+          Information on how to use this application can be found on our <a href="https://gitlab.hzdr.de/hub-terra/sms/service-desk/-/wikis/home" target="_blank" style="text-decoration: none">
+            <strong>Wiki Page</strong>
+          </a>.
+        </p>
+      </v-card-text>
+      <v-card flat>
+        <v-card-title>Support</v-card-title>
+        <v-card-text>
+          <p>
+            If you require technical support or have any questions or suggestions, please send an e-mail to our <a href="mailto:gitlab-incoming+hub-terra-sms-service-desk-4415-issue-@hzdr.de" style="text-decoration: none">
+              <strong>Help Desk <v-icon>mdi-message-question-outline</v-icon></strong>
+            </a>
+          </p>
+        </v-card-text>
+      </v-card>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -38,11 +59,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class HelpPage extends Vue {
   created () {
-    this.$store.commit('appbar/setTitle', 'Help')
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.$store.dispatch('appbar/init', { title: 'Help' })
   }
 }
 </script>

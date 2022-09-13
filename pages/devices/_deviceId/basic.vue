@@ -29,36 +29,18 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <NuxtChild
-    v-model="device"
-  />
+  <NuxtChild />
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
-
-import { Device } from '@/models/Device'
+import { Component, Vue } from 'nuxt-property-decorator'
 
 @Component
 export default class DeviceBasicPage extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Device
-
   head () {
     return {
       titleTemplate: 'Basic Data - %s'
     }
-  }
-
-  get device (): Device {
-    return this.value
-  }
-
-  set device (value: Device) {
-    this.$emit('input', value)
   }
 }
 </script>

@@ -2,11 +2,15 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -39,23 +43,11 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/contacts"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="redirect ? redirect : '/contacts'"
+          save-btn-text="create"
+          @save="save"
+        />
       </v-card-actions>
       <ContactBasicDataForm
         ref="basicForm"
@@ -63,23 +55,11 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/contacts"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="redirect ? redirect : '/contacts'"
+          save-btn-text="create"
+          @save="save"
+        />
       </v-card-actions>
     </v-card>
   </div>
@@ -88,58 +68,82 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
+
+import { SetDefaultsAction, SetTitleAction } from '@/store/appbar'
+import { SaveContactAction } from '@/store/contacts'
+
 import { Rules } from '@/mixins/Rules'
 
 import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     ContactBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods: {
+    ...mapActions('contacts', ['saveContact']),
+    ...mapActions('appbar', ['setDefaults', 'setTitle'])
+  }
 })
 export default class ContactNewPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
   private contact: Contact = new Contact()
   private isLoading: boolean = false
+  private redirect: string = ''
 
-  mounted () {
+  // vuex definition for typescript check
+  initContactsNewAppBar!: () => void
+  saveContact!: SaveContactAction
+  setDefaults!: SetDefaultsAction
+  setTitle!: SetTitleAction
+
+  created () {
+    /** this page accepts the query parameter 'redirect' as a html encoded URI
+      * and sends the user back to this page after a new contact has been created.
+      * it is currently used in /devices/contacts/new and /platforms/contacts/new
+      * it also checks if the redirect starts with http to prevent linking to external pages
+    */
+    const backLink = this.$route.query.redirect as string
+    if (backLink && !backLink.startsWith('http')) {
+      this.redirect = backLink
+    }
     this.initializeAppBar()
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+  initializeAppBar () {
+    this.setTitle('New Contact')
   }
 
-  onSaveButtonClicked (): void {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the contact')
-      return
-    }
-    this.isLoading = true
-    this.$api.contacts.save(this.contact).then((savedContact) => {
-      this.isLoading = false
-      this.$store.commit('snackbar/setSuccess', 'Contact created')
-      this.$router.push('/contacts/' + savedContact.id + '')
-    }).catch((_error) => {
-      this.isLoading = false
-      this.$store.commit('snackbar/setError', 'Creation of contact failed')
-    })
-  }
 
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      title: 'Add Contact'
-    })
+    const redirect: string | (string | null)[] = this.$route.query.redirect
+
+    try {
+      this.isLoading = true
+      const savedContact = await this.saveContact(this.contact)
+      this.$store.commit('snackbar/setSuccess', 'Contact created')
+      // sends the user back to the previous contact creation page
+      if (redirect && savedContact.id) {
+        this.$router.push(redirect + '?contact=' + encodeURI(savedContact.id))
+      } else {
+        this.$router.push('/contacts/' + savedContact.id)
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Creation of contact failed')
+    } finally {
+      this.isLoading = false
+    }
   }
 }
 </script>

@@ -73,11 +73,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class UfzPrivacyPolicyPage extends Vue {
   created () {
-    this.$store.commit('appbar/setTitle', 'Privacy Policy')
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.$store.dispatch('appbar/init', { title: 'Privacy Policy' })
   }
 }
 </script>

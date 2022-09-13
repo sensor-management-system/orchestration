@@ -35,137 +35,38 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
+      v-model="isLoading"
     />
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn && isActionsPage"
-        color="primary"
-        small
-        :to="'/platforms/' + platformId + '/actions/new'"
-      >
-        Add Action
-      </v-btn>
-    </v-card-actions>
-
-    <template v-if="isAddActionPage">
-      <NuxtChild
-        @input="$fetch"
-        @showsave="showsave"
-      />
-    </template>
-
-    <template v-else-if="isEditActionPage">
-      <NuxtChild
-        @input="$fetch"
-        @showload="showload"
-        @showsave="showsave"
-      />
-    </template>
-
-    <template v-else>
-      <hint-card v-if="actions.length === 0">
-        There are no actions for this platform.
-      </hint-card>
-      <PlatformActionTimeline
-        v-else
-        :value="actions"
-        :platform-id="platformId"
-        :action-api-dispatcher="apiDispatcher"
-        :is-user-authenticated="$auth.loggedIn"
-        @input="$fetch"
-        @showdelete="showsave"
-      />
-    </template>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
 
-import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
-import HintCard from '@/components/HintCard.vue'
+import { LoadAllPlatformActionsAction } from '@/store/platforms'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-import { IActionCommonDetails } from '@/models/ActionCommonDetails'
-import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
-import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
-import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
-
-import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
-import { PlatformActionApiDispatcher } from '@/modelUtils/actionHelpers'
-
 @Component({
-  components: {
-    HintCard,
-    PlatformActionTimeline,
-    ProgressIndicator
-  }
+  components: { ProgressIndicator },
+  methods: mapActions('platforms', ['loadAllPlatformActions'])
 })
 export default class PlatformActionsPage extends Vue {
-  private isSaving: boolean = false
-  private isLoading: boolean = false
-  private actions: IActionCommonDetails[] = []
+  private isLoading = false
+
+  // vuex definition for typescript check
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
 
   async fetch () {
-    this.showload(true)
-    await this.fetchActions()
-    this.showload(false)
-  }
-
-  async fetchActions (): Promise<void> {
-    this.actions = []
-    await Promise.all([
-      this.fetchGenericActions(),
-      this.fetchSoftwareUpdateActions(),
-      this.fetchMountActions(),
-      this.fetchUnmountActions()
-    ])
-    // sort the actions
-    const comparator = new DateComparator()
-    this.actions.sort((i: IActionCommonDetails, j: IActionCommonDetails): number => {
-      if (isDateCompareable(i) && isDateCompareable(j)) {
-        // multiply result with -1 to get descending order
-        return comparator.compare(i, j) * -1
-      }
-      if (isDateCompareable(i)) {
-        return -1
-      }
-      if (isDateCompareable(j)) {
-        return 1
-      }
-      return 0
-    })
-  }
-
-  async fetchGenericActions (): Promise<void> {
-    const actions: GenericAction[] = await this.$api.platforms.findRelatedGenericActions(this.platformId)
-    actions.forEach((action: GenericAction) => this.actions.push(action))
-  }
-
-  async fetchSoftwareUpdateActions (): Promise<void> {
-    const actions: SoftwareUpdateAction[] = await this.$api.platforms.findRelatedSoftwareUpdateActions(this.platformId)
-    actions.forEach((action: SoftwareUpdateAction) => this.actions.push(action))
-  }
-
-  async fetchMountActions (): Promise<void> {
-    const actions: PlatformMountAction[] = await this.$api.platforms.findRelatedMountActions(this.platformId)
-    actions.forEach((action: PlatformMountAction) => this.actions.push(new PlatformMountActionWrapper(action)))
-  }
-
-  async fetchUnmountActions (): Promise<void> {
-    const actions: PlatformUnmountAction[] = await this.$api.platforms.findRelatedUnmountActions(this.platformId)
-    actions.forEach((action: PlatformUnmountAction) => this.actions.push(new PlatformUnmountActionWrapper(action)))
-  }
-
-  head () {
-    return {
-      titleTemplate: 'Actions - %s'
+    try {
+      this.isLoading = true
+      await this.loadAllPlatformActions(this.platformId)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch actions')
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -173,36 +74,10 @@ export default class PlatformActionsPage extends Vue {
     return this.$route.params.platformId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
-  get isActionsPage (): boolean {
-    return !this.isEditActionPage && !this.isAddActionPage
-  }
-
-  get isAddActionPage (): boolean {
-    // eslint-disable-next-line no-useless-escape
-    const addUrl = '^\/platforms\/' + this.platformId + '\/actions\/new$'
-    return !!this.$route.path.match(addUrl)
-  }
-
-  get isEditActionPage (): boolean {
-    // eslint-disable-next-line no-useless-escape
-    const editUrl = '^\/platforms\/' + this.platformId + '\/actions\/[a-zA-Z-]+\/[0-9]+\/edit$'
-    return !!this.$route.path.match(editUrl)
-  }
-
-  showsave (isSaving: boolean) {
-    this.isSaving = isSaving
-  }
-
-  showload (isLoading: boolean) {
-    this.isLoading = isLoading
-  }
-
-  get apiDispatcher () {
-    return new PlatformActionApiDispatcher(this.$api)
+  head () {
+    return {
+      titleTemplate: 'Actions - %s'
+    }
   }
 }
 </script>

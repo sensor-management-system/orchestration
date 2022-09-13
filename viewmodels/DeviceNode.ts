@@ -44,18 +44,17 @@ import { DeviceMountAction } from '@/models/DeviceMountAction'
 export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
   private node: DeviceMountAction
   private _disabled: boolean = false
+  private _id: string | null = ''
 
   static readonly ID_PREFIX = 'DeviceNode-'
 
   constructor (node: DeviceMountAction) {
     this.node = node
+    this._id = DeviceNode.ID_PREFIX + this.node.device.id
   }
 
   get id (): string | null {
-    if (!this.node.device.id) {
-      return null
-    }
-    return DeviceNode.ID_PREFIX + this.node.device.id
+    return this._id
   }
 
   get elementId (): string | null {
@@ -103,8 +102,12 @@ export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
     return false
   }
 
-  isDevice (): boolean {
+  isDevice (): this is DeviceNode {
     return true
+  }
+
+  isConfiguration (): boolean {
+    return false
   }
 
   unpack (): DeviceMountAction {

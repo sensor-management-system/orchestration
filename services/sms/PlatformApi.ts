@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,17 +31,18 @@
  */
 import { AxiosInstance, Method } from 'axios'
 
+import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { ContactRole } from '@/models/ContactRole'
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { GenericAction } from '@/models/GenericAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
-import { PlatformUnmountAction } from '@/models/views/platforms/actions/PlatformUnmountAction'
 
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 
@@ -56,50 +57,364 @@ import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAtta
 import { GenericPlatformActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 import { PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
 import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
-import { PlatformUnmountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformUnmountActionSerializer'
+import { Availability } from '@/models/Availability'
+import { AvailabilitySerializer } from '@/serializers/controller/AvailabilitySerializer'
 
-import { IFlaskJSONAPIFilter } from '@/utils/JSONApiInterfaces'
-
-import {
-  IPaginationLoader
-} from '@/utils/PaginatedLoader'
-
-interface IncludedRelationships {
+export interface IncludedRelationships {
   includeContacts?: boolean
   includePlatformAttachments?: boolean
+  includeCreatedBy?: boolean
+  includeUpdatedBy?: boolean
 }
+
+function getIncludeParams (includes: IncludedRelationships): string {
+  const listIncludedRelationships: string[] = []
+  if (includes.includeContacts) {
+    listIncludedRelationships.push('contacts')
+  }
+  if (includes.includePlatformAttachments) {
+    listIncludedRelationships.push('platform_attachments')
+  }
+  if (includes.includeCreatedBy) {
+    listIncludedRelationships.push('created_by.contact')
+  }
+  if (includes.includeUpdatedBy) {
+    listIncludedRelationships.push('updated_by.contact')
+  }
+  return listIncludedRelationships.join(',')
+}
+
+export type PlatformPermissionFetchFunction = () => Promise<PermissionGroup[]>
 
 export class PlatformApi {
   private axiosApi: AxiosInstance
   readonly basePath: string
   private serializer: PlatformSerializer
+  private permissionFetcher: PlatformPermissionFetchFunction | undefined
 
-  constructor (axiosInstance: AxiosInstance, basePath: string) {
+  private _searchedManufacturers: Manufacturer[] = []
+  private _searchedStates: Status[] = []
+  private _searchedPlatformTypes: PlatformType[] = []
+  private _searchedPermissionGroups: PermissionGroup[] = []
+  private _searchedUserMail: string | null = null
+  private _searchedCreatorId: string | null = null
+  private _searchText: string | null = null
+  private filterSettings: any[] = []
+
+  constructor (axiosInstance: AxiosInstance, basePath: string, permissionFetcher?: PlatformPermissionFetchFunction) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
     this.serializer = new PlatformSerializer()
+    if (permissionFetcher) {
+      this.permissionFetcher = permissionFetcher
+    }
   }
 
-  findById (id: string, includes: IncludedRelationships): Promise<Platform> {
-    const listIncludedRelationships: string[] = []
-    if (includes.includeContacts) {
-      listIncludedRelationships.push('contacts')
-    }
-    if (includes.includePlatformAttachments) {
-      listIncludedRelationships.push('platform_attachments')
-    }
-    const include = listIncludedRelationships.join(',')
+  get searchedManufacturers (): Manufacturer[] {
+    return this._searchedManufacturers
+  }
 
-    return this.axiosApi.get(this.basePath + '/' + id, {
-      params: {
-        include
+  setSearchedManufacturers (value: Manufacturer[]) {
+    this._searchedManufacturers = value
+    return this
+  }
+
+  get searchedStates (): Status[] {
+    return this._searchedStates
+  }
+
+  setSearchedStates (value: Status[]) {
+    this._searchedStates = value
+    return this
+  }
+
+  get searchedPlatformTypes (): PlatformType[] {
+    return this._searchedPlatformTypes
+  }
+
+  setSearchedPlatformTypes (value: PlatformType[]) {
+    this._searchedPlatformTypes = value
+    return this
+  }
+
+  get searchedPermissionGroups (): PermissionGroup[] {
+    return this._searchedPermissionGroups
+  }
+
+  setSearchedPermissionGroups (value: PermissionGroup[]) {
+    this._searchedPermissionGroups = value
+    return this
+  }
+
+  get searchText (): string | null {
+    return this._searchText
+  }
+
+  setSearchText (value: string | null) {
+    this._searchText = value
+    return this
+  }
+
+  get searchedUserMail (): string | null {
+    return this._searchedUserMail
+  }
+
+  setSearchedUserMail (value: string | null) {
+    this._searchedUserMail = value
+    return this
+  }
+
+  get searchedCreatorId (): string | null {
+    return this._searchedCreatorId
+  }
+
+  setSearchedCreatorId (value: string | null) {
+    this._searchedCreatorId = value
+    return this
+  }
+
+  private get commonParams (): any {
+    const result: any = {
+      filter: JSON.stringify(this.filterSettings)
+    }
+    if (this.searchText) {
+      result.q = this.searchText
+    }
+    result.sort = 'short_name'
+    return result
+  }
+
+  async searchPaginated (pageNumber: number, pageSize: number, includes: IncludedRelationships = {}) {
+    this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+
+    const include = getIncludeParams(includes)
+
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          'page[size]': pageSize,
+          'page[number]': pageNumber,
+          include,
+          ...this.commonParams
+        }
       }
-    }).then((rawResponse) => {
+    ).then((rawResponse) => {
       const rawData = rawResponse.data
-      // As we ask the api to include all the contacts, we want to have them here
-      // if they are missing => throw an error
-      return platformWithMetaToPlatformThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
+      // And - again - as we don't ask the api to include the contacts, we just handle
+      // the missing contact data by adding dummy objects for those.
+      const elements: Platform[] = this.serializer.convertJsonApiObjectListToModelList(
+        rawData
+      ).map(platformWithMetaToPlatformByAddingDummyObjects)
+
+      // This is given by the json api. Regardless of the pagination it
+      // represents the total amount of entries found.
+      const totalCount = rawData.meta.count
+
+      return {
+        elements,
+        totalCount
+      }
     })
+  }
+
+  async searchAll () {
+    this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          ...this.commonParams
+        }
+      }
+    ).then((rawResponse: any) => {
+      const rawData = rawResponse.data
+      // We don't ask the api to load the contacts, so we just add dummy objects
+      // to stay with the relationships
+      return this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
+    })
+  }
+
+  async searchRecentlyUpdated (amount: number) {
+    this.prepareSearch()
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+    return this.axiosApi.get(
+      this.basePath,
+      {
+        params: {
+          'page[size]': amount,
+          'page[number]': 1,
+          sort: '-updated_at',
+          include: 'updated_by.contact'
+        }
+      }
+
+    ).then((rawResponse: any) => {
+      const rawData = rawResponse.data
+      // We don't ask the api to load the contacts, so we just add dummy objects
+      // to stay with the relationships
+      return this.serializer
+        .convertJsonApiObjectListToModelList(rawData)
+        .map(platformWithMetaToPlatformByAddingDummyObjects)
+    })
+  }
+
+  searchMatchingAsCsvBlob (): Promise<Blob> {
+    this.prepareSearch()
+
+    const url = this.basePath
+    return this.axiosApi.request({
+      url,
+      method: 'get',
+      headers: {
+        accept: 'text/csv'
+      },
+      params: {
+        'page[size]': 10000,
+        ...this.commonParams
+      }
+    }).then((response) => {
+      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+    })
+  }
+
+  prepareSearch () {
+    this.resetFilterSetting()
+    this.prepareManufacturers()
+    this.prepareStates()
+    this.prepareTypes()
+    this.preparePermissionGroups()
+    this.prepareMail()
+    this.prepareCreator()
+  }
+
+  prepareMail () {
+    if (this.searchedUserMail) {
+      this.filterSettings.push({
+        name: 'platform_contact_roles.contact.email',
+        op: 'eq',
+        val: this.searchedUserMail
+      })
+    }
+  }
+
+  prepareCreator () {
+    if (this.searchedCreatorId) {
+      this.filterSettings.push({
+        name: 'created_by_id',
+        op: 'eq',
+        val: this.searchedCreatorId
+      })
+    }
+  }
+
+  resetFilterSetting () {
+    this.filterSettings = []
+  }
+
+  prepareManufacturers () {
+    if (this.searchedManufacturers.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'manufacturer_name',
+            op: 'in_',
+            val: this.searchedManufacturers.map((m: Manufacturer) => m.name)
+          },
+          {
+            name: 'manufacturer_uri',
+            op: 'in_',
+            val: this.searchedManufacturers.map((m: Manufacturer) => m.uri)
+          }
+        ]
+      })
+    }
+  }
+
+  prepareStates () {
+    if (this.searchedStates.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'status_name',
+            op: 'in_',
+            val: this.searchedStates.map((s: Status) => s.name)
+          },
+          {
+            name: 'status_uri',
+            op: 'in_',
+            val: this.searchedStates.map((s: Status) => s.uri)
+          }
+        ]
+      })
+    }
+  }
+
+  prepareTypes () {
+    if (this.searchedPlatformTypes.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'platform_type_name',
+            op: 'in_',
+            val: this.searchedPlatformTypes.map((t: PlatformType) => t.name)
+          },
+          {
+            name: 'platform_type_uri',
+            op: 'in_',
+            val: this.searchedPlatformTypes.map((t: PlatformType) => t.uri)
+          }
+        ]
+      })
+    }
+  }
+
+  preparePermissionGroups () {
+    if (this.searchedPermissionGroups.length > 0) {
+      this.filterSettings.push({
+        or: this.searchedPermissionGroups.map((permissionGroup) => {
+          return {
+            name: 'group_ids',
+            op: 'any',
+            val: permissionGroup.id
+          }
+        })
+      })
+    }
+  }
+
+  async findById (id: string, includes: IncludedRelationships): Promise<Platform> {
+    const include = getIncludeParams(includes)
+
+    // set the permission groups for the serializer
+    if (this.permissionFetcher) {
+      this.serializer.permissionGroups = await this.permissionFetcher()
+    }
+    const rawResponse = await this.axiosApi.get(
+      this.basePath + '/' + id,
+      {
+        params: {
+          include
+        }
+      }
+    )
+    const rawData = rawResponse.data
+    // As we ask the api to include all the contacts, we want to have them here
+    // if they are missing => throw an error
+    return platformWithMetaToPlatformThrowingNoErrorOnMissing(this.serializer.convertJsonApiObjectToModel(rawData))
   }
 
   deleteById (id: string): Promise<void> {
@@ -112,7 +427,8 @@ export class PlatformApi {
     // If we would include them here (without fetching them before), we would
     // delete them. So we will skip them in order to keep them in the backend.
     const includeRelationships = false
-    const data: any = this.serializer.convertModelToJsonApiData(platform, includeRelationships)
+    const data:
+      any = this.serializer.convertModelToJsonApiData(platform, includeRelationships)
     let method: Method = 'patch'
     let url = this.basePath
 
@@ -138,11 +454,8 @@ export class PlatformApi {
     })
   }
 
-  newSearchBuilder (): PlatformSearchBuilder {
-    return new PlatformSearchBuilder(this.axiosApi, this.basePath, this.serializer)
-  }
-
-  findRelatedContactRoles (platformId: string): Promise<ContactRole[]> {
+  findRelatedContactRoles (platformId: string):
+    Promise<ContactRole[]> {
     const url = this.basePath + '/' + platformId + '/platform-contact-roles'
     const params = {
       'page[size]': 10000,
@@ -196,27 +509,14 @@ export class PlatformApi {
     const params = {
       'page[size]': 10000,
       include: [
-        'contact',
+        'begin_contact',
+        'end_contact',
         'parent_platform',
         'configuration'
       ].join(',')
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new PlatformMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
-    })
-  }
-
-  findRelatedUnmountActions (platformId: string): Promise<PlatformUnmountAction[]> {
-    const url = this.basePath + '/' + platformId + '/platform-unmount-actions'
-    const params = {
-      'page[size]': 10000,
-      include: [
-        'contact',
-        'configuration'
-      ].join(',')
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new PlatformUnmountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 
@@ -230,231 +530,16 @@ export class PlatformApi {
     const data = new ContactRoleSerializer().convertModelToJsonApiData(contactRole, 'platform_contact_role', 'platform', platformId)
     return this.axiosApi.post(url, { data }).then(response => response.data.data.id)
   }
-}
 
-export class PlatformSearchBuilder {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private clientSideFilterFunc: (platform: Platform) => boolean
-  private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
-  private esTextFilter: string | null = null
-  private serializer: PlatformSerializer
-
-  constructor (axiosApi: AxiosInstance, basePath: string, serializer: PlatformSerializer) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.serializer = serializer
-    this.clientSideFilterFunc = (_p: Platform) => true
-  }
-
-  withText (text: string | null): PlatformSearchBuilder {
-    if (text) {
-      this.esTextFilter = text
+  checkAvailability (ids: (string | null)[], from: DateTime, to: DateTime | null): Promise<Availability[]> {
+    const url = '/controller/platform-availabilities'
+    const params = {
+      ids: ids ? ids.join(',') : '',
+      from: from.toISO(),
+      to: to ? to.toISO() : ''
     }
-    return this
-  }
-
-  withOneMatchingManufacturerOf (manufacturers: Manufacturer[]): PlatformSearchBuilder {
-    if (manufacturers.length > 0) {
-      this.serverSideFilterSettings.push({
-        or: [
-          {
-            name: 'manufacturer_name',
-            op: 'in_',
-            val: manufacturers.map((m: Manufacturer) => m.name)
-          },
-          {
-            name: 'manufacturer_uri',
-            op: 'in_',
-            val: manufacturers.map((m: Manufacturer) => m.uri)
-          }
-        ]
-      })
-    }
-    return this
-  }
-
-  withOneMatchingStatusOf (states: Status[]): PlatformSearchBuilder {
-    if (states.length > 0) {
-      this.serverSideFilterSettings.push({
-        or: [
-          {
-            name: 'status_name',
-            op: 'in_',
-            val: states.map((s: Status) => s.name)
-          },
-          {
-            name: 'status_uri',
-            op: 'in_',
-            val: states.map((s: Status) => s.uri)
-          }
-        ]
-      })
-    }
-    return this
-  }
-
-  withOneMatchingPlatformTypeOf (types: PlatformType[]): PlatformSearchBuilder {
-    if (types.length > 0) {
-      this.serverSideFilterSettings.push({
-        or: [
-          {
-            name: 'platform_type_name',
-            op: 'in_',
-            val: types.map((t: PlatformType) => t.name)
-          },
-          {
-            name: 'platform_type_uri',
-            op: 'in_',
-            val: types.map((t: PlatformType) => t.uri)
-          }
-        ]
-      })
-    }
-    return this
-  }
-
-  withContactEmail (email: string) {
-    this.serverSideFilterSettings.push({
-      name: 'contacts.email',
-      op: 'eq',
-      val: email
-    })
-    return this
-  }
-
-  build (): PlatformSearcher {
-    return new PlatformSearcher(
-      this.axiosApi,
-      this.basePath,
-      this.clientSideFilterFunc,
-      this.serverSideFilterSettings,
-      this.esTextFilter,
-      this.serializer
-    )
-  }
-}
-
-export class PlatformSearcher {
-  private axiosApi: AxiosInstance
-  readonly basePath: string
-  private clientSideFilterFunc: (platform: Platform) => boolean
-  private serverSideFilterSettings: IFlaskJSONAPIFilter[]
-  private esTextFilter: string | null
-  private serializer: PlatformSerializer
-
-  constructor (
-    axiosApi: AxiosInstance,
-    basePath: string,
-    clientSideFilterFunc: (platform: Platform) => boolean,
-    serverSideFilterSetting: IFlaskJSONAPIFilter[],
-    esTextFilter: string | null,
-    serializer: PlatformSerializer
-  ) {
-    this.axiosApi = axiosApi
-    this.basePath = basePath
-    this.clientSideFilterFunc = clientSideFilterFunc
-    this.serverSideFilterSettings = serverSideFilterSetting
-    this.esTextFilter = esTextFilter
-    this.serializer = serializer
-  }
-
-  private get commonParams (): any {
-    const result: any = {
-      filter: JSON.stringify(this.serverSideFilterSettings)
-    }
-    if (this.esTextFilter) {
-      result.q = this.esTextFilter
-    } else {
-      result.sort = 'short_name'
-    }
-    return result
-  }
-
-  findMatchingAsCsvBlob (): Promise<Blob> {
-    const url = this.basePath
-    return this.axiosApi.request({
-      url,
-      method: 'get',
-      headers: {
-        accept: 'text/csv'
-      },
-      params: {
-        'page[size]': 10000,
-        ...this.commonParams
-      }
-    }).then((response) => {
-      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
-    })
-  }
-
-  findMatchingAsList (): Promise<Platform[]> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': 10000,
-          ...this.commonParams
-        }
-      }
-    ).then((rawResponse: any) => {
-      const rawData = rawResponse.data
-      // We don't ask the api to include the contacts, so we add dummy objects.
-      // This way we at least stay with the relationships.
-      return this.serializer
-        .convertJsonApiObjectListToModelList(rawData)
-        .map(platformWithMetaToPlatformByAddingDummyObjects)
-    })
-  }
-
-  findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Platform>> {
-    return this.findAllOnPage(page, pageSize)
-  }
-
-  private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Platform>> {
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          'page[size]': pageSize,
-          'page[number]': page,
-          ...this.commonParams
-        }
-      }
-    ).then((rawResponse) => {
-      const rawData = rawResponse.data
-      // And - again - as we don't ask the api to include the contacts, we just handle
-      // the missing contact data by adding dummy objects for those.
-      const elements: Platform[] = this.serializer.convertJsonApiObjectListToModelList(
-        rawData
-      ).map(platformWithMetaToPlatformByAddingDummyObjects)
-
-      // This is given by the json api. Regardless of the pagination it
-      // represents the total amount of entries found.
-      const totalCount = rawData.meta.count
-
-      // check if the provided page param is valid
-      if (totalCount > 0 && elements.length === 0) {
-        throw new RangeError('page is out of bounds')
-      }
-
-      let funToLoadNext = null
-      if (elements.length > 0) {
-        funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
-      }
-
-      let funToLoadPage = null
-      if (elements.length > 0) {
-        funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
-      }
-
-      return {
-        elements,
-        totalCount,
-        page,
-        funToLoadNext,
-        funToLoadPage
-      }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new AvailabilitySerializer().convertJsonApiObjectListToModelList(rawServerResponse)
     })
   }
 }

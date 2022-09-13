@@ -30,89 +30,499 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ConfigurationsSearch
-      :active-tab="activeTab"
-      load-initial-data
-      :delete-callback="deleteConfiguration"
-      @change-active-tab="activeTab = $event"
-    />
-    <v-btn
-      v-if="$auth.loggedIn"
-      bottom
-      color="primary"
-      dark
-      elevation="10"
-      fab
-      fixed
-      right
-      nuxt
-      to="/configurations/new"
+    <v-tabs-items
+      :value="activeTab"
+      @input="setActiveTab"
     >
-      <v-icon>
-        mdi-plus
-      </v-icon>
-    </v-btn>
+      <v-tab-item :eager="true">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="5">
+            <v-text-field
+              v-model="searchText"
+              label="Label"
+              placeholder="Label of configuration"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="basicSearch"
+            />
+          </v-col>
+          <v-col
+            cols="5"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="basicSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearBasicSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/configurations/new"
+            >
+              New Configuration
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+      <v-tab-item :eager="true">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchText"
+              label="Label"
+              placeholder="Label of configuration"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="extendedSearch"
+            />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <StringSelect
+              v-model="selectedConfigurationStates"
+              label="Select a status"
+              :items="configurationStates"
+              color="green"
+            />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <permission-group-search-select v-model="selectedPermissionGroups" label="Select a permission group" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col
+            cols="5"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="extendedSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearExtendedSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/configurations/new"
+            >
+              New Configuration
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items>
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+    <div v-if="configurations.length <=0 && !loading">
+      <p class="text-center">
+        There are no configurations that match your search criteria.
+      </p>
+    </div>
+    <div
+      v-if="configurations.length >0"
+    >
+      <v-row
+        no-gutters
+        class="mt-10"
+      >
+        <v-subheader>
+          <template v-if="configurations.length == 1">
+            1 configuration found
+          </template>
+          <template v-else>
+            {{ configurations.length }} configurations found
+          </template>
+          <v-spacer />
+        </v-subheader>
+        <v-spacer />
+        <v-col
+          cols="4"
+        >
+          <v-pagination
+            v-model="page"
+            :disabled="loading"
+            :length="totalPages"
+            :total-visible="7"
+            @input="runSearch"
+          />
+        </v-col>
+        <v-col
+          cols="4"
+          class="flex-grow-1 flex-shrink-0"
+        >
+          <v-subheader>
+            <page-size-select
+              v-model="size"
+              :items="pageSizeItems"
+              label="Items per page"
+            />
+          </v-subheader>
+        </v-col>
+      </v-row>
+      <BaseList
+        :list-items="configurations"
+      >
+        <template #list-item="{item}">
+          <ConfigurationsListItem
+            :configuration="item"
+          >
+            <template
+              v-if="$auth.loggedIn"
+              #dot-menu-items
+            >
+              <DotMenuActionDelete
+                v-if="canDeleteEntity(item)"
+                @click="initDeleteDialog(item)"
+              />
+            </template>
+          </ConfigurationsListItem>
+        </template>
+      </BaseList>
+      <v-pagination
+        v-model="page"
+        :disabled="loading"
+        :length="totalPages"
+        :total-visible="7"
+        @input="runSearch"
+      />
+    </div>
+    <ConfigurationsDeleteDialog
+      v-model="showDeleteDialog"
+      :configuration-to-delete="configurationToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { Configuration } from '@/models/Configuration'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-import ConfigurationsOverviewCard from '@/components/configurations/ConfigurationsOverviewCard.vue'
+import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
+import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState } from '@/store/permissions'
+
+import BaseList from '@/components/shared/BaseList.vue'
+import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
-import ConfigurationsDownloader from '@/components/configurations/ConfigurationsDownloader.vue'
-import ConfigurationsBasicSearch from '@/components/configurations/ConfigurationsBasicSearch.vue'
-import ConfigurationsExtendedSearch from '@/components/configurations/ConfigurationsExtendedSearch.vue'
-import ConfigurationsSearch from '@/components/configurations/ConfigurationsSearch.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import StringSelect from '@/components/StringSelect.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
+import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 
+import { Configuration } from '@/models/Configuration'
+import { PermissionGroup } from '@/models/PermissionGroup'
+import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
+import { QueryParams } from '@/modelUtils/QueryParams'
 @Component({
   components: {
-    ConfigurationsSearch,
-    ConfigurationsExtendedSearch,
-    ConfigurationsBasicSearch,
-    ConfigurationsDownloader,
+    StringSelect,
+    DotMenuActionDelete,
     ConfigurationsDeleteDialog,
-    ConfigurationsOverviewCard
+    ConfigurationsListItem,
+    BaseList,
+    PageSizeSelect,
+    PermissionGroupSearchSelect
+  },
+  computed: {
+    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates']),
+    ...mapState('appbar', ['activeTab']),
+    ...mapGetters('configurations', ['pageSizes']),
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups'])
+  },
+  methods: {
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
+    ...mapActions('permissions', ['loadPermissionGroups'])
   }
 })
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
-  created () {
-    this.initializeAppBar()
+  private loading = false
+
+  private searchText: string | null = null
+  private selectedConfigurationStates: string[] = []
+  private selectedPermissionGroups: PermissionGroup[] = []
+
+  private showDeleteDialog: boolean = false
+  private configurationToDelete: Configuration | null = null
+
+  // vuex definition for typescript check
+  canDeleteEntity!: CanDeleteEntityGetter
+  canAccessEntity!: CanAccessEntityGetter
+  initConfigurationsIndexAppBar!: () => void
+  loadConfigurationsStates!: () => void
+  loadPermissionGroups!: LoadPermissionGroupsAction
+  pageNumber!: number
+  setPageNumber!: (newPageNumber: number) => void
+  pageSize!: number
+  setPageSize!: (newPageSize: number) => void
+  pageSizes!: number[]
+  searchConfigurationsPaginated!: (searchParams: IConfigurationSearchParams) => void
+  configurations!: Configuration[]
+  deleteConfiguration!: (id: string) => void
+  configurationStates!: string[]
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+  activeTab!: IAppbarState['activeTab']
+  setActiveTab!: SetActiveTabAction
+  permissionGroups!: PermissionsState['permissionGroups']
+
+  async created () {
+    try {
+      this.loading = true
+      this.initializeAppBar()
+      await Promise.all([this.loadConfigurationsStates(), this.loadPermissionGroups()])
+      await this.initSearchQueryParams()
+      await this.runInitialSearch()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+    } finally {
+      this.loading = false
+    }
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+  get page () {
+    return this.pageNumber
   }
 
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        'Search',
-        'Extended Search'
-      ],
-      title: 'Configurations'
+  set page (newVal) {
+    this.setPageNumber(newVal)
+    this.setPageInUrl(false)
+  }
+
+  get size (): number {
+    return this.pageSize
+  }
+
+  set size (newVal: number) {
+    const sizeChanged: boolean = this.size !== newVal
+
+    this.setPageSize(newVal)
+    this.setSizeInUrl(false)
+
+    if (sizeChanged) {
+      this.runSearch()
+    }
+  }
+
+  get pageSizeItems (): number[] {
+    const resultSet = new Set([
+      ...this.pageSizes,
+      this.getSizeFromUrl()
+    ])
+    return Array.from(resultSet).sort((a, b) => a - b)
+  }
+
+  get searchParams (): IConfigurationSearchParams {
+    return {
+      searchText: this.searchText,
+      states: this.selectedConfigurationStates,
+      permissionGroups: this.selectedPermissionGroups
+    }
+  }
+
+  isExtendedSearch (): boolean {
+    return !!this.selectedPermissionGroups.length ||
+      !!this.selectedConfigurationStates.length
+  }
+
+  async runInitialSearch () {
+    this.setActiveTab(this.isExtendedSearch() ? 1 : 0)
+
+    this.page = this.getPageFromUrl()
+    this.size = this.getSizeFromUrl()
+    await this.runSearch()
+  }
+
+  basicSearch () {
+    this.selectedConfigurationStates = []
+    this.selectedPermissionGroups = []
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
+  }
+
+  clearBasicSearch () {
+    this.searchText = null
+    this.initUrlQueryParams()
+  }
+
+  extendedSearch () {
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
+  }
+
+  clearExtendedSearch () {
+    this.clearBasicSearch()
+    this.selectedConfigurationStates = []
+    this.selectedPermissionGroups = []
+    this.initUrlQueryParams()
+  }
+
+  async runSearch () {
+    try {
+      this.loading = true
+      this.initUrlQueryParams()
+      await this.searchConfigurationsPaginated(this.searchParams)
+      this.setPageInUrl()
+      this.setSizeInUrl()
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Loading of configurations failed')
+    } finally {
+      this.loading = false
+    }
+  }
+
+  initDeleteDialog (configuration: Configuration) {
+    this.showDeleteDialog = true
+    this.configurationToDelete = configuration
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.configurationToDelete = null
+  }
+
+  async deleteAndCloseDialog () {
+    if (this.configurationToDelete === null || this.configurationToDelete.id === null) {
+      this.closeDialog()
+      return
+    }
+    try {
+      this.loading = true
+      await this.deleteConfiguration(this.configurationToDelete.id)
+      this.runSearch()
+      this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
+    } catch {
+      this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
+    } finally {
+      this.loading = false
+      this.closeDialog()
+    }
+  }
+
+  initSearchQueryParams (): void {
+    const searchParamsObject = (new ConfigurationSearchParamsSerializer({
+      states: this.configurationStates,
+      permissionGroups: this.permissionGroups
+    })).toSearchParams(this.$route.query)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.states) {
+      this.selectedConfigurationStates = searchParamsObject.states
+    }
+    if (searchParamsObject.permissionGroups) {
+      this.selectedPermissionGroups = searchParamsObject.permissionGroups
+    }
+  }
+
+  initUrlQueryParams (): void {
+    this.$router.push({
+      query: (new ConfigurationSearchParamsSerializer()).toQueryParams(this.searchParams),
+      hash: this.$route.hash
     })
   }
 
-  get activeTab (): number | null {
-    return this.$store.state.appbar.activeTab
-  }
-
-  set activeTab (tab: number | null) {
-    this.$store.commit('appbar/setActiveTab', tab)
-  }
-
-  async deleteConfiguration (configuration: Configuration) {
-    try {
-      await this.$api.configurations.deleteById(configuration.id)
-      this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
-    } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
-      // throw the error again so that the caller knows that something went wrong
-      throw _error
+  getPageFromUrl (): number {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 1
     }
+    return 1
+  }
+
+  setPageInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(this.page)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  getSizeFromUrl (): number {
+    if ('size' in this.$route.query && typeof this.$route.query.size === 'string') {
+      return parseInt(this.$route.query.size) ?? this.size
+    }
+    return this.size
+  }
+
+  setSizeInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.size) {
+      // add size to the current url params
+      query = {
+        ...this.$route.query,
+        size: String(this.size)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      'Search',
+      'Extended Search'
+    ])
+    this.setTitle('Configurations')
   }
 }
 
@@ -120,4 +530,14 @@ export default class SearchConfigurationsPage extends Vue {
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+.progress-spinner {
+  position: absolute;
+  top: 40vh;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 32px;
+  z-index: 99;
+}
 </style>

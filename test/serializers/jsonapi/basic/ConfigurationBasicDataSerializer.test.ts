@@ -44,8 +44,6 @@ describe('ConfigurationBasicDataSerializer', () => {
         attributes: {
           start_date: '2020-08-28T13:49:48.015620+00:00',
           end_date: '2020-08-29T13:49:48.015620+00:00',
-          project_uri: 'projects/Tereno-NO',
-          project_name: 'Tereno NO',
           label: 'Tereno NO Boeken',
           status: 'draft'
         },
@@ -56,8 +54,6 @@ describe('ConfigurationBasicDataSerializer', () => {
       expectedConfiguration.id = '1'
       expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
-      expectedConfiguration.projectUri = 'projects/Tereno-NO'
-      expectedConfiguration.projectName = 'Tereno NO'
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.status = 'draft'
 

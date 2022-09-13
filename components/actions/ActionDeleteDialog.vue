@@ -35,11 +35,11 @@ permissions and limitations under the Licence.
 
 <template>
   <v-dialog
-    v-model="show"
+    v-model="showDialog"
     max-width="290"
-    @click:outside="show = false"
+    @click:outside="$emit('cancel-deletion')"
   >
-    <v-card>
+    <v-card v-if="hasActionToDelete">
       <v-card-title class="headline">
         Delete action
       </v-card-title>
@@ -49,7 +49,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-btn
           text
-          @click="show = false"
+          @click="$emit('cancel-deletion')"
         >
           No
         </v-btn>
@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="error"
           text
-          @click="onDeleteButtonClick"
+          @click="$emit('submit-deletion')"
         >
           <v-icon left>
             mdi-delete
@@ -71,6 +71,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Platform } from '@/models/Platform'
 
 /**
  * A dialog component to confirm the deletion of an action.
@@ -79,37 +80,27 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
  */
 @Component
 export default class ActionDeleteDialog extends Vue {
-  /**
-   * A boolean indication whether the dialog is shown or not
-   */
   @Prop({
-    default: false,
-    type: Boolean,
-    required: true
+    required: true,
+    type: Boolean
   })
   readonly value!: boolean
 
-  get show (): boolean {
+  @Prop({
+    type: Object
+  })
+  readonly actionToDelete!: Platform
+
+  get showDialog (): boolean {
     return this.value
   }
 
-  set show (value: boolean) {
-    /**
-     * is triggered when the dialog is closed
-     *
-     * @event input
-     * @property {boolean} value
-     */
+  set showDialog (value: boolean) {
     this.$emit('input', value)
   }
 
-  onDeleteButtonClick () {
-    /**
-     * is triggered when the user clicks the delete button
-     *
-     * @event delete-dialog-button-click
-     */
-    this.$emit('delete-dialog-button-click')
+  get hasActionToDelete () {
+    return this.actionToDelete !== null
   }
 }
 </script>

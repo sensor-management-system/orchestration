@@ -59,6 +59,7 @@ const createTestPlatform = () => {
   platform.website = 'http://gfz-potsdam.de'
   platform.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
   platform.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
+  platform.updateDescription = ''
 
   platform.attachments = [
     Attachment.createFromObject({
@@ -148,6 +149,10 @@ describe('PlatformSerializer', () => {
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/platforms/37/relationships/createdUser'
+              },
+              data: {
+                id: '42',
+                type: 'user'
               }
             }
           },
@@ -313,6 +318,7 @@ describe('PlatformSerializer', () => {
         website: '',
         familyName: 'Mustermann'
       })]
+      expectedPlatform1.createdByUserId = '42'
 
       const expectedPlatform2 = new Platform()
       expectedPlatform2.id = '52'

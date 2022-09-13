@@ -67,5 +67,11 @@ export default class CustomOIDCScheme extends OpenIDConnectScheme {
           })
       }, process.env.NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME || 30 * 60 * 1000) // time in milliseconds when to start the token refresh
     }
+
+    // Fetch user info
+    this.$auth.ctx.store.dispatch('permissions/loadUserInfo')
+
+    // Fetch all permission groups
+    this.$auth.ctx.store.dispatch('permissions/loadPermissionGroups')
   }
 }

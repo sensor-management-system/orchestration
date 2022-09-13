@@ -34,81 +34,100 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <contact-role-form
-      :existing-contact-roles="value"
-      :contacts="allContacts"
-      :cv-contact-roles="allContactRoles"
-      :cancel-to="'/devices/' + deviceId + '/contacts'"
-      :editable="$auth.loggedIn"
-      @add-contact="addContact"
+    <contact-role-assignment-form
+      :contacts="contacts"
+      :contact="selectedContact"
+      :cv-contact-roles="cvContactRoles"
+      :existing-contact-roles="deviceContactRoles"
+      @cancel="$router.push('/devices/' + deviceId + '/contacts')"
+      @input="assignContact"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+
+import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
+import { LoadDeviceContactRolesAction, AddDeviceContactRoleAction, DevicesState } from '@/store/devices'
+import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
 import { Contact } from '@/models/Contact'
 import { ContactRole } from '@/models/ContactRole'
-import { CvContactRole } from '@/models/CvContactRole'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import ContactRoleForm from '@/components/contacts/ContactRoleForm.vue'
+import ContactRoleAssignmentForm from '@/components/shared/ContactRoleAssignmentForm.vue'
 
 @Component({
   components: {
-    ContactRoleForm,
-    ProgressIndicator
+    ProgressIndicator,
+    ContactRoleAssignmentForm
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: {
+    ...mapState('devices', ['deviceContactRoles']),
+    ...mapState('contacts', ['contacts']),
+    ...mapState('vocabulary', ['cvContactRoles'])
+  },
+  methods: {
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('devices', ['loadDeviceContactRoles', 'addDeviceContactRole']),
+    ...mapActions('vocabulary', ['loadCvContactRoles'])
+  }
 })
-export default class DeviceAddContactPage extends Vue {
-  @Prop({
-    type: Array,
-    required: false,
-    default: () => [] as ContactRole[]
-  })
-  // existing contact roles
-  private readonly value!: ContactRole[]
+export default class DeviceAssignContactPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
 
-  private allContacts: Contact[] = []
-  private allContactRoles: CvContactRole[] = []
-
+  private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-  async fetch () {
+  // vuex definition for typescript check
+  deviceContactRoles!: DevicesState['deviceContactRoles']
+  contacts!: ContactsState['contacts']
+  loadDeviceContactRoles!: LoadDeviceContactRolesAction
+  addDeviceContactRole!: AddDeviceContactRoleAction
+  loadAllContacts!: LoadAllContactsAction
+  loadCvContactRoles!: LoadCvContactRolesAction
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      // We can run both queries in parallel.
-      // And the page currently handles the server interaction
-      // (and not the form component).
-      const allContactsPromise = this.$api.contacts.findAll()
-      const allContactRolesPromise = this.$api.cvContactRoles.findAll()
-      this.allContacts = await allContactsPromise
-      this.allContactRoles = await allContactRolesPromise
-    } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch contact information')
+      await this.loadAllContacts()
+
+      const redirectContactId = this.$route.query.contact
+      if (redirectContactId) {
+        this.selectedContact = this.contacts.find(contact => contact.id === redirectContactId) as Contact
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
     } finally {
       this.isLoading = false
     }
+  }
+
+  get deviceId (): string {
+    return this.$route.params.deviceId
   }
 
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }
 
-  async addContact (newContactRole: ContactRole) {
-    if (this.$auth.loggedIn) {
-      this.isSaving = true
+  async assignContact (contactRole: ContactRole | null) {
+    if (this.editable && contactRole) {
       try {
-        const newContactRoleId = await this.$api.devices.addContact(this.deviceId, newContactRole)
-        // the current one has no id so far, so we will set it here
-        newContactRole.id = newContactRoleId
-        const result = [...this.value, newContactRole]
-        this.$emit('input', result)
+        this.isSaving = true
+        await this.addDeviceContactRole({
+          deviceId: this.deviceId,
+          contactRole
+        })
+        this.loadDeviceContactRoles(this.deviceId)
+        this.$store.commit('snackbar/setSuccess', 'New Contact added')
         this.$router.push('/devices/' + this.deviceId + '/contacts')
-      } catch (_error) {
+      } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
       } finally {
         this.isSaving = false
@@ -116,8 +135,15 @@ export default class DeviceAddContactPage extends Vue {
     }
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/contacts', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
   }
 }
 </script>

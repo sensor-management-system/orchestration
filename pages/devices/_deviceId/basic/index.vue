@@ -30,10 +30,14 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -49,18 +53,20 @@ permissions and limitations under the Licence.
             :path="'/devices/copy/' + deviceId"
           />
           <DotMenuActionDelete
+            :readonly="!deletable"
             @click="initDeleteDialog"
           />
         </template>
       </DotMenu>
     </v-card-actions>
     <DeviceBasicData
+      v-if="device"
       v-model="device"
     />
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -76,12 +82,14 @@ permissions and limitations under the Licence.
             :path="'/devices/copy/' + deviceId"
           />
           <DotMenuActionDelete
+            :readonly="!deletable"
             @click="initDeleteDialog"
           />
         </template>
       </DotMenu>
     </v-card-actions>
     <DeviceDeleteDialog
+      v-if="device"
       v-model="showDeleteDialog"
       :device-to-delete="device"
       @cancel-deletion="closeDialog"
@@ -91,41 +99,44 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
-import DeviceBasicData from '@/components/DeviceBasicData.vue'
+import { DeleteDeviceAction, DevicesState } from '@/store/devices'
 
-import { Device } from '@/models/Device'
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DeviceBasicData from '@/components/DeviceBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
+    ProgressIndicator,
     DotMenuActionDelete,
     DotMenuActionCopy,
     DotMenu,
     DeviceDeleteDialog,
     DeviceBasicData
-  }
+  },
+  computed: mapState('devices', ['device']),
+  methods: mapActions('devices', ['deleteDevice'])
 })
 export default class DeviceShowBasicPage extends Vue {
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Device
+  @InjectReactive()
+    editable!: boolean
+
+  @InjectReactive()
+    deletable!: boolean
+
+  private isSaving = false
 
   private showDeleteDialog: boolean = false
 
-  get device (): Device {
-    return this.value
-  }
-
-  set device (value: Device) {
-    this.$emit('input', value)
-  }
+  // vuex definition for typescript check
+  device!: DevicesState['device']
+  deleteDevice!: DeleteDeviceAction
 
   get deviceId () {
     return this.$route.params.deviceId
@@ -139,18 +150,21 @@ export default class DeviceShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
-  deleteAndCloseDialog () {
+  async deleteAndCloseDialog () {
     this.showDeleteDialog = false
-    if (this.device === null) {
+    if (this.device === null || this.device.id === null) {
       return
     }
-
-    this.$api.devices.deleteById(this.device.id!).then(() => {
-      this.$router.push('/devices')
+    try {
+      this.isSaving = true
+      await this.deleteDevice(this.device.id)
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
-    }).catch((_error) => {
+      this.$router.push('/devices')
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
-    })
+    } finally {
+      this.isSaving = false
+    }
   }
 }
 </script>

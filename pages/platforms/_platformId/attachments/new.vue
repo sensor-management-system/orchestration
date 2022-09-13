@@ -32,126 +32,122 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-form ref="attachmentsForm" class="pb-2" @submit.prevent>
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        ref="cancelButton"
-        text
-        small
-        nuxt
-        :to="'/platforms/' + platformId + '/attachments'"
-      >
-        Cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        data-role="add-attachment"
-        @click="add()"
-      >
-        {{ attachmentType === 'url' ? 'Add' : 'Upload' }}
-      </v-btn>
-    </v-card-actions>
-    <v-card-text>
-      <v-row>
-        <v-col cols="12" md="3">
-          <v-radio-group
-            v-model="attachmentType"
-            label="Type"
-            row
-          >
-            <v-radio label="File" value="file" />
-            <v-radio label="Url" value="url" />
-          </v-radio-group>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-file-input
-            v-if="attachmentType === 'file'"
-            v-model="file"
-            :accept="mimeTypeList"
-            label="File"
-            required
-            class="required"
-            :rules="[rules.required, uploadRules.maxSize, uploadRules.mimeTypeAllowed]"
-            show-size
-          />
-          <v-text-field
-            v-if="attachmentType === 'url'"
-            v-model="attachment.url"
-            label="URL"
-            type="url"
-            placeholder="https://"
-            required
-            class="required"
-            :rules="[rules.required, rules.validUrl]"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-text-field
-            v-model="attachment.label"
-            label="Label"
-          />
-        </v-col>
-      </v-row>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        ref="cancelButton"
-        text
-        small
-        nuxt
-        :to="'/platforms/' + platformId + '/attachments'"
-      >
-        Cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        data-role="add-attachment"
-        @click="add()"
-      >
-        {{ attachmentType === 'url' ? 'Add' : 'Upload' }}
-      </v-btn>
-    </v-card-actions>
-  </v-form>
+  <div>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
+    <v-form ref="attachmentsForm" class="pb-2" @submit.prevent>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          v-if="editable"
+          :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
+          :to="'/platforms/' + platformId + '/attachments'"
+          @save="add"
+        />
+      </v-card-actions>
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" md="3">
+            <v-radio-group
+              v-model="attachmentType"
+              label="Type"
+              row
+            >
+              <v-radio label="File" value="file" />
+              <v-radio label="Url" value="url" />
+            </v-radio-group>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-file-input
+              v-if="attachmentType === 'file'"
+              v-model="file"
+              :accept="mimeTypeList"
+              label="File"
+              required
+              class="required"
+              :rules="[rules.required, uploadRules.maxSize, uploadRules.mimeTypeAllowed]"
+              show-size
+            />
+            <v-text-field
+              v-if="attachmentType === 'url'"
+              v-model="attachment.url"
+              label="URL"
+              type="url"
+              placeholder="https://"
+              required
+              class="required"
+              :rules="[rules.required, rules.validUrl]"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="attachment.label"
+              label="Label"
+              required
+              class="required"
+              :rules="[rules.required]"
+            />
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          v-if="editable"
+          :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
+          :to="'/platforms/' + platformId + '/attachments'"
+          @save="add"
+        />
+      </v-card-actions>
+    </v-form>
+  </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, mixins, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
+
+import { AddPlatformAttachmentAction, LoadPlatformAttachmentsAction } from '@/store/platforms'
 
 import UploadConfig from '@/config/uploads'
+
+import { IUploadResult } from '@/services/sms/UploadApi'
+
+import { Attachment } from '@/models/Attachment'
+
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
-import { Attachment } from '@/models/Attachment'
-
 @Component({
-  components: {},
-  middleware: ['auth']
+  components: { ProgressIndicator, SaveAndCancelButtons },
+  middleware: ['auth'],
+  methods: {
+    ...mapActions('platforms', ['addPlatformAttachment', 'loadPlatformAttachments']),
+    ...mapActions('files', ['uploadFile'])
+  }
 })
-export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
+export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules) {
+  @InjectReactive()
+    editable!: boolean
+
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
+  private isSaving: boolean = false
 
-  mounted () {
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
-  }
+  // vuex definition for typescript check
+  uploadFile!: (file: File) => Promise<IUploadResult>
+  addPlatformAttachment!: AddPlatformAttachmentAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
 
   /**
    * returns a list of MimeTypes, seperated by ,
@@ -162,6 +158,10 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
     return UploadConfig.allowedMimeTypes.join(',')
   }
 
+  get platformId (): string {
+    return this.$route.params.platformId
+  }
+
   async add () {
     if (!(this.$refs.attachmentsForm as Vue & { validate: () => boolean }).validate()) {
       return
@@ -169,37 +169,53 @@ export default class AttachmentAddPage extends mixins(Rules, UploadRules) {
 
     (this.$refs.attachmentsForm as Vue & { resetValidation: () => boolean }).resetValidation()
 
-    this.$emit('showsave', true)
     let theFailureCanBeFromUpload = true
 
     try {
-      if (this.attachmentType !== 'url') {
+      this.isSaving = true
+
+      if (this.attachmentType !== 'url' && this.file !== null) {
         // Due to the validation we can be sure that the file is not null
-        const uploadResult = await this.$api.upload.file(this.file as File)
+        const uploadResult = await this.uploadFile(this.file)
         this.attachment.url = uploadResult.url
         theFailureCanBeFromUpload = false
       }
-      const newAttachment = await this.$api.platformAttachments.add(this.platformId, this.attachment)
-      this.$emit('input', newAttachment)
+      await this.addPlatformAttachment({ platformId: this.platformId, attachment: this.attachment })
+      await this.loadPlatformAttachments(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'New attachment added')
       this.$router.push('/platforms/' + this.platformId + '/attachments')
     } catch (error: any) {
-      let message = 'Failed to save an attachment'
-
-      if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
-        const errorDetails = error.response.data.errors[0]
-        if (errorDetails.source && errorDetails.title) {
-          // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
-          message = errorDetails.title + ': ' + errorDetails.source
-        }
-      }
-      this.$store.commit('snackbar/setError', message)
+      this.handleError(theFailureCanBeFromUpload, error)
     } finally {
-      this.$emit('showsave', false)
+      this.isSaving = false
     }
   }
 
-  get platformId (): string {
-    return this.$route.params.platformId
+  private handleError (theFailureCanBeFromUpload: boolean, error: any) {
+    let message = 'Failed to save an attachment'
+
+    if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
+      const errorDetails = error.response.data.errors[0]
+      if (errorDetails.source && errorDetails.title) {
+        // In this case something ala 'Unsupported Media Type: application/exe is Not Permitted'
+        message = errorDetails.title + ': ' + errorDetails.source
+      }
+    }
+    this.$store.commit('snackbar/setError', message)
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
   }
 }
 </script>
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

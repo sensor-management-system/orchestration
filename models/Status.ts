@@ -33,12 +33,14 @@ export interface IStatus {
   id: string
   name: string
   uri: string
+  definition: string
 }
 
 export class Status implements IStatus {
   private _id: string = ''
   private _name: string = ''
   private _uri: string = ''
+  private _definition: string = ''
 
   get id (): string {
     return this._id
@@ -64,15 +66,24 @@ export class Status implements IStatus {
     this._uri = newUri
   }
 
+  get definition (): string {
+    return this._definition
+  }
+
+  set definition (newDefinition: string) {
+    this._definition = newDefinition
+  }
+
   toString (): string {
     return this._name
   }
 
-  static createWithData (id: string, name: string, uri: string): Status {
+  static createWithData (id: string, name: string, uri: string, definition: string): Status {
     const result = new Status()
     result.id = id
     result.name = name
     result.uri = uri
+    result.definition = definition
     return result
   }
 
@@ -82,6 +93,7 @@ export class Status implements IStatus {
     newObject.id = someObject.id
     newObject.name = someObject.name
     newObject.uri = someObject.uri
+    newObject.definition = someObject.definition
 
     return newObject
   }

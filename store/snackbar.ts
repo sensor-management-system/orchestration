@@ -31,27 +31,41 @@
  */
 export interface ISnackbarStore {
   error: string,
-  success: string
+  success: string,
+  warning: string
 }
 
-export const state = () => {
+const state = () => {
   return {
     error: '',
-    success: ''
+    success: '',
+    warning: ''
   }
 }
 
-export const mutations = {
+const mutations = {
   setError (state: ISnackbarStore, error: string) {
     state.error = error
   },
   setSuccess (state: ISnackbarStore, success: string) {
     state.success = success
   },
+  setWarning (state: ISnackbarStore, warning: string) {
+    state.warning = warning
+  },
   clearError (state: ISnackbarStore) {
     state.error = ''
   },
   clearSuccess (state: ISnackbarStore) {
     state.success = ''
+  },
+  clearWarning (state: ISnackbarStore) {
+    state.warning = ''
   }
+}
+
+export default {
+  namespaced: true,
+  state,
+  mutations
 }

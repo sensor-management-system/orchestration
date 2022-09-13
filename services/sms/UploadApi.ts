@@ -37,8 +37,6 @@ export interface IUploadResult {
 }
 
 export class UploadApi {
-  public readonly UPLOAD_SIZE_LIMIT = 200 * 1024 * 1024
-
   private axiosApi: AxiosInstance
   readonly basePath: string
 

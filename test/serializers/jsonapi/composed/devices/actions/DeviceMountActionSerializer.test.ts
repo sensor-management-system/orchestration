@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -51,14 +51,22 @@ describe('DeviceMountActionSerializer', () => {
               offset_x: 0,
               offset_y: 0,
               offset_z: 0,
-              description: 'Device mount',
-              begin_date: '2020-01-01T12:00:00.000Z'
+              begin_description: 'Device mount',
+              end_description: 'Device unmount',
+              begin_date: '2020-01-01T12:00:00.000Z',
+              end_date: '2020-02-01T12:00:00.000Z'
             },
             relationships: {
-              contact: {
+              begin_contact: {
                 data: {
                   type: 'contact',
                   id: 'ct1'
+                }
+              },
+              end_contact: {
+                data: {
+                  type: 'contact',
+                  id: 'ct2'
                 }
               },
               configuration: {
@@ -76,11 +84,11 @@ describe('DeviceMountActionSerializer', () => {
               offset_x: 1,
               offset_y: 2,
               offset_z: 3,
-              description: 'Device mount',
+              begin_description: 'Device mount',
               begin_date: '2020-03-01T12:00:00.000Z'
             },
             relationships: {
-              contact: {
+              begin_contact: {
                 data: {
                   type: 'contact',
                   id: 'ct2'
@@ -108,8 +116,6 @@ describe('DeviceMountActionSerializer', () => {
             attributes: {
               start_date: '2020-08-28T13:49:48.015620+00:00',
               end_date: '2020-08-29T13:49:48.015620+00:00',
-              project_uri: 'projects/Tereno-NO',
-              project_name: 'Tereno NO',
               label: 'Tereno NO Boeken',
               status: 'draft'
             }
@@ -200,8 +206,6 @@ describe('DeviceMountActionSerializer', () => {
         id: 'cf1',
         startDate: DateTime.utc(2020, 8, 28, 13, 49, 48, 15),
         endDate: DateTime.utc(2020, 8, 29, 13, 49, 48, 15),
-        projectUri: 'projects/Tereno-NO',
-        projectName: 'Tereno NO',
         label: 'Tereno NO Boeken',
         status: 'draft'
       })
@@ -211,8 +215,10 @@ describe('DeviceMountActionSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        date: DateTime.utc(2020, 1, 1, 12, 0, 0),
-        description: 'Device mount'
+        beginDate: DateTime.utc(2020, 1, 1, 12, 0, 0),
+        endDate: DateTime.utc(2020, 2, 1, 12, 0, 0),
+        beginDescription: 'Device mount',
+        endDescription: 'Device unmount'
       })
 
       const expectedDm2 = DeviceMountActionBasicData.createFromObject({
@@ -220,16 +226,18 @@ describe('DeviceMountActionSerializer', () => {
         offsetX: 1,
         offsetY: 2,
         offsetZ: 3,
-        date: DateTime.utc(2020, 3, 1, 12, 0, 0),
-        description: 'Device mount'
+        beginDate: DateTime.utc(2020, 3, 1, 12, 0, 0),
+        beginDescription: 'Device mount',
+        endDate: null,
+        endDescription: ''
       })
 
       const expectedResult = [
         new DeviceMountAction(
-          expectedDm1, expectedCf1, expectedCt1, null
+          expectedDm1, expectedCf1, expectedCt1, expectedCt2, null
         ),
         new DeviceMountAction(
-          expectedDm2, expectedCf1, expectedCt2, expectedPt1
+          expectedDm2, expectedCf1, expectedCt2, null, expectedPt1
         )
       ]
 

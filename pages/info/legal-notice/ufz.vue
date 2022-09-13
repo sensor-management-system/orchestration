@@ -56,7 +56,7 @@ permissions and limitations under the Licence.
     </section>
     <section>
       <h2>Authorized representatives</h2>
-      <p>The UFZ is legally represented by Prof. Dr. Georg Teutsch (Scientific Director) and Dr. Sabine König (Administrative Director).</p>
+      <p>The UFZ is legally represented by Prof. Dr. Rolf Altenburger, Scientific Managing Director and Dr. Sabine König, Administrative Managing Director.</p>
     </section>
     <section>
       <h2>Value Added Tax ID</h2>
@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
     <section>
       <h2>Editorial Staff</h2>
       <p>
-        Responsible editor for the contents of this internet presence with regard to media law is<br>
+        Responsible editors for the contents of this internet presence with regard to media law are<br>
         <br>
         Dr.-Ing. Jan Bumberger (Head of <a href="https://www.ufz.de/index.php?en=48474" target="_blank">Research Data Management (RDM)</a>)
         E-Mail: <a href="mailto:jan.bumberger@ufz.de">jan.bumberger@ufz.de</a>
@@ -103,11 +103,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class UfzImprintPage extends Vue {
   created () {
-    this.$store.commit('appbar/setTitle', 'Legal Notice')
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.$store.dispatch('appbar/init', { title: 'Legal Notice' })
   }
 }
 </script>

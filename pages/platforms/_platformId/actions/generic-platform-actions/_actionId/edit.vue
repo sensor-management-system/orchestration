@@ -34,16 +34,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-card-actions>
-      <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
-      />
-    </v-card-actions>
-
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
     <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
     <v-select
       :value="action.actionTypeName"
@@ -52,70 +46,91 @@ permissions and limitations under the Licence.
       disabled
       label="Action Type"
     />
+    <v-card-actions>
+      <v-spacer />
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
+      />
+    </v-card-actions>
     <GenericActionForm
       ref="genericPlatformActionForm"
       v-model="action"
-      :attachments="attachments"
+      :attachments="platformAttachments"
       :current-user-mail="$auth.user.email"
     />
 
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+
+import {
+  PlatformsState,
+  LoadPlatformGenericActionAction,
+  LoadAllPlatformActionsAction,
+  LoadPlatformAttachmentsAction,
+  UpdatePlatformGenericActionAction
+} from '@/store/platforms'
 
 import { GenericAction } from '@/models/GenericAction'
-import { Attachment } from '@/models/Attachment'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
-    ActionButtonTray,
+    SaveAndCancelButtons,
+    ProgressIndicator,
     GenericActionForm
   },
   scrollToTop: true,
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('platforms', ['platformGenericAction', 'platformAttachments']),
+  methods: mapActions('platforms', ['loadPlatformGenericAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformGenericAction'])
 })
 export default class EditPlatformAction extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: GenericAction = new GenericAction()
-  private attachments: Attachment[] = []
-  private _isLoading: boolean = false
-  private _isSaving: boolean = false
+  private isSaving = false
+  private isLoading = false
 
-  async fetch (): Promise<any> {
-    this.isLoading = true
-    await Promise.all([
-      this.fetchAttachments(),
-      this.fetchAction()
-    ])
-    this.isLoading = false
-  }
+  // vuex definition for typescript check
+  platforms!: PlatformsState['platforms']
+  platformGenericAction!: PlatformsState['platformGenericAction']
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
+  loadPlatformGenericAction!: LoadPlatformGenericActionAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  updatePlatformGenericAction!: UpdatePlatformGenericActionAction
 
-  async fetchAction (): Promise<any> {
+  async fetch (): Promise<void> {
     try {
-      this.action = await this.$api.genericPlatformActions.findById(this.actionId)
+      this.isLoading = true
+      await Promise.all([
+        this.loadPlatformGenericAction(this.actionId),
+        this.loadPlatformAttachments(this.platformId)
+      ])
+      if (this.platformGenericAction) {
+        this.action = GenericAction.createFromObject(this.platformGenericAction)
+      }
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-  }
-
-  async fetchAttachments (): Promise<any> {
-    try {
-      this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
-    } catch (_) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -127,38 +142,38 @@ export default class EditPlatformAction extends Vue {
     return this.$route.params.actionId
   }
 
-  get isLoading (): boolean {
-    return this.$data._isLoading
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
-  set isLoading (value: boolean) {
-    this.$data._isLoading = value
-    this.$emit('showload', value)
-  }
-
-  get isSaving (): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving (value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save (): void {
+  async save () {
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    this.$api.genericPlatformActions.update(this.platformId, this.action).then((action: GenericAction) => {
-      this.$store.commit('snackbar/setSuccess', `Action: ${this.action.actionTypeName} updated`)
-      this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
-    }).catch(() => {
+
+    try {
+      this.isSaving = true
+      await this.updatePlatformGenericAction({ platformId: this.platformId, genericPlatformAction: this.action })
+      this.loadAllPlatformActions(this.platformId)
+      this.$store.commit('snackbar/setSuccess', `${this.action.actionTypeName} updated`)
+      this.$router.push('/platforms/' + this.platformId + '/actions')
+    } catch (err) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }).finally(() => {
+    } finally {
       this.isSaving = false
-    })
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
   }
 }
 </script>

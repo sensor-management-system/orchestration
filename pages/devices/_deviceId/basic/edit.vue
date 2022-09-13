@@ -31,28 +31,17 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isLoading"
+      v-model="isSaving"
       dark
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        v-if="editable"
+        save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
     <DeviceBasicDataForm
       ref="basicForm"
@@ -60,93 +49,127 @@ permissions and limitations under the Licence.
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        v-if="editable"
+        save-btn-text="Apply"
         :to="'/devices/' + deviceId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
+
+    <navigation-guard-dialog
+      v-model="showNavigationWarning"
+      :has-entity-changed="deviceHasBeenEdited"
+      :to="to"
+      @close="to = null"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 
-import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { RawLocation } from 'vue-router'
+
+import { mapActions, mapState } from 'vuex'
+
+import { DevicesState, LoadDeviceAction, SaveDeviceAction } from '@/store/devices'
 
 import { Device } from '@/models/Device'
 
+import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
+
 @Component({
   components: {
+    SaveAndCancelButtons,
     DeviceBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NavigationGuardDialog
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('devices', ['device']),
+  methods: mapActions('devices', ['saveDevice', 'loadDevice'])
 })
 export default class DeviceEditBasicPage extends Vue {
-  // we need to initialize the instance variable with an empty Device instance
-  // here, otherwise the form is not reactive
+  @InjectReactive()
+    editable!: boolean
+
   private deviceCopy: Device = new Device()
+  private isSaving: boolean = false
+  private hasSaved: boolean = false
+  private showNavigationWarning: boolean = false
+  private to: RawLocation | null = null
 
-  private isLoading: boolean = false
-
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Device
+  // vuex definition for typescript check
+  device!: DevicesState['device']
+  saveDevice!: SaveDeviceAction
+  loadDevice!: LoadDeviceAction
 
   created () {
-    this.deviceCopy = Device.createFromObject(this.value)
-  }
-
-  onSaveButtonClicked () {
-    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
-      this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
+    if (this.device) {
+      this.deviceCopy = Device.createFromObject(this.device)
     }
-    this.isLoading = true
-    this.save().then((device) => {
-      this.isLoading = false
-      this.$emit('input', device)
-      this.$router.push('/devices/' + this.deviceId + '/basic')
-    }).catch((_error) => {
-      this.isLoading = false
-      this.$store.commit('snackbar/setError', 'Save failed')
-    })
-  }
-
-  save (): Promise<Device> {
-    return new Promise((resolve, reject) => {
-      this.$api.devices.save(this.deviceCopy).then((savedDevice) => {
-        resolve(savedDevice)
-      }).catch((_error) => {
-        reject(_error)
-      })
-    })
   }
 
   get deviceId () {
     return this.$route.params.deviceId
   }
 
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onDeviceChanged (val: Device) {
-    this.deviceCopy = Device.createFromObject(val)
+  get deviceHasBeenEdited () {
+    return (JSON.stringify(this.device) !== JSON.stringify(this.deviceCopy))
+  }
+
+  async save () {
+    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+    try {
+      this.isSaving = true
+      await this.saveDevice(this.deviceCopy)
+      this.loadDevice({
+        deviceId: this.deviceId,
+        includeContacts: false,
+        includeCustomFields: false,
+        includeDeviceProperties: false,
+        includeDeviceAttachments: false
+      }) // Todo eventuell gibt es eine besser möglichkeit die Änderungen nachzuladen/eventuell das gespeicherte Device als das device im store setzen
+      this.hasSaved = true
+      this.$store.commit('snackbar/setSuccess', 'Device updated')
+      this.$router.push('/devices/' + this.deviceId + '/basic')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Save failed')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  beforeRouteLeave (to: RawLocation, from: RawLocation, next: any) {
+    if (this.deviceHasBeenEdited && !this.hasSaved) {
+      if (this.to && this.to) {
+        next()
+      } else {
+        this.to = to
+        this.showNavigationWarning = true
+      }
+    } else {
+      return next()
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
   }
 }
 </script>

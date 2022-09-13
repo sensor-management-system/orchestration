@@ -50,9 +50,12 @@ describe('DeviceNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a device mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a device mount action',
+      endDescription: ''
     })
     const node = new DeviceNode(deviceMountAction)
     expect(Object.is(node.unpack(), deviceMountAction)).toBeTruthy()
@@ -69,9 +72,12 @@ describe('DeviceNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a device mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a device mount action',
+      endDescription: ''
     })
     const firstNode = new DeviceNode(firstDeviceMountAction)
     const secondNode = DeviceNode.createFromObject(firstNode)
@@ -90,9 +96,12 @@ describe('DeviceNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a device mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a device mount action',
+      endDescription: ''
     })
     const node = new DeviceNode(deviceMountAction)
     expect(node.canHaveChildren()).toBeFalsy()
@@ -109,9 +118,12 @@ describe('DeviceNode', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'just a device mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a device mount action',
+      endDescription: ''
     })
     const node = new DeviceNode(deviceMountAction)
     const name = node.name
@@ -131,9 +143,12 @@ describe('DeviceNode', () => {
       offsetX: 1,
       offsetY: 2,
       offsetZ: 3,
-      contact,
-      date,
-      description: 'just a device mount action'
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a device mount action',
+      endDescription: ''
     })
     const node = new DeviceNode(deviceMountAction)
     const name = node.name

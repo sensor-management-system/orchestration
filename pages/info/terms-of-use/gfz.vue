@@ -243,11 +243,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class GfzTermsOfUsePage extends Vue {
   created () {
-    this.$store.commit('appbar/setTitle', 'Terms of Use')
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
+    this.$store.dispatch('appbar/init', { title: 'Terms of Use' })
   }
 }
 </script>

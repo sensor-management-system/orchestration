@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -95,9 +95,9 @@ export class DeviceMountActionSerializer {
       const configurationData = configurationRelationship.data as IJsonApiEntityWithoutDetails
       const configurationId = configurationData.id
 
-      const contactRelationship = relationships.contact as IJsonApiRelationships
-      const contactData = contactRelationship.data as IJsonApiEntityWithoutDetails
-      const contactId = contactData.id
+      const beginContactRelationship = relationships.begin_contact as IJsonApiRelationships
+      const beginContactData = beginContactRelationship.data as IJsonApiEntityWithoutDetails
+      const beginContactId = beginContactData.id
 
       let parentPlatformId = null
 
@@ -106,9 +106,16 @@ export class DeviceMountActionSerializer {
         parentPlatformId = parentPlatformData.id
       }
 
-      if (configurationByIdLookup[configurationId] && contactByIdLookup[contactId]) {
+      let endContactId = null
+
+      if (relationships.end_contact && relationships.end_contact.data) {
+        const endContactData = relationships.end_contact.data as IJsonApiEntityWithoutDetails
+        endContactId = endContactData.id
+      }
+
+      if (configurationByIdLookup[configurationId] && contactByIdLookup[beginContactId]) {
         const configurationBasicData = configurationByIdLookup[configurationId]
-        const contactBasicData = contactByIdLookup[contactId]
+        const contactBasicData = contactByIdLookup[beginContactId]
 
         let parentPlatformBasicData = null
 
@@ -116,8 +123,13 @@ export class DeviceMountActionSerializer {
           parentPlatformBasicData = platformByIdLookup[parentPlatformId]
         }
 
+        let endContactData = null
+        if (endContactId !== null && contactByIdLookup[endContactId]) {
+          endContactData = contactByIdLookup[endContactId]
+        }
+
         result.push(
-          new DeviceMountAction(deviceMountActionBasic, configurationBasicData, contactBasicData, parentPlatformBasicData)
+          new DeviceMountAction(deviceMountActionBasic, configurationBasicData, contactBasicData, endContactData, parentPlatformBasicData)
         )
       }
     }

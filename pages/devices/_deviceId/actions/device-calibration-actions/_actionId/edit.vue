@@ -30,92 +30,110 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
+    <v-select
+      value="Device Calibration"
+      :items="['Device Calibration']"
+      :item-text="(x) => x"
+      disabled
+      label="Action Type"
+    />
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <SaveAndCancelButtons
+        v-if="editable"
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
 
     <DeviceCalibrationActionForm
       ref="deviceCalibrationActionForm"
       v-model="action"
-      :attachments="attachments"
-      :measured-quantities="measuredQuantities"
+      :attachments="deviceAttachments"
+      :measured-quantities="deviceMeasuredQuantities"
       :current-user-mail="$auth.user.email"
     />
 
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/devices/' + deviceId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <SaveAndCancelButtons
+        v-if="editable"
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
-import { Attachment } from '@/models/Attachment'
+import {
+  LoadDeviceCalibrationActionAction,
+  LoadAllDeviceActionsAction,
+  LoadDeviceAttachmentsAction,
+  LoadDeviceMeasuredQuantitiesAction,
+  UpdateDeviceCalibrationAction,
+  DevicesState
+} from '@/store/devices'
+
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
-    DeviceCalibrationActionForm,
-    ActionButtonTray
+    ProgressIndicator,
+    SaveAndCancelButtons,
+    DeviceCalibrationActionForm
   },
   scrollToTop: true,
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('devices', ['deviceCalibrationAction', 'deviceAttachments', 'deviceMeasuredQuantities']),
+  methods: mapActions('devices', ['loadDeviceCalibrationAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'loadDeviceMeasuredQuantities', 'updateDeviceCalibrationAction'])
 })
 export default class DeviceCalibrationActionEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()
-  private attachments: Attachment[] = []
-  private measuredQuantities: DeviceProperty[] = []
-  private _isLoading: boolean = false
-  private _isSaving: boolean = false
+  private isSaving = false
+  private isLoading = false
 
-  async fetch (): Promise<any> {
-    this.isLoading = true
-    await Promise.all([
-      this.fetchAttachments(),
-      this.fetchAction(),
-      this.fetchMeasuredQuantities()
-    ])
-    this.isLoading = false
-  }
+  // vuex definition for typescript check
+  deviceCalibrationAction!: DevicesState['deviceCalibrationAction']
+  deviceAttachments!: DevicesState['deviceAttachments']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
+  loadDeviceCalibrationAction!: LoadDeviceCalibrationActionAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+  updateDeviceCalibrationAction!: UpdateDeviceCalibrationAction
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
-  async fetchAction (): Promise<any> {
+  async fetch (): Promise<void> {
     try {
-      this.action = await this.$api.deviceCalibrationActions.findById(this.actionId)
-    } catch (_) {
+      this.isLoading = true
+      await Promise.all([
+        this.loadDeviceCalibrationAction(this.actionId),
+        this.loadDeviceAttachments(this.deviceId),
+        this.loadDeviceMeasuredQuantities(this.deviceId)
+      ])
+      if (this.deviceCalibrationAction) {
+        this.action = DeviceCalibrationAction.createFromObject(this.deviceCalibrationAction)
+      }
+    } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-  }
-
-  async fetchAttachments (): Promise<any> {
-    try {
-      this.attachments = await this.$api.devices.findRelatedDeviceAttachments(this.deviceId)
-    } catch (_) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
-    }
-  }
-
-  async fetchMeasuredQuantities (): Promise<any> {
-    try {
-      this.measuredQuantities = await this.$api.devices.findRelatedDeviceProperties(this.deviceId)
-    } catch (_) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -127,37 +145,40 @@ export default class DeviceCalibrationActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
-  get isLoading (): boolean {
-    return this.$data._isLoading
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
-  set isLoading (value: boolean) {
-    this.$data._isLoading = value
-    this.$emit('showload', value)
-  }
-
-  get isSaving (): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving (value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save (): void {
+  async save () {
     if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    this.$api.deviceCalibrationActions.update(this.deviceId, this.action).then((action: DeviceCalibrationAction) => {
-      this.$router.push('/devices/' + this.deviceId + '/actions', () => this.$emit('input', action))
-    }).catch(() => {
+
+    try {
+      this.isLoading = true
+      await this.updateDeviceCalibrationAction({
+        deviceId: this.deviceId,
+        calibrationAction: this.action
+      })
+      this.loadAllDeviceActions(this.deviceId)
+      this.$router.push('/devices/' + this.deviceId + '/actions')
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }).finally(() => {
-      this.isSaving = false
-    })
+    } finally {
+      this.isLoading = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
   }
 }
 </script>

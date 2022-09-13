@@ -30,137 +30,158 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-card class="mt-4">
-      <v-card-title>
-        <v-row>
-          <v-col>
-            Create a new measured quantity
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <v-btn
-              text
-              small
-              @click.prevent.stop="cancel"
-            >
-              Cancel
-            </v-btn>
-            <v-btn
-              color="green"
-              small
-              @click.prevent.stop="save"
-            >
-              Save
-            </v-btn>
-          </v-col>
-        </v-row>
-        <v-card-actions />
-      </v-card-title>
+    <ProgressIndicator
+      v-model="isSaving"
+      dark
+    />
+    <v-card
+      flat
+    >
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          save-btn-text="Add"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
+          @save="save"
+        />
+      </v-card-actions>
       <v-card-text>
         <DevicePropertyForm
           ref="propertyForm"
-          v-model="value"
+          v-model="valueCopy"
           :readonly="false"
           :compartments="compartments"
-          :sampling-medias="samplingMedias"
+          :sampling-medias="samplingMedia"
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
         />
       </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          save-btn-text="Add"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
+          @save="save"
+        />
+      </v-card-actions>
     </v-card>
+    <v-subheader>Existing measured quantities</v-subheader>
+    <BaseList
+      :list-items="deviceMeasuredQuantities"
+    >
+      <template #list-item="{item,index}">
+        <DevicesMeasuredQuantitiesListItem
+          :measured-quantity="item"
+          :index="index"
+          :device-id="deviceId"
+          :compartments="compartments"
+          :sampling-medias="samplingMedia"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
+        />
+      </template>
+    </BaseList>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+
+import { AddDeviceMeasuredQuantityAction, DevicesState, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
+import {
+  LoadCompartmentsAction,
+  LoadSamplingMediaAction,
+  LoadPropertiesAction,
+  LoadUnitsAction,
+  LoadMeasuredQuantityUnitsAction,
+  VocabularyState
+} from '@/store/vocabulary'
+
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
-
-import { Compartment } from '@/models/Compartment'
-import { DeviceProperty } from '@/models/DeviceProperty'
-import { Property } from '@/models/Property'
-import { SamplingMedia } from '@/models/SamplingMedia'
-import { Unit } from '@/models/Unit'
-import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import BaseList from '@/components/shared/BaseList.vue'
+import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
 
 @Component({
-  components: { DevicePropertyForm },
-  middleware: ['auth']
+  middleware: ['auth'],
+  components: { DevicesMeasuredQuantitiesListItem, BaseList, ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
+  computed: {
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('devices', ['deviceMeasuredQuantities'])
+  },
+
+  methods: {
+    ...mapActions('devices', ['addDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities']),
+    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits'])
+  }
 })
-export default class DevicePropertyNewPage extends Vue {
-  private value: DeviceProperty = new DeviceProperty()
+export default class DevicePropertyAddPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
 
-  /**
-   * a list of Compartments
-   */
-  @Prop({
-    default: () => [] as Compartment[],
-    required: true,
-    type: Array
-  })
-  readonly compartments!: Compartment[]
+  private isSaving = false
+  private valueCopy: DeviceProperty = new DeviceProperty()
 
-  /**
-   * a list of SamplingMedias
-   */
-  @Prop({
-    default: () => [] as SamplingMedia[],
-    required: true,
-    type: Array
-  })
-  readonly samplingMedias!: SamplingMedia[]
-
-  /**
-   * a list of Properties
-   */
-  @Prop({
-    default: () => [] as Property[],
-    required: true,
-    type: Array
-  })
-  readonly properties!: Property[]
-
-  /**
-   * a list of Units
-   */
-  @Prop({
-    default: () => [] as Unit[],
-    required: true,
-    type: Array
-  })
-  readonly units!: Unit[]
-
-  /**
-   * a list of MeasuredQuantityUnits
-   */
-  @Prop({
-    default: () => [] as MeasuredQuantityUnit[],
-    required: true,
-    type: Array
-  })
-  readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
-
-  save () {
-    this.$emit('showsave', true)
-    this.$api.deviceProperties.add(this.deviceId, this.value).then((newDeviceProperty: DeviceProperty) => {
-      this.$emit('showsave', false)
-      this.$emit('input', newDeviceProperty)
-      this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
-    }).catch(() => {
-      this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
-    })
-  }
-
-  cancel () {
-    this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
-  }
+  // vuex definition for typescript check
+  compartments!: VocabularyState['compartments']
+  samplingMedia!: VocabularyState['samplingMedia']
+  properties!: VocabularyState['properties']
+  units!: VocabularyState['units']
+  measuredQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
+  loadCompartments!: LoadCompartmentsAction
+  loadSamplingMedia!: LoadSamplingMediaAction
+  loadProperties!: LoadPropertiesAction
+  loadUnits!: LoadUnitsAction
+  loadMeasuredQuantityUnits!: LoadMeasuredQuantityUnitsAction
+  addDeviceMeasuredQuantity!: AddDeviceMeasuredQuantityAction
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
+
+  async save (): Promise<void> {
+    if (!(this.$refs.propertyForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+
+    try {
+      this.isSaving = true
+      await this.addDeviceMeasuredQuantity({
+        deviceId: this.deviceId,
+        deviceMeasuredQuantity: this.valueCopy
+      })
+      this.loadDeviceMeasuredQuantities(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'New measured quantity added')
+      this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
+  }
 }
 </script>
+
+<style scoped>
+
+</style>

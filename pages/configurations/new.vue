@@ -43,9 +43,10 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <save-and-cancel-buttons
+        <SaveAndCancelButtons
           :to="'/configurations'"
-          @save="save()"
+          save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
       <ConfigurationsBasicDataForm
@@ -55,9 +56,10 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <save-and-cancel-buttons
+        <SaveAndCancelButtons
           :to="'/configurations'"
-          @save="save()"
+          save-btn-text="create"
+          @save="save"
         />
       </v-card-actions>
     </v-card>
@@ -67,6 +69,10 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
+import { mapActions } from 'vuex'
+
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+
 import { Configuration } from '@/models/Configuration'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -75,50 +81,24 @@ import ConfigurationsBasicDataForm from '@/components/configurations/Configurati
 
 @Component({
   components: { ConfigurationsBasicDataForm, SaveAndCancelButtons, ProgressIndicator },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods: {
+    ...mapActions('configurations', ['saveConfiguration']),
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
+  }
 })
 export default class ConfigurationNewPage extends Vue {
   private configuration: Configuration = new Configuration()
   private isLoading: boolean = false
 
+  // vuex definition for typescript check
+  initConfigurationsNewAppBar!: () => void
+  saveConfiguration!: (configuration: Configuration) => Promise<Configuration>
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+
   created () {
-    this.$store.commit('configurations/setConfiguration', this.configuration)
-  }
-
-  mounted () {
     this.initializeAppBar()
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  private initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/configurations/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Platforms and Devices',
-          disabled: true
-        },
-        {
-          name: 'Locations',
-          disabled: true
-        },
-        {
-          name: 'Actions',
-          disabled: true
-        }
-      ],
-      title: 'Add Configuration'
-    })
   }
 
   async save () {
@@ -129,7 +109,7 @@ export default class ConfigurationNewPage extends Vue {
 
     try {
       this.isLoading = true
-      const savedConfiguration = await this.$api.configurations.save(this.configuration)
+      const savedConfiguration = await this.saveConfiguration(this.configuration)
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       await this.$router.push('/configurations/' + savedConfiguration.id)
     } catch (e) {
@@ -137,6 +117,34 @@ export default class ConfigurationNewPage extends Vue {
     } finally {
       this.isLoading = false
     }
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/configurations/new',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Platforms and Devices',
+        disabled: true
+      },
+      {
+        name:
+        'Locations',
+        disabled: true
+      },
+      {
+        name:
+        'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('New Configuration')
   }
 }
 </script>

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -83,12 +83,22 @@ permissions and limitations under the Licence.
         </v-list-item>
 
         <!-- Contacts -->
-        <v-list-item to="/contacts" nuxt>
+        <v-list-item v-if="isLoggedIn" to="/contacts" nuxt>
           <v-list-item-action>
             <v-icon>mdi-account-multiple</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Contacts</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <!-- Group information -->
+        <v-list-item to="/info/groups" nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-account-group</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Groups</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
@@ -184,7 +194,7 @@ permissions and limitations under the Licence.
       </v-menu>
     </v-app-bar>
     <v-main>
-      <v-container>
+      <v-container :fluid="fullWidth" :class="fullWidth ? ['mx-0', 'px-0', 'pt-0']: []">
         <v-snackbar v-model="hasSuccess" top color="green">
           {{ success }}
           <template #action="{ attrs }">
@@ -205,11 +215,22 @@ permissions and limitations under the Licence.
             </v-btn>
           </template>
         </v-snackbar>
+        <v-snackbar v-model="hasWarning" top color="orange" :timeout="-1">
+          {{ warning }}
+          <template #action="{ attrs }">
+            <v-btn icon small color="white" v-bind="attrs" @click="closeWarningSnackbar">
+              <v-icon small>
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-snackbar>
         <nuxt />
       </v-container>
     </v-main>
     <v-footer
-      :fixed="fixed"
+      :absolute="$vuetify.breakpoint.smAndDown"
+      :fixed="$vuetify.breakpoint.smAndUp"
       app
       padless
     >
@@ -267,8 +288,8 @@ permissions and limitations under the Licence.
             color="secondary"
           >
             Terms of Use
-          </v-btn>&nbsp;|&nbsp;
-          <span class="ma-2 pl-3">&copy; {{ new Date().getFullYear() }}</span>
+          </v-btn>
+          |&nbsp;<span class="ma-2 pl-3">&copy;&nbsp;{{ new Date().getFullYear() }}</span>
         </v-col>
         <v-col
           cols="12"
@@ -309,6 +330,7 @@ permissions and limitations under the Licence.
 <script>
 
 import CookieLaw from 'vue-cookie-law'
+import { mapActions, mapState } from 'vuex'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
 
@@ -337,6 +359,7 @@ export default {
     }
   },
   computed: {
+    ...mapState('defaultlayout', ['fullWidth']),
     browserTitle () {
       if (this.title === this.appBarTitle) {
         return this.title
@@ -369,6 +392,19 @@ export default {
       set (newValue) {
         if (!newValue) {
           this.$store.commit('snackbar/clearSuccess')
+        }
+      }
+    },
+    warning () {
+      return this.$store.state.snackbar.warning
+    },
+    hasWarning: {
+      get () {
+        return this.$store.state.snackbar.warning !== ''
+      },
+      set (newValue) {
+        if (!newValue) {
+          this.$store.commit('snackbar/clearWarning')
         }
       }
     },
@@ -414,7 +450,7 @@ export default {
     apiLink () {
       let link = ''
       if (this.$fullContext.env.smsBackendUrl) {
-        link = this.$fullContext.env.smsBackendUrl + '/swagger'
+        link = this.$fullContext.env.smsBackendUrl + '/openapi'
       }
       return link
     },
@@ -432,6 +468,9 @@ export default {
           break
       }
       return align + ' pr-2'
+    },
+    isLoggedIn () {
+      return this.$auth.loggedIn
     }
   },
   created () {
@@ -443,11 +482,15 @@ export default {
     })
   },
   methods: {
+    ...mapActions('permissions', ['clearUserInfo']),
     closeErrorSnackbar () {
       this.$store.commit('snackbar/clearError')
     },
     closeSuccessSnackbar () {
       this.$store.commit('snackbar/clearSuccess')
+    },
+    closeWarningSnackbar () {
+      this.$store.commit('snackbar/clearWarning')
     },
     onChangeTab (tab) {
       this.$store.commit('appbar/setActiveTab', tab)
@@ -465,8 +508,9 @@ export default {
           this.$store.commit('snackbar/setError', 'Login failed')
         })
     },
-    logout () {
-      this.$auth.logout()
+    async logout () {
+      await this.$auth.logout()
+      this.clearUserInfo()
     }
   }
 }

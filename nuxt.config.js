@@ -93,6 +93,7 @@ export default {
   env: {
     smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000/rdm/svm-api/v1',
     cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001/api',
+    idlSyncUrl: process.env.IDL_SYNC_URL || '',
     institute: process.env.INSTITUTE || ''
   },
   /*
@@ -183,9 +184,14 @@ export default {
   },
   router: {
     base: process.env.BASE_URL || '/',
-    middleware: ['institute-pages']
+    middleware: [
+      'institute-pages',
+      'login-success'
+    ]
   },
   auth: {
+    // load all plugins, that require the $auth instance from context
+    plugins: [],
     cookie: false,
     redirect: {
       login: '/',

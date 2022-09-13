@@ -42,23 +42,11 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/platforms'"
+          save-btn-text="create"
+          @save="save"
+        />
       </v-card-actions>
       <PlatformBasicDataForm
         ref="basicForm"
@@ -66,98 +54,93 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/platforms'"
+          save-btn-text="create"
+          @save="save"
+        />
       </v-card-actions>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
 
-import { Rules } from '@/mixins/Rules'
-
-import { Platform } from '@/models/Platform'
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SavePlatformAction } from '@/store/platforms'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+
+import { Platform } from '@/models/Platform'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods: {
+    ...mapActions('platforms', ['savePlatform']),
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
+  }
 })
 // @ts-ignore
-export default class PlatformNewPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
+export default class PlatformNewPage extends Vue {
   private platform: Platform = new Platform()
   private isLoading: boolean = false
 
-  mounted () {
+  // vuex definition for typescript check
+  savePlatform!: SavePlatformAction
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+
+  created () {
     this.initializeAppBar()
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  onSaveButtonClicked (): void {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
-      return
-    }
-    this.isLoading = true
-    this.$api.platforms.save(this.platform).then((savedPlatform) => {
-      this.isLoading = false
+
+    try {
+      this.isLoading = true
+      const savedPlatform = await this.savePlatform(this.platform)
       this.$store.commit('snackbar/setSuccess', 'Platform created')
-      this.$router.push('/platforms/' + savedPlatform.id + '')
-    }).catch((_error) => {
-      this.isLoading = false
+      this.$router.push('/platforms/' + savedPlatform.id)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
-    })
+    } finally {
+      this.isLoading = false
+    }
   }
 
   initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platforms/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        }
-      ],
-      title: 'Add Platform'
-    })
+    this.setTabs([
+      {
+        to: '/platforms/new',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('New Platform')
   }
 }
 </script>

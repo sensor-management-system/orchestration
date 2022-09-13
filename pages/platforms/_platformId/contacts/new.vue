@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020 - 2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -37,81 +37,105 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <contact-role-form
-      :existing-contact-roles="value"
-      :contacts="allContacts"
-      :cv-contact-roles="allContactRoles"
-      :cancel-to="'/platforms/' + platformId + '/contacts'"
-      :editable="$auth.loggedIn"
-      @add-contact="addContact"
+    <contact-role-assignment-form
+      :contacts="contacts"
+      :contact="selectedContact"
+      :cv-contact-roles="cvContactRoles"
+      :existing-contact-roles="platformContactRoles"
+      @cancel="$router.push('/platforms/' + platformId + '/contacts')"
+      @input="assignContact"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+
+import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
+import {
+  PlatformsState,
+  LoadPlatformContactRolesAction,
+  AddPlatformContactRoleAction
+} from '@/store/platforms'
+import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
 import { Contact } from '@/models/Contact'
 import { ContactRole } from '@/models/ContactRole'
-import { CvContactRole } from '@/models/CvContactRole'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import ContactRoleForm from '@/components/contacts/ContactRoleForm.vue'
+import ContactRoleAssignmentForm from '@/components/shared/ContactRoleAssignmentForm.vue'
 
 @Component({
   components: {
-    ContactRoleForm,
-    ProgressIndicator
+    ProgressIndicator,
+    ContactRoleAssignmentForm
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: {
+    ...mapState('platforms', ['platformContactRoles']),
+    ...mapState('contacts', ['contacts']),
+    ...mapState('vocabulary', ['cvContactRoles'])
+
+  },
+  methods: {
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('platforms', ['loadPlatformContactRoles', 'addPlatformContactRole']),
+    ...mapActions('vocabulary', ['loadCvContactRoles'])
+  }
 })
 export default class PlatformAddContactPage extends Vue {
-  @Prop({
-    type: Array,
-    required: false,
-    default: () => [] as ContactRole[]
-  })
-  // existing contact roles
-  private readonly value!: ContactRole[]
+  @InjectReactive()
+    editable!: boolean
 
-  private allContacts: Contact[] = []
-  private allContactRoles: CvContactRole[] = []
-
+  private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
 
-  async fetch () {
+  // vuex definition for typescript check
+  platformContactRoles!: PlatformsState['platformContactRoles']
+  contacts!: ContactsState['contacts']
+  loadAllContacts!: LoadAllContactsAction
+  loadPlatformContactRoles!: LoadPlatformContactRolesAction
+  addPlatformContactRole!: AddPlatformContactRoleAction
+  loadCvContactRoles!: LoadCvContactRolesAction
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      // We can run both queries in parallel.
-      // And the page currently handles the server interaction
-      // (and not the form component).
-      const allContactsPromise = this.$api.contacts.findAll()
-      const allContactRolesPromise = this.$api.cvContactRoles.findAll()
-      this.allContacts = await allContactsPromise
-      this.allContactRoles = await allContactRolesPromise
-    } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch contact information')
+      await this.loadAllContacts()
+
+      const redirectContactId = this.$route.query.contact
+      if (redirectContactId) {
+        this.selectedContact = this.contacts.find(contact => contact.id === redirectContactId) as Contact
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
     } finally {
       this.isLoading = false
     }
+  }
+
+  get platformId (): string {
+    return this.$route.params.platformId
   }
 
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
   }
 
-  async addContact (newContactRole: ContactRole) {
-    if (this.$auth.loggedIn) {
-      this.isSaving = true
+  async assignContact (contactRole: ContactRole | null) {
+    if (this.editable && contactRole) {
       try {
-        const newContactRoleId = await this.$api.platforms.addContact(this.platformId, newContactRole)
-        // the current one has no id so far, so we will set it here
-        newContactRole.id = newContactRoleId
-        const result = [...this.value, newContactRole]
-        this.$emit('input', result)
+        this.isSaving = true
+        await this.addPlatformContactRole({
+          platformId: this.platformId,
+          contactRole
+        })
+        this.loadPlatformContactRoles(this.platformId)
+        this.$store.commit('snackbar/setSuccess', 'New Contact added')
         this.$router.push('/platforms/' + this.platformId + '/contacts')
-      } catch (_error) {
+      } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
       } finally {
         this.isSaving = false
@@ -119,8 +143,15 @@ export default class PlatformAddContactPage extends Vue {
     }
   }
 
-  get platformId (): string {
-    return this.$route.params.platformId
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/contacts', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
   }
 }
 </script>

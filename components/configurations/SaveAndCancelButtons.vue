@@ -43,21 +43,25 @@ permissions and limitations under the Licence.
       cancel
     </v-btn>
     <v-btn
-      color="green"
+      color="accent"
       small
+      :disabled="disabled"
       @click="$emit('save')"
     >
-      apply
+      {{ saveBtnText }}
     </v-btn>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { RawLocation } from 'vue-router'
 
 @Component
 export default class SaveAndCancelButtons extends Vue {
-  @Prop({ default: false, type: String }) to!: string
+  @Prop({ required: true, type: [String, Object] }) to!: RawLocation
+  @Prop({ required: true, type: String }) saveBtnText!: string
+  @Prop({ default: false, type: Boolean }) disabled!: boolean
 }
 </script>
 

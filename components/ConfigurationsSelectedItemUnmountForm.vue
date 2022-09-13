@@ -2,11 +2,15 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -41,7 +45,7 @@ permissions and limitations under the Licence.
             :items="contacts"
             label="Contact"
             required
-            :readonly="readonly"
+            :disabled="readonly"
             :rules="[rules.required]"
           />
         </v-col>
@@ -52,7 +56,7 @@ permissions and limitations under the Licence.
             v-model="description"
             label="Description"
             rows="3"
-            :readonly="readonly"
+            :disabled="readonly"
           />
         </v-col>
       </v-row>
@@ -64,9 +68,9 @@ permissions and limitations under the Licence.
         color="red"
         text
         data-role="remove-node"
-        @click="remove"
+        @click="unmount"
       >
-        remove
+        unmount
       </v-btn>
     </div>
   </v-form>
@@ -116,9 +120,9 @@ export default class ConfigurationsSelectedItemUnmountForm extends mixins(Rules)
     return null
   }
 
-  remove () {
+  unmount () {
     if (this.validateForm()) {
-      this.$emit('remove', {
+      this.$emit('unmount', {
         contact: this.contact,
         description: this.description
       })

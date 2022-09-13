@@ -46,6 +46,34 @@ export class ContactApi {
     this.serializer = new ContactSerializer()
   }
 
+  searchPaginated (pageNumber: number, pageSize: number, search: string = '') {
+    const queryParams = {
+      params: {
+        'page[number]': pageNumber,
+        'page[size]': pageSize,
+        sort: 'family_name'
+      }
+    }
+    if (search !== '') {
+      // @ts-ignore
+      queryParams.params.q = search
+    }
+
+    return this.axiosApi.get(
+      this.basePath,
+      queryParams
+    ).then((rawResponse) => {
+      const rawData = rawResponse.data
+      const elements: Contact[] = this.serializer.convertJsonApiObjectListToModelList(rawData)
+      const totalCount = rawData.meta.count
+
+      return {
+        elements,
+        totalCount
+      }
+    })
+  }
+
   findById (id: string): Promise<Contact> {
     return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
@@ -61,7 +89,7 @@ export class ContactApi {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
-  save (contact: Contact) {
+  save (contact: Contact): Promise<Contact> {
     const data: any = this.serializer.convertModelToJsonApiData(contact)
     let method: Method = 'patch'
     let url = this.basePath

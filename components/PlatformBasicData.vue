@@ -35,6 +35,17 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-row>
+      <v-col cols="12">
+        <label>Visibility / Permissions</label>
+        <visibility-chip
+          v-model="value.visibility"
+        />
+        <permission-group-chips
+          v-model="value.permissionGroups"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="6">
         <label>URN</label>
         {{ platformURN }}
@@ -72,7 +83,7 @@ permissions and limitations under the Licence.
         {{ value.model | orDefault }}
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="9">
         <label>Description</label>
@@ -92,7 +103,7 @@ permissions and limitations under the Licence.
         </a>
       </v-col>
     </v-row>
-    <v-divider />
+    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="3">
         <label>Serial number</label>
@@ -108,6 +119,17 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+
+import {
+  VocabularyState,
+  GetEquipmentstatusByUriGetter,
+  GetPlatformTypeByUriGetter,
+  GetManufacturerByUriGetter,
+  LoadManufacturersAction,
+  LoadPlatformtypesAction,
+  LoadEquipmentstatusAction
+} from '@/store/vocabulary'
 
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
@@ -115,12 +137,22 @@ import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
+import VisibilityChip from '@/components/VisibilityChip.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
-@Component
+@Component({
+  components: {
+    PermissionGroupChips,
+    VisibilityChip
+  },
+  computed: {
+    ...mapState('vocabulary', ['platformtypes']),
+    ...mapGetters('vocabulary', ['getEquipmentstatusByUri', 'getPlatformTypeByUri', 'getManufacturerByUri'])
+  },
+  methods: mapActions('vocabulary', ['loadManufacturers', 'loadPlatformtypes', 'loadEquipmentstatus'])
+})
 export default class PlatformBasicData extends Vue {
-  private states: Status[] = []
-  private manufacturers: Manufacturer[] = []
-  private platformTypes: PlatformType[] = []
+  public readonly NO_TYPE: string = 'Unknown type'
 
   @Prop({
     default: () => new Platform(),
@@ -129,62 +161,69 @@ export default class PlatformBasicData extends Vue {
   })
   readonly value!: Platform
 
-  mounted () {
-    this.$api.states.findAllPaginated().then((foundStates) => {
-      this.states = foundStates
-    }).catch(() => {
+  // vuex definition for typescript check
+  loadEquipmentstatus!: LoadEquipmentstatusAction
+  loadPlatformtypes!: LoadPlatformtypesAction
+  loadManufacturers!: LoadManufacturersAction
+  getManufacturerByUri!: GetManufacturerByUriGetter
+  getPlatformTypeByUri!: GetPlatformTypeByUriGetter
+  getEquipmentstatusByUri!: GetEquipmentstatusByUriGetter
+  platformtypes!: VocabularyState['platformtypes']
+
+  async mounted () {
+    try {
+      await this.loadEquipmentstatus()
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of states failed')
-    })
-    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
-      this.manufacturers = foundManufacturers
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
-    })
-    this.$api.platformTypes.findAllPaginated().then((foundPlatformTypes) => {
-      this.platformTypes = foundPlatformTypes
-    }).catch(() => {
+    }
+    try {
+      await this.loadPlatformtypes()
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platform types failed')
-    })
-  }
-
-  get manufacturerNames (): string[] {
-    return this.manufacturers.map(m => m.name)
-  }
-
-  get statusNames (): string[] {
-    return this.states.map(s => s.name)
-  }
-
-  get platformTypeNames (): string[] {
-    return this.platformTypes.map(t => t.name)
+    }
+    try {
+      await this.loadManufacturers()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
+    }
   }
 
   get platformManufacturerName (): string {
-    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-    if (manufacturerIndex > -1) {
-      return this.manufacturers[manufacturerIndex].name
+    if (this.value.manufacturerName) {
+      return this.value.manufacturerName
     }
-    return this.value.manufacturerName
+    if (this.getManufacturerByUri(this.value.manufacturerUri)) {
+      const manufacturer: Manufacturer|undefined = this.getManufacturerByUri(this.value.manufacturerUri)
+      return manufacturer!.name
+    }
+    return ''
   }
 
-  get platformStatusName () {
-    const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
-    if (statusIndex > -1) {
-      return this.states[statusIndex].name
+  get platformTypeName (): string {
+    if (this.value.platformTypeName) {
+      return this.value.platformTypeName
     }
-    return this.value.statusName
+
+    if (this.getPlatformTypeByUri(this.value.platformTypeUri)) {
+      const platformType: PlatformType|undefined = this.getPlatformTypeByUri(this.value.platformTypeUri)
+      return platformType!.name
+    }
+    return this.NO_TYPE
   }
 
-  get platformTypeName () {
-    const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.value.platformTypeUri)
-    if (platformTypeIndex > -1) {
-      return this.platformTypes[platformTypeIndex].name
+  get platformStatusName (): string {
+    if (this.value.statusName) {
+      return this.value.statusName
     }
-    return this.value.platformTypeName
+    if (this.getEquipmentstatusByUri(this.value.statusUri)) {
+      const platformStatus: Status|undefined = this.getEquipmentstatusByUri(this.value.statusUri)
+      return platformStatus!.name
+    }
+    return ''
   }
 
   get platformURN () {
-    return createPlatformUrn(this.value, this.platformTypes)
+    return createPlatformUrn(this.value, this.platformtypes)
   }
 }
 </script>

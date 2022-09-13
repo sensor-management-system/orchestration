@@ -36,6 +36,7 @@
  */
 
 import { Vue, Component } from 'nuxt-property-decorator'
+
 import UploadConfig from '@/config/uploads'
 
 /**
@@ -50,7 +51,8 @@ export class UploadRules extends Vue {
    */
   private uploadRules: Object = {
     maxSize: (f: File | null) => {
-      if (f !== null && f.size > this.$api.upload.UPLOAD_SIZE_LIMIT) {
+      const uploadSizeLimit = this.$store.state.files.uploadSizeLimit
+      if (f !== null && f.size > uploadSizeLimit) {
         return 'File is too large'
       }
       return true

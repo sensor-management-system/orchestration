@@ -45,7 +45,8 @@ export class StatusSerializer {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links?.self || ''
+    const definition = jsonApiData.attributes.definition
 
-    return Status.createWithData(id, name, url)
+    return Status.createWithData(id, name, url, definition)
   }
 }

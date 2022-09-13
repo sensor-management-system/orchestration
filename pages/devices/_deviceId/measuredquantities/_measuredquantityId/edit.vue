@@ -30,121 +30,175 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <DevicePropertyForm
-      ref="propertyForm"
-      v-model="valueCopy"
-      :readonly="false"
-      :compartments="compartments"
-      :sampling-medias="samplingMedias"
-      :properties="properties"
-      :units="units"
-      :measured-quantity-units="measuredQuantityUnits"
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
     />
+    <v-card
+      flat
+    >
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          v-if="editable"
+          save-btn-text="Apply"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
+          @save="save"
+        />
+      </v-card-actions>
+      <v-card-text>
+        <DevicePropertyForm
+          ref="propertyEditForm"
+          v-model="valueCopy"
+          :readonly="false"
+          :compartments="compartments"
+          :sampling-medias="samplingMedia"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
+        />
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          v-if="editable"
+          save-btn-text="Apply"
+          :to="'/devices/' + deviceId + '/measuredquantities'"
+          @save="save"
+        />
+      </v-card-actions>
+    </v-card>
+    <v-subheader>Existing measured quantities</v-subheader>
+    <BaseList
+      v-if="deviceMeasuredQuantity !== null"
+      :list-items="quantitiesExceptCurrent"
+    >
+      <template #list-item="{item,index}">
+        <DevicesMeasuredQuantitiesListItem
+          :measured-quantity="item"
+          :index="index"
+          :device-id="deviceId"
+          :compartments="compartments"
+          :sampling-medias="samplingMedia"
+          :properties="properties"
+          :units="units"
+          :measured-quantity-units="measuredQuantityUnits"
+        />
+      </template>
+    </BaseList>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+
+import {
+  DevicesState,
+  LoadDeviceMeasuredQuantityAction,
+  LoadDeviceMeasuredQuantitiesAction,
+  UpdateDeviceMeasuredQuantityAction
+} from '@/store/devices'
+
+import { VocabularyState } from '@/store/vocabulary'
+
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
-
-import { Compartment } from '@/models/Compartment'
-import { DeviceProperty } from '@/models/DeviceProperty'
-import { Property } from '@/models/Property'
-import { SamplingMedia } from '@/models/SamplingMedia'
-import { Unit } from '@/models/Unit'
-import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import BaseList from '@/components/shared/BaseList.vue'
 
 @Component({
-  components: { DevicePropertyForm },
-  middleware: ['auth']
+  components: { BaseList, DotMenuActionDelete, DevicesMeasuredQuantitiesListItem, SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
+  middleware: ['auth'],
+  computed: {
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('devices', ['deviceMeasuredQuantity', 'deviceMeasuredQuantities'])
+  },
+  methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity'])
 })
 export default class DevicePropertyEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
+  private isSaving = false
+  private isLoading = false
+
   private valueCopy: DeviceProperty = new DeviceProperty()
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: DeviceProperty
 
-  // TODO: uncomment the next two lines and remove the third one after merging the permission management branch
-  // @InjectReactive()
-  //   editable!: boolean
-  get editable () {
-    return this.$auth.loggedIn
-  }
+  // vuex definition for typescript check
+  compartments!: VocabularyState['compartments']
+  samplingMedia!: VocabularyState['samplingMedia']
+  properties!: VocabularyState['properties']
+  units!: VocabularyState['units']
+  measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  deviceMeasuredQuantity!: DevicesState['deviceMeasuredQuantity']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
+  loadDeviceMeasuredQuantity!: LoadDeviceMeasuredQuantityAction
+  updateDeviceMeasuredQuantity!: UpdateDeviceMeasuredQuantityAction
+  loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
 
-  /**
-   * a list of Compartments
-   */
-  @Prop({
-    default: () => [] as Compartment[],
-    required: true,
-    type: Array
-  })
-  readonly compartments!: Compartment[]
-
-  /**
-   * a list of SamplingMedias
-   */
-  @Prop({
-    default: () => [] as SamplingMedia[],
-    required: true,
-    type: Array
-  })
-  readonly samplingMedias!: SamplingMedia[]
-
-  /**
-   * a list of Properties
-   */
-  @Prop({
-    default: () => [] as Property[],
-    required: true,
-    type: Array
-  })
-  readonly properties!: Property[]
-
-  /**
-   * a list of Units
-   */
-  @Prop({
-    default: () => [] as Unit[],
-    required: true,
-    type: Array
-  })
-  readonly units!: Unit[]
-
-  /**
-   * a list of MeasuredQuantityUnits
-   */
-  @Prop({
-    default: () => [] as MeasuredQuantityUnit[],
-    required: true,
-    type: Array
-  })
-  readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
-
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities')
+  async created () {
+    try {
+      this.isLoading = true
+      await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
+      if (this.deviceMeasuredQuantity) {
+        this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load measured quantity')
+    } finally {
+      this.isLoading = false
     }
-    this.valueCopy = DeviceProperty.createFromObject(this.value)
-  }
-
-  save () {
-    this.$emit('showsave', true)
-    this.$api.deviceProperties.update(this.deviceId, this.valueCopy).then((newProperty: DeviceProperty) => {
-      this.$emit('showsave', false)
-      this.$emit('input', newProperty)
-      this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
-    }).catch(() => {
-      this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
-    })
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
+  }
+
+  get measuredquantityId (): string {
+    return this.$route.params.measuredquantityId
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
+  get quantitiesExceptCurrent () {
+    return this.deviceMeasuredQuantities.filter((measuredQuantity) => {
+      return measuredQuantity.id !== this.deviceMeasuredQuantity!.id
+    })
+  }
+
+  async save () {
+    try {
+      this.isSaving = true
+      await this.updateDeviceMeasuredQuantity({
+        deviceId: this.deviceId,
+        deviceMeasuredQuantity: this.valueCopy
+      })
+      this.loadDeviceMeasuredQuantities(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Measured quantity updated')
+      this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
   }
 }
 </script>

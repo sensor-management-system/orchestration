@@ -32,137 +32,154 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card class="mb-2">
-    <v-list-item>
-      <v-list-item-avatar>
-        <v-icon large>
-          {{ filetypeIcon }}
-        </v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-subtitle>
-          {{ filename }}, uploaded at {{ uploadedDateTime }}
-        </v-list-item-subtitle>
-        <v-list-item-title>
-          <v-text-field
-            v-model="valueCopy.label"
-          />
-        </v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action-text>
-        <v-row>
-          <v-col align-self="end" class="text-right">
-            <v-btn
-              icon
-              color="primary"
-              :href="valueCopy.url"
-              target="_blank"
+  <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
+    <v-card-actions>
+      <v-spacer />
+      <SaveAndCancelButtons
+        v-if="editable"
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/attachments'"
+        @save="save"
+      />
+    </v-card-actions>
+    <v-card>
+      <v-container>
+        <v-row no-gutters>
+          <v-avatar class="mt-0 align-self-center">
+            <v-icon large>
+              {{ filetypeIcon(valueCopy) }}
+            </v-icon>
+          </v-avatar>
+          <v-col>
+            <v-row
+              no-gutters
             >
-              <v-icon>
-                mdi-open-in-new
-              </v-icon>
-            </v-btn>
-            <v-btn
-              ref="cancelButton"
-              text
-              small
-              :to="'/platforms/' + platformId + '/attachments'"
+              <v-col>
+                <v-card-subtitle>
+                  {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
+                </v-card-subtitle>
+              </v-col>
+            </v-row>
+            <v-row
+              no-gutters
             >
-              Cancel
-            </v-btn>
-            <v-btn
-              color="green"
-              small
-              @click.prevent.stop="save"
-            >
-              Apply
-            </v-btn>
+              <v-col class="text-subtitle-1">
+                <v-text-field
+                  v-model="valueCopy.label"
+                  label="Label"
+                />
+              </v-col>
+              <v-col
+                align-self="end"
+                class="text-right"
+              >
+                <v-btn
+                  icon
+                  color="primary"
+                  :href="valueCopy.url"
+                  target="_blank"
+                >
+                  <v-icon>
+                    mdi-open-in-new
+                  </v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
-      </v-list-item-action-text>
-    </v-list-item>
-  </v-card>
+      </v-container>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, InjectReactive } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+
+import {
+  PlatformsState,
+  LoadPlatformAttachmentAction,
+  LoadPlatformAttachmentsAction,
+  UpdatePlatformAttachmentAction
+} from '@/store/platforms'
 
 import { Attachment } from '@/models/Attachment'
+
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 /**
  * A class component that displays a single attached file
  * @extends Vue
  */
-@Component
+@Component({
+  components: { ProgressIndicator, SaveAndCancelButtons },
+  middleware: ['auth'],
+  computed: mapState('platforms', ['platformAttachment']),
+  methods: mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment'])
+})
 // @ts-ignore
-export default class AttachmentEditPage extends Vue {
+export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
+  @InjectReactive()
+    editable!: boolean
+
+  private isSaving = false
+  private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
-  /**
-   * an Attachment
-   */
-  @Prop({
-    required: true,
-    type: Attachment
-  })
-  // @ts-ignore
-  readonly value!: Attachment
+  // vuex definition for typescript check
+  platformAttachment!: PlatformsState['platformAttachment']
+  loadPlatformAttachment!: LoadPlatformAttachmentAction
+  updatePlatformAttachment!: UpdatePlatformAttachmentAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
 
-  created () {
-    this.valueCopy = Attachment.createFromObject(this.value)
-  }
-
-  mounted () {
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
+  async fetch () {
+    try {
+      this.isLoading = true
+      await this.loadPlatformAttachment(this.attachmentId)
+      if (this.platformAttachment) {
+        this.valueCopy = Attachment.createFromObject(this.platformAttachment)
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load attachment')
+    } finally {
+      this.isLoading = false
+    }
   }
 
   get platformId (): string {
     return this.$route.params.platformId
   }
 
-  /**
-   * returns the timestamp of the upload date
-   *
-   * @TODO this must be implemented when the file API is ready
-   * @return {string} a readable timestamp
-   */
-  get uploadedDateTime (): string {
-    return '2020-06-17 16:35 (TODO)'
+  get attachmentId (): string {
+    return this.$route.params.attachmentId
   }
 
-  /**
-   * returns a filename from a full filepath
-   *
-   * @return {string} the filename
-   */
-  get filename (): string {
-    const UNKNOWN_FILENAME = 'unknown filename'
-
-    if (this.valueCopy.url === '') {
-      return UNKNOWN_FILENAME
-    }
-    const paths = this.valueCopy.url.split('/')
-    if (!paths.length) {
-      return UNKNOWN_FILENAME
-    }
-    // @ts-ignore
-    return paths.pop()
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
-  save () {
-    this.$emit('showsave', true)
-    this.$api.platformAttachments.update(this.platformId, this.valueCopy).then((savedAttachment: Attachment) => {
-      this.$emit('showsave', false)
-      this.$emit('input', savedAttachment)
+  async save () {
+    try {
+      this.isSaving = true
+      await this.updatePlatformAttachment({
+        platformId: this.platformId,
+        attachment: this.valueCopy
+      })
+      this.loadPlatformAttachments(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'Attachment updated')
       this.$router.push('/platforms/' + this.platformId + '/attachments')
-    }).catch(() => {
-      this.$emit('showsave', false)
-      this.$store.commit('snackbar/setError', 'Failed to save attachments')
-    })
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to save attachment')
+    } finally {
+      this.isSaving = false
+    }
   }
 }
 </script>

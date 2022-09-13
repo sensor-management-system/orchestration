@@ -34,18 +34,14 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import { Platform } from '@/models/Platform'
-import { Contact } from '@/models/Contact'
+import { IPlatform } from '@/models/Platform'
+import { IContact, Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { PlatformUnmountAction } from '@/models/PlatformUnmountAction'
-import { DeviceUnmountAction } from '@/models/DeviceUnmountAction'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { StaticLocationAction } from '@/models/StaticLocationAction'
 
 export interface IActionDateWithText {
   date: DateTime
@@ -58,7 +54,7 @@ export interface IActionDateWithTextItem extends IActionDateWithText {
 }
 
 export interface IMountInfo {
-  parentPlatform: Platform | null
+  parentPlatform: IPlatform | null
   offsetX: number
   offsetY: number
   offsetZ: number
@@ -87,9 +83,9 @@ export interface IMountTimelineAction {
   key: string
   color: string
   icon: string
-  date: DateTime
+  date: DateTime | null
   title: string
-  contact: Contact
+  contact: IContact | null
   mountInfo: IMountInfo | null
   description: string
 }
@@ -101,7 +97,7 @@ export interface IStaticLocationTimelineAction {
   date: DateTime
   title: string
   contact: Contact
-  description: string
+  description: string | null
   staticLocationInfo: IStaticLocationInfo | null
 }
 
@@ -112,11 +108,12 @@ export interface IDynamicLocationTimelineAction {
   date: DateTime
   title: string
   contact: Contact
-  description: string
+  description: string | null
   dynamicLocationInfo: IDynamicLocationInfo | null
 }
 
 export type ITimelineAction = IMountTimelineAction | IStaticLocationTimelineAction | IDynamicLocationTimelineAction
+
 export class PlatformMountTimelineAction implements IMountTimelineAction {
   private mountAction: PlatformMountAction
 
@@ -137,15 +134,15 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime {
-    return this.mountAction.date
+    return this.mountAction.beginDate
   }
 
   get title (): string {
     return this.mountAction.platform.shortName + ' mounted'
   }
 
-  get contact (): Contact {
-    return this.mountAction.contact
+  get contact (): IContact {
+    return this.mountAction.beginContact
   }
 
   get mountInfo (): IMountInfo {
@@ -158,7 +155,7 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.mountAction.description
+    return this.mountAction.beginDescription
   }
 }
 
@@ -182,15 +179,15 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime {
-    return this.mountAction.date
+    return this.mountAction.beginDate
   }
 
   get title (): string {
     return this.mountAction.device.shortName + ' mounted'
   }
 
-  get contact (): Contact {
-    return this.mountAction.contact
+  get contact (): IContact {
+    return this.mountAction.beginContact
   }
 
   get mountInfo (): IMountInfo {
@@ -203,19 +200,19 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.mountAction.description
+    return this.mountAction.beginDescription
   }
 }
 
 export class PlatformUnmountTimelineAction implements IMountTimelineAction {
-  private unmountAction: PlatformUnmountAction
+  private mountAction: PlatformMountAction
 
-  constructor (unmountAction: PlatformUnmountAction) {
-    this.unmountAction = unmountAction
+  constructor (mountAction: PlatformMountAction) {
+    this.mountAction = mountAction
   }
 
   get key (): string {
-    return 'Platform-unmount-action-' + this.unmountAction.id
+    return 'Platform-unmount-action-' + this.mountAction.id
   }
 
   get color (): string {
@@ -226,16 +223,16 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
     return 'mdi-rocket'
   }
 
-  get date (): DateTime {
-    return this.unmountAction.date
+  get date (): DateTime | null {
+    return this.mountAction.endDate
   }
 
   get title (): string {
-    return this.unmountAction.platform.shortName + ' unmounted'
+    return this.mountAction.platform.shortName + ' unmounted'
   }
 
-  get contact (): Contact {
-    return this.unmountAction.contact
+  get contact (): IContact | null {
+    return this.mountAction.endContact
   }
 
   get mountInfo (): null {
@@ -243,19 +240,19 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.unmountAction.description
+    return this.mountAction.endDescription || ''
   }
 }
 
 export class DeviceUnmountTimelineAction implements IMountTimelineAction {
-  private unmountAction: DeviceUnmountAction
+  private mountAction: DeviceMountAction
 
-  constructor (unmountAction: DeviceUnmountAction) {
-    this.unmountAction = unmountAction
+  constructor (mountAction: DeviceMountAction) {
+    this.mountAction = mountAction
   }
 
   get key (): string {
-    return 'Device-unmount-action-' + this.unmountAction.device.id + this.unmountAction.date.toString()
+    return 'Device-unmount-action-' + this.mountAction.id
   }
 
   get color (): string {
@@ -266,16 +263,16 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
     return 'mdi-network'
   }
 
-  get date (): DateTime {
-    return this.unmountAction.date
+  get date (): DateTime | null {
+    return this.mountAction.endDate
   }
 
   get title (): string {
-    return this.unmountAction.device.shortName + ' unmounted'
+    return this.mountAction.device.shortName + ' unmounted'
   }
 
-  get contact (): Contact {
-    return this.unmountAction.contact
+  get contact (): IContact | null {
+    return this.mountAction.endContact
   }
 
   get mountInfo (): null {
@@ -283,14 +280,14 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.unmountAction.description
+    return this.mountAction.endDescription || ''
   }
 }
 
 export class StaticLocationBeginTimelineAction implements IStaticLocationTimelineAction {
-  private staticLocationBeginAction: StaticLocationBeginAction
+  private staticLocationBeginAction: StaticLocationAction
 
-  constructor (staticLocationBeginAction: StaticLocationBeginAction) {
+  constructor (staticLocationBeginAction: StaticLocationAction) {
     this.staticLocationBeginAction = staticLocationBeginAction
   }
 
@@ -310,12 +307,12 @@ export class StaticLocationBeginTimelineAction implements IStaticLocationTimelin
     return 'Static location begin'
   }
 
-  get description (): string {
-    return this.staticLocationBeginAction.description
+  get description (): string|null {
+    return this.staticLocationBeginAction.beginDescription
   }
 
   get contact (): Contact {
-    return this.staticLocationBeginAction.contact!
+    return this.staticLocationBeginAction.beginContact!
   }
 
   get date (): DateTime {
@@ -334,9 +331,9 @@ export class StaticLocationBeginTimelineAction implements IStaticLocationTimelin
 }
 
 export class StaticLocationEndTimelineAction implements IStaticLocationTimelineAction {
-  private staticLocationEndAction: StaticLocationEndAction
+  private staticLocationEndAction: StaticLocationAction
 
-  constructor (staticLocationEndAction: StaticLocationEndAction) {
+  constructor (staticLocationEndAction: StaticLocationAction) {
     this.staticLocationEndAction = staticLocationEndAction
   }
 
@@ -356,12 +353,12 @@ export class StaticLocationEndTimelineAction implements IStaticLocationTimelineA
     return 'Static location end'
   }
 
-  get description (): string {
-    return this.staticLocationEndAction.description
+  get description (): string | null {
+    return this.staticLocationEndAction.endDescription
   }
 
   get contact (): Contact {
-    return this.staticLocationEndAction.contact!
+    return this.staticLocationEndAction.endContact!
   }
 
   get date (): DateTime {
@@ -374,10 +371,10 @@ export class StaticLocationEndTimelineAction implements IStaticLocationTimelineA
 }
 
 export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimelineAction {
-  private dynamicLocationBeginAction: DynamicLocationBeginAction
+  private dynamicLocationBeginAction: DynamicLocationAction
   private devices: Device[]
 
-  constructor (dynamicLocationBeginAction: DynamicLocationBeginAction, devices: Device[]) {
+  constructor (dynamicLocationBeginAction: DynamicLocationAction, devices: Device[]) {
     this.dynamicLocationBeginAction = dynamicLocationBeginAction
     this.devices = devices
   }
@@ -398,12 +395,12 @@ export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimel
     return 'Dynamic location begin'
   }
 
-  get description (): string {
-    return this.dynamicLocationBeginAction.description
+  get description (): string |null {
+    return this.dynamicLocationBeginAction.beginDescription
   }
 
   get contact (): Contact {
-    return this.dynamicLocationBeginAction.contact!
+    return this.dynamicLocationBeginAction.beginContact!
   }
 
   get date (): DateTime {
@@ -453,9 +450,9 @@ export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimel
 }
 
 export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelineAction {
-  private dynamicLocationEndAction: DynamicLocationEndAction
+  private dynamicLocationEndAction: DynamicLocationAction
 
-  constructor (dynamicLocationEndAction: DynamicLocationEndAction) {
+  constructor (dynamicLocationEndAction: DynamicLocationAction) {
     this.dynamicLocationEndAction = dynamicLocationEndAction
   }
 
@@ -475,12 +472,12 @@ export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelin
     return 'Dynamic location end'
   }
 
-  get description (): string {
-    return this.dynamicLocationEndAction.description
+  get description (): string | null {
+    return this.dynamicLocationEndAction.endDescription
   }
 
   get contact (): Contact {
-    return this.dynamicLocationEndAction.contact!
+    return this.dynamicLocationEndAction.endContact!
   }
 
   get date (): DateTime {

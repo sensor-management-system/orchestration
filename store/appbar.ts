@@ -29,9 +29,11 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { Commit, ActionTree } from 'vuex'
+import { RootState } from '@/store'
 import { TabItemConfiguration } from '@/models/TabItemConfiguration'
 
-export interface IAppbarStore {
+export interface IAppbarState {
   activeTab: null | number,
   cancelBtnDisabled: boolean,
   cancelBtnHidden: boolean,
@@ -44,9 +46,9 @@ export interface IAppbarStore {
 /**
  * The initial state of the AppbarTabsStore
  *
- * @return {IAppbarStore} the state object
+ * @return {IAppbarState} the state object
  */
-export const state = (): IAppbarStore => {
+const state = (): IAppbarState => {
   return {
     activeTab: null,
     cancelBtnDisabled: false,
@@ -58,14 +60,14 @@ export const state = (): IAppbarStore => {
   }
 }
 
-export const mutations = {
+const mutations = {
   /**
    * Sets the title of the AppBar
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {string} title - the title of the AppBar
    */
-  setTitle (state: IAppbarStore, title: string): void {
+  setTitle (state: IAppbarState, title: string): void {
     state.title = title
   },
   /**
@@ -74,10 +76,10 @@ export const mutations = {
    * When the tabs are set and are not empty, the active tab is set
    * automatically to the first tab
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {string[]} tabs - the tabs to set
    */
-  setTabs (state: IAppbarStore, tabs: TabItemConfiguration[]): void {
+  setTabs (state: IAppbarState, tabs: TabItemConfiguration[]): void {
     state.tabs = tabs
     state.activeTab = tabs.length > 0 ? 0 : null
   },
@@ -87,10 +89,10 @@ export const mutations = {
    * When the tabs are empty or active is lt 0 or gt the length of the tabs,
    * active is set to null
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {null | number} active - the index of the active tab, null if none is selected
    */
-  setActiveTab (state: IAppbarStore, active: null | number): void {
+  setActiveTab (state: IAppbarState, active: null | number): void {
     // if the index of the active tab is out of range, set it to null
     if (!state.tabs.length || (active !== null && (active < 0 || active + 1 > state.tabs.length))) {
       active = null
@@ -100,37 +102,37 @@ export const mutations = {
   /**
    * Hides or shows the save button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} hidden - whether to hide or show the save button
    */
-  setSaveBtnHidden (state: IAppbarStore, hidden: boolean): void {
+  setSaveBtnHidden (state: IAppbarState, hidden: boolean): void {
     state.saveBtnHidden = hidden
   },
   /**
    * Disables the save button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} disabled - whether to hide or show the save button
    */
-  setSaveBtnDisabled (state: IAppbarStore, disabled: boolean): void {
+  setSaveBtnDisabled (state: IAppbarState, disabled: boolean): void {
     state.saveBtnDisabled = disabled
   },
   /**
    * Hides or shows the cancel button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} hidden - whether to hide or show the cancel button
    */
-  setCancelBtnHidden (state: IAppbarStore, hidden: boolean): void {
+  setCancelBtnHidden (state: IAppbarState, hidden: boolean): void {
     state.cancelBtnHidden = hidden
   },
   /**
    * Disables the cancel button
    *
-   * @param {IAppbarStore} state - the current state
+   * @param {IAppbarState} state - the current state
    * @param {boolean} disabled - whether to hide or show the cancel button
    */
-  setCancelBtnDisabled (state: IAppbarStore, disabled: boolean): void {
+  setCancelBtnDisabled (state: IAppbarState, disabled: boolean): void {
     state.cancelBtnDisabled = disabled
   }
 }
@@ -140,39 +142,34 @@ type StoreContext = {
   dispatch: (action: string, payload: any) => void
 }
 
-export const actions = {
+export type InitAction = (payload: Partial<IAppbarState>) => void
+export type SetDefaultsAction = () => void
+export type SetTitleAction = (title: string) => void
+export type SetTabsAction = (tabs: TabItemConfiguration[]) => void
+export type SetActiveTabAction = (active: null | number) => void
+export type SetSaveBtnHiddenAction = (hidden: boolean) => void
+export type SetSaveBtnDisabledAction = (disabled: boolean) => void
+export type SetCancelBtnHiddenAction = (hidden: boolean) => void
+export type SetCancelBtnDisabledAction = (disabled: boolean) => void
+
+const actions: ActionTree<IAppbarState, RootState> = {
   /**
    * initializes the Appbar
    *
    * calls the mutations for every property in the payload
    *
    * @param {StoreContext} context - the context of the store
-   * @param {Partial<IAppbarStore>} payload - the payload which must be a partial of IAppbarStore
+   * @param {Partial<IAppbarState>} payload - the payload which must be a partial of IAppbarStore
    */
-  init (context: StoreContext, payload: Partial<IAppbarStore>): void {
-    if (typeof payload.title !== 'undefined') {
-      context.commit('setTitle', payload.title)
-    }
-    if (typeof payload.tabs !== 'undefined') {
-      context.commit('setTabs', payload.tabs)
-    }
-    if (typeof payload.activeTab !== 'undefined') {
-      context.commit('setActiveTab', payload.activeTab)
-    }
-    if (typeof payload.saveBtnHidden !== 'undefined') {
-      context.commit('setSaveBtnHidden', payload.saveBtnHidden)
-    }
-    if (typeof payload.saveBtnDisabled !== 'undefined') {
-      context.commit('setSaveBtnDisabled', payload.saveBtnDisabled)
-    }
-    if (typeof payload.cancelBtnHidden !== 'undefined') {
-      context.commit('setCancelBtnHidden', payload.cancelBtnHidden)
-    }
-    if (typeof payload.cancelBtnDisabled !== 'undefined') {
-      context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled)
-    }
+  init (context: StoreContext, payload: Partial<IAppbarState>): void {
+    context.commit('setTitle', payload.title || '')
+    context.commit('setTabs', payload.tabs || [])
+    context.commit('setActiveTab', payload.activeTab || null)
+    context.commit('setSaveBtnHidden', payload.saveBtnHidden || true)
+    context.commit('setSaveBtnDisabled', payload.saveBtnDisabled || true)
+    context.commit('setCancelBtnHidden', payload.cancelBtnHidden || true)
+    context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled || true)
   },
-
   /**
    * sets the Appbar to its default settings
    *
@@ -180,5 +177,33 @@ export const actions = {
    */
   setDefaults (context: StoreContext): void {
     context.dispatch('init', state())
+  },
+  setTitle ({ commit }: { commit: Commit }, title: string): void {
+    commit('setTitle', title)
+  },
+  setTabs ({ commit }: { commit: Commit }, tabs: TabItemConfiguration[]): void {
+    commit('setTabs', tabs)
+  },
+  setActiveTab ({ commit }: { commit: Commit }, active: null | number): void {
+    commit('setActiveTab', active)
+  },
+  setSaveBtnHidden ({ commit }: { commit: Commit }, hidden: boolean): void {
+    commit('setSaveBtnHidden', hidden)
+  },
+  setSaveBtnDisabled ({ commit }: { commit: Commit }, disabled: boolean): void {
+    commit('setSaveBtnDisabled', disabled)
+  },
+  setCancelBtnHidden ({ commit }: { commit: Commit }, hidden: boolean): void {
+    commit('setCancelBtnHidden', hidden)
+  },
+  setCancelBtnDisabled ({ commit }: { commit: Commit }, disabled: boolean): void {
+    commit('setCancelBtnDisabled', disabled)
   }
+}
+
+export default {
+  namespaced: true,
+  state,
+  actions,
+  mutations
 }

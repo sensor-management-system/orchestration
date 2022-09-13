@@ -29,139 +29,178 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card class="mb-2">
-    <v-list-item>
-      <v-list-item-avatar>
-        <v-icon large>
-          {{ filetypeIcon }}
-        </v-icon>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-subtitle>
-          {{ filename }}, uploaded at {{ uploadedDateTime }}
-        </v-list-item-subtitle>
-        <v-list-item-title>
-          <v-text-field
-            v-model="valueCopy.label"
-          />
-        </v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action-text>
-        <v-row>
-          <v-col align-self="end" class="text-right">
-            <v-btn
-              icon
-              color="primary"
-              :href="valueCopy.url"
-              target="_blank"
-            >
-              <v-icon>
-                mdi-open-in-new
+  <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
+    <v-card-actions>
+      <v-spacer />
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/devices/' + deviceId + '/attachments'"
+        @save="save"
+      />
+    </v-card-actions>
+    <v-card>
+      <v-container>
+        <v-row no-gutters>
+          <v-form ref="attachmentsEditForm" class="pb-2" @submit.prevent>
+            <v-avatar class="mt-0 align-self-center">
+              <v-icon large>
+                {{ filetypeIcon(valueCopy) }}
               </v-icon>
-            </v-btn>
-            <v-btn
-              ref="cancelButton"
-              text
-              small
-              :to="'/devices/' + deviceId + '/attachments'"
-            >
-              Cancel
-            </v-btn>
-            <v-btn
-              color="green"
-              small
-              @click.prevent.stop="save"
-            >
-              Apply
-            </v-btn>
-          </v-col>
+            </v-avatar>
+            <v-col>
+              <v-row
+                no-gutters
+              >
+                <v-col>
+                  <v-card-subtitle>
+                    {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
+                  </v-card-subtitle>
+                </v-col>
+              </v-row>
+              <v-row
+                no-gutters
+              >
+                <v-col class="text-subtitle-1">
+                  <v-text-field
+                    v-model="valueCopy.label"
+                    label="Label"
+                    required
+                    class="required"
+                    :rules="[rules.required]"
+                  />
+                </v-col>
+                <v-col
+                  align-self="end"
+                  class="text-right"
+                >
+                  <v-btn
+                    icon
+                    color="primary"
+                    :href="valueCopy.url"
+                    target="_blank"
+                  >
+                    <v-icon>
+                      mdi-open-in-new
+                    </v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-form>
         </v-row>
-      </v-list-item-action-text>
-    </v-list-item>
-  </v-card>
+      </v-container>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapState, mapActions } from 'vuex'
+
+import {
+  DevicesState,
+  LoadDeviceAttachmentAction,
+  LoadDeviceAttachmentsAction,
+  UpdateDeviceAttachmentAction
+} from '@/store/devices'
 
 import { Attachment } from '@/models/Attachment'
+
+import { Rules } from '@/mixins/Rules'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 /**
  * A class component that displays a single attached file
  * @extends Vue
  */
 @Component({
-  middleware: ['auth']
+  components: { SaveAndCancelButtons, ProgressIndicator },
+  middleware: ['auth'],
+  computed: mapState('devices', ['deviceAttachment']),
+  methods: mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment'])
 })
 // @ts-ignore
-export default class AttachmentEditPage extends Vue {
+export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) {
+  @InjectReactive()
+    editable!: boolean
+
+  private isSaving = false
+  private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
-  /**
-   * an Attachment
-   */
-  @Prop({
-    required: true,
-    type: Attachment
-  })
-  // @ts-ignore
-  readonly value!: Attachment
+  // vuex definition for typescript check
+  deviceAttachment!: DevicesState['deviceAttachment']
+  loadDeviceAttachment!: LoadDeviceAttachmentAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  updateDeviceAttachment!: UpdateDeviceAttachmentAction
 
-  created () {
-    this.valueCopy = Attachment.createFromObject(this.value)
-  }
-
-  mounted () {
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
+  async fetch (): Promise<void> {
+    try {
+      this.isLoading = true
+      await this.loadDeviceAttachment(this.attachmentId)
+      if (this.deviceAttachment) {
+        this.valueCopy = Attachment.createFromObject(this.deviceAttachment)
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load attachment')
+    } finally {
+      this.isLoading = false
+    }
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  /**
-   * returns the timestamp of the upload date
-   *
-   * @TODO this must be implemented when the file API is ready
-   * @return {string} a readable timestamp
-   */
-  get uploadedDateTime (): string {
-    return '2020-06-17 16:35 (TODO)'
+  get attachmentId (): string {
+    return this.$route.params.attachmentId
   }
 
-  /**
-   * returns a filename from a full filepath
-   *
-   * @return {string} the filename
-   */
-  get filename (): string {
-    const UNKNOWN_FILENAME = 'unknown filename'
-
-    if (this.valueCopy.url === '') {
-      return UNKNOWN_FILENAME
-    }
-    const paths = this.valueCopy.url.split('/')
-    if (!paths.length) {
-      return UNKNOWN_FILENAME
-    }
-    // @ts-ignore
-    return paths.pop()
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
-  save () {
-    this.$emit('showsave', true)
-    this.$api.deviceAttachments.update(this.deviceId, this.valueCopy).then((savedAttachment: Attachment) => {
-      this.$emit('showsave', false)
-      this.$emit('input', savedAttachment)
+  async save () {
+    if (!(this.$refs.attachmentsEditForm as Vue & { validate: () => boolean }).validate()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+    try {
+      this.isSaving = true
+      await this.updateDeviceAttachment({
+        deviceId: this.deviceId,
+        attachment: this.valueCopy
+      })
+      this.loadDeviceAttachments(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Attachment updated')
       this.$router.push('/devices/' + this.deviceId + '/attachments')
-    }).catch(() => {
-      this.$emit('showsave', false)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
-    })
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
   }
 }
 </script>
+<style lang="scss">
+@import "@/assets/styles/_forms.scss";
+</style>

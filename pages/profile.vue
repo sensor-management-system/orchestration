@@ -171,8 +171,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent.vue'
-
 import { timeStampToUTCDateTime } from '@/utils/dateHelper'
 
 @Component({
@@ -189,17 +187,7 @@ export default class ProfilePage extends Vue {
   private secondCol = 9
 
   created () {
-    this.$nuxt.$emit('app-bar-content', AppBarEditModeContent)
-  }
-
-  mounted () {
-    this.$nextTick(() => {
-      this.$nuxt.$emit('AppBarContent:title', 'Profile')
-    })
-  }
-
-  beforeDestroy () {
-    this.$nuxt.$emit('app-bar-content', null)
+    this.$store.dispatch('appbar/init', { title: 'Profile' })
   }
 
   get notExplicitPrintedClaims () {

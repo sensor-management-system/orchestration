@@ -67,6 +67,7 @@ const createTestDevice = () => {
   device.dualUse = true
   device.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
   device.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
+  device.updateDescription = ''
 
   device.customFields = [
     CustomTextField.createFromObject({
@@ -204,6 +205,10 @@ describe('DeviceSerializer', () => {
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/devices/46/relationships/created-user'
+              },
+              data: {
+                id: '123',
+                type: 'user'
               }
             },
             customfields: {
@@ -316,6 +321,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.persistentIdentifier = ''
       expectedDevice1.manufacturerUri = ''
       expectedDevice1.contacts = []
+      expectedDevice1.createdByUserId = '123'
 
       const expectedDevice2 = new Device()
       expectedDevice2.id = '44'

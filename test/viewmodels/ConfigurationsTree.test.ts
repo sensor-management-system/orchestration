@@ -51,9 +51,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -62,9 +65,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -78,9 +84,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -89,9 +98,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -109,9 +121,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -120,9 +135,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const firstTree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -142,9 +160,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -153,9 +174,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -172,9 +196,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -183,9 +210,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -202,9 +232,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -213,9 +246,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const tree = new ConfigurationsTree()
@@ -234,9 +270,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -245,9 +284,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const someOtherNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -256,9 +298,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -278,9 +323,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -289,9 +337,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     platformNode.getTree().push(deviceNode)
@@ -310,9 +361,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -321,9 +375,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -349,9 +406,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -360,9 +420,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     platformNode.getTree().push(deviceNode)
@@ -378,9 +441,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     })))).toEqual([])
   })
   it('should return a node by its id recursively', () => {
@@ -399,9 +465,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -410,9 +479,12 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     platformNode.getTree().push(deviceNode)
@@ -433,20 +505,26 @@ describe('ConfigurationsTree', () => {
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Platform mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Platform mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
     const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
       device,
-      parentPlatform: null,
+      parentPlatform: platform,
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
-      contact,
-      date,
-      description: 'Device mount'
+      beginContact: contact,
+      beginDate: date,
+      beginDescription: 'Device mount',
+      endDate: null,
+      endContact: null,
+      endDescription: null
     }))
 
     platformNode.getTree().push(deviceNode)
@@ -473,9 +551,12 @@ describe('ConfigurationsTree', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        contact,
-        date,
-        description: 'Platform mount'
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Platform mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
       }))
 
       const tree = ConfigurationsTree.fromArray([platformNode])
@@ -495,9 +576,12 @@ describe('ConfigurationsTree', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        contact,
-        date,
-        description: 'Platform mount'
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Platform mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
       }))
       const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
         id: '',
@@ -506,9 +590,12 @@ describe('ConfigurationsTree', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        contact,
-        date,
-        description: 'Device mount'
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Device mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
       }))
 
       const tree = ConfigurationsTree.fromArray([platformNode, deviceNode])
@@ -528,9 +615,12 @@ describe('ConfigurationsTree', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        contact,
-        date,
-        description: 'Platform mount'
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Platform mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
       }))
       const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
         id: '',
@@ -539,9 +629,12 @@ describe('ConfigurationsTree', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
-        contact,
-        date,
-        description: 'Device mount'
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Device mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
       }))
 
       platformNode.getTree().push(deviceNode)

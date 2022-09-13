@@ -34,28 +34,17 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isLoading"
+      v-model="isSaving"
       dark
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        v-if="editable"
+        save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
     <PlatformBasicDataForm
       ref="basicForm"
@@ -63,93 +52,127 @@ permissions and limitations under the Licence.
     />
     <v-card-actions>
       <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        small
-        text
-        nuxt
+      <SaveAndCancelButtons
+        v-if="editable"
+        save-btn-text="Apply"
         :to="'/platforms/' + platformId + '/basic'"
-      >
-        cancel
-      </v-btn>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="green"
-        small
-        @click="onSaveButtonClicked"
-      >
-        apply
-      </v-btn>
+        @save="save"
+      />
     </v-card-actions>
+
+    <navigation-guard-dialog
+      v-model="showNavigationWarning"
+      :has-entity-changed="platformHasBeenEdited"
+      :to="to"
+      @close="to = null"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
 
-import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { RawLocation } from 'vue-router'
+import { mapActions, mapState } from 'vuex'
+
+import { PlatformsState, LoadPlatformAction, SavePlatformAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
 
+import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
+
 @Component({
   components: {
+    SaveAndCancelButtons,
     PlatformBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NavigationGuardDialog
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('platforms', ['platform']),
+  methods: mapActions('platforms', ['loadPlatform', 'savePlatform'])
 })
 export default class PlatformEditBasicPage extends Vue {
-  // we need to initialize the instance variable with an empty Platform instance
-  // here, otherwise the form is not reactive
+  @InjectReactive()
+    editable!: boolean
+
   private platformCopy: Platform = new Platform()
+  private isSaving: boolean = false
+  private hasSaved: boolean = false
+  private showNavigationWarning: boolean = false
+  private to: RawLocation | null = null
 
-  private isLoading: boolean = false
-
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: Platform
+  // vuex definition for typescript check
+  platform!: PlatformsState['platform']
+  savePlatform!: SavePlatformAction
+  loadPlatform!: LoadPlatformAction
 
   created () {
-    this.platformCopy = Platform.createFromObject(this.value)
-  }
-
-  onSaveButtonClicked () {
-    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
-      this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
+    if (this.platform) {
+      this.platformCopy = Platform.createFromObject(this.platform)
     }
-    this.isLoading = true
-    this.save().then((platform) => {
-      this.isLoading = false
-      this.$emit('input', platform)
-      this.$router.push('/platforms/' + this.platformId + '/basic')
-    }).catch((_error) => {
-      this.isLoading = false
-      this.$store.commit('snackbar/setError', 'Save failed')
-    })
-  }
-
-  save (): Promise<Platform> {
-    return new Promise((resolve, reject) => {
-      this.$api.platforms.save(this.platformCopy).then((savedPlatform) => {
-        resolve(savedPlatform)
-      }).catch((_error) => {
-        reject(_error)
-      })
-    })
   }
 
   get platformId () {
     return this.$route.params.platformId
   }
 
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onPlatformChanged (val: Platform) {
-    this.platformCopy = Platform.createFromObject(val)
+  get platformHasBeenEdited () {
+    return (JSON.stringify(this.platform) !== JSON.stringify(this.platformCopy))
+  }
+
+  async save () {
+    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+
+    try {
+      this.isSaving = true
+      await this.savePlatform(this.platformCopy)
+      this.loadPlatform({
+        platformId: this.platformId,
+        includeContacts: false,
+        includePlatformAttachments: false
+      })
+      this.hasSaved = true
+
+      this.$router.push('/platforms/' + this.platformId + '/basic')
+      this.$store.commit('snackbar/setSuccess', 'Platform updated')
+      this.$router.push('/platforms/' + this.platformId + '/basic')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Save failed')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  beforeRouteLeave (to: RawLocation, from: RawLocation, next: any) {
+    if (this.platformHasBeenEdited && !this.hasSaved) {
+      if (this.to && this.to) {
+        next()
+      } else {
+        this.to = to
+        this.showNavigationWarning = true
+      }
+    } else {
+      return next()
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/basic', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
   }
 }
 </script>

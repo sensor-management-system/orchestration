@@ -37,5 +37,6 @@
 
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
+import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 
-export type ConfigurationsTreeNode = PlatformNode | DeviceNode
+export type ConfigurationsTreeNode = PlatformNode | DeviceNode | ConfigurationNode

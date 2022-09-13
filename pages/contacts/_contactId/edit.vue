@@ -36,116 +36,101 @@ permissions and limitations under the Licence.
     <v-card flat>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          nuxt
+        <SaveAndCancelButtons
+          save-btn-text="apply"
           :to="'/contacts/' + contactId"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          apply
-        </v-btn>
+          @save="save"
+        />
       </v-card-actions>
       <ContactBasicDataForm
+        v-if="contactCopy"
         ref="basicForm"
         v-model="contactCopy"
         :readonly="false"
       />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          nuxt
+        <SaveAndCancelButtons
+          save-btn-text="apply"
           :to="'/contacts/' + contactId"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          apply
-        </v-btn>
+          @save="save"
+        />
       </v-card-actions>
     </v-card>
   </div>
 </template>
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
+
+import { mapActions, mapState } from 'vuex'
+
+import { SetTitleAction } from '@/store/appbar'
+import { ContactsState, LoadContactAction, SaveContactAction } from '@/store/contacts'
 
 import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     ContactBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('contacts', ['contact']),
+  methods: {
+    ...mapActions('contacts', ['saveContact', 'loadContact']),
+    ...mapActions('appbar', ['setTitle'])
+  }
 })
 export default class ContactEditPage extends Vue {
-  private contactCopy: Contact = new Contact()
   private isLoading: boolean = false
+  private contactCopy: Contact = new Contact()
 
-  @Prop({
-    required: true,
-    type: Contact
-  })
-  readonly value!: Contact
+  // vuex definition for typescript check
+  contact!: ContactsState['contact']
+  saveContact!: SaveContactAction
+  loadContact!: LoadContactAction
+  setTitle!: SetTitleAction
 
-  mounted () {
-    this.contactCopy = Contact.createFromObject(this.value)
-  }
-
-  onSaveButtonClicked () {
-    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
-      this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
+  created () {
+    if (this.contact) {
+      this.contactCopy = Contact.createFromObject(this.contact)
     }
-    this.isLoading = true
-    this.save().then((contact) => {
-      this.isLoading = false
-      this.$emit('input', contact)
-      this.$router.push('/contacts/' + this.contactId)
-    }).catch((_error) => {
-      this.isLoading = false
-      this.$store.commit('snackbar/setError', 'Saving of contact failed')
-    })
-  }
-
-  save (): Promise<Contact> {
-    return new Promise((resolve, reject) => {
-      this.$api.contacts.save(this.contactCopy).then((savedContact) => {
-        resolve(savedContact)
-      }).catch((_error) => {
-        reject(_error)
-      })
-    })
   }
 
   get contactId () {
     return this.$route.params.contactId
   }
 
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onContactChanged (val: Contact) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.toString() || 'Edit contact')
+  async save () {
+    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
     }
-    this.contactCopy = Contact.createFromObject(val)
+    try {
+      this.isLoading = true
+      await this.saveContact(this.contactCopy)
+      this.loadContact(this.contactId)
+      this.$router.push('/contacts/' + this.contactId)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Saving of contact failed')
+    } finally {
+      this.isLoading = false
+    }
+  }
+
+  @Watch('contact', {
+    immediate: true,
+    deep: true
+  })
+  onContactChanged (value: Contact | null) {
+    if (value) {
+      this.contactCopy = Contact.createFromObject(value)
+    }
   }
 }
 </script>

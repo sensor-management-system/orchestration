@@ -30,25 +30,26 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row>
+    <v-row
+      dense
+    >
       <v-col cols="12" md="5">
         <v-text-field
           v-model="searchText"
           label="Name"
           placeholder="Name of contact"
           hint="Please enter at least 3 characters"
-          @keydown.enter="runSearch"
+          @keydown.enter="basicSearch"
         />
       </v-col>
       <v-col
-        cols="12"
-        md="7"
+        cols="5"
         align-self="center"
       >
         <v-btn
           color="primary"
           small
-          @click="runSearch"
+          @click="basicSearch"
         >
           Search
         </v-btn>
@@ -60,6 +61,20 @@ permissions and limitations under the Licence.
           Clear
         </v-btn>
       </v-col>
+      <v-col
+        align-self="center"
+        class="text-right"
+      >
+        <v-btn
+          v-if="$auth.loggedIn"
+          color="accent"
+          small
+          nuxt
+          to="/contacts/new"
+        >
+          New Contact
+        </v-btn>
+      </v-col>
     </v-row>
 
     <v-progress-circular
@@ -68,185 +83,90 @@ permissions and limitations under the Licence.
       color="primary"
       indeterminate
     />
-    <div v-if="!totalCount && !loading">
+    <div v-if="contacts.length<=0 && !loading">
       <p class="text-center">
         There are no contacts that match your search criteria.
       </p>
     </div>
 
-    <div v-if="totalCount">
-      <v-subheader>
-        <template v-if="totalCount == 1">
-          1 contact found
-        </template>
-        <template v-else>
-          {{ totalCount }} contacts found
-        </template>
-        <!-- No export to pdf due to data privacy reasons -->
-      </v-subheader>
-
-      <v-pagination
-        :value="page"
-        :disabled="loading"
-        :length="numberOfPages"
-        :total-visible="7"
-        @input="setPage"
-      />
-      <v-hover
-        v-for="result in getSearchResultForPage(page)"
-        v-slot="{ hover }"
-        :key="result.id"
+    <div
+      v-if="contacts.length > 0"
+    >
+      <v-row
+        no-gutters
+        class="mt-10"
       >
-        <v-card
-          :disabled="loading"
-          :elevation="hover ? 6 : 2"
-          class="ma-2"
+        <v-subheader>
+          <template v-if="contacts.length == 1">
+            1 contact found
+          </template>
+          <template v-else>
+            {{ contacts.length }} contacts found
+          </template>
+          <v-spacer />
+        </v-subheader>
+        <v-spacer />
+        <v-col
+          cols="4"
         >
-          <v-card-text
-            @click.stop.prevent="showResultItem(result.id)"
+          <v-pagination
+            v-model="page"
+            :disabled="loading"
+            :length="totalPages"
+            :total-visible="7"
+            @input="runSearch"
+          />
+        </v-col>
+        <v-col
+          cols="4"
+          class="flex-grow-1 flex-shrink-0"
+        >
+          <v-subheader>
+            <page-size-select
+              v-model="size"
+              :items="pageSizeItems"
+              label="Items per page"
+            />
+          </v-subheader>
+        </v-col>
+      </v-row>
+
+      <BaseList
+        :list-items="contacts"
+      >
+        <template #list-item="{item}">
+          <ContactsListItem
+            :key="item.id"
+            :contact="item"
           >
-            <v-row
-              no.gutters
+            <template
+              v-if="$auth.loggedIn"
+              #dot-menu-items
             >
-              <v-col>
-                <div class="'text-caption text-disabled">
-                  {{ result.email }}
-                </div>
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
+              <DotMenuActionDelete
+                @click="initDeleteDialog(item)"
+              />
+            </template>
+            <template #actions>
+              <v-btn
+                :to="'/contacts/' + item.id"
+                color="primary"
+                text
+                small
+                @click.stop.prevent
               >
-                <DotMenu>
-                  <template #actions>
-                    <DotMenuActionDelete
-                      :readonly="!$auth.loggedIn"
-                      @click="initDeleteDialog(result)"
-                    />
-                  </template>
-                </DotMenu>
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col class="text-subtitle-1">
-                {{ result.fullName }}
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
-              >
-                <v-btn
-                  :to="'/contacts/' + result.id"
-                  color="primary"
-                  text
-                  @click.stop.prevent
-                >
-                  View
-                </v-btn>
-                <v-btn
-                  icon
-                  @click.stop.prevent="showResultItem(result.id)"
-                >
-                  <v-icon>{{ isResultItemShown(result.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-expand-transition>
-            <v-card
-              v-show="isResultItemShown(result.id)"
-              flat
-              tile
-              color="grey lighten-5"
-            >
-              <v-card-text>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Given name:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ result.givenName }}
-                  </v-col>
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Family name:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ result.familyName }}
-                  </v-col>
-                </v-row>
-                <v-row
-                  dense
-                >
-                  <v-col
-                    cols="4"
-                    xs="4"
-                    sm="3"
-                    md="2"
-                    lg="2"
-                    xl="1"
-                    class="font-weight-medium"
-                  >
-                    Website:
-                  </v-col>
-                  <v-col
-                    cols="8"
-                    xs="8"
-                    sm="9"
-                    md="4"
-                    lg="4"
-                    xl="5"
-                    class="nowrap-truncate"
-                  >
-                    {{ result.website }}
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-expand-transition>
-        </v-card>
-      </v-hover>
+                View
+              </v-btn>
+            </template>
+          </ContactsListItem>
+        </template>
+      </BaseList>
       <v-pagination
-        :value="page"
+        v-model="page"
         :disabled="loading"
-        :length="numberOfPages"
+        :length="totalPages"
         :total-visible="7"
-        @input="setPage"
+        @input="runSearch"
       />
     </div>
     <ContacsDeleteDialog
@@ -255,171 +175,143 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
-    <v-btn
-      v-if="$auth.loggedIn"
-      bottom
-      color="primary"
-      dark
-      elevation="10"
-      fab
-      fixed
-      right
-      to="/contacts/new"
-    >
-      <v-icon>
-        mdi-plus
-      </v-icon>
-    </v-btn>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { IPaginationLoader } from '@/utils/PaginatedLoader'
+import { mapActions, mapState, mapGetters } from 'vuex'
+
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import {
+  ContactsState,
+  PageSizesGetter,
+  SearchContactsPaginatedAction,
+  SetPageNumberAction,
+  SetPageSizeAction,
+  DeleteContactAction
+} from '@/store/contacts'
 
 import { Contact } from '@/models/Contact'
 
-import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
+import BaseList from '@/components/shared/BaseList.vue'
+import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { IContactSearchParams, ContactSearchParamsSerializer } from '@/modelUtils/ContactSearchParams'
-
-type PaginatedResult = {
-  [page: number]: Contact[]
-}
 
 @Component({
   components: {
+    ContactsListItem,
+    BaseList,
     ContacsDeleteDialog,
     DotMenuActionDelete,
-    DotMenu
+    PageSizeSelect
+  },
+  computed: {
+    ...mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'contacts']),
+    ...mapGetters('contacts', ['pageSizes'])
+  },
+  methods: {
+    ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'setPageSize', 'deleteContact']),
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 export default class SearchContactsPage extends Vue {
-  private readonly pageSize: number = 20
-  private page: number = 0
-  private loading: boolean = true
-
-  private totalCount: number = 0
-  private loader: null | IPaginationLoader<Contact> = null
-
-  private searchResults: PaginatedResult = {}
+  private loading: boolean = false
   private searchText: string = ''
 
   private showDeleteDialog: boolean = false
   private contactToDelete: Contact | null = null
-  private searchResultItemsShown: { [id: string]: boolean } = {}
 
-  created () {
-    this.initializeAppBar()
-  }
+  // vuex definition for typescript check
+  pageNumber!: ContactsState['pageNumber']
+  setPageNumber!: SetPageNumberAction
+  pageSize!: ContactsState['pageSize']
+  setPageSize!: SetPageSizeAction
+  pageSizes!: PageSizesGetter
+  searchContactsPaginated!: SearchContactsPaginatedAction
+  deleteContact!: DeleteContactAction
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
-  mounted () {
-    this.initSearchQueryParams(this.$route.query)
-    this.runInitialSearch()
-  }
-
-  beforeDestroy () {
-    this.unsetResultItemsShown()
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [],
-      title: 'Contacts',
-      saveBtnHiden: true,
-      cancelBtnHidden: true
-    })
-  }
-
-  clearSearch () {
-    this.searchText = ''
-  }
-
-  async runInitialSearch (): Promise<void> {
-    const page: number | undefined = this.getPageFromUrl()
-
-    await this.search(
-      {
-        searchText: this.searchText
-      },
-      page
-    )
-  }
-
-  runSearch () {
-    this.search({
-      searchText: this.searchText
-    })
-  }
-
-  async search (
-    searchParameters: IContactSearchParams,
-    page: number = 1
-  ): Promise<void> {
-    this.initUrlQueryParams(searchParameters)
-
-    this.totalCount = 0
-    this.loading = true
-    this.searchResults = []
-    this.unsetResultItemsShown()
-    this.loader = null
-    this.page = 0
-
-    const lastActiveSearcher = this.$api.contacts
-      .newSearchBuilder()
-      .withText(this.searchText)
-      .build()
-
+  async created () {
     try {
-      const loader = await lastActiveSearcher.findMatchingAsPaginationLoaderOnPage(page, this.pageSize)
-      this.loader = loader
-      this.searchResults[page] = loader.elements
-      this.totalCount = loader.totalCount
-      this.page = page
-      this.setPageInUrl(page)
-    } catch (_error) {
+      this.loading = true
+      this.initializeAppBar()
+      this.initSearchQueryParams()
+      await this.runInitialSearch()
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
       this.loading = false
     }
   }
 
-  async loadPage (pageNr: number, useCache: boolean = true) {
-    // use the results that were already loaded if available
-    if (useCache && this.searchResults[pageNr]) {
-      return
+  get page () {
+    return this.pageNumber
+  }
+
+  set page (newVal) {
+    this.setPageNumber(newVal)
+    this.setPageInUrl(false)
+  }
+
+  get size (): number {
+    return this.pageSize
+  }
+
+  set size (newVal: number) {
+    const sizeChanged: boolean = this.size !== newVal
+
+    this.setPageSize(newVal)
+    this.setSizeInUrl(false)
+
+    if (sizeChanged) {
+      this.runSearch()
     }
-    if (this.loader != null && this.loader.funToLoadPage != null) {
-      try {
-        this.loading = true
-        const loader = await this.loader.funToLoadPage(pageNr)
-        this.loader = loader
-        this.searchResults[pageNr] = loader.elements
-        this.totalCount = loader.totalCount
-      } catch (_error) {
-        this.$store.commit('snackbar/setError', 'Loading of contacts failed')
-      } finally {
-        this.loading = false
-      }
+  }
+
+  get pageSizeItems (): number[] {
+    const resultSet = new Set([
+      ...this.pageSizes,
+      this.getSizeFromUrl()
+    ])
+    return Array.from(resultSet).sort((a, b) => a - b)
+  }
+
+  async runInitialSearch (): Promise<void> {
+    this.page = this.getPageFromUrl()
+    this.size = this.getSizeFromUrl()
+
+    await this.runSearch()
+  }
+
+  basicSearch () {
+    // Important to set page to one otherwise it's possible that you don't anything
+    this.page = 1
+    this.runSearch()
+  }
+
+  clearSearch () {
+    this.searchText = ''
+    this.initUrlQueryParams()
+  }
+
+  async runSearch () {
+    try {
+      this.loading = true
+      this.initUrlQueryParams()
+      await this.searchContactsPaginated(this.searchText)
+      this.setPageInUrl()
+      this.setSizeInUrl()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of contacts failed')
+    } finally {
+      this.loading = false
     }
-  }
-
-  get numberOfPages (): number {
-    return Math.ceil(this.totalCount / this.pageSize)
-  }
-
-  async setPage (page: number) {
-    await this.loadPage(page)
-    this.page = page
-    this.setPageInUrl(page, false)
-  }
-
-  getSearchResultForPage (pageNr: number): Contact[] | undefined {
-    return this.searchResults[pageNr]
   }
 
   initDeleteDialog (contact: Contact) {
@@ -437,15 +329,10 @@ export default class SearchContactsPage extends Vue {
       return
     }
 
-    this.loading = true
     try {
-      await this.$api.contacts.deleteById(this.contactToDelete.id)
-      // if we know that the deleted device was the last of the page, we
-      // decrement the page by one
-      if (this.getSearchResultForPage(this.page)?.length === 1) {
-        this.page = this.page > 1 ? this.page - 1 : 1
-      }
-      this.loadPage(this.page, false)
+      this.loading = true
+      await this.deleteContact(this.contactToDelete.id)
+      this.runSearch()// to update the list
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
@@ -455,57 +342,66 @@ export default class SearchContactsPage extends Vue {
     }
   }
 
-  showResultItem (id: string) {
-    const show = !!this.searchResultItemsShown[id]
-    Vue.set(this.searchResultItemsShown, id, !show)
+  getPageFromUrl (): number {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) || 1
+    }
+    return 1
   }
 
-  isResultItemShown (id: string): boolean {
-    return this.searchResultItemsShown[id]
+  setPageInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(this.page)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
   }
 
-  unsetResultItemsShown (): void {
-    this.searchResultItemsShown = {}
-  }
-
-  initSearchQueryParams (params: QueryParams): void {
-    const searchParamsObject = new ContactSearchParamsSerializer().toSearchParams(params)
-
-    // prefill the form by the serialized search params from the URL
-    if (searchParamsObject.searchText) {
-      this.searchText = searchParamsObject.searchText
+  initSearchQueryParams (): void {
+    if (this.$route.query.searchText) {
+      this.searchText = this.$route.query.searchText as string
     }
   }
 
-  initUrlQueryParams (params: IContactSearchParams): void {
+  initUrlQueryParams (): void {
+    const params: {[key: string]: string} = {}
+
+    if (this.searchText) {
+      params.searchText = this.searchText
+    }
     this.$router.push({
-      query: (new ContactSearchParamsSerializer()).toQueryParams(params),
+      query: params,
       hash: this.$route.hash
     })
   }
 
-  getPageFromUrl (): number | undefined {
-    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
-      return parseInt(this.$route.query.page) || 0
+  getSizeFromUrl (): number {
+    if ('size' in this.$route.query && typeof this.$route.query.size === 'string') {
+      return parseInt(this.$route.query.size) ?? this.size
     }
+    return this.size
   }
 
-  setPageInUrl (page: number, preserveHash: boolean = true): void {
+  initializeAppBar () {
+    this.setTitle('Contacts')
+    this.setTabs([])
+  }
+
+  setSizeInUrl (preserveHash: boolean = true): void {
     let query: QueryParams = {}
-    if (page) {
-      // add page to the current url params
+    if (this.size) {
+      // add size to the current url params
       query = {
         ...this.$route.query,
-        page: String(page)
+        size: String(this.size)
       }
-    } else {
-      // remove page from the current url params
-      const {
-        // eslint-disable-next-line
-        page,
-        ...params
-      } = this.$route.query
-      query = params
     }
     this.$router.push({
       query,

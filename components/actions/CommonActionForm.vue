@@ -52,6 +52,7 @@ permissions and limitations under the Licence.
             label="Contact"
             clearable
             required
+            class="required"
             :item-text="(x) => x.toString()"
             :item-value="(x) => x"
             :rules="rules"
@@ -242,3 +243,6 @@ export default class CommonActionForm extends Vue {
   }
 }
 </script>
+<style lang="scss">
+@import '@/assets/styles/_forms.scss';
+</style>

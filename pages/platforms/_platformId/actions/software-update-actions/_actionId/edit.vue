@@ -30,80 +30,103 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isInProgress"
+      :dark="isSaving"
+    />
+    <v-select
+      value="Software Update"
+      :items="['Software Update']"
+      :item-text="(x) => x"
+      disabled
+      label="Action Type"
+    />
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
 
     <SoftwareUpdateActionForm
       ref="softwareUpdateActionForm"
       v-model="action"
-      :attachments="attachments"
+      :attachments="platformAttachments"
       :current-user-mail="$auth.user.email"
     />
 
     <v-card-actions>
       <v-spacer />
-      <ActionButtonTray
-        v-if="$auth.loggedIn"
-        :cancel-url="'/platforms/' + platformId + '/actions'"
-        :is-saving="isSaving"
-        @apply="save"
+      <SaveAndCancelButtons
+        save-btn-text="Apply"
+        :to="'/platforms/' + platformId + '/actions'"
+        @save="save"
       />
     </v-card-actions>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
-import { Attachment } from '@/models/Attachment'
+import {
+  PlatformsState,
+  LoadPlatformSoftwareUpdateActionAction,
+  LoadAllPlatformActionsAction,
+  LoadPlatformAttachmentsAction,
+  UpdatePlatformSoftwareUpdateActionAction
+} from '@/store/platforms'
+
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-import ActionButtonTray from '@/components/actions/ActionButtonTray.vue'
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
-    SoftwareUpdateActionForm,
-    ActionButtonTray
+    ProgressIndicator,
+    SaveAndCancelButtons,
+    SoftwareUpdateActionForm
   },
   scrollToTop: true,
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('platforms', ['platformSoftwareUpdateAction', 'platformAttachments']),
+  methods: mapActions('platforms', ['loadPlatformSoftwareUpdateAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformSoftwareUpdateAction'])
 })
 export default class PlatformSoftwareUpdateActionEditPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
-  private attachments: Attachment[] = []
-  private _isLoading: boolean = false
-  private _isSaving: boolean = false
+  private isSaving = false
+  private isLoading = false
 
-  async fetch (): Promise<any> {
-    this.isLoading = true
-    await Promise.all([
-      this.fetchAttachments(),
-      this.fetchAction()
-    ])
-    this.isLoading = false
-  }
+  // vuex definition for typescript check
+  platformSoftwareUpdateAction!: PlatformsState['platformSoftwareUpdateAction']
+  platformAttachments!: PlatformsState['platformAttachments']
+  loadPlatformSoftwareUpdateAction!: LoadPlatformSoftwareUpdateActionAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  updatePlatformSoftwareUpdateAction!: UpdatePlatformSoftwareUpdateActionAction
+  loadAllPlatformActions!: LoadAllPlatformActionsAction
 
-  async fetchAction (): Promise<any> {
+  async fetch (): Promise<void> {
     try {
-      this.action = await this.$api.platformSoftwareUpdateActions.findById(this.actionId)
-    } catch (_) {
+      this.isLoading = true
+      await Promise.all([
+        this.loadPlatformSoftwareUpdateAction(this.actionId),
+        this.loadPlatformAttachments(this.platformId)
+      ])
+      if (this.platformSoftwareUpdateAction) {
+        this.action = SoftwareUpdateAction.createFromObject(this.platformSoftwareUpdateAction)
+      }
+    } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
-    }
-  }
-
-  async fetchAttachments (): Promise<any> {
-    try {
-      this.attachments = await this.$api.platforms.findRelatedPlatformAttachments(this.platformId)
-    } catch (_) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch attachments')
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -115,37 +138,41 @@ export default class PlatformSoftwareUpdateActionEditPage extends Vue {
     return this.$route.params.actionId
   }
 
-  get isLoading (): boolean {
-    return this.$data._isLoading
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
   }
 
-  set isLoading (value: boolean) {
-    this.$data._isLoading = value
-    this.$emit('showload', value)
-  }
-
-  get isSaving (): boolean {
-    return this.$data._isSaving
-  }
-
-  set isSaving (value: boolean) {
-    this.$data._isSaving = value
-    this.$emit('showsave', value)
-  }
-
-  save (): void {
+  async save () {
     if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
-    this.isSaving = true
-    this.$api.platformSoftwareUpdateActions.update(this.platformId, this.action).then((action: SoftwareUpdateAction) => {
-      this.$router.push('/platforms/' + this.platformId + '/actions', () => this.$emit('input', action))
-    }).catch(() => {
+
+    try {
+      this.isSaving = true
+      await this.updatePlatformSoftwareUpdateAction({
+        platformId: this.platformId,
+        softwareUpdateAction: this.action
+      })
+      this.loadAllPlatformActions(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'Software Update Action updated')
+      this.$router.push('/platforms/' + this.platformId + '/actions')
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
-    }).finally(() => {
+    } finally {
       this.isSaving = false
-    })
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
+      })
+    }
   }
 }
 </script>

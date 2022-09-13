@@ -39,23 +39,11 @@ permissions and limitations under the Licence.
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/devices"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/devices'"
+          save-btn-text="create"
+          @save="save"
+        />
       </v-card-actions>
       <DeviceBasicDataForm
         ref="basicForm"
@@ -63,110 +51,101 @@ permissions and limitations under the Licence.
       />
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/devices"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :to="'/devices'"
+          save-btn-text="create"
+          @save="save"
+        />
       </v-card-actions>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
 
-import { Rules } from '@/mixins/Rules'
-
-import { Device } from '@/models/Device'
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SaveDeviceAction } from '@/store/devices'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+
+import { Device } from '@/models/Device'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     DeviceBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  methods: {
+    ...mapActions('devices', ['saveDevice']),
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
+  }
 })
 // @ts-ignore
-export default class DeviceNewPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
+export default class DeviceNewPage extends Vue {
   private device: Device = new Device()
   private isLoading: boolean = false
 
-  mounted () {
+  // vuex definition for typescript check
+  saveDevice!: SaveDeviceAction
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+
+  created () {
     this.initializeAppBar()
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  onSaveButtonClicked (): void {
+  async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the device')
-      return
-    }
-    this.isLoading = true
-    this.$api.devices.save(this.device).then((savedDevice) => {
-      this.isLoading = false
+
+    try {
+      this.isLoading = true
+      const savedDevice = await this.saveDevice(this.device)
       this.$store.commit('snackbar/setSuccess', 'Device created')
-      this.$router.push('/devices/' + savedDevice.id + '')
-    }).catch((_error) => {
-      this.isLoading = false
+      this.$router.push('/devices/' + savedDevice.id)
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
-    })
+    } finally {
+      this.isLoading = false
+    }
   }
 
   initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/devices/new',
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Measured Quantities',
-          disabled: true
-        },
-        {
-          name: 'Custom Fields',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        },
-        {
-          name: 'Actions',
-          disabled: true
-        }
-      ],
-      title: 'Add Device'
-    })
+    this.setTabs([
+      {
+        to: '/devices/new/',
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Measured Quantities',
+        disabled: true
+      },
+      {
+        name: 'Custom Fields',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('New Device')
   }
 }
 </script>

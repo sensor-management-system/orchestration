@@ -31,170 +31,56 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
+      v-model="isLoading"
     />
-    <NuxtChild
-      v-model="contactRoles"
-    />
-    <v-card-actions
-      v-if="!isAddContactPage"
-    >
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="primary"
-        small
-        nuxt
-        :to="'/devices/' + deviceId + '/contacts/new'"
-      >
-        Add contact
-      </v-btn>
-    </v-card-actions>
-    <hint-card v-if="contactRoles.length===0 && !isAddContactPage">
-      There are no contacts for this device.
-    </hint-card>
-    <v-expansion-panels>
-      <v-expansion-panel
-        v-for="contactRole in contactRoles"
-        :key="contactRole.id"
-      >
-        <v-expansion-panel-header>
-          <contact-role-header-row :value="contactRole">
-            <v-menu
-              v-if="$auth.loggedIn"
-              close-on-click
-              close-on-content-click
-              offset-x
-              left
-              z-index="999"
-            >
-              <template #activator="{ on }">
-                <v-btn
-                  data-role="property-menu"
-                  icon
-                  small
-                  v-on="on"
-                >
-                  <v-icon
-                    dense
-                    small
-                  >
-                    mdi-dots-vertical
-                  </v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item
-                  dense
-                  @click="removeContactRole(contactRole.id)"
-                >
-                  <v-list-item-content>
-                    <v-list-item-title
-                      class="red--text"
-                    >
-                      <v-icon
-                        left
-                        small
-                        color="red"
-                      >
-                        mdi-delete
-                      </v-icon>
-                      Remove
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </contact-role-header-row>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <template #default>
-            <contact-role-panel :value="contactRole" />
-          </template>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
-    <v-card-actions
-      v-if="!isAddContactPage && contactRoles.length > 3"
-    >
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="primary"
-        small
-        nuxt
-        :to="'/devices/' + deviceId + '/contacts/new'"
-      >
-        Add contact
-      </v-btn>
-    </v-card-actions>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { ContactRole } from '@/models/ContactRole'
+import { mapActions } from 'vuex'
 
-import HintCard from '@/components/HintCard.vue'
+import { LoadDeviceContactRolesAction } from '@/store/devices'
+import { LoadCvContactRolesAction } from '@/store/vocabulary'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import ContactRoleHeaderRow from '@/components/contacts/ContactRoleHeaderRow.vue'
-import ContactRolePanel from '@/components/contacts/ContactRolePanel.vue'
 
 @Component({
-  components: {
-    ContactRoleHeaderRow,
-    ContactRolePanel,
-    HintCard,
-    ProgressIndicator
+  components: { ProgressIndicator },
+  methods: {
+    ...mapActions('devices', ['loadDeviceContactRoles']),
+    ...mapActions('vocabulary', ['loadCvContactRoles'])
   }
 })
 export default class DeviceContactsPage extends Vue {
-  private contactRoles: ContactRole[] = []
   private isLoading = false
-  private isSaving = false
+
+  // vuex definition for typescript check
+  loadDeviceContactRoles!: LoadDeviceContactRolesAction
+  loadCvContactRoles!: LoadCvContactRolesAction
 
   async fetch () {
-    this.isLoading = true
     try {
-      this.contactRoles = await this.$api.devices.findRelatedContactRoles(this.deviceId)
-    } catch (_err) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch contact roles')
+      this.isLoading = true
+      await Promise.all([
+        this.loadDeviceContactRoles(this.deviceId),
+        this.loadCvContactRoles()
+      ])
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     } finally {
       this.isLoading = false
     }
-  }
-
-  head () {
-    return {
-      titleTemplate: 'Contacts - %s'
-    }
-  }
-
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  get isAddContactPage (): boolean {
-    return this.$route.path === '/devices/' + this.deviceId + '/contacts/new'
-  }
-
-  async removeContactRole (contactRoleId: string) {
-    try {
-      this.isSaving = true
-      await this.$api.devices.removeContact(contactRoleId)
-      const searchIndex = this.contactRoles.findIndex(cr => cr.id === contactRoleId)
-      if (searchIndex > -1) {
-        this.contactRoles.splice(searchIndex, 1)
-      }
-    } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Removing contact failed')
-    } finally {
-      this.isSaving = false
+  head () {
+    return {
+      titleTemplate: 'Contacts - %s'
     }
   }
 }

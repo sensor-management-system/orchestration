@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -37,75 +37,17 @@
 import { DateTime } from 'luxon'
 
 import { Configuration } from '@/models/Configuration'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
-
-import { IActionDateWithTextItem } from '@/utils/configurationInterfaces'
 import { Platform } from '@/models/Platform'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { Contact } from '@/models/Contact'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Device } from '@/models/Device'
+import { Visibility } from '@/models/Visibility'
+
 import { buildConfigurationTree } from '@/modelUtils/mountHelpers'
 import configurationHelper from '@/utils/configurationHelper'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 
-describe('#getActionDatesWithTextByConfiguration', () => {
-  it('should return a sorted list of action dates', () => {
-    const configuration = new Configuration()
-
-    const staticLocationBeginAction1 = new StaticLocationBeginAction()
-    staticLocationBeginAction1.beginDate = DateTime.utc(2021, 1, 1, 12, 0, 0)
-    const staticLocationEndAction1 = new StaticLocationEndAction()
-    staticLocationEndAction1.endDate = DateTime.utc(2021, 1, 1, 20, 0, 0)
-
-    const staticLocationBeginAction2 = new StaticLocationBeginAction()
-    staticLocationBeginAction2.beginDate = DateTime.utc(1999, 8, 1, 10, 0, 0)
-    const staticLocationEndAction2 = new StaticLocationEndAction()
-    staticLocationEndAction2.endDate = DateTime.utc(1999, 8, 15, 10, 0, 0)
-
-    const dynamicLocationBeginAction1 = new DynamicLocationBeginAction()
-    dynamicLocationBeginAction1.beginDate = DateTime.utc(2020, 3, 1, 10, 0, 0)
-    const dynamicLocationEndAction1 = new DynamicLocationEndAction()
-    dynamicLocationEndAction1.endDate = DateTime.utc(2020, 3, 31, 10, 0, 0)
-
-    configuration.staticLocationBeginActions = [
-      staticLocationBeginAction1,
-      staticLocationBeginAction2
-    ]
-    configuration.staticLocationEndActions = [
-      staticLocationEndAction1,
-      staticLocationEndAction2
-    ]
-    configuration.dynamicLocationBeginActions = [
-      dynamicLocationBeginAction1
-    ]
-    configuration.dynamicLocationEndActions = [
-      dynamicLocationEndAction1
-    ]
-    const selectedDate = DateTime.utc(2021, 10, 6, 12, 0, 0)
-    const actionDates: IActionDateWithTextItem[] = configurationHelper.getActionDatesWithTextsByConfiguration(configuration, selectedDate, { useMounts: false, useLoctions: true })
-
-    expect(actionDates.length).toEqual(8)
-    expect(actionDates[0]).toHaveProperty('date', DateTime.utc(1999, 8, 1, 10, 0, 0))
-    expect(actionDates[0]).toHaveProperty('text', '1999-08-01 10:00 - Static location begin')
-    expect(actionDates[1]).toHaveProperty('date', DateTime.utc(1999, 8, 15, 10, 0, 0))
-    expect(actionDates[1]).toHaveProperty('text', '1999-08-15 10:00 - Static location end')
-    expect(actionDates[2]).toHaveProperty('date', DateTime.utc(2020, 3, 1, 10, 0, 0))
-    expect(actionDates[2]).toHaveProperty('text', '2020-03-01 10:00 - Dynamic location begin')
-    expect(actionDates[3]).toHaveProperty('date', DateTime.utc(2020, 3, 31, 10, 0, 0))
-    expect(actionDates[3]).toHaveProperty('text', '2020-03-31 10:00 - Dynamic location end')
-    expect(actionDates[4]).toHaveProperty('date', DateTime.utc(2021, 1, 1, 12, 0, 0))
-    expect(actionDates[4]).toHaveProperty('text', '2021-01-01 12:00 - Static location begin')
-    expect(actionDates[5]).toHaveProperty('date', DateTime.utc(2021, 1, 1, 20, 0, 0))
-    expect(actionDates[5]).toHaveProperty('text', '2021-01-01 20:00 - Static location end')
-    expect(actionDates[6]).toHaveProperty('date', DateTime.utc(2021, 10, 6, 12, 0, 0))
-    expect(actionDates[6]).toHaveProperty('text', '2021-10-06 12:00 - Selected')
-    // the 7th item is now - which we can't text because of the time
-  })
-})
 describe('#addNewMountAction', () => {
   it('should add a new platformMountAction to our configuration', () => {
     const platform1 = Platform.createFromObject({
@@ -125,11 +67,15 @@ describe('#addNewMountAction', () => {
       attachments: [],
       contacts: [],
       model: '',
+      description: '',
       createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
       updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
-      createdByUserId: 1,
-      updatedByUserId: 1,
-      description: ''
+      updateDescription: '',
+      createdBy: null,
+      updatedBy: null,
+      createdByUserId: null,
+      permissionGroups: [],
+      visibility: Visibility.Internal
     })
     const device1 = Device.createFromObject({
       shortName: 'device 1',
@@ -150,12 +96,16 @@ describe('#addNewMountAction', () => {
       model: '',
       createdAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
       updatedAt: DateTime.utc(2021, 12, 15, 8, 54, 13),
-      createdByUserId: 1,
-      updatedByUserId: 1,
+      updateDescription: '',
       description: '',
       dualUse: false,
       properties: [],
-      customFields: []
+      customFields: [],
+      createdBy: null,
+      updatedBy: null,
+      createdByUserId: null,
+      permissionGroups: [],
+      visibility: Visibility.Internal
     })
     const contact1 = Contact.createFromObject({
       id: '111111',
@@ -170,9 +120,12 @@ describe('#addNewMountAction', () => {
       offsetX: 1,
       offsetY: 2,
       offsetZ: 3,
-      description: 'This is the very first mount',
-      contact: contact1,
-      date: DateTime.utc(2021, 12, 15, 9, 0, 0),
+      beginDescription: 'This is the very first mount',
+      endDescription: '',
+      beginContact: contact1,
+      endContact: null,
+      beginDate: DateTime.utc(2021, 12, 15, 9, 0, 0),
+      endDate: null,
       parentPlatform: null
     })
     const deviceMountAction1 = DeviceMountAction.createFromObject({
@@ -181,29 +134,31 @@ describe('#addNewMountAction', () => {
       offsetX: -1,
       offsetY: -2,
       offsetZ: -3,
-      description: 'Mount of the device on the platform',
-      contact: contact1,
+      beginDescription: 'Mount of the device on the platform',
+      endDescription: '',
+      beginContact: contact1,
+      endContact: null,
       parentPlatform: platform1,
-      date: DateTime.utc(2021, 12, 15, 9, 0, 0)
+      beginDate: DateTime.utc(2021, 12, 15, 9, 0, 0),
+      endDate: null
     })
     const configuration = Configuration.createFromObject({
       id: '123',
       label: 'test config',
       startDate: null,
       endDate: null,
-      projectName: '',
-      projectUri: '',
-      staticLocationBeginActions: [],
-      staticLocationEndActions: [],
-      dynamicLocationBeginActions: [],
-      dynamicLocationEndActions: [],
       platformMountActions: [platformMountAction1],
-      platformUnmountActions: [],
       deviceMountActions: [deviceMountAction1],
-      deviceUnmountActions: [],
       contacts: [],
       status: '',
-      location: null
+      permissionGroup: null,
+      visibility: Visibility.Internal,
+      createdAt: null,
+      updatedAt: null,
+      updateDescription: '',
+      createdBy: null,
+      updatedBy: null,
+      createdByUserId: null
     })
 
     const selectedDate = DateTime.utc(2021, 12, 15, 9, 15, 0)

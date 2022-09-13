@@ -35,31 +35,38 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-row>
+      <v-col cols="12">
+        <label>Visibility / Permissions</label>
+        <VisibilityChip
+          v-model="value.visibility"
+        />
+        <PermissionGroupChips
+          :value="[value.permissionGroup]"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="3">
         <label>Label</label>
         {{ value.label }}
       </v-col>
       <v-col cols="12" md="3">
         <label>Status</label>
-        {{ value.status }}
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>Project</label>
-        {{ value.projectName }}
+        {{ value.status | orDefault }}
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
         <label>Start date</label>
         <span v-if="value.startDate">
-          {{ value.startDate | dateToDateTimeString }}
+          {{ value.startDate | dateToDateTimeString | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
       </v-col>
       <v-col cols="12" md="3">
         <label>End date</label>
         <span v-if="value.endDate">
-          {{ value.endDate | dateToDateTimeString }}
+          {{ value.endDate | dateToDateTimeString | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
       </v-col>
@@ -75,9 +82,13 @@ import { Configuration } from '@/models/Configuration'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 @Component({
   components: {
+    PermissionGroupChips,
+    VisibilityChip,
     DateTimePicker
   },
   filters: {
@@ -93,18 +104,11 @@ export default class ConfigurationsBasicDataForm extends Vue {
   })
   readonly value!: Configuration
 
-  readonly LOCATION_TYPE_STATIONARY = 'Stationary'
-  readonly LOCATION_TYPE_DYNAMIC = 'Dynamic'
-
   async mounted () {
-    await Promise.all([
-      this.$store.dispatch('configurations/loadProjects'),
-      this.$store.dispatch('configurations/loadConfigurationsStates')
-    ])
+    await this.$store.dispatch('configurations/loadConfigurationsStates')
   }
 
   get configurationStates () { return this.$store.state.configurations.configurationStates }
-  get projectNames () { return this.$store.getters['configurations/projectNames'] }
   // @ts-ignore
   update (key: string, value: any) {
     // @ts-ignore

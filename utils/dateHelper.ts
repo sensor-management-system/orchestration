@@ -63,6 +63,14 @@ export const timeStampToUTCDateTime = (value: number): string => {
   return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
 }
 
+export const ISOToDateTimeString = (aDate: string | null): string => {
+  if (!aDate) {
+    return ''
+  }
+  const date = DateTime.fromISO(aDate, { zone: 'utc' })
+  return dateToDateTimeStringHHMM(date)
+}
+
 export function dateTimesEqual (dateTime1: DateTime, dateTime2: DateTime): boolean {
   return dateTime1.toUTC().toISO() === dateTime2.toUTC().toISO()
 }
@@ -71,5 +79,18 @@ export const dateToDateTimeString = (aDate: DateTime | null): string => {
   if (!aDate) {
     return ''
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
+  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
+}
+
+export const currentAsUtcDateSecondsAsZeros = (): DateTime => {
+  return DateTime.fromFormat(DateTime.now().toFormat('yyyy-MM-dd HH:mm'), 'yyyy-MM-dd HH:mm')
+}
+
+export const sortCriteriaAscending = (a: DateTime, b: DateTime) => {
+  if (a < b) {
+    return -1
+  } else if (a > b) {
+    return 1
+  }
+  return 0
 }

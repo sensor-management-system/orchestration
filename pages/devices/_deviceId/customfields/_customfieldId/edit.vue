@@ -31,109 +31,118 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isSaving"
-      dark
+      v-model="isInProgress"
+      :dark="isSaving"
     />
-    <CustomFieldCardForm
+    <CustomFieldForm
       ref="customFieldCardForm"
       v-model="valueCopy"
     >
       <template #actions>
-        <v-btn
-          v-if="editable"
-          ref="cancelButton"
-          text
-          small
-          nuxt
-          @click="cancel()"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          v-if="editable"
-          color="green"
-          small
-          @click="save()"
-        >
-          Apply
-        </v-btn>
+        <SaveAndCancelButtons
+          save-btn-text="Apply"
+          :to="'/devices/' + deviceId + '/customfields'"
+          @save="save"
+        />
       </template>
-    </CustomFieldCardForm>
+    </CustomFieldForm>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+
+import {
+  DevicesState,
+  LoadDeviceCustomFieldAction,
+  LoadDeviceCustomFieldsAction,
+  UpdateDeviceCustomFieldAction
+} from '@/store/devices'
 
 import { CustomTextField } from '@/models/CustomTextField'
 
-import CustomFieldCardForm from '@/components/CustomFieldCardForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import CustomFieldForm from '@/components/CustomFieldForm.vue'
 
 @Component({
   components: {
-    CustomFieldCardForm,
+    CustomFieldForm,
+    SaveAndCancelButtons,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapState('devices', ['deviceCustomField']),
+  methods: mapActions('devices', ['loadDeviceCustomField', 'loadDeviceCustomFields', 'updateDeviceCustomField'])
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
-  private isSaving: boolean = false
+  @InjectReactive()
+    editable!: boolean
+
+  private isSaving = false
+  private isLoading = false
+
   private valueCopy: CustomTextField = new CustomTextField()
 
-  @Prop({
-    required: true,
-    type: Object
-  })
-  readonly value!: CustomTextField
+  // vuex definition for typescript check
+  deviceCustomField!: DevicesState['deviceCustomField']
+  loadDeviceCustomField!: LoadDeviceCustomFieldAction
+  updateDeviceCustomField!: UpdateDeviceCustomFieldAction
+  loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
 
-  // TODO: uncomment the next two lines and remove the third one after merging the permission management branch
-  // @InjectReactive()
-  //   editable!: boolean
-  get editable (): boolean {
-    return this.$auth.loggedIn
-  }
-
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/devices/' + this.deviceId + '/customfields')
+  async fetch (): Promise<void> {
+    try {
+      this.isLoading = true
+      await this.loadDeviceCustomField(this.customFieldId)
+      if (this.deviceCustomField) {
+        this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load custom field')
+    } finally {
+      this.isLoading = false
     }
-    this.valueCopy = CustomTextField.createFromObject(this.value)
-  }
-
-  mounted () {
-    (this.$refs.customFieldCardForm as Vue & { focus: () => void}).focus()
-    const cancelButton = this.$refs.cancelButton as Vue
-    // due to the active route (and the button being a router link)
-    // this button has the active class
-    // however, we don't want this special behaviour for this button
-    cancelButton.$el.classList.remove('v-btn--active')
   }
 
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  save (): void {
-    this.isSaving = true
-    this.$api.customfields.update(this.deviceId, this.valueCopy).then((newField: CustomTextField) => {
-      this.isSaving = false
-      this.$emit('input', newField)
+  get customFieldId (): string {
+    return this.$route.params.customfieldId
+  }
+
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
+  async save () {
+    try {
+      this.isSaving = true
+      await this.updateDeviceCustomField({
+        deviceId: this.deviceId,
+        deviceCustomField: this.valueCopy
+      })
+      this.loadDeviceCustomFields(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Custom field updated')
       this.$router.push('/devices/' + this.deviceId + '/customfields')
-    }).catch(() => {
-      this.isSaving = false
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
-    })
+    } finally {
+      this.isSaving = false
+    }
   }
 
-  cancel (): void {
-    this.$router.push('/devices/' + this.deviceId + '/customfields')
-  }
-
-  @Watch('value', { immediate: true, deep: true })
-  // @ts-ignore
-  onValueChanged (val: CustomTextField) {
-    this.valueCopy = CustomTextField.createFromObject(val)
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/devices/' + this.deviceId + '/customfields', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
+      })
+    }
   }
 }
 </script>

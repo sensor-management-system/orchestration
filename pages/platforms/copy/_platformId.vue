@@ -2,11 +2,15 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -31,31 +35,20 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isLoading"
-      dark
+      v-model="isInProgress"
+      :dark="isSaving"
     />
     <v-card
       flat
     >
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :disabled="!canModifyEntity(platformToCopy)"
+          :to="'/platforms'"
+          save-btn-text="Copy"
+          @save="save"
+        />
       </v-card-actions>
       <v-alert
         border="left"
@@ -85,7 +78,7 @@ permissions and limitations under the Licence.
 
       <PlatformBasicDataForm
         ref="basicForm"
-        v-model="platform"
+        v-model="platformToCopy"
         :persistent-identifier-placeholder="persistentIdentifierPlaceholder"
         :serial-number-placeholder="serialNumberPlaceholder"
         :inventory-number-placeholder="inventoryNumberPlaceholder"
@@ -118,54 +111,52 @@ permissions and limitations under the Licence.
       </v-alert>
       <v-card-actions>
         <v-spacer />
-        <v-btn
-          v-if="$auth.loggedIn"
-          small
-          text
-          nuxt
-          to="/platforms"
-        >
-          cancel
-        </v-btn>
-        <v-btn
-          v-if="$auth.loggedIn"
-          color="green"
-          small
-          @click="onSaveButtonClicked"
-        >
-          create
-        </v-btn>
+        <SaveAndCancelButtons
+          :disabled="!canModifyEntity(platformToCopy)"
+          :to="'/platforms'"
+          save-btn-text="Copy"
+          @save="save"
+        />
       </v-card-actions>
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { Rules } from '@/mixins/Rules'
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
+import { PlatformsState, LoadPlatformAction, CopyPlatformAction } from '@/store/platforms'
 
-import { Attachment } from '@/models/Attachment'
-import { ContactRole } from '@/models/ContactRole'
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
+    SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: {
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
+    ...mapState('platforms', ['platform'])
+  },
+  methods: {
+    ...mapActions('platforms', ['loadPlatform', 'copyPlatform']),
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
+  }
 })
 // @ts-ignore
-export default class PlatformCopyPage extends mixins(Rules) {
-  private numberOfTabs: number = 1
-
-  private platform: Platform = new Platform()
-  private existingPlatform: Platform = new Platform()
-  private isLoading: boolean = true
+export default class PlatformCopyPage extends Vue {
+  private platformToCopy: Platform = new Platform()
+  private isSaving = false
+  private isLoading = false
 
   private copyContacts: boolean = true
   private copyAttachments: boolean = false
@@ -174,139 +165,131 @@ export default class PlatformCopyPage extends mixins(Rules) {
   private serialNumberPlaceholder: string | null = null
   private inventoryNumberPlaceholder: string | null = null
 
-  mounted () {
+  // vuex definition for typescript check
+  platform!: PlatformsState['platform']
+  loadPlatform!: LoadPlatformAction
+  copyPlatform!: CopyPlatformAction
+  canAccessEntity!: CanAccessEntityGetter
+  canModifyEntity!: CanModifyEntityGetter
+  userGroups!: UserGroupsGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+
+  created () {
     this.initializeAppBar()
   }
 
-  async fetch () {
-    // We also load the contacts and the measured quantities as those
-    // are the ones that we will also copy.
+  async fetch (): Promise<void> {
     try {
-      const platform = await this.$api.platforms.findById(this.platformId, {
+      this.isLoading = true
+      await this.loadPlatform({
+        platformId: this.platformId,
         includeContacts: true,
         includePlatformAttachments: true
       })
-      this.existingPlatform = platform
-      const platformToEdit = Platform.createFromObject(this.existingPlatform)
-      // Unset the fields that are very device specific
-      // (we need other PIDs, serial numbers and inventory numbers)
-      // For the moment we just unset them completely, but there may be
-      // some more logic in those numbers.
-      // For example the serial numbers could just be something like 'XXXX-1'
-      // and for the next device 'XXXX-2'.
-      // For the inventory numbers the same.
-      platformToEdit.id = null
-      if (platformToEdit.persistentIdentifier) {
-        this.persistentIdentifierPlaceholder = platformToEdit.persistentIdentifier
-      }
-      platformToEdit.persistentIdentifier = ''
-      if (platformToEdit.serialNumber) {
-        this.serialNumberPlaceholder = platformToEdit.serialNumber
-      }
-      platformToEdit.serialNumber = ''
-      if (platformToEdit.inventoryNumber) {
-        this.inventoryNumberPlaceholder = platformToEdit.inventoryNumber
-      }
-      platformToEdit.inventoryNumber = ''
 
-      this.platform = platformToEdit
-    } catch (_error) {
+      if (!this.platform || !this.canAccessEntity(this.platform)) {
+        this.$router.replace('/platforms/')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to copy this platform.')
+        return
+      }
+
+      const platformCopy = this.getPreparedPlatformForCopy()
+      if (platformCopy) {
+        this.platformToCopy = platformCopy
+      }
+    } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     } finally {
       this.isLoading = false
     }
   }
 
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
-  async onSaveButtonClicked () {
-    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
-      this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
-    }
-    if (!this.$auth.loggedIn) {
-      this.$store.commit('snackbar/setError', 'You need to be logged in to save the platform')
-      return
-    }
-    this.isLoading = true
-    const attachments = this.platform.attachments.map(Attachment.createFromObject)
-    try {
-      // most importantly: Save the device itself
-      const savedPlatform = await this.$api.platforms.save(this.platform)
-      const savedPlatformId = savedPlatform.id!
-
-      const related: Promise<any>[] = []
-
-      if (this.copyContacts) {
-        // Then we can deal about the contacts
-        // The contacts have the special issue, that our system will add the contact who
-        // add/edit the device automatically.
-        // We we should check who we added this way already.
-        const sourceContactRoles = await this.$api.platforms.findRelatedContactRoles(this.platformId)
-        const freshCreatedContactRoles = await this.$api.platforms.findRelatedContactRoles(savedPlatformId)
-        // And then only add those remaining
-        const contactRolesToSave = sourceContactRoles.filter(c => freshCreatedContactRoles.findIndex((ec: ContactRole) => { return ec.contact!.id === c.contact!.id && ec.roleName === c.roleName }) === -1)
-
-        for (const contactRole of contactRolesToSave) {
-          const contactRoleToSave = ContactRole.createFromObject(contactRole)
-          // we don't have a reference to the platform here, but we have an id
-          // that we should remove before we save it
-          contactRoleToSave.id = null
-          related.push(this.$api.platforms.addContact(savedPlatformId, contactRoleToSave))
-        }
-      }
-      if (this.copyAttachments) {
-        for (const attachment of attachments) {
-          attachment.id = null
-          related.push(this.$api.platformAttachments.add(savedPlatformId, attachment))
-        }
-      }
-      await Promise.all(related)
-
-      this.isLoading = false
-      this.$store.commit('snackbar/setSuccess', 'Platform copied')
-      this.$router.push('/platforms/' + savedPlatform.id + '')
-    } catch (_error) {
-      this.isLoading = false
-      this.$store.commit('snackbar/setError', 'Copy failed')
-    }
-  }
-
-  initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platform/copy/' + this.platformId,
-          name: 'Basic Data'
-        },
-        {
-          name: 'Contacts',
-          disabled: true
-        },
-        {
-          name: 'Attachments',
-          disabled: true
-        },
-        {
-          name: 'Actions',
-          disabled: true
-        }
-      ],
-      title: 'Copy Platform'
-    })
-  }
-
   get platformId () {
     return this.$route.params.platformId
   }
 
-  @Watch('existingPlatform', { immediate: true, deep: true })
-  // @ts-ignore
-  onDeviceChanged (val: Platform) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', 'Copy ' + (val?.shortName || 'Platform'))
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
+  getPreparedPlatformForCopy (): Platform | null {
+    if (!this.platform) {
+      return null
+    }
+    const platformToEdit = Platform.createFromObject(this.platform)
+    // Unset the fields that are very device specific
+    // (we need other PIDs, serial numbers and inventory numbers)
+    // For the moment we just unset them completely, but there may be
+    // some more logic in those numbers.
+    // For example the serial numbers could just be something like 'XXXX-1'
+    // and for the next device 'XXXX-2'.
+    // For the inventory numbers the same.
+    platformToEdit.id = null
+    if (platformToEdit.persistentIdentifier) {
+      this.persistentIdentifierPlaceholder = platformToEdit.persistentIdentifier
+    }
+    platformToEdit.persistentIdentifier = ''
+    if (platformToEdit.serialNumber) {
+      this.serialNumberPlaceholder = platformToEdit.serialNumber
+    }
+    platformToEdit.serialNumber = ''
+    if (platformToEdit.inventoryNumber) {
+      this.inventoryNumberPlaceholder = platformToEdit.inventoryNumber
+    }
+    platformToEdit.inventoryNumber = ''
+    platformToEdit.permissionGroups = this.userGroups.filter(userGroup => this.platform?.permissionGroups.filter(group => userGroup.equals(group)).length)
+    return platformToEdit
+  }
+
+  async save () {
+    if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+    try {
+      this.isSaving = true
+      const savedPLatformId = await this.copyPlatform({
+        platform: this.platformToCopy,
+        copyContacts: this.copyContacts,
+        copyAttachments: this.copyAttachments,
+        originalPlatformId: this.platformId
+      })
+      this.$store.commit('snackbar/setSuccess', 'Platform copied')
+      this.$router.push('/platforms/' + savedPLatformId)
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Copy failed')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      {
+        to: '/platform/copy/' + this.platformId,
+        name: 'Basic Data'
+      },
+      {
+        name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
+        name: 'Actions',
+        disabled: true
+      }
+    ])
+    this.setTitle('Copy Platform')
+  }
+
+  @Watch('platform', { immediate: true, deep: true })
+  onDeviceChanged (val: PlatformsState['platform']) {
+    if (val && val.id) {
+      this.setTitle('Copy ' + val.shortName)
     }
   }
 }

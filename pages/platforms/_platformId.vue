@@ -34,7 +34,9 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild
+      <NuxtChild />
+      <modification-info
+        v-if="platform"
         v-model="platform"
       />
     </v-card>
@@ -42,81 +44,120 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
-import { Platform } from '@/models/Platform'
+import { Component, Vue, ProvideReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+
+import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { PlatformsState, LoadPlatformAction } from '@/store/platforms'
+import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ModificationInfo from '@/components/ModificationInfo.vue'
 
 @Component({
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ModificationInfo
+  },
+  computed: {
+    ...mapState('platforms', ['platform']),
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity'])
+  },
+  methods: {
+    ...mapActions('platforms', ['loadPlatform']),
+    ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 export default class PlatformPage extends Vue {
-  private platform: Platform = new Platform()
-  private isLoading: boolean = true
+  private isLoading: boolean = false
+
+  @ProvideReactive()
+    editable: boolean = false
+
+  @ProvideReactive()
+    deletable: boolean = false
+
+  // vuex definition for typescript check
+  platform!: PlatformsState['platform']
+  loadPlatform!: LoadPlatformAction
+  initPlatformsPlatformIdAppBar!: (id: string) => void
+  canAccessEntity!: CanAccessEntityGetter
+  canModifyEntity!: CanModifyEntityGetter
+  canDeleteEntity!: CanDeleteEntityGetter
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
 
   created () {
-    if (this.isBasePath()) {
-      this.$router.replace('/platforms/' + this.platformId + '/basic')
+    this.initializeAppBar()
+  }
+
+  async fetch () {
+    try {
+      this.isLoading = true
+      await this.loadPlatform({
+        platformId: this.platformId,
+        includeContacts: false,
+        includePlatformAttachments: false,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
+      }
+      )
+      if (!this.platform || !this.canAccessEntity(this.platform)) {
+        this.$router.replace('/platforms/')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to access this platform.')
+        return
+      }
+      this.editable = this.canModifyEntity(this.platform)
+      this.deletable = this.canDeleteEntity(this.platform)
+
+      if (this.isBasePath()) {
+        this.$router.replace('/platforms/' + this.platformId + '/basic')
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading platform failed')
+      this.$router.replace('/platforms/')
+    } finally {
+      this.isLoading = false
     }
   }
 
-  mounted () {
-    this.initializeAppBar()
-
-    this.$api.platforms.findById(this.platformId, {
-      includeContacts: false,
-      includePlatformAttachments: false
-    }).then((platform) => {
-      this.platform = platform
-      this.isLoading = false
-    }).catch((_error) => {
-      this.$store.commit('snackbar/setError', 'Loading platform failed')
-      this.isLoading = false
-    })
-  }
-
-  beforeDestroy () {
-    this.$store.dispatch('appbar/setDefaults')
-  }
-
   initializeAppBar () {
-    this.$store.dispatch('appbar/init', {
-      tabs: [
-        {
-          to: '/platforms/' + this.platformId + '/basic',
-          name: 'Basic Data'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/contacts',
-          name: 'Contacts'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/attachments',
-          name: 'Attachments'
-        },
-        {
-          to: '/platforms/' + this.platformId + '/actions',
-          name: 'Actions'
-        }
-      ],
-      title: 'Platforms'
-    })
-  }
-
-  isBasePath () {
-    return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
+    this.setTabs([
+      {
+        to: '/platforms/' + this.platformId + '/basic',
+        name: 'Basic Data'
+      },
+      {
+        to: '/platforms/' + this.platformId + '/contacts',
+        name: 'Contacts'
+      },
+      {
+        to: '/platforms/' + this.platformId + '/attachments',
+        name: 'Attachments'
+      },
+      {
+        to: '/platforms/' + this.platformId + '/actions',
+        name: 'Actions'
+      }
+    ]
+    )
+    if (this.platform) {
+      this.setTitle(this.platform.shortName || 'Platform')
+    }
   }
 
   get platformId () {
     return this.$route.params.platformId
   }
 
+  isBasePath () {
+    return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
+  }
+
   @Watch('platform', { immediate: true, deep: true })
-  // @ts-ignore
-  onPlatformChanged (val: Platform) {
-    if (val.id) {
-      this.$store.commit('appbar/setTitle', val?.shortName || 'Add Platform')
+  onPlatformChanged (val: PlatformsState['platform']) {
+    if (val && val.id) {
+      this.setTitle(val.shortName)
     }
   }
 }

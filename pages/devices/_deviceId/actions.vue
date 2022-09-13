@@ -31,156 +31,38 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
+      v-model="isLoading"
     />
-    <v-card-actions>
-      <v-spacer />
-      <v-btn
-        v-if="$auth.loggedIn && isActionsPage"
-        color="primary"
-        small
-        :to="'/devices/' + deviceId + '/actions/new'"
-      >
-        Add Action
-      </v-btn>
-    </v-card-actions>
-    <template
-      v-if="isAddActionPage"
-    >
-      <NuxtChild
-        @input="$fetch"
-        @showsave="showsave"
-      />
-    </template>
-    <template
-      v-else-if="isEditActionPage"
-    >
-      <NuxtChild
-        @input="$fetch"
-        @showload="showload"
-        @showsave="showsave"
-      />
-    </template>
-    <template v-else>
-      <hint-card v-if="actions.length === 0">
-        There are no actions for this device.
-      </hint-card>
-      <DeviceActionTimeline
-        v-else
-        :value="actions"
-        :device-id="deviceId"
-        :action-api-dispatcher="apiDispatcher"
-        :is-user-authenticated="$auth.loggedIn"
-        @input="$fetch"
-        @showdelete="showsave"
-      />
-    </template>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
 
-import { DateTime } from 'luxon'
+import { LoadAllDeviceActionsAction } from '@/store/devices'
 
-import { IActionCommonDetails } from '@/models/ActionCommonDetails'
-import { GenericAction } from '@/models/GenericAction'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
-import { DeviceUnmountAction } from '@/models/views/devices/actions/DeviceUnmountAction'
-import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
-import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
-
-import { DateComparator, isDateCompareable } from '@/modelUtils/Compareables'
-import { DeviceActionApiDispatcher } from '@/modelUtils/actionHelpers'
-
-import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
-import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-const toUtcDate = (dt: DateTime) => {
-  return dt.toUTC().toFormat('yyyy-MM-dd TT')
-}
-
 @Component({
-  components: {
-    DeviceActionTimeline,
-    HintCard,
-    ProgressIndicator
-  },
-  filters: {
-    toUtcDate
-  }
+  components: { ProgressIndicator },
+  methods: mapActions('devices', ['loadAllDeviceActions'])
 })
 export default class DeviceActionsPage extends Vue {
-  private isLoading: boolean = false
-  private isSaving: boolean = false
+  private isLoading = false
 
-  private actions: IActionCommonDetails[] = []
+  // vuex definition for typescript check
+  loadAllDeviceActions!: LoadAllDeviceActionsAction
 
-  async fetch () {
-    this.showload(true)
-    await this.fetchActions()
-    this.showload(false)
-  }
-
-  async fetchActions () {
-    this.actions = []
-    await Promise.all([
-      this.fetchGenericActions(),
-      this.fetchSoftwareUpdateActions(),
-      this.fetchDeviceCalibrationActions(),
-      this.fetchMountActions(),
-      this.fetchUnmountActions()
-    ])
-
-    // sort the actions
-    const comparator = new DateComparator()
-    this.actions.sort((i: IActionCommonDetails, j: IActionCommonDetails): number => {
-      if (isDateCompareable(i) && isDateCompareable(j)) {
-        // multiply result with -1 to get descending order
-        return comparator.compare(i, j) * -1
-      }
-      if (isDateCompareable(i)) {
-        return -1
-      }
-      if (isDateCompareable(j)) {
-        return 1
-      }
-      return 0
-    })
-  }
-
-  async fetchGenericActions (): Promise<void> {
-    const actions: GenericAction[] = await this.$api.devices.findRelatedGenericActions(this.deviceId)
-    actions.forEach((action: GenericAction) => this.actions.push(action))
-  }
-
-  async fetchSoftwareUpdateActions (): Promise<void> {
-    const actions: SoftwareUpdateAction[] = await this.$api.devices.findRelatedSoftwareUpdateActions(this.deviceId)
-    actions.forEach((action: SoftwareUpdateAction) => this.actions.push(action))
-  }
-
-  async fetchMountActions (): Promise<void> {
-    const actions: DeviceMountAction[] = await this.$api.devices.findRelatedMountActions(this.deviceId)
-    actions.forEach((action: DeviceMountAction) => this.actions.push(new DeviceMountActionWrapper(action)))
-  }
-
-  async fetchUnmountActions (): Promise<void> {
-    const actions: DeviceUnmountAction[] = await this.$api.devices.findRelatedUnmountActions(this.deviceId)
-    actions.forEach((action: DeviceUnmountAction) => this.actions.push(new DeviceUnmountActionWrapper(action)))
-  }
-
-  async fetchDeviceCalibrationActions (): Promise<void> {
-    const actions: DeviceCalibrationAction[] = await this.$api.devices.findRelatedCalibrationActions(this.deviceId)
-    actions.forEach((action: DeviceCalibrationAction) => this.actions.push(action))
-  }
-
-  head () {
-    return {
-      titleTemplate: 'Actions - %s'
+  async created () {
+    try {
+      this.isLoading = true
+      await this.loadAllDeviceActions(this.deviceId)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch actions')
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -188,36 +70,10 @@ export default class DeviceActionsPage extends Vue {
     return this.$route.params.deviceId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
-  get isActionsPage (): boolean {
-    return !this.isEditActionPage && !this.isAddActionPage
-  }
-
-  get isAddActionPage (): boolean {
-    // eslint-disable-next-line no-useless-escape
-    const addUrl = '^\/devices\/' + this.deviceId + '\/actions\/new$'
-    return !!this.$route.path.match(addUrl)
-  }
-
-  get isEditActionPage (): boolean {
-    // eslint-disable-next-line no-useless-escape
-    const editUrl = '^\/devices\/' + this.deviceId + '\/actions\/[a-zA-Z-]+\/[0-9]+\/edit$'
-    return !!this.$route.path.match(editUrl)
-  }
-
-  showsave (isSaving: boolean) {
-    this.isSaving = isSaving
-  }
-
-  showload (isLoading: boolean) {
-    this.isLoading = isLoading
-  }
-
-  get apiDispatcher () {
-    return new DeviceActionApiDispatcher(this.$api)
+  head () {
+    return {
+      titleTemplate: 'Actions - %s'
+    }
   }
 }
 </script>

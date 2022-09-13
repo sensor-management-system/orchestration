@@ -33,6 +33,7 @@ stages:
   - build
   - release
   - deploy-staging
+  - deploy-prod
   - after-deployment-tests
 
 cache:
@@ -252,17 +253,32 @@ release-ufz-tag-image:
     - docker push $UFZ_RELEASE_TAG_IMAGE
   needs: ["build-deploy-image-ufz"]
   rules:
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-rc-.*/'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-.*/'
 
 trigger-deploy-on-orchestration-ufz-stage:
-  stage: deploy-staging
+  stage: "deploy-staging"
   variables:
     UPSTREAM_DEPLOYMENT_TARGET: "ufz"
+    DEPLOYMENT_TARGET_ENVIRONMENT: "stage"
     SMS_COMPONENT_NAME: "frontend"
     SMS_COMPONENT_TAG: "$CI_COMMIT_REF_SLUG"
   trigger:
-    project: hub-terra/sms/orchestration
-    branch: main
+    project: "hub-terra/sms/orchestration"
+    branch: "main"
   needs: ["release-ufz-tag-image"]
   rules:
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-rc-.*/'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-stage-.*/'
+
+trigger-deploy-on-orchestration-ufz-prod:
+  stage: "deploy-prod"
+  variables:
+    UPSTREAM_DEPLOYMENT_TARGET: "ufz"
+    DEPLOYMENT_TARGET_ENVIRONMENT: "prod"
+    SMS_COMPONENT_NAME: "frontend"
+    SMS_COMPONENT_TAG: "$CI_COMMIT_REF_SLUG"
+  trigger:
+    project: "hub-terra/sms/orchestration"
+    branch: "main"
+  needs: ["release-ufz-tag-image"]
+  rules:
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-prod-.*/'

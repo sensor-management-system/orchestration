@@ -35,7 +35,7 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { IConfigurationsTreeNode } from '@/viewmodels/IConfigurationsTreeNode'
+import { IConfigurationsTreeNodeWithChildren } from '@/viewmodels/IConfigurationsTreeNode'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
@@ -43,22 +43,21 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 /**
  * a class that wraps a Platform instance for the usage in a ConfigurationsTree
  */
-export class PlatformNode implements IConfigurationsTreeNode<PlatformMountAction> {
+export class PlatformNode implements IConfigurationsTreeNodeWithChildren<PlatformMountAction> {
   private node: PlatformMountAction
   private tree: ConfigurationsTree = new ConfigurationsTree()
   private _disabled: boolean = false
+  private _id: string | null = ''
 
   static readonly ID_PREFIX = 'PlatformNode-'
 
   constructor (node: PlatformMountAction) {
     this.node = node
+    this._id = PlatformNode.ID_PREFIX + node.platform.id
   }
 
   get id (): string | null {
-    if (!this.node.platform.id) {
-      return null
-    }
-    return PlatformNode.ID_PREFIX + this.node.platform.id
+    return this._id
   }
 
   get elementId (): string | null {
@@ -98,15 +97,19 @@ export class PlatformNode implements IConfigurationsTreeNode<PlatformMountAction
     this._disabled = isDisabled
   }
 
-  canHaveChildren (): boolean {
+  canHaveChildren (): this is IConfigurationsTreeNodeWithChildren<PlatformMountAction> {
     return true
   }
 
-  isPlatform (): boolean {
+  isPlatform (): this is PlatformNode {
     return true
   }
 
   isDevice (): boolean {
+    return false
+  }
+
+  isConfiguration (): boolean {
     return false
   }
 
