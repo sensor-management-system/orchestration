@@ -49,6 +49,23 @@ export class PlatformMountActionApi {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
+  async findById (id: string): Promise<PlatformMountAction|null> {
+    const url = this.basePath + '/' + id
+    const params = {
+      include: [
+        'begin_contact',
+        'end_contact',
+        'parent_platform',
+        'platform'
+      ].join(',')
+    }
+    const response = await this.axiosApi.get(url, { params })
+    if ('data' in response && !response.data) {
+      return null
+    }
+    return this.serializer.convertJsonApiObjectToModel(response.data)
+  }
+
   async add (configurationId: string, platformMountAction: PlatformMountAction): Promise<string> {
     const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(configurationId, platformMountAction)

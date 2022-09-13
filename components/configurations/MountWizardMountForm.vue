@@ -35,24 +35,24 @@ permissions and limitations under the Licence.
     <v-card v-for="(device, i) in selectedDevices" :key="`device-${i}`" class="mb-6">
       <v-card-title>Mounting info for {{ device.shortName }}</v-card-title>
       <v-card-subtitle>{{ dateRangeString }}</v-card-subtitle>
-      <ConfigurationsPlatformDeviceMountForm
-        :entity="device"
+      <mount-action-details-form
+        :value="mountAction"
         :readonly="false"
         :contacts="contacts"
-        :current-user-mail="currentUserMail"
         :with-unmount="selectedEndDate !== null"
+        :with-dates="false"
         @add="setDeviceToMount(device, $event)"
       />
     </v-card>
     <v-card v-for="(platform, i) in selectedPlatforms" :key="`platform-${i}`" class="mb-6">
       <v-card-title>Mounting info for {{ platform.shortName }}</v-card-title>
       <v-card-subtitle>{{ dateRangeString }}</v-card-subtitle>
-      <ConfigurationsPlatformDeviceMountForm
-        :entity="platform"
+      <mount-action-details-form
         :readonly="false"
+        :value="mountAction"
         :contacts="contacts"
-        :current-user-mail="currentUserMail"
         :with-unmount="selectedEndDate !== null"
+        :with-dates="false"
         @add="setPlatformToMount(platform, $event)"
       />
     </v-card>
@@ -65,18 +65,20 @@ import { mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
+import { ContactsState } from '@/store/contacts'
+
+import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Platform } from '@/models/Platform'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { MountAction } from '@/models/MountAction'
 
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 
-import ConfigurationsPlatformDeviceMountForm from '@/components/ConfigurationsPlatformDeviceMountForm.vue'
+import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
 
 @Component({
   components: {
-    ConfigurationsPlatformDeviceMountForm
+    MountActionDetailsForm
   },
   filters: { dateToDateTimeStringHHMM },
   computed: {
@@ -100,20 +102,32 @@ export default class MountWizardMountForm extends Vue {
     required: false,
     type: Array
   })
-    syncedDevicesToMount!: { entity: Device, mountInfo: DeviceMountAction }[]
+    syncedDevicesToMount!: { entity: Device, mountInfo: MountAction }[]
 
   @PropSync('platformsToMount', {
     required: false,
     type: Array
   })
-    syncedPlatformsToMount!: { entity: Platform, mountInfo: PlatformMountAction }[]
+    syncedPlatformsToMount!: { entity: Platform, mountInfo: MountAction }[]
 
   @InjectReactive() selectedDate!: DateTime
   @InjectReactive() selectedEndDate!: DateTime | null
 
+  contacts!: ContactsState['contacts']
+
   get currentUserMail (): string | null {
     if (this.$auth.user && this.$auth.user.email) {
       return this.$auth.user.email as string
+    }
+    return null
+  }
+
+  get currentUserAsContact (): Contact | null {
+    if (this.currentUserMail) {
+      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
+      if (userIndex > -1) {
+        return this.contacts[userIndex]
+      }
     }
     return null
   }
@@ -124,7 +138,23 @@ export default class MountWizardMountForm extends Vue {
     return start + end
   }
 
-  setPlatformToMount (platform: Platform, mountInfo: PlatformMountAction) {
+  get mountAction (): MountAction {
+    return MountAction.createFromObject({
+      id: '',
+      parentPlatform: null,
+      beginContact: this.currentUserAsContact || new Contact(),
+      beginDate: this.selectedDate,
+      endContact: this.selectedEndDate ? this.currentUserAsContact : null,
+      endDate: this.selectedEndDate || null,
+      beginDescription: '',
+      endDescription: '',
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0
+    })
+  }
+
+  setPlatformToMount (platform: Platform, mountInfo: MountAction) {
     mountInfo.beginDate = this.selectedDate
     mountInfo.endDate = this.selectedEndDate
     const platformToMount = {
@@ -141,7 +171,7 @@ export default class MountWizardMountForm extends Vue {
     }
   }
 
-  setDeviceToMount (device: Device, mountInfo: DeviceMountAction) {
+  setDeviceToMount (device: Device, mountInfo: MountAction) {
     mountInfo.beginDate = this.selectedDate
     mountInfo.endDate = this.selectedEndDate
     const deviceToMount = {

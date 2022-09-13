@@ -86,6 +86,7 @@ const PAGE_SIZES = [
 ]
 
 export interface ConfigurationsState {
+  selectedDate: DateTime
   configurations: Configuration[]
   configuration: Configuration | null
   configurationContactRoles: ContactRole[]
@@ -94,6 +95,8 @@ export interface ConfigurationsState {
   configurationMountingActionsForDate: ConfigurationsTree | null
   configurationDeviceMountActions: DeviceMountAction[]
   configurationPlatformMountActions: PlatformMountAction[]
+  deviceMountAction: DeviceMountAction | null
+  platformMountAction: PlatformMountAction | null
   configurationLocationActionTimepoints: []
   selectedTimepointItem: ILocationTimepoint| null
   staticLocationAction: StaticLocationAction|null
@@ -108,6 +111,7 @@ export interface ConfigurationsState {
 }
 
 const state = (): ConfigurationsState => ({
+  selectedDate: DateTime.utc(),
   configurations: [],
   configuration: null,
   configurationContactRoles: [],
@@ -116,6 +120,8 @@ const state = (): ConfigurationsState => ({
   configurationMountingActionsForDate: null,
   configurationDeviceMountActions: [],
   configurationPlatformMountActions: [],
+  deviceMountAction: null,
+  platformMountAction: null,
   configurationLocationActionTimepoints: [],
   selectedTimepointItem: null,
   staticLocationAction: null,
@@ -301,6 +307,7 @@ export type EarliestEndDateOfRelatedDeviceOfDynamicActionGetter = (action: Dynam
 
 type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 
+export type SetSelectedDateAction = (params: DateTime) => void
 export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
 export type AddDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type AddPlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
@@ -329,15 +336,20 @@ export type RemoveConfigurationContactRoleAction = (params: { configurationConta
 
 export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
-export type UpdateStaticLocationActionAction = (params: {configurationId: string,
-  staticLocationAction: StaticLocationAction}) => Promise<string>
-export type UpdateDynamicLocationActionAction = (params: {configurationId: string,
-  dynamicLocationAction: DynamicLocationAction}) => Promise<string>
+export type LoadDeviceMountActionAction = IdParamReturnsVoidPromiseAction
+export type SetDeviceMountActionAction = (action: DeviceMountAction) => void
+export type LoadPlatformMountActionAction = IdParamReturnsVoidPromiseAction
+export type SetPlatformMountActionAction = (action: PlatformMountAction) => void
+export type UpdateStaticLocationActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
+export type UpdateDynamicLocationActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
 
 export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
 export type SetSelectedLocationDateAction = (newVal: DateTime|null) => void
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
+  setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime) {
+    commit('setSelectedDate', selectedDate)
+  },
   async searchConfigurationsPaginated ({
     commit,
     state
@@ -442,6 +454,13 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   }: { configurationContactRoleId: string }): Promise<void> {
     return this.$api.configurations.removeContact(configurationContactRoleId)
   },
+  async loadDeviceMountAction ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const action = await this.$api.configurations.deviceMountActionApi.findById(id)
+    commit('setDeviceMountAction', action)
+  },
+  setDeviceMountAction ({ commit }: { commit: Commit }, action: DeviceMountAction): void {
+    commit('setDeviceMountAction', action)
+  },
   addDeviceMountAction (
     _context,
     {
@@ -451,14 +470,6 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   ): Promise<string> {
     return this.$api.configurations.deviceMountActionApi.add(configurationId, deviceMountAction)
   },
-  addPlatformMountAction (_context,
-    {
-      configurationId,
-      platformMountAction
-    }: { configurationId: string, platformMountAction: PlatformMountAction }
-  ): Promise<string> {
-    return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
-  },
   updateDeviceMountAction (
     _context,
     {
@@ -467,6 +478,21 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     }: { configurationId: string, deviceMountAction: DeviceMountAction }
   ): Promise<string> {
     return this.$api.configurations.deviceMountActionApi.update(configurationId, deviceMountAction)
+  },
+  async loadPlatformMountAction ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const action = await this.$api.configurations.platformMountActionApi.findById(id)
+    commit('setPlatformMountAction', action)
+  },
+  setPlatformMountAction ({ commit }: { commit: Commit }, action: PlatformMountAction): void {
+    commit('setPlatformMountAction', action)
+  },
+  addPlatformMountAction (_context,
+    {
+      configurationId,
+      platformMountAction
+    }: { configurationId: string, platformMountAction: PlatformMountAction }
+  ): Promise<string> {
+    return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
   },
   updatePlatformMountAction (_context,
     {
@@ -536,6 +562,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
 }
 
 const mutations = {
+  setSelectedDate (state: ConfigurationsState, selectedDate: DateTime) {
+    state.selectedDate = selectedDate
+  },
   setConfigurations (state: ConfigurationsState, configurations: Configuration[]) {
     state.configurations = configurations
   },
@@ -586,6 +615,12 @@ const mutations = {
   },
   setConfigurationPlatformMountActions (state: ConfigurationsState, configurationPlatformMountActions: []) {
     state.configurationPlatformMountActions = configurationPlatformMountActions
+  },
+  setDeviceMountAction (state: ConfigurationsState, deviceMountAction: DeviceMountAction | null) {
+    state.deviceMountAction = deviceMountAction
+  },
+  setPlatformMountAction (state: ConfigurationsState, platformMountAction: PlatformMountAction | null) {
+    state.platformMountAction = platformMountAction
   },
   setDeviceMountActionsForDynamicLocation (state: ConfigurationsState, deviceMountActionsForDynamicLocation: []) {
     state.deviceMountActionsForDynamicLocation = deviceMountActionsForDynamicLocation

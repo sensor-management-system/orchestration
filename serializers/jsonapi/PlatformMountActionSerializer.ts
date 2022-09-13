@@ -32,7 +32,15 @@
  */
 import { DateTime } from 'luxon'
 
-import { IJsonApiRelationships, IJsonApiEntityWithoutDetails, IJsonApiEntityWithOptionalId, IJsonApiEntityListEnvelope } from '@/serializers/jsonapi/JsonApiTypes'
+import {
+  IJsonApiRelationships,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithOptionalId,
+  IJsonApiEntityListEnvelope,
+  IJsonApiEntityEnvelope,
+  IJsonApiEntity,
+  IJsonApiEntityWithOptionalAttributes
+} from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
@@ -44,6 +52,9 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 export class PlatformMountActionSerializer {
   private contactSerializer: ContactSerializer
   private platformSerializer: PlatformSerializer
+
+  private contactLookup: {[idx: string]: Contact} = {}
+  private platformLookup: {[idx: string]: Platform} = {}
 
   constructor () {
     this.contactSerializer = new ContactSerializer()
@@ -110,85 +121,97 @@ export class PlatformMountActionSerializer {
     return data
   }
 
+  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): PlatformMountAction {
+    if (jsonApiObject.included) {
+      this.convertJsonApiIncluded(jsonApiObject.included)
+    }
+    return this.convertJsonApiEntityToModel(jsonApiObject.data)
+  }
+
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): PlatformMountAction[] {
+    if (jsonApiObjectList.included) {
+      this.convertJsonApiIncluded(jsonApiObjectList.included)
+    }
     const data = jsonApiObjectList.data
-
-    const contactLookup: {[idx: string]: Contact} = {}
-    const platformLookup: {[idx: string]: Platform} = {}
-
-    for (const included of jsonApiObjectList.included || []) {
-      if (included.type === 'contact') {
-        const contact = this.contactSerializer.convertJsonApiDataToModel(included)
-        if (contact.id !== null) {
-          contactLookup[contact.id] = contact
-        }
-      } else if (included.type === 'platform') {
-        const platform = this.platformSerializer.convertJsonApiDataToModel(included, [])
-        if (platform.platform.id !== null) {
-          platformLookup[platform.platform.id] = platform.platform
-        }
-      }
-    }
-
     const result = []
-
     for (const platformMountActionPayload of data) {
-      const attributes = platformMountActionPayload.attributes
-
-      const relationships = platformMountActionPayload.relationships as IJsonApiRelationships
-
-      // platform is mandatory
-      const platformRelationship = relationships.platform as IJsonApiRelationships
-      const platformData = platformRelationship.data as IJsonApiEntityWithoutDetails
-      const platformId = platformData.id
-      const platform = platformLookup[platformId]
-
-      // beginContact is mandatory
-      const beginContactRelationship = relationships.begin_contact as IJsonApiRelationships
-      const beginContactData = beginContactRelationship.data as IJsonApiEntityWithoutDetails
-      const beginContactId = beginContactData.id
-      const beginContact = contactLookup[beginContactId]
-
-      let endContactId = null
-      if (relationships.end_contact && relationships.end_contact.data) {
-        const endContactData = relationships.end_contact.data as IJsonApiEntityWithoutDetails
-        endContactId = endContactData.id
-      }
-      let endContact = null
-      if (endContactId !== null && contactLookup[endContactId]) {
-        endContact = contactLookup[endContactId]
-      }
-
-      let parentPlatformId = null
-      if (relationships.parent_platform && relationships.parent_platform.data) {
-        const parentPlatformData = relationships.parent_platform.data as IJsonApiEntityWithoutDetails
-        parentPlatformId = parentPlatformData.id
-      }
-      let parentPlatform = null
-      if (parentPlatformId !== null && platformLookup[parentPlatformId]) {
-        parentPlatform = platformLookup[parentPlatformId]
-      }
-
-      const platformMountAction = new PlatformMountAction(
-        platformMountActionPayload.id || '',
-        platform,
-        parentPlatform,
-        DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' }),
-        attributes?.end_date ? DateTime.fromISO(attributes?.end_date, { zone: 'UTC' }) : null,
-        attributes?.offset_x || 0,
-        attributes?.offset_y || 0,
-        attributes?.offset_z || 0,
-        beginContact,
-        endContact,
-        attributes?.begin_description || '',
-        attributes?.end_description || ''
-      )
-
       result.push(
-        platformMountAction
+        this.convertJsonApiEntityToModel(platformMountActionPayload)
       )
     }
-
     return result
+  }
+
+  private convertJsonApiIncluded (included: IJsonApiEntityWithOptionalAttributes[]): void {
+    this.contactLookup = {}
+    this.platformLookup = {}
+
+    for (const entity of included) {
+      if (entity.type === 'contact') {
+        const contact = this.contactSerializer.convertJsonApiDataToModel(entity)
+        if (contact.id !== null) {
+          this.contactLookup[contact.id] = contact
+        }
+      } else if (entity.type === 'platform') {
+        const platform = this.platformSerializer.convertJsonApiDataToModel(entity, [])
+        if (platform.platform.id !== null) {
+          this.platformLookup[platform.platform.id] = platform.platform
+        }
+      }
+    }
+  }
+
+  private convertJsonApiEntityToModel (data: IJsonApiEntity): PlatformMountAction {
+    const attributes = data.attributes
+    const relationships = data.relationships as IJsonApiRelationships
+
+    // platform is mandatory
+    const platformRelationship = relationships.platform as IJsonApiRelationships
+    const platformData = platformRelationship.data as IJsonApiEntityWithoutDetails
+    const platformId = platformData.id
+    const platform = this.platformLookup[platformId]
+
+    // beginContact is mandatory
+    const beginContactRelationship = relationships.begin_contact as IJsonApiRelationships
+    const beginContactData = beginContactRelationship.data as IJsonApiEntityWithoutDetails
+    const beginContactId = beginContactData.id
+    const beginContact = this.contactLookup[beginContactId]
+
+    let endContactId = null
+    if (relationships.end_contact && relationships.end_contact.data) {
+      const endContactData = relationships.end_contact.data as IJsonApiEntityWithoutDetails
+      endContactId = endContactData.id
+    }
+    let endContact = null
+    if (endContactId !== null && this.contactLookup[endContactId]) {
+      endContact = this.contactLookup[endContactId]
+    }
+
+    let parentPlatformId = null
+    if (relationships.parent_platform && relationships.parent_platform.data) {
+      const parentPlatformData = relationships.parent_platform.data as IJsonApiEntityWithoutDetails
+      parentPlatformId = parentPlatformData.id
+    }
+    let parentPlatform = null
+    if (parentPlatformId !== null && this.platformLookup[parentPlatformId]) {
+      parentPlatform = this.platformLookup[parentPlatformId]
+    }
+
+    const platformMountAction = new PlatformMountAction(
+      data.id || '',
+      platform,
+      parentPlatform,
+      DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' }),
+      attributes?.end_date ? DateTime.fromISO(attributes?.end_date, { zone: 'UTC' }) : null,
+      attributes?.offset_x || 0,
+      attributes?.offset_y || 0,
+      attributes?.offset_z || 0,
+      beginContact,
+      endContact,
+      attributes?.begin_description || '',
+      attributes?.end_description || ''
+    )
+
+    return platformMountAction
   }
 }

@@ -31,114 +31,131 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-divider />
-    <v-container>
-      <v-row
-        dense
+    <v-divider class="my-1" />
+    <v-row
+      dense
+    >
+      <v-col class="text-subtitle-1 font-weight-medium">
+        Mount information
+      </v-col>
+    </v-row>
+    <v-row
+      dense
+    >
+      <v-col>
+        <slot name="mount" />
+      </v-col>
+    </v-row>
+    <v-divider class="my-4" />
+    <v-row
+      dense
+    >
+      <v-col class="text-subtitle-1 font-weight-medium">
+        Platform information
+      </v-col>
+    </v-row>
+    <v-row
+      dense
+    >
+      <v-col
+        cols="4"
+        class="font-weight-medium"
       >
-        <v-col
-          cols="4"
-          class="font-weight-medium"
-        >
-          Type:
-        </v-col>
-        <v-col
-          cols="8"
-          class="nowrap-truncate"
-        >
-          {{ platform.platformTypeName | orDefault }}
-        </v-col>
-        <v-col
-          cols="4"
-          class="font-weight-medium"
-        >
-          Manufacturer:
-        </v-col>
-        <v-col
-          cols="8"
-          class="nowrap-truncate"
-        >
-          {{ platform.manufacturerName | orDefault }}
-        </v-col>
-        <v-col
-          cols="4"
-          class="font-weight-medium"
-        >
-          Model:
-        </v-col>
-        <v-col
-          cols="8"
-          class="nowrap-truncate"
-        >
-          {{ platform.model | orDefault }}
-        </v-col>
-      </v-row>
-      <v-row
-        dense
+        Type:
+      </v-col>
+      <v-col
+        cols="8"
+        class="nowrap-truncate"
       >
-        <v-col
-          cols="4"
-          class="font-weight-medium"
-        >
-          Serial number:
-        </v-col>
-        <v-col
-          cols="8"
-          class="nowrap-truncate"
-        >
-          {{ platform.serialNumber | orDefault }}
-        </v-col>
-        <v-col
-          cols="4"
-          class="font-weight-medium"
-        >
-          Inventory number:
-        </v-col>
-        <v-col
-          cols="8"
-          class="nowrap-truncate"
-        >
-          {{ platform.inventoryNumber | orDefault }}
-        </v-col>
-      </v-row>
-      <v-row
-        dense
+        {{ platform.platformTypeName | orDefault }}
+      </v-col>
+      <v-col
+        cols="4"
+        class="font-weight-medium"
       >
-        <v-col
-          cols="4"
-          class="font-weight-medium"
+        Manufacturer:
+      </v-col>
+      <v-col
+        cols="8"
+        class="nowrap-truncate"
+      >
+        {{ platform.manufacturerName | orDefault }}
+      </v-col>
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Model:
+      </v-col>
+      <v-col
+        cols="8"
+        class="nowrap-truncate"
+      >
+        {{ platform.model | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row
+      dense
+    >
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Serial number:
+      </v-col>
+      <v-col
+        cols="8"
+        class="nowrap-truncate"
+      >
+        {{ platform.serialNumber | orDefault }}
+      </v-col>
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Inventory number:
+      </v-col>
+      <v-col
+        cols="8"
+        class="nowrap-truncate"
+      >
+        {{ platform.inventoryNumber | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row
+      dense
+    >
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Description:
+      </v-col>
+      <v-col
+        cols="8"
+        class="nowrap-truncate"
+        :title="platform.description.length > 25 ? platform.description : ''"
+      >
+        {{ platform.description | shortenRight(25, '...') | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-btn
+          :href="'platforms/' + platform.id"
+          target="_blank"
+          :disabled="false"
+          small
         >
-          Description:
-        </v-col>
-        <v-col
-          cols="8"
-          class="nowrap-truncate"
-          :title="platform.description.length > 25 ? platform.description : ''"
-        >
-          {{ platform.description | shortenRight(25, '...') | orDefault }}
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <v-btn :href="'platforms/' + platform.id" target="_blank" :disabled="false">
-            <v-icon>
-              mdi-open-in-new
-            </v-icon>
-            Open in new tab
-          </v-btn>
-        </v-col>
-      </v-row>
-      <v-divider class="my-4" />
-      <v-row>
-        <v-col class="text-subtitle-1 font-weight-medium">
-          Mount information
-        </v-col>
-      </v-row>      <v-row>
-        <v-col>
-          <slot name="mount" />
-        </v-col>
-      </v-row>
-    </v-container>
+          <v-icon
+            small
+          >
+            mdi-open-in-new
+          </v-icon>
+          Open in new tab
+        </v-btn>
+      </v-col>
+    </v-row>
   </div>
 </template>
 

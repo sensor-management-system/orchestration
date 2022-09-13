@@ -81,8 +81,8 @@ function getActivePlatforms (
 
   for (const platformId of Object.keys(latestMountActions)) {
     const lastEntry = latestMountActions[platformId]
-    if (lastEntry.isMountAction) {
-      activePlatforms[platformId] = lastEntry as PlatformMountAction
+    if (lastEntry.isPlatformMountAction()) {
+      activePlatforms[platformId] = lastEntry
     }
   }
   return activePlatforms
@@ -106,8 +106,8 @@ function getActiveDevices (
 
   for (const deviceId of Object.keys(latestMountActions)) {
     const lastEntry = latestMountActions[deviceId]
-    if (lastEntry.isMountAction) {
-      activeDevices[deviceId] = lastEntry as DeviceMountAction
+    if (lastEntry.isDeviceMountAction()) {
+      activeDevices[deviceId] = lastEntry
     }
   }
 

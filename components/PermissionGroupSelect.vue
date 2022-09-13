@@ -39,7 +39,7 @@ permissions and limitations under the Licence.
       :items="items"
       :readonly="readonly"
       :disabled="readonly"
-      label="Permission groups"
+      :label="label"
       chips
       :deletable-chips="multiple"
       :multiple="multiple"
@@ -145,6 +145,13 @@ export default class PermissionGroupSelect extends Vue {
     type: Boolean
   })
   readonly multiple!: boolean
+
+  @Prop({
+    default: 'Permission groups',
+    required: false,
+    type: String
+  })
+  readonly label!: string
 
   created () {
     // copy the initial value so that we can check which of the groups are new

@@ -49,6 +49,23 @@ export class DeviceMountActionApi {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
+  async findById (id: string): Promise<DeviceMountAction|null> {
+    const url = this.basePath + '/' + id
+    const params = {
+      include: [
+        'begin_contact',
+        'end_contact',
+        'parent_platform',
+        'device'
+      ].join(',')
+    }
+    const response = await this.axiosApi.get(url, { params })
+    if ('data' in response && !response.data) {
+      return null
+    }
+    return this.serializer.convertJsonApiObjectToModel(response.data)
+  }
+
   async add (configurationId: string, deviceMountAction: DeviceMountAction): Promise<string> {
     const url = this.basePath
     const data = this.serializer.convertModelToJsonApiData(configurationId, deviceMountAction)
@@ -97,6 +114,6 @@ export class DeviceMountActionApi {
       ].join(',')
     }
     const rawServerResponse = await this.axiosApi.get(url, { params })
-    return this.serializer.convertJsonApiObjectListToModelListAdditionalDeviceInformation(rawServerResponse.data)
+    return this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
   }
 }

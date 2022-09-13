@@ -34,8 +34,8 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import { Platform } from '@/models/Platform'
-import { Contact } from '@/models/Contact'
+import { IPlatform } from '@/models/Platform'
+import { IContact, Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
@@ -54,7 +54,7 @@ export interface IActionDateWithTextItem extends IActionDateWithText {
 }
 
 export interface IMountInfo {
-  parentPlatform: Platform | null
+  parentPlatform: IPlatform | null
   offsetX: number
   offsetY: number
   offsetZ: number
@@ -85,7 +85,7 @@ export interface IMountTimelineAction {
   icon: string
   date: DateTime | null
   title: string
-  contact: Contact | null
+  contact: IContact | null
   mountInfo: IMountInfo | null
   description: string
 }
@@ -141,7 +141,7 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
     return this.mountAction.platform.shortName + ' mounted'
   }
 
-  get contact (): Contact {
+  get contact (): IContact {
     return this.mountAction.beginContact
   }
 
@@ -186,7 +186,7 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
     return this.mountAction.device.shortName + ' mounted'
   }
 
-  get contact (): Contact {
+  get contact (): IContact {
     return this.mountAction.beginContact
   }
 
@@ -231,7 +231,7 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
     return this.mountAction.platform.shortName + ' unmounted'
   }
 
-  get contact (): Contact | null {
+  get contact (): IContact | null {
     return this.mountAction.endContact
   }
 
@@ -271,7 +271,7 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
     return this.mountAction.device.shortName + ' unmounted'
   }
 
-  get contact (): Contact | null {
+  get contact (): IContact | null {
     return this.mountAction.endContact
   }
 

@@ -59,19 +59,21 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <DateTimePicker
-          v-model="selectedDate"
+          :value="selectedDate"
           placeholder="e.g. 2000-01-31 12:00"
           label="Configuration at date"
           hint=""
+          @input="setSelectedDate"
         />
       </v-col>
       <v-col>
         <v-select
-          v-model="selectedDate"
+          :value="selectedDate"
           :items="mountActionDateItems"
           label="Dates defined by actions"
           hint="The referenced time zone is UTC."
           persistent-hint
+          @input="setSelectedDate"
         />
       </v-col>
     </v-row>
@@ -114,13 +116,17 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
-import { LoadMountingActionsAction, LoadMountingConfigurationForDateAction, ConfigurationsState } from '@/store/configurations'
-
-import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
+import {
+  LoadMountingActionsAction,
+  LoadMountingConfigurationForDateAction,
+  SetSelectedDateAction,
+  ConfigurationsState
+} from '@/store/configurations'
 
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
+import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
@@ -131,15 +137,14 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 @Component({
   components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeTitle, ConfigurationsTreeView, DateTimePicker, ProgressIndicator },
   computed: {
-    ...mapState('configurations', ['configuration', 'configurationMountingActions', 'configurationMountingActionsForDate']),
+    ...mapState('configurations', ['selectedDate', 'configuration', 'configurationMountingActions', 'configurationMountingActionsForDate']),
     ...mapGetters('configurations', ['mountActionDateItems'])
   },
-  methods: mapActions('configurations', ['loadMountingActions', 'loadMountingConfigurationForDate'])
+  methods: mapActions('configurations', ['setSelectedDate', 'loadMountingActions', 'loadMountingConfigurationForDate'])
 })
 export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private selectedNode: ConfigurationsTreeNode | null = null
-  private selectedDate: DateTime = DateTime.utc()
-  private tree: ConfigurationsTree = ConfigurationsTree.fromArray([])
+  private tree: ConfigurationsTree = new ConfigurationsTree()
 
   private isLoading: boolean = false
 
@@ -147,14 +152,23 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   configuration!: ConfigurationsState['configuration']
   loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
   loadMountingActions!: LoadMountingActionsAction
-  configurationMountingActionsForDate!: ConfigurationsTree
-  configurationMountingActions!: ConfigurationMountingAction[]
+  configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
+  configurationMountingActions!: ConfigurationsState['configurationMountingActions']
+  selectedDate!: ConfigurationsState['selectedDate']
+  setSelectedDate!: SetSelectedDateAction
 
   async created () {
+    if (this.$route.query.date) {
+      this.setSelectedDate(DateTime.fromISO(this.$route.query.date.toString(), { zone: 'utc' }))
+    }
     try {
       this.isLoading = true
-      await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+      await Promise.all([
+        this.loadMountingActions(this.configurationId),
+        this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+      ])
       this.createTreeWithConfigAsRootNode()
+      this.setSelectedNodeFromUrlParam()
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
     } finally {
@@ -163,11 +177,26 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   }
 
   createTreeWithConfigAsRootNode () {
-    if (this.configuration) {
+    if (this.configuration && this.configurationMountingActionsForDate) {
       // construct the configuration as the root node of the tree
-      const rootNode = new ConfigurationNode(this.configuration)
+      const rootNode = new ConfigurationNode(new ConfigurationMountAction(this.configuration))
       rootNode.children = this.configurationMountingActionsForDate.toArray()
       this.tree = ConfigurationsTree.fromArray([rootNode])
+    }
+  }
+
+  setSelectedNodeFromUrlParam () {
+    if (this.$route.query.deviceMountAction) {
+      const selected = this.tree.getAllDeviceNodesAsList().find(i => i.unpack().id === this.$route.query.deviceMountAction)
+      if (selected) {
+        this.selectedNode = selected
+      }
+    }
+    if (this.$route.query.platformMountAction) {
+      const selected = this.tree.getAllPlatformNodesAsList().find(i => i.unpack().id === this.$route.query.platformMountAction)
+      if (selected) {
+        this.selectedNode = selected
+      }
     }
   }
 

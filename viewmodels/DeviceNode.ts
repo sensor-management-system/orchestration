@@ -102,7 +102,7 @@ export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
     return false
   }
 
-  isDevice (): boolean {
+  isDevice (): this is DeviceNode {
     return true
   }
 

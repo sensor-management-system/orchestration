@@ -51,6 +51,7 @@ export class AvailabilitySerializer {
       newAvailability.beginDate = stringToDate(jsonApiData.begin_date)
       newAvailability.endDate = stringToDate(jsonApiData.end_date)
       newAvailability.configurationID = jsonApiData.configuration
+      newAvailability.mountID = jsonApiData.mount
     }
 
     return Availability.createFromObject(newAvailability)

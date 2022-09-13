@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
     :hint="hint"
     persistent-hint
     :class="{ 'required': required }"
+    :clearable="!required"
     v-bind="$attrs"
     @input="updateByTextfield"
   >
@@ -272,8 +273,8 @@ export default class DateTimePicker extends Vue {
     return currentFormatTime
   }
 
-  updateByTextfield (newTextValue: string) {
-    this.textInput = newTextValue
+  updateByTextfield (newTextValue: string | null) {
+    this.textInput = newTextValue || ''
     if (this.isValueValidByCurrentFormat(this.textInput)) {
       this.emitDateTimeObject()
     } else {

@@ -30,6 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import { Configuration } from '@/models/Configuration'
+import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 
 describe('ConfigurationNode', () => {
@@ -37,15 +38,18 @@ describe('ConfigurationNode', () => {
     const config = new Configuration()
     config.id = '1'
 
-    const node = new ConfigurationNode(config)
-    expect(Object.is(node.unpack(), config)).toBeTruthy()
-    expect(node).toHaveProperty('id', ConfigurationNode.ID_PREFIX + config.id)
+    const mountAction = new ConfigurationMountAction(config)
+    mountAction.id = '1'
+    const node = new ConfigurationNode(mountAction)
+    expect(Object.is(node.unpack().configuration, config)).toBeTruthy()
+    expect(node).toHaveProperty('id', ConfigurationNode.ID_PREFIX + mountAction.id)
   })
   it('should create a ConfigurationNode from another one', () => {
     const config = new Configuration()
     config.id = '1'
 
-    const firstNode = new ConfigurationNode(config)
+    const firstMountAction = new ConfigurationMountAction(config)
+    const firstNode = new ConfigurationNode(firstMountAction)
     const secondNode = ConfigurationNode.createFromObject(firstNode)
 
     expect(Object.is(secondNode, firstNode)).toBeFalsy()
@@ -56,16 +60,19 @@ describe('ConfigurationNode', () => {
     const config = new Configuration()
     config.id = '1'
 
-    const node = new ConfigurationNode(config)
+    const mountAction = new ConfigurationMountAction(config)
+    const node = new ConfigurationNode(mountAction)
     expect(node.canHaveChildren()).toBeTruthy()
   })
   it('should return an Array for children', () => {
     const firstConfig = new Configuration()
     firstConfig.id = '1'
-    const firstNode = new ConfigurationNode(firstConfig)
+    const firstMountAction = new ConfigurationMountAction(firstConfig)
+    const firstNode = new ConfigurationNode(firstMountAction)
 
     const secondConfig = new Configuration()
-    const secondNode = new ConfigurationNode(secondConfig)
+    const secondMountAction = new ConfigurationMountAction(secondConfig)
+    const secondNode = new ConfigurationNode(secondMountAction)
 
     firstNode.getTree().push(secondNode)
 
@@ -76,10 +83,12 @@ describe('ConfigurationNode', () => {
   it('should set the tree from an array of children', () => {
     const firstConfig = new Configuration()
     firstConfig.id = '1'
-    const firstNode = new ConfigurationNode(firstConfig)
+    const firstMountAction = new ConfigurationMountAction(firstConfig)
+    const firstNode = new ConfigurationNode(firstMountAction)
 
     const secondConfig = new Configuration()
-    const secondNode = new ConfigurationNode(secondConfig)
+    const secondMountAction = new ConfigurationMountAction(secondConfig)
+    const secondNode = new ConfigurationNode(secondMountAction)
 
     firstNode.children = [secondNode]
     expect(firstNode.getTree()).toHaveLength(1)
@@ -91,7 +100,8 @@ describe('ConfigurationNode', () => {
     config.id = '1'
     config.label = 'ABC'
 
-    const node = new ConfigurationNode(config)
+    const mountAction = new ConfigurationMountAction(config)
+    const node = new ConfigurationNode(mountAction)
     const name = node.name
     const expectedName = 'ABC'
 
