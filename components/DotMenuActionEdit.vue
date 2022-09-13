@@ -2,11 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2020, 2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tim Eder (UFZ, tim.eder@ufz.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -33,63 +33,37 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
-    <v-row>
-      <v-col cols="12" md="3">
-        <label>Given name</label>
-        {{ value.givenName | orDefault }}
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>Family name</label>
-        {{ value.familyName | orDefault }}
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="9">
-        <label>E-mail</label>
-        {{ value.email | orDefault }}
-        <a v-if="value.email.length > 0" :href="'mailto:' + value.email">
-          <v-icon
-            small
-          >
-            mdi-email
-          </v-icon>
-        </a>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="9">
-        <label>Website</label>
-        {{ value.website | orDefault }}
-        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
-          <v-icon
-            small
-          >
-            mdi-open-in-new
-          </v-icon>
-        </a>
-      </v-col>
-    </v-row>
-  </div>
+  <v-list-item
+    :disabled="readonly"
+    dense
+    @click="$emit('click')"
+  >
+    <v-list-item-content>
+      <v-list-item-title
+        :class="readonly ? 'grey--text' : 'text'"
+      >
+        <v-icon
+          left
+          small
+          :color="readonly ? 'grey' : 'black'"
+        >
+          mdi-pen
+        </v-icon>
+        Edit
+      </v-list-item-title>
+    </v-list-item-content>
+  </v-list-item>
 </template>
-
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-import { Contact } from '@/models/Contact'
-
 @Component
-export default class ContactBasicData extends Vue {
+export default class DotMenuActionEdit extends Vue {
   @Prop({
-    default: () => new Contact(),
-    required: true,
-    type: Contact
+    default: false,
+    type: Boolean
   })
-  readonly value!: Contact
+  // @ts-ignore
+  readonly readonly: boolean
 }
-
 </script>
-
-<style lang="scss">
-@import "@/assets/styles/_readonly_views.scss";
-</style>

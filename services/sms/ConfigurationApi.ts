@@ -36,6 +36,8 @@ import { AxiosInstance, Method } from 'axios'
 import { DateTime } from 'luxon'
 
 import { MountingActionsControllerApi } from './MountingActionsControllerApi'
+import { StaticLocationActionApi } from './StaticLocationActionApi'
+import { DynamicLocationActionApi } from './DynamicLocationActionApi'
 import {
   ConfigurationSerializer,
   configurationWithMetaToConfigurationByAddingDummyObjects,
@@ -43,29 +45,24 @@ import {
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
-import { MountingActionsSerializer } from '@/serializers/custom/MountingActionsSerializer'
-import { DeviceMountActionSerializer } from '@/serializers/jsonapi/DeviceMountActionSerializer'
-import { PlatformMountActionSerializer } from '@/serializers/jsonapi/PlatformMountActionSerializer'
 
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
-import { StaticLocationBeginActionApi } from '@/services/sms/StaticLocationBeginActionApi'
-import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActionApi'
-import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
-import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
 
 import { Configuration } from '@/models/Configuration'
 import { ContactRole } from '@/models/ContactRole'
 import { PermissionGroup } from '@/models/PermissionGroup'
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 import { Contact } from '@/models/Contact'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
+import {
+  ILocationTimepoint
+} from '@/serializers/controller/LocationActionTimepointSerializer'
+import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { StaticLocationAction } from '@/models/StaticLocationAction'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -96,10 +93,9 @@ export class ConfigurationApi {
   private _deviceMountActionApi: DeviceMountActionApi
   private _platformMountActionApi: PlatformMountActionApi
 
-  private _staticLocationBeginActionApi: StaticLocationBeginActionApi
-  private _staticLocationEndActionApi: StaticLocationEndActionApi
-  private _dynamicLocationBeginActionApi: DynamicLocationBeginActionApi
-  private _dynamicLocationEndActionApi: DynamicLocationEndActionApi
+  private _staticLocationActionApi: StaticLocationActionApi
+  private _dynamicLocationActionApi: DynamicLocationActionApi
+  private _locationActionTimepointControllerApi: LocationActionTimepointControllerApi
   private _mountingActionsControllerApi: MountingActionsControllerApi
 
   private _searchedStates: string[] = []
@@ -109,7 +105,6 @@ export class ConfigurationApi {
   private filterSettings: any[] = []
 
   private serializer: ConfigurationSerializer
-  private mountingActionsSerializer: MountingActionsSerializer
   private permissionFetcher: ConfigurationPermissionFetchFunction | undefined
 
   constructor (
@@ -117,10 +112,9 @@ export class ConfigurationApi {
     basePath: string,
     deviceMountActionApi: DeviceMountActionApi,
     platformMountActionApi: PlatformMountActionApi,
-    staticLocationBeginActionApi: StaticLocationBeginActionApi,
-    staticLocationEndActionApi: StaticLocationEndActionApi,
-    dynamicLocationBeginActionApi: DynamicLocationBeginActionApi,
-    dynamicLocationEndActionApi: DynamicLocationEndActionApi,
+    staticLocationActionApi: StaticLocationActionApi,
+    dynamicLocationActionApi: DynamicLocationActionApi,
+    locationActionTimepointControllerApi: LocationActionTimepointControllerApi,
     mountingActionsControllerApi: MountingActionsControllerApi,
     permissionFetcher?: ConfigurationPermissionFetchFunction
   ) {
@@ -130,14 +124,12 @@ export class ConfigurationApi {
     this._deviceMountActionApi = deviceMountActionApi
     this._platformMountActionApi = platformMountActionApi
 
-    this._staticLocationBeginActionApi = staticLocationBeginActionApi
-    this._staticLocationEndActionApi = staticLocationEndActionApi
-    this._dynamicLocationBeginActionApi = dynamicLocationBeginActionApi
-    this._dynamicLocationEndActionApi = dynamicLocationEndActionApi
+    this._staticLocationActionApi = staticLocationActionApi
+    this._dynamicLocationActionApi = dynamicLocationActionApi
+    this._locationActionTimepointControllerApi = locationActionTimepointControllerApi
     this._mountingActionsControllerApi = mountingActionsControllerApi
 
     this.serializer = new ConfigurationSerializer()
-    this.mountingActionsSerializer = new MountingActionsSerializer()
 
     if (permissionFetcher) {
       this.permissionFetcher = permissionFetcher
@@ -152,20 +144,16 @@ export class ConfigurationApi {
     return this._platformMountActionApi
   }
 
-  get staticLocationBeginActionApi (): StaticLocationBeginActionApi {
-    return this._staticLocationBeginActionApi
+  get staticLocationActionApi (): StaticLocationActionApi {
+    return this._staticLocationActionApi
   }
 
-  get staticLocationEndActionApi (): StaticLocationEndActionApi {
-    return this._staticLocationEndActionApi
+  get dynamicLocationActionApi (): DynamicLocationActionApi {
+    return this._dynamicLocationActionApi
   }
 
-  get dynamicLocationBeginActionApi (): DynamicLocationBeginActionApi {
-    return this._dynamicLocationBeginActionApi
-  }
-
-  get dynamicLocationEndActionApi (): DynamicLocationEndActionApi {
-    return this._dynamicLocationEndActionApi
+  get locationActionTimepointControllerApi (): LocationActionTimepointControllerApi {
+    return this._locationActionTimepointControllerApi
   }
 
   get mountingActionsControllerApi (): MountingActionsControllerApi {
@@ -354,49 +342,6 @@ export class ConfigurationApi {
     const data: any = this.serializer.convertModelToJsonApiData(configuration)
     let method: Method = 'patch'
     let url = this.basePath
-    const relationshipsToDelete: string[] = []
-    let platformMountActionIdsToDelete: Set<string> = new Set()
-    let platformMountActionIdsToUpdate: Set<string> = new Set()
-    let deviceMountActionIdsToDelete: Set<string> = new Set()
-    let deviceMountActionIdsToUpdate: Set<string> = new Set()
-    let staticLocationBeginActionIdsToDelete: Set<string> = new Set()
-    let staticLocationBeginActionIdsToUpdate: Set<string> = new Set()
-    let staticLocationEndActionIdsToDelete: Set<string> = new Set()
-    let staticLocationEndActionIdsToUpdate: Set<string> = new Set()
-    let dynamicLocationBeginActionIdsToDelete: Set<string> = new Set()
-    let dynamicLocationBeginActionIdsToUpdate: Set<string> = new Set()
-    let dynamicLocationEndActionIdsToDelete: Set<string> = new Set()
-    let dynamicLocationEndActionIdsToUpdate: Set<string> = new Set()
-
-    // step 1
-    // load existing config to check current setting of the configuration
-
-    if (configuration.id) {
-      const existingConfig = await this.findById(configuration.id)
-      const newPlatformMountActionIds = new Set(configuration.platformMountActions.map(x => x.id))
-      platformMountActionIdsToDelete = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => !newPlatformMountActionIds.has(x)))
-      platformMountActionIdsToUpdate = new Set(existingConfig.platformMountActions.map(x => x.id).filter(x => newPlatformMountActionIds.has(x)))
-
-      const newDeviceMountActionIds = new Set(configuration.deviceMountActions.map(x => x.id))
-      deviceMountActionIdsToDelete = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => !newDeviceMountActionIds.has(x)))
-      deviceMountActionIdsToUpdate = new Set(existingConfig.deviceMountActions.map(x => x.id).filter(x => newDeviceMountActionIds.has(x)))
-
-      const newStaticLocationBeginActionIds = new Set(configuration.staticLocationBeginActions.map(x => x.id))
-      staticLocationBeginActionIdsToDelete = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => !newStaticLocationBeginActionIds.has(x)))
-      staticLocationBeginActionIdsToUpdate = new Set(existingConfig.staticLocationBeginActions.map(x => x.id).filter(x => newStaticLocationBeginActionIds.has(x)))
-
-      const newStaticLocationEndActionIds = new Set(configuration.staticLocationEndActions.map(x => x.id))
-      staticLocationEndActionIdsToDelete = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => !newStaticLocationEndActionIds.has(x)))
-      staticLocationEndActionIdsToUpdate = new Set(existingConfig.staticLocationEndActions.map(x => x.id).filter(x => newStaticLocationEndActionIds.has(x)))
-
-      const newDynamicLocationBeginActionIds = new Set(configuration.dynamicLocationBeginActions.map(x => x.id))
-      dynamicLocationBeginActionIdsToDelete = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => !newDynamicLocationBeginActionIds.has(x)))
-      dynamicLocationBeginActionIdsToUpdate = new Set(existingConfig.dynamicLocationBeginActions.map(x => x.id).filter(x => newDynamicLocationBeginActionIds.has(x)))
-
-      const newDynamicLocationEndActionIds = new Set(configuration.dynamicLocationEndActions.map(x => x.id))
-      dynamicLocationEndActionIdsToDelete = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => !newDynamicLocationEndActionIds.has(x)))
-      dynamicLocationEndActionIdsToUpdate = new Set(existingConfig.dynamicLocationEndActions.map(x => x.id).filter(x => newDynamicLocationEndActionIds.has(x)))
-    }
 
     if (!configuration.id) {
       method = 'post'
@@ -410,75 +355,6 @@ export class ConfigurationApi {
         data
       }
     })
-    const configurationId = serverAnswer.data.data.id
-    const promisesDelete = []
-    for (const deviceMountActionId of deviceMountActionIdsToDelete) {
-      promisesDelete.push(this._deviceMountActionApi.deleteById(deviceMountActionId))
-    }
-    for (const platformMountActionId of platformMountActionIdsToDelete) {
-      promisesDelete.push(this._platformMountActionApi.deleteById(platformMountActionId))
-    }
-    for (const staticLocationBeginActionId of staticLocationBeginActionIdsToDelete) {
-      promisesDelete.push(this._staticLocationBeginActionApi.deleteById(staticLocationBeginActionId))
-    }
-    for (const staticLocationEndActionId of staticLocationEndActionIdsToDelete) {
-      promisesDelete.push(this._staticLocationEndActionApi.deleteById(staticLocationEndActionId))
-    }
-    for (const dynamicLocationBeginActionId of dynamicLocationBeginActionIdsToDelete) {
-      promisesDelete.push(this._dynamicLocationBeginActionApi.deleteById(dynamicLocationBeginActionId))
-    }
-    for (const dynamicLocationEndActionId of dynamicLocationEndActionIdsToDelete) {
-      promisesDelete.push(this._dynamicLocationEndActionApi.deleteById(dynamicLocationEndActionId))
-    }
-    relationshipsToDelete.forEach(relationship => promisesDelete.push(this.tryToDeleteRelationship(relationship, configurationId)))
-
-    await Promise.all(promisesDelete)
-
-    // now we need to add the new ones
-    const promisesSave = []
-    for (const platformMountAction of configuration.platformMountActions) {
-      if (!platformMountAction.id) {
-        promisesSave.push(this._platformMountActionApi.add(configurationId, platformMountAction))
-      } else if (platformMountActionIdsToUpdate.has(platformMountAction.id)) {
-        promisesSave.push(this._platformMountActionApi.update(configurationId, platformMountAction))
-      }
-    }
-    for (const deviceMountAction of configuration.deviceMountActions) {
-      if (!deviceMountAction.id) {
-        promisesSave.push(this._deviceMountActionApi.add(configurationId, deviceMountAction))
-      } else if (deviceMountActionIdsToUpdate.has(deviceMountAction.id)) {
-        promisesSave.push(this._deviceMountActionApi.update(configurationId, deviceMountAction))
-      }
-    }
-    for (const staticLocationBeginAction of configuration.staticLocationBeginActions) {
-      if (!staticLocationBeginAction.id) {
-        promisesSave.push(this._staticLocationBeginActionApi.add(configurationId, staticLocationBeginAction))
-      } else if (staticLocationBeginActionIdsToUpdate.has(staticLocationBeginAction.id)) {
-        promisesSave.push(this._staticLocationBeginActionApi.update(configurationId, staticLocationBeginAction))
-      }
-    }
-    for (const staticLocationEndAction of configuration.staticLocationEndActions) {
-      if (!staticLocationEndAction.id) {
-        promisesSave.push(this._staticLocationEndActionApi.add(configurationId, staticLocationEndAction))
-      } else if (staticLocationEndActionIdsToUpdate.has(staticLocationEndAction.id)) {
-        promisesSave.push(this._staticLocationEndActionApi.update(configurationId, staticLocationEndAction))
-      }
-    }
-    for (const dynamicLocationBeginAction of configuration.dynamicLocationBeginActions) {
-      if (!dynamicLocationBeginAction.id) {
-        promisesSave.push(this._dynamicLocationBeginActionApi.add(configurationId, dynamicLocationBeginAction))
-      } else if (dynamicLocationBeginActionIdsToUpdate.has(dynamicLocationBeginAction.id)) {
-        promisesSave.push(this._dynamicLocationBeginActionApi.update(configurationId, dynamicLocationBeginAction))
-      }
-    }
-    for (const dynamicLocationEndAction of configuration.dynamicLocationEndActions) {
-      if (!dynamicLocationEndAction.id) {
-        promisesSave.push(this._dynamicLocationEndActionApi.add(configurationId, dynamicLocationEndAction))
-      } else if (dynamicLocationEndActionIdsToUpdate.has(dynamicLocationEndAction.id)) {
-        promisesSave.push(this._dynamicLocationEndActionApi.update(configurationId, dynamicLocationEndAction))
-      }
-    }
-    await Promise.all(promisesSave)
 
     return this.findById(serverAnswer.data.data.id)
   }
@@ -520,12 +396,6 @@ export class ConfigurationApi {
     }
   }
 
-  // newSearchBuilder ()
-  //   :
-  //   ConfigurationSearchBuilder {
-  //   return new ConfigurationSearchBuilder(this.axiosApi, this.basePath, this.serializer)
-  // }
-
   findRelatedContactRoles (configurationId: string): Promise<ContactRole[]> {
     const url = this.basePath + '/' + configurationId + '/configuration-contact-roles'
     const params = {
@@ -537,98 +407,37 @@ export class ConfigurationApi {
     })
   }
 
-  findRelatedStaticLocationBeginActions (configurationId: string): Promise<StaticLocationBeginAction> {
-    const url = this.basePath + '/' + configurationId + '/static-location-begin-actions'
-    const params = {
-      'page[size]': 10000
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any) => {
-        return {
-          id: apiData.id,
-          beginDate: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
-          description: apiData.attributes.description,
-          epsgCode: apiData.attributes.epsg_code ?? '4326',
-          x: apiData.attributes.x,
-          y: apiData.attributes.y,
-          z: apiData.attributes.z,
-          elevationDatumName: apiData.attributes.elevation_datum_name ?? 'MSL',
-          elevationDatumUri: apiData.attributes.elevation_datum_uri ?? ''
-        }
-      })
-    })
+  async findRelatedLocationActions (configurationId: string): Promise<ILocationTimepoint[]> {
+    return await this.locationActionTimepointControllerApi.findLocationActions(configurationId)
   }
 
-  findRelatedStaticLocationEndActions (configurationId: string): Promise<StaticLocationEndAction> {
-    const url = this.basePath + '/' + configurationId + '/static-location-end-actions'
-    const params = {
-      'page[size]': 10000
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any) => {
-        return {
-          id: apiData.id,
-          description: apiData.attributes.description,
-          endDate: apiData.attributes.end_data
-        }
-      })
-    })
-  }
-
-  findRelatedDynamicLocationBeginActions (configurationId: string): Promise<DynamicLocationBeginAction> {
-    const url = this.basePath + '/' + configurationId + '/dynamic-location-begin-action'
-    const params = {
-      'page[size]': 10000
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any) => {
-        return {
-          id: apiData.id,
-          beginDate: DateTime.fromISO(apiData.attributes.begin_date, { zone: 'UTC' }),
-          description: apiData.attributes.description,
-          epsgCode: apiData.attributes.epsg_code ?? '4326',
-          elevationDatumName: apiData.attributes.elevation_datum_name ?? 'MSL',
-          elevationDatumUri: apiData.attributes.elevation_datum_uri ?? '',
-          contactId: apiData.relationships.contact.data.id
-        }
-      })
-    })
-  }
-
-  findRelatedDynamicLocationEndActions (configurationId: string): Promise<DynamicLocationEndAction> {
-    const url = this.basePath + '/' + configurationId + '/dynamic-location-end-actions'
-    const params = {
-      'page[size]': 10000
-    }
-    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return rawServerResponse.data.data.map((apiData: any) => {
-        return {
-          id: apiData.id,
-          description: apiData.attributes.description,
-          endDate: apiData.attributes.end_data
-        }
-      })
-    })
-  }
-
-  async findMountingActions (configurationId: string): Promise<ConfigurationMountingAction[]> {
+  async findRelatedMountingActions (configurationId: string): Promise<ConfigurationMountingAction[]> {
     const response = await this.mountingActionsControllerApi.findMountingActions(configurationId)
     return response
   }
 
-  async findMountingActionsByDate (configurationId: string, timepoint: DateTime, contacts: Contact[]): Promise<ConfigurationsTree> {
-    const response = await this.mountingActionsControllerApi.findMountingActionsByDate(configurationId, timepoint, contacts)
-    return response
+  async findRelatedMountingActionsByDate (configurationId: string, timepoint: DateTime, contacts: Contact[]): Promise<ConfigurationsTree> {
+    return await this.mountingActionsControllerApi.findMountingActionsByDate(configurationId, timepoint, contacts)
   }
 
   async findRelatedDeviceMountActions (configurationId: string): Promise<DeviceMountAction[]> {
-    const response = await this.deviceMountActionApi.getRelatedActions(configurationId)
-    return new DeviceMountActionSerializer().convertJsonApiObjectListToModelList(response)
+    return await this.deviceMountActionApi.getRelatedActions(configurationId)
+  }
+
+  async findRelatedDeviceMountActionsIncludingDeviceInformation (configurationId: string): Promise<DeviceMountAction[]> {
+    return await this.deviceMountActionApi.getRelatedActionsIncludingDeviceInformation(configurationId)
   }
 
   async findRelatedPlatformMountActions (configurationId: string): Promise<PlatformMountAction[]> {
-    const response = await this.platformMountActionApi.getRelatedActions(configurationId)
-    return new PlatformMountActionSerializer().convertJsonApiObjectListToModelList(response)
+    return await this.platformMountActionApi.getRelatedActions(configurationId)
+  }
+
+  async findRelatedDynamicLocationActions (configurationId: string): Promise<DynamicLocationAction[]> {
+    return await this.dynamicLocationActionApi.getRelatedActions(configurationId)
+  }
+
+  async findRelatedStaticLocationActions (configurationId: string): Promise<StaticLocationAction[]> {
+    return await this.staticLocationActionApi.getRelatedActions(configurationId)
   }
 
   removeContact (configurationContactRoleId: string): Promise<void> {
@@ -642,215 +451,3 @@ export class ConfigurationApi {
     return this.axiosApi.post(url, { data }).then(response => response.data.data.id)
   }
 }
-
-//
-// export class ConfigurationSearchBuilder {
-//   private axiosApi: AxiosInstance
-//   readonly basePath: string
-//
-//   private clientSideFilterFunc: (configuration: Configuration) => boolean
-//   private serverSideFilterSettings: IFlaskJSONAPIFilter[] = []
-//   private esTextFilter: string | null = null
-//   private serializer: ConfigurationSerializer
-//
-//   constructor (axiosApi: AxiosInstance, basePath: string, serializer: ConfigurationSerializer) {
-//     this.axiosApi = axiosApi
-//     this.basePath = basePath
-//     this.clientSideFilterFunc = (_c: Configuration) => true
-//     this.serializer = serializer
-//   }
-//
-//   withText (text: string | null) {
-//     if (text) {
-//       this.esTextFilter = text
-//     }
-//     return this
-//   }
-//
-//   withOneMatchingProjectOf (projects: Project[]) {
-//     if (projects.length > 0) {
-//       this.serverSideFilterSettings.push({
-//         or: [
-//           {
-//             name: 'project_name',
-//             op: 'in_',
-//             val: projects.map((p: Project) => p.name)
-//           },
-//           {
-//             name: 'project_uri',
-//             op: 'in_',
-//             val: projects.map((p: Project) => p.uri)
-//           }
-//         ]
-//       })
-//     }
-//     return this
-//   }
-//
-//   withOneLocationTypeOf (locationTypes: string[]) {
-//     if (locationTypes.length > 0) {
-//       this.serverSideFilterSettings.push({
-//         name: 'location_type',
-//         op: 'in_',
-//         val: locationTypes
-//       })
-//     }
-//     return this
-//   }
-//
-//   withOneStatusOf (states: string[]) {
-//     if (states.length > 0) {
-//       this.serverSideFilterSettings.push({
-//         name: 'status',
-//         op: 'in_',
-//         val: states
-//       })
-//     }
-//     return this
-//   }
-//
-//   withContactEmail (email: string) {
-//     this.serverSideFilterSettings.push({
-//       name: 'contacts.email',
-//       op: 'eq',
-//       val: email
-//     })
-//     return this
-//   }
-
-// build (): ConfigurationSearcher {
-//   return new ConfigurationSearcher(
-//     this.axiosApi,
-//     this.basePath,
-//     this.clientSideFilterFunc,
-//     this.serverSideFilterSettings,
-//     this.esTextFilter,
-//     this.serializer
-//   )
-// }
-// }
-
-// export class ConfigurationSearcher {
-//   private axiosApi: AxiosInstance
-//   readonly basePath: string
-//   private clientSideFilterFunc: (configuration: Configuration) => boolean
-//   private serverSideFilterSettings: IFlaskJSONAPIFilter[]
-//   private esTextFilter: string | null
-//   private serializer: ConfigurationSerializer
-//
-//   constructor (
-//     axiosApi: AxiosInstance,
-//     basePath: string,
-//     clientSideFilterFunc: (configuration: Configuration) => boolean,
-//     serverSideFilterSettings: IFlaskJSONAPIFilter[],
-//     esTextFilter: string | null,
-//     serializer: ConfigurationSerializer
-//   ) {
-//     this.axiosApi = axiosApi
-//     this.basePath = basePath
-//     this.clientSideFilterFunc = clientSideFilterFunc
-//     this.serverSideFilterSettings = serverSideFilterSettings
-//     this.esTextFilter = esTextFilter
-//     this.serializer = serializer
-//   }
-//
-//   private get commonParams (): any {
-//     const result: any = {
-//       filter: JSON.stringify(this.serverSideFilterSettings)
-//     }
-//     if (this.esTextFilter != null) {
-//       // In case we have a search string, then we want to
-//       // sort by relevance (which is the default)
-//       result.q = this.esTextFilter
-//     } else {
-//       // otherwise we want to search alphabetically
-//       result.sort = 'label'
-//     }
-//     return result
-//   }
-//
-//   findMatchingAsCsvBlob (): Promise<Blob> {
-//     const url = this.basePath
-//     return this.axiosApi.request({
-//       url,
-//       method: 'get',
-//       headers: {
-//         accept: 'text/csv'
-//       },
-//       params: {
-//         'page[size]': 10000,
-//         ...this.commonParams
-//       }
-//     }).then((response) => {
-//       return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
-//     })
-//   }
-//
-//   findMatchingAsList (): Promise<Configuration[]> {
-//     return this.axiosApi.get(
-//       this.basePath,
-//       {
-//         params: {
-//           'page[size]': 100000,
-//           ...this.commonParams
-//         }
-//       }
-//     ).then((rawResponse: any) => {
-//       const rawData = rawResponse.data
-//       // We don't ask the api to load the contacts, so we just add dummy objects
-//       // to stay with the relationships
-//       return this.serializer
-//         .convertJsonApiObjectListToModelList(rawData)
-//         .map(configurationWithMetaToConfigurationByAddingDummyObjects)
-//     })
-//   }
-//
-//   findMatchingAsPaginationLoaderOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
-//     return this.findAllOnPage(page, pageSize)
-//   }
-//
-//   private findAllOnPage (page: number, pageSize: number): Promise<IPaginationLoader<Configuration>> {
-//     return this.axiosApi.get(
-//       this.basePath,
-//       {
-//         params: {
-//           'page[size]': pageSize,
-//           'page[number]': page,
-//           ...this.commonParams
-//         }
-//       }
-//     ).then((rawResponse) => {
-//       const rawData = rawResponse.data
-//       // And - again - we don't ask the api here to load the contact data as well
-//       // so we will add the dummy objects to stay with the relationships
-//       const elements: Configuration[] = this.serializer.convertJsonApiObjectListToModelList(
-//         rawData
-//       ).map(configurationWithMetaToConfigurationByAddingDummyObjects)
-//
-//       const totalCount = rawData.meta.count
-//
-//       // check if the provided page param is valid
-//       if (totalCount > 0 && elements.length === 0) {
-//         throw new RangeError('page is out of bounds')
-//       }
-//
-//       let funToLoadNext = null
-//       if (elements.length > 0) {
-//         funToLoadNext = () => this.findAllOnPage(page + 1, pageSize)
-//       }
-//
-//       let funToLoadPage = null
-//       if (elements.length > 0) {
-//         funToLoadPage = (pageNr: number) => this.findAllOnPage(pageNr, pageSize)
-//       }
-//
-//       return {
-//         elements,
-//         totalCount,
-//         page,
-//         funToLoadNext,
-//         funToLoadPage
-//       }
-//     })
-//   }
-// }

@@ -92,7 +92,6 @@ permissions and limitations under the Licence.
             </v-col>
           </v-form>
         </v-row>
-        </v-form>
       </v-container>
     </v-card>
   </div>

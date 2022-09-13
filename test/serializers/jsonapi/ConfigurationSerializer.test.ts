@@ -45,14 +45,6 @@ import {
   configurationWithMetaToConfigurationByAddingDummyObjects
 } from '@/serializers/jsonapi/ConfigurationSerializer'
 
-import { DeviceProperty } from '@/models/DeviceProperty'
-import { MeasuringRange } from '@/models/MeasuringRange'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
-
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
-
 describe('ConfigurationSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
     it('should convert a json api object with multiple entries to a configuration model list', () => {
@@ -66,52 +58,6 @@ describe('ConfigurationSerializer', () => {
             status: 'draft'
           },
           relationships: {
-            src_longitude: {
-              data: {
-                type: 'device_property',
-                id: '100'
-              }
-            },
-            src_latitude: {
-              data: {
-                type: 'device_property',
-                id: '101'
-              }
-            },
-            src_elevation: {
-            },
-            configuration_static_location_begin_actions: {
-              data: [
-                {
-                  type: 'configuration_static_location_begin_action',
-                  id: '1111'
-                }
-              ]
-            },
-            configuration_static_location_end_actions: {
-              data: [
-                {
-                  type: 'configuration_static_location_end_action',
-                  id: '2222'
-                }
-              ]
-            },
-            configuration_dynamic_location_begin_actions: {
-              data: [
-                {
-                  type: 'configuration_dynamic_location_end_action',
-                  id: '3333'
-                }
-              ]
-            },
-            configuration_dynamic_location_end_actions: {
-              data: [
-                {
-                  type: 'configuration_dynamic_location_end_action',
-                  id: '4444'
-                }
-              ]
-            },
             created_by: {
               data: {
                 id: '123456',
@@ -147,121 +93,6 @@ describe('ConfigurationSerializer', () => {
           id: '4'
         }],
         included: [
-          {
-            type: 'configuration_static_location_begin_action',
-            id: '1111',
-            attributes: {
-              description: 'start static action',
-              x: 1.0,
-              y: 2.0,
-              z: 3.0,
-              epsg_code: '4326',
-              elevation_datum_name: 'MSL',
-              elevation_datum_uri: 'some/uri',
-              begin_date: '2021-01-01T17:49:48.000000+00:00'
-            },
-            relationships: {
-              contact: {
-                data: {
-                  type: 'contact',
-                  id: '1'
-                }
-              },
-              configuration: {
-                data: {
-                  type: 'configuration',
-                  id: '1'
-                }
-              }
-            }
-          },
-          {
-            type: 'configuration_static_location_end_action',
-            id: '2222',
-            attributes: {
-              description: 'stop static action',
-              end_date: '2021-01-02T17:49:48.000000+00:00'
-            },
-            relationships: {
-              contact: {
-                data: {
-                  type: 'contact',
-                  id: '1'
-                }
-              },
-              configuration: {
-                data: {
-                  type: 'configuration',
-                  id: '1'
-                }
-              }
-            }
-          },
-          {
-            type: 'configuration_dynamic_location_begin_action',
-            id: '3333',
-            attributes: {
-              description: 'start static action',
-              epsg_code: '4326',
-              elevation_datum_name: 'MSL',
-              elevation_datum_uri: 'some/uri',
-              begin_date: '2021-01-03T17:49:48.000000+00:00'
-            },
-            relationships: {
-              contact: {
-                data: {
-                  type: 'contact',
-                  id: '1'
-                }
-              },
-              configuration: {
-                data: {
-                  type: 'configuration',
-                  id: '1'
-                }
-              },
-              x_property: {
-                data: {
-                  type: 'device_property',
-                  id: '100'
-                }
-              },
-              y_property: {
-                data: {
-                  type: 'device_property',
-                  id: '101'
-                }
-              },
-              z_property: {
-                data: {
-                  type: 'device_property',
-                  id: null
-                }
-              }
-            }
-          },
-          {
-            type: 'configuration_dynamic_location_end_action',
-            id: '4444',
-            attributes: {
-              description: 'stop dynamic action',
-              end_date: '2021-01-04T17:49:48.000000+00:00'
-            },
-            relationships: {
-              contact: {
-                data: {
-                  type: 'contact',
-                  id: '1'
-                }
-              },
-              configuration: {
-                data: {
-                  type: 'configuration',
-                  id: '1'
-                }
-              }
-            }
-          },
           {
             type: 'device_property',
             id: '100',
@@ -370,48 +201,48 @@ describe('ConfigurationSerializer', () => {
         }
       }
 
-      const property1 = DeviceProperty.createFromObject({
-        id: '100',
-        samplingMediaName: 'Air',
-        samplingMediaUri: 'medium/air',
-        compartmentName: 'C1',
-        compartmentUri: 'compartment/c1',
-        propertyName: 'Temperature',
-        propertyUri: 'property/temperature',
-        unitName: 'degree',
-        unitUri: 'unit/degree',
-        failureValue: -999,
-        measuringRange: MeasuringRange.createFromObject({
-          min: -273,
-          max: 100
-        }),
-        label: 'air_temperature',
-        accuracy: 0.1,
-        resolution: 0.05,
-        resolutionUnitName: 'TemperatureRes',
-        resolutionUnitUri: 'property/res/temperature'
-      })
-      const property2 = DeviceProperty.createFromObject({
-        id: '101',
-        samplingMediaName: 'Water',
-        samplingMediaUri: 'medium/water',
-        compartmentName: 'C1',
-        compartmentUri: 'compartment/c1',
-        propertyName: 'Temperature',
-        propertyUri: 'property/temperature',
-        unitName: 'degree',
-        unitUri: 'unit/degree',
-        failureValue: -999,
-        measuringRange: MeasuringRange.createFromObject({
-          min: -10,
-          max: 100
-        }),
-        label: 'water_temperature',
-        accuracy: 0.1,
-        resolution: 0.05,
-        resolutionUnitName: 'TemperatureRes',
-        resolutionUnitUri: 'property/res/temperature'
-      })
+      // const property1 = DeviceProperty.createFromObject({
+      //   id: '100',
+      //   samplingMediaName: 'Air',
+      //   samplingMediaUri: 'medium/air',
+      //   compartmentName: 'C1',
+      //   compartmentUri: 'compartment/c1',
+      //   propertyName: 'Temperature',
+      //   propertyUri: 'property/temperature',
+      //   unitName: 'degree',
+      //   unitUri: 'unit/degree',
+      //   failureValue: -999,
+      //   measuringRange: MeasuringRange.createFromObject({
+      //     min: -273,
+      //     max: 100
+      //   }),
+      //   label: 'air_temperature',
+      //   accuracy: 0.1,
+      //   resolution: 0.05,
+      //   resolutionUnitName: 'TemperatureRes',
+      //   resolutionUnitUri: 'property/res/temperature'
+      // })
+      // const property2 = DeviceProperty.createFromObject({
+      //   id: '101',
+      //   samplingMediaName: 'Water',
+      //   samplingMediaUri: 'medium/water',
+      //   compartmentName: 'C1',
+      //   compartmentUri: 'compartment/c1',
+      //   propertyName: 'Temperature',
+      //   propertyUri: 'property/temperature',
+      //   unitName: 'degree',
+      //   unitUri: 'unit/degree',
+      //   failureValue: -999,
+      //   measuringRange: MeasuringRange.createFromObject({
+      //     min: -10,
+      //     max: 100
+      //   }),
+      //   label: 'water_temperature',
+      //   accuracy: 0.1,
+      //   resolution: 0.05,
+      //   resolutionUnitName: 'TemperatureRes',
+      //   resolutionUnitUri: 'property/res/temperature'
+      // })
 
       const expectedContact = new Contact()
       expectedContact.id = '1'
@@ -420,56 +251,12 @@ describe('ConfigurationSerializer', () => {
       expectedContact.email = 'max@mustermann.xyz'
       expectedContact.website = ''
 
-      const expectedStaticLocationBeginAction1 = StaticLocationBeginAction.createFromObject({
-        id: '1111',
-        beginDate: DateTime.utc(2021, 1, 1, 17, 49, 48),
-        description: 'start static action',
-        epsgCode: '4326',
-        elevationDatumName: 'MSL',
-        elevationDatumUri: 'some/uri',
-        contact: expectedContact,
-        x: 1.0,
-        y: 2.0,
-        z: 3.0
-      })
-
-      const expectedStaticLocationEndAction1 = StaticLocationEndAction.createFromObject({
-        id: '2222',
-        endDate: DateTime.utc(2021, 1, 2, 17, 49, 48),
-        description: 'stop static action',
-        contact: expectedContact
-      })
-
-      const expectedDynamicLocationBeginAction1 = DynamicLocationBeginAction.createFromObject({
-        id: '3333',
-        beginDate: DateTime.utc(2021, 1, 3, 17, 49, 48),
-        description: 'start static action',
-        epsgCode: '4326',
-        elevationDatumName: 'MSL',
-        elevationDatumUri: 'some/uri',
-        contact: expectedContact,
-        x: property1,
-        y: property2,
-        z: null
-      })
-
-      const expectedDynamicLocationEndAction1 = DynamicLocationEndAction.createFromObject({
-        id: '4444',
-        endDate: DateTime.utc(2021, 1, 4, 17, 49, 48),
-        description: 'stop dynamic action',
-        contact: expectedContact
-      })
-
       const expectedConfiguration1 = new Configuration()
       expectedConfiguration1.id = '1'
       expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration1.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration1.label = 'Tereno NO Boeken'
       expectedConfiguration1.status = 'draft'
-      expectedConfiguration1.staticLocationBeginActions = [expectedStaticLocationBeginAction1]
-      expectedConfiguration1.staticLocationEndActions = [expectedStaticLocationEndAction1]
-      expectedConfiguration1.dynamicLocationBeginActions = [expectedDynamicLocationBeginAction1]
-      expectedConfiguration1.dynamicLocationEndActions = [expectedDynamicLocationEndAction1]
       expectedConfiguration1.createdByUserId = '123456'
 
       const expectedConfiguration2 = new Configuration()

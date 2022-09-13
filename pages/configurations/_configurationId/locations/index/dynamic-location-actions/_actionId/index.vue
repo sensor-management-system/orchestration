@@ -2,15 +2,13 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -37,60 +35,76 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild v-if="!isLoading" />
+    <DynamicLocationView
+      v-if="dynamicLocationAction"
+      :action="dynamicLocationAction"
+      :configuration-id="configurationId"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-
-import { mapActions } from 'vuex'
-
-import { LoadEpsgCodesAction, LoadElevationDataAction } from '@/store/vocabulary'
-
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import * as VueRouter from 'vue-router'
+import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import DynamicLocationView from '@/components/configurations/DynamicLocationView.vue'
 import {
+  ConfigurationsState,
   LoadDeviceMountActionsForDynamicLocationAction,
-  LoadLocationActionTimepointsAction
+  LoadDynamicLocationActionAction
 } from '@/store/configurations'
-
 @Component({
-  components: {
-    ProgressIndicator
+  components: { DynamicLocationView, ProgressIndicator },
+  middleware: ['auth'],
+  computed: {
+    ...mapState('configurations', ['dynamicLocationAction'])
   },
   methods: {
-    ...mapActions('vocabulary', ['loadEpsgCodes', 'loadElevationData']),
-    ...mapActions('contacts', ['loadAllContacts']),
-    ...mapActions('configurations', ['loadLocationActionTimepoints', 'loadDeviceMountActionsForDynamicLocation'])
+    ...mapActions('configurations', ['loadDynamicLocationAction', 'loadDeviceMountActionsForDynamicLocation'])
   }
 })
-export default class ConfigurationLocations extends Vue {
+export default class DynamicLocationActionView extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadEpsgCodes!: LoadEpsgCodesAction
-  loadElevationData!: LoadElevationDataAction
-  loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
-  loadAllContacts!: () => void
+  dynamicLocationAction!: ConfigurationsState['dynamicLocationAction']
+  loadDynamicLocationAction!: LoadDynamicLocationActionAction
   loadDeviceMountActionsForDynamicLocation!: LoadDeviceMountActionsForDynamicLocationAction
 
   async created () {
+    await this.loadLocationAction()
+  }
+
+  get actionId () {
+    return this.$route.params.actionId
+  }
+
+  get configurationId (): string {
+    return this.$route.params.configurationId
+  }
+
+  async loadLocationAction () {
     try {
       this.isLoading = true
-      await this.loadEpsgCodes()
-      await this.loadElevationData()
-      await this.loadAllContacts()
-      await this.loadLocationActionTimepoints(this.configurationId)
+      await this.loadDynamicLocationAction(this.actionId)
       await this.loadDeviceMountActionsForDynamicLocation(this.configurationId)
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch locations')
+      this.$store.commit('snackbar/setError', 'Loading failed')
     } finally {
       this.isLoading = false
     }
   }
 
-  get configurationId () {
-    return this.$route.params.configurationId
+  @Watch('$route')
+  async onRouteChange (newRoute: VueRouter.Route, oldRoute: VueRouter.Route) {
+    if (newRoute.params.actionId !== oldRoute.params.actionId) {
+      await this.loadLocationAction()
+    }
   }
 }
 </script>
+
+<style scoped>
+
+</style>

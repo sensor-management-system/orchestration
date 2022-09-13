@@ -29,9 +29,17 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import Validator from '@/utils/validator'
+import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
+import { LocationTypes } from '@/store/configurations'
 
 const isValidEmailAddress = Validator.isValidEmailAddress
+const startDateMustBeAfterPreviousAction = Validator.startDateMustBeAfterPreviousAction
+const endDateMustBeBeforeNextAction = Validator.endDateMustBeBeforeNextAction
+const validateStartDateIsBeforeEndDate = Validator.validateStartDateIsBeforeEndDate
+const canNotIntersectWithExistingInterval = Validator.canNotIntersectWithExistingInterval
+const canNotStartAnActionAfterAnActiveAction = Validator.canNotStartAnActionAfterAnActiveAction
 
 describe('#isValidEmailAddress()', () => {
   it('should return true with an valid email address', () => {
@@ -71,5 +79,304 @@ describe('#isValidEmailAddress()', () => {
   it('should return false with no recipent', () => {
     const email1 = '@gfz-potsdam.de'
     expect(typeof isValidEmailAddress(email1)).toBe('string')
+  })
+})
+
+describe('#startDateMustBeAfterPreviousAction', () => {
+  it('should return true if no locations actions exists', () => {
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = []
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+  })
+  it('should return true if the new location dates are before the existing ones', () => {
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-22', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+  })
+  it('should return true if the new location dates are after the existing ones', () => {
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-17', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-18', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+  })
+
+  it('should throw a validation error if the startdate is before the previous action', () => {
+    const date1 = DateTime.fromISO('1990-09-18', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBe('Start date must be after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm'))
+  })
+})
+describe('#endDateMustBeBeforeNextAction', () => {
+  it('should return true if no location actions exists', () => {
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = []
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+  })
+  it('should return true if the new location dates are before the existing ones', () => {
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-22', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+  })
+  it('should return true if the new location dates are after the existing ones', () => {
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-17', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-18', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+  })
+
+  it('should throw a validation error if the enddate is after the next action', () => {
+    const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-22', { zone: 'UTC' })
+
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBe('End date must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' (next action)')
+  })
+})
+
+describe('#validateStartDateIsBeforeEndDate', () => {
+  it('should return true if startDate is missing', () => {
+    const startDate = null
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    expect(validateStartDateIsBeforeEndDate(startDate, endDate)).toBeTruthy()
+  })
+
+  it('should return true if endDate is missing', () => {
+    const startDate = null
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    expect(validateStartDateIsBeforeEndDate(startDate, endDate)).toBeTruthy()
+  })
+
+  it('should return true if startDate is before endDate', () => {
+    const startDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    expect(validateStartDateIsBeforeEndDate(startDate, endDate)).toBeTruthy()
+  })
+  it('should return a validation error if startDate is after endDate', () => {
+    const startDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('1990-09-18', { zone: 'UTC' })
+    expect(validateStartDateIsBeforeEndDate(startDate, endDate)).toBe('Start date must not be after end date')
+  })
+})
+describe('#canNotIntersectWithExistingInterval', () => {
+  it('should return true if startDate is missing', () => {
+    const startDate = null
+    const locationTimepoints: ILocationTimepoint[] = []
+
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBeTruthy()
+  })
+  it('should return true if no locations exists', () => {
+    const startDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = []
+
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBeTruthy()
+  })
+  it('should return a validation error when the startDate is intersecting with an existing location action', () => {
+    const startDate = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-22', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+
+    const expectedValidationMessage = 'Must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' or after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)
+  })
+
+  it('should return a validation error when the startDate is the same es the end date of an existing location action', () => {
+    const startDate = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+
+    const expectedValidationMessage = 'Must be after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)
+  })
+})
+
+describe('#canNotStartAnActionAfterAnActiveAction', () => {
+  it('should return true if dateToValidate is null', () => {
+    const dateToCheck = null
+
+    const date1 = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBeTruthy()
+  })
+
+  it('should return true if no location actions exist', () => {
+    const dateToCheck = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+    const locationTimepoints: ILocationTimepoint[] = []
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBeTruthy()
+  })
+
+  it('should return true if no active action exist', () => {
+    const dateToCheck = DateTime.fromISO('1990-09-23', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+    const date2 = DateTime.fromISO('1990-09-22', { zone: 'UTC' })
+
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: date2,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBeTruthy()
+  })
+  it('should return validation error if the date is after an active action', () => {
+    const dateToCheck = DateTime.fromISO('1990-09-23', { zone: 'UTC' })
+
+    const date1 = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
+
+    const locationTimepoints: ILocationTimepoint[] = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: date1,
+        id: '1',
+        text: 'not important for test'
+      }
+    ]
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBe('Must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm'))
   })
 })

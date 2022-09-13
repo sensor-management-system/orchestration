@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -36,19 +37,49 @@ permissions and limitations under the Licence.
       <v-btn
         v-if="$auth.loggedIn"
         color="primary"
-        :disabled="selectedAction !== null"
+        :disabled="isDisabled"
         small
         nuxt
-        :to="'/configurations/' + configurationId + '/locations/static-location-begin-actions/new?timestamp=' + selectedDate.toISO()"
+        :to="'/configurations/' + configurationId + '/locations/static-location-actions/new'"
       >
         Start Static Location
       </v-btn>
+      <v-tooltip
+        v-if="isDynamicStartButtonDisabled"
+        bottom
+      >
+        <template #activator="{ on }">
+          <div v-on="on">
+            <v-btn
+              class="extraMarginForTooltipBtn"
+              color="primary"
+              small
+              disabled
+            >
+              Start Dynamic Location
+              <v-icon
+                right
+                dark
+              >
+                mdi-help-circle
+              </v-icon>
+            </v-btn>
+          </div>
+        </template>
+        <div>
+          <div><span>The configuration has no devices with properties mounted.</span></div>
+          <div>
+            <span>To start a new action, you must mount devices with suitable properties.</span>
+          </div>
+        </div>
+      </v-tooltip>
       <v-btn
-        v-if="$auth.loggedIn"
+        v-else-if="$auth.loggedIn"
         color="primary"
-        :disabled="selectedAction !== null"
+        :disabled="isDisabled"
         small
         nuxt
+        :to="'/configurations/' + configurationId + '/locations/dynamic-location-actions/new'"
       >
         Start Dynamic Location
       </v-btn>
@@ -57,136 +88,160 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <DateTimePicker
           v-model="selectedDate"
+          :disabled="isDisabled"
+          :readonly="isDisabled"
           placeholder="e.g. 2000-01-31 12:00"
           label="Configuration at date"
-          @input="updateUrlDate"
+          @input="updateTimepointItemWhenDateSelected"
         />
       </v-col>
       <v-col>
         <v-select
-          v-model="selectedAction"
-          :item-text="(x) => x.text"
-          :items="locationActionsDates"
+          v-model="selectedTimepoint"
+          :items="configurationLocationActionTimepoints"
+          :disabled="isDisabled"
+          item-text="text"
+          clearable
           label="Dates defined by actions"
           hint="The referenced time zone is UTC."
           return-object
           persistent-hint
-          @input="updateDate"
+          @input="selectTimepoint"
         />
       </v-col>
     </v-row>
-    <v-row v-if="selectedAction && selectedAction.value">
-      <v-col>
-        <v-card>
-          <v-container>
-            <ConfigurationStaticLocationBeginActionData
-              v-if="isStaticLocationStartAction"
-              :value="selectedAction.value"
-              :elevation-data="[]"
-              :epsg-codes="[]"
-            />
-            <ConfigurationStaticLocationEndActionData
-              v-if="isStaticLocationEndAction"
-              :value="selectedAction.value"
-            />
-            <ConfigurationDynamicLocationBeginActionData
-              v-if="isDynamicLocationStartAction"
-              :value="selectedAction.value"
-              :epsg-codes="[]"
-              :elevation-data="[]"
-              :devices="[]"
-            />
-            <ConfigurationDynamicLocationEndActionData
-              v-if="isDynamicLocationEndAction"
-              :value="selectedAction.value"
-            />
-          </v-container>
-        </v-card>
-      </v-col>
-    </v-row>
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
-import { LocationTypes } from '@/store/configurations'
 
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
+import {
+  ConfigurationsState,
+  HasActiveDevicesWithPropertiesForDate,
+  HasMountedDevicesWithPropertiesGetter,
+  LocationTypes,
+  SetSelectedLocationDateAction,
+  SetSelectedTimepointItemAction
+} from '@/store/configurations'
 
-import { currentAsUtcDateSecondsAsZeros, stringToDate } from '@/utils/dateHelper'
+import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
-import ConfigurationStaticLocationBeginActionData from '@/components/configurations/ConfigurationStaticLocationBeginActionData.vue'
-import ConfigurationStaticLocationEndActionData from '@/components/configurations/ConfigurationStaticLocationEndActionData.vue'
-import ConfigurationDynamicLocationBeginActionData from '@/components/configurations/ConfigurationDynamicLocationBeginActionData.vue'
-import ConfigurationDynamicLocationEndActionData from '@/components/configurations/ConfigurationDynamicLocationEndActionData.vue'
+import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
+import { isTimePointForDynamicAction, isTimePointForStaticAction } from '@/utils/locationHelper'
 
 @Component({
-  components: { ConfigurationDynamicLocationEndActionData, ConfigurationDynamicLocationBeginActionData, ConfigurationStaticLocationEndActionData, ConfigurationStaticLocationBeginActionData, DateTimePicker },
-  computed: mapGetters('configurations', ['locationActionsDates'])
+  components: {
+    DateTimePicker
+  },
+  computed: {
+    ...mapState('configurations',
+      ['configurationLocationActionTimepoints',
+        'selectedTimepointItem',
+        'selectedLocationDate']),
+    ...mapGetters('configurations', [
+      'hasMountedDevicesWithProperties',
+      'hasActiveDevicesWithPropertiesForDate'
+    ])
+  },
+  methods: {
+    ...mapActions('configurations', ['setSelectedTimepointItem', 'setSelectedLocationDate'])
+  }
 })
 export default class ConfigurationShowLocationPage extends Vue {
-  private selectedDate = currentAsUtcDateSecondsAsZeros()
-  private selectedAction: StaticLocationBeginAction|StaticLocationEndAction|DynamicLocationBeginAction|DynamicLocationEndAction|null = null
+  // vuex definition for typescript check
+  configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
+  selectedTimepointItem!: ConfigurationsState['selectedTimepointItem']
+  selectedLocationDate!: ConfigurationsState['selectedLocationDate']
+  setSelectedTimepointItem!: SetSelectedTimepointItemAction
+  setSelectedLocationDate!: SetSelectedLocationDateAction
+  hasDeviceMountActionsForDynamicLocation!: () => boolean
+  hasMountedDevicesWithProperties!: HasMountedDevicesWithPropertiesGetter
+  hasActiveDevicesWithPropertiesForDate!: HasActiveDevicesWithPropertiesForDate
 
   created () {
-    if (this.$route.query.timestamp) {
-      this.selectedDate = stringToDate(this.$route.query.timestamp as string)
-    }
+    this.selectedDate = currentAsUtcDateSecondsAsZeros()
+  }
+
+  get selectedTimepoint () {
+    return this.selectedTimepointItem
+  }
+
+  set selectedTimepoint (newVal: ILocationTimepoint | null) {
+    this.setSelectedTimepointItem(newVal)
+  }
+
+  get selectedDate () {
+    return this.selectedLocationDate
+  }
+
+  set selectedDate (newVal: DateTime | null) {
+    this.setSelectedLocationDate(newVal)
   }
 
   get configurationId (): string {
     return this.$route.params.configurationId
   }
 
-  updateDate (val: DateTime) {
-    this.selectedDate = val
-    this.updateUrlDate()
+  get isDisabled () {
+    return this.$route.path.endsWith('/new') || this.$route.path.endsWith('/edit') || this.$route.path.endsWith('/stop')
   }
 
-  updateUrlDate () {
-    this.$router.push({
-      query: { timestamp: this.selectedDate as unknown as string },
-      hash: this.$route.hash
+  get isDynamicStartButtonDisabled () {
+    return !this.hasMountedDevicesWithProperties || !this.hasActiveDevicesWithPropertiesForDate(this.selectedDate)
+  }
+
+  selectTimepoint () {
+    if (this.selectedTimepoint !== null) {
+      this.selectedDate = this.selectedTimepoint.timepoint
+    }
+    this.updateRoute()
+  }
+
+  updateRoute () {
+    if (this.selectedTimepoint) {
+      if (isTimePointForStaticAction(this.selectedTimepoint)) {
+        this.$router.push(`/configurations/${this.configurationId}/locations/static-location-actions/${this.selectedTimepoint.id}`)
+      }
+
+      if (isTimePointForDynamicAction(this.selectedTimepoint)) {
+        this.$router.push(`/configurations/${this.configurationId}/locations/dynamic-location-actions/${this.selectedTimepoint.id}`)
+      }
+    } else {
+      this.$router.push(`/configurations/${this.configurationId}/locations`)
+    }
+  }
+
+  updateTimepointItemWhenDateSelected () {
+    const filteredList = this.configurationLocationActionTimepoints.filter((item: ILocationTimepoint) => {
+      return item.timepoint <= this.selectedDate!
     })
+    if (filteredList.length > 0) {
+      const lastEntry = filteredList[filteredList.length - 1]
+      if (this.isEndLocationAndTimepointIsBeforeSelectedDate(lastEntry)) {
+        this.selectedTimepoint = null
+      } else {
+        this.selectedTimepoint = lastEntry
+      }
+    } else {
+      this.selectedTimepoint = null
+    }
+    this.updateRoute()
   }
 
-  get isStaticLocationStartAction () {
-    if (this.selectedAction && this.selectedAction.type) {
-      return this.selectedAction.type === LocationTypes.staticStart
-    }
-    return false
-  }
-
-  get isStaticLocationEndAction () {
-    if (this.selectedAction && this.selectedAction.type) {
-      return this.selectedAction.type === LocationTypes.staticEnd
-    }
-    return false
-  }
-
-  get isDynamicLocationStartAction () {
-    if (this.selectedAction && this.selectedAction.type) {
-      return this.selectedAction.type === LocationTypes.dynamicStart
-    }
-    return false
-  }
-
-  get isDynamicLocationEndAction () {
-    if (this.selectedAction && this.selectedAction.type) {
-      return this.selectedAction.type === LocationTypes.dynamicEnd
-    }
-    return false
+  isEndLocationAndTimepointIsBeforeSelectedDate (item: ILocationTimepoint) {
+    return (item.type === LocationTypes.staticEnd || item.type === LocationTypes.dynamicEnd) && item.timepoint < this.selectedDate!
   }
 }
 </script>
 
 <style scoped>
-
+.extraMarginForTooltipBtn{
+  margin-left: 8px
+}
 </style>
