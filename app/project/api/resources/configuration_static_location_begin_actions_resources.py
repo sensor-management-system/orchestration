@@ -12,7 +12,12 @@ from ..auth.permission_utils import (
     check_post_permission_for_configuration_related_objects,
     get_query_with_permissions_for_configuration_related_objects,
 )
-from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
+from ..helpers.location_checks import StaticLocationActionValidator
+from ..helpers.resource_mixin import (
+    add_created_by_id,
+    add_updated_by_id,
+    decode_json_request_data,
+)
 from ..models import Configuration, ConfigurationStaticLocationBeginAction
 from ..models.base_model import db
 from ..schemas.configuration_static_location_actions_schema import (
@@ -30,7 +35,9 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
     """List resource for Configuration static location begin actions (get, post)."""
 
     def before_create_object(self, data, *args, **kwargs):
-        """Use jwt to add user id to dataset."""
+        """Run some validations before we create the object."""
+        data_with_relationships = decode_json_request_data()
+        StaticLocationActionValidator().validate_create(data_with_relationships)
         add_created_by_id(data)
 
     def query(self, view_kwargs):
@@ -62,6 +69,7 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
         return query_
 
     def before_post(self, args, kwargs, data=None):
+        """Run some checks before we create the object."""
         check_post_permission_for_configuration_related_objects()
 
     def after_post(self, result):
@@ -92,17 +100,28 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
 class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
     """Detail resource for Configuration static location begin actions (get, delete, patch)."""
 
+    validator = StaticLocationActionValidator()
+
     def before_get(self, args, kwargs):
-        """Return 404 Responses if ConfigurationStaticLocationBeginAction not found"""
+        """
+        Return some checks before we return ob object.
+
+        Currently we have the following checks:
+        - Check if the object exists (return 404 otherwise)
+        - Check that the user is allowed to see the object (401 or 405 otherwise)
+        """
         check_if_object_not_found(self._data_layer.model, kwargs)
         check_permissions_for_configuration_related_objects(
             self._data_layer.model, kwargs["id"]
         )
 
     def before_patch(self, args, kwargs, data=None):
+        """Run some checks before we update an object."""
         check_patch_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
+        data_with_relationships = decode_json_request_data()
+        self.validator.validate_update(data_with_relationships, kwargs["id"])
         add_updated_by_id(data)
 
     def after_patch(self, result):
@@ -118,6 +137,7 @@ class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Run some checks before we delete."""
         check_deletion_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )

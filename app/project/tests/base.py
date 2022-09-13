@@ -233,6 +233,19 @@ class BaseTestCase(TestCase):
         self.assertIn(object_type, data["data"]["type"])
         return data
 
+    def try_add_object_with_status_code(self, url, data_object, expected_status_code):
+        """Try to add the new object, test the response code and return the complete response."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.post(
+                url,
+                data=json.dumps(data_object),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, expected_status_code)
+        return response
+
     def add_object_invalid_data_key(self, url, data_object):
         """Ensure error is thrown if the JSON object has invalid data key."""
         access_headers = create_token()
@@ -261,6 +274,21 @@ class BaseTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(object_type, data["data"]["type"])
         return data
+
+    def try_update_object_with_status_code(
+        self, url, data_object, expected_status_code
+    ):
+        """Try to update the object & check the status code."""
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                url,
+                data=json.dumps(data_object),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, expected_status_code)
+        return response
 
     def delete_object(self, url):
         """Ensure delete an object."""

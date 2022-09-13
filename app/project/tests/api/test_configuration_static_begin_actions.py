@@ -1,3 +1,6 @@
+"""Tests for the static location action api."""
+
+import datetime
 import json
 
 from project import base_url, db
@@ -39,6 +42,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
 
     def test_add_configuration_static_begin_location_action(self):
         """
+        Ensure that we can create a new static location.
+
         Ensure POST a new configuration static location begin action
         can be added to the database.
         """
@@ -61,8 +66,16 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         self.assertEqual(
             configuration.update_description, "create;static location action"
         )
+        # But we can't add another one with the very same settings, as
+        # the exact configuration has already the location for the time slot
+        self.try_add_object_with_status_code(
+            url=self.url,
+            data_object=data,
+            expected_status_code=409,  # 409 => ConflictError
+        )
 
     def prepare_request_data(self, description):
+        """Return a payload to create a static location action later."""
         config = generate_configuration_model(
             is_public=True, is_private=False, is_internal=False
         )
@@ -200,8 +213,53 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             object_type=self.object_type,
         )
 
+    def test_update_configuration_static_location_fail_due_to_overlapping_times_for_locations(
+        self,
+    ):
+        """Ensure that patching fails if there is already a location for the time."""
+        static_location_begin_action1 = add_static_location_begin_action_model()
+        static_location_begin_action2 = add_static_location_begin_action_model()
+        static_location_begin_action1.begin_date = datetime.datetime(
+            2023, 1, 1, 12, 0, 0
+        )
+        static_location_begin_action1.end_date = datetime.datetime(
+            2023, 12, 31, 12, 0, 0
+        )
+
+        static_location_begin_action2.begin_date = datetime.datetime(
+            2024, 1, 1, 12, 0, 0
+        )
+        static_location_begin_action2.end_date = datetime.datetime(
+            2024, 12, 31, 12, 0, 0
+        )
+        static_location_begin_action2.configuration = (
+            static_location_begin_action1.configuration
+        )
+
+        db.session.add_all(
+            [static_location_begin_action1, static_location_begin_action2]
+        )
+        db.session.commit()
+
+        updated_data = {
+            "data": {
+                "type": self.object_type,
+                "id": static_location_begin_action1.id,
+                "attributes": {
+                    "begin_date": "2023-11-11T11:11:11.000Z",
+                    "end_date": "2024-08-09T00:00:50.542Z",
+                },
+            }
+        }
+
+        _ = super().try_update_object_with_status_code(
+            url=f"{self.url}/{static_location_begin_action1.id}",
+            data_object=updated_data,
+            expected_status_code=409,
+        )
+
     def test_delete_configuration_static_begin_location_action(self):
-        """Ensure a configuration_static_begin_location_action can be deleted"""
+        """Ensure a configuration_static_begin_location_action can be deleted."""
         static_location_begin_action = add_static_location_begin_action_model()
         configuration_id = static_location_begin_action.configuration_id
 

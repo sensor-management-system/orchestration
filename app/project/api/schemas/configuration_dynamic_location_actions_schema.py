@@ -69,4 +69,5 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         include_resource_linkage=True,
         type_="device_property",
         schema="DevicePropertySchema",
+        allow_none=True
     )
