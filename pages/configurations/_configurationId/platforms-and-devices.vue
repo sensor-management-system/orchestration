@@ -35,44 +35,18 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
-import { LoadMountingActionsAction } from '@/store/configurations'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
-@Component({
-  components: { ProgressIndicator },
-  methods: { ...mapActions('configurations', ['loadMountingActions']) }
-})
+@Component
 export default class ConfigurationPlatformsAndDevices extends Vue {
-  loadMountingActions!: LoadMountingActionsAction
-  private isLoading: boolean = false
   head () {
     return {
       titleTemplate: 'Platforms and Devices - %s'
-    }
-  }
-
-  get configurationId (): string {
-    return this.$route.params.configurationId
-  }
-
-  async created () {
-    try {
-      this.isLoading = true
-      await this.loadMountingActions(this.configurationId)
-    } catch (error) {
-      this.$store.commit('snackbar/setError', 'Loading of mounting actions failed')
-    } finally {
-      this.isLoading = false
     }
   }
 }

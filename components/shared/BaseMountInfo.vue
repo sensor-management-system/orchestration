@@ -31,7 +31,7 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-container>
+  <div>
     <v-row dense>
       <v-col
         cols="4"
@@ -124,16 +124,30 @@ permissions and limitations under the Licence.
         {{ mountAction.endDescription | shortenRight(25, '...') | orDefault }}
       </v-col>
     </v-row>
-  </v-container>
+    <v-row>
+      <v-col>
+        <v-btn
+          small
+          color="primary"
+          nuxt
+          :to="editLink"
+        >
+          Edit mount information
+        </v-btn>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { RawLocation } from 'vue-router'
 
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 
 import { ISOToDateTimeString } from '@/utils/dateHelper'
+import { removeTrailingSlash } from '@/utils/urlHelpers'
 
 @Component({
   components: {
@@ -147,6 +161,12 @@ export default class BaseMountInfo extends Vue {
     required: true,
     type: Object
   })
-  private mountAction!: DeviceMountAction|PlatformMountAction
+  private mountAction!: DeviceMountAction | PlatformMountAction
+
+  get editLink (): RawLocation {
+    return {
+      path: removeTrailingSlash(this.$route.path) + '/' + ('device' in this.mountAction ? 'device-mount-actions' : 'platform-mount-actions') + '/' + this.mountAction.id + '/edit'
+    }
+  }
 }
 </script>

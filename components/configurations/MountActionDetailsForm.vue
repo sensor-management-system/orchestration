@@ -35,17 +35,26 @@ permissions and limitations under the Licence.
 <template>
   <span>
     <v-form
+      v-if="valueCopy"
       ref="mountForm"
       @submit.prevent
     >
       <v-container>
+        <mount-action-date-form
+          v-if="withDates"
+          ref="dateForm"
+          :value="valueCopy"
+          :begin-date-rules="beginDateRules"
+          :end-date-rules="endDateRules"
+          @input="updateDates"
+        />
         <v-row class="pb-0">
           <v-col
             cols="12"
             md="3"
           >
             <v-text-field
-              v-model.number="offsetX"
+              v-model.number="valueCopy.offsetX"
               data-role="textfield-offset-x"
               label="Offset (x)"
               type="number"
@@ -55,7 +64,7 @@ permissions and limitations under the Licence.
               :rules="[rules.numericRequired]"
               class="m-annotated"
               @wheel.prevent
-              @input="add"
+              @input="update"
             />
           </v-col>
           <v-col
@@ -63,7 +72,7 @@ permissions and limitations under the Licence.
             md="3"
           >
             <v-text-field
-              v-model.number="offsetY"
+              v-model.number="valueCopy.offsetY"
               data-role="textfield-offset-y"
               label="Offset (y)"
               type="number"
@@ -73,7 +82,7 @@ permissions and limitations under the Licence.
               :rules="[rules.numericRequired]"
               class="m-annotated"
               @wheel.prevent
-              @input="add"
+              @input="update"
             />
           </v-col>
           <v-col
@@ -81,7 +90,7 @@ permissions and limitations under the Licence.
             md="3"
           >
             <v-text-field
-              v-model.number="offsetZ"
+              v-model.number="valueCopy.offsetZ"
               data-role="textfield-offset-z"
               label="Offset (z)"
               type="number"
@@ -91,7 +100,7 @@ permissions and limitations under the Licence.
               :rules="[rules.numericRequired]"
               class="m-annotated"
               @wheel.prevent
-              @input="add"
+              @input="update"
             />
           </v-col>
         </v-row>
@@ -104,7 +113,7 @@ permissions and limitations under the Licence.
           <v-col>
             <span>
               <v-autocomplete
-                v-model="beginContact"
+                v-model="valueCopy.beginContact"
                 data-role="select-begin-contact"
                 :items="contacts"
                 label="Begin Contact"
@@ -112,23 +121,23 @@ permissions and limitations under the Licence.
                 required
                 :rules="[rules.required]"
                 class="required"
-                @input="add"
+                @input="update"
               />
             </span>
           </v-col>
           <v-col v-if="withUnmount">
             <span>
-
               <v-autocomplete
-                v-model="endContact"
+                v-model="valueCopy.endContact"
                 data-role="select-end-contact"
                 :items="contacts"
                 label="End Contact"
                 :disabled="readonly"
-                required
-                :rules="[rules.required]"
-                class="required"
-                @input="add"
+                :required="unmountRequired"
+                :clearable="!unmountRequired"
+                :rules="getEndContactRules()"
+                :class="unmountRequired ? 'required' : ''"
+                @input="update"
               />
             </span>
           </v-col>
@@ -136,22 +145,22 @@ permissions and limitations under the Licence.
         <v-row>
           <v-col>
             <v-textarea
-              v-model="beginDescription"
+              v-model="valueCopy.beginDescription"
               data-role="textarea-begin-description"
               label="Begin Description"
               rows="3"
               :disabled="readonly"
-              @input="add"
+              @input="update"
             />
           </v-col>
           <v-col v-if="withUnmount">
             <v-textarea
-              v-model="endDescription"
+              v-model="valueCopy.endDescription"
               data-role="textarea-end-description"
               label="End Description"
               rows="3"
               :disabled="readonly"
-              @input="add"
+              @input="update"
             />
           </v-col>
         </v-row>
@@ -161,43 +170,52 @@ permissions and limitations under the Licence.
 </template>
 <script lang="ts">
 
-import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
+
+import { DateTime } from 'luxon'
 
 import { Rules } from '@/mixins/Rules'
 
+import { IMountAction, MountAction } from '@/models/MountAction'
 import { Contact } from '@/models/Contact'
-import { Platform } from '@/models/Platform'
-import { Device } from '@/models/Device'
 
-@Component
-export default class ConfigurationsPlatformDeviceMountForm extends mixins(Rules) {
-  private offsetX: number = 0.0
-  private offsetY: number = 0.0
-  private offsetZ: number = 0.0
+import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
 
-  private beginContact: Contact | null = null
-  private beginDescription = ''
-  private endContact: Contact | null = null
-  private endDescription = ''
-
+@Component({
+  components: {
+    MountActionDateForm
+  }
+})
+export default class MountActionDetailsForm extends mixins(Rules) {
   @Prop({
     required: true,
     type: Object
   })
-  readonly entity!: Platform | Device
+  readonly value!: IMountAction
 
   @Prop({
     default: () => false,
     type: Boolean
   })
-  // @ts-ignore
-  readonly readonly: boolean
+  readonly readonly!: boolean
 
   @Prop({
-    default: () => false,
+    default: () => true,
     type: Boolean
   })
   readonly withUnmount!: boolean
+
+  @Prop({
+    default: () => false,
+    type: Boolean
+  })
+  readonly unmountRequired!: boolean
+
+  @Prop({
+    default: () => true,
+    type: Boolean
+  })
+  readonly withDates!: boolean
 
   @Prop({
     default: () => [],
@@ -206,57 +224,65 @@ export default class ConfigurationsPlatformDeviceMountForm extends mixins(Rules)
   readonly contacts!: Contact[]
 
   @Prop({
-    type: String
+    default: () => [],
+    required: false,
+    type: Array
   })
-  // @ts-ignore
-  readonly currentUserMail: string | null
+  readonly beginDateRules!: ((value: DateTime | null) => string | boolean)[]
 
-  created () {
-    this.beginContact = this.currentUserAsMountContact
-    this.endContact = this.withUnmount ? this.currentUserAsMountContact : null
-    this.add()
-  }
+  @Prop({
+    default: () => [],
+    required: false,
+    type: Array
+  })
+  readonly endDateRules!: ((value: DateTime | null) => string | boolean)[]
 
-  get currentUserAsMountContact (): Contact | null {
-    if (this.currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
-      if (userIndex > -1) {
-        return this.contacts[userIndex]
-      }
-    }
-    return null
-  }
-
-  get entityType (): string {
-    return this.entity.type
-  }
-
-  get entityIDString (): string {
-    return `${this.entityType}-${this.entity?.id}`
-  }
-
-  add () {
-    if (this.validateForm()) {
-      this.$emit('add', {
-        entity: this.entity,
-        offsetX: this.offsetX,
-        offsetY: this.offsetY,
-        offsetZ: this.offsetZ,
-        beginContact: this.beginContact,
-        beginDescription: this.beginDescription,
-        endContact: this.endContact,
-        endDescription: this.endDescription
-      })
-    } else {
-      this.$store.commit('snackbar/setError', 'Please correct the errors')
-    }
-  }
+  private valueCopy: IMountAction | null = null
 
   validateForm (): boolean {
-    if (this.$refs.mountForm !== undefined) {
-      return (this.$refs.mountForm as Vue & { validate: () => boolean }).validate()
-    } else {
-      return true
+    let isValid: boolean = false
+    if (this.$refs.mountForm) {
+      isValid = (this.$refs.mountForm as Vue & { validate: () => boolean }).validate()
+    }
+    if (isValid && this.$refs.dateForm) {
+      isValid = (this.$refs.dateForm as MountActionDateForm).validateForm()
+    }
+    return isValid
+  }
+
+  resetValidation (): void {
+    if (this.$refs.mountForm) {
+      (this.$refs.mountForm as Vue & { resetValidation: () => void }).resetValidation()
+    }
+    if (this.$refs.dateForm) {
+      (this.$refs.dateForm as MountActionDateForm).resetValidation()
+    }
+  }
+
+  getEndContactRules (): ((value: any) => boolean | string)[] {
+    if (this.unmountRequired) {
+      // @ts-ignore
+      return [this.rules.required]
+    }
+    return []
+  }
+
+  updateDates (mountAction: MountAction) {
+    this.$emit('add', mountAction)
+  }
+
+  update () {
+    this.$emit('add', this.valueCopy)
+  }
+
+  @Watch('value', {
+    immediate: true,
+    deep: true
+  })
+  onValueChange (value: IMountAction) {
+    if (value) {
+      this.valueCopy = MountAction.createFromObject(value)
+      this.$nextTick(() => this.validateForm())
     }
   }
 }

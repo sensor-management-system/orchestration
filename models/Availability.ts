@@ -34,10 +34,11 @@ import { DateTime } from 'luxon'
  */
 export interface IAvailability {
   id: string
-  available: boolean,
-  beginDate?: DateTime,
-  endDate?: DateTime,
+  available: boolean
+  beginDate?: DateTime
+  endDate?: DateTime
   configurationID?: string
+  mountID?: string
 }
 
 export class Availability implements IAvailability {
@@ -46,6 +47,7 @@ export class Availability implements IAvailability {
   private _beginDate?: DateTime | undefined
   private _endDate?: DateTime | undefined
   private _configurationID?: string | undefined = ''
+  private _mountID?: string | undefined = ''
 
   get id (): string {
     return this._id
@@ -87,6 +89,14 @@ export class Availability implements IAvailability {
     this._configurationID = newConfiguration
   }
 
+  get mountID (): string | undefined {
+    return this._mountID
+  }
+
+  set mountID (newmount: string | undefined) {
+    this._mountID = newmount
+  }
+
   static createFromObject (someObject: IAvailability): Availability {
     const newObject = new Availability()
 
@@ -96,6 +106,7 @@ export class Availability implements IAvailability {
       newObject.beginDate = someObject.beginDate
       newObject.endDate = someObject.endDate
       newObject.configurationID = someObject.configurationID
+      newObject.mountID = someObject.mountID
     }
 
     return newObject

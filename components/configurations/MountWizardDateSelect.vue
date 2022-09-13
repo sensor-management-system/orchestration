@@ -31,29 +31,12 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-row justify="start" class="mb-6">
-    <v-col cols="6" md="6">
-      <DateTimePicker
-        :value="syncedSelectedDate"
-        placeholder="e.g. 2000-01-31 12:00"
-        label="Select begin date"
-        hint="Start date"
-        @input="setStartDate"
-      />
-    </v-col>
-    <v-col cols="6">
-      <v-form ref="form">
-        <DateTimePicker
-          :value="syncedSelectedEndDate"
-          placeholder="Open End"
-          label="Select end date"
-          hint="Optional. Leave blank for open end"
-          :rules="[rules.validateMountingDates, rules.validateMountingTimeRange]"
-          @input="setEndDate"
-        />
-      </v-form>
-    </v-col>
-  </v-row>
+  <mount-action-date-form
+    :value="mountAction"
+    :begin-date-rules="beginDateRules"
+    :end-date-rules="endDateRules"
+    @input="update"
+  />
 </template>
 
 <script lang="ts">
@@ -61,14 +44,16 @@ import { Component, Vue, Prop, PropSync } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 
-import DateTimePicker from '@/components/DateTimePicker.vue'
+import { Contact } from '@/models/Contact'
+import { MountAction } from '@/models/MountAction'
 
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
-import Validator from '@/utils/validator'
+
+import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
 
 @Component({
   components: {
-    DateTimePicker
+    MountActionDateForm
   },
   filters: { dateToDateTimeStringHHMM }
 })
@@ -80,36 +65,60 @@ export default class MountWizardDateSelect extends Vue {
     syncedSelectedDate!: DateTime
 
   @PropSync('selectedEndDate', {
+    default: null,
     required: false,
     type: Object
   })
     syncedSelectedEndDate!: DateTime | null
 
   @Prop({
+    default: null,
     required: false,
     type: Object
-  }) readonly selectedNodeEndDate!: DateTime | null
+  })
+  readonly selectedNodeBeginDate!: DateTime
 
-  get rules (): Object {
-    return {
-      validateMountingDates: Validator.validateMountingDates(this.syncedSelectedDate, this.syncedSelectedEndDate),
-      validateMountingTimeRange: Validator.validateMountingTimeRange(this.syncedSelectedEndDate, this.selectedNodeEndDate)
-    }
+  @Prop({
+    default: null,
+    required: false,
+    type: Object
+  })
+  readonly selectedNodeEndDate!: DateTime | null
+
+  @Prop({
+    default: () => [],
+    required: false,
+    type: Array
+  })
+  readonly beginDateRules!: ((value: DateTime | null) => string | boolean)[]
+
+  @Prop({
+    default: () => [],
+    required: false,
+    type: Array
+  })
+  readonly endDateRules!: ((value: DateTime | null) => string | boolean)[]
+
+  get mountAction (): MountAction {
+    return MountAction.createFromObject({
+      id: '',
+      parentPlatform: null,
+      beginContact: new Contact(), // we don't need a real contact here
+      beginDate: this.syncedSelectedDate,
+      endContact: null,
+      endDate: this.syncedSelectedEndDate || null,
+      beginDescription: '',
+      endDescription: '',
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0
+    })
   }
 
-  setStartDate (aDate: DateTime) {
-    this.syncedSelectedDate = aDate
+  update (mountAction: MountAction) {
+    this.syncedSelectedDate = mountAction.beginDate
+    this.syncedSelectedEndDate = mountAction.endDate
   }
-
-  setEndDate (aDate: DateTime | null) {
-    this.syncedSelectedEndDate = aDate
-  }
-
-  // TODO: this method should trigger a form validation but needs to be called from MountWizardNodeSelect
-  // async checkEndDateOfDatePicker () {
-  //   await this.$nextTick()
-  //   return (this.$refs.form as Vue & { validate: () => boolean }).validate()
-  // }
 }
 </script>
 

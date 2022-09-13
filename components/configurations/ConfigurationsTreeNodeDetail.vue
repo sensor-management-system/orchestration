@@ -51,7 +51,7 @@ permissions and limitations under the Licence.
     <template v-if="node.isConfiguration()">
       <div>
         <v-divider class="pb-4" />
-        <configurations-basic-data :value="node.unpack()" />
+        <configurations-basic-data :value="node.unpack().configuration" />
       </div>
     </template>
   </div>
@@ -60,7 +60,6 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-import { } from '@/models/Platform'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 import PlatformMountListItem from '@/components/platforms/PlatformMountListItem.vue'

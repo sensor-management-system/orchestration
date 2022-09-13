@@ -37,8 +37,8 @@ permissions and limitations under the Licence.
     <v-treeview
       :active.sync="selectedNodeSingletonList"
       :items="items"
-      activatable
-      hoverable
+      :activatable="activatable"
+      :hoverable="activatable"
       rounded
       open-all
       :open.sync="openNodes"
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
           Platform - {{ item.unpack().platform.shortName }}
         </div>
         <div v-if="item.isConfiguration()">
-          Configuration - {{ getConfigurationLabel(item.unpack()) }}
+          Configuration - {{ getConfigurationLabel(item.unpack().configuration) }}
         </div>
       </template>
       <template #prepend="{ item }">
@@ -110,6 +110,16 @@ export default class ConfigurationsTreeView extends Vue {
     type: Object
   })
   readonly tree!: ConfigurationsTree
+
+  /**
+   * activatable nodes
+   */
+  @Prop({
+    default: true,
+    required: false,
+    type: Boolean
+  })
+  readonly activatable!: boolean
 
   created (): void {
     this.initializeOpenNodes()

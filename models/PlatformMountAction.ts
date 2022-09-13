@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,37 +31,17 @@
  */
 
 import { DateTime } from 'luxon'
+
+import { IMountAction, MountAction } from '@/models/MountAction'
 import { Platform } from '@/models/Platform'
 import { Contact } from '@/models/Contact'
 
-export interface IPlatformMountAction {
-  id: string
+export interface IPlatformMountAction extends IMountAction {
   platform: Platform
-  parentPlatform: Platform | null
-  beginDate: DateTime
-  endDate: DateTime | null
-  offsetX: number
-  offsetY: number
-  offsetZ: number
-  beginContact: Contact
-  endContact: Contact | null
-  beginDescription: string
-  endDescription: string | null
 }
 
-export class PlatformMountAction {
-  private _id: string = ''
+export class PlatformMountAction extends MountAction implements IPlatformMountAction {
   private _platform: Platform
-  private _parentPlatform: Platform | null
-  private _beginDate: DateTime
-  private _endDate: DateTime | null
-  private _offsetX: number
-  private _offsetY: number
-  private _offsetZ: number
-  private _beginContact: Contact
-  private _endContact: Contact |null
-  private _beginDescription: string
-  private _endDescription: string |null
 
   constructor (
     id: string,
@@ -77,113 +57,35 @@ export class PlatformMountAction {
     beginDescription: string,
     endDescription: string | null
   ) {
-    this._id = id
+    super(
+      id,
+      parentPlatform,
+      beginDate,
+      endDate,
+      offsetX,
+      offsetY,
+      offsetZ,
+      beginContact,
+      endContact,
+      beginDescription,
+      endDescription
+    )
     this._platform = platform
-    this._parentPlatform = parentPlatform
-    this._beginDate = beginDate
-    this._endDate = endDate
-    this._offsetX = offsetX
-    this._offsetY = offsetY
-    this._offsetZ = offsetZ
-    this._beginContact = beginContact
-    this._endContact = endContact
-    this._beginDescription = beginDescription
-    this._endDescription = endDescription
   }
 
-  get id (): string {
-    return this._id
-  }
-
-  set id (newId: string) {
-    this._id = newId
+  get TYPE (): string {
+    return 'PLATFORM_MOUNT_ACTION'
   }
 
   get platform (): Platform {
     return this._platform
   }
 
-  get parentPlatform (): Platform | null {
-    return this._parentPlatform
-  }
-
-  get beginDate (): DateTime {
-    return this._beginDate
-  }
-
-  set beginDate (newDate: DateTime) {
-    this._beginDate = newDate
-  }
-
-  get endDate (): DateTime | null {
-    return this._endDate
-  }
-
-  set endDate (newDate: DateTime | null) {
-    this._endDate = newDate
-  }
-
-  get offsetX (): number {
-    return this._offsetX
-  }
-
-  set offsetX (newOffsetX: number) {
-    this._offsetX = newOffsetX
-  }
-
-  get offsetY (): number {
-    return this._offsetY
-  }
-
-  set offsetY (newOffsetY: number) {
-    this._offsetY = newOffsetY
-  }
-
-  get offsetZ (): number {
-    return this._offsetZ
-  }
-
-  set offsetZ (newOffsetZ: number) {
-    this._offsetZ = newOffsetZ
-  }
-
-  get isMountAction (): boolean {
+  isPlatformMountAction (): this is IPlatformMountAction {
     return true
   }
 
-  get beginContact (): Contact {
-    return this._beginContact
-  }
-
-  set beginContact (newContact: Contact) {
-    this._beginContact = newContact
-  }
-
-  get endContact (): Contact | null {
-    return this._endContact
-  }
-
-  set endContact (newContact: Contact | null) {
-    this._endContact = newContact
-  }
-
-  get beginDescription (): string {
-    return this._beginDescription
-  }
-
-  set beginDescription (newDescription: string) {
-    this._beginDescription = newDescription
-  }
-
-  get endDescription (): string | null {
-    return this._endDescription
-  }
-
-  set endDescription (newDescription: string | null) {
-    this._endDescription = newDescription
-  }
-
-  static createFromObject (otherAction: IPlatformMountAction): PlatformMountAction {
+  static createFromObject (otherAction: Omit<IPlatformMountAction, 'TYPE'>): PlatformMountAction {
     return new PlatformMountAction(
       otherAction.id,
       Platform.createFromObject(otherAction.platform),

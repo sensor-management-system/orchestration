@@ -133,6 +133,7 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
+import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
@@ -185,7 +186,8 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
     if (this.configuration) {
       // construct the configuration as the root node of the tree
-      const rootNode = new ConfigurationNode(this.configuration)
+      const rootMountAction = new ConfigurationMountAction(this.configuration)
+      const rootNode = new ConfigurationNode(rootMountAction)
       // as we don't want to alter the Vuex state, we create a new Tree here
       if (this.configurationMountingActionsForDate) {
         rootNode.children = ConfigurationsTree.createFromObject(this.configurationMountingActionsForDate).toArray()
@@ -194,14 +196,14 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     }
   }
 
-  nodeCanBeUnmounted (node: ConfigurationNode | null): boolean {
+  nodeCanBeUnmounted (node: ConfigurationsTreeNode | null): boolean {
     if (node === null) {
       return true
     }
     if (node.isConfiguration()) {
       return false
     }
-    if (node.isPlatform() && node.children.length > 0) {
+    if (node.isPlatform() && node.canHaveChildren() && node.children.length > 0) {
       return false
     }
     return true

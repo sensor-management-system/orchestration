@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
       </v-icon>
       {{ selectedNode.node.platform.shortName }}
     </v-card-title>
-    <v-card-title v-if="selectedNode.isDevice()">
+    <v-card-title v-else-if="selectedNode.isDevice()">
       <v-icon
         left
       >
@@ -48,18 +48,24 @@ permissions and limitations under the Licence.
       </v-icon>
       {{ selectedNode.node.device.shortName }}
     </v-card-title>
-    <v-card-title v-if="selectedNode.isConfiguration()">
+    <v-card-title v-else-if="selectedNode.isConfiguration()">
       <v-icon
         left
       >
         mdi-file-cog
       </v-icon>
-      {{ selectedNode.node.label }}
+      {{ selectedNode.node.configuration.label }}
     </v-card-title>
-    <v-card-subtitle v-if="selectedNode.isConfiguration()">
+    <v-card-subtitle
+      v-if="selectedNode.isConfiguration()"
+      class="pb-0"
+    >
       Configuration root
     </v-card-subtitle>
-    <v-card-subtitle v-else>
+    <v-card-subtitle
+      v-else
+      class="pb-0"
+    >
       Selected node information
     </v-card-subtitle>
   </div>

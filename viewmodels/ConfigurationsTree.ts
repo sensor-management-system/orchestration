@@ -202,6 +202,60 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   }
 
   /**
+   * replaces a ConfigurationsTreeNode at the given index
+   *
+   * If the node to replace has children, they get appended to the children of
+   * the new node.
+   *
+   * @param {number} index - the index of the ConfigurationsTreeNode to replace
+   * @param {ConfigurationsTreeNode} node - the new ConfigurationsTreeNode
+   * @return {ConfigurationsTreeNode} the replaced ConfigurationsTreeNode
+   */
+  replaceAt (index: number, node: ConfigurationsTreeNode): ConfigurationsTreeNode {
+    if (!this.isValidIndex(index)) {
+      throw new RangeError('index out of range')
+    }
+    const oldNode = this.tree[index]
+    if (oldNode.canHaveChildren() && node.canHaveChildren()) {
+      node.children = [
+        ...node.children,
+        ...oldNode.children
+      ]
+    }
+    this.tree[index] = node
+    return node
+  }
+
+  /**
+   * replaces a node in the tree
+   *
+   * @param {ConfigurationsTreeNode} node - the node to replace
+   * @param {ConfigurationsTreeNode} newNode - the new node
+   * @return {boolean} whether the node was replaced or not
+   */
+  replace (node: ConfigurationsTreeNode, newNode: ConfigurationsTreeNode): boolean {
+    const replaceRecursive = (node: ConfigurationsTreeNode, newNode: ConfigurationsTreeNode, nodes: ConfigurationsTree): boolean => {
+      for (let i: number = 0; i < nodes.length; i++) {
+        const iteratedNode: ConfigurationsTreeNode = nodes.at(i)
+        if (iteratedNode === node) {
+          nodes.replaceAt(i, newNode)
+          return true
+        }
+        if (!iteratedNode.canHaveChildren()) {
+          continue
+        }
+        const replaced = replaceRecursive(node, newNode, (iteratedNode as PlatformNode).getTree())
+        if (!replaced) {
+          continue
+        }
+        return true
+      }
+      return false
+    }
+    return replaceRecursive(node, newNode, this)
+  }
+
+  /**
    * returns the path to the node in the tree
    *
    * @param {ConfigurationsTreeNode} node - the node to get the path for

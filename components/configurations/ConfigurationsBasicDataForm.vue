@@ -54,6 +54,7 @@ permissions and limitations under the Licence.
           :entity-name="entityName"
           :multiple="false"
           :rules="[rules.validatePermissionGroup]"
+          label="Permission group"
           @input="update('permissionGroup', $event)"
         />
       </v-col>

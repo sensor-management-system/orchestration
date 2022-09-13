@@ -75,28 +75,32 @@ export default {
     }
   },
 
-  validateMountingTimeRange (mountEndDate: DateTime | null, parentEndDate: DateTime | null): (v: string) => (boolean | string) {
-    return (v) => {
-      if (v === null || v === '' || parentEndDate === null) {
-        return true
-      }
-      if (mountEndDate && mountEndDate <= parentEndDate) {
-        return true
-      }
-      return `End date must be before parent platform end date (${dateToString(parentEndDate)})`
+  validateMountingTimeRange (startDate: DateTime, endDate: DateTime | null, parentStartDate: DateTime, parentEndDate: DateTime | null): boolean | string {
+    if (!(startDate >= parentStartDate)) {
+      return `Start date must not be before start date of the parent platform (${dateToString(parentStartDate)})`
     }
+    if (parentEndDate) {
+      if (!(startDate <= parentEndDate)) {
+        return `Start date must be before end date of the parent platform (${dateToString(parentEndDate)})`
+      }
+      if (endDate && !(endDate >= parentStartDate)) {
+        return `End date must be after start date of the parent platform (${dateToString(parentStartDate)})`
+      }
+      if (!endDate || !(endDate <= parentEndDate)) {
+        return `End date must be before end date of the parent platform (${dateToString(parentEndDate)})`
+      }
+    }
+    return true
   },
 
-  validateMountingDates (startDate: DateTime, endDate: DateTime | null): (v: string) => (boolean | string) {
-    return (v) => {
-      if (v === null || v === '' || endDate === null) {
-        return true
-      }
-      if (startDate && startDate <= endDate) {
-        return true
-      }
-      return 'End date must not be before start date'
+  validateMountingDates (startDate: DateTime, endDate: DateTime | null): boolean | string {
+    if (endDate === null) {
+      return true
     }
+    if (startDate && startDate <= endDate) {
+      return true
+    }
+    return 'End date must not be before start date'
   },
 
   validateInputForLocationType (v: string): boolean | string {

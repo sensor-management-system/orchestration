@@ -91,7 +91,7 @@ permissions and limitations under the Licence.
                 <td>
                   {{ item.mountInfo.beginContact.fullName | orDefault }}
                 </td>
-                <td v-if="selectedEndDate !== null" class="table-border-left">
+                <td v-if="selectedEndDate !== null && item.mountInfo.endDescription !== null" class="table-border-left">
                   {{ item.mountInfo.endDescription | shortenRight(14, '...') | orDefault }}
                 </td>
                 <td v-if="selectedEndDate !== null && item.mountInfo.endContact !== null">
@@ -113,7 +113,7 @@ permissions and limitations under the Licence.
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>
                 <td>{{ item.mountInfo.beginContact.fullName }}</td>
-                <td v-if="selectedEndDate !== null" class="table-border-left">
+                <td v-if="selectedEndDate !== null && item.mountInfo.endDescription !== null" class="table-border-left">
                   {{ item.mountInfo.endDescription | shortenRight(14, '...') | orDefault }}
                 </td>
                 <td v-if="selectedEndDate !== null && item.mountInfo.endContact !== null">
@@ -134,9 +134,8 @@ import { Component, Vue, PropSync, InjectReactive } from 'nuxt-property-decorato
 import { DateTime } from 'luxon'
 
 import { Device } from '@/models/Device'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { MountAction } from '@/models/MountAction'
 import { Platform } from '@/models/Platform'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
@@ -149,13 +148,13 @@ export default class MountWizardSubmitOverview extends Vue {
     required: false,
     type: Array
   })
-    syncedDevicesToMount!: { entity: Device, mountInfo: DeviceMountAction }[]
+    syncedDevicesToMount!: { entity: Device, mountInfo: MountAction }[]
 
   @PropSync('platformsToMount', {
     required: false,
     type: Array
   })
-    syncedPlatformsToMount!: { entity: Platform, mountInfo: PlatformMountAction }[]
+    syncedPlatformsToMount!: { entity: Platform, mountInfo: MountAction }[]
 
   @InjectReactive() selectedDate!: DateTime
   @InjectReactive() selectedEndDate!: DateTime | null

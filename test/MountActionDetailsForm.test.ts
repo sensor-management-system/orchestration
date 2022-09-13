@@ -33,17 +33,20 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 
+import { DateTime } from 'luxon'
+
 import { mount, createLocalVue } from '@vue/test-utils'
 
 // @ts-ignore
-import ConfigurationsPlatformDeviceMountForm from '@/components/ConfigurationsPlatformDeviceMountForm.vue'
+import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
 
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
 
 Vue.use(Vuetify)
 
-describe('ConfigurationsPlatformDeviceMountForm', () => {
+describe('MountActionDetailsForm', () => {
   const localVue = createLocalVue()
   let vuetify = new Vuetify()
 
@@ -68,27 +71,31 @@ describe('ConfigurationsPlatformDeviceMountForm', () => {
     contact2.familyName = 'Musterfrau'
     contact2.email = 'eva@musterfrau.mail'
 
-    return mount(ConfigurationsPlatformDeviceMountForm, {
+    const mountAction = new PlatformMountAction(
+      '1',
+      platform1,
+      null,
+      DateTime.fromISO('2022-08-01T10:00:00'),
+      null,
+      0,
+      0,
+      0,
+      contact1,
+      null,
+      'begin of mount',
+      null
+    )
+
+    return mount(MountActionDetailsForm, {
       localVue,
       vuetify,
       propsData: {
-        entity: platform1,
+        value: mountAction,
         readonly: false,
         withUnmount: false,
+        withDates: false,
         contacts: [contact1, contact2],
-        currentUserMail: 'max@mustermann.mail',
         ...propsData
-      },
-      data () {
-        return {
-          offsetX: 0,
-          offsetY: 0,
-          offsetZ: 0,
-          beginContact: contact1,
-          endContact: null,
-          beginDescription: '',
-          endDescription: ''
-        }
       },
       mocks: {
         $auth: {
@@ -106,21 +113,14 @@ describe('ConfigurationsPlatformDeviceMountForm', () => {
     expect(wrapper.findComponent('[data-role="textarea-end-description"]').exists()).toBe(true)
   })
 
-  it('should trigger an add event on creation', () => {
-    const wrapper: any = createWrapper()
-    expect(wrapper.emitted('add')).toBeTruthy()
-    expect(wrapper.emitted('add').length).toBe(1)
-  })
-
   it('should trigger an event when the value of offset-x changes', async () => {
     const wrapper: any = createWrapper()
     const newValue = 1
     const component = await wrapper.findComponent('[data-role="textfield-offset-x"]')
     await component.setValue(newValue)
-    expect(wrapper.vm.offsetX).toBeCloseTo(newValue)
     expect(wrapper.emitted('add')).toBeTruthy()
-    expect(wrapper.emitted('add').length).toBe(2)
-    const addPayload = wrapper.emitted('add')[1]
+    expect(wrapper.emitted('add').length).toBe(1)
+    const addPayload = wrapper.emitted('add')[0]
     expect(addPayload.length).toEqual(1)
     const addPayloadContent = addPayload[0]
     expect(addPayloadContent.offsetX).toBeCloseTo(newValue)
@@ -131,10 +131,9 @@ describe('ConfigurationsPlatformDeviceMountForm', () => {
     const newValue = 2
     const component = await wrapper.findComponent('[data-role="textfield-offset-y"]')
     await component.setValue(newValue)
-    expect(wrapper.vm.offsetY).toBeCloseTo(newValue)
     expect(wrapper.emitted('add')).toBeTruthy()
-    expect(wrapper.emitted('add').length).toBe(2)
-    const addPayload = wrapper.emitted('add')[1]
+    expect(wrapper.emitted('add').length).toBe(1)
+    const addPayload = wrapper.emitted('add')[0]
     expect(addPayload.length).toEqual(1)
     const addPayloadContent = addPayload[0]
     expect(addPayloadContent.offsetY).toBeCloseTo(newValue)
@@ -145,10 +144,9 @@ describe('ConfigurationsPlatformDeviceMountForm', () => {
     const newValue = 3
     const component = await wrapper.findComponent('[data-role="textfield-offset-z"]')
     await component.setValue(newValue)
-    expect(wrapper.vm.offsetZ).toBeCloseTo(newValue)
     expect(wrapper.emitted('add')).toBeTruthy()
-    expect(wrapper.emitted('add').length).toBe(2)
-    const addPayload = wrapper.emitted('add')[1]
+    expect(wrapper.emitted('add').length).toBe(1)
+    const addPayload = wrapper.emitted('add')[0]
     expect(addPayload.length).toEqual(1)
     const addPayloadContent = addPayload[0]
     expect(addPayloadContent.offsetZ).toBeCloseTo(newValue)

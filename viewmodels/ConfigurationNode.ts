@@ -35,23 +35,23 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { Configuration } from '@/models/Configuration'
-import { IConfigurationsTreeNode } from '@/viewmodels/IConfigurationsTreeNode'
+import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
+import { IConfigurationsTreeNodeWithChildren } from '@/viewmodels/IConfigurationsTreeNode'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 /**
  * a class that wraps a Configuration instance for the usage in a ConfigurationsTree
  */
-export class ConfigurationNode implements IConfigurationsTreeNode<Configuration> {
-  private node: Configuration
+export class ConfigurationNode implements IConfigurationsTreeNodeWithChildren<ConfigurationMountAction> {
+  private node: ConfigurationMountAction
   private tree: ConfigurationsTree = new ConfigurationsTree()
   private _disabled: boolean = false
   private _id: string | null = ''
 
   static readonly ID_PREFIX = 'ConfigurationNode-'
 
-  constructor (node: Configuration) {
+  constructor (node: ConfigurationMountAction) {
     this.node = node
     this._id = ConfigurationNode.ID_PREFIX + this.node.id
   }
@@ -68,7 +68,7 @@ export class ConfigurationNode implements IConfigurationsTreeNode<Configuration>
   }
 
   get name (): string {
-    return this.node.label
+    return this.node.configuration.label
   }
 
   get nameWithoutOffsets (): string {
@@ -83,7 +83,7 @@ export class ConfigurationNode implements IConfigurationsTreeNode<Configuration>
     this._disabled = isDisabled
   }
 
-  canHaveChildren (): boolean {
+  canHaveChildren (): this is IConfigurationsTreeNodeWithChildren<ConfigurationMountAction> {
     return true
   }
 
@@ -95,11 +95,11 @@ export class ConfigurationNode implements IConfigurationsTreeNode<Configuration>
     return false
   }
 
-  isConfiguration (): boolean {
+  isConfiguration (): this is ConfigurationNode {
     return true
   }
 
-  unpack (): Configuration {
+  unpack (): ConfigurationMountAction {
     return this.node
   }
 
