@@ -7,11 +7,14 @@ from .configuration import Configuration  # noqa: F401
 from .configuration_attachment import ConfigurationAttachment  # noqa: F401
 from .configuration_location_actions import (  # noqa: F401
     ConfigurationDynamicLocationBeginAction,
-    ConfigurationDynamicLocationEndAction,
     ConfigurationStaticLocationBeginAction,
-    ConfigurationStaticLocationEndAction,
 )
 from .contact import Contact  # noqa: F401
+from .contact_role import (  # noqa: F401
+    ConfigurationContactRole,
+    DeviceContactRole,
+    PlatformContactRole,
+)
 from .customfield import CustomField  # noqa: F401
 from .device import Device  # noqa: F401
 from .device_attachment import DeviceAttachment  # noqa: F401
@@ -37,5 +40,4 @@ from .software_update_actions import (  # noqa: F401
     DeviceSoftwareUpdateAction,
     PlatformSoftwareUpdateAction,
 )
-from .unmount_actions import DeviceUnmountAction, PlatformUnmountAction  # noqa: F401
 from .user import User  # noqa: F401

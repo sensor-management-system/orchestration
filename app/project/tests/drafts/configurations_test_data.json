@@ -1,17 +1,22 @@
 {
   "configuration": [
     {
-      "longitude": 56.1,
-      "elevation": 42.23,
-      "location_type": "test"
+      "label": "Test1",
+      "is_public": false,
+      "is_internal": true,
+      "cfg_permission_group": "12"
     },
     {
-      "longitude": 56.1,
-      "location_type": "test2"
+      "label": "Test2",
+      "is_public": false,
+      "is_internal": true,
+      "cfg_permission_group": "2"
     },
     {
-      "longitude": 56.1,
-      "location_type": "test3"
+      "label": "Test3",
+      "is_public": false,
+      "is_internal": true,
+      "cfg_permission_group": "1"
     }
   ]
 }

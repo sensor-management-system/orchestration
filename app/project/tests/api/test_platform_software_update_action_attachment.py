@@ -42,8 +42,14 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
 
     def test_post_platform_software_update_action_attachment(self):
         """Create PlatformSoftwareUpdateActionAttachment"""
-        platform = Platform(short_name="Platform 144")
         userinfo = generate_userinfo_data()
+        platform = Platform(
+            short_name="Platform 144",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+
         contact = Contact(
             given_name=userinfo["given_name"],
             family_name=userinfo["family_name"],
@@ -96,7 +102,12 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         platform_software_update_action_attachment = (
             add_platform_software_update_action_attachment_model()
         )
-        platform = Platform(short_name="Platform new 144")
+        platform = Platform(
+            short_name="Platform new 144",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(platform)
         db.session.commit()
         attachment = PlatformAttachment(

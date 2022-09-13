@@ -1,3 +1,5 @@
+"""Application for the sensor management system."""
+
 from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
@@ -5,14 +7,20 @@ from flask_migrate import Migrate
 from healthcheck import HealthCheck
 
 from .api import minio
-from .api.helpers.docs import docs_routes
-from .api.helpers.health_checks import health_check_elastic_search, health_check_db, \
-    health_check_migrations, health_check_minio
+from .api.auth.permission_manager import permission_manager
+from .api.helpers.health_checks import (
+    health_check_db,
+    health_check_elastic_search,
+    health_check_migrations,
+    health_check_minio,
+)
 from .api.models.base_model import db
-from .api.auth.flask_openidconnect import open_id_connect
-from .api.upload_files import upload_routes
 from .config import env
+from .extensions.instances import auth, idl, well_known_url_config_loader
 from .urls import api
+from .views.docs import docs_routes
+from .views.login import login_routes
+from .views.upload_files import upload_routes
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
@@ -21,13 +29,14 @@ health = HealthCheck()
 
 
 def create_app():
-    """Return an application
-    set up the application in a function
-    """
+    """Return an application and set up the application in a function."""
     # init the app
-    app = Flask(__name__, template_folder='../templates', static_folder='static',
-                static_url_path=static_url_path)
-
+    app = Flask(
+        __name__,
+        template_folder="../templates",
+        static_folder="static",
+        static_url_path=static_url_path,
+    )
     # enable CORS
     # get space separated list from environment var
     origins_raw = env("HTTP_ORIGINS", None)
@@ -45,15 +54,19 @@ def create_app():
     db.init_app(app)
     api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
-    open_id_connect.init_app(app)
+    api.permission_manager(permission_manager)
 
     # instantiate minio client
     minio.init_app(app)
 
+    well_known_url_config_loader.init_app(app)
+    auth.init_app(app)
+    idl.init_app(app)
+
     # shell context for flask cli
     @app.shell_context_processor
     def shell_context():
-        return {'app': app, 'db': db}
+        return {"app": app, "db": db}
 
     # add elasticsearch as mentioned here
     # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xvi-full-text-search
@@ -78,4 +91,7 @@ def create_app():
     app.register_blueprint(upload_routes)
     # docs_routes
     app.register_blueprint(docs_routes)
+    # login_routes
+    app.register_blueprint(login_routes)
+
     return app

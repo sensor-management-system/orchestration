@@ -1,12 +1,18 @@
 """Model for platforms."""
 
-
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
-from ..models.mixin import AuditMixin, IndirectSearchableMixin, SearchableMixin
 from .base_model import db
+from ..models.mixin import (
+    AuditMixin,
+    SearchableMixin,
+    PermissionMixin,
+    IndirectSearchableMixin,
+)
 
 
-class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
+class Platform(
+    db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin
+):
     """Platform class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -24,6 +30,7 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     inventory_number = db.Column(db.String(256), nullable=True)
     serial_number = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
+    update_description = db.Column(db.String(256), nullable=True)
     platform_attachments = db.relationship(
         "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
@@ -53,6 +60,11 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "software_update_actions": [
                 s.to_search_entry() for s in self.platform_software_update_actions
             ],
+            "is_internal": self.is_internal,
+            "is_public": self.is_public,
+            "is_private": self.is_private,
+            "created_by_id": self.created_by_id,
+            "group_ids": self.group_ids,
         }
 
     def get_parent_search_entities(self):
@@ -76,10 +88,8 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = (
-            ElasticSearchIndexTypes.keyword_and_full_searchable(
-                analyzer="ngram_analyzer"
-            )
+        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
+            analyzer="ngram_analyzer"
         )
         return {
             # Search the description just via text (and not via keyword).
@@ -104,6 +114,11 @@ class Platform(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "inventory_number": type_keyword_and_full_searchable,
             "serial_number": type_keyword_and_full_searchable,
             "persistent_identifier": type_keyword_and_full_searchable,
+            "is_internal": {"type": "boolean",},
+            "is_public": {"type": "boolean",},
+            "is_private": {"type": "boolean",},
+            "created_by_id": {"type": "integer",},
+            "group_ids": type_keyword,
             "attachments": {
                 "type": "nested",
                 "properties": {

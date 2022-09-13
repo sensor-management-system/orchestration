@@ -1,11 +1,18 @@
 """Model for the devices."""
 
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
-from ..models.mixin import AuditMixin, IndirectSearchableMixin, SearchableMixin
 from .base_model import db
+from ..models.mixin import (
+    AuditMixin,
+    SearchableMixin,
+    IndirectSearchableMixin,
+    PermissionMixin,
+)
 
 
-class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
+class Device(
+    db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin
+):
     """Device class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -24,6 +31,7 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     device_type_name = db.Column(db.String(256), nullable=True)
     status_uri = db.Column(db.String(256), nullable=True)
     status_name = db.Column(db.String(256), nullable=True)
+    update_description = db.Column(db.String(256), nullable=True)
     customfields = db.relationship(
         "CustomField", cascade="save-update, merge, delete, delete-orphan"
     )
@@ -64,6 +72,11 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "software_update_actions": [
                 s.to_search_entry() for s in self.device_software_update_actions
             ],
+            "is_internal": self.is_internal,
+            "is_public": self.is_public,
+            "is_private": self.is_private,
+            "created_by_id": self.created_by_id,
+            "group_ids": self.group_ids,
         }
 
     def get_parent_search_entities(self):
@@ -109,6 +122,10 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "manufacturer_uri": type_keyword,
             # dual use is a boolean
             "dual_use": {"type": "boolean"},
+            "is_internal": {"type": "boolean",},
+            "is_public": {"type": "boolean",},
+            "is_private": {"type": "boolean",},
+            "created_by_id": {"type": "integer",},
             # Model should be both keyword & text.
             "model": type_keyword_and_full_searchable,
             # Inventory number is the same as serial number.
@@ -126,6 +143,8 @@ class Device(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "status_name": type_keyword_and_full_searchable,
             # Just keyword for status uri.
             "status_uri": type_keyword,
+            # For the group ids we just want it to be exact.
+            "group_ids": type_keyword,
             "attachments": {
                 "type": "nested",
                 "properties": {

@@ -16,7 +16,9 @@ class PlatformMountActionSchema(Schema):
 
     id = fields.Integer(as_string=True)
     begin_date = fields.DateTime(required=True)
-    description = fields.Str(allow_none=True)
+    end_date = fields.DateTime(allow_none=True)
+    begin_description = fields.Str(allow_none=True)
+    end_description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)
     offset_z = fields.Float(allow_none=True)
@@ -25,8 +27,6 @@ class PlatformMountActionSchema(Schema):
 
     platform = Relationship(
         attribute="platform",
-        self_view="api.platform_mount_action_platform",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
         include_resource_linkage=True,
@@ -36,8 +36,6 @@ class PlatformMountActionSchema(Schema):
     )
     parent_platform = Relationship(
         attribute="parent_platform",
-        self_view="api.platform_mount_action_parent_platform",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<parent_platform_id>"},
         include_resource_linkage=True,
@@ -47,8 +45,6 @@ class PlatformMountActionSchema(Schema):
     )
     configuration = Relationship(
         attribute="configuration",
-        self_view="api.platform_mount_action_configuration",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,
@@ -56,20 +52,26 @@ class PlatformMountActionSchema(Schema):
         type_="configuration",
         id_field="id",
     )
-    contact = Relationship(
-        attribute="contact",
-        self_view="api.platform_mount_action_contact",
-        self_view_kwargs={"id": "<id>"},
+    begin_contact = Relationship(
+        attribute="begin_contact",
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<contact_id>"},
+        related_view_kwargs={"id": "<begin_contact_id>"},
         include_resource_linkage=True,
         schema="ContactSchema",
         type_="contact",
         id_field="id",
     )
+    end_contact = Relationship(
+        attribute="end_contact",
+        related_view="api.contact_detail",
+        related_view_kwargs={"id": "<end_contact_id>"},
+        include_resource_linkage=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+        allow_none=True,
+    )
     created_by = Relationship(
-        self_view="api.platform_mount_action_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -79,8 +81,6 @@ class PlatformMountActionSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.platform_mount_action_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,
@@ -105,7 +105,9 @@ class DeviceMountActionSchema(Schema):
 
     id = fields.Integer(as_string=True)
     begin_date = fields.DateTime(required=True)
-    description = fields.Str(allow_none=True)
+    end_date = fields.DateTime(allow_none=True)
+    begin_description = fields.Str(allow_none=True)
+    end_description = fields.Str(allow_none=True)
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)
     offset_z = fields.Float(allow_none=True)
@@ -114,8 +116,6 @@ class DeviceMountActionSchema(Schema):
 
     device = Relationship(
         attribute="device",
-        self_view="api.device_mount_action_device",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
         include_resource_linkage=True,
@@ -125,8 +125,6 @@ class DeviceMountActionSchema(Schema):
     )
     parent_platform = Relationship(
         attribute="parent_platform",
-        self_view="api.device_mount_action_parent_platform",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<parent_platform_id>"},
         include_resource_linkage=True,
@@ -136,8 +134,6 @@ class DeviceMountActionSchema(Schema):
     )
     configuration = Relationship(
         attribute="configuration",
-        self_view="api.device_mount_action_configuration",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
         include_resource_linkage=True,
@@ -145,20 +141,26 @@ class DeviceMountActionSchema(Schema):
         type_="configuration",
         id_field="id",
     )
-    contact = Relationship(
-        attribute="contact",
-        self_view="api.device_mount_action_contact",
-        self_view_kwargs={"id": "<id>"},
+    begin_contact = Relationship(
+        attribute="begin_contact",
         related_view="api.contact_detail",
-        related_view_kwargs={"id": "<contact_id>"},
+        related_view_kwargs={"id": "<begin_contact_id>"},
         include_resource_linkage=True,
         schema="ContactSchema",
         type_="contact",
         id_field="id",
     )
+    end_contact = Relationship(
+        attribute="end_contact",
+        related_view="api.contact_detail",
+        related_view_kwargs={"id": "<end_contact_id>"},
+        include_resource_linkage=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+        allow_none=True,
+    )
     created_by = Relationship(
-        self_view="api.device_mount_action_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -168,8 +170,6 @@ class DeviceMountActionSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.device_mount_action_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,

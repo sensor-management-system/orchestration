@@ -27,6 +27,9 @@ class TestPlatformModel(BaseTestCase):
             inventory_number="inventory_number test",
             serial_number="serial_number test",
             persistent_identifier="persistent_identifier_test",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         PlatformSchema().dump(platform)
         db.session.add(platform)

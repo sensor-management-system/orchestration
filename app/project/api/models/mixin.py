@@ -1,10 +1,14 @@
+"""Several mixin classes for our models."""
+
 import collections
 import itertools
 from datetime import datetime
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.mutable import MutableList
 
+from ..helpers.errors import ConflictError
 from ..search import (
     add_to_index,
     create_index,
@@ -16,22 +20,25 @@ from .base_model import db
 
 
 class AuditMixin:
+    """Audit mixin to save information about creation & updates."""
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # define 'updated at' to be populated with datetime.utcnow()
-    updated_at = db.Column(db.DateTime, default=None, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     @declared_attr
     def created_by_id(self):
+        """Add the created by user id attribute."""
         return db.Column(
             db.Integer,
             db.ForeignKey(
                 "user.id", name="fk_%s_created_by_id" % self.__name__, use_alter=True
             ),
-            # nullable=False,
         )
 
     @declared_attr
     def created_by(self):
+        """Add the created by user relationship."""
         return db.relationship(
             "User",
             primaryjoin="User.id == %s.created_by_id" % self.__name__,
@@ -40,6 +47,7 @@ class AuditMixin:
 
     @declared_attr
     def updated_by_id(self):
+        """Add the updated by user id attribute."""
         return db.Column(
             db.Integer,
             db.ForeignKey(
@@ -49,6 +57,7 @@ class AuditMixin:
 
     @declared_attr
     def updated_by(self):
+        """Add the updated by user relationship."""
         return db.relationship(
             "User",
             primaryjoin="User.id == %s.updated_by_id" % self.__name__,
@@ -314,3 +323,72 @@ db.event.listen(db.session, "after_commit", SearchableMixin.after_commit)
 SearchModelWithEntry = collections.namedtuple(
     "SearchModelWithEntry", ["model", "entry"]
 )
+
+
+class BeforeCommitValidatableMixin:
+    """
+    Mixin to run validations right before an commit.
+
+    We can run basic validations using the sqlalchemy.orm.validates
+    function. However, those validations run right in that moment
+    when we set a value.
+    Sometimes this is not what we want: We want to run one validation
+    for the state of the model when we want to save it.
+    This way we skip invalid intermediate states.
+    """
+
+    def validate(self):
+        """Run the validation of the instance."""
+        pass
+
+    @classmethod
+    def before_commit(cls, session):
+        """Collect the model instances that must be validated."""
+        validation_needed = []
+        for obj in itertools.chain(session.new, session.dirty):
+            if isinstance(obj, BeforeCommitValidatableMixin):
+                validation_needed.append(obj)
+        for obj in session.deleted:
+            if obj in validation_needed:
+                validation_needed.remove(obj)
+
+        for obj in validation_needed:
+            obj.validate()
+
+
+db.event.listen(db.session, "before_commit", BeforeCommitValidatableMixin.before_commit)
+
+
+class PermissionMixin(BeforeCommitValidatableMixin):
+    """
+    Abstract mixin to add fields for the permission handling.
+
+    This includes visibility (is_private, is_internal, is_public)
+    and group ids.
+    """
+
+    __abstract__ = True
+    group_ids = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
+    is_private = db.Column(db.Boolean, default=False)
+    is_internal = db.Column(db.Boolean, default=False)
+    is_public = db.Column(db.Boolean, default=False)
+
+    def validate(self):
+        """
+        Validate the model.
+
+        Check that we don't have multiple visibility values.
+        """
+        super().validate()
+        if self.is_private and any([self.is_public, self.is_internal]):
+            raise ConflictError(
+                "Please make sure that this object is neither public nor internal at first."
+            )
+        if self.is_internal and any([self.is_private, self.is_public]):
+            raise ConflictError(
+                "Please make sure that this object is neither public nor private at first."
+            )
+        if self.is_public and any([self.is_private, self.is_internal]):
+            raise ConflictError(
+                "Please make sure that this object is neither private nor internal at first."
+            )

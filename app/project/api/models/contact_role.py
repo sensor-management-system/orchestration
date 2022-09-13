@@ -44,6 +44,10 @@ class DeviceContactRole(db.Model, Role, IndirectSearchableMixin):
         """Return the device."""
         return [self.device]
 
+    def get_parent(self):
+        """Return the parent object (for permission management)."""
+        return self.device
+
 
 class PlatformContactRole(db.Model, Role, IndirectSearchableMixin):
     """Contact role for a platform."""
@@ -57,6 +61,10 @@ class PlatformContactRole(db.Model, Role, IndirectSearchableMixin):
     def get_parent_search_entities(self):
         """Return the platform."""
         return [self.platform]
+
+    def get_parent(self):
+        """Return the parent object (for permission management)."""
+        return self.platform
 
 
 class ConfigurationContactRole(db.Model, Role, IndirectSearchableMixin):
@@ -73,3 +81,7 @@ class ConfigurationContactRole(db.Model, Role, IndirectSearchableMixin):
     def get_parent_search_entities(self):
         """Return the configuration."""
         return [self.configuration]
+
+    def get_parent(self):
+        """Return the parent object (for permission management)."""
+        return self.configuration

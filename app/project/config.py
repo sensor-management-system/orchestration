@@ -36,6 +36,19 @@ class BaseConfig:
     MINIO_HTTP_CLIENT = env("MINIO_HTTP_CLIENT", None)
     MINIO_BUCKET_NAME = env("MINIO_BUCKET_NAME", "sms-attachments")
     ALLOWED_MIME_TYPES = env.list("ALLOWED_MIME_TYPES", [])
+    SMS_IDL_TOKEN = env("SMS_IDL_TOKEN", None)
+    IDL_URL = env("IDL_URL", None)
+    CATCH_EXCEPTIONS = True
+    INSTITUTE = env("INSTITUTE", "ufz")
+    OIDC_TOKEN_CACHING_SECONDS = env.int("OIDC_TOKEN_CACHING_SECONDS", 600)
+    PKCE_SCOPES = env("PKCE_SCOPES", "openid profile email auth_context")
+    PKCE_CLIENT_ID = env("PKCE_CLIENT_ID", "rdmsms-pkce-flow")
+    SMS_BACKEND_URL = env(
+        "SMS_BACKEND_URL", "https://localhost.localdomain/backend/api/v1"
+    )
+    SMS_FRONTEND_URL = env(
+        "SMS_FRONTEND_URL", "https://localhost.localdomain"
+    )
 
 
 class DevelopmentConfig(BaseConfig):
@@ -61,6 +74,7 @@ class TestingConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL", None)
     ELASTICSEARCH_URL = None
+    # https://github.com/jarus/flask-testing/issues/21
     # AssertionError: Popped wrong request context
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 

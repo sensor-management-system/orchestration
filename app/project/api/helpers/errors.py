@@ -51,6 +51,13 @@ class UnauthorizedError(ErrorResponse):
     status = 401
 
 
+class AuthenticationFailedError(ErrorResponse):
+    """Indication for an failed authentication (403)."""
+
+    title = "Authentication failed"
+    status = 403
+
+
 class ForbiddenError(ErrorResponse):
     """Default class for 403 Error."""
 

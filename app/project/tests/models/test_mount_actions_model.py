@@ -11,9 +11,15 @@ from project.tests.models.test_configurations_model import generate_configuratio
 def add_mount_device_action_model():
     d = Device(
         short_name=fake.linux_processor(),
+        is_public=True,
+        is_private=False,
+        is_internal=False,
     )
     p_p = Platform(
         short_name="device parent platform",
+        is_public=True,
+        is_private=False,
+        is_internal=False,
     )
     userinfo = generate_userinfo_data()
     c1 = Contact(
@@ -25,7 +31,7 @@ def add_mount_device_action_model():
     config = generate_configuration_model()
     device_mount_action = DeviceMountAction(
         begin_date=fake.date(),
-        description="test mount device action model",
+        begin_description="test mount device action model",
         offset_x=fake.coordinate(),
         offset_y=fake.coordinate(),
         offset_z=fake.coordinate(),
@@ -34,7 +40,7 @@ def add_mount_device_action_model():
     )
     device_mount_action.parent_platform = p_p
     device_mount_action.configuration = config
-    device_mount_action.contact = c1
+    device_mount_action.begin_contact = c1
     db.session.add_all([d, p_p, c1, u1, config, device_mount_action])
     db.session.commit()
     return device_mount_action
@@ -43,9 +49,15 @@ def add_mount_device_action_model():
 def add_mount_platform_action_model():
     p = Platform(
         short_name="short_name test",
+        is_public=True,
+        is_private=False,
+        is_internal=False,
     )
     p_p = Platform(
         short_name="parent platform",
+        is_public=True,
+        is_private=False,
+        is_internal=False,
     )
     userinfo = generate_userinfo_data()
     c1 = Contact(
@@ -57,7 +69,7 @@ def add_mount_platform_action_model():
     config = generate_configuration_model()
     platform_mount_action = PlatformMountAction(
         begin_date=fake.date(),
-        description="test mount platform action model",
+        begin_description="test mount platform action model",
         offset_x=fake.coordinate(),
         offset_y=fake.coordinate(),
         offset_z=fake.coordinate(),
@@ -66,7 +78,7 @@ def add_mount_platform_action_model():
     )
     platform_mount_action.parent_platform = p_p
     platform_mount_action.configuration = config
-    platform_mount_action.contact = c1
+    platform_mount_action.begin_contact = c1
     db.session.add_all([p, p_p, c1, u1, config, platform_mount_action])
     db.session.commit()
     return platform_mount_action
@@ -82,7 +94,7 @@ class TestMountActionsModel(BaseTestCase):
         platform_mount_action = add_mount_platform_action_model()
         mpa_r = (
             db.session.query(PlatformMountAction)
-            .filter_by(description="test mount platform action model")
+            .filter_by(begin_description="test mount platform action model")
             .one()
         )
         self.assertEqual(
@@ -96,7 +108,7 @@ class TestMountActionsModel(BaseTestCase):
         mount_device_action_model = add_mount_device_action_model()
         mount_device_action = (
             db.session.query(DeviceMountAction)
-            .filter_by(description="test mount device action model")
+            .filter_by(begin_description="test mount device action model")
             .one()
         )
         self.assertEqual(

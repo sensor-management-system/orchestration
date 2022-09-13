@@ -8,7 +8,7 @@ class DeviceAttachment(db.Model, IndirectSearchableMixin):
     """
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String(256), nullable=True)
+    label = db.Column(db.String(256), nullable=False)
     url = db.Column(db.String(1024), nullable=False)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship("Device")
@@ -20,3 +20,7 @@ class DeviceAttachment(db.Model, IndirectSearchableMixin):
     def get_parent_search_entities(self):
         """Return the device as parent search entity."""
         return [self.device]
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device

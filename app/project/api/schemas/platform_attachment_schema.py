@@ -13,12 +13,10 @@ class PlatformAttachmentSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    label = fields.Str(allow_none=True)
+    label = fields.Str(required=True)
     url = fields.Str(required=True)
 
     platform = Relationship(
-        self_view="api.platform_attachment_platform",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
         include_resource_linkage=True,

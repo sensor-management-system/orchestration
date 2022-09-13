@@ -65,7 +65,11 @@ class TestCliCommands(BaseTestCase):
             )
             user1 = User(subject="testuser1@ufz.test", contact=contact1)
             user2 = User(subject="testuser2@ufz.test", contact=contact2)
-            device = Device(short_name="device_short_name test", created_by_id=user1.id)
+            device = Device(short_name="device_short_name test", created_by_id=user1.id,
+                            is_public=False,
+                            is_private=False,
+                            is_internal=True,
+                            )
 
             db.session.add_all([contact1, contact2, user1, user2, device])
             device.contacts.append(contact1)

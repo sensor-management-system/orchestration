@@ -26,6 +26,9 @@ class Test(BaseTestCase):
             website="http://website/device",
             inventory_number="inventory_number test",
             persistent_identifier="persistent_identifier_test",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(sensor1)
         db.session.commit()
@@ -42,8 +45,18 @@ class Test(BaseTestCase):
             website="http://website/device2",
             inventory_number="inventory_number test2",
             persistent_identifier="persistent_identifier_test2",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         db.session.add(sensor2)
+
+        # Make the object public.
+        sensor1.is_internal = False
+        sensor2.is_internal = False
+        sensor1.is_public = True
+        sensor2.is_public = True
+
         db.session.commit()
         response = self.client.get(
             self.device_url,

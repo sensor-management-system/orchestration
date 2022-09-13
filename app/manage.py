@@ -146,12 +146,12 @@ def deactivate_a_user(src_user_subject, dest_user_subject):
 def reactivate_a_user(subject_user, given_name, family_name, email):
     """
     Reactivate a user.
-    The user active attribute will be set to True and then the contact 
+    The user active attribute will be set to True and then the contact
     Info will be asked by Prompting.
 
     # How to use:
      python manage.py users deactivate srcuserubject@ufz.de
-     
+
 
     :param subject_user: Subject attribute for the user.
     :param given_name: Contact given name.
@@ -170,6 +170,41 @@ def reactivate_a_user(subject_user, given_name, family_name, email):
     user.active = True
 
     db.session.commit()
+
+
+@users.command("upgrade-to-superuser")
+@click.argument('user_subject')
+def make_super_user(user_subject):
+    """
+    Upgrade a user to superuser a superuser.
+
+    How To use: python manage.py users upgrade-to-superuser testuser@ufz.de
+
+    :param user_subject: the subject attribute identical to jwt.sub
+    """
+    user = db.session.query(User).filter_by(subject=user_subject).first()
+    user.is_superuser = True
+    db.session.commit()
+    click.secho(f"{user.contact.given_name} is now upgraded to super user!", fg="green")
+    click.secho("As super-user you will be able to modify or delete any entity \n"
+                "in SMS without the need to belong to a group or a project.\n"
+                "Please use it wisely", fg="yellow")
+
+
+@users.command("downgrade-to-user")
+@click.argument('user_subject')
+def downgrade_to_user(user_subject):
+    """
+    Downgrade a superuser to a normal user.
+
+    How To use: python manage.py users downgrade-to-user testsuperuser@ufz.de
+
+    :param user_subject: the subject attribute identical to jwt.sub
+    """
+    user = db.session.query(User).filter_by(subject=user_subject).first()
+    user.is_superuser = False
+    db.session.commit()
+    click.secho(f"{user.contact.given_name} is now a downgraded to a normal user!", fg="green")
 
 
 if __name__ == "__main__":

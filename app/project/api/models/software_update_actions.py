@@ -42,6 +42,9 @@ class DeviceSoftwareUpdateAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "description": self.description,
         }
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.device
 
 class PlatformSoftwareUpdateAction(db.Model, AuditMixin, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -82,3 +85,7 @@ class PlatformSoftwareUpdateAction(db.Model, AuditMixin, IndirectSearchableMixin
             "repository_url": self.repository_url,
             "description": self.description,
         }
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.platform

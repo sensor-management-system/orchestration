@@ -14,8 +14,11 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
 def add_device_software_update_action_attachment():
-    d = Device(short_name="Device 133")
     userinfo = generate_userinfo_data()
+    d = Device(
+        short_name="Device 133", is_public=False, is_private=False, is_internal=True,
+    )
+
     c = Contact(
         given_name=userinfo["given_name"],
         family_name=userinfo["family_name"],
@@ -43,8 +46,11 @@ def add_device_software_update_action_attachment():
 
 
 def add_platform_software_update_action_attachment_model():
-    p = Platform(short_name="Platform 144")
     userinfo = generate_userinfo_data()
+    p = Platform(
+        short_name="Platform 144", is_public=False, is_private=False, is_internal=True,
+    )
+
     c = Contact(
         given_name=userinfo["given_name"],
         family_name=userinfo["family_name"],

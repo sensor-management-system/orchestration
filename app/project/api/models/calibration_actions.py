@@ -27,6 +27,10 @@ class DeviceCalibrationAction(db.Model, AuditMixin):
         backref=db.backref("device_calibration_actions"),
     )
 
+    def get_parent(self):
+        """Return parent object."""
+        return self.device
+
 
 class DevicePropertyCalibration(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -54,3 +58,7 @@ class DevicePropertyCalibration(db.Model, AuditMixin):
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
+
+    def get_parent(self):
+        """Return parent object."""
+        return self.device

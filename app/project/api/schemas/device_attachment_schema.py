@@ -18,12 +18,10 @@ class DeviceAttachmentSchema(Schema):
         self_view_kwargs = {"id": "<id>"}
 
     id = fields.Integer(as_string=True)
-    label = fields.Str(allow_none=True)
+    label = fields.Str(required=True)
     url = fields.Str(required=True)
 
     device = Relationship(
-        self_view="api.device_attachment_device",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
         include_resource_linkage=True,

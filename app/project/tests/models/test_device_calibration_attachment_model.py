@@ -10,8 +10,10 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
 def add_device_calibration_attachment():
-    device = Device(short_name="Device 1")
     userinfo = generate_userinfo_data()
+    device = Device(
+        short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+    )
     contact = Contact(
         given_name=userinfo["given_name"],
         family_name=userinfo["family_name"],

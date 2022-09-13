@@ -6,7 +6,12 @@ import os
 from project import base_url
 from project.api.models import Configuration, Contact, GenericConfigurationAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data, test_file_path
+from project.tests.base import (
+    BaseTestCase,
+    fake,
+    generate_userinfo_data,
+    test_file_path,
+)
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_configuration_action_attachment_model,
@@ -43,7 +48,9 @@ class TestGenericConfigurationAction(BaseTestCase):
 
     def test_get_generic_configuration_action_collection(self):
         """Test retrieve a collection of GenericConfigurationAction objects."""
-        configuration_action = generate_configuration_action_model()
+        configuration_action = generate_configuration_action_model(
+            is_public=True, is_private=False, is_internal=False
+        )
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
@@ -87,6 +94,10 @@ class TestGenericConfigurationAction(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration.id).first()
+        )
+        self.assertEqual(configuration.update_description, "create;action")
 
     def test_update_generic_configuration_action(self):
         """Update GenericConfigurationAction."""
@@ -95,7 +106,9 @@ class TestGenericConfigurationAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": configuration_action.id,
-                "attributes": {"description": "updated", },
+                "attributes": {
+                    "description": "updated",
+                },
             }
         }
         _ = super().update_object(
@@ -103,20 +116,36 @@ class TestGenericConfigurationAction(BaseTestCase):
             data_object=gca_updated,
             object_type=self.object_type,
         )
+        configuration_id = configuration_action.configuration_id
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(configuration.update_description, "update;action")
 
     def test_delete_generic_configuration_action(self):
         """Delete GenericConfigurationAction."""
         configuration_action = generate_configuration_action_model()
-        _ = super().delete_object(url=f"{self.url}/{configuration_action.id}", )
+        configuration_id = configuration_action.configuration_id
+        _ = super().delete_object(
+            url=f"{self.url}/{configuration_action.id}",
+        )
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        self.assertEqual(configuration.update_description, "delete;action")
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
         configuration1 = Configuration(
-            label="sample configuration", location_type="static"
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II", location_type="static"
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
         )
         db.session.add(configuration2)
 
@@ -156,8 +185,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         # then test only for the first configuration
         with self.client:
             url_get_for_configuration1 = (
-                    base_url
-                    + f"/configurations/{configuration1.id}/generic-configuration-actions"
+                base_url
+                + f"/configurations/{configuration1.id}/generic-configuration-actions"
             )
             response = self.client.get(
                 url_get_for_configuration1, content_type="application/vnd.api+json"
@@ -171,8 +200,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         # and test the second configuration
         with self.client:
             url_get_for_configuration2 = (
-                    base_url
-                    + f"/configurations/{configuration2.id}/generic-configuration-actions"
+                base_url
+                + f"/configurations/{configuration2.id}/generic-configuration-actions"
             )
             response = self.client.get(
                 url_get_for_configuration2, content_type="application/vnd.api+json"
@@ -186,8 +215,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         # and for a non existing
         with self.client:
             url_get_for_non_existing_configuration = (
-                    base_url
-                    + f"/configurations/{configuration2.id + 9999}/generic-configuration-actions"
+                base_url
+                + f"/configurations/{configuration2.id + 9999}/generic-configuration-actions"
             )
             response = self.client.get(
                 url_get_for_non_existing_configuration,
@@ -198,7 +227,9 @@ class TestGenericConfigurationAction(BaseTestCase):
     def test_delete_generic_configuration_action_with_attachment_link(self):
         """Delete GenericConfigurationAction with an attachment link."""
         configuration_action = add_generic_configuration_action_attachment_model()
-        _ = super().delete_object(url=f"{self.url}/{configuration_action.id}", )
+        _ = super().delete_object(
+            url=f"{self.url}/{configuration_action.id}",
+        )
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

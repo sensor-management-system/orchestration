@@ -6,8 +6,8 @@ from project import base_url
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import BaseTestCase, query_result_to_list
-from project.tests.base import fake
+from project.tests.base import (BaseTestCase, create_token, fake,
+                                query_result_to_list)
 
 
 class TestPlatformAttachmentServices(BaseTestCase):
@@ -18,7 +18,12 @@ class TestPlatformAttachmentServices(BaseTestCase):
     def test_post_platform_attachment_api(self):
         """Ensure that we can add a platform attachment."""
         # First we need to make sure that we have a platform
-        platform = Platform(short_name="Very new platform",)
+        platform = Platform(
+            short_name="Very new platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(platform)
         db.session.commit()
 
@@ -54,6 +59,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # We expect that it worked and that we have a new entry
         self.assertEqual(response.status_code, 201)
@@ -72,10 +78,17 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(
             str(platform_attachment.platform_id), response.get_json()["data"]["id"]
         )
+        msg = "create;attachment"
+        self.assertEqual(msg, platform_attachment.platform.update_description)
 
     def test_post_platform_attachment_api_missing_url(self):
         """Ensure that we don't add a platform attachment with missing url."""
-        platform = Platform(short_name="Very new platform",)
+        platform = Platform(
+            short_name="Very new platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
         db.session.add(platform)
         db.session.commit()
 
@@ -95,6 +108,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # it will not work, as we miss an important part (the url)
         # 422 => unprocessable entity
@@ -124,9 +138,10 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_post,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
         # it will not work, as we miss an important part (the platform)
-        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.status_code, 404)
         count_platform_attachments_after = db.session.query(PlatformAttachment).count()
         self.assertEqual(
             count_platform_attachments_before, count_platform_attachments_after
@@ -134,8 +149,18 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
     def test_get_platform_attachment_api(self):
         """Ensure that we can get a list of platform attachments."""
-        platform1 = Platform(short_name="Just a platform")
-        platform2 = Platform(short_name="Another platform")
+        platform1 = Platform(
+            short_name="Just a platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        platform2 = Platform(
+            short_name="Another platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
 
         db.session.add(platform1)
         db.session.add(platform2)
@@ -236,8 +261,18 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
     def test_patch_platform_attachment_api(self):
         """Ensure that we can update a platform attachment."""
-        platform1 = Platform(short_name="Just a platform")
-        platform2 = Platform(short_name="Another platform")
+        platform1 = Platform(
+            short_name="Just a platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        platform2 = Platform(
+            short_name="Another platform",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
 
         db.session.add(platform1)
         db.session.add(platform2)
@@ -267,6 +302,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 url_patch,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
+                headers=create_token(),
             )
 
         self.assertEqual(response.status_code, 200)
@@ -280,47 +316,47 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(platform_attachment_reloaded.label, "UFZ")
         self.assertEqual(platform_attachment_reloaded.platform_id, platform2.id)
 
-    def test_delete_platform_attachment_api(self):
-        """Ensure that we can delete a platform attachment."""
-        platform1 = Platform(short_name="Just a platform")
-        db.session.add(platform1)
-        db.session.commit()
-        platform_attachment1 = PlatformAttachment(
-            label="GFZ", url="https://www.gfz-potsdam.de", platform=platform1,
-        )
-        db.session.add(platform_attachment1)
-        db.session.commit()
-
-        with self.client:
-            response = self.client.get(
-                base_url + "/platforms/" + str(platform1.id) + "/platform-attachments",
-                content_type="application/vnd.api+json",
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.get_json()["data"]), 1)
-
-            response = self.client.delete(
-                base_url + "/platform-attachments/" + str(platform_attachment1.id),
-            )
-
-            # I would expect a 204 (no content), but 200 is good as well
-            self.assertTrue(response.status_code in [200, 204])
-
-            response = self.client.get(
-                base_url + "/platforms/" + str(platform1.id) + "/platform-attachments",
-                content_type="application/vnd.api+json",
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.get_json()["data"]), 0)
-
-        count_platform_attachments = (
-            db.session.query(PlatformAttachment)
-            .filter_by(platform_id=platform1.id,)
-            .count()
-        )
-        self.assertEqual(count_platform_attachments, 0)
+        msg = "update;attachment"
+        self.assertEqual(msg, platform_attachment_reloaded.platform.update_description)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_post_platform_attachment_with_no_label(self):
+        """Ensure that we can not add a platform attachment without a label."""
+        # First we need to make sure that we have a platform
+        platform = Platform(
+            short_name="Very new platform",
+            is_public=False,
+            is_private=True,
+            is_internal=False,
+        )
+        db.session.add(platform)
+        db.session.commit()
+        self.assertTrue(platform.id is not None)
+        count_platform_attachments = (
+            db.session.query(PlatformAttachment)
+            .filter_by(platform_id=platform.id,)
+            .count()
+        )
+        self.assertEqual(count_platform_attachments, 0)
+        payload = {
+            "data": {
+                "type": "platform_attachment",
+                "attributes": {"url": "https://www.ufz.de", "label": None,},
+                "relationships": {
+                    "platform": {"data": {"type": "platform", "id": str(platform.id)}}
+                },
+            }
+        }
+        with self.client:
+            url_post = base_url + "/platform-attachments"
+            response = self.client.post(
+                url_post,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+        self.assertEqual(response.status_code, 403)

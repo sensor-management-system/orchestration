@@ -22,6 +22,9 @@ class TestDeviceModel(BaseTestCase):
             website="http://website/device",
             inventory_number="inventory_number test",
             persistent_identifier="persistent_identifier_test",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
         DeviceSchema().dump(sensor)
         db.session.add(sensor)

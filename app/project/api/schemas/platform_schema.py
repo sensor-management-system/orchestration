@@ -36,9 +36,12 @@ class PlatformSchema(Schema):
     website = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    group_ids = fields.Field(many=True, allow_none=True)
+    is_private = fields.Boolean(allow_none=True)
+    is_internal = fields.Boolean(allow_none=True)
+    is_public = fields.Boolean(allow_none=True)
+    update_description = fields.Str(dump_only=True)
     created_by = Relationship(
-        self_view="api.platform_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -47,8 +50,6 @@ class PlatformSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.platform_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,
@@ -60,7 +61,7 @@ class PlatformSchema(Schema):
     serial_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     platform_attachments = Relationship(
-        related_view="api.platform_platform_attachments",
+        related_view="api.platform_attachment_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -70,7 +71,7 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     contacts = Relationship(
-        related_view="api.platform_contacts",
+        related_view="api.contact_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -79,7 +80,7 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     generic_platform_actions = Relationship(
-        related_view="api.platform_generic_platform_actions",
+        related_view="api.generic_platform_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -88,7 +89,7 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     platform_mount_actions = Relationship(
-        related_view="api.platform_platform_mount_actions",
+        related_view="api.platform_mount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -96,17 +97,8 @@ class PlatformSchema(Schema):
         type_="platform_mount_actions",
         id_field="id",
     )
-    platform_unmount_actions = Relationship(
-        related_view="api.platform_platform_unmount_actions",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        schema="PlatformUnmountActionSchema",
-        type_="platform_unmount_actions",
-        id_field="id",
-    )
     platform_software_update_actions = Relationship(
-        related_view="api.platform_platform_software_update_actions",
+        related_view="api.platform_software_update_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -115,7 +107,7 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     outer_platform_mount_actions = Relationship(
-        related_view="api.platform_outer_platform_mount_actions",
+        related_view="api.platform_mount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -124,7 +116,7 @@ class PlatformSchema(Schema):
         id_field="id",
     )
     outer_device_mount_actions = Relationship(
-        related_view="api.platform_outer_device_mount_actions",
+        related_view="api.device_mount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -180,3 +172,14 @@ class PlatformToNestedDictSerializer:
                     ContactSchema().dict_serializer(c) for c in platform.contacts
                 ],
             }
+
+
+class PlatformSchemaForOnlyId(Schema):
+    class Meta:
+
+        type_ = "platform"
+        self_view = "api.platform_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.platform_list"
+
+    id = fields.Integer(as_string=True)

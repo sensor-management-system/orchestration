@@ -22,11 +22,12 @@ class DeviceSchema(Schema):
     """
 
     class Meta:
-        """Meta class for the DeviceSchema."""
+        """Metaclass for the DeviceSchema."""
 
         type_ = "device"
         self_view = "api.device_detail"
         self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.device_list"
 
     id = fields.Integer(as_string=True)
     description = fields.Str(allow_none=True)
@@ -46,10 +47,13 @@ class DeviceSchema(Schema):
     website = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    group_ids = fields.Field(many=True, allow_none=True)
+    is_private = fields.Boolean(allow_none=True)
+    is_internal = fields.Boolean(allow_none=True)
+    is_public = fields.Boolean(allow_none=True)
+    update_description = fields.Str(dump_only=True)
     created_by = Relationship(
         attribute="created_by",
-        self_view="api.device_created_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},
         include_resource_linkage=True,
@@ -58,8 +62,6 @@ class DeviceSchema(Schema):
         dump_only=True,
     )
     updated_by = Relationship(
-        self_view="api.device_updated_user",
-        self_view_kwargs={"id": "<id>"},
         related_view="api.user_detail",
         related_view_kwargs={"id": "<updated_by_id>"},
         include_resource_linkage=True,
@@ -68,7 +70,7 @@ class DeviceSchema(Schema):
         dump_only=True,
     )
     customfields = Relationship(
-        related_view="api.device_customfields",
+        related_view="api.customfield_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -78,7 +80,7 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     device_properties = Relationship(
-        related_view="api.device_device_properties",
+        related_view="api.device_property_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -88,7 +90,7 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     device_attachments = Relationship(
-        related_view="api.device_device_attachments",
+        related_view="api.device_attachment_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -98,7 +100,7 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     contacts = Relationship(
-        related_view="api.device_contacts",
+        related_view="api.contact_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -107,7 +109,7 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     generic_device_actions = Relationship(
-        related_view="api.device_generic_device_actions",
+        related_view="api.generic_device_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -116,7 +118,7 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     device_mount_actions = Relationship(
-        related_view="api.device_device_mount_actions",
+        related_view="api.device_mount_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -124,17 +126,8 @@ class DeviceSchema(Schema):
         type_="device_mount_action",
         id_field="id",
     )
-    device_unmount_actions = Relationship(
-        related_view="api.device_device_unmount_actions",
-        related_view_kwargs={"id": "<id>"},
-        include_resource_linkage=True,
-        many=True,
-        schema="DeviceUnmountActionSchema",
-        type_="device_unmount_action",
-        id_field="id",
-    )
     device_calibration_actions = Relationship(
-        related_view="api.device_device_calibration_actions",
+        related_view="api.device_calibration_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -143,7 +136,7 @@ class DeviceSchema(Schema):
         id_field="id",
     )
     device_software_update_actions = Relationship(
-        related_view="api.device_device_software_update_actions",
+        related_view="api.device_software_update_action_list",
         related_view_kwargs={"id": "<id>"},
         include_resource_linkage=True,
         many=True,
@@ -215,3 +208,13 @@ class DeviceToNestedDictSerializer:
                     for c in device.customfields
                 ],
             }
+
+
+class DeviceSchemaForOnlyId(Schema):
+    class Meta:
+        type_ = "device"
+        self_view = "api.device_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.device_list"
+
+    id = fields.Integer(as_string=True)

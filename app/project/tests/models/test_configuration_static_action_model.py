@@ -1,6 +1,5 @@
 from project.api.models import (
     ConfigurationStaticLocationBeginAction,
-    ConfigurationStaticLocationEndAction,
     Contact,
 )
 from project.api.models.base_model import db
@@ -9,8 +8,12 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 
 
-def add_static_location_begin_action_model():
-    config = generate_configuration_model()
+def add_static_location_begin_action_model(
+    is_public=False, is_private=False, is_internal=True
+):
+    config = generate_configuration_model(
+        is_public=is_public, is_private=is_private, is_internal=is_internal
+    )
     userinfo = generate_userinfo_data()
     contact = Contact(
         given_name=userinfo["given_name"],
@@ -18,8 +21,10 @@ def add_static_location_begin_action_model():
         email=userinfo["email"],
     )
     configuration_static_location_begin_action = ConfigurationStaticLocationBeginAction(
-        begin_date=fake.date(),
-        description="test configuration_static_location_begin_action",
+        begin_date="2021-10-21T10:00:50.542Z",
+        end_date="2033-10-22T10:00:50.542Z",
+        begin_description="test configuration_static_location_begin_action",
+        end_description="end",
         x=fake.coordinate(),
         y=fake.coordinate(),
         z=fake.coordinate(),
@@ -27,30 +32,12 @@ def add_static_location_begin_action_model():
         elevation_datum_name=None,
         elevation_datum_uri=fake.uri(),
         configuration=config,
-        contact=contact,
+        begin_contact=contact,
+        end_contact=contact,
     )
     db.session.add_all([config, contact, configuration_static_location_begin_action])
     db.session.commit()
     return configuration_static_location_begin_action
-
-
-def add_static_location_end_action_model():
-    config = generate_configuration_model()
-    userinfo = generate_userinfo_data()
-    contact = Contact(
-        given_name=userinfo["given_name"],
-        family_name=userinfo["family_name"],
-        email=userinfo["email"],
-    )
-    configuration_static_location_end_action = ConfigurationStaticLocationEndAction(
-        end_date=fake.date(),
-        description="test configuration_static_location_end_action",
-        configuration=config,
-        contact=contact,
-    )
-    db.session.add_all([config, contact, configuration_static_location_end_action])
-    db.session.commit()
-    return configuration_static_location_end_action
 
 
 class TestConfigurationStaticLocationActionModel(BaseTestCase):
@@ -65,17 +52,6 @@ class TestConfigurationStaticLocationActionModel(BaseTestCase):
         )
         self.assertTrue(configuration_static_location_begin_action.id is not None)
         self.assertEqual(
-            configuration_static_location_begin_action.description,
+            configuration_static_location_begin_action.begin_description,
             "test configuration_static_location_begin_action",
-        )
-
-    def test_add_configuration_static_location_end_action_model(self):
-        """""Ensure Add configuration static location end action model."""
-        configuration_static_location_end_action = (
-            add_static_location_end_action_model()
-        )
-        self.assertTrue(configuration_static_location_end_action.id is not None)
-        self.assertEqual(
-            configuration_static_location_end_action.description,
-            "test configuration_static_location_end_action",
         )
