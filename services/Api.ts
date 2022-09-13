@@ -50,10 +50,8 @@ import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi } 
 import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
 import { PlatformSoftwareUpdateActionApi } from '@/services/sms/PlatformSoftwareUpdateActionApi'
 import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
-import { StaticLocationBeginActionApi } from '@/services/sms/StaticLocationBeginActionApi'
-import { StaticLocationEndActionApi } from '@/services/sms/StaticLocationEndActionApi'
-import { DynamicLocationBeginActionApi } from '@/services/sms/DynamicLocationBeginActionApi'
-import { DynamicLocationEndActionApi } from '@/services/sms/DynamicLocationEndActionApi'
+import { StaticLocationActionApi } from '@/services/sms/StaticLocationActionApi'
+import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
 import { UploadApi } from '@/services/sms/UploadApi'
 import { PermissionGroupApi } from '@/services/sms/PermissionGroupApi'
 
@@ -81,6 +79,7 @@ import { StatisticsApi } from '@/services/sms/StatisticsApi'
 import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
 import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
 import { UserInfoApi } from '@/services/sms/UserInfoApi'
+import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -106,11 +105,10 @@ export class Api {
   private readonly _deviceCalibrationActionAttachmentApi: DeviceCalibrationActionAttachmentApi
   private readonly _devicePropertyCalibrationApi: DeviceCalibrationDevicePropertyApi
   private readonly _deviceCalibrationActionApi: DeviceCalibrationActionApi
-  private readonly _staticLocationBeginActionApi: StaticLocationBeginActionApi
-  private readonly _staticLocationEndActionApi: StaticLocationEndActionApi
-  private readonly _dynamicLocationBeginActionApi: DynamicLocationBeginActionApi
-  private readonly _dynamicLocationEndActionApi: DynamicLocationEndActionApi
   private readonly _mountingActionsControllerApi: MountingActionsControllerApi
+  private readonly _staticLocationActionApi: StaticLocationActionApi
+  private readonly _dynamicLocationActionApi: DynamicLocationActionApi
+  private readonly _locationActionTimepointControllerApi: LocationActionTimepointControllerApi
   private readonly _uploadApi: UploadApi
   private readonly _statisticsApi: StatisticsApi
 
@@ -184,21 +182,17 @@ export class Api {
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-mount-actions'
     )
-    this._staticLocationBeginActionApi = new StaticLocationBeginActionApi(
+    this._staticLocationActionApi = new StaticLocationActionApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/static-location-begin-actions'
+      '/static-location-actions'
     )
-    this._staticLocationEndActionApi = new StaticLocationEndActionApi(
+    this._dynamicLocationActionApi = new DynamicLocationActionApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/static-location-end-actions'
+      '/dynamic-location-actions'
     )
-    this._dynamicLocationBeginActionApi = new DynamicLocationBeginActionApi(
+    this._locationActionTimepointControllerApi = new LocationActionTimepointControllerApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/dynamic-location-begin-actions'
-    )
-    this._dynamicLocationEndActionApi = new DynamicLocationEndActionApi(
-      createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/dynamic-location-end-actions'
+      '/controller/configurations'
     )
     this._mountingActionsControllerApi = new MountingActionsControllerApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
@@ -209,10 +203,9 @@ export class Api {
       '/configurations',
       deviceMountActionApi,
       platformMountActionApi,
-      this._staticLocationBeginActionApi,
-      this._staticLocationEndActionApi,
-      this._dynamicLocationBeginActionApi,
-      this._dynamicLocationEndActionApi,
+      this._staticLocationActionApi,
+      this._dynamicLocationActionApi,
+      this._locationActionTimepointControllerApi,
       this._mountingActionsControllerApi,
       // callback function to fetch permission groups
       async (): Promise<PermissionGroup[]> => {

@@ -44,10 +44,7 @@ import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchPara
 import { ContactRole } from '@/models/ContactRole'
 import {
   DeviceMountTimelineAction,
-  DeviceUnmountTimelineAction,
-  DynamicLocationBeginTimelineAction,
-  DynamicLocationEndTimelineAction,
-  IActionDateWithTextItem,
+  DeviceUnmountTimelineAction, DynamicLocationBeginTimelineAction, DynamicLocationEndTimelineAction,
   ITimelineAction,
   PlatformMountTimelineAction,
   PlatformUnmountTimelineAction,
@@ -55,25 +52,24 @@ import {
   StaticLocationEndTimelineAction
 } from '@/utils/configurationInterfaces'
 
-import { byDateOldestLast, IWithDate } from '@/modelUtils/mountHelpers'
-import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
+import { StaticLocationAction } from '@/models/StaticLocationAction'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
-// import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
-// import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
-// import { mockCurrentConfiguration, mockMountingActions } from '@/utils/mockHelper'
+import { Device } from '@/models/Device'
+import { byDateOldestLast, IWithDate } from '@/modelUtils/mountHelpers'
+import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { sortCriteriaAscending } from '@/utils/dateHelper'
 
 export enum LocationTypes {
-  staticStart = 'staticStart',
-  staticEnd = 'staticEnd',
-  dynamicStart = 'dynamicStart',
-  dynamicEnd = 'dynamicEnd',
+  staticStart = 'configuration_static_location_begin',
+  staticEnd = 'configuration_static_location_end',
+  dynamicStart = 'configuration_dynamic_location_begin',
+  dynamicEnd = 'configuration_dynamic_location_end',
 }
 
 export enum MountingTypes {
@@ -94,14 +90,18 @@ export interface ConfigurationsState {
   configuration: Configuration | null
   configurationContactRoles: ContactRole[]
   configurationStates: string[]
-  configurationStaticLocationBeginActions: StaticLocationBeginAction[]
-  configurationStaticLocationEndActions: StaticLocationEndAction[]
-  configurationDynamicLocationBeginActions: DynamicLocationBeginAction[]
-  configurationDynamicLocationEndActions: DynamicLocationEndAction[]
   configurationMountingActions: ConfigurationMountingAction[]
   configurationMountingActionsForDate: ConfigurationsTree | null
   configurationDeviceMountActions: DeviceMountAction[]
   configurationPlatformMountActions: PlatformMountAction[]
+  configurationLocationActionTimepoints: []
+  selectedTimepointItem: ILocationTimepoint| null
+  staticLocationAction: StaticLocationAction|null
+  dynamicLocationAction: DynamicLocationAction|null
+  deviceMountActionsForDynamicLocation: DeviceMountAction []
+  selectedLocationDate: DateTime|null
+  configurationStaticLocationActions: StaticLocationAction[]
+  configurationDynamicLocationActions: DynamicLocationAction[]
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -112,14 +112,18 @@ const state = (): ConfigurationsState => ({
   configuration: null,
   configurationContactRoles: [],
   configurationStates: [],
-  configurationStaticLocationBeginActions: [],
-  configurationStaticLocationEndActions: [],
-  configurationDynamicLocationBeginActions: [],
-  configurationDynamicLocationEndActions: [],
   configurationMountingActions: [],
   configurationMountingActionsForDate: null,
   configurationDeviceMountActions: [],
   configurationPlatformMountActions: [],
+  configurationLocationActionTimepoints: [],
+  selectedTimepointItem: null,
+  staticLocationAction: null,
+  dynamicLocationAction: null,
+  deviceMountActionsForDynamicLocation: [],
+  selectedLocationDate: null,
+  configurationStaticLocationActions: [],
+  configurationDynamicLocationActions: [],
   totalPages: 1,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0]
@@ -146,37 +150,38 @@ function formatMountActionString (value: ConfigurationMountingAction): string {
 }
 
 const getters: GetterTree<ConfigurationsState, RootState> = {
-  timelineActions: (state: ConfigurationsState): ITimelineAction[] => { // Todo überlegen, ob das man das eventuell anders macht
+  timelineActions: (state: ConfigurationsState): ITimelineAction[] => {
     const result: ITimelineAction[] = []
 
-    if (state.configuration !== null) {
-      const devices = state.configuration.deviceMountActions.map(a => a.device)
-      for (const platformMountAction of state.configurationPlatformMountActions) {
-        result.push(new PlatformMountTimelineAction(platformMountAction))
-        if (platformMountAction.endDate !== null) {
-          result.push(new PlatformUnmountTimelineAction(platformMountAction))
-        }
+    const devices = state.configurationDeviceMountActions.map(a => a.device)
+    for (const platformMountAction of state.configurationPlatformMountActions) {
+      result.push(new PlatformMountTimelineAction(platformMountAction))
+      if (platformMountAction.endDate !== null) {
+        result.push(new PlatformUnmountTimelineAction(platformMountAction))
       }
-      for (const deviceMountAction of state.configurationDeviceMountActions) {
-        result.push(new DeviceMountTimelineAction(deviceMountAction))
-        if (deviceMountAction.endDate !== null) {
-          result.push(new DeviceUnmountTimelineAction(deviceMountAction))
-        }
-      }
-      for (const action of state.configuration.staticLocationBeginActions) {
-        result.push(new StaticLocationBeginTimelineAction(action))
-      }
-      for (const action of state.configuration.staticLocationEndActions) {
-        result.push(new StaticLocationEndTimelineAction(action))
-      }
-      for (const action of state.configuration.dynamicLocationBeginActions) {
-        result.push(new DynamicLocationBeginTimelineAction(action, devices))
-      }
-      for (const action of state.configuration.dynamicLocationEndActions) {
-        result.push(new DynamicLocationEndTimelineAction(action))
-      }
-      (result as IWithDate[]).sort(byDateOldestLast)
     }
+    for (const deviceMountAction of state.configurationDeviceMountActions) {
+      result.push(new DeviceMountTimelineAction(deviceMountAction))
+      if (deviceMountAction.endDate !== null) {
+        result.push(new DeviceUnmountTimelineAction(deviceMountAction))
+      }
+    }
+
+    for (const staticLocationAction of state.configurationStaticLocationActions) {
+      result.push(new StaticLocationBeginTimelineAction(staticLocationAction))
+      if (staticLocationAction.endDate !== null) {
+        result.push(new StaticLocationEndTimelineAction(staticLocationAction))
+      }
+    }
+    for (const dynamicLocationAction of state.configurationDynamicLocationActions) {
+      result.push(new DynamicLocationBeginTimelineAction(dynamicLocationAction, devices))
+      if (dynamicLocationAction.endDate !== null) {
+        result.push(new DynamicLocationEndTimelineAction(dynamicLocationAction))
+      }
+    }
+
+    (result as IWithDate[]).sort(byDateOldestLast)
+
     return result
   },
   mountActionDateItems: (state: ConfigurationsState) => {
@@ -185,85 +190,152 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
       value: item.timepoint
     })).reverse()
   },
-  locationActionsDates: (state: ConfigurationsState) => {
-    let result: IActionDateWithTextItem[] = []
-
-    if (state.configuration) {
-      const datesWithTexts = []
-      for (const staticLocationBeginAction of state.configuration.staticLocationBeginActions) {
-        if (staticLocationBeginAction.beginDate) {
-          datesWithTexts.push({
-            type: LocationTypes.staticStart,
-            value: staticLocationBeginAction,
-            date: staticLocationBeginAction.beginDate,
-            text: dateToDateTimeStringHHMM(staticLocationBeginAction.beginDate) + ' - ' + 'Static location begin'
-          })
-        }
-      }
-      for (const staticLocationEndAction of state.configuration.staticLocationEndActions) {
-        if (staticLocationEndAction.endDate) {
-          datesWithTexts.push({
-            type: LocationTypes.staticEnd,
-            value: staticLocationEndAction,
-            date: staticLocationEndAction.endDate,
-            text: dateToDateTimeStringHHMM(staticLocationEndAction.endDate) + ' - ' + 'Static location end'
-          })
-        }
-      }
-      for (const dynamicLocationBeginAction of state.configuration.dynamicLocationBeginActions) {
-        if (dynamicLocationBeginAction.beginDate) {
-          datesWithTexts.push({
-            type: LocationTypes.dynamicStart,
-            value: dynamicLocationBeginAction,
-            date: dynamicLocationBeginAction.beginDate,
-            text: dateToDateTimeStringHHMM(dynamicLocationBeginAction.beginDate) + ' - ' + 'Dynamic location begin'
-          })
-        }
-      }
-      for (const dynamicLocationEndAction of state.configuration.dynamicLocationEndActions) {
-        if (dynamicLocationEndAction.endDate) {
-          datesWithTexts.push({
-            type: LocationTypes.dynamicEnd,
-            value: dynamicLocationEndAction,
-            date: dynamicLocationEndAction.endDate,
-            text: dateToDateTimeStringHHMM(dynamicLocationEndAction.endDate) + ' - ' + 'Dynamic location end'
-          })
-        }
-      }
-      datesWithTexts.sort((a, b) => {
-        if (a.date < b.date) {
-          return -1
-        }
-        if (a.date > b.date) {
-          return 1
-        }
-        return 0
-      })
-      // Todo: Anmerknug: ich hab das grouping nicht eingebaut
-
-      result = datesWithTexts
+  activeDevicesWithPropertiesForDate: (state: ConfigurationsState) => (selectedDate: DateTime | null): Device[] => {
+    if (!selectedDate) {
+      return []
     }
-    return result
+    if (state.deviceMountActionsForDynamicLocation.length > 0) {
+      return state.deviceMountActionsForDynamicLocation.filter((value) => {
+        return selectedDate >= value.beginDate && (!value.endDate || selectedDate <= value.endDate)
+      }
+      ).map((value) => {
+        return value.device
+      })
+    }
+    return []
+  },
+  devicesForDynamicLocation: (state: ConfigurationsState) => {
+    if (state.deviceMountActionsForDynamicLocation.length > 0) {
+      return state.deviceMountActionsForDynamicLocation.map((value) => {
+        return value.device
+      })
+    }
+    return []
+  },
+  locationActionTimepointsExceptPassedIdAndType: (state: ConfigurationsState) => (id: string | null, type: string | null) => {
+    if (id && type) {
+      return state.configurationLocationActionTimepoints.filter((item: ILocationTimepoint) => {
+        return item.type !== type && item.id !== id
+      })
+    }
+    return state.configurationLocationActionTimepoints
+  },
+  hasDeviceMountActionsForDynamicLocation: (state: ConfigurationsState) => {
+    return state.deviceMountActionsForDynamicLocation.length > 0
+  },
+  hasMountedDevicesWithProperties: (state: ConfigurationsState) => {
+    return state.deviceMountActionsForDynamicLocation.filter((action: DeviceMountAction) => {
+      return action.device.properties.length > 0
+    }).length > 0
+  },
+  hasActiveDevicesWithPropertiesForDate: (_state: ConfigurationsState, getters) => (selectedDate: DateTime | null): boolean => {
+    const activeDevicesWithProperties = getters.activeDevicesWithPropertiesForDate(selectedDate)
+    return activeDevicesWithProperties.length > 0
+  },
+  activeLocationActionTimepoint: (state: ConfigurationsState): ILocationTimepoint| null => {
+    return state.configurationLocationActionTimepoints.find((element: ILocationTimepoint) => {
+      if (element.type === LocationTypes.staticEnd || element.type === LocationTypes.dynamicEnd) {
+        return false
+      }
+
+      const correspondingEndAction = getEndLocationTimepointForBeginning(element, state.configurationLocationActionTimepoints)
+      const hasNoEndAction = correspondingEndAction == null
+
+      return (element.type === LocationTypes.staticStart || element.type === LocationTypes.dynamicStart) && hasNoEndAction
+    }) ?? null
+  },
+  hasActiveLocationActionTimepoint: (_state: ConfigurationsState, getters): boolean => {
+    if (getters.activeLocationActionTimepoint) {
+      return true
+    }
+    return false
+  },
+  earliestEndDateOfRelatedDeviceOfDynamicAction: (state: ConfigurationsState) => (action: DynamicLocationAction) => {
+    if (state.deviceMountActionsForDynamicLocation.length > 0 && action.beginDate !== null) {
+      const deviceMountActionsForDate = state.deviceMountActionsForDynamicLocation.filter((value) => {
+        return action.beginDate! >= value.beginDate && (!value.endDate || action.beginDate! <= value.endDate) && value.device.properties.length > 0
+      }
+      )
+
+      const deviceMountActionsBelongingToDynamicAction = deviceMountActionsForDate.filter((deviceMount: DeviceMountAction) => {
+        return deviceMount.endDate !== null && deviceMount.device.properties.some((prop: DeviceProperty) => {
+          if (action.x && prop.id === action.x.id) {
+            return true
+          }
+          if (action.y && prop.id === action.y.id) {
+            return true
+          }
+          if (action.z && prop.id === action.z.id) {
+            return true
+          }
+          return false
+        })
+      })
+
+      // Sort by end date because, earliest first
+      deviceMountActionsBelongingToDynamicAction.sort((a: DeviceMountAction, b: DeviceMountAction) => {
+        return sortCriteriaAscending(a.endDate!, b.endDate!)
+      })
+
+      if (deviceMountActionsBelongingToDynamicAction.length > 0) {
+        return deviceMountActionsBelongingToDynamicAction[0].endDate
+      }
+    }
+
+    return null
   },
   pageSizes: () => {
     return PAGE_SIZES
   }
 }
 
+export type ActiveDevicesWithPropertiesForDateGetter = (selectedDate: DateTime | null) => Device[]
+export type DevicesForDynamicLocationGetter = Device[]
+export type ActiveLocationActionTimepointGetter = ILocationTimepoint | null
+export type activeDevicesWithPropertiesForDate = ILocationTimepoint | null
+export type HasActiveLocationActionTimepointGetter = boolean
+export type HasMountedDevicesWithPropertiesGetter = boolean
+export type HasActiveDevicesWithPropertiesForDate = (selectedDate: DateTime | null) => boolean
+export type LocationActionTimepointsExceptPassedIdAndTypeTypeGetter = (id: string | null, type: string | null) => ILocationTimepoint[]
+export type EarliestEndDateOfRelatedDeviceOfDynamicActionGetter = (action: DynamicLocationAction) => DateTime|null
+
 type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 
 export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
 export type AddDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type AddPlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
+export type AddStaticLocationBeginActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
+export type AddStaticLocationEndActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
+export type AddDynamicLocationBeginActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
+export type AddDynamicLocationEndActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
+
+export type DeleteDynamicLocationActionAction = (id: string) => Promise<void>
+export type DeleteStaticLocationActionAction = (id: string) => Promise<void>
+
 export type LoadConfigurationAction = IdParamReturnsVoidPromiseAction
 export type LoadConfigurationContactRolesAction = IdParamReturnsVoidPromiseAction
 export type LoadDeviceMountActionsAction = IdParamReturnsVoidPromiseAction
 export type LoadMountingActionsAction = IdParamReturnsVoidPromiseAction
 export type LoadMountingConfigurationForDateAction = (params: { id: string, timepoint: DateTime }) => Promise<void>
 export type LoadPlatformMountActionsAction = IdParamReturnsVoidPromiseAction
+export type LoadConfigurationDynamicLocationActionsAction = IdParamReturnsVoidPromiseAction
+export type LoadConfigurationStaticLocationActionsAction = IdParamReturnsVoidPromiseAction
+export type LoadLocationActionTimepointsAction = IdParamReturnsVoidPromiseAction
+export type LoadStaticLocationActionAction = IdParamReturnsVoidPromiseAction
+export type LoadDynamicLocationActionAction = IdParamReturnsVoidPromiseAction
+export type LoadDeviceMountActionsForDynamicLocationAction = IdParamReturnsVoidPromiseAction
+
 export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
+
 export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
+export type UpdateStaticLocationActionAction = (params: {configurationId: string,
+  staticLocationAction: StaticLocationAction}) => Promise<string>
+export type UpdateDynamicLocationActionAction = (params: {configurationId: string,
+  dynamicLocationAction: DynamicLocationAction}) => Promise<string>
+
+export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
+export type SetSelectedLocationDateAction = (newVal: DateTime|null) => void
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
   async searchConfigurationsPaginated ({
@@ -304,26 +376,29 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     const configurationStates = await this.$api.configurationStates.findAll()
     commit('setConfigurationStates', configurationStates)
   },
-  async loadConfigurationStaticLocationBeginActions ({ commit }: { commit: Commit }, id: string) {
-    commit('setConfigurationStaticLocationBeginActions', await this.$api.configurations.findRelatedStaticLocationBeginActions(id))
+  async loadStaticLocationAction ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    commit('setStaticLocationAction', await this.$api.configurations.staticLocationActionApi.findById(id))
   },
-  async loadConfigurationStaticLocationEndActions ({ commit }: { commit: Commit }, id: string) {
-    commit('setConfigurationStaticLocationEndActions', await this.$api.configurations.findRelatedStaticLocationEndActions(id))
+  async loadDynamicLocationAction ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    commit('setDynamicLocationAction', await this.$api.configurations.dynamicLocationActionApi.findById(id))
   },
-  async loadConfigurationDynamicLocationBeginActions ({ commit }: { commit: Commit }, id: string) {
-    commit('setConfigurationDynamicLocationBeginActions', await this.$api.configurations.findRelatedDynamicLocationBeginActions(id))
+  async loadConfigurationStaticLocationActions ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    commit('setConfigurationStaticLocationActions', await this.$api.configurations.findRelatedStaticLocationActions(id))
   },
-  async loadConfigurationDynamicLocationEndActions ({ commit }: { commit: Commit }, id: string) {
-    commit('setConfigurationDynamicLocationEndActions', await this.$api.configurations.findRelatedDynamicLocationEndActions(id))
+  async loadConfigurationDynamicLocationActions ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    commit('setConfigurationDynamicLocationActions', await this.$api.configurations.findRelatedDynamicLocationActions(id))
   },
   async loadDeviceMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setConfigurationDeviceMountActions', await this.$api.configurations.findRelatedDeviceMountActions(id))
+  },
+  async loadDeviceMountActionsForDynamicLocation ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    commit('setDeviceMountActionsForDynamicLocation', await this.$api.configurations.findRelatedDeviceMountActionsIncludingDeviceInformation(id))
   },
   async loadPlatformMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setConfigurationPlatformMountActions', await this.$api.configurations.findRelatedPlatformMountActions(id))
   },
   async loadMountingActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
-    commit('setConfigurationMountingActions', await this.$api.configurations.findMountingActions(id))
+    commit('setConfigurationMountingActions', await this.$api.configurations.findRelatedMountingActions(id))
   },
   async loadMountingConfigurationForDate ({
     commit,
@@ -337,17 +412,18 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   }): Promise<void> {
     await dispatch('contacts/loadAllContacts', null, { root: true })
     const contacts = this.getters['contacts/searchContacts']
-    const mountingActionsByDate = await this.$api.configurations.findMountingActionsByDate(id, timepoint, contacts)
+    const mountingActionsByDate = await this.$api.configurations.findRelatedMountingActionsByDate(id, timepoint, contacts)
 
     commit('setConfigurationMountingActionsForDate', mountingActionsByDate)
-
-    // return mockCurrentConfiguration
   },
   async loadLocationActions ({ dispatch }: { dispatch: Dispatch }, id: string) {
     await dispatch('loadConfigurationStaticLocationBeginActions', id)
     await dispatch('loadConfigurationStaticLocationEndActions', id)
     await dispatch('loadConfigurationDynamicLocationBeginActions', id)
     await dispatch('loadConfigurationDynamicLocationEndActions', id)
+  },
+  async loadLocationActionTimepoints ({ commit }: {commit: Commit}, id: string) {
+    commit('setConfigurationLocationActionTimepoints', await this.$api.configurations.findRelatedLocationActions(id))
   },
   async deleteConfiguration (_context, id: string) {
     await this.$api.configurations.deleteById(id)
@@ -402,15 +478,60 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   addStaticLocationBeginAction (_context, {
     configurationId,
-    staticLocationBeginAction
-  }: { configurationId: string, staticLocationBeginAction: StaticLocationBeginAction }) {
-    return this.$api.configurations.staticLocationBeginActionApi.add(configurationId, staticLocationBeginAction)
+    staticLocationAction
+  }: { configurationId: string, staticLocationAction: StaticLocationAction }) {
+    return this.$api.configurations.staticLocationActionApi.add(configurationId, staticLocationAction)
+  },
+  addStaticLocationEndAction (_context, {
+    configurationId,
+    staticLocationAction
+  }: { configurationId: string, staticLocationAction: StaticLocationAction }) {
+    return _context.dispatch('updateStaticLocationAction', {
+      configurationId,
+      staticLocationAction
+    })
+  },
+  updateStaticLocationAction (_context, {
+    configurationId,
+    staticLocationAction
+  }: { configurationId: string, staticLocationAction: StaticLocationAction }) {
+    return this.$api.configurations.staticLocationActionApi.update(configurationId, staticLocationAction)
+  },
+  deleteStaticLocationAction (_context, id: string) {
+    return this.$api.configurations.staticLocationActionApi.deleteById(id)
+  },
+  addDynamicLocationBeginAction (_context, {
+    configurationId,
+    dynamicLocationAction
+  }: { configurationId: string, dynamicLocationAction: DynamicLocationAction }) {
+    return this.$api.configurations.dynamicLocationActionApi.add(configurationId, dynamicLocationAction)
+  },
+  addDynamicLocationEndAction (_context, {
+    configurationId,
+    dynamicLocationAction
+  }: { configurationId: string, dynamicLocationAction: DynamicLocationAction }) {
+    return _context.dispatch('updateDynamicLocationAction', { configurationId, dynamicLocationAction })
+  },
+  updateDynamicLocationAction (_context, {
+    configurationId,
+    dynamicLocationAction
+  }: { configurationId: string, dynamicLocationAction: DynamicLocationAction }) {
+    return this.$api.configurations.dynamicLocationActionApi.update(configurationId, dynamicLocationAction)
+  },
+  deleteDynamicLocationAction (_context, id: string) {
+    return this.$api.configurations.dynamicLocationActionApi.deleteById(id)
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
   },
   setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
     commit('setPageSize', newPageSize)
+  },
+  setSelectedTimepointItem ({ commit }: { commit: Commit }, newval: ILocationTimepoint|null) {
+    commit('setSelectedTimepointItem', newval)
+  },
+  setSelectedLocationDate ({ commit }: { commit: Commit }, newval: DateTime|null) {
+    commit('setSelectedLocationDate', newval)
   }
 }
 
@@ -436,20 +557,26 @@ const mutations = {
   setTotalPages (state: ConfigurationsState, count: number) {
     state.totalPages = count
   },
-  setConfigurationStaticLocationBeginActions (state: ConfigurationsState, staticLocationBeginActions: StaticLocationBeginAction[]) {
-    state.configurationStaticLocationBeginActions = staticLocationBeginActions
-  },
-  setConfigurationStaticLocationEndActions (state: ConfigurationsState, staticLocationEndActions: StaticLocationEndAction[]) {
-    state.configurationStaticLocationEndActions = staticLocationEndActions
-  },
-  setConfigurationDynamicLocationBeginActions (state: ConfigurationsState, dynamicLocationBeginActions: DynamicLocationBeginAction[]) {
-    state.configurationDynamicLocationBeginActions = dynamicLocationBeginActions
-  },
-  setConfigurationDynamicLocationEndActions (state: ConfigurationsState, dynamicLocationEndActions: DynamicLocationEndAction[]) {
-    state.configurationDynamicLocationEndActions = dynamicLocationEndActions
-  },
   setConfigurationMountingActions (state: ConfigurationsState, configurationMountingActions: []) {
     state.configurationMountingActions = configurationMountingActions
+  },
+  setConfigurationLocationActionTimepoints (state: ConfigurationsState, configurationLocationActionTimepoints: []) {
+    state.configurationLocationActionTimepoints = configurationLocationActionTimepoints
+  },
+  setSelectedTimepointItem (state: ConfigurationsState, newVal: ILocationTimepoint|null) {
+    state.selectedTimepointItem = newVal
+  },
+  setStaticLocationAction (state: ConfigurationsState, newVal: StaticLocationAction|null) {
+    state.staticLocationAction = newVal
+  },
+  setDynamicLocationAction (state: ConfigurationsState, newVal: DynamicLocationAction|null) {
+    state.dynamicLocationAction = newVal
+  },
+  setConfigurationStaticLocationActions (state: ConfigurationsState, newVal: StaticLocationAction[]) {
+    state.configurationStaticLocationActions = newVal
+  },
+  setConfigurationDynamicLocationActions (state: ConfigurationsState, newVal: DynamicLocationAction[]) {
+    state.configurationDynamicLocationActions = newVal
   },
   setConfigurationMountingActionsForDate (state: ConfigurationsState, configurationMountingActionsForDate: ConfigurationsTree) {
     state.configurationMountingActionsForDate = configurationMountingActionsForDate
@@ -459,6 +586,12 @@ const mutations = {
   },
   setConfigurationPlatformMountActions (state: ConfigurationsState, configurationPlatformMountActions: []) {
     state.configurationPlatformMountActions = configurationPlatformMountActions
+  },
+  setDeviceMountActionsForDynamicLocation (state: ConfigurationsState, deviceMountActionsForDynamicLocation: []) {
+    state.deviceMountActionsForDynamicLocation = deviceMountActionsForDynamicLocation
+  },
+  setSelectedLocationDate (state: ConfigurationsState, newVal: DateTime|null) {
+    state.selectedLocationDate = newVal
   }
 }
 

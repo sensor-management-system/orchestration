@@ -85,3 +85,12 @@ export const dateToDateTimeString = (aDate: DateTime | null): string => {
 export const currentAsUtcDateSecondsAsZeros = (): DateTime => {
   return DateTime.fromFormat(DateTime.now().toFormat('yyyy-MM-dd HH:mm'), 'yyyy-MM-dd HH:mm')
 }
+
+export const sortCriteriaAscending = (a: DateTime, b: DateTime) => {
+  if (a < b) {
+    return -1
+  } else if (a > b) {
+    return 1
+  }
+  return 0
+}

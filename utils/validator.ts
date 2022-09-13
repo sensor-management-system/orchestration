@@ -39,7 +39,10 @@ import { LocationType } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { IPermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
-import { dateToString } from '@/utils/dateHelper'
+import { dateTimesEqual, dateToDateTimeStringHHMM, dateToString } from '@/utils/dateHelper'
+import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
+import { LocationTypes } from '@/store/configurations'
+import { getActiveActionOrNull, getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
 
 export default {
   validateInputForStartDate (configuration: Configuration): (v: string) => (boolean | string) {
@@ -194,5 +197,122 @@ export default {
       }
       return true
     }
+  },
+  canNotStartAnActionAfterAnActiveAction (dateToValidate: DateTime | null, locationTimepoints: ILocationTimepoint[]) {
+    const activeAction = getActiveActionOrNull(locationTimepoints)
+
+    if (activeAction == null) {
+      return true
+    }
+
+    if (dateToValidate == null) {
+      return true
+    }
+
+    return activeAction.timepoint < dateToValidate ? 'Must be before ' + dateToDateTimeStringHHMM(activeAction.timepoint) : true
+  },
+  canNotIntersectWithExistingInterval (dateToValidate: DateTime | null, locationTimepoints: ILocationTimepoint[]) {
+    if (dateToValidate === null) {
+      return true
+    }
+
+    if (locationTimepoints.length === 0) {
+      return true
+    }
+
+    const filteredArray = locationTimepoints.filter((item: ILocationTimepoint) => {
+      return item.timepoint <= dateToValidate!
+    })
+    // wenn de letzte eintrag eine start action ist, dann ist es invalide
+    if (filteredArray.length > 0) {
+      const lastEntry = filteredArray[filteredArray.length - 1] as ILocationTimepoint
+
+      const correspondingEndAction = getEndLocationTimepointForBeginning(lastEntry, locationTimepoints)
+
+      if (correspondingEndAction) {
+        return 'Must be before ' + dateToDateTimeStringHHMM(lastEntry.timepoint) + ' or after ' + dateToDateTimeStringHHMM(correspondingEndAction.timepoint)
+      }
+
+      if (lastEntry.type === LocationTypes.staticEnd || lastEntry.type === LocationTypes.dynamicEnd) {
+        if (dateTimesEqual(lastEntry.timepoint, dateToValidate)) {
+          return 'Must be after ' + dateToDateTimeStringHHMM(lastEntry.timepoint)
+        }
+      }
+    }
+    return true
+  },
+  validateStartDateIsBeforeEndDate (startDate: DateTime | null, endDate: DateTime | null) {
+    if (!startDate) {
+      return true
+    }
+    if (!endDate) {
+      return true
+    }
+
+    if (startDate >= endDate) {
+      return 'Start date must not be after end date'
+    }
+
+    return true
+  },
+  endDateMustBeBeforeNextAction (startDate: DateTime | null, endDate: DateTime|null, locationTimepoints: ILocationTimepoint[]) {
+    if (!startDate) {
+      return true
+    }
+
+    const filteredArray = locationTimepoints.filter((item: ILocationTimepoint) => {
+      return item.timepoint > startDate
+    })
+
+    if (filteredArray.length === 0) {
+      return true
+    }
+
+    // the endDate has to be before the timepoint of the first entry of the location timepoint list
+    if (!endDate) {
+      return 'End date must be before ' + dateToDateTimeStringHHMM(filteredArray[0].timepoint) + ' (next action)'
+    }
+
+    if (endDate >= filteredArray[0].timepoint) {
+      return 'End date must be before ' + dateToDateTimeStringHHMM(filteredArray[0].timepoint) + ' (next action)'
+    }
+
+    return true
+  },
+  startDateMustBeAfterPreviousAction (startDate: DateTime | null, endDate: DateTime | null, locationTimepoints: ILocationTimepoint[]) {
+    if (!startDate) {
+      return true
+    }
+    if (!endDate) {
+      return true
+    }
+
+    const filteredArray = locationTimepoints.filter((item: ILocationTimepoint) => {
+      return item.timepoint < endDate
+    })
+
+    if (filteredArray.length === 0) {
+      return true
+    }
+
+    if (startDate <= filteredArray[filteredArray.length - 1].timepoint) {
+      return 'Start date must be after ' + dateToDateTimeStringHHMM(filteredArray[filteredArray.length - 1].timepoint)
+    }
+
+    return true
+  },
+  endDateMustBeBeforeEndDateOfRelatedDevice (endDateOfDynamicAction: DateTime | null, earliestEndDateOfRelatedDevice: DateTime | null) {
+    if (!earliestEndDateOfRelatedDevice && !endDateOfDynamicAction) {
+      return true
+    }
+
+    if (!endDateOfDynamicAction && earliestEndDateOfRelatedDevice != null) {
+      return 'End date must be before ' + dateToDateTimeStringHHMM(earliestEndDateOfRelatedDevice) + ' (planned unmount).'
+    }
+
+    if ((endDateOfDynamicAction && earliestEndDateOfRelatedDevice) && endDateOfDynamicAction > earliestEndDateOfRelatedDevice) {
+      return 'End date must be before ' + dateToDateTimeStringHHMM(earliestEndDateOfRelatedDevice) + ' (planned unmount).'
+    }
+    return true
   }
 }

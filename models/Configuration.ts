@@ -35,10 +35,6 @@ import { IContact, Contact } from '@/models/Contact'
 import { IMountActions } from '@/models/IMountActions'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { StaticLocationBeginAction } from '@/models/StaticLocationBeginAction'
-import { StaticLocationEndAction } from '@/models/StaticLocationEndAction'
-import { DynamicLocationBeginAction } from '@/models/DynamicLocationBeginAction'
-import { DynamicLocationEndAction } from '@/models/DynamicLocationEndAction'
 import { PermissionGroup, IPermissionGroup, IPermissionableSingleGroup } from '@/models/PermissionGroup'
 import { Visibility, IVisible } from '@/models/Visibility'
 
@@ -49,10 +45,6 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   label: string
   status: string
   contacts: IContact[]
-  staticLocationBeginActions: StaticLocationBeginAction[]
-  staticLocationEndActions: StaticLocationEndAction[]
-  dynamicLocationBeginActions: DynamicLocationBeginAction[]
-  dynamicLocationEndActions: DynamicLocationEndAction[]
   createdAt: DateTime | null
   updatedAt: DateTime | null
   updateDescription: string
@@ -77,10 +69,6 @@ export class Configuration implements IConfiguration, IVisible {
   private _contacts: IContact[] = [] as IContact[]
   private _deviceMountActions: DeviceMountAction[] = []
   private _platformMountActions: PlatformMountAction[] = []
-  private _staticLocationBeginActions: StaticLocationBeginAction[] = []
-  private _staticLocationEndActions: StaticLocationEndAction[] = []
-  private _dynamicLocationBeginActions: DynamicLocationBeginAction[] = []
-  private _dynamicLocationEndActions: DynamicLocationEndAction[] = []
   private _permissionGroup: IPermissionGroup | null = null
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -152,38 +140,6 @@ export class Configuration implements IConfiguration, IVisible {
 
   set platformMountActions (newPlatformMountActions: PlatformMountAction[]) {
     this._platformMountActions = newPlatformMountActions
-  }
-
-  get staticLocationBeginActions (): StaticLocationBeginAction[] {
-    return this._staticLocationBeginActions
-  }
-
-  set staticLocationBeginActions (newActions: StaticLocationBeginAction[]) {
-    this._staticLocationBeginActions = newActions
-  }
-
-  get staticLocationEndActions (): StaticLocationEndAction[] {
-    return this._staticLocationEndActions
-  }
-
-  set staticLocationEndActions (newActions: StaticLocationEndAction[]) {
-    this._staticLocationEndActions = newActions
-  }
-
-  get dynamicLocationBeginActions (): DynamicLocationBeginAction[] {
-    return this._dynamicLocationBeginActions
-  }
-
-  set dynamicLocationBeginActions (newActions: DynamicLocationBeginAction[]) {
-    this._dynamicLocationBeginActions = newActions
-  }
-
-  get dynamicLocationEndActions (): DynamicLocationEndAction[] {
-    return this._dynamicLocationEndActions
-  }
-
-  set dynamicLocationEndActions (newActions: DynamicLocationEndAction[]) {
-    this._dynamicLocationEndActions = newActions
   }
 
   get permissionGroup (): IPermissionGroup | null {
@@ -276,10 +232,6 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.deviceMountActions = someObject.deviceMountActions.map(DeviceMountAction.createFromObject)
     newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
-    newObject.staticLocationBeginActions = someObject.staticLocationBeginActions.map(StaticLocationBeginAction.createFromObject)
-    newObject.staticLocationEndActions = someObject.staticLocationEndActions.map(StaticLocationEndAction.createFromObject)
-    newObject.dynamicLocationBeginActions = someObject.dynamicLocationBeginActions.map(DynamicLocationBeginAction.createFromObject)
-    newObject.dynamicLocationEndActions = someObject.dynamicLocationEndActions.map(DynamicLocationEndAction.createFromObject)
 
     newObject.permissionGroup = someObject.permissionGroup ? PermissionGroup.createFromObject(someObject.permissionGroup) : null
 

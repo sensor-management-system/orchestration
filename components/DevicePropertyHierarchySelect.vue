@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
         :item-text="(device) => device.shortName"
         :item-value="(device) => device"
         :label="deviceSelectLabel"
+        :rules="deviceSelectRules"
         clearable
         :disabled="disabled"
         @change="selectDevice"
@@ -48,6 +49,7 @@ permissions and limitations under the Licence.
         :item-text="(property) => property.propertyName"
         :item-value="(property) => property"
         :label="propertySelectLabel"
+        :rules="propertySelectRules"
         clearable
         :disabled="disabled"
         @change="selectProperty"
@@ -146,6 +148,9 @@ export default class DevicePropertyHierarchySelect extends Vue {
   })
   // @ts-ignore
   readonly disabled: boolean
+
+  @Prop({ default: () => [], type: Array }) readonly deviceSelectRules!: []
+  @Prop({ default: () => [], type: Array }) readonly propertySelectRules!: []
 
   private selectedDevice: Device | null = null
 

@@ -1,11 +1,12 @@
 /**
  * @license
- * Web client of the Sensor Management System software developed within
- * the Helmholtz DataHub Initiative by GFZ and UFZ.
+ * Web client of the Sensor Management System software developed within the
+ * Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020, 2021
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -31,59 +32,77 @@
  */
 
 import { AxiosInstance } from 'axios'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { PlatformMountActionSerializer } from '@/serializers/jsonapi/PlatformMountActionSerializer'
 
-export class PlatformMountActionApi {
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { DynamicLocationActionSerializer } from '@/serializers/jsonapi/DynamicLocationActionSerializer'
+
+export class DynamicLocationActionApi {
   private axiosApi: AxiosInstance
   readonly basePath: string
-  private serializer: PlatformMountActionSerializer
+  private serializer: DynamicLocationActionSerializer
 
   constructor (axiosApi: AxiosInstance, basePath: string) {
     this.axiosApi = axiosApi
     this.basePath = basePath
-    this.serializer = new PlatformMountActionSerializer()
+    this.serializer = new DynamicLocationActionSerializer()
+  }
+
+  findById (id: string): Promise<DynamicLocationAction> {
+    const url = this.basePath + '/' + id
+
+    const params = {
+      include: [
+        'begin_contact',
+        'end_contact',
+        'x_property',
+        'y_property',
+        'z_property'
+      ].join(',')
+    }
+
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return this.serializer.convertJsonApiObjectToModel(rawServerResponse.data)
+    })
   }
 
   deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
-  async add (configurationId: string, platformMountAction: PlatformMountAction): Promise<string> {
+  async add (configurationId: string, action: DynamicLocationAction): Promise<string> {
     const url = this.basePath
-    const data = this.serializer.convertModelToJsonApiData(configurationId, platformMountAction)
+    const data = this.serializer.convertModelToJsonApiData(configurationId, action)
     const response = await this.axiosApi.post(url, { data })
-    // we can't return a full entity here, as we need to included data about the contacts & the device
-    // so we just return the id, and let the client load the full element with the included data
-    // once it is necessary
-    return response.data.id
+    return response.data.data.id
   }
 
-  async update (configurationId: string, platformMountAction: PlatformMountAction): Promise<string> {
-    if (!platformMountAction.id) {
-      throw new Error('no id for the PlatformMountAction')
+  async update (configurationId: string, action: DynamicLocationAction): Promise<string> {
+    if (!action.id) {
+      throw new Error('no id for the DynamicLocationAction')
     }
-    const url = this.basePath + '/' + platformMountAction.id
-    const data = this.serializer.convertModelToJsonApiData(configurationId, platformMountAction)
+    const url = this.basePath + '/' + action.id
+    const data = this.serializer.convertModelToJsonApiData(configurationId, action)
     const response = await this.axiosApi.patch(url, { data })
     // we can't return a full entity here, as we need to included data about the contacts & the device
     // so we just return the id, and let the client load the full element with the included data
     // once it is necessary
-    return response.data.id
+    return response.data.data.id
   }
 
-  async getRelatedActions (configurationId: string) {
-    const url = '/configurations/' + configurationId + '/platform-mount-actions'
+  getRelatedActions (configurationId: string): Promise<DynamicLocationAction[]> {
+    const url = '/configurations/' + configurationId + '/dynamic-location-actions'
     const params = {
-      'page[size]': 10000,
       include: [
         'begin_contact',
         'end_contact',
-        'parent_platform',
-        'platform'
+        'x_property',
+        'y_property',
+        'z_property'
       ].join(',')
     }
-    const rawServerResponse = await this.axiosApi.get(url, { params })
-    return this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
+    return this.axiosApi.get(url, { params }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      return this.serializer.convertJsonApiObjectListToModelList(rawData)
+    })
   }
 }

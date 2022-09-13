@@ -2,15 +2,13 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -37,65 +35,65 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild />
+    <StaticLocationView
+      v-if="staticLocationAction"
+      :action="staticLocationAction"
+      :configuration-id="configurationId"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
-
-import {
-  LoadConfigurationDynamicLocationActionsAction,
-  LoadConfigurationStaticLocationActionsAction,
-  LoadDeviceMountActionsAction,
-  LoadPlatformMountActionsAction
-} from '@/store/configurations'
-
+import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
+import * as VueRouter from 'vue-router'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
+import StaticLocationView from '@/components/configurations/StaticLocationView.vue'
+import { ConfigurationsState, LoadStaticLocationActionAction } from '@/store/configurations'
 @Component({
-  components: {
-    ProgressIndicator
+  components: { StaticLocationView, ProgressIndicator },
+  middleware: ['auth'],
+  computed: {
+    ...mapState('configurations', ['staticLocationAction'])
   },
-  methods: mapActions('configurations', [
-    'loadDeviceMountActions',
-    'loadPlatformMountActions',
-    'loadConfigurationDynamicLocationActions',
-    'loadConfigurationStaticLocationActions'
-  ])
+  methods: {
+    ...mapActions('configurations', ['loadStaticLocationAction'])
+  }
 })
-export default class ConfigurationActions extends Vue {
+export default class StaticLocationActionView extends Vue {
   private isLoading = false
 
-  loadDeviceMountActions!: LoadDeviceMountActionsAction
-  loadPlatformMountActions!: LoadPlatformMountActionsAction
-  loadConfigurationDynamicLocationActions!: LoadConfigurationDynamicLocationActionsAction
-  loadConfigurationStaticLocationActions!: LoadConfigurationStaticLocationActionsAction
+  // vuex definition for typescript check
+  staticLocationAction!: ConfigurationsState['staticLocationAction']
+  loadStaticLocationAction!: LoadStaticLocationActionAction
 
-  head () {
-    return {
-      titleTemplate: 'Actions - %s'
-    }
+  async created () {
+    await this.loadLocationAction()
+  }
+
+  get actionId () {
+    return this.$route.params.actionId
   }
 
   get configurationId (): string {
     return this.$route.params.configurationId
   }
 
-  async fetch () {
+  async loadLocationAction () {
     try {
       this.isLoading = true
-      await Promise.all([
-        this.loadDeviceMountActions(this.configurationId),
-        this.loadPlatformMountActions(this.configurationId),
-        this.loadConfigurationDynamicLocationActions(this.configurationId),
-        this.loadConfigurationStaticLocationActions(this.configurationId)
-      ])
+      await this.loadStaticLocationAction(this.actionId)
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch actions')
+      this.$store.commit('snackbar/setError', 'Loading failed')
     } finally {
       this.isLoading = false
+    }
+  }
+
+  @Watch('$route')
+  async onRouteChange (newRoute: VueRouter.Route, oldRoute: VueRouter.Route) {
+    if (newRoute.params.actionId !== oldRoute.params.actionId) {
+      await this.loadLocationAction()
     }
   }
 }

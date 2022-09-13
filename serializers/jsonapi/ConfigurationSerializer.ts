@@ -40,23 +40,11 @@ import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityWithOptionalId,
   IJsonApiEntityWithoutDetails,
-  IJsonApiEntityWithOptionalAttributes,
-  IJsonApiRelationships
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
-import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
-import { PlatformSerializer } from '@/serializers/jsonapi/PlatformSerializer'
-import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
-import { StaticLocationBeginActionSerializer } from '@/serializers/jsonapi/StaticLocationBeginActionSerializer'
-import { StaticLocationEndActionSerializer } from '@/serializers/jsonapi/StaticLocationEndActionSerializer'
-import { DynamicLocationBeginActionSerializer } from '@/serializers/jsonapi/DynamicLocationBeginActionSerializer'
-import { DynamicLocationEndActionSerializer } from '@/serializers/jsonapi/DynamicLocationEndActionSerializer'
-import { PermissionGroupSerializer } from '@/serializers/jsonapi/PermissionGroupSerializer'
 
-import { Platform } from '@/models/Platform'
-import { Device } from '@/models/Device'
-import { DeviceProperty } from '@/models/DeviceProperty'
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
 
@@ -71,15 +59,6 @@ export interface IConfigurationWithMeta {
 
 export class ConfigurationSerializer {
   private contactSerializer: ContactSerializer = new ContactSerializer()
-  private deviceSerializer: DeviceSerializer = new DeviceSerializer()
-  private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
-  private platformSerializer: PlatformSerializer = new PlatformSerializer()
-  private staticLocationBeginActionSerializer: StaticLocationBeginActionSerializer = new StaticLocationBeginActionSerializer()
-  private staticLocationEndActionSerializer: StaticLocationEndActionSerializer = new StaticLocationEndActionSerializer()
-  private dynamicLocationBeginActionSerializer: DynamicLocationBeginActionSerializer = new DynamicLocationBeginActionSerializer()
-  private dynamicLocationEndActionSerializer: DynamicLocationEndActionSerializer = new DynamicLocationEndActionSerializer()
-  private permissionGroupSerializer: PermissionGroupSerializer = new PermissionGroupSerializer()
-
   private _permissionGroups: PermissionGroup[] = []
 
   set permissionGroups (groups: PermissionGroup[]) {
@@ -128,41 +107,6 @@ export class ConfigurationSerializer {
       }
     }
 
-    const deviceLookupById: {[idx: string]: Device} = {}
-    const devices = this.deviceSerializer.convertJsonApiRelationshipsModelList(included)
-
-    for (const device of devices) {
-      const deviceId = device.id
-      if (deviceId != null) {
-        deviceLookupById[deviceId] = device
-      }
-    }
-
-    const devicePropertyLookupById: {[idx: string]: DeviceProperty} = {}
-
-    for (const includedEntry of included) {
-      if (includedEntry.type === 'device_property') {
-        const relationships = includedEntry.relationships
-        if (relationships) {
-          const deviceRelationship = relationships.device
-          if (deviceRelationship) {
-            const deviceRelationshipData = deviceRelationship.data as IJsonApiEntityWithoutDetails
-            if (deviceRelationshipData) {
-              const deviceId = deviceRelationshipData.id
-              if (deviceLookupById[deviceId]) {
-                const deviceProperty = this.devicePropertySerializer.convertJsonApiDataToModel(includedEntry)
-                deviceLookupById[deviceId].properties.push(deviceProperty)
-
-                if (deviceProperty.id) {
-                  devicePropertyLookupById[deviceProperty.id] = deviceProperty
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
     let missingDataForContactIds: string[] = []
     if (relationships) {
       const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
@@ -170,19 +114,7 @@ export class ConfigurationSerializer {
       missingDataForContactIds = contactsWithMissing.missing.ids
     }
 
-    const platforms = this.platformSerializer.convertJsonApiRelationshipsModelList(included)
-
-    const platformLookupById: {[idx: string]: Platform} = {}
-    for (const platform of platforms) {
-      const platformId = platform.id
-      if (platformId != null) {
-        platformLookupById[platformId] = platform
-      }
-    }
-
     const allPossibleContacts: {[key: string]: Contact} = {}
-    const allPossibleDevices: {[key: string]: Device} = {}
-    const allPossiblePlatforms: {[key: string]: Platform} = {}
 
     if (included && included.length > 0) {
       for (const includedEntry of included) {
@@ -190,38 +122,8 @@ export class ConfigurationSerializer {
           const contactId = includedEntry.id
           const contact = this.contactSerializer.convertJsonApiDataToModel(includedEntry)
           allPossibleContacts[contactId] = contact
-        } else if (includedEntry.type === 'platform') {
-          const platformId = includedEntry.id
-          const platform = this.platformSerializer.convertJsonApiDataToModel(includedEntry, []).platform
-          allPossiblePlatforms[platformId] = platform
         }
-        // devices are already processed
       }
-    }
-
-    for (const deviceId of Object.keys(deviceLookupById)) {
-      const device = deviceLookupById[deviceId]
-      allPossibleDevices[deviceId] = device
-    }
-
-    if (relationships) {
-      // included mount actions are not processed any more, they can be loaded
-      // seperately
-
-      // seems to be necessary as the pure if clause isn't recognized by typescript to avoid undefined type
-      const rs = relationships as IJsonApiRelationships
-      configuration.staticLocationBeginActions = this.staticLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
-        rs, included, allPossibleContacts
-      )
-      configuration.staticLocationEndActions = this.staticLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
-        rs, included, allPossibleContacts
-      )
-      configuration.dynamicLocationBeginActions = this.dynamicLocationBeginActionSerializer.convertJsonApiRelationshipsModelList(
-        rs, included, allPossibleContacts, devicePropertyLookupById
-      )
-      configuration.dynamicLocationEndActions = this.dynamicLocationEndActionSerializer.convertJsonApiRelationshipsModelList(
-        rs, included, allPossibleContacts
-      )
     }
 
     // just pick the contact from the relationships that is referenced by the created_by user

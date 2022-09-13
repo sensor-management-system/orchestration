@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
           <v-row no-gutters>
             <v-col cols="12">
               <v-card-subtitle class="pt-0">
-                {{ action.contact.toString() }}
+                {{ contactName | orDefault }}
               </v-card-subtitle>
             </v-col>
           </v-row>
@@ -201,6 +201,13 @@ export default class ConfigurationsTimelineActionCard extends Vue {
   })
   // @ts-ignore
   readonly action!: ITimelineAction
+
+  get contactName () {
+    if (this.action.contact) {
+      return this.action.contact.toString()
+    }
+    return ''
+  }
 }
 </script>
 

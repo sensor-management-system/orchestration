@@ -2,11 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2020, 2021
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tim Eder (UFZ, tim.eder@ufz.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -33,63 +33,73 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div>
-    <v-row>
-      <v-col cols="12" md="3">
-        <label>Given name</label>
-        {{ value.givenName | orDefault }}
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>Family name</label>
-        {{ value.familyName | orDefault }}
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="9">
-        <label>E-mail</label>
-        {{ value.email | orDefault }}
-        <a v-if="value.email.length > 0" :href="'mailto:' + value.email">
-          <v-icon
-            small
-          >
-            mdi-email
+  <v-dialog
+    v-model="showDialog"
+    max-width="360"
+    @click:outside="$emit('cancel-deletion')"
+  >
+    <v-card v-if="hasActionToDelete">
+      <v-card-title class="headline">
+        Delete dynamic location
+      </v-card-title>
+      <v-card-text>
+        Do you really want to delete the dynamic location?
+      </v-card-text>
+      <v-card-actions>
+        <v-btn
+          text
+          @click="$emit('cancel-deletion')"
+        >
+          Cancel
+        </v-btn>
+        <v-spacer />
+        <v-btn
+          color="error"
+          text
+          @click="$emit('submit-deletion')"
+        >
+          <v-icon left>
+            mdi-delete
           </v-icon>
-        </a>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="9">
-        <label>Website</label>
-        {{ value.website | orDefault }}
-        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
-          <v-icon
-            small
-          >
-            mdi-open-in-new
-          </v-icon>
-        </a>
-      </v-col>
-    </v-row>
-  </div>
+          Delete
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
-import { Contact } from '@/models/Contact'
+import { IDynamicLocationAction } from '@/models/DynamicLocationAction'
 
 @Component
-export default class ContactBasicData extends Vue {
+export default class DynamicLocationDeleteDialog extends Vue {
   @Prop({
-    default: () => new Contact(),
     required: true,
-    type: Contact
+    type: Boolean
   })
-  readonly value!: Contact
-}
+  readonly value!: boolean
 
+  @Prop({
+    type: Object
+  })
+    action!: IDynamicLocationAction
+
+  get showDialog (): boolean {
+    return this.value
+  }
+
+  set showDialog (value: boolean) {
+    this.$emit('input', value)
+  }
+
+  get hasActionToDelete () {
+    return this.action !== null
+  }
+}
 </script>
 
-<style lang="scss">
-@import "@/assets/styles/_readonly_views.scss";
+<style scoped>
+
 </style>

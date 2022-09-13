@@ -83,7 +83,20 @@ export class DeviceMountActionApi {
         'device'
       ].join(',')
     }
-    const response = await this.axiosApi.get(url, { params })
-    return response.data
+    const rawServerResponse = await this.axiosApi.get(url, { params })
+    return this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
+  }
+
+  async getRelatedActionsIncludingDeviceInformation (configurationId: string) {
+    const url = '/configurations/' + configurationId + '/device-mount-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'device',
+        'device.device_properties'
+      ].join(',')
+    }
+    const rawServerResponse = await this.axiosApi.get(url, { params })
+    return this.serializer.convertJsonApiObjectListToModelListAdditionalDeviceInformation(rawServerResponse.data)
   }
 }
