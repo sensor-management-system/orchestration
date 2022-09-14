@@ -46,10 +46,10 @@ permissions and limitations under the Licence.
     >
       <template #label="{item}">
         <div v-if="item.isDevice()">
-          Device - {{ item.unpack().device.shortName }}
+          Device - {{ item.unpack().device.shortName | shortenMiddle }}
         </div>
         <div v-if="item.isPlatform()">
-          Platform - {{ item.unpack().platform.shortName }}
+          Platform - {{ item.unpack().platform.shortName | shortenMiddle }}
         </div>
         <div v-if="item.isConfiguration()">
           Configuration - {{ getConfigurationLabel(item.unpack().configuration) }}
@@ -171,7 +171,7 @@ export default class ConfigurationsTreeView extends Vue {
   }
 
   getConfigurationLabel (config: Configuration): string {
-    let label = config.label
+    let label = this.$options.filters?.shortenMiddle(config.label, 30)
     if (config.startDate) {
       label += ' (' + dateToString(config.startDate)
       if (config.endDate) {
