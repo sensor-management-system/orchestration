@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
         Offsets:
       </v-col>
       <v-col cols="8">
-        {{ `X = ${mountAction.offsetX} | Y = ${mountAction.offsetY} | Z = ${mountAction.offsetZ}` }}
+        {{ `X = ${mountAction.offsetX} m | Y = ${mountAction.offsetY} m | Z = ${mountAction.offsetZ} m` }}
       </v-col>
     </v-row>
     <v-row
