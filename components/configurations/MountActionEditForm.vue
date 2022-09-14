@@ -43,9 +43,11 @@ permissions and limitations under the Licence.
           <ConfigurationsTreeView
             v-if="tree.length > 0"
             ref="treeView"
-            :activatable="false"
             :value="selectedNode"
             :tree="tree"
+            disable-per-node
+            :activatable="false"
+            @input="$emit('select', $event)"
           />
         </v-card-text>
       </v-card>

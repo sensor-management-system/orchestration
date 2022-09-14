@@ -39,6 +39,7 @@ permissions and limitations under the Licence.
       :items="items"
       :activatable="activatable"
       :hoverable="activatable"
+      :disable-per-node="disablePerNode"
       rounded
       open-all
       :open.sync="openNodes"
@@ -121,6 +122,16 @@ export default class ConfigurationsTreeView extends Vue {
   })
   readonly activatable!: boolean
 
+  /**
+   * whether disabling a parent node disables children nodes as well
+   */
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  readonly disablePerNode!: boolean
+
   created (): void {
     this.initializeOpenNodes()
   }
@@ -163,7 +174,7 @@ export default class ConfigurationsTreeView extends Vue {
    * notice that in this component the selection of only one node is supported
    * so this method sets the first item of the argument array
    *
-   * @fires ConfigurationsTreeView#select
+   * @fires ConfigurationsTreeView#input
    */
   set selectedNodeSingletonList (nodesArray: ConfigurationsTreeNode[]) {
     const node: ConfigurationsTreeNode | null = nodesArray[0] ?? null
