@@ -168,8 +168,14 @@ export default class ConfigurationEditPlatformMountActionsPage extends Vue {
     if (this.configuration && this.configurationMountingActionsForDate) {
       // construct the configuration as the root node of the tree
       const rootNode = new ConfigurationNode(new ConfigurationMountAction(this.configuration))
-      rootNode.children = this.configurationMountingActionsForDate.toArray()
+      rootNode.children = ConfigurationsTree.createFromObject(this.configurationMountingActionsForDate).toArray()
       this.tree = ConfigurationsTree.fromArray([rootNode])
+      this.tree.getAllNodesAsList().forEach((i) => {
+        // disable all but the selected node
+        if (!i.isPlatform() || i.unpack().id !== this.mountActionId) {
+          i.disabled = true
+        }
+      })
     }
   }
 
