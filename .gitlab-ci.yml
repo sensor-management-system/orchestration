@@ -551,14 +551,11 @@ deploy-gfz-prod:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
-deploy-ufz-staging:
+deploy-ufz:
   stage: "deploy"
-  environment:
-    name: "ufz-staging"
-    url: "https://webapp-stage.intranet.ufz.de/sms/frontend"
-  image: "curlimages/curl:7.81.0"
+  image: "curlimages/curl:7.85.0"
   script:
-    - 'curl -X POST --data-urlencode "payload={\"text\": \"Dear Wombat Admins,\nI would really appreciate it if you could deploy the SMS **$SMS_COMPONENT_NAME** version **$SMS_COMPONENT_TAG** on **STAGE**.\nThank you very much for your help!\nRequested by: $GITLAB_USER_NAME <$GITLAB_USER_EMAIL>\"}" $UFZ_MM_WEBHOOK_URL'
+    - 'curl -X POST --data-urlencode "payload={\"text\": \"Dear Wombat Admins,\nI would really appreciate it if you could deploy the SMS **$SMS_COMPONENT_NAME** version **$SMS_COMPONENT_TAG** on **$DEPLOYMENT_TARGET_ENVIRONMENT**.\nThank you very much for your help! :money_with_wings: \nRequested by: $GITLAB_USER_NAME <$GITLAB_USER_EMAIL>\"}" $UFZ_MM_WEBHOOK_URL'
   rules:
     - if: '$CI_PIPELINE_SOURCE == "pipeline" && $UPSTREAM_DEPLOYMENT_TARGET == "ufz"'
       when: "always"
