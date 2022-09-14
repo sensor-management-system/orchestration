@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
         cols="4"
         class="font-weight-medium"
       >
-        Begin Date:
+        Begin date:
       </v-col>
       <v-col cols="8">
         {{ mountAction.beginDate | ISOToDateTimeString }}
@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
         cols="4"
         class="font-weight-medium"
       >
-        End Date:
+        End date:
       </v-col>
       <v-col v-if="mountAction.endDate" cols="8">
         {{ mountAction.endDate | ISOToDateTimeString }}
@@ -89,7 +89,7 @@ permissions and limitations under the Licence.
         cols="4"
         class="font-weight-medium"
       >
-        End Contact:
+        End contact:
       </v-col>
       <v-col cols="8">
         {{ mountAction.endContact }}
@@ -118,7 +118,7 @@ permissions and limitations under the Licence.
         class="font-weight-medium"
         :title="mountAction.endDescription.length > 25 ? mountAction.endDescription : ''"
       >
-        End Description:
+        End description:
       </v-col>
       <v-col cols="8">
         {{ mountAction.endDescription | shortenRight(25, '...') | orDefault }}

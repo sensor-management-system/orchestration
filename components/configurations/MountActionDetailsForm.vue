@@ -116,7 +116,7 @@ permissions and limitations under the Licence.
                 v-model="valueCopy.beginContact"
                 data-role="select-begin-contact"
                 :items="contacts"
-                label="Begin Contact"
+                label="Begin contact"
                 :disabled="readonly"
                 required
                 :rules="[rules.required]"
@@ -131,7 +131,7 @@ permissions and limitations under the Licence.
                 v-model="valueCopy.endContact"
                 data-role="select-end-contact"
                 :items="contacts"
-                label="End Contact"
+                label="End contact"
                 :disabled="readonly"
                 :required="unmountRequired"
                 :clearable="!unmountRequired"
@@ -147,7 +147,7 @@ permissions and limitations under the Licence.
             <v-textarea
               v-model="valueCopy.beginDescription"
               data-role="textarea-begin-description"
-              label="Begin Description"
+              label="Begin description"
               rows="3"
               :disabled="readonly"
               @input="update"
@@ -157,7 +157,7 @@ permissions and limitations under the Licence.
             <v-textarea
               v-model="valueCopy.endDescription"
               data-role="textarea-end-description"
-              label="End Description"
+              label="End description"
               rows="3"
               :disabled="readonly"
               @input="update"
