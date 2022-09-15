@@ -204,6 +204,7 @@ import { mapGetters, mapState } from 'vuex'
 import { VocabularyState } from '@/store/vocabulary'
 import { ContactsState } from '@/store/contacts'
 import {
+  ConfigurationsState,
   EarliestEndDateOfRelatedDeviceOfDynamicActionGetter,
   LocationActionTimepointsExceptPassedIdAndTypeTypeGetter,
   LocationTypes
@@ -225,7 +226,8 @@ import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
   computed: {
     ...mapState('vocabulary', ['epsgCodes', 'elevationData']),
     ...mapState('contacts', ['contacts']),
-    ...mapGetters('configurations', ['locationActionTimepointsExceptPassedIdAndType', 'earliestEndDateOfRelatedDeviceOfDynamicAction'])
+    ...mapGetters('configurations', ['locationActionTimepointsExceptPassedIdAndType', 'earliestEndDateOfRelatedDeviceOfDynamicAction']),
+    ...mapState('configurations', ['configuration'])
   }
 })
 export default class DynamicLocationActionDataForm extends mixins(Rules) {
@@ -252,6 +254,7 @@ export default class DynamicLocationActionDataForm extends mixins(Rules) {
   epsgCodes!: VocabularyState['epsgCodes']
   elevationData!: VocabularyState['elevationData']
   contacts!: ContactsState['contacts']
+  configuration!: ConfigurationsState['configuration']
   locationActionTimepointsExceptPassedIdAndType!: LocationActionTimepointsExceptPassedIdAndTypeTypeGetter
   earliestEndDateOfRelatedDeviceOfDynamicAction!: EarliestEndDateOfRelatedDeviceOfDynamicActionGetter
 
@@ -360,17 +363,19 @@ export default class DynamicLocationActionDataForm extends mixins(Rules) {
       Validator.startDateMustBeAfterPreviousAction(this.value.beginDate, this.value.endDate, this.timepointsExceptCurrentlyEdited),
       Validator.validateStartDateIsBeforeEndDate(this.value.beginDate, this.value.endDate),
       Validator.canNotStartAnActionAfterAnActiveAction(this.value.beginDate, this.timepointsExceptCurrentlyEdited),
-      hasDevicesWithPropertiesForSelectedDate
+      hasDevicesWithPropertiesForSelectedDate,
+      Validator.dateMustBeInRangeOfConfigurationDates(this.configuration, this.value.beginDate)
+
     ]
   }
 
   get endDateExtraRules (): any[] {
-    // TODO Additional rule for setting date later than mounted devices
     return [
       Validator.canNotIntersectWithExistingInterval(this.value.endDate, this.timepointsExceptCurrentlyEdited),
       Validator.validateStartDateIsBeforeEndDate(this.value.beginDate, this.value.endDate),
       Validator.endDateMustBeBeforeNextAction(this.value.beginDate, this.value.endDate, this.timepointsExceptCurrentlyEdited),
-      Validator.endDateMustBeBeforeEndDateOfRelatedDevice(this.value.endDate, this.earliestEndDateOfRelatedDeviceOfDynamicAction(this.value))
+      Validator.endDateMustBeBeforeEndDateOfRelatedDevice(this.value.endDate, this.earliestEndDateOfRelatedDeviceOfDynamicAction(this.value)),
+      Validator.dateMustBeInRangeOfConfigurationDates(this.configuration, this.value.endDate)
     ]
   }
 }

@@ -318,5 +318,24 @@ export default {
       return 'End date must be before ' + dateToDateTimeStringHHMM(earliestEndDateOfRelatedDevice) + ' (planned unmount).'
     }
     return true
+  },
+  dateMustBeInRangeOfConfigurationDates (configuration: Configuration|null, dateToValidate: DateTime|null) {
+    if (!configuration || !dateToValidate) {
+      return true
+    }
+
+    if ((!configuration.endDate && configuration.startDate) && (dateToValidate < configuration.startDate)) {
+      return 'Date must be after ' + dateToDateTimeStringHHMM(configuration.startDate) + ' ( start date of configuration)'
+    }
+
+    if ((!configuration.startDate && configuration.endDate) && (dateToValidate > configuration.endDate)) {
+      return 'Date must be before ' + dateToDateTimeStringHHMM(configuration.endDate) + ' ( end date of configuration)'
+    }
+
+    if ((configuration.startDate && configuration.endDate) && (dateToValidate < configuration.startDate || dateToValidate > configuration.endDate)) {
+      return 'Date must be in the range of ' + dateToDateTimeStringHHMM(configuration.startDate) + ' -- ' + dateToDateTimeStringHHMM(configuration.endDate) + ' (dates of configuration)'
+    }
+
+    return true
   }
 }
