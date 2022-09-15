@@ -88,6 +88,15 @@ permissions and limitations under the Licence.
       </p>
     </section>
     <section>
+      <h2>
+        Software licenses
+      </h2>
+      <p>
+        The following third-party software is used within the scope of this web application <br>
+        <a href="/info/licenses/">Licenses</a>
+      </p>
+    </section>
+    <section>
       <h2>Copyright</h2>
       <p>
         The texts and images on this website are protected by copyright. Copying these files or printing the publications is only permitted for private use.
