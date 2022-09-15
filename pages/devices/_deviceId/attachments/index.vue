@@ -65,6 +65,18 @@ permissions and limitations under the Licence.
               @click="initDeleteDialog(item)"
             />
           </template>
+          <template #edit-action>
+            <v-btn
+              v-if="editable"
+              color="primary"
+              text
+              small
+              nuxt
+              :to="'/devices/' + deviceId + '/attachments/' + item.id + '/edit'"
+            >
+              Edit
+            </v-btn>
+          </template>
         </DevicesAttachmentListItem>
       </template>
     </BaseList>

@@ -47,51 +47,52 @@ permissions and limitations under the Licence.
       />
     </v-card-actions>
     <v-card>
-      <v-container>
-        <v-row no-gutters>
-          <v-avatar class="mt-0 align-self-center">
-            <v-icon large>
+      <v-card-text
+        class="py-2 px-3"
+      >
+        <div class="d-flex align-center">
+          <span class="text-caption">
+            {{ filename(valueCopy) }}
+          </span>
+        </div>
+        <v-row
+          no-gutters
+        >
+          <v-col cols="8" class="text-subtitle-1">
+            <v-icon>
               {{ filetypeIcon(valueCopy) }}
             </v-icon>
-          </v-avatar>
-          <v-col>
-            <v-row
-              no-gutters
+            <v-form ref="attachmentsEditForm" class="pb-2" @submit.prevent>
+              <v-text-field
+                v-model="valueCopy.label"
+                label="Label"
+                required
+                class="required"
+                :rules="[rules.required]"
+              />
+            </v-form>
+          </v-col>
+          <v-col
+            align-self="end"
+            class="text-right"
+          >
+            <v-btn
+              :href="valueCopy.url"
+              target="_blank"
+              text
+              small
+              nuxt
             >
-              <v-col>
-                <v-card-subtitle>
-                  {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
-                </v-card-subtitle>
-              </v-col>
-            </v-row>
-            <v-row
-              no-gutters
-            >
-              <v-col class="text-subtitle-1">
-                <v-text-field
-                  v-model="valueCopy.label"
-                  label="Label"
-                />
-              </v-col>
-              <v-col
-                align-self="end"
-                class="text-right"
+              <v-icon
+                small
               >
-                <v-btn
-                  icon
-                  color="primary"
-                  :href="valueCopy.url"
-                  target="_blank"
-                >
-                  <v-icon>
-                    mdi-open-in-new
-                  </v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
+                mdi-open-in-new
+              </v-icon>
+              Open in new tab
+            </v-btn>
           </v-col>
         </v-row>
-      </v-container>
+      </v-card-text>
     </v-card>
   </div>
 </template>
@@ -113,6 +114,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+import { Rules } from '@/mixins/Rules'
 
 /**
  * A class component that displays a single attached file
@@ -125,7 +127,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
   methods: mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment'])
 })
 // @ts-ignore
-export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
+export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) {
   @InjectReactive()
     editable!: boolean
 
@@ -166,6 +168,10 @@ export default class AttachmentEditPage extends mixins(AttachmentsMixin) {
   }
 
   async save () {
+    if (!(this.$refs.attachmentsEditForm as Vue & { validate: () => boolean }).validate()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
     try {
       this.isSaving = true
       await this.updatePlatformAttachment({

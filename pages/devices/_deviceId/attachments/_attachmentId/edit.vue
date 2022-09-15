@@ -43,56 +43,52 @@ permissions and limitations under the Licence.
       />
     </v-card-actions>
     <v-card>
-      <v-container>
-        <v-row no-gutters>
-          <v-form ref="attachmentsEditForm" class="pb-2" @submit.prevent>
-            <v-avatar class="mt-0 align-self-center">
-              <v-icon large>
-                {{ filetypeIcon(valueCopy) }}
+      <v-card-text
+        class="py-2 px-3"
+      >
+        <div class="d-flex align-center">
+          <span class="text-caption">
+            {{ filename(valueCopy) }}
+          </span>
+        </div>
+        <v-row
+          no-gutters
+        >
+          <v-col cols="8" class="text-subtitle-1">
+            <v-icon>
+              {{ filetypeIcon(valueCopy) }}
+            </v-icon>
+            <v-form ref="attachmentsEditForm" class="pb-2" @submit.prevent>
+              <v-text-field
+                v-model="valueCopy.label"
+                label="Label"
+                required
+                class="required"
+                :rules="[rules.required]"
+              />
+            </v-form>
+          </v-col>
+          <v-col
+            align-self="end"
+            class="text-right"
+          >
+            <v-btn
+              :href="valueCopy.url"
+              target="_blank"
+              text
+              small
+              nuxt
+            >
+              <v-icon
+                small
+              >
+                mdi-open-in-new
               </v-icon>
-            </v-avatar>
-            <v-col>
-              <v-row
-                no-gutters
-              >
-                <v-col>
-                  <v-card-subtitle>
-                    {{ filename(valueCopy) }}, uploaded at {{ uploadedDateTime(valueCopy) }}
-                  </v-card-subtitle>
-                </v-col>
-              </v-row>
-              <v-row
-                no-gutters
-              >
-                <v-col class="text-subtitle-1">
-                  <v-text-field
-                    v-model="valueCopy.label"
-                    label="Label"
-                    required
-                    class="required"
-                    :rules="[rules.required]"
-                  />
-                </v-col>
-                <v-col
-                  align-self="end"
-                  class="text-right"
-                >
-                  <v-btn
-                    icon
-                    color="primary"
-                    :href="valueCopy.url"
-                    target="_blank"
-                  >
-                    <v-icon>
-                      mdi-open-in-new
-                    </v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-form>
+              Open in new tab
+            </v-btn>
+          </v-col>
         </v-row>
-      </v-container>
+      </v-card-text>
     </v-card>
   </div>
 </template>
@@ -122,7 +118,10 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
  * @extends Vue
  */
 @Component({
-  components: { SaveAndCancelButtons, ProgressIndicator },
+  components: {
+    SaveAndCancelButtons,
+    ProgressIndicator
+  },
   middleware: ['auth'],
   computed: mapState('devices', ['deviceAttachment']),
   methods: mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment'])
