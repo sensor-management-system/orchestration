@@ -70,16 +70,6 @@ export class AttachmentsMixin extends Vue {
   }
 
   /**
-   * returns the timestamp of the upload date
-   *
-   * @TODO this must be implemented when the file API is ready
-   * @return {string} a readable timestamp
-   */
-  uploadedDateTime (_attachment: Attachment): string {
-    return '2020-06-17 16:35 (TODO)'
-  }
-
-  /**
    * returns a material design icon name based on the file type extension
    *
    * @return {string} a material design icon name

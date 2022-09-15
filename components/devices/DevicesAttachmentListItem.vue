@@ -30,38 +30,50 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <base-expandable-list-item>
-    <template #header>
-      <span class="text-caption">
-        {{ attachment.url | shortenMiddle }}
-      </span>
-    </template>
-    <template #dot-menu-items>
-      <slot name="dot-menu-items" />
-    </template>
-    <template #actions>
-      <v-btn
-        v-if="$auth.loggedIn"
-        color="primary"
-        text
-        small
-        nuxt
-        :to="'/devices/' + deviceId + '/attachments/' + attachment.id + '/edit'"
+  <v-hover
+    v-slot="{ hover }"
+  >
+    <v-card
+      :elevation="hover ? 6 : 2"
+      class="ma-2"
+    >
+      <v-card-text
+        class="py-2 px-3"
       >
-        Edit
-      </v-btn>
-    </template>
-    <template #default>
-      <v-icon>
-        {{ filetypeIcon(attachment) }}
-      </v-icon>
-      <span class="text-caption">
-        <a :href="attachment.url" target="_blank">
-          {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
-        </a>
-      </span>
-    </template>
-  </base-expandable-list-item>
+        <div class="d-flex align-center">
+          <span class="text-caption">
+            {{ attachment.url | shortenMiddle }}
+          </span>
+          <v-spacer />
+          <DotMenu>
+            <template #actions>
+              <slot name="dot-menu-items" />
+            </template>
+          </DotMenu>
+        </div>
+        <v-row
+          no-gutters
+        >
+          <v-col cols="8" class="text-subtitle-1">
+            <v-icon>
+              {{ filetypeIcon(attachment) }}
+            </v-icon>
+            <span class="text-caption">
+              <a :href="attachment.url" target="_blank">
+                {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
+              </a>
+            </span>
+          </v-col>
+          <v-col
+            align-self="end"
+            class="text-right"
+          >
+            <slot name="edit-action" />
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-hover>
 </template>
 
 <script lang="ts">
@@ -72,9 +84,11 @@ import { Attachment } from '@/models/Attachment'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
+import DotMenu from '@/components/DotMenu.vue'
 
 @Component({
   components: {
+    DotMenu,
     BaseExpandableListItem
   }
 })
