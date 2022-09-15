@@ -98,9 +98,9 @@ permissions and limitations under the Licence.
             clearable
             label="Affected measured quantities"
             :items="measuredQuantities"
-            :item-value="(x) => x"
-            :item-text="(x) => x.label"
+            item-text="propertyName"
             @input="setMeasuredQuantities"
+            return-object
           />
         </v-col>
       </v-row>
