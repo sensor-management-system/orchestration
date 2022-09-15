@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -225,14 +225,17 @@ permissions and limitations under the Licence.
             :platform="item"
           >
             <template
-              v-if="$auth.loggedIn"
               #dot-menu-items
             >
+              <DotMenuActionSensorML
+                @click="openSensorML(item.id)"
+              />
               <DotMenuActionCopy
+                v-if="$auth.loggedIn"
                 :path="'/platforms/copy/' + item.id"
               />
               <DotMenuActionDelete
-                v-if="canDeleteEntity(item)"
+                v-if="$auth.loggedIn && canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
               />
             </template>
@@ -270,7 +273,8 @@ import {
   SetPageSizeAction,
   ExportAsCsvAction,
   DeletePlatformAction,
-  PageSizesGetter
+  PageSizesGetter,
+  ExportAsSensorMLAction
 } from 'store/platforms'
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 
@@ -282,6 +286,7 @@ import StatusSelect from '@/components/StatusSelect.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
@@ -301,6 +306,7 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     PlatformsListItem,
     BaseList,
     DotMenuActionDelete,
+    DotMenuActionSensorML,
     DotMenuActionCopy,
     PlatformDeleteDialog,
     ManufacturerSelect,
@@ -314,7 +320,7 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity'])
   },
   methods: {
-    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform']),
+    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'exportAsSensorML']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
@@ -340,6 +346,7 @@ export default class SearchPlatformsPage extends Vue {
   canDeleteEntity!: CanDeleteEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  exportAsSensorML!: ExportAsSensorMLAction
 
   created () {
     this.initializeAppBar()
@@ -479,6 +486,16 @@ export default class SearchPlatformsPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Platforms')
+  }
+
+  async openSensorML (platformId: string) {
+    try {
+      const blob = await this.exportAsSensorML(platformId)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+    }
   }
 }
 

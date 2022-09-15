@@ -277,6 +277,12 @@ export class ConfigurationApi {
     this.prepareMail()
   }
 
+  async getSensorML (configurationId: string): Promise<Blob> {
+    const url = this.basePath + '/' + configurationId + '/sensorml'
+    const response = await this.axiosApi.get(url)
+    return new Blob([response.data], { type: 'text/xml' })
+  }
+
   resetFilterSetting () {
     this.filterSettings = []
   }

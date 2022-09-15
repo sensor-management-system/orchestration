@@ -194,6 +194,7 @@ export type SaveDeviceAction = (device: Device) => Promise<Device>
 export type CopyDeviceAction = (params: {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean, originalDeviceId: string}) => Promise<string>
 export type DeleteDeviceAction = (id: string) => Promise<void>
 export type ExportAsCsvAction = (searchParams: IDeviceSearchParams) => Promise<Blob>
+export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
 export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
@@ -492,6 +493,9 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   async deleteDevice (_, id: string): Promise<void> {
     await this.$api.devices.deleteById(id)
+  },
+  async exportAsSensorML (_, id: string): Promise<Blob> {
+    return await this.$api.devices.getSensorML(id)
   },
   async exportAsCsv (_, searchParams: IDeviceSearchParams): Promise<Blob> {
     let userId = null

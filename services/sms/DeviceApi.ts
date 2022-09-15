@@ -302,6 +302,12 @@ export class DeviceApi {
     })
   }
 
+  async getSensorML (deviceId: string): Promise<Blob> {
+    const url = this.basePath + '/' + deviceId + '/sensorml'
+    const response = await this.axiosApi.get(url)
+    return new Blob([response.data], { type: 'text/xml' })
+  }
+
   prepareSearch () {
     this.resetFilterSetting()
     this.prepareManufacturers()

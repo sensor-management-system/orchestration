@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -50,11 +50,13 @@ permissions and limitations under the Licence.
         >
           Edit
         </v-btn>
-        <DotMenu
-          v-if="$auth.loggedIn"
-        >
+        <DotMenu>
           <template #actions>
+            <DotMenuActionSensorML
+              @click="openSensorML"
+            />
             <DotMenuActionDelete
+              v-if="$auth.loggedIn"
               :readonly="!deletable"
               @click="initDeleteDialog"
             />
@@ -79,11 +81,13 @@ permissions and limitations under the Licence.
         >
           Edit
         </v-btn>
-        <DotMenu
-          v-if="$auth.loggedIn"
-        >
+        <DotMenu>
           <template #actions>
+            <DotMenuActionSensorML
+              @click="openSensorML"
+            />
             <DotMenuActionDelete
+              v-if="$auth.loggedIn"
               :readonly="!deletable"
               @click="initDeleteDialog"
             />
@@ -107,14 +111,17 @@ import { mapActions, mapState } from 'vuex'
 import ConfigurationsBasicData from '@/components/configurations/ConfigurationsBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { IConfiguration } from '@/models/Configuration'
 
+import { ExportAsSensorMLAction } from '@/store/configurations'
+
 @Component({
-  components: { ProgressIndicator, ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenu, ConfigurationsBasicData },
+  components: { ProgressIndicator, ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenuActionSensorML, DotMenu, ConfigurationsBasicData },
   computed: mapState('configurations', ['configuration']),
-  methods: mapActions('configurations', ['deleteConfiguration'])
+  methods: mapActions('configurations', ['deleteConfiguration', 'exportAsSensorML'])
 })
 export default class ConfigurationShowBasicPage extends Vue {
   @InjectReactive()
@@ -130,6 +137,7 @@ export default class ConfigurationShowBasicPage extends Vue {
   // vuex definition for typescript check
   configuration!: IConfiguration
   deleteConfiguration!: (id: string) => void
+  exportAsSensorML!: ExportAsSensorMLAction
 
   get configurationId () {
     return this.$route.params.configurationId
@@ -141,6 +149,16 @@ export default class ConfigurationShowBasicPage extends Vue {
 
   closeDialog () {
     this.showDeleteDialog = false
+  }
+
+  async openSensorML () {
+    try {
+      const blob = await this.exportAsSensorML(this.configurationId)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+    }
   }
 
   async deleteAndCloseDialog () {

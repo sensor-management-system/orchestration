@@ -245,6 +245,12 @@ export class PlatformApi {
     })
   }
 
+  async getSensorML (platformId: string): Promise<Blob> {
+    const url = this.basePath + '/' + platformId + '/sensorml'
+    const response = await this.axiosApi.get(url)
+    return new Blob([response.data], { type: 'text/xml' })
+  }
+
   async searchRecentlyUpdated (amount: number) {
     this.prepareSearch()
     // set the permission groups for the serializer
