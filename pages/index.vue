@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
       <v-row
         align="center"
         justify="center"
-        class="mb-0 pb-0"
+        class="mb-n10 pb-0"
         no-gutters
       >
         <v-col
@@ -58,28 +58,30 @@ permissions and limitations under the Licence.
           </h1>
         </v-col>
       </v-row>
-      <v-row justify="space-around" align-content="start" class="mt-0">
-        <v-spacer />
-        <v-col class="d-flex flex-column align-center">
-          <div class="counter-number">
-            {{ stats.devices }}
-          </div>
-          <div>Devices</div>
-        </v-col>
-        <v-col class="d-flex flex-column align-center">
-          <div class="counter-number">
-            {{ stats.platforms }}
-          </div>
-          <div>Platforms</div>
-        </v-col>
-        <v-col class="d-flex flex-column align-center">
-          <div class="counter-number">
-            {{ stats.configurations }}
-          </div>
-          <div>Configurations</div>
-        </v-col>
-        <v-spacer />
-      </v-row>
+      <v-container class="mt-n20 px-12 pb-16">
+        <v-row justify="center" class="mt-0">
+          <!-- <v-spacer /> -->
+          <v-col cols="4" class="d-flex flex-column align-center">
+            <div class="counter-number">
+              {{ stats.devices }}
+            </div>
+            <div>Devices</div>
+          </v-col>
+          <v-col cols="4" class="d-flex flex-column align-center">
+            <div class="counter-number">
+              {{ stats.platforms }}
+            </div>
+            <div>Platforms</div>
+          </v-col>
+          <v-col cols="4" class="d-flex flex-column align-center">
+            <div class="counter-number">
+              {{ stats.configurations }}
+            </div>
+            <div>Configurations</div>
+          </v-col>
+        <!-- <v-spacer /> -->
+        </v-row>
+      </v-container>
     </v-parallax>
     <v-container class="mt-n14 px-12">
       <v-row justify="center">
@@ -118,8 +120,8 @@ permissions and limitations under the Licence.
       <v-row>
         <v-col cols="12">
           <v-card>
-            <div class="d-flex flex-no-wrap justify-space-between">
-              <div>
+            <v-row no-gutters class="d-flex flex-no-wrap justify-space-between">
+              <v-col cols="8">
                 <div class="primary white--text rounded rounded-b-0 rounded-tr-0">
                   <v-card-title
                     class="text-h5 font-weight-bold"
@@ -140,9 +142,11 @@ permissions and limitations under the Licence.
                     If you're already registered, you can login above.
                   </p>
                 </v-card-text>
-              </div>
-              <v-img class="rounded rounded-l-0" max-width="40%" src="UFZ_Standort-7.jpg" />
-            </div>
+              </v-col>
+              <v-col cols="4">
+                <v-img class="rounded rounded-l-0" height="100%" width="100%" src="UFZ_Standort-7.jpg" />
+              </v-col>
+            </v-row>
           </v-card>
         </v-col>
       </v-row>

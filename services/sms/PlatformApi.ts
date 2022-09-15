@@ -253,11 +253,7 @@ export class PlatformApi {
 
   async searchRecentlyUpdated (amount: number) {
     this.prepareSearch()
-    // set the permission groups for the serializer
-    if (this.permissionFetcher) {
-      this.serializer.permissionGroups = await this.permissionFetcher()
-    }
-    return this.axiosApi.get(
+    return await this.axiosApi.get(
       this.basePath,
       {
         params: {
