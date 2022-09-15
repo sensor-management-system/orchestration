@@ -1,0 +1,156 @@
+{% macro build_tree(element) -%}
+    {% if element.action_type == 'platform_mount' %}
+        {% with %}
+            {% set obj = element.entity %}
+                <sml:component xlink:href="{{frontend_url}}/platforms/{{obj.id}}" name='{{obj.short_name}}' xlink:title="Link To Platform {{obj.id}}">
+                    <!-- Component Device / Platform  -  -->
+                    {% include 'platform_sensorml_template.xml' %}
+                    {% for child in element.children %}
+                    {% set obj = child %}
+                        {{build_tree(child)}}
+                    {% endfor %}
+                </sml:component>
+            {% endwith %}
+    {% else %}
+            {% set obj = element.entity %}
+            <sml:component xlink:href="{{frontend_url}}/devices/{{obj.id}}" name='{{obj.short_name}}' xlink:title="Link To Device {{obj.id}}">
+                     {% include 'device_sensorml_template.xml' %}
+            </sml:component>
+    {% endif %}
+{%- endmacro %}
+
+{% macro mount_event(event, event_name) -%}
+    <sml:event>
+        <sml:Event>
+            <sml:classification>
+                <sml:ClassifierList>
+                    <sml:classifier>
+                        <sml:Term definition="#">
+                            <sml:label>"{{event_name}}"</sml:label>
+                        </sml:Term>
+                    </sml:classifier>
+                </sml:ClassifierList>
+            </sml:classification>
+            <sml:time>
+                <gml:TimePeriod gml:id="TimePeriodFor{{event_name}}_{{event.id}}_of_{{event.get_parent().short_name or event.get_parent().label}}">
+                    <gml:description>TimePeriod</gml:description>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition>{{event.begin_date}}</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition>{{event.end_date}}</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                </gml:TimePeriod>
+            </sml:time>
+            <gml:description>{{event.description}}</gml:description>
+        </sml:Event>
+    </sml:event>
+{%- endmacro %}
+
+
+<sml:PhysicalSystem gml:id='SMS_ID_{{obj.id}}'
+                    xmlns:sml="http://www.opengis.net/sensorml/2.0"
+                    xmlns:swe="http://www.opengis.net/swe/2.0"
+                    xmlns:gml="http://www.opengis.net/gml/3.2"
+                    xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                    xmlns:gco="http://www.isotc211.org/2005/gco"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorml/2.0/sensorML.xsd">
+    <!-- ========================================================================= -->
+    <!--                      System Description                                   -->
+    <!-- ========================================================================= -->
+    <gml:name>{{obj.label}}</gml:name>
+    {% if obj.start_date %}
+    <!-- ======================================= -->
+    <!--            Constraints                  -->
+    <!-- ======================================= -->
+    <sml:validTime>
+        <gml:TimePeriod gml:id="ConfigurationValidTime">
+            <gml:beginPosition>{{obj.start_date}}</gml:beginPosition>
+            <gml:endPosition>{{obj.end_date}}</gml:endPosition>
+        </gml:TimePeriod>
+    </sml:validTime>
+    {% endif %}
+
+    <!-- ========================================================================= -->
+    <!--                 Contacts                                                  -->
+    <!-- ========================================================================= -->
+    <sml:contacts>
+        <sml:ContactList>
+            {% for contact in obj.contacts %}
+            <sml:contact xlink:arcrole="http://sensorml.com/ont/swe/property/Manufacturer">
+                <gmd:CI_ResponsibleParty>
+                    <gmd:individualName>
+                        <gco:CharacterString>{{contact.given_name}} {{contact.family_name}}</gco:CharacterString>
+                    </gmd:individualName>
+                    {% for role in obj.configuration_contact_roles %}
+                        <gmd:role gco:nilReason="contact_role">
+                             <gmd:CI_RoleCode codeList="" codeListValue="">{{role.role_name}}</gmd:CI_RoleCode>
+                        </gmd:role>
+                    {% endfor %}
+                </gmd:CI_ResponsibleParty>
+            </sml:contact>
+            {% endfor %}
+        </sml:ContactList>
+    </sml:contacts>
+
+    <!-- ========================================================================= -->
+    <!--                 History                                                  -->
+    <!-- ========================================================================= -->
+<sml:history>
+    <sml:EventList>
+
+    {% block mount_actions %}
+    {% for event in obj.device_mount_actions %}
+    <!-- ========================================================================= -->
+    <!--                Device Mount action   id:{{event.id}}                     -->
+    <!-- ========================================================================= -->
+        {{mount_event(event, "DeviceMountAction")}}
+    {% endfor %}
+    {% for event in obj.platform_mount_actions %}
+    <!-- ========================================================================= -->
+    <!--                Platform Mount action   id:{{event.id}}                  -->
+    <!-- ========================================================================= -->
+        {{mount_event(event, "PlatformMountAction")}}
+    {% endfor %}
+    {% endblock %}
+
+     {% block static_location_actions %}
+        {% for event in obj.configuration_static_location_begin_actions %}
+        <!-- ========================================================================= -->
+        <!--               Static Location action   id:{{event.id}}                  -->
+        <!-- ========================================================================= -->
+        {{mount_event(event, "StaticLocationAction")}}
+        {% endfor %}
+     {% endblock %}
+     {% block dynamic_location_actions %}
+        {% for event in obj.configuration_dynamic_location_begin_actions %}
+        <!-- ========================================================================= -->
+        <!--               Dynamic Location action   id:{{event.id}}                 -->
+        <!-- ========================================================================= -->
+        {{mount_event(event, "DynamicLocationAction")}}
+        {% endfor %}
+     {% endblock %}
+
+
+</sml:EventList>
+</sml:history>
+    <!-- ======================================= -->
+    <!--        Components              -->
+    <!-- ======================================== -->
+    <sml:components>
+        <sml:ComponentList>
+            {% for element in tree %}
+            <!-- Component 1 -  -->
+                {{build_tree(element)}}
+            {% endfor %}
+        </sml:ComponentList>
+    </sml:components>
+
+</sml:PhysicalSystem>
+
