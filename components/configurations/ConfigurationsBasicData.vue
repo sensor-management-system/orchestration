@@ -126,6 +126,6 @@ export default class ConfigurationsBasicDataForm extends Vue {
 }
 </script>
 
-<style scoped>
-
+<style lang="scss">
+@import "@/assets/styles/_readonly_views.scss";
 </style>

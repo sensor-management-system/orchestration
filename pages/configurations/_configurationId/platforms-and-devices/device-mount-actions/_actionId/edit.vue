@@ -55,7 +55,7 @@ permissions and limitations under the Licence.
         :value="deviceMountAction"
         :tree="tree"
         :contacts="contacts"
-        :availabilities="availabilities"
+        :original-action="originalAction"
         @input="update"
         @select="selectNode"
       />
@@ -116,6 +116,9 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
   middleware: ['auth'],
   computed: {
     ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate', 'selectedDate']),
+    ...mapState('configurations', {
+      originalAction: 'deviceMountAction'
+    }),
     ...mapState('contacts', ['contacts'])
   },
   methods: {
@@ -124,15 +127,16 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
   }
 })
 export default class ConfigurationEditDeviceMountActionsPage extends Vue {
-  configuration!: ConfigurationsState['configuration']
-  configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
-  selectedDate!: ConfigurationsState['selectedDate']
-  loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
-  loadDeviceMountAction!: LoadDeviceMountActionAction
-  updateDeviceMountAction!: UpdateDeviceMountActionAction
+  private configuration!: ConfigurationsState['configuration']
+  private configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
+  private selectedDate!: ConfigurationsState['selectedDate']
+  private loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
+  private loadDeviceMountAction!: LoadDeviceMountActionAction
+  private updateDeviceMountAction!: UpdateDeviceMountActionAction
+  private originalAction!: ConfigurationsState['deviceMountAction']
 
-  contacts!: ContactsState['contacts']
-  loadAllContacts!: LoadAllContactsAction
+  private contacts!: ContactsState['contacts']
+  private loadAllContacts!: LoadAllContactsAction
 
   private deviceMountAction: DeviceMountAction | null = null
   private showNavigationWarning: boolean = false
@@ -156,11 +160,10 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
         this.loadDeviceMountAction(this.mountActionId),
         this.loadAllContacts()
       ])
-      const loadedDeviceMountAction = this.$store.state.configurations.deviceMountAction
-      if (!loadedDeviceMountAction) {
+      if (!this.originalAction) {
         throw new Error('could not load mount action')
       }
-      this.deviceMountAction = DeviceMountAction.createFromObject(loadedDeviceMountAction)
+      this.deviceMountAction = DeviceMountAction.createFromObject(this.originalAction)
       await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
       this.createTreeWithConfigAsRootNode()
     } catch (error) {
