@@ -85,7 +85,7 @@ describe('timeStampToUTCDateTime', () => {
 
     // in german summer time it is 15:12:25
     // in utc it is 13:12:25
-    expect(formatted).toEqual('2020-10-21 13:12:25 UTC')
+    expect(formatted).toEqual('2020-10-21 13:12:25')
   })
 })
 describe('dateTimesEqual', () => {
