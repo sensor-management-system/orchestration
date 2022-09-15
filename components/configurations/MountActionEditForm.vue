@@ -316,9 +316,6 @@ export default class MountActionEditForm extends Vue {
     if (!this.selectedNode) {
       return false
     }
-    if (this.selectedNode.unpack().endDate) {
-      return true
-    }
     const parent = this.tree.getParent(this.selectedNode)
     if (parent && parent.unpack().endDate) {
       return true
