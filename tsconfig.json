@@ -33,7 +33,9 @@
       "nuxt-leaflet"
     ],
     "allowSyntheticDefaultImports": true,
-    "plugins": [{ "name": "ts-vue-plugin" }]
+    "plugins": [{
+      "name": "ts-vue-plugin"
+    }]
   },
   "exclude": [
     "node_modules",
