@@ -289,22 +289,22 @@ export default class MountActionEditForm extends Vue {
       until: null
     })
 
-    /* const availabilities: Availability[] = selected.isDevice() ? this.deviceAvailabilities : this.platformAvailabilities */
-    /* // we have to ignore the current mount action */
-    /* const availabilitiesWithoutSelectedMountAction = availabilities.filter(i => i.mountID !== selected.unpack().id) */
+    const availabilities: Availability[] = selected.isDevice() ? this.deviceAvailabilities : this.platformAvailabilities
+    // we have to ignore the current mount action
+    const availabilitiesWithoutSelectedMountAction = availabilities.filter(i => i.mountID !== selected.unpack().id)
 
-    /* const error3 = MountActionValidator.actionAvailableIn(selected.unpack(), availabilitiesWithoutSelectedMountAction) */
-    /* if (typeof error3 === 'object') { */
-    /*   const message = MountActionValidator.buildErrorMessage(error3) + (error3.op !== MountActionValidationResultOp.EMPTY ? ' of next mounting action' : '') */
-    /*   if (error3.property === 'beginDate') { */
-    /*     this.beginDateErrorMessage = message */
-    /*     this.endDateErrorMessage = '' */
-    /*   } else { */
-    /*     this.beginDateErrorMessage = '' */
-    /*     this.endDateErrorMessage = message */
-    /*   } */
-    /*   return false */
-    /* } */
+    const error3 = MountActionValidator.actionAvailableIn(selected.unpack(), availabilitiesWithoutSelectedMountAction)
+    if (typeof error3 === 'object') {
+      const message = MountActionValidator.buildErrorMessage(error3) + (error3.op !== MountActionValidationResultOp.EMPTY ? ' of next mounting action' : '')
+      if (error3.property === 'beginDate') {
+        this.beginDateErrorMessage = message
+        this.endDateErrorMessage = ''
+      } else {
+        this.beginDateErrorMessage = ''
+        this.endDateErrorMessage = message
+      }
+      return false
+    }
 
     // if we have no errors at all, clear the error messages
     this.beginDateErrorMessage = ''
