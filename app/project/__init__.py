@@ -18,9 +18,7 @@ from .api.models.base_model import db
 from .config import env
 from .extensions.instances import auth, idl, well_known_url_config_loader
 from .urls import api
-from .views.docs import docs_routes
-from .views.login import login_routes
-from .views.upload_files import upload_routes
+from .views import upload_routes, docs_routes, login_routes, sensor_ml_routes
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
@@ -93,5 +91,8 @@ def create_app():
     app.register_blueprint(docs_routes)
     # login_routes
     app.register_blueprint(login_routes)
-
+    # sensor_ml_routes
+    app.jinja_env.lstrip_blocks = True
+    app.jinja_env.trim_blocks = True
+    app.register_blueprint(sensor_ml_routes)
     return app

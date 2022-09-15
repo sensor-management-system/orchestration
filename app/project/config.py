@@ -49,7 +49,7 @@ class BaseConfig:
     SMS_FRONTEND_URL = env(
         "SMS_FRONTEND_URL", "https://localhost.localdomain"
     )
-
+    SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain")
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
