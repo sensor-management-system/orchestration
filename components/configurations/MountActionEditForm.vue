@@ -91,6 +91,7 @@ import { MountAction } from '@/models/MountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { Availability } from '@/models/Availability'
 
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
