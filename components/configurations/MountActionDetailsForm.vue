@@ -46,6 +46,7 @@ permissions and limitations under the Licence.
           :value="valueCopy"
           :begin-date-rules="beginDateRules"
           :end-date-rules="endDateRules"
+          :end-required="unmountRequired"
           @input="updateDates"
         />
         <v-row class="pb-0">

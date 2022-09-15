@@ -57,8 +57,10 @@ permissions and limitations under the Licence.
           :value="valueCopy.endDate"
           placeholder="Open End"
           label="Select end date"
-          hint="Optional. Leave blank for open end"
+          :hint="!endRequired ? 'Optional. Leave blank for open end' : ''"
+          :required="endRequired"
           :rules="[additionalRules.validateMountingDates, ...endDateRules]"
+          :class="{'required' : endRequired}"
           @input="dateChanged('endDate', $event)"
         />
       </v-col>
@@ -106,6 +108,13 @@ export default class MountActionDateForm extends mixins(Rules) {
     type: Array
   })
   readonly endDateRules!: ((value: DateTime | null) => string | boolean)[]
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  readonly endRequired!: boolean
 
   private valueCopy: IMountAction | null = null
   private formIsValid: boolean = true
