@@ -84,12 +84,13 @@ import { mapState, mapActions } from 'vuex'
 
 import { DevicesState, LoadDeviceAvailabilitiesAction } from '@/store/devices'
 import { PlatformsState, LoadPlatformAvailabilitiesAction } from '@/store/platforms'
+import { ConfigurationsState, LoadConfigurationDynamicLocationActionsAction } from '@/store/configurations'
 
 import { Contact } from '@/models/Contact'
 import { MountAction } from '@/models/MountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { Availability } from '@/models/Availability'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
@@ -107,11 +108,13 @@ import MountActionDetailsForm from '@/components/configurations/MountActionDetai
   },
   computed: {
     ...mapState('devices', ['deviceAvailabilities']),
-    ...mapState('platforms', ['platformAvailabilities'])
+    ...mapState('platforms', ['platformAvailabilities']),
+    ...mapState('configurations', ['configurationDynamicLocationActions'])
   },
   methods: {
     ...mapActions('devices', ['loadDeviceAvailabilities']),
-    ...mapActions('platforms', ['loadPlatformAvailabilities'])
+    ...mapActions('platforms', ['loadPlatformAvailabilities']),
+    ...mapActions('configurations', ['loadConfigurationDynamicLocationActions'])
   }
 })
 export default class MountActionEditForm extends Vue {
@@ -122,17 +125,17 @@ export default class MountActionEditForm extends Vue {
   readonly value!: DeviceMountAction | PlatformMountAction
 
   @Prop({
+    default: null,
+    required: false,
+    type: Object
+  })
+  readonly originalAction!: DeviceMountAction | PlatformMountAction
+
+  @Prop({
     required: true,
     type: Object
   })
   readonly tree!: ConfigurationsTree
-
-  @Prop({
-    default: () => [],
-    required: false,
-    type: Array
-  })
-  readonly availabilities!: Availability[]
 
   @Prop({
     default: () => [],
@@ -149,6 +152,18 @@ export default class MountActionEditForm extends Vue {
   private loadDeviceAvailabilities!: LoadDeviceAvailabilitiesAction
   private platformAvailabilities!: PlatformsState['platformAvailabilities']
   private loadPlatformAvailabilities!: LoadPlatformAvailabilitiesAction
+  private configurationDynamicLocationActions!: ConfigurationsState['configurationDynamicLocationActions']
+  private loadConfigurationDynamicLocationActions!: LoadConfigurationDynamicLocationActionsAction
+
+  async fetch () {
+    try {
+      await Promise.all([
+        this.loadConfigurationDynamicLocationActions(this.configurationId)
+      ])
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch resources')
+    }
+  }
 
   get mountActionName (): string {
     if ('isDeviceMountAction' in this.value && this.value.isDeviceMountAction()) {
@@ -306,10 +321,35 @@ export default class MountActionEditForm extends Vue {
       return false
     }
 
+    // check device mount actions against dynamic location actions
+    if (selected.isDevice()) {
+      const dynamicLocationActions = this.getRelatedDynamicLocationActions()
+      const error4 = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(selected.unpack(), dynamicLocationActions)
+      if (typeof error4 === 'object') {
+        const message = MountActionValidator.buildErrorMessage(error4) + ' of dynamic location action'
+        if (error4.property === 'beginDate') {
+          this.beginDateErrorMessage = message
+          this.endDateErrorMessage = ''
+        } else {
+          this.beginDateErrorMessage = ''
+          this.endDateErrorMessage = message
+        }
+        return false
+      }
+    }
+
     // if we have no errors at all, clear the error messages
     this.beginDateErrorMessage = ''
     this.endDateErrorMessage = ''
     return true
+  }
+
+  getRelatedDynamicLocationActions (): DynamicLocationAction[] {
+    if (!this.originalAction || !('device' in this.originalAction)) {
+      return []
+    }
+    // filter all dynamic location actions, that are within the original time range
+    return MountActionValidator.getRelatedDynamicLocationActions(this.originalAction, this.configurationDynamicLocationActions)
   }
 
   getUnmountRequired (): boolean {

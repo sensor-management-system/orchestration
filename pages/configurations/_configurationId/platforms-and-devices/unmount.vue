@@ -54,44 +54,52 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <DateTimePicker
-          v-model="selectedDate"
+          :value="selectedDate"
           placeholder="e.g. 2000-01-31 12:00"
           label="Configuration at date"
+          @input="setSelectedDate"
         />
       </v-col>
       <v-col>
         <v-select
-          v-model="selectedDate"
+          :value="selectedDate"
           :item-value="(x) => x.value"
           :item-text="(x) => x.text"
           :items="mountActionDateItems"
           label="Dates defined by actions"
           hint="The referenced time zone is UTC."
           persistent-hint
+          @input="setSelectedDate"
         />
       </v-col>
     </v-row>
     <v-row justify="center">
       <v-col cols="12" md="6">
         <v-card>
-          <v-container>
-            <v-card-title>Mounted devices and platforms</v-card-title>
+          <v-card-title class="primary white--text">
+            Mounted devices and platforms
+          </v-card-title>
+          <v-card-text>
             <ConfigurationsTreeView
               v-if="configuration && tree"
               ref="unmountTreeView"
               v-model="selectedNode"
+              disable-per-node
               :tree="tree"
+              @input="onNodeSelect"
             />
-          </v-container>
+          </v-card-text>
         </v-card>
       </v-col>
       <v-col>
         <v-slide-x-reverse-transition>
           <div v-show="selectedNode && !selectedNode.isConfiguration()">
             <v-card>
-              <v-card-title>Submit unmount form</v-card-title>
-              <v-card-subtitle v-if="!nodeCanBeUnmounted(selectedNode)" class="error--text">
-                The selected node still has active children. Please unmount them first.
+              <v-card-title>
+                Unmount {{ selectedNode ? selectedNode.nameWithoutOffsets : '' }}
+              </v-card-title>
+              <v-card-subtitle v-if="!nodeCanBeUnmounted" class="error--text">
+                {{ errorMessage }}
               </v-card-subtitle>
               <v-container>
                 <ConfigurationsSelectedItemUnmountForm
@@ -99,7 +107,7 @@ permissions and limitations under the Licence.
                   :node="selectedNode"
                   :contacts="contacts"
                   :current-user-mail="currentUserMail"
-                  :readonly="!nodeCanBeUnmounted(selectedNode)"
+                  :readonly="!nodeCanBeUnmounted"
                   @unmount="unmount"
                 />
               </v-container>
@@ -121,7 +129,11 @@ import {
   UpdateDeviceMountActionAction,
   UpdatePlatformMountActionAction,
   ConfigurationsState,
-  LoadMountingConfigurationForDateAction
+  LoadMountingConfigurationForDateAction,
+  SetSelectedDateAction,
+  LoadConfigurationDynamicLocationActionsAction,
+  LoadDeviceMountActionAction,
+  LoadMountingActionsAction
 } from '@/store/configurations'
 
 import { Contact } from '@/models/Contact'
@@ -135,6 +147,8 @@ import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 
+import { MountActionValidator } from '@/utils/MountActionValidator'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
@@ -144,7 +158,7 @@ import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSe
   components: { ProgressIndicator, ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
   middleware: ['auth'],
   computed: {
-    ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate']),
+    ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate', 'selectedDate', 'configurationDynamicLocationActions', 'deviceMountAction']),
     ...mapState('contacts', ['contacts']),
     ...mapGetters('configurations', ['mountActionDateItems'])
   },
@@ -152,29 +166,45 @@ import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSe
     ...mapActions('configurations', [
       'loadMountingConfigurationForDate',
       'updateDeviceMountAction',
-      'updatePlatformMountAction'
+      'updatePlatformMountAction',
+      'setSelectedDate',
+      'loadConfigurationDynamicLocationActions',
+      'loadDeviceMountAction',
+      'loadMountingActions'
     ])
   }
 })
 export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
-  private selectedDate = DateTime.utc()
   private selectedNode: ConfigurationsTreeNode | null = null
   private tree: ConfigurationsTree = ConfigurationsTree.fromArray([])
 
-  private isSaving = false
-  private isLoading = false
+  private isSaving: boolean = false
+  private isLoading: boolean = false
+  private errorMessage: string = ''
+  private nodeCanBeUnmounted: boolean = false
 
   // vuex definition for typescript check
-  configuration!: ConfigurationsState['configuration']
-  configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
-  updateDeviceMountAction!: UpdateDeviceMountActionAction
-  updatePlatformMountAction!: UpdatePlatformMountActionAction
-  loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
+  private configuration!: ConfigurationsState['configuration']
+  private configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
+  private updateDeviceMountAction!: UpdateDeviceMountActionAction
+  private updatePlatformMountAction!: UpdatePlatformMountActionAction
+  private loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
+  private selectedDate!: ConfigurationsState['selectedDate']
+  private setSelectedDate!: SetSelectedDateAction
+  private configurationDynamicLocationActions!: ConfigurationsState['configurationDynamicLocationActions']
+  private loadConfigurationDynamicLocationActions!: LoadConfigurationDynamicLocationActionsAction
+  private deviceMountAction!: ConfigurationsState['deviceMountAction']
+  private loadDeviceMountAction!: LoadDeviceMountActionAction
+  private loadMountingActions!: LoadMountingActionsAction
 
   async fetch () {
     try {
       this.isLoading = true
-      await this.loadTree()
+      await Promise.all([
+        this.loadConfigurationDynamicLocationActions(this.configurationId),
+        this.loadMountingActions(this.configurationId),
+        this.loadTree()
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch resources')
     } finally {
@@ -191,22 +221,49 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       // as we don't want to alter the Vuex state, we create a new Tree here
       if (this.configurationMountingActionsForDate) {
         rootNode.children = ConfigurationsTree.createFromObject(this.configurationMountingActionsForDate).toArray()
+        rootNode.disabled = true
         this.tree = ConfigurationsTree.fromArray([rootNode])
       }
     }
   }
 
-  nodeCanBeUnmounted (node: ConfigurationsTreeNode | null): boolean {
-    if (node === null) {
-      return true
-    }
+  async checkIfNodeCanBeUnmounted (node: ConfigurationsTreeNode): Promise<boolean> {
     if (node.isConfiguration()) {
+      this.nodeCanBeUnmounted = false
       return false
     }
     if (node.isPlatform() && node.canHaveChildren() && node.children.length > 0) {
+      this.errorMessage = 'The selected node still has active children. Please unmount them first.'
+      this.nodeCanBeUnmounted = false
       return false
     }
+    // check device mount actions against dynamic location actions
+    if (node.isDevice()) {
+      // load the full action (with device properties)
+      await this.loadDeviceMountAction(node.unpack().id)
+      if (this.deviceMountAction) {
+        // get all dynamic location actions that use properties of the current device mount action
+        const dynamicLocationActions = MountActionValidator.getRelatedDynamicLocationActions(this.deviceMountAction, this.configurationDynamicLocationActions)
+        // create a new device mount action with the selected end date
+        const newDeviceMountAction = DeviceMountAction.createFromObject(this.deviceMountAction)
+        newDeviceMountAction.endDate = this.selectedDate
+        const error = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(newDeviceMountAction, dynamicLocationActions)
+        if (typeof error === 'object') {
+          this.errorMessage = 'The selected node is still referenced by dynamic locations.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
+      }
+    }
+    this.nodeCanBeUnmounted = true
     return true
+  }
+
+  onNodeSelect (node: ConfigurationsTreeNode | null) {
+    if (!node) {
+      return
+    }
+    this.checkIfNodeCanBeUnmounted(node)
   }
 
   get configurationId (): string {
@@ -288,6 +345,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
     try {
       this.isLoading = true
       await this.loadTree()
+      this.onNodeSelect(this.selectedNode)
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
     } finally {

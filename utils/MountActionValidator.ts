@@ -42,6 +42,8 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { Availability } from '@/models/Availability'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 
 export enum MountActionValidationResultOp {
   GREATER_THAN = '>',
@@ -131,7 +133,7 @@ export class MountActionValidator {
    * @static
    * @param {MountAction} action - the action to validate
    * @param {MountAction} otherAction - an action to validate against
-   * @returns {boolean | IMountActionValidationResult} returns `true` if the timeranges do not intersect, otherwise an error object
+   * @returns {boolean | IMountActionValidationResult} returns `false` if the timeranges do not intersect, otherwise an error object
    */
   public static actionConflictsWith (action: MountAction, otherAction: MountAction): boolean | IMountActionValidationResult {
     if (!(action.beginDate >= otherAction.beginDate)) {
@@ -144,7 +146,7 @@ export class MountActionValidator {
       })
     }
     if (!otherAction.endDate) {
-      return true
+      return false
     }
     if (!(action.beginDate <= otherAction.endDate)) {
       return new MountActionValidationResult({
@@ -182,7 +184,7 @@ export class MountActionValidator {
         op: MountActionValidationResultOp.EMPTY
       })
     }
-    return true
+    return false
   }
 
   /**
@@ -193,16 +195,16 @@ export class MountActionValidator {
    * @static
    * @param {MountAction} action - the action to validate
    * @param {MountAction[]} otherActions - an `Array` of actions to validate against
-   * @returns {boolean | IMountActionValidationResult} returns `true` if the timeranges do not intersect, otherwise an error object
+   * @returns {boolean | IMountActionValidationResult} returns `false` if the timeranges do not intersect, otherwise an error object
    */
   public static actionConflictsWithMultiple (action: MountAction, otherActions: MountAction[]): boolean | MountActionValidationResult {
     for (const otherAction of otherActions) {
       const result = MountActionValidator.actionConflictsWith(otherAction, action)
-      if (result !== true) {
+      if (result !== false) {
         return result // we can stop with the first negative test
       }
     }
-    return true
+    return false
   }
 
   public static actionAvailableIn (action: MountAction, availabilities: Availability[]): boolean | MountActionValidationResult {
@@ -270,6 +272,94 @@ export class MountActionValidator {
   }
 
   /**
+   * checks if at least one of the device properties of the device of a device
+   * mount action is used in a dynamic location action
+   *
+   * @static
+   * @param {DeviceMountAction} deviceMountAction - the device mount action
+   * @param {DynamicLocationAction} dynamicLocationAction - a dynamic location action
+   * @returns {boolean} returns `true` when at least of the device properties is used in the dynamic location action
+   */
+  public static isDevicePropertyUsedInDynamicLocationAction (deviceMountAction: DeviceMountAction, dynamicLocationAction: DynamicLocationAction): boolean {
+    let devicePropertiesUsed = false
+    deviceMountAction.device.properties.forEach((i) => {
+      if (i.id === dynamicLocationAction.x?.id || i.id === dynamicLocationAction.y?.id || i.id === dynamicLocationAction.z?.id) {
+        devicePropertiesUsed = true
+      }
+    })
+    return devicePropertiesUsed
+  }
+
+  /**
+   * returns all dynamic location actions, that are using the device properties
+   * of the device of the device mounting action and are withing the timerange
+   * of the mounting action
+   *
+   * @static
+   * @param {DeviceMountAction} deviceMountAction - the device mount action
+   * @param {DynamicLocationAction[]} dynamicLocationActions - an array of dynamic location actions
+   * @returns {DynamicLocationAction[]} an array of dynamic location actions
+   */
+  public static getRelatedDynamicLocationActions (deviceMountAction: DeviceMountAction, dynamicLocationActions: DynamicLocationAction[]): DynamicLocationAction[] {
+    return dynamicLocationActions.filter((i) => {
+      return MountActionValidator.isDevicePropertyUsedInDynamicLocationAction(deviceMountAction, i) &&
+        i.beginDate &&
+        i.beginDate >= deviceMountAction.beginDate &&
+        (!i.endDate || !deviceMountAction.endDate || (i.endDate <= deviceMountAction.endDate))
+    })
+  }
+
+  /**
+   * validates if the timerange of a device mount action includes the
+   * timeranges of dynamic location actions which use the device
+   *
+   * @static
+   * @param {DeviceMountAction} deviceMountAction - the device mount action to validate
+   * @param {DynamicLocationAction} dynamicLocationAction - the dynamic location action to validate against
+   * @returns {boolean | IMountActionValidationResult} returns `true` if the timerange of the dynamic location action is included, otherwise an error object
+   */
+  public static isDeviceMountActionCompatibleWithDynamicLocationAction (deviceMountAction: DeviceMountAction, dynamicLocationAction: DynamicLocationAction): boolean | MountActionValidationResult {
+    if (!MountActionValidator.isDevicePropertyUsedInDynamicLocationAction(deviceMountAction, dynamicLocationAction)) {
+      return true
+    }
+    // we ignore dynamic location actions without a begin date. dynamic
+    // location actions from the backend should always have a begin date
+    if (!dynamicLocationAction.beginDate) {
+      return true
+    }
+    // the time range of the dynamic location action must be within the time range of the mount action
+    if (!(deviceMountAction.beginDate <= dynamicLocationAction.beginDate)) {
+      return new MountActionValidationResult({
+        property: 'beginDate',
+        targetProperty: 'beginDate',
+        value: deviceMountAction.beginDate,
+        targetValue: dynamicLocationAction.beginDate,
+        op: MountActionValidationResultOp.GREATER_THAN
+      })
+    }
+    if (!(deviceMountAction.endDate && (!dynamicLocationAction.endDate || deviceMountAction.endDate >= dynamicLocationAction.endDate))) {
+      return new MountActionValidationResult({
+        property: 'endDate',
+        targetProperty: 'endDate',
+        value: deviceMountAction.endDate,
+        targetValue: dynamicLocationAction.endDate ? dynamicLocationAction.endDate : null,
+        op: MountActionValidationResultOp.LESS_THAN
+      })
+    }
+    return true
+  }
+
+  public static isDeviceMountActionCompatibleWithMultipleDynamicLocationActions (deviceMountAction: DeviceMountAction, dynamicLocationActions: DynamicLocationAction[]): boolean | MountActionValidationResult {
+    for (const dynamicLocationAction of dynamicLocationActions) {
+      const result = MountActionValidator.isDeviceMountActionCompatibleWithDynamicLocationAction(deviceMountAction, dynamicLocationAction)
+      if (result !== true) {
+        return result // we can stop with the first negative test
+      }
+    }
+    return true
+  }
+
+  /**
    * validates, if the timerange of the `MountAction` of a node intersects with
    * the timerange of the `MountAction` of its parent node
    *
@@ -281,7 +371,11 @@ export class MountActionValidator {
     if (!parent) {
       return true
     }
-    return MountActionValidator.actionConflictsWith(node.unpack(), parent.unpack())
+    const error = MountActionValidator.actionConflictsWith(node.unpack(), parent.unpack())
+    if (!error) {
+      return true
+    }
+    return error
   }
 
   /**
@@ -305,6 +399,10 @@ export class MountActionValidator {
       parent.children.forEach(i => getChildrenRecursive(i, collected))
     }
     getChildrenRecursive(node, children)
-    return MountActionValidator.actionConflictsWithMultiple(node.unpack(), children)
+    const error = MountActionValidator.actionConflictsWithMultiple(node.unpack(), children)
+    if (!error) {
+      return true
+    }
+    return error
   }
 }

@@ -149,13 +149,13 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  configuration!: ConfigurationsState['configuration']
-  loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
-  loadMountingActions!: LoadMountingActionsAction
-  configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
-  configurationMountingActions!: ConfigurationsState['configurationMountingActions']
-  selectedDate!: ConfigurationsState['selectedDate']
-  setSelectedDate!: SetSelectedDateAction
+  private configuration!: ConfigurationsState['configuration']
+  private loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
+  private loadMountingActions!: LoadMountingActionsAction
+  private configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
+  private configurationMountingActions!: ConfigurationsState['configurationMountingActions']
+  private selectedDate!: ConfigurationsState['selectedDate']
+  private setSelectedDate!: SetSelectedDateAction
 
   async created () {
     if (this.$route.query.date) {

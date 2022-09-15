@@ -55,7 +55,6 @@ permissions and limitations under the Licence.
         :value="platformMountAction"
         :tree="tree"
         :contacts="contacts"
-        :availabilities="availabilities"
         @input="update"
       />
       <v-card-actions>

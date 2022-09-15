@@ -56,7 +56,8 @@ export class DeviceMountActionApi {
         'begin_contact',
         'end_contact',
         'parent_platform',
-        'device'
+        'device',
+        'device.device_properties'
       ].join(',')
     }
     const response = await this.axiosApi.get(url, { params })
