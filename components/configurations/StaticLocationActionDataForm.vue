@@ -220,7 +220,11 @@ import LocationMap from '@/components/configurations/LocationMap.vue'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 import { VocabularyState } from '@/store/vocabulary'
 import { ContactsState } from '@/store/contacts'
-import { LocationActionTimepointsExceptPassedIdAndTypeTypeGetter, LocationTypes } from '@/store/configurations'
+import {
+  ConfigurationsState,
+  LocationActionTimepointsExceptPassedIdAndTypeTypeGetter,
+  LocationTypes
+} from '@/store/configurations'
 import { StationaryLocation } from '@/models/Location'
 import {
   extractStationaryLocationFromStaticLocationBeginAction,
@@ -239,7 +243,8 @@ import { Rules } from '@/mixins/Rules'
   computed: {
     ...mapState('vocabulary', ['epsgCodes', 'elevationData']),
     ...mapState('contacts', ['contacts']),
-    ...mapGetters('configurations', ['locationActionTimepointsExceptPassedIdAndType'])
+    ...mapGetters('configurations', ['locationActionTimepointsExceptPassedIdAndType']),
+    ...mapState('configurations', ['configuration'])
   }
 })
 export default class StaticLocationActionDataForm extends mixins(Rules) {
@@ -258,6 +263,7 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
   epsgCodes!: VocabularyState['epsgCodes']
   elevationData!: VocabularyState['elevationData']
   contacts!: ContactsState['contacts']
+  configuration!: ConfigurationsState['configuration']
   locationActionTimepointsExceptPassedIdAndType!: LocationActionTimepointsExceptPassedIdAndTypeTypeGetter
 
   get currentUserMail (): string | null {
@@ -353,7 +359,8 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
       Validator.canNotIntersectWithExistingInterval(this.value.beginDate, this.timepointsExceptCurrentlyEdited),
       Validator.startDateMustBeAfterPreviousAction(this.value.beginDate, this.value.endDate, this.timepointsExceptCurrentlyEdited),
       Validator.validateStartDateIsBeforeEndDate(this.value.beginDate, this.value.endDate),
-      Validator.canNotStartAnActionAfterAnActiveAction(this.value.beginDate, this.timepointsExceptCurrentlyEdited)
+      Validator.canNotStartAnActionAfterAnActiveAction(this.value.beginDate, this.timepointsExceptCurrentlyEdited),
+      Validator.dateMustBeInRangeOfConfigurationDates(this.configuration, this.value.beginDate)
     ]
   }
 
@@ -361,7 +368,8 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
     return [
       Validator.canNotIntersectWithExistingInterval(this.value.endDate, this.timepointsExceptCurrentlyEdited),
       Validator.validateStartDateIsBeforeEndDate(this.value.beginDate, this.value.endDate),
-      Validator.endDateMustBeBeforeNextAction(this.value.beginDate, this.value.endDate, this.timepointsExceptCurrentlyEdited)
+      Validator.endDateMustBeBeforeNextAction(this.value.beginDate, this.value.endDate, this.timepointsExceptCurrentlyEdited),
+      Validator.dateMustBeInRangeOfConfigurationDates(this.configuration, this.value.endDate)
     ]
   }
 }
