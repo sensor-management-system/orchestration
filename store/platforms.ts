@@ -184,6 +184,7 @@ export type UpdatePlatformAction = (platform: Platform) => void
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
 export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, originalPlatformId: string}) => Promise<string>
 export type ExportAsCsvAction = () => Promise<Blob>
+export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type DeletePlatformAction = (id: string) => Promise<void>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
@@ -371,6 +372,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
     }
     await Promise.all(related)
     return savedPlatformId
+  },
+  async exportAsSensorML (_, id: string): Promise<Blob> {
+    return await this.$api.platforms.getSensorML(id)
   },
   async exportAsCsv ({ getters }: { getters: any }): Promise<Blob> {
     let userId = null

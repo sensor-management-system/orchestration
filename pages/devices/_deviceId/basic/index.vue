@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -45,14 +45,17 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
-      <DotMenu
-        v-if="$auth.loggedIn"
-      >
+      <DotMenu>
         <template #actions>
+          <DotMenuActionSensorML
+            @click="openSensorML"
+          />
           <DotMenuActionCopy
+            v-if="$auth.loggedIn"
             :path="'/devices/copy/' + deviceId"
           />
           <DotMenuActionDelete
+            v-if="$auth.loggedIn"
             :readonly="!deletable"
             @click="initDeleteDialog"
           />
@@ -74,14 +77,17 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
-      <DotMenu
-        v-if="$auth.loggedIn"
-      >
+      <DotMenu>
         <template #actions>
+          <DotMenuActionSensorML
+            @click="openSensorML"
+          />
           <DotMenuActionCopy
+            v-if="$auth.loggedIn"
             :path="'/devices/copy/' + deviceId"
           />
           <DotMenuActionDelete
+            v-if="$auth.loggedIn"
             :readonly="!deletable"
             @click="initDeleteDialog"
           />
@@ -102,13 +108,14 @@ permissions and limitations under the Licence.
 import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { DeleteDeviceAction, DevicesState } from '@/store/devices'
+import { DeleteDeviceAction, DevicesState, ExportAsSensorMLAction } from '@/store/devices'
 
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DeviceBasicData from '@/components/DeviceBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
@@ -116,12 +123,13 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ProgressIndicator,
     DotMenuActionDelete,
     DotMenuActionCopy,
+    DotMenuActionSensorML,
     DotMenu,
     DeviceDeleteDialog,
     DeviceBasicData
   },
   computed: mapState('devices', ['device']),
-  methods: mapActions('devices', ['deleteDevice'])
+  methods: mapActions('devices', ['deleteDevice', 'exportAsSensorML'])
 })
 export default class DeviceShowBasicPage extends Vue {
   @InjectReactive()
@@ -137,6 +145,7 @@ export default class DeviceShowBasicPage extends Vue {
   // vuex definition for typescript check
   device!: DevicesState['device']
   deleteDevice!: DeleteDeviceAction
+  exportAsSensorML!: ExportAsSensorMLAction
 
   get deviceId () {
     return this.$route.params.deviceId
@@ -148,6 +157,16 @@ export default class DeviceShowBasicPage extends Vue {
 
   closeDialog () {
     this.showDeleteDialog = false
+  }
+
+  async openSensorML () {
+    try {
+      const blob = await this.exportAsSensorML(this.deviceId)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+    }
   }
 
   async deleteAndCloseDialog () {

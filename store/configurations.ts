@@ -336,6 +336,7 @@ export type LoadDynamicLocationActionAction = IdParamReturnsVoidPromiseAction
 export type LoadDeviceMountActionsForDynamicLocationAction = IdParamReturnsVoidPromiseAction
 
 export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
+export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 
 export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
@@ -405,6 +406,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   async loadDeviceMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setConfigurationDeviceMountActions', await this.$api.configurations.findRelatedDeviceMountActions(id))
+  },
+  async exportAsSensorML (_, id: string): Promise<Blob> {
+    return await this.$api.configurations.getSensorML(id)
   },
   async loadDeviceMountActionsForDynamicLocation ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setDeviceMountActionsForDynamicLocation', await this.$api.configurations.findRelatedDeviceMountActionsIncludingDeviceInformation(id))
