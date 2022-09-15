@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
         Begin date:
       </v-col>
       <v-col cols="8">
-        {{ mountAction.beginDate | ISOToDateTimeString }}
+        {{ mountAction.beginDate | ISOToDateTimeString }} <span class="text-caption text--secondary">(UTC)</span>
       </v-col>
     </v-row>
     <v-row dense>
@@ -51,7 +51,7 @@ permissions and limitations under the Licence.
         End date:
       </v-col>
       <v-col v-if="mountAction.endDate" cols="8">
-        {{ mountAction.endDate | ISOToDateTimeString }}
+        {{ mountAction.endDate | ISOToDateTimeString }} <span class="text-caption text--secondary">(UTC)</span>
       </v-col>
       <v-col v-else cols="8">
         open end
