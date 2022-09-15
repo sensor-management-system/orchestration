@@ -228,12 +228,17 @@ permissions and limitations under the Licence.
         <nuxt />
       </v-container>
     </v-main>
+    <v-footer v-if="!isLandingPage" app absolute padless>
+      <logo-footer :is-landing-page="isLandingPage" />
+    </v-footer>
     <v-footer
+      class="link-footer"
       :absolute="$vuetify.breakpoint.smAndDown"
       :fixed="$vuetify.breakpoint.smAndUp"
       app
       padless
     >
+      <logo-footer v-if="isLandingPage" :is-landing-page="isLandingPage" class="logo-footer__landing" />
       <cookie-law
         button-text="Okay"
         button-class="v-btn v-btn--is-elevated v-btn--has-bg v-size--default primary"
@@ -252,6 +257,7 @@ permissions and limitations under the Licence.
           <!-- eslint-enable -->
         </template>
       </cookie-law>
+
       <v-row
         no-gutters
       >
@@ -323,6 +329,7 @@ permissions and limitations under the Licence.
           </v-btn>
         </v-col>
       </v-row>
+      <!-- </v-container> -->
     </v-footer>
   </v-app>
 </template>
@@ -333,6 +340,7 @@ import CookieLaw from 'vue-cookie-law'
 import { mapActions, mapState } from 'vuex'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
+import LogoFooter from '@/components/LogoFooter'
 
 import { saveCurrentRoute } from '@/utils/loginHelpers'
 
@@ -340,7 +348,8 @@ export default {
   components: {
     AppBarTabsExtension,
     AppBarEditModeContent,
-    CookieLaw
+    CookieLaw,
+    LogoFooter
   },
   data () {
     return {
@@ -471,6 +480,9 @@ export default {
     },
     isLoggedIn () {
       return this.$auth.loggedIn
+    },
+    isLandingPage () {
+      return this.$route.path === '/'
     }
   },
   created () {
@@ -524,4 +536,13 @@ export default {
     background: map-get($grey, 'lighten-3');
     padding: $grid-gutter / 2;
   }
+
+  .link-footer {
+    z-index: 10
+  }
+
+  .logo-footer__landing {
+    margin-bottom: 0 !important;
+  }
+
 </style>>
