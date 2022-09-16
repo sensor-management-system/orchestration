@@ -54,6 +54,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :entity-name="entityName"
           :rules="[pageRules.validatePermissionGroups]"
+          required
           @input="update('permissionGroups', $event)"
         />
       </v-col>
