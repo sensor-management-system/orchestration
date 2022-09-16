@@ -1,6 +1,8 @@
 import datetime
 import os
 
+import pytz
+
 from project import base_url
 from project.api.models import Contact, PlatformMountAction, User
 from project.api.models.base_model import db
@@ -54,19 +56,31 @@ class TestConfigurationsService(BaseTestCase):
         # we want to run the very same test with multiple dates
         calibration_dates = {
             "20201111": {
-                "json_api_value": "2020-11-11T00:00:00",
+                "json_api_value": "2020-11-11T00:00:00+00:00",
                 "sql_alchemy_value": datetime.datetime(
-                    year=2020, month=11, day=11, hour=0, minute=0, second=0
+                    year=2020,
+                    month=11,
+                    day=11,
+                    hour=0,
+                    minute=0,
+                    second=0,
+                    tzinfo=pytz.UTC,
                 ),
             },
             "20200229": {
-                "json_api_value": "2020-02-29T00:00:00",
+                "json_api_value": "2020-02-29T00:00:00+00:00",
                 "sql_alchemy_value": datetime.datetime(
-                    year=2020, month=2, day=29, hour=0, minute=0, second=0
+                    year=2020,
+                    month=2,
+                    day=29,
+                    hour=0,
+                    minute=0,
+                    second=0,
+                    tzinfo=pytz.UTC,
                 ),
             },
             "2020-08-29T13:49:48.015620+00:00": {
-                "json_api_value": "2020-08-29T13:49:48.015620",
+                "json_api_value": "2020-08-29T13:49:48.015620+00:00",
                 # first this should be wrong
                 "sql_alchemy_value": datetime.datetime(
                     year=2020,
@@ -76,6 +90,7 @@ class TestConfigurationsService(BaseTestCase):
                     minute=49,
                     second=48,
                     microsecond=15620,
+                    tzinfo=pytz.UTC,
                 ),
             },
         }
@@ -183,7 +198,9 @@ class TestConfigurationsService(BaseTestCase):
         db.session.add(device3)
 
         config1 = Configuration(
-            label="Config1", is_public=False, is_internal=True,
+            label="Config1",
+            is_public=False,
+            is_internal=True,
         )
         db.session.add(config1)
         db.session.commit()
@@ -197,9 +214,7 @@ class TestConfigurationsService(BaseTestCase):
                     "?",
                     "include",
                     "=",
-                    ",".join(
-                        ["contacts" ]
-                    ),
+                    ",".join(["contacts"]),
                 ]
             )
             access_headers = create_token()

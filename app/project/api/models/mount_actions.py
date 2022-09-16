@@ -32,7 +32,7 @@ class PlatformMountAction(db.Model, AuditMixin):
         foreign_keys=[parent_platform_id],
         backref=db.backref("outer_platform_mount_actions"),
     )
-    begin_date = db.Column(db.DateTime, nullable=False)
+    begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
     begin_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     begin_contact = db.relationship(
@@ -44,7 +44,7 @@ class PlatformMountAction(db.Model, AuditMixin):
     offset_x = db.Column(db.Float, default=0)
     offset_y = db.Column(db.Float, default=0)
     offset_z = db.Column(db.Float, default=0)
-    end_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     end_description = db.Column(db.Text, nullable=True)
     end_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=True)
     end_contact = db.relationship(
@@ -105,7 +105,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
-    begin_date = db.Column(db.DateTime, nullable=False)
+    begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
     begin_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     begin_contact = db.relationship(
@@ -118,7 +118,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     offset_y = db.Column(db.Float, default=0)
     offset_z = db.Column(db.Float, default=0)
 
-    end_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     end_description = db.Column(db.Text, nullable=True)
     end_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=True)
     end_contact = db.relationship(

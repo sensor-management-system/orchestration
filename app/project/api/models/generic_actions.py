@@ -17,8 +17,8 @@ class GenericPlatformAction(db.Model, AuditMixin, IndirectSearchableMixin):
     description = db.Column(db.Text, nullable=True)
     action_type_name = db.Column(db.String(256), nullable=False)
     action_type_uri = db.Column(db.String(256), nullable=True)
-    begin_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime, nullable=True)
+    begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     contact = db.relationship(
         "Contact",
@@ -60,8 +60,8 @@ class GenericDeviceAction(db.Model, AuditMixin, IndirectSearchableMixin):
     description = db.Column(db.Text, nullable=True)
     action_type_name = db.Column(db.String(256), nullable=False)
     action_type_uri = db.Column(db.String(256), nullable=True)
-    begin_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime)
+    begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_date = db.Column(db.DateTime(timezone=True))
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     contact = db.relationship(
         "Contact",
@@ -108,8 +108,8 @@ class GenericConfigurationAction(db.Model, AuditMixin, IndirectSearchableMixin):
     description = db.Column(db.Text, nullable=True)
     action_type_name = db.Column(db.String(256), nullable=False)
     action_type_uri = db.Column(db.String(256), nullable=True)
-    begin_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime)
+    begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_date = db.Column(db.DateTime(timezone=True))
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     contact = db.relationship(
         "Contact",
