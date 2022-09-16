@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { DateTime } from 'luxon'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -87,6 +87,9 @@ import DynamicLocationActionDataForm from '@/components/configurations/DynamicLo
   }
 })
 export default class DynamicLocationActionEdit extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private valueCopy: DynamicLocationAction = new DynamicLocationAction()
   private isSaving: boolean = false
   private isLoading: boolean = false
@@ -101,6 +104,12 @@ export default class DynamicLocationActionEdit extends Vue {
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
 
   async created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/locations', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+      return
+    }
     try {
       this.isLoading = true
 

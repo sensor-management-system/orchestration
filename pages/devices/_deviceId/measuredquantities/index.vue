@@ -63,9 +63,11 @@ permissions and limitations under the Licence.
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
         >
-          <template #actions>
+          <template
+            v-if="editable"
+            #actions
+          >
             <v-btn
-              v-if="$auth.loggedIn"
               :to="'/devices/'+deviceId+'/measuredquantities/'+item.id+'/edit'"
               color="primary"
               text
@@ -75,7 +77,10 @@ permissions and limitations under the Licence.
               Edit
             </v-btn>
           </template>
-          <template #dot-menu-items>
+          <template
+            v-if="editable"
+            #dot-menu-items
+          >
             <DotMenuActionDelete
               :readonly="!$auth.loggedIn"
               @click="initDeleteDialog(item)"
@@ -98,6 +103,7 @@ permissions and limitations under the Licence.
       </v-btn>
     </v-card-actions>
     <DevicesMeasuredQuantitiesDeleteDialog
+      v-if="editable"
       v-model="showDeleteDialog"
       :measured-quantity="measuredQuantityToDelete"
       @cancel-deletion="closeDialog"

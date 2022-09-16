@@ -124,7 +124,9 @@ permissions and limitations under the Licence.
         {{ mountAction.endDescription | shortenRight(25, '...') | orDefault }}
       </v-col>
     </v-row>
-    <v-row>
+    <v-row
+      v-if="editable"
+    >
       <v-col>
         <v-btn
           small
@@ -162,6 +164,13 @@ export default class BaseMountInfo extends Vue {
     type: Object
   })
   private mountAction!: DeviceMountAction | PlatformMountAction
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private editable!: boolean
 
   get editLink (): RawLocation {
     return {

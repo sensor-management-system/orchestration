@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { DateTime } from 'luxon'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -88,6 +88,9 @@ import { Device } from '@/models/Device'
   }
 })
 export default class DynamicLocationActionNew extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private beginAction: DynamicLocationAction = new DynamicLocationAction()
   private isSaving: boolean = false
 
@@ -103,6 +106,12 @@ export default class DynamicLocationActionNew extends Vue {
   activeDevicesWithPropertiesForDate!: ActiveDevicesWithPropertiesForDateGetter
 
   created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/locations', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+      return
+    }
     this.beginAction.beginDate = this.selectedDate
     if (!this.hasActiveDevicesWithPropertiesForDate(this.beginAction.beginDate)) {
       this.$store.commit('snackbar/setError', 'No devices with properties for selected date exist')

@@ -39,12 +39,13 @@ permissions and limitations under the Licence.
       v-if="dynamicLocationAction"
       :action="dynamicLocationAction"
       :configuration-id="configurationId"
+      :editable="editable"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import * as VueRouter from 'vue-router'
 import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -65,6 +66,9 @@ import {
   }
 })
 export default class DynamicLocationActionView extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isLoading = false
 
   // vuex definition for typescript check
