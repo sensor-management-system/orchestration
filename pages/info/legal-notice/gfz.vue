@@ -106,7 +106,9 @@ permissions and limitations under the Licence.
       </h2>
       <p>
         The following third-party software is used within the scope of this web application <br>
-        <a href="/info/licenses/">Licenses</a>
+        <NuxtLink to="/info/licenses/">
+          Licenses
+        </NuxtLink>
       </p>
     </section>
     <section class="mb-6">
