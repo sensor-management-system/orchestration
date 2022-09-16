@@ -1,7 +1,6 @@
 """Check functions to ensure consistency for mounts."""
 
 import abc
-import datetime
 import itertools
 
 import dateutil.parser
@@ -14,6 +13,7 @@ from ..models import (
     DeviceProperty,
     PlatformMountAction,
 )
+from ..models.mixin import utc_now
 from .date_time_range import DateTimeRange
 from .errors import BadRequestError, ConflictError, NotFoundError
 
@@ -173,7 +173,7 @@ class AbstractMountActionValidator(abc.ABC):
         )
         # Main point is that both are the very same. No real action
         # can be covered by those.
-        start_and_end = datetime.datetime.now()
+        start_and_end = utc_now()
         fake_date_time_range = DateTimeRange(start_and_end, start_and_end)
 
         # The _get_first_orphan method checks if we would lose any action by putting

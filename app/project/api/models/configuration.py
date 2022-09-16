@@ -12,8 +12,8 @@ class Configuration(
     """Data model for the configurations."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    start_date = db.Column(db.DateTime, nullable=True)
-    end_date = db.Column(db.DateTime, nullable=True)
+    start_date = db.Column(db.DateTime(timezone=True), nullable=True)
+    end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     label = db.Column(db.String(256), nullable=True)
     status = db.Column(db.String(256), nullable=True, default="draft")
     cfg_permission_group = db.Column(db.String, nullable=True)

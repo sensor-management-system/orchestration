@@ -18,7 +18,7 @@ class ConfigurationStaticLocationBeginAction(
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
-    begin_date = db.Column(db.DateTime, nullable=False)
+    begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
     begin_contact_id = db.Column(
         db.Integer, db.ForeignKey("contact.id"), nullable=False
@@ -35,7 +35,7 @@ class ConfigurationStaticLocationBeginAction(
     epsg_code = db.Column(db.String(256), default="4326")
     elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
     elevation_datum_uri = db.Column(db.String(256), nullable=True)
-    end_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     end_description = db.Column(db.Text, nullable=True)
     end_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=True)
     end_contact = db.relationship(
@@ -77,7 +77,7 @@ class ConfigurationDynamicLocationBeginAction(
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
-    begin_date = db.Column(db.DateTime, nullable=False)
+    begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
     begin_contact_id = db.Column(
         db.Integer, db.ForeignKey("contact.id"), nullable=False
@@ -118,7 +118,7 @@ class ConfigurationDynamicLocationBeginAction(
     epsg_code = db.Column(db.String(256), default="4326")
     elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
     elevation_datum_uri = db.Column(db.String(256), nullable=True)
-    end_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     end_description = db.Column(db.Text, nullable=True)
     end_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=True)
     end_contact = db.relationship(

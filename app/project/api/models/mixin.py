@@ -3,6 +3,7 @@
 import collections
 import itertools
 from datetime import datetime
+import pytz
 
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
@@ -18,13 +19,16 @@ from ..search import (
 )
 from .base_model import db
 
+def utc_now():
+    now = datetime.utcnow()
+    return pytz.utc.localize(now)
 
 class AuditMixin:
     """Audit mixin to save information about creation & updates."""
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
     # define 'updated at' to be populated with datetime.utcnow()
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(db.DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
     @declared_attr
     def created_by_id(self):

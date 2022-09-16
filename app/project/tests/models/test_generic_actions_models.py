@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.device import Device
@@ -8,6 +6,7 @@ from project.api.models.generic_actions import (
     GenericDeviceAction,
     GenericPlatformAction,
 )
+from project.api.models.mixin import utc_now
 from project.api.models.platform import Platform
 from project.api.models.user import User
 from project.tests.base import BaseTestCase, generate_userinfo_data
@@ -35,7 +34,7 @@ def generate_platform_action_model(
         description="test GenericPlatformAction",
         action_type_name="testing",
         action_type_uri="testing.unittest.de",
-        begin_date=datetime.now(),
+        begin_date=utc_now(),
         end_date=None,
         created_by=u,
     )
@@ -70,7 +69,7 @@ def generate_device_action_model(
         description="test GenericDeviceAction",
         action_type_name="testing",
         action_type_uri="testing.unittest.de",
-        begin_date=datetime.now(),
+        begin_date=utc_now(),
         end_date=None,
         created_by=u1,
     )
@@ -81,8 +80,12 @@ def generate_device_action_model(
     return generic_device_action
 
 
-def generate_configuration_action_model(is_public=False, is_private=False, is_internal=True):
-    config = generate_configuration_model(is_public=is_public, is_private=is_private, is_internal=is_internal)
+def generate_configuration_action_model(
+    is_public=False, is_private=False, is_internal=True
+):
+    config = generate_configuration_model(
+        is_public=is_public, is_private=is_private, is_internal=is_internal
+    )
     userinfo = generate_userinfo_data()
     c1 = Contact(
         given_name=userinfo["given_name"],
@@ -95,7 +98,7 @@ def generate_configuration_action_model(is_public=False, is_private=False, is_in
         description="test GenericConfigurationAction",
         action_type_name="testing",
         action_type_uri="testing.unittest.de",
-        begin_date=datetime.now(),
+        begin_date=utc_now(),
         end_date=None,
         created_by=u1,
     )

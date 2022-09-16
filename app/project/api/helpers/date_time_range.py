@@ -1,8 +1,17 @@
 """Datetime range tools."""
 
+import pytz
+
 
 class DateTimeRange:
     """A class to represent a range of datetimes."""
+
+    @staticmethod
+    def tz_aware(date):
+        """Help to handle timezone aware datetimes."""
+        if not date or date.tzinfo is not None:
+            return date
+        return pytz.utc.localize(date)
 
     def __init__(self, begin_date, end_date=None):
         """
@@ -18,8 +27,8 @@ class DateTimeRange:
         :param datetime.datetime begin_date: param_begin_date
         :param datetime.datetime end_date: param_end_date
         """
-        self.begin_date = begin_date
-        self.end_date = end_date
+        self.begin_date = self.tz_aware(begin_date)
+        self.end_date = self.tz_aware(end_date)
 
         # Just to make sure that the begin_date is before the end_date
         if self.begin_date is not None and self.end_date is not None:
