@@ -54,6 +54,7 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :entity-name="entityName"
           :rules="[pageRules.validatePermissionGroups]"
+          required
           @input="update('permissionGroups', $event)"
         />
       </v-col>
@@ -70,8 +71,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="6">
         <v-text-field
           :value="value.persistentIdentifier"
-          :readonly="readonly"
-          :disabled="readonly"
+          disabled
           label="Persistent identifier (PID)"
           :placeholder="persistentIdentifierPlaceholder"
           @input="update('persistentIdentifier', $event)"

@@ -39,12 +39,13 @@ permissions and limitations under the Licence.
       v-if="staticLocationAction"
       :action="staticLocationAction"
       :configuration-id="configurationId"
+      :editable="editable"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import * as VueRouter from 'vue-router'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -61,6 +62,9 @@ import { ConfigurationsState, LoadStaticLocationActionAction } from '@/store/con
   }
 })
 export default class StaticLocationActionView extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private isLoading = false
 
   // vuex definition for typescript check

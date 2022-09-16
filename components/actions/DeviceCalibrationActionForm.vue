@@ -98,8 +98,8 @@ permissions and limitations under the Licence.
             clearable
             label="Affected measured quantities"
             :items="measuredQuantities"
-            :item-value="(x) => x"
-            :item-text="(x) => x.label"
+            item-text="propertyName"
+            return-object
             @input="setMeasuredQuantities"
           />
         </v-col>

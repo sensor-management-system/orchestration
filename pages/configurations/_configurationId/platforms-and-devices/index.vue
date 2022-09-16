@@ -38,7 +38,7 @@ permissions and limitations under the Licence.
     <v-card-actions>
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         small
         nuxt
@@ -47,7 +47,7 @@ permissions and limitations under the Licence.
         Mount Platform or Device
       </v-btn>
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="secondary"
         small
         nuxt
@@ -101,6 +101,7 @@ permissions and limitations under the Licence.
               <ConfigurationsTreeNodeDetail
                 v-if="selectedNode"
                 :node="selectedNode"
+                :editable="editable"
               />
             </v-card-text>
           </v-card>
@@ -111,7 +112,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
@@ -143,19 +144,22 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   methods: mapActions('configurations', ['setSelectedDate', 'loadMountingActions', 'loadMountingConfigurationForDate'])
 })
 export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private selectedNode: ConfigurationsTreeNode | null = null
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
   private isLoading: boolean = false
 
   // vuex definition for typescript check
-  configuration!: ConfigurationsState['configuration']
-  loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
-  loadMountingActions!: LoadMountingActionsAction
-  configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
-  configurationMountingActions!: ConfigurationsState['configurationMountingActions']
-  selectedDate!: ConfigurationsState['selectedDate']
-  setSelectedDate!: SetSelectedDateAction
+  private configuration!: ConfigurationsState['configuration']
+  private loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
+  private loadMountingActions!: LoadMountingActionsAction
+  private configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
+  private configurationMountingActions!: ConfigurationsState['configurationMountingActions']
+  private selectedDate!: ConfigurationsState['selectedDate']
+  private setSelectedDate!: SetSelectedDateAction
 
   async created () {
     if (this.$route.query.date) {

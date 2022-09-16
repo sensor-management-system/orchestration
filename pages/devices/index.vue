@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020,2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -300,14 +300,17 @@ permissions and limitations under the Licence.
             :device="item"
           >
             <template
-              v-if="$auth.loggedIn"
               #dot-menu-items
             >
+              <DotMenuActionSensorML
+                @click="openSensorML(item.id)"
+              />
               <DotMenuActionCopy
+                v-if="$auth.loggedIn"
                 :path="'/devices/copy/' + item.id"
               />
               <DotMenuActionDelete
-                v-if="canDeleteEntity(item)"
+                v-if="$auth.loggedIn && canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
               />
             </template>
@@ -354,7 +357,8 @@ import {
   SetPageSizeAction,
   ExportAsCsvAction,
   DeleteDeviceAction,
-  PageSizesGetter
+  PageSizesGetter,
+  ExportAsSensorMLAction
 } from '@/store/devices'
 
 import {
@@ -379,6 +383,7 @@ import StatusSelect from '@/components/StatusSelect.vue'
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
@@ -390,6 +395,7 @@ import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelec
     BaseList,
     DotMenuActionDelete,
     DotMenuActionCopy,
+    DotMenuActionSensorML,
     DeviceDeleteDialog,
     DeviceTypeSelect,
     ManufacturerSelect,
@@ -406,7 +412,7 @@ import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelec
   },
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
-    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice']),
+    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'exportAsSensorML']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
@@ -450,6 +456,7 @@ export default class SearchDevicesPage extends Vue {
   setTitle!: SetTitleAction
   activeTab!: IAppbarState['activeTab']
   setActiveTab!: SetActiveTabAction
+  exportAsSensorML!: ExportAsSensorMLAction
 
   async created () {
     this.initializeAppBar()
@@ -702,6 +709,16 @@ export default class SearchDevicesPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Devices')
+  }
+
+  async openSensorML (deviceId: string) {
+    try {
+      const blob = await this.exportAsSensorML(deviceId)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+    }
   }
 }
 

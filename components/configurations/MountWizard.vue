@@ -324,6 +324,8 @@ export default class MountWizard extends Vue {
   get selectedNodeEndDate (): DateTime | null {
     if (this.selectedNode && 'endDate' in this.selectedNode.unpack()) {
       return (this.selectedNode.unpack() as DeviceMountAction | PlatformMountAction).endDate
+    } else if (this.configuration) {
+      return this.configuration.endDate
     } else {
       return null
     }

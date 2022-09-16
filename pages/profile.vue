@@ -150,7 +150,7 @@ permissions and limitations under the Licence.
                 Authentification
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ $auth.user.iat | timeStampToUTCDateTime }}
+                {{ $auth.user.iat | timeStampToUTCDateTime }} <span class="text-caption text--secondary">(UTC)</span>
               </v-col>
             </v-row>
             <v-row no-gutters>
@@ -158,7 +158,7 @@ permissions and limitations under the Licence.
                 Your token expires
               </v-col>
               <v-col align-self="end" :cols="secondCol">
-                {{ $auth.user.exp | timeStampToUTCDateTime }}
+                {{ $auth.user.exp | timeStampToUTCDateTime }} <span class="text-caption text--secondary">(UTC)</span>
               </v-col>
             </v-row>
           </v-card-text>

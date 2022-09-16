@@ -245,11 +245,7 @@ export class ConfigurationApi {
 
   async searchRecentlyUpdated (amount: number) {
     this.prepareSearch()
-    // set the permission groups for the serializer
-    if (this.permissionFetcher) {
-      this.serializer.permissionGroups = await this.permissionFetcher()
-    }
-    return this.axiosApi.get(
+    return await this.axiosApi.get(
       this.basePath,
       {
         params: {
@@ -275,6 +271,12 @@ export class ConfigurationApi {
     this.prepareStates()
     this.preparePermissionGroups()
     this.prepareMail()
+  }
+
+  async getSensorML (configurationId: string): Promise<Blob> {
+    const url = this.basePath + '/' + configurationId + '/sensorml'
+    const response = await this.axiosApi.get(url)
+    return new Blob([response.data], { type: 'text/xml' })
   }
 
   resetFilterSetting () {

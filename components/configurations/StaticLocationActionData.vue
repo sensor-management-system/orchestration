@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
 <template>
   <v-card>
     <v-card-title>
-      Begin of static loaction
+      Begin of static location
       <v-spacer />
       <slot name="dot-menu" />
     </v-card-title>

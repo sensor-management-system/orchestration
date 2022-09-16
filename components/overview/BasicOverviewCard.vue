@@ -31,7 +31,7 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card class="mx-auto d-flex flex-column" max-width="344" min-height="100%">
+  <v-card class="mx-auto d-flex flex-column" min-height="100%">
     <v-card-title class="primary white--text rounded rounded-b-0">
       <v-icon
         left

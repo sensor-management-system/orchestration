@@ -56,7 +56,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { DateTime } from 'luxon'
 import { mapActions, mapState } from 'vuex'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
@@ -78,6 +78,9 @@ import StaticLocationActionDataForm from '@/components/configurations/StaticLoca
   }
 })
 export default class StaticLocationActionNew extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private newAction: StaticLocationAction = new StaticLocationAction()
   private isSaving: boolean = false
 
@@ -90,6 +93,12 @@ export default class StaticLocationActionNew extends Vue {
   addStaticLocationBeginAction!: AddStaticLocationBeginActionAction
 
   created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/locations', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+      return
+    }
     this.newAction.beginDate = this.selectedDate
   }
 

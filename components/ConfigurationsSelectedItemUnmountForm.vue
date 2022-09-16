@@ -61,18 +61,24 @@ permissions and limitations under the Licence.
         </v-col>
       </v-row>
     </v-card-text>
-    <div
+    <v-row
       v-if="!readonly"
+      dense
     >
-      <v-btn
-        color="red"
-        text
-        data-role="remove-node"
-        @click="unmount"
+      <v-col
+        class="text-right"
       >
-        unmount
-      </v-btn>
-    </div>
+        <v-btn
+          color="red"
+          text
+          data-role="remove-node"
+          small
+          @click="unmount"
+        >
+          unmount
+        </v-btn>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 <script lang="ts">
@@ -121,14 +127,14 @@ export default class ConfigurationsSelectedItemUnmountForm extends mixins(Rules)
   }
 
   unmount () {
-    if (this.validateForm()) {
-      this.$emit('unmount', {
-        contact: this.contact,
-        description: this.description
-      })
-    } else {
+    if (!this.validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
+      return
     }
+    this.$emit('unmount', {
+      contact: this.contact,
+      description: this.description
+    })
   }
 
   validateForm (): boolean {

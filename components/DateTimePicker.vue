@@ -41,6 +41,9 @@ permissions and limitations under the Licence.
     v-bind="$attrs"
     @input="updateByTextfield"
   >
+    <template #append>
+      <span class="text-caption text--secondary">(UTC)</span>
+    </template>
     <template #append-outer>
       <v-btn
         v-if="!readonly"
@@ -204,7 +207,9 @@ export default class DateTimePicker extends Vue {
     if (this.isValueValidByCurrentFormat(this.textInput)) {
       return this.parseToCurrentFormat().toFormat(DEFAULT_TIME_FORMAT)
     }
-    return DateTime.now().setZone('UTC').toFormat(DEFAULT_TIME_FORMAT)
+    return DateTime.utc().set({
+      hour: 12, minute: 0, second: 0, millisecond: 0
+    }).toFormat(DEFAULT_TIME_FORMAT)
   }
 
   setTextInputByValue (datetimeValue: DateTime | null) {

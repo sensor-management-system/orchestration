@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020,2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -214,11 +214,13 @@ permissions and limitations under the Licence.
             :configuration="item"
           >
             <template
-              v-if="$auth.loggedIn"
               #dot-menu-items
             >
+              <DotMenuActionSensorML
+                @click="openSensorML(item.id)"
+              />
               <DotMenuActionDelete
-                v-if="canDeleteEntity(item)"
+                v-if="$auth.loggedIn && canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
               />
             </template>
@@ -247,12 +249,14 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
+import { ExportAsSensorMLAction } from '@/store/configurations'
 import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState } from '@/store/permissions'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import StringSelect from '@/components/StringSelect.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
@@ -265,6 +269,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
   components: {
     StringSelect,
     DotMenuActionDelete,
+    DotMenuActionSensorML,
     ConfigurationsDeleteDialog,
     ConfigurationsListItem,
     BaseList,
@@ -278,7 +283,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups'])
   },
   methods: {
-    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration']),
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'exportAsSensorML']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
@@ -313,6 +318,7 @@ export default class SearchConfigurationsPage extends Vue {
   setTitle!: SetTitleAction
   activeTab!: IAppbarState['activeTab']
   setActiveTab!: SetActiveTabAction
+  exportAsSensorML!: ExportAsSensorMLAction
   permissionGroups!: PermissionsState['permissionGroups']
 
   async created () {
@@ -523,6 +529,16 @@ export default class SearchConfigurationsPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Configurations')
+  }
+
+  async openSensorML (cinfigurationId: string) {
+    try {
+      const blob = await this.exportAsSensorML(cinfigurationId)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+    }
   }
 }
 

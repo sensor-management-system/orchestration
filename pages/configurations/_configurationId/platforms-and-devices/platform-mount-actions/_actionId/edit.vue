@@ -55,7 +55,6 @@ permissions and limitations under the Licence.
         :value="platformMountAction"
         :tree="tree"
         :contacts="contacts"
-        :availabilities="availabilities"
         @input="update"
       />
       <v-card-actions>
@@ -78,7 +77,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
 
 import { RawLocation } from 'vue-router'
@@ -122,6 +121,9 @@ import MountActionEditForm from '@/components/configurations/MountActionEditForm
   }
 })
 export default class ConfigurationEditPlatformMountActionsPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   configuration!: ConfigurationsState['configuration']
   configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
   selectedDate!: ConfigurationsState['selectedDate']
@@ -142,6 +144,14 @@ export default class ConfigurationEditPlatformMountActionsPage extends Vue {
   private beginDateErrorMessage: string = ''
   private endDateErrorMessage: string = ''
   private availabilities: Availability[] = []
+
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+    }
+  }
 
   async fetch () {
     this.isLoading = true
@@ -168,8 +178,14 @@ export default class ConfigurationEditPlatformMountActionsPage extends Vue {
     if (this.configuration && this.configurationMountingActionsForDate) {
       // construct the configuration as the root node of the tree
       const rootNode = new ConfigurationNode(new ConfigurationMountAction(this.configuration))
-      rootNode.children = this.configurationMountingActionsForDate.toArray()
+      rootNode.children = ConfigurationsTree.createFromObject(this.configurationMountingActionsForDate).toArray()
       this.tree = ConfigurationsTree.fromArray([rootNode])
+      this.tree.getAllNodesAsList().forEach((i) => {
+        // disable all but the selected node
+        if (!i.isPlatform() || i.unpack().id !== this.mountActionId) {
+          i.disabled = true
+        }
+      })
     }
   }
 
@@ -235,7 +251,7 @@ export default class ConfigurationEditPlatformMountActionsPage extends Vue {
   }
 
   beforeRouteLeave (to: RawLocation, _from: RawLocation, next: any) {
-    if (this.mountActionHasChanged) {
+    if (this.mountActionHasChanged && this.editable) {
       if (this.to) {
         next()
       } else {

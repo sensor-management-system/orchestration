@@ -60,7 +60,7 @@ export const timeStampToUTCDateTime = (value: number): string => {
     return ''
   }
   const date = DateTime.fromSeconds(value).setZone('UTC')
-  return date.toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
+  return date.toFormat('yyyy-MM-dd HH:mm:ss')
 }
 
 export const ISOToDateTimeString = (aDate: string | null): string => {
@@ -79,7 +79,7 @@ export const dateToDateTimeString = (aDate: DateTime | null): string => {
   if (!aDate) {
     return ''
   }
-  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss') + ' UTC'
+  return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
 }
 
 export const currentAsUtcDateSecondsAsZeros = (): DateTime => {

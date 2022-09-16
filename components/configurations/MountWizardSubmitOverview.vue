@@ -71,14 +71,19 @@ permissions and limitations under the Licence.
                   Contact
                 </th>
                 <th v-if="selectedEndDate !== null" class="text-left table-border-left">
-                  End Description
+                  End description
                 </th>
                 <th v-if="selectedEndDate !== null" class="text-left">
-                  End Contact
+                  End contact
                 </th>
               </tr>
             </thead>
             <tbody>
+              <tr v-if="platformsToMount.length !== 0 && devicesToMount.length > 0">
+                <td colspan="6" class="font-weight-bold">
+                  Devices
+                </td>
+              </tr>
               <tr
                 v-for="(item, index) in devicesToMount"
                 :key="'device-'+index"
@@ -99,7 +104,7 @@ permissions and limitations under the Licence.
                 </td>
               </tr>
               <tr v-if="devicesToMount.length !== 0 && platformsToMount.length > 0">
-                <td colspan="4" class="font-weight-bold">
+                <td colspan="6" class="font-weight-bold">
                   Platforms
                 </td>
               </tr>

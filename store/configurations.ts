@@ -42,16 +42,6 @@ import { RootState } from '@/store'
 import { Configuration } from '@/models/Configuration'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { ContactRole } from '@/models/ContactRole'
-import {
-  DeviceMountTimelineAction,
-  DeviceUnmountTimelineAction, DynamicLocationBeginTimelineAction, DynamicLocationEndTimelineAction,
-  ITimelineAction,
-  PlatformMountTimelineAction,
-  PlatformUnmountTimelineAction,
-  StaticLocationBeginTimelineAction,
-  StaticLocationEndTimelineAction
-} from '@/utils/configurationInterfaces'
-
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
@@ -60,10 +50,23 @@ import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimep
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
 import { Device } from '@/models/Device'
-import { byDateOldestLast, IWithDate } from '@/modelUtils/mountHelpers'
-import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { sortCriteriaAscending } from '@/utils/dateHelper'
+
+import { byDateOldestLast, IWithDate } from '@/modelUtils/mountHelpers'
+
+import {
+  DeviceMountTimelineAction,
+  DeviceUnmountTimelineAction,
+  DynamicLocationBeginTimelineAction,
+  DynamicLocationEndTimelineAction,
+  ITimelineAction,
+  PlatformMountTimelineAction,
+  PlatformUnmountTimelineAction,
+  StaticLocationBeginTimelineAction,
+  StaticLocationEndTimelineAction
+} from '@/utils/configurationInterfaces'
+import { dateToDateTimeStringHHMM, sortCriteriaAscending } from '@/utils/dateHelper'
+import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -138,9 +141,9 @@ const state = (): ConfigurationsState => ({
 export type TimelineActionsGetter = ITimelineAction[]
 
 function formatMountActionString (value: ConfigurationMountingAction): string {
-  const date = value.timepoint.toLocaleString(DateTime.DATETIME_SHORT)
+  const date = dateToDateTimeStringHHMM(value.timepoint)
 
-  const formatAction = (entity: string, name: string, action: string, timepoint: string): string => `${entity} ${name} ${action} at ${timepoint}`
+  const formatAction = (entity: string, name: string, action: string, timepoint: string): string => `${timepoint} - ${entity} ${name} ${action}`
   switch (value.type) {
     case MountingTypes.device_mount:
       return formatAction('Device', value.attributes.shortName, 'mounted', date)
@@ -333,6 +336,7 @@ export type LoadDynamicLocationActionAction = IdParamReturnsVoidPromiseAction
 export type LoadDeviceMountActionsForDynamicLocationAction = IdParamReturnsVoidPromiseAction
 
 export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
+export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 
 export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
@@ -402,6 +406,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   async loadDeviceMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setConfigurationDeviceMountActions', await this.$api.configurations.findRelatedDeviceMountActions(id))
+  },
+  async exportAsSensorML (_, id: string): Promise<Blob> {
+    return await this.$api.configurations.getSensorML(id)
   },
   async loadDeviceMountActionsForDynamicLocation ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setDeviceMountActionsForDynamicLocation', await this.$api.configurations.findRelatedDeviceMountActionsIncludingDeviceInformation(id))

@@ -46,6 +46,7 @@ permissions and limitations under the Licence.
       :hint="hint"
       persistent-hint
       :rules="[...rules]"
+      :class="{ required: required }"
     >
       <template #selection="data">
         <v-chip
@@ -152,6 +153,16 @@ export default class PermissionGroupSelect extends Vue {
     type: String
   })
   readonly label!: string
+
+  /**
+   * whether the component is in required mode or not
+   */
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  readonly required!: boolean
 
   created () {
     // copy the initial value so that we can check which of the groups are new

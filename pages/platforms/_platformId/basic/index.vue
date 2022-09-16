@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -48,14 +48,17 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
-      <DotMenu
-        v-if="$auth.loggedIn"
-      >
+      <DotMenu>
         <template #actions>
+          <DotMenuActionSensorML
+            @click="openSensorML"
+          />
           <DotMenuActionCopy
+            v-if="$auth.loggedIn"
             :path="'/platforms/copy/' + platformId"
           />
           <DotMenuActionDelete
+            v-if="$auth.loggedIn"
             :readonly="!deletable"
             @click="initDeleteDialog"
           />
@@ -77,14 +80,17 @@ permissions and limitations under the Licence.
       >
         Edit
       </v-btn>
-      <DotMenu
-        v-if="$auth.loggedIn"
-      >
+      <DotMenu>
         <template #actions>
+          <DotMenuActionSensorML
+            @click="openSensorML"
+          />
           <DotMenuActionCopy
+            v-if="$auth.loggedIn"
             :path="'/platforms/copy/' + platformId"
           />
           <DotMenuActionDelete
+            v-if="$auth.loggedIn"
             :readonly="!deletable"
             @click="initDeleteDialog"
           />
@@ -105,12 +111,13 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { PlatformsState, DeletePlatformAction } from '@/store/platforms'
+import { PlatformsState, DeletePlatformAction, ExportAsSensorMLAction } from '@/store/platforms'
 
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -119,6 +126,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ProgressIndicator,
     PlatformDeleteDialog,
     DotMenuActionDelete,
+    DotMenuActionSensorML,
     DotMenuActionCopy,
     DotMenu,
     PlatformBasicData
@@ -126,7 +134,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   computed: {
     ...mapState('platforms', ['platform'])
   },
-  methods: mapActions('platforms', ['deletePlatform'])
+  methods: mapActions('platforms', ['deletePlatform', 'exportAsSensorML'])
 })
 export default class PlatformShowBasicPage extends Vue {
   @InjectReactive()
@@ -141,6 +149,7 @@ export default class PlatformShowBasicPage extends Vue {
   // vuex definition for typescript check
   platform!: PlatformsState['platform']
   deletePlatform!: DeletePlatformAction
+  exportAsSensorML!: ExportAsSensorMLAction
 
   get platformId () {
     return this.$route.params.platformId
@@ -152,6 +161,16 @@ export default class PlatformShowBasicPage extends Vue {
 
   closeDialog () {
     this.showDeleteDialog = false
+  }
+
+  async openSensorML () {
+    try {
+      const blob = await this.exportAsSensorML(this.platformId)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+    }
   }
 
   async deleteAndCloseDialog () {

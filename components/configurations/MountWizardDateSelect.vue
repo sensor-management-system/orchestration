@@ -35,6 +35,7 @@ permissions and limitations under the Licence.
     :value="mountAction"
     :begin-date-rules="beginDateRules"
     :end-date-rules="endDateRules"
+    :end-required="selectedNodeEndDate !== null"
     @input="update"
   />
 </template>

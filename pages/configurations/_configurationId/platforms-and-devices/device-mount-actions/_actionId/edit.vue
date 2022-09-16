@@ -55,8 +55,9 @@ permissions and limitations under the Licence.
         :value="deviceMountAction"
         :tree="tree"
         :contacts="contacts"
-        :availabilities="availabilities"
+        :original-action="originalAction"
         @input="update"
+        @select="selectNode"
       />
       <v-card-actions>
         <v-spacer />
@@ -78,10 +79,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
 
-import { RawLocation } from 'vue-router'
+import * as VueRouter from 'vue-router'
 
 import {
   ConfigurationsState,
@@ -103,6 +104,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import MountActionEditForm from '@/components/configurations/MountActionEditForm.vue'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 @Component({
   components: {
@@ -114,6 +116,9 @@ import MountActionEditForm from '@/components/configurations/MountActionEditForm
   middleware: ['auth'],
   computed: {
     ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate', 'selectedDate']),
+    ...mapState('configurations', {
+      originalAction: 'deviceMountAction'
+    }),
     ...mapState('contacts', ['contacts'])
   },
   methods: {
@@ -122,19 +127,23 @@ import MountActionEditForm from '@/components/configurations/MountActionEditForm
   }
 })
 export default class ConfigurationEditDeviceMountActionsPage extends Vue {
-  configuration!: ConfigurationsState['configuration']
-  configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
-  selectedDate!: ConfigurationsState['selectedDate']
-  loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
-  loadDeviceMountAction!: LoadDeviceMountActionAction
-  updateDeviceMountAction!: UpdateDeviceMountActionAction
+  @InjectReactive()
+    editable!: boolean
 
-  contacts!: ContactsState['contacts']
-  loadAllContacts!: LoadAllContactsAction
+  private configuration!: ConfigurationsState['configuration']
+  private configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
+  private selectedDate!: ConfigurationsState['selectedDate']
+  private loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
+  private loadDeviceMountAction!: LoadDeviceMountActionAction
+  private updateDeviceMountAction!: UpdateDeviceMountActionAction
+  private originalAction!: ConfigurationsState['deviceMountAction']
+
+  private contacts!: ContactsState['contacts']
+  private loadAllContacts!: LoadAllContactsAction
 
   private deviceMountAction: DeviceMountAction | null = null
   private showNavigationWarning: boolean = false
-  private to: RawLocation | null = null
+  private to: VueRouter.RawLocation | null = null
   private mountActionHasChanged = false
   private isLoading = false
   private tree: ConfigurationsTree = new ConfigurationsTree()
@@ -143,18 +152,29 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
   private endDateErrorMessage: string = ''
   private availabilities: Availability[] = []
 
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+    }
+  }
+
   async fetch () {
+    await this.loadActionAndTree()
+  }
+
+  async loadActionAndTree (): Promise<void> {
     this.isLoading = true
     try {
       await Promise.all([
         this.loadDeviceMountAction(this.mountActionId),
         this.loadAllContacts()
       ])
-      const loadedDeviceMountAction = this.$store.state.configurations.deviceMountAction
-      if (!loadedDeviceMountAction) {
+      if (!this.originalAction) {
         throw new Error('could not load mount action')
       }
-      this.deviceMountAction = DeviceMountAction.createFromObject(loadedDeviceMountAction)
+      this.deviceMountAction = DeviceMountAction.createFromObject(this.originalAction)
       await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
       this.createTreeWithConfigAsRootNode()
     } catch (error) {
@@ -168,8 +188,15 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
     if (this.configuration && this.configurationMountingActionsForDate) {
       // construct the configuration as the root node of the tree
       const rootNode = new ConfigurationNode(new ConfigurationMountAction(this.configuration))
-      rootNode.children = this.configurationMountingActionsForDate.toArray()
+      rootNode.disabled = true
+      rootNode.children = ConfigurationsTree.createFromObject(this.configurationMountingActionsForDate).toArray()
       this.tree = ConfigurationsTree.fromArray([rootNode])
+      this.tree.getAllNodesAsList().forEach((i) => {
+        // disable all but the selected node
+        if (!i.isDevice() || i.unpack().id !== this.mountActionId) {
+          i.disabled = true
+        }
+      })
     }
   }
 
@@ -178,6 +205,10 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
   }
 
   get mountActionId (): string {
+    return this.$route.params.actionId
+  }
+
+  getMountActionId (): string {
     return this.$route.params.actionId
   }
 
@@ -214,8 +245,8 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
     }
   }
 
-  get platformsAndDevicesLink (): RawLocation {
-    const backLink: RawLocation = {
+  get platformsAndDevicesLink (): VueRouter.RawLocation {
+    const backLink: VueRouter.RawLocation = {
       path: '/configurations/' + this.configurationId + '/platforms-and-devices'
     }
     if (this.deviceMountAction) {
@@ -234,8 +265,17 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
     return this.tree.length === 0 || !this.formIsValid
   }
 
-  beforeRouteLeave (to: RawLocation, _from: RawLocation, next: any) {
-    if (this.mountActionHasChanged) {
+  selectNode (node: ConfigurationsTreeNode | null) {
+    if (!node) {
+      this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
+      return
+    }
+    const actionId = node.unpack().id
+    this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices/' + (node.isDevice() ? 'device-mount-actions/' : 'platform-mount-actions/') + actionId + '/edit')
+  }
+
+  beforeRouteUpdate (to: VueRouter.RawLocation, _from: VueRouter.RawLocation, next: any) {
+    if (this.mountActionHasChanged && this.editable) {
       if (this.to) {
         next()
       } else {
@@ -244,6 +284,13 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
       }
     } else {
       return next()
+    }
+  }
+
+  @Watch('$route')
+  async onRouteChange (newRoute: VueRouter.Route, oldRoute: VueRouter.Route) {
+    if (newRoute.params.actionId !== oldRoute.params.actionId) {
+      await this.loadActionAndTree()
     }
   }
 }

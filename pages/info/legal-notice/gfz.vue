@@ -100,6 +100,15 @@ permissions and limitations under the Licence.
         E-Mail: <a href="mailto:datahub-support@gfz-potsdam.de">datahub-support@gfz-potsdam.de</a>
       </p>
     </section>
+    <section>
+      <h2>
+        Software licenses
+      </h2>
+      <p>
+        The following third-party software is used within the scope of this web application <br>
+        <a href="/info/licenses/">Licenses</a>
+      </p>
+    </section>
     <section class="mb-6">
       <h2 class="mb-1">
         Copyright

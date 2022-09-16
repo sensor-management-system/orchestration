@@ -37,10 +37,10 @@ permissions and limitations under the Licence.
         cols="4"
         class="font-weight-medium"
       >
-        Begin Date:
+        Begin date:
       </v-col>
       <v-col cols="8">
-        {{ mountAction.beginDate | ISOToDateTimeString }}
+        {{ mountAction.beginDate | ISOToDateTimeString }} <span class="text-caption text--secondary">(UTC)</span>
       </v-col>
     </v-row>
     <v-row dense>
@@ -48,10 +48,10 @@ permissions and limitations under the Licence.
         cols="4"
         class="font-weight-medium"
       >
-        End Date:
+        End date:
       </v-col>
       <v-col v-if="mountAction.endDate" cols="8">
-        {{ mountAction.endDate | ISOToDateTimeString }}
+        {{ mountAction.endDate | ISOToDateTimeString }} <span class="text-caption text--secondary">(UTC)</span>
       </v-col>
       <v-col v-else cols="8">
         open end
@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
         Offsets:
       </v-col>
       <v-col cols="8">
-        {{ `X = ${mountAction.offsetX} | Y = ${mountAction.offsetY} | Z = ${mountAction.offsetZ}` }}
+        {{ `X = ${mountAction.offsetX} m | Y = ${mountAction.offsetY} m | Z = ${mountAction.offsetZ} m` }}
       </v-col>
     </v-row>
     <v-row
@@ -89,7 +89,7 @@ permissions and limitations under the Licence.
         cols="4"
         class="font-weight-medium"
       >
-        End Contact:
+        End contact:
       </v-col>
       <v-col cols="8">
         {{ mountAction.endContact }}
@@ -118,13 +118,15 @@ permissions and limitations under the Licence.
         class="font-weight-medium"
         :title="mountAction.endDescription.length > 25 ? mountAction.endDescription : ''"
       >
-        End Description:
+        End description:
       </v-col>
       <v-col cols="8">
         {{ mountAction.endDescription | shortenRight(25, '...') | orDefault }}
       </v-col>
     </v-row>
-    <v-row>
+    <v-row
+      v-if="editable"
+    >
       <v-col>
         <v-btn
           small
@@ -162,6 +164,13 @@ export default class BaseMountInfo extends Vue {
     type: Object
   })
   private mountAction!: DeviceMountAction | PlatformMountAction
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private editable!: boolean
 
   get editLink (): RawLocation {
     return {

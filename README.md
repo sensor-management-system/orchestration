@@ -61,6 +61,15 @@ $ npm run format .
 **Note:** when used with the `npm` script, the linter ignores all files and
 directories that are ignored by `.gitignore` (eg. the `dist` folder).
 
+
+#### Generating the license file
+
+After installing new dependencies, the license generator needs to be run once and `/generated/licenses.json` commited. 
+```bash
+$ npm run generate:license-list
+```
+
+
 ## Run development environment with docker
 
 ### Docker

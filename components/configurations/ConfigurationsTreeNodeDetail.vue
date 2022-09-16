@@ -36,7 +36,10 @@ permissions and limitations under the Licence.
       :platform="node.unpack().platform"
     >
       <template #mount>
-        <base-mount-info :mount-action="node.unpack()" />
+        <base-mount-info
+          :mount-action="node.unpack()"
+          :editable="editable"
+        />
       </template>
     </PlatformMountListItem>
 
@@ -45,7 +48,10 @@ permissions and limitations under the Licence.
       :device="node.unpack().device"
     >
       <template #mount>
-        <base-mount-info :mount-action="node.unpack()" />
+        <base-mount-info
+          :mount-action="node.unpack()"
+          :editable="editable"
+        />
       </template>
     </DevicesMountListItem>
     <template v-if="node.isConfiguration()">
@@ -76,6 +82,13 @@ export default class ConfigurationsTreeNodeDetail extends Vue {
     type: Object
   })
   private node!: ConfigurationsTreeNode
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private editable!: boolean
 }
 </script>
 

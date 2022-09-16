@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
     <section>
       <h2>Provider</h2>
       <p>
-        The provider of the internet presence <a href="https://rdm-test.intranet.ufz.de/sms">rdm-test.intranet.ufz.de/sms</a> is the <a href="https://www.ufz.de/index.php?en=33573" target="_blank">Helmholtz Centre for Environmental Research UFZ</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
+        The provider of the internet presence <a href="https://webapp.ufz.de/sms/frontend">sensors.ufz.de</a> is the <a href="https://www.ufz.de/index.php?en=33573" target="_blank">Helmholtz Centre for Environmental Research UFZ</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
       </p>
     </section>
     <section>
@@ -85,6 +85,15 @@ permissions and limitations under the Licence.
       <p>
         Responsible for the technical implementation is the <a href="https://www.ufz.de/index.php?en=45348" target="_blank">Research Data Management (RDM)</a><br>
         E-Mail: <a href="mailto:sms-administration@ufz.de">sms-administration@ufz.de</a>
+      </p>
+    </section>
+    <section>
+      <h2>
+        Software licenses
+      </h2>
+      <p>
+        The following third-party software is used within the scope of this web application <br>
+        <a href="/info/licenses/">Licenses</a>
       </p>
     </section>
     <section>

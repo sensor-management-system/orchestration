@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
 
 import { RawLocation } from 'vue-router'
@@ -92,6 +92,9 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
   }
 })
 export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   configuration!: ConfigurationsState['configuration']
   loadConfiguration!: LoadConfigurationAction
   contacts!: ContactsState['contacts']
@@ -103,6 +106,11 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
   private isLoading = false
 
   async created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+    }
     if (!this.configuration) {
       try {
         this.isLoading = true
@@ -123,7 +131,7 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends Vue {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   beforeRouteLeave (to: RawLocation, from: RawLocation, next: any) {
-    if (!this.hasSaved) {
+    if (!this.hasSaved && this.editable) {
       if (this.to) {
         next()
       } else {

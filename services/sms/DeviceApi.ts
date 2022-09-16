@@ -258,11 +258,7 @@ export class DeviceApi {
 
   async searchRecentlyUpdated (amount: number) {
     this.prepareSearch()
-    // set the permission groups for the serializer
-    if (this.permissionFetcher) {
-      this.serializer.permissionGroups = await this.permissionFetcher()
-    }
-    return this.axiosApi.get(
+    return await this.axiosApi.get(
       this.basePath,
       {
         params: {
@@ -300,6 +296,12 @@ export class DeviceApi {
     }).then((response) => {
       return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
     })
+  }
+
+  async getSensorML (deviceId: string): Promise<Blob> {
+    const url = this.basePath + '/' + deviceId + '/sensorml'
+    const response = await this.axiosApi.get(url)
+    return new Blob([response.data], { type: 'text/xml' })
   }
 
   prepareSearch () {

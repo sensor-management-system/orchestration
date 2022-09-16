@@ -200,7 +200,7 @@ describe('DatetimePicker.vue', () => {
 
   it('emits correct dateTime object when updated by date picker when value was null', async () => {
     const expectedDate = '2020-05-01'
-    const expectedTime = DateTime.now().setZone('UTC').toFormat('HH:mm')
+    const expectedTime = '12:00'
 
     wrapper = factory({
       propsData: {
@@ -380,7 +380,7 @@ describe('DatetimePicker.vue', () => {
     // --------------------------------------------------------
 
     const expectedDate = new Date().toISOString().substr(0, 10)
-    const expectedTime = DateTime.now().setZone('UTC').toFormat('HH:mm')
+    const expectedTime = '12:00'
     wrapper = factory({
       propsData: {
         label: 'Testlabel',

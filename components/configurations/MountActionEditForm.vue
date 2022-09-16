@@ -43,9 +43,11 @@ permissions and limitations under the Licence.
           <ConfigurationsTreeView
             v-if="tree.length > 0"
             ref="treeView"
-            :activatable="false"
             :value="selectedNode"
             :tree="tree"
+            disable-per-node
+            :activatable="false"
+            @input="$emit('select', $event)"
           />
         </v-card-text>
       </v-card>
@@ -82,11 +84,13 @@ import { mapState, mapActions } from 'vuex'
 
 import { DevicesState, LoadDeviceAvailabilitiesAction } from '@/store/devices'
 import { PlatformsState, LoadPlatformAvailabilitiesAction } from '@/store/platforms'
+import { ConfigurationsState, LoadConfigurationDynamicLocationActionsAction } from '@/store/configurations'
 
 import { Contact } from '@/models/Contact'
 import { MountAction } from '@/models/MountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { Availability } from '@/models/Availability'
 
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
@@ -105,11 +109,13 @@ import MountActionDetailsForm from '@/components/configurations/MountActionDetai
   },
   computed: {
     ...mapState('devices', ['deviceAvailabilities']),
-    ...mapState('platforms', ['platformAvailabilities'])
+    ...mapState('platforms', ['platformAvailabilities']),
+    ...mapState('configurations', ['configurationDynamicLocationActions'])
   },
   methods: {
     ...mapActions('devices', ['loadDeviceAvailabilities']),
-    ...mapActions('platforms', ['loadPlatformAvailabilities'])
+    ...mapActions('platforms', ['loadPlatformAvailabilities']),
+    ...mapActions('configurations', ['loadConfigurationDynamicLocationActions'])
   }
 })
 export default class MountActionEditForm extends Vue {
@@ -120,17 +126,17 @@ export default class MountActionEditForm extends Vue {
   readonly value!: DeviceMountAction | PlatformMountAction
 
   @Prop({
+    default: null,
+    required: false,
+    type: Object
+  })
+  readonly originalAction!: DeviceMountAction | PlatformMountAction
+
+  @Prop({
     required: true,
     type: Object
   })
   readonly tree!: ConfigurationsTree
-
-  @Prop({
-    default: () => [],
-    required: false,
-    type: Array
-  })
-  readonly availabilities!: Availability[]
 
   @Prop({
     default: () => [],
@@ -147,6 +153,18 @@ export default class MountActionEditForm extends Vue {
   private loadDeviceAvailabilities!: LoadDeviceAvailabilitiesAction
   private platformAvailabilities!: PlatformsState['platformAvailabilities']
   private loadPlatformAvailabilities!: LoadPlatformAvailabilitiesAction
+  private configurationDynamicLocationActions!: ConfigurationsState['configurationDynamicLocationActions']
+  private loadConfigurationDynamicLocationActions!: LoadConfigurationDynamicLocationActionsAction
+
+  async fetch () {
+    try {
+      await Promise.all([
+        this.loadConfigurationDynamicLocationActions(this.configurationId)
+      ])
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch resources')
+    }
+  }
 
   get mountActionName (): string {
     if ('isDeviceMountAction' in this.value && this.value.isDeviceMountAction()) {
@@ -287,22 +305,39 @@ export default class MountActionEditForm extends Vue {
       until: null
     })
 
-    /* const availabilities: Availability[] = selected.isDevice() ? this.deviceAvailabilities : this.platformAvailabilities */
-    /* // we have to ignore the current mount action */
-    /* const availabilitiesWithoutSelectedMountAction = availabilities.filter(i => i.mountID !== selected.unpack().id) */
+    const availabilities: Availability[] = selected.isDevice() ? this.deviceAvailabilities : this.platformAvailabilities
+    // we have to ignore the current mount action
+    const availabilitiesWithoutSelectedMountAction = availabilities.filter(i => i.mountID !== selected.unpack().id)
 
-    /* const error3 = MountActionValidator.actionAvailableIn(selected.unpack(), availabilitiesWithoutSelectedMountAction) */
-    /* if (typeof error3 === 'object') { */
-    /*   const message = MountActionValidator.buildErrorMessage(error3) + (error3.op !== MountActionValidationResultOp.EMPTY ? ' of next mounting action' : '') */
-    /*   if (error3.property === 'beginDate') { */
-    /*     this.beginDateErrorMessage = message */
-    /*     this.endDateErrorMessage = '' */
-    /*   } else { */
-    /*     this.beginDateErrorMessage = '' */
-    /*     this.endDateErrorMessage = message */
-    /*   } */
-    /*   return false */
-    /* } */
+    const error3 = MountActionValidator.actionAvailableIn(selected.unpack(), availabilitiesWithoutSelectedMountAction)
+    if (typeof error3 === 'object') {
+      const message = MountActionValidator.buildErrorMessage(error3) + (error3.op !== MountActionValidationResultOp.EMPTY ? ' of next mounting action' : '')
+      if (error3.property === 'beginDate') {
+        this.beginDateErrorMessage = message
+        this.endDateErrorMessage = ''
+      } else {
+        this.beginDateErrorMessage = ''
+        this.endDateErrorMessage = message
+      }
+      return false
+    }
+
+    // check device mount actions against dynamic location actions
+    if (selected.isDevice()) {
+      const dynamicLocationActions = this.getRelatedDynamicLocationActions()
+      const error4 = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(selected.unpack(), dynamicLocationActions)
+      if (typeof error4 === 'object') {
+        const message = MountActionValidator.buildErrorMessage(error4) + ' of dynamic location action'
+        if (error4.property === 'beginDate') {
+          this.beginDateErrorMessage = message
+          this.endDateErrorMessage = ''
+        } else {
+          this.beginDateErrorMessage = ''
+          this.endDateErrorMessage = message
+        }
+        return false
+      }
+    }
 
     // if we have no errors at all, clear the error messages
     this.beginDateErrorMessage = ''
@@ -310,12 +345,17 @@ export default class MountActionEditForm extends Vue {
     return true
   }
 
+  getRelatedDynamicLocationActions (): DynamicLocationAction[] {
+    if (!this.originalAction || !('device' in this.originalAction)) {
+      return []
+    }
+    // filter all dynamic location actions, that are within the original time range
+    return MountActionValidator.getRelatedDynamicLocationActions(this.originalAction, this.configurationDynamicLocationActions)
+  }
+
   getUnmountRequired (): boolean {
     if (!this.selectedNode) {
       return false
-    }
-    if (this.selectedNode.unpack().endDate) {
-      return true
     }
     const parent = this.tree.getParent(this.selectedNode)
     if (parent && parent.unpack().endDate) {

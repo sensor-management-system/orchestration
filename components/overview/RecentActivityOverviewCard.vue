@@ -201,9 +201,7 @@ export default class RecentActivityOverviewCard extends Vue {
     return descriptionObject
   }
 
-  @Watch('amountCopy', {
-    immediate: true
-  })
+  @Watch('amountCopy')
   onAmountChanged () {
     this.loadRecentEntities()
   }

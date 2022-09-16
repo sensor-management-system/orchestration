@@ -32,10 +32,11 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-card-actions>
+    <v-card-actions
+      v-if="editable"
+    >
       <v-spacer />
       <v-btn
-        v-if="$auth.loggedIn"
         color="primary"
         :disabled="isDisabled"
         small
@@ -115,7 +116,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
@@ -154,15 +155,18 @@ import { isTimePointForDynamicAction, isTimePointForStaticAction } from '@/utils
   }
 })
 export default class ConfigurationShowLocationPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   // vuex definition for typescript check
-  configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
-  selectedTimepointItem!: ConfigurationsState['selectedTimepointItem']
-  selectedLocationDate!: ConfigurationsState['selectedLocationDate']
-  setSelectedTimepointItem!: SetSelectedTimepointItemAction
-  setSelectedLocationDate!: SetSelectedLocationDateAction
-  hasDeviceMountActionsForDynamicLocation!: () => boolean
-  hasMountedDevicesWithProperties!: HasMountedDevicesWithPropertiesGetter
-  hasActiveDevicesWithPropertiesForDate!: HasActiveDevicesWithPropertiesForDate
+  private configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
+  private selectedTimepointItem!: ConfigurationsState['selectedTimepointItem']
+  private selectedLocationDate!: ConfigurationsState['selectedLocationDate']
+  private setSelectedTimepointItem!: SetSelectedTimepointItemAction
+  private setSelectedLocationDate!: SetSelectedLocationDateAction
+  private hasDeviceMountActionsForDynamicLocation!: () => boolean
+  private hasMountedDevicesWithProperties!: HasMountedDevicesWithPropertiesGetter
+  private hasActiveDevicesWithPropertiesForDate!: HasActiveDevicesWithPropertiesForDate
 
   created () {
     if (this.selectedTimepoint) {
