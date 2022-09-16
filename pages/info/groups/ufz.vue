@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
       <v-card-text>
         <p>
           Groups and roles are handled using the <b>Data Projects</b>.
-          You can access them at <a href="https://webapp.ufz.de/dataprojects/login" target="_blank" style="text-decoration: none">
+          You can access them at <a href="https://webapp.ufz.de/dataprojects" target="_blank" style="text-decoration: none">
             <strong>UFZ DPVM</strong>
             <v-icon small>
               mdi-open-in-new
