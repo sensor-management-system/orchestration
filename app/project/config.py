@@ -49,7 +49,7 @@ class BaseConfig:
     SMS_FRONTEND_URL = env(
         "SMS_FRONTEND_URL", "https://localhost.localdomain"
     )
-
+    SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain")
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
@@ -77,6 +77,11 @@ class TestingConfig(BaseConfig):
     # https://github.com/jarus/flask-testing/issues/21
     # AssertionError: Popped wrong request context
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+         "connect_args": {
+            "options": "-c timezone=utc"
+        }
+    }
 
 
 class ProductionConfig(BaseConfig):

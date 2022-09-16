@@ -1,0 +1,156 @@
+<sml:PhysicalSystem gml:id='{{gmlId}}'
+                    xmlns:sml="http://www.opengis.net/sensorml/2.0"
+                    xmlns:swe="http://www.opengis.net/swe/2.0"
+                    xmlns:gml="http://www.opengis.net/gml/3.2"
+                    xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                    xmlns:gco="http://www.isotc211.org/2005/gco"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorml/2.0/sensorML.xsd">
+    {% block description %}
+    {% if obj.description %}
+    <!-- ========================================================================= -->
+    <!--                  System Description                                       -->
+    <!-- ========================================================================= -->
+    <gml:description>{{obj.description}}</gml:description>
+    {% endif %}
+    {% endblock %}
+    {% block identifiers %}
+    <!-- ========================================================================= -->
+    <!--                  Identifiers                                              -->
+    <!-- ========================================================================= -->
+    <sml:identification>
+        <sml:IdentifierList>
+            {% if obj.long_name %}
+            <sml:identifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/LongName">
+                    <sml:label>Long Name</sml:label>
+                    <sml:value>{{obj.long_name}}</sml:value>
+                </sml:Term>
+            </sml:identifier>
+            {% endif %}
+            <sml:identifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/ShortName">
+                    <sml:label>Short Name</sml:label>
+                    <sml:value>{{obj.short_name}}</sml:value>
+                </sml:Term>
+            </sml:identifier>
+            {% if obj.long_name %}
+            <sml:identifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/ModelNumber">
+                    <sml:label>Model Number</sml:label>
+                    <sml:value>{{obj.model}}</sml:value>
+                </sml:Term>
+            </sml:identifier>
+            {% endif %}
+            {% if obj.status_name %}
+            <sml:identifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/SystemStatus">
+                    <sml:label>System Status</sml:label>
+                    <sml:value>{{obj.status_name}}</sml:value>
+                </sml:Term>
+            </sml:identifier>
+            {% endif %}
+            {% if obj.serial_number %}
+            <sml:identifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/SerialNumber">
+                    <sml:label>Serial Number</sml:label>
+                    <sml:value>{{obj.serial_number}}</sml:value>
+                </sml:Term>
+            </sml:identifier>
+            {% endif %}
+            {% if obj.manufacturer %}
+            <sml:identifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/Manufacturer">
+                    <sml:label>Manufacturer</sml:label>
+                    <sml:value>{{obj.manufacturer_name}}</sml:value>
+                </sml:Term>
+            </sml:identifier>
+            {% endif %}
+        </sml:IdentifierList>
+    </sml:identification>
+    {% endblock %}
+
+    {% block classifiers %}
+    {% if obj.obj_type_name %}
+    <!-- ========================================================================= -->
+    <!--                  Classifiers                                              -->
+    <!-- ========================================================================= -->
+    <sml:classification>
+        <sml:ClassifierList>
+            <sml:classifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/SensorType">
+                    <sml:label>Sensor Type</sml:label>
+                    <sml:value>{{obj.obj_type_name}}</sml:value>
+                </sml:Term>
+            </sml:classifier>
+            <sml:classifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/Manufacturer">
+                    <sml:label>Manufacturer</sml:label>
+                    <sml:value>{{obj.manufacturer_name}}</sml:value>
+                </sml:Term>
+            </sml:classifier>
+        </sml:ClassifierList>
+    </sml:classification>
+    {% endif %}
+    {% endblock %}
+    {% block documentation %}
+    {% if obj.obj_attachments or obj.website %}
+    <!-- ========================================================================= -->
+    <!--                 Documentation                                             -->
+    <!-- ========================================================================= -->
+    <sml:documentation>
+        <sml:DocumentList>
+            {% if obj.obj_attachments %}
+            {% for attachment in obj.obj_attachments %}
+            <sml:document xlink:arcrole="Attachment">
+                <gmd:CI_OnlineResource id="Attachment_{{attachment.id}}_of_PhysicalSystem_{{gmlId}}">
+                    <gmd:linkage>
+                        <gmd:URL>
+                            {{attachment.url}}
+                        </gmd:URL>
+                    </gmd:linkage>
+                    <gmd:name>
+                        <gco:CharacterString>{{attachment.label}}
+                        </gco:CharacterString>
+                    </gmd:name>
+                </gmd:CI_OnlineResource>
+            </sml:document>
+            {% endfor %}
+            {% endif %}
+            {% if obj.website %}
+            <sml:document xlink:arcrole="Website">
+                <gmd:CI_OnlineResource>
+                    <gmd:linkage>
+                        <gmd:URL>{{obj.website}}
+                        </gmd:URL>
+                    </gmd:linkage>
+                </gmd:CI_OnlineResource>
+            </sml:document>
+            {% endif %}
+        </sml:DocumentList>
+    </sml:documentation>
+    {% endif %}
+    {% endblock %}
+    {% block contacts %}
+    <!-- ========================================================================= -->
+    <!--                 Contacts                                                  -->
+    <!-- ========================================================================= -->
+    <sml:contacts>
+        <sml:ContactList>
+            {% for contact in obj.contacts %}
+            <sml:contact xlink:arcrole="http://sensorml.com/ont/swe/property/Manufacturer">
+                <gmd:CI_ResponsibleParty>
+                    <gmd:individualName>
+                        <gco:CharacterString>{{contact.given_name}} {{contact.family_name}}</gco:CharacterString>
+                    </gmd:individualName>
+                    {% block contcat_role %}{% endblock %}
+                </gmd:CI_ResponsibleParty>
+            </sml:contact>
+            {% endfor %}
+        </sml:ContactList>
+    </sml:contacts>
+    {% endblock %}
+    {% block outputs %}{% endblock %}
+    {% block history %}{% endblock %}
+</sml:PhysicalSystem>

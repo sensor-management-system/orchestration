@@ -1,11 +1,11 @@
 """Tests for the generic device actions api."""
 
 import os
-from datetime import datetime
 from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, Device, GenericDeviceAction
+from project.api.models.mixin import utc_now
 from project.extensions.instances import idl
 from project.tests.base import (
     BaseTestCase,
@@ -99,7 +99,7 @@ class TestGenericDeviceAction(BaseTestCase):
                         text="Random type: ??????????", letters="ABCDE"
                     ),
                     "action_type_uri": fake.uri(),
-                    "begin_date": datetime.now().__str__(),
+                    "begin_date": utc_now().__str__(),
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": device.id}},
@@ -141,7 +141,7 @@ class TestGenericDeviceAction(BaseTestCase):
                             text="Random type: ??????????", letters="ABCDE"
                         ),
                         "action_type_uri": fake.uri(),
-                        "begin_date": datetime.now().__str__(),
+                        "begin_date": utc_now().__str__(),
                     },
                     "relationships": {
                         "device": {"data": {"type": "device", "id": "1"}},

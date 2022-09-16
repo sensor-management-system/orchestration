@@ -1,0 +1,140 @@
+{% extends "base_sensorml_template.xml" %}
+
+        {% block description %}{{super()}}{% endblock %}
+
+        {% block identifiers %}{{super()}}{% endblock %}
+
+        {% block classifiers %}{{super()}}{% endblock %}
+
+        {% block documentation %}{{super()}}{% endblock %}
+
+        {% block contacts %}{{super()}}{% endblock %}
+
+        {% block contcat_role %}
+             {% for role in obj.platform_contact_roles %}
+                        <gmd:role gco:nilReason="contact_role">
+                             <gmd:CI_RoleCode codeList="" codeListValue="">{{role.role_name}}</gmd:CI_RoleCode>
+                        </gmd:role>
+            {% endfor %}
+        {% endblock %}
+ 
+        {% block history %}
+        <!-- ========================================================================= -->
+        <!--                 History                                                  -->
+        <!-- ========================================================================= -->
+<sml:history>
+    <sml:EventList>
+        {% block mount_actions %}
+        {% for action in obj.platform_mount_actions %}
+        <!-- ========================================================================= -->
+        <!--                 Mount action   id:{{action.id}}                                           -->
+        <!-- ========================================================================= -->
+        <sml:event>
+            <sml:Event>
+                <sml:classification>
+                    <sml:ClassifierList>
+                        <sml:classifier>
+                            <sml:Term definition="Mount">
+                                <sml:label>MountAction</sml:label>
+                            </sml:Term>
+                        </sml:classifier>
+                    </sml:ClassifierList>
+                </sml:classification>
+                <sml:attachedTo xlink:title="{{action.configuration.label}}"
+                                xlink:href="URI of the configuration"/>
+                <sml:attachedTo xlink:title="{{action.parent_platform.short_name}}"
+                                xlink:href="URI of the parent_platform"/>
+                <sml:time>
+                    <gml:TimePeriod gml:id="TimePeriodForMountAction_{{action.id}}_of_Device_{{gmlId}}">
+                        <gml:description>TimePeriod</gml:description>
+                        <gml:begin>
+                            <gml:TimeInstant>
+                                <gml:timePosition>{{action.begin_date}}</gml:timePosition>
+                            </gml:TimeInstant>
+                        </gml:begin>
+                        <gml:end>
+                        <gml:TimeInstant>
+                            <gml:timePosition>{{action.end_date}}</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:end>
+                    </gml:TimePeriod>
+                </sml:time>
+                <gml:description>{{action.description}}</gml:description>
+            </sml:Event>
+        </sml:event>
+        {% endfor %}
+        {% endblock %}
+
+        {% block generic_actions %}
+        {% for action in obj.generic_platform_actions %}
+        <!-- ========================================================================= -->
+        <!--                 Generic actions:{{action.action_type_name}} id:{{action.id}} -->
+        <!-- ========================================================================= -->
+        <sml:event>
+            <sml:Event>
+                <sml:classification>
+                    <sml:ClassifierList>
+                        <sml:classifier>
+                            <sml:Term definition="{{action.action_type_uri}}">
+                                <sml:label>{{action.action_type_name}}</sml:label>
+                            </sml:Term>
+                        </sml:classifier>
+                    </sml:ClassifierList>
+                </sml:classification>
+                <sml:time>
+                    <gml:TimePeriod
+                            gml:id="TimePeriodFor{{action.action_type_name.replace(' ', '')}}_{{action.id}}_of_Device_{{gmlId}}">
+                        <gml:description>TimePeriod</gml:description>
+                        <gml:begin>
+                            <gml:TimeInstant>
+                                <gml:timePosition>{{action.begin_date}}</gml:timePosition>
+                            </gml:TimeInstant>
+                        </gml:begin>
+                        <gml:end>
+                            <gml:TimeInstant>
+                                <gml:timePosition>{{action.end_date}}</gml:timePosition>
+                            </gml:TimeInstant>
+                        </gml:end>
+                    </gml:TimePeriod>
+                </sml:time>
+                <gml:description>{{action.description}}</gml:description>
+            </sml:Event>
+        </sml:event>
+        {% endfor %}
+        {% endblock %}
+        {% block software_update_actions %}
+        {% for action in obj.platform_software_update_actions %}
+        <!-- ========================================================================= -->
+        <!--                 Software Update actions    id:{{action.id}}             -->
+        <!-- ========================================================================= -->
+        <sml:event>
+            <sml:Event>
+                <sml:classification>
+                    <sml:ClassifierList>
+                        <sml:classifier>
+                            <sml:Term definition="{{action.software_type_uri}}">
+                                <sml:label>{{action.software_type_name}}</sml:label>
+                            </sml:Term>
+                        </sml:classifier>
+                    </sml:ClassifierList>
+                </sml:classification>
+                <sml:time>
+                    <gml:TimePeriod
+                            gml:id="TimePeriodFor{{action.software_type_name.replace(' ', '')}}_{{action.id}}_of_Device_{{gmlId}}">
+                        <gml:description>TimePeriod</gml:description>
+                        <gml:begin>
+                            <gml:TimeInstant>
+                                <gml:timePosition>{{action.update_date}}</gml:timePosition>
+                            </gml:TimeInstant>
+                        </gml:begin>
+                    </gml:TimePeriod>
+                </sml:time>
+                <gml:description>{{action.description}}</gml:description>
+            </sml:Event>
+        </sml:event>
+        {% endfor %}
+        {% endblock %}
+        {{super()}}
+    </sml:EventList>
+</sml:history>
+        {% endblock %}

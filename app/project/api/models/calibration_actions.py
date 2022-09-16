@@ -5,8 +5,8 @@ from .mixin import AuditMixin
 class DeviceCalibrationAction(db.Model, AuditMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.Text, nullable=True)
-    current_calibration_date = db.Column(db.DateTime, nullable=False)
-    next_calibration_date = db.Column(db.DateTime, nullable=True)
+    current_calibration_date = db.Column(db.DateTime(timezone=True), nullable=False)
+    next_calibration_date = db.Column(db.DateTime(timezone=True), nullable=True)
     formula = db.Column(db.String(256), nullable=True)
     value = db.Column(db.Float, nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)

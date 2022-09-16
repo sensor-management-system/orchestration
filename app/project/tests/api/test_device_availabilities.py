@@ -2,6 +2,8 @@
 
 import datetime
 
+import pytz
+
 from project import base_url
 from project.api.models import Configuration, Contact, Device, DeviceMountAction, User
 from project.api.models.base_model import db
@@ -109,8 +111,8 @@ class TestDeviceAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(1970, 1, 1),
-                    "to": datetime.datetime(1970, 1, 12),
+                    "from": datetime.datetime(1970, 1, 1, tzinfo=pytz.UTC),
+                    "to": datetime.datetime(1970, 1, 12, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Device)]),
                 },
             )
@@ -120,8 +122,8 @@ class TestDeviceAvailabilities(BaseTestCase):
     def test_get_one_device_is_available_for_mount(self):
         """Ensure we get a one device available."""
         available_device, _ = self.mount_a_device(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0),
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
         )
         for _ in range(3):
             self.mount_a_device()
@@ -130,7 +132,7 @@ class TestDeviceAvailabilities(BaseTestCase):
                 self.url,
                 query_string={
                     "from": fake.date_time_this_month(),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0),
+                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Device)]),
                 },
             )
@@ -148,8 +150,8 @@ class TestDeviceAvailabilities(BaseTestCase):
     def test_get_one_device_is_available_for_mount_without_end_date_in_query(self):
         """Ensure we get a one device available."""
         available_device, _ = self.mount_a_device(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0),
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
         )
         for _ in range(3):
             self.mount_a_device()
@@ -175,19 +177,19 @@ class TestDeviceAvailabilities(BaseTestCase):
     def test_get_no_device_available(self):
         """Ensure we get a one device entry per blocking mount."""
         unavailable_device_1, _ = self.mount_a_device(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0),
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
         )
         unavailable_device_2, _ = self.mount_a_device(
-            begin_date=datetime.datetime(2022, 1, 13, 0, 0, 0),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0),
+            begin_date=datetime.datetime(2022, 1, 13, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
         )
         with self.run_requests_as(self.u):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 1, 1, 0, 0, 0),
-                    "to": datetime.datetime(2022, 1, 15, 0, 0, 0),
+                    "from": datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "to": datetime.datetime(2022, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Device)]),
                 },
             )
@@ -225,8 +227,8 @@ class TestDeviceAvailabilities(BaseTestCase):
     def test_device_with_multiple_mounting_actions(self):
         """Ensure get a platform with multiple mounting actions."""
         device, device_mount_action_1 = self.mount_a_device(
-            begin_date=datetime.datetime(2020, 1, 1, 0, 0, 0),
-            end_date=datetime.datetime(2021, 1, 30, 0, 0, 0),
+            begin_date=datetime.datetime(2020, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2021, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
         )
         device_mount_action_2 = DeviceMountAction(
             configuration=self.configuration,
@@ -236,8 +238,8 @@ class TestDeviceAvailabilities(BaseTestCase):
             offset_z=fake.pyint(),
             begin_description=fake.text(),
             begin_contact=self.u.contact,
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0),
-            end_date=datetime.datetime(2025, 1, 1, 0, 0, 0),
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2025, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
             end_description=fake.text(),
             end_contact=self.u.contact,
         )
@@ -247,8 +249,8 @@ class TestDeviceAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2023, 1, 1, 0, 0, 0),
-                    "to": datetime.datetime(2025, 1, 15, 0, 0, 0),
+                    "from": datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "to": datetime.datetime(2025, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Device)]),
                 },
             )
@@ -267,8 +269,8 @@ class TestDeviceAvailabilities(BaseTestCase):
                 "available": False,
                 "mount": str(device_mount_action_2.id),
                 "configuration": str(self.configuration.id),
-                "begin_date": "2022-01-01T00:00:00",
-                "end_date": "2025-01-01T00:00:00",
+                "begin_date": "2022-01-01T00:00:00+00:00",
+                "end_date": "2025-01-01T00:00:00+00:00",
             }
         ]
         self.assertEqual(expected_output, data)
@@ -277,8 +279,8 @@ class TestDeviceAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2021, 1, 1, 0, 0, 0),
-                    "to": datetime.datetime(2025, 1, 15, 0, 0, 0),
+                    "from": datetime.datetime(2021, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "to": datetime.datetime(2025, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Device)]),
                 },
             )
@@ -297,16 +299,16 @@ class TestDeviceAvailabilities(BaseTestCase):
                 "available": False,
                 "mount": str(device_mount_action_1.id),
                 "configuration": str(self.configuration.id),
-                "begin_date": "2020-01-01T00:00:00",
-                "end_date": "2021-01-30T00:00:00",
+                "begin_date": "2020-01-01T00:00:00+00:00",
+                "end_date": "2021-01-30T00:00:00+00:00",
             },
             {
                 "id": str(device.id),
                 "available": False,
                 "mount": str(device_mount_action_2.id),
                 "configuration": str(self.configuration.id),
-                "begin_date": "2022-01-01T00:00:00",
-                "end_date": "2025-01-01T00:00:00",
+                "begin_date": "2022-01-01T00:00:00+00:00",
+                "end_date": "2025-01-01T00:00:00+00:00",
             },
         ]
 
@@ -315,8 +317,8 @@ class TestDeviceAvailabilities(BaseTestCase):
     def test_filter_one_or_multiple_devices(self):
         """Test that we can filter for specific devices."""
         available_device, _ = self.mount_a_device(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0),
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
         )
         for _ in range(4):
             self.mount_a_device()
@@ -326,7 +328,7 @@ class TestDeviceAvailabilities(BaseTestCase):
                 self.url,
                 query_string={
                     "from": fake.date_time_this_month(),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0),
+                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Device)]),
                 },
             )
@@ -340,7 +342,7 @@ class TestDeviceAvailabilities(BaseTestCase):
                 self.url,
                 query_string={
                     "from": fake.date_time_this_month(),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0),
+                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": available_device.id,
                 },
             )
@@ -353,15 +355,15 @@ class TestDeviceAvailabilities(BaseTestCase):
 
         # With more than one id
         available_device_2, device_mount_action_2 = self.mount_a_device(
-            begin_date=datetime.datetime(2022, 3, 1, 0, 0, 0),
-            end_date=datetime.datetime(2022, 12, 30, 0, 0, 0),
+            begin_date=datetime.datetime(2022, 3, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2022, 12, 30, 0, 0, 0, tzinfo=pytz.UTC),
         )
         with self.run_requests_as(self.u):
             response = self.client.get(
                 self.url,
                 query_string={
                     "from": fake.date_time_this_month(),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0),
+                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": f"{available_device.id},{available_device_2.id}",
                 },
             )
@@ -374,8 +376,8 @@ class TestDeviceAvailabilities(BaseTestCase):
                 "available": False,
                 "mount": str(device_mount_action_2.id),
                 "configuration": str(self.configuration.id),
-                "begin_date": "2022-03-01T00:00:00",
-                "end_date": "2022-12-30T00:00:00",
+                "begin_date": "2022-03-01T00:00:00+00:00",
+                "end_date": "2022-12-30T00:00:00+00:00",
             },
             {"id": str(available_device.id), "available": True},
         ]
@@ -394,8 +396,8 @@ class TestDeviceAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2021, 1, 1, 0, 0, 0),
-                    "to": datetime.datetime(2025, 1, 15, 0, 0, 0),
+                    "from": datetime.datetime(2021, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "to": datetime.datetime(2025, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Device)]),
                 },
             )

@@ -1,11 +1,11 @@
 """Tests for the generic platform action api."""
 
 import os
-from datetime import datetime
 from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, GenericPlatformAction, Platform
+from project.api.models.mixin import utc_now
 from project.extensions.instances import idl
 from project.tests.base import (
     BaseTestCase,
@@ -82,7 +82,7 @@ class TestGenericPlatformAction(BaseTestCase):
                         text="Random type: ??????????", letters="ABCDE"
                     ),
                     "action_type_uri": fake.uri(),
-                    "begin_date": datetime.now().__str__(),
+                    "begin_date": utc_now().__str__(),
                 },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": platform.id}},
@@ -129,7 +129,7 @@ class TestGenericPlatformAction(BaseTestCase):
                             text="Random type: ??????????", letters="ABCDE"
                         ),
                         "action_type_uri": fake.uri(),
-                        "begin_date": datetime.now().__str__(),
+                        "begin_date": utc_now().__str__(),
                     },
                     "relationships": {
                         "platform": {"data": {"type": "platform", "id": "1"}},

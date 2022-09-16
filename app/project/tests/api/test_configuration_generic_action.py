@@ -1,7 +1,7 @@
 import os
-from datetime import datetime
 
 from project import base_url
+from project.api.models.mixin import utc_now
 from project.tests.base import (
     BaseTestCase,
     fake,
@@ -79,7 +79,7 @@ class TestGenericConfigurationActionServices(BaseTestCase):
                         text="Random type: ??????????", letters="ABCDE"
                     ),
                     "action_type_uri": fake.uri(),
-                    "begin_date": datetime.now().__str__(),
+                    "begin_date": utc_now().__str__(),
                 },
                 "relationships": {
                     "configuration": {
@@ -128,7 +128,7 @@ class TestGenericConfigurationActionServices(BaseTestCase):
                         text="Random type: ??????????", letters="ABCDE"
                     ),
                     "action_type_uri": fake.uri(),
-                    "begin_date": datetime.now().__str__(),
+                    "begin_date": utc_now().__str__(),
                 },
                 "relationships": {
                     "configuration": {"data": {"type": "configuration", "id": "1"}},
