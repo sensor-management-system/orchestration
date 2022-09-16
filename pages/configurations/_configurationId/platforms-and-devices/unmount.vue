@@ -120,7 +120,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
@@ -175,6 +175,9 @@ import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSe
   }
 })
 export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private selectedNode: ConfigurationsTreeNode | null = null
   private tree: ConfigurationsTree = ConfigurationsTree.fromArray([])
 
@@ -196,6 +199,14 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
   private deviceMountAction!: ConfigurationsState['deviceMountAction']
   private loadDeviceMountAction!: LoadDeviceMountActionAction
   private loadMountingActions!: LoadMountingActionsAction
+
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+    }
+  }
 
   async fetch () {
     try {

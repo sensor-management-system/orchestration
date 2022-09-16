@@ -99,8 +99,8 @@ permissions and limitations under the Licence.
             label="Affected measured quantities"
             :items="measuredQuantities"
             item-text="propertyName"
-            @input="setMeasuredQuantities"
             return-object
+            @input="setMeasuredQuantities"
           />
         </v-col>
       </v-row>

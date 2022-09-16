@@ -56,7 +56,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
@@ -77,6 +77,9 @@ import StaticLocationActionDataForm from '@/components/configurations/StaticLoca
   }
 })
 export default class StaticLocationActionEdit extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private valueCopy: StaticLocationAction = new StaticLocationAction()
   private isSaving: boolean = false
   private isLoading: boolean = false
@@ -88,6 +91,12 @@ export default class StaticLocationActionEdit extends Vue {
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
 
   async created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/locations', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+      return
+    }
     try {
       this.isLoading = true
       await this.loadStaticLocationAction(this.actionId)

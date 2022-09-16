@@ -42,10 +42,11 @@ permissions and limitations under the Licence.
       :value="action"
       :devices="devicesForDynamicLocation"
     >
-      <template #dot-menu>
-        <DotMenu
-          v-if="$auth.loggedIn"
-        >
+      <template
+        v-if="editable"
+        #dot-menu
+      >
+        <DotMenu>
           <template #actions>
             <DotMenuActionEdit
               @click="openEditDynamicLocationForm"
@@ -58,6 +59,7 @@ permissions and limitations under the Licence.
       </template>
     </dynamic-location-action-data>
     <DynamicLocationDeleteDialog
+      v-if="editable"
       v-model="showDeleteDialog"
       :action="action"
       @cancel-deletion="closeDeleteDialog"
@@ -110,6 +112,13 @@ export default class DynamicLocationView extends Vue {
     type: Object
   })
     action!: IDynamicLocationAction
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private editable!: boolean
 
   openEditDynamicLocationForm () {
     this.$router.push('/configurations/' + this.configurationId + '/locations/dynamic-location-actions/' + this.action.id + '/edit')

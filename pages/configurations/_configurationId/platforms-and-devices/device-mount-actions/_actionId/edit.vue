@@ -79,7 +79,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
 
 import * as VueRouter from 'vue-router'
@@ -127,6 +127,9 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
   }
 })
 export default class ConfigurationEditDeviceMountActionsPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   private configuration!: ConfigurationsState['configuration']
   private configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
   private selectedDate!: ConfigurationsState['selectedDate']
@@ -148,6 +151,14 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
   private beginDateErrorMessage: string = ''
   private endDateErrorMessage: string = ''
   private availabilities: Availability[] = []
+
+  created () {
+    if (!this.editable) {
+      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
+      })
+    }
+  }
 
   async fetch () {
     await this.loadActionAndTree()
@@ -264,7 +275,7 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
   }
 
   beforeRouteUpdate (to: VueRouter.RawLocation, _from: VueRouter.RawLocation, next: any) {
-    if (this.mountActionHasChanged) {
+    if (this.mountActionHasChanged && this.editable) {
       if (this.to) {
         next()
       } else {

@@ -41,10 +41,11 @@ permissions and limitations under the Licence.
       v-if="action"
       :value="action"
     >
-      <template #dot-menu>
-        <DotMenu
-          v-if="$auth.loggedIn"
-        >
+      <template
+        v-if="editable"
+        #dot-menu
+      >
+        <DotMenu>
           <template #actions>
             <DotMenuActionEdit
               @click="openEditStaticLocationForm"
@@ -57,6 +58,7 @@ permissions and limitations under the Licence.
       </template>
     </StaticLocationActionData>
     <StaticLocationDeleteDialog
+      v-if="editable"
       v-model="showBeginDeleteDialog"
       :action="action"
       @cancel-deletion="closeBeginDeleteDialog"
@@ -97,6 +99,13 @@ export default class StaticLocationView extends Vue {
     type: String
   })
     configurationId!: string
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private editable!: boolean
 
   private isLoading = false
   private showBeginDeleteDialog = false
