@@ -7,6 +7,7 @@ from ..auth.permission_utils import get_query_with_permissions_for_related_objec
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_property import DeviceProperty
+from ..helpers.resource_checks import DevicePropertyValidator
 from ..schemas.device_property_schema import DevicePropertySchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -74,6 +75,8 @@ class DevicePropertyList(ResourceList):
 
 
 class DevicePropertyDetail(ResourceDetail):
+
+    validator = DevicePropertyValidator()
     """
     provides get, patch and delete methods to retrieve details
     of an object, update an object and delete a Device
@@ -96,6 +99,7 @@ class DevicePropertyDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        self.validator.validate_property_dynamic_location_action_deletion(kwargs["id"])
         device_property = (
             db.session.query(DeviceProperty).filter_by(id=kwargs["id"]).one_or_none()
         )
