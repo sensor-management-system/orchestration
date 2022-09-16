@@ -37,16 +37,16 @@ permissions and limitations under the Licence.
           <v-col cols="12" md="9">
             <v-row class="d-flex justify-space-around justify-center align-center">
               <v-col cols="3" class="align-self-center">
-                <a href="https://www.ufz.de/index.php?en=33573" target="_blank"><v-img contain height="4em" src="/logos/UFZ_Logo_SW_RGB_invertiert_EN.png" /></a>
+                <a href="https://www.ufz.de/index.php?en=33573" target="_blank"><v-img contain height="4em" src="/logos/ufz_logo.png" /></a>
               </v-col>
               <v-col cols="3" class="align-self-center">
-                <a href="https://www.ufz.de/index.php?en=45348" target="_blank"><v-img contain height="3em" src="/logos/RDM_subline_inverted_white.png" /></a>
+                <a href="https://www.ufz.de/index.php?en=45348" target="_blank"><v-img contain height="3em" src="/logos/rdm_logo.png" /></a>
               </v-col>
               <v-col cols="3" class="align-self-center">
-                <a href="https://www.gfz-potsdam.de/en/" target="_blank"><v-img contain height="3em" src="/logos/GFZ-CD_LogoRGB_EN_W.png" /></a>
+                <a href="https://www.gfz-potsdam.de/en/" target="_blank"><v-img contain height="3em" src="/logos/gfz_logo.png" /></a>
               </v-col>
               <v-col cols="3" class="align-self-center">
-                <a href="https://datahub.erde-und-umwelt.de/en/" target="_blank"><v-img contain height="2.5em" src="/logos/datahublogo.png" /></a>
+                <a href="https://datahub.erde-und-umwelt.de/en/" target="_blank"><v-img contain height="2.5em" src="/logos/datahub_logo.png" /></a>
               </v-col>
             </v-row>
           </v-col>
