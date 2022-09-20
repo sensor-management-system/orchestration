@@ -63,6 +63,8 @@ import {
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
+import { Attachment } from '@/models/Attachment'
+import { ConfigurationAttachmentSerializer } from '@/serializers/jsonapi/ConfigurationAttachmentSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -323,7 +325,6 @@ export class ConfigurationApi {
     }
 
     const include = getIncludeParams(includes)
-
     return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include
@@ -440,6 +441,16 @@ export class ConfigurationApi {
 
   async findRelatedStaticLocationActions (configurationId: string): Promise<StaticLocationAction[]> {
     return await this.staticLocationActionApi.getRelatedActions(configurationId)
+  }
+
+  async findRelatedConfigurationAttachments (configurationId: string): Promise<Attachment[]> {
+    const url = this.basePath + '/' + configurationId + '/configuration-attachments'
+    const params = {
+      'page[size]': 10000
+    }
+    return await this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new ConfigurationAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
   }
 
   removeContact (configurationContactRoleId: string): Promise<void> {

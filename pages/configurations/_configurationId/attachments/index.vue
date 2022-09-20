@@ -3,12 +3,10 @@ Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
 Copyright (C) 2020 - 2022
-- Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -39,24 +37,23 @@ permissions and limitations under the Licence.
       dark
     />
     <v-card-actions
-      v-if="$auth.loggedIn"
+      v-if="editable"
     >
       <v-spacer />
       <v-btn
-        v-if="editable"
         color="primary"
         small
-        :to="'/platforms/' + platformId + '/attachments/new'"
+        :to="'/configurations/' + configurationId + '/attachments/new'"
       >
         Add Attachment
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="platformAttachments.length === 0">
-      There are no attachments for this platform.
+    <hint-card v-if="configurationAttachments.length === 0">
+      There are no attachments for this configuration.
     </hint-card>
 
     <BaseList
-      :list-items="platformAttachments"
+      :list-items="configurationAttachments"
     >
       <template #list-item="{item}">
         <AttachmentListItem
@@ -75,7 +72,7 @@ permissions and limitations under the Licence.
               text
               small
               nuxt
-              :to="'/platforms/' + platformId + '/attachments/' + item.id + '/edit'"
+              :to="'/configurations/' + configurationId + '/attachments/' + item.id + '/edit'"
             >
               Edit
             </v-btn>
@@ -84,13 +81,14 @@ permissions and limitations under the Licence.
       </template>
     </BaseList>
     <v-card-actions
-      v-if="platformAttachments.length > 3"
+      v-if="configurationAttachments.length > 3"
     >
       <v-spacer />
       <v-btn
         v-if="editable"
         color="primary"
         small
+        :to="'/configurations/' + configurationId + '/attachments/new'"
       >
         Add Attachment
       </v-btn>
@@ -108,37 +106,37 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { PlatformsState, LoadPlatformAttachmentsAction, DeletePlatformAttachmentAction } from '@/store/platforms'
+import { LoadConfigurationAttachmentsAction, DeleteConfigurationAttachmentAction, ConfigurationsState } from '@/store/configurations'
 
 import { Attachment } from '@/models/Attachment'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
-import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import AttachmentDeleteDialog from '@/components/shared/AttachmentDeleteDialog.vue'
+import HintCard from '@/components/HintCard.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { AttachmentDeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, ProgressIndicator },
-  computed: mapState('platforms', ['platformAttachments']),
-  methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment'])
+  components: { ProgressIndicator, DotMenuActionDelete, HintCard, AttachmentDeleteDialog, AttachmentListItem, BaseList },
+  computed: mapState('configurations', ['configurationAttachments']),
+  methods: mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment'])
 })
-export default class PlatformAttachmentShowPage extends Vue {
+export default class ConfigurationAttachmentShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
   private isSaving = false
   private showDeleteDialog = false
-  private attachmentToDelete: Attachment|null = null
+  private attachmentToDelete: Attachment | null = null
 
   // vuex definition for typescript check
-  platformAttachments!: PlatformsState['platformAttachments']
-  loadPlatformAttachments!: LoadPlatformAttachmentsAction
-  deletePlatformAttachment!: DeletePlatformAttachmentAction
+  configurationAttachments!: ConfigurationsState['configurationAttachments']
+  deleteConfigurationAttachment!: DeleteConfigurationAttachmentAction
+  loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
 
-  get platformId (): string {
-    return this.$route.params.platformId
+  get configurationId (): string {
+    return this.$route.params.configurationId
   }
 
   initDeleteDialog (attachment: Attachment) {
@@ -157,8 +155,8 @@ export default class PlatformAttachmentShowPage extends Vue {
     }
     try {
       this.isSaving = true
-      await this.deletePlatformAttachment(this.attachmentToDelete.id)
-      this.loadPlatformAttachments(this.platformId)
+      await this.deleteConfigurationAttachment(this.attachmentToDelete.id)
+      this.loadConfigurationAttachments(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')

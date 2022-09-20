@@ -67,6 +67,7 @@ import {
 } from '@/utils/configurationInterfaces'
 import { dateToDateTimeStringHHMM, sortCriteriaAscending } from '@/utils/dateHelper'
 import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
+import { Attachment } from '@/models/Attachment'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -108,6 +109,8 @@ export interface ConfigurationsState {
   selectedLocationDate: DateTime|null
   configurationStaticLocationActions: StaticLocationAction[]
   configurationDynamicLocationActions: DynamicLocationAction[]
+  configurationAttachments: Attachment[]
+  configurationAttachment: Attachment | null
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -133,6 +136,8 @@ const state = (): ConfigurationsState => ({
   selectedLocationDate: null,
   configurationStaticLocationActions: [],
   configurationDynamicLocationActions: [],
+  configurationAttachments: [],
+  configurationAttachment: null,
   totalPages: 1,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0]
@@ -317,7 +322,8 @@ export type AddPlatformMountActionAction = (params: { configurationId: string, p
 export type AddStaticLocationBeginActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
 export type AddStaticLocationEndActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
 export type AddDynamicLocationBeginActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
-export type AddDynamicLocationEndActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
+export type AddDynamicLocationEndActionAction = (params: { configurationId: string, dynamicLocationAction: DynamicLocationAction }) => Promise<string>
+export type AddConfigurationAttachmentAction = (params: { configurationId: string, attachment: Attachment }) => Promise<Attachment>
 
 export type DeleteDynamicLocationActionAction = (id: string) => Promise<void>
 export type DeleteStaticLocationActionAction = (id: string) => Promise<void>
@@ -334,6 +340,10 @@ export type LoadLocationActionTimepointsAction = IdParamReturnsVoidPromiseAction
 export type LoadStaticLocationActionAction = IdParamReturnsVoidPromiseAction
 export type LoadDynamicLocationActionAction = IdParamReturnsVoidPromiseAction
 export type LoadDeviceMountActionsForDynamicLocationAction = IdParamReturnsVoidPromiseAction
+export type LoadConfigurationAttachmentsAction = (id: string) => Promise<void>
+export type LoadConfigurationAttachmentAction = (id: string) => Promise<void>
+
+export type DeleteConfigurationAttachmentAction = (attachmentId: string) => Promise<void>
 
 export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
@@ -346,6 +356,7 @@ export type LoadPlatformMountActionAction = IdParamReturnsVoidPromiseAction
 export type SetPlatformMountActionAction = (action: PlatformMountAction) => void
 export type UpdateStaticLocationActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
 export type UpdateDynamicLocationActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
+export type UpdateConfigurationAttachmentAction = (params: { configurationId: string, attachment: Attachment }) => Promise<Attachment>
 
 export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
 export type SetSelectedLocationDateAction = (newVal: DateTime|null) => void
@@ -387,6 +398,29 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async loadConfigurationContactRoles ({ commit }: { commit: Commit }, id: string) {
     const configurationContactRoles = await this.$api.configurations.findRelatedContactRoles(id)
     commit('setConfigurationContactRoles', configurationContactRoles)
+  },
+  async loadConfigurationAttachments ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const configurationAttachments = await this.$api.configurations.findRelatedConfigurationAttachments(id)
+    commit('setConfigurationAttachments', configurationAttachments)
+  },
+  async loadConfigurationAttachment ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const configurationAttachment = await this.$api.configurationAttachments.findById(id)
+    commit('setConfigurationAttachment', configurationAttachment)
+  },
+  async addConfigurationAttachment (_, {
+    configurationId,
+    attachment
+  }: { configurationId: string, attachment: Attachment }): Promise<Attachment> {
+    return await this.$api.configurationAttachments.add(configurationId, attachment)
+  },
+  async deleteConfigurationAttachment (_, attachmentId: string): Promise<void> {
+    return await this.$api.configurationAttachments.deleteById(attachmentId)
+  },
+  async updateConfigurationAttachment (_, {
+    configurationId,
+    attachment
+  }: { configurationId: string, attachment: Attachment }): Promise<Attachment> {
+    return await this.$api.configurationAttachments.update(configurationId, attachment)
   },
   async loadConfigurationsStates ({ commit }: { commit: Commit }) {
     const configurationStates = await this.$api.configurationStates.findAll()
@@ -580,6 +614,12 @@ const mutations = {
   },
   setConfigurationContactRoles (state: ConfigurationsState, configurationContactRoles: ContactRole[]) {
     state.configurationContactRoles = configurationContactRoles
+  },
+  setConfigurationAttachments (state: ConfigurationsState, attachments: Attachment[]) {
+    state.configurationAttachments = attachments
+  },
+  setConfigurationAttachment (state: ConfigurationsState, attachment: Attachment) {
+    state.configurationAttachment = attachment
   },
   setConfigurationStates (state: ConfigurationsState, configurationStates: string[]) {
     state.configurationStates = configurationStates
