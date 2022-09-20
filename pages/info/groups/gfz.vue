@@ -191,6 +191,7 @@ import PermissionInfo from '@/components/PermissionInfo.vue'
 })
 export default class GfzGroupInfoPage extends Vue {
   created () {
+    this.$store.dispatch('appbar/setDefaults')
     this.$store.commit('appbar/setTitle', 'Group information')
   }
 
