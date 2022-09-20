@@ -45,6 +45,7 @@ import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
 import { DeviceCalibrationActionApi } from '@/services/sms/DeviceCalibrationActionApi'
 import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
+import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachmentApi'
 import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
 import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
 import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
@@ -93,6 +94,7 @@ export class Api {
   private readonly _customfieldsApi: CustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
+  private readonly _configurationAttachmentApi: ConfigurationAttachmentApi
   private readonly _devicePropertyApi: DevicePropertyApi
   private readonly _genericDeviceActionApi: GenericDeviceActionApi
   private readonly _genericPlatformActionApi: GenericPlatformActionApi
@@ -231,6 +233,11 @@ export class Api {
     this._platformAttachmentApi = new PlatformAttachmentApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-attachments'
+    )
+
+    this._configurationAttachmentApi = new ConfigurationAttachmentApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/configuration-attachments'
     )
 
     this._devicePropertyApi = new DevicePropertyApi(
@@ -397,6 +404,10 @@ export class Api {
 
   get platformAttachments (): PlatformAttachmentApi {
     return this._platformAttachmentApi
+  }
+
+  get configurationAttachments (): ConfigurationAttachmentApi {
+    return this._configurationAttachmentApi
   }
 
   get deviceProperties (): DevicePropertyApi {

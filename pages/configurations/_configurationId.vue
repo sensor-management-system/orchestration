@@ -137,6 +137,10 @@ export default class ConfigurationsIdPage extends Vue {
         name: 'Locations'
       },
       {
+        to: '/configurations/' + this.configurationId + '/attachments',
+        name: 'Attachments'
+      },
+      {
         to: '/configurations/' + this.configurationId + '/actions',
         name: 'Actions'
       }

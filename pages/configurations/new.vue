@@ -139,6 +139,10 @@ export default class ConfigurationNewPage extends Vue {
         disabled: true
       },
       {
+        name: 'Attachments',
+        disabled: true
+      },
+      {
         name:
         'Actions',
         disabled: true
