@@ -538,10 +538,11 @@ export default {
   }
 
   .link-footer {
-    z-index: 10
+    z-index: 10;
   }
 
   .logo-footer__landing {
+    z-index: 1 !important;
     margin-bottom: 0 !important;
   }
 
