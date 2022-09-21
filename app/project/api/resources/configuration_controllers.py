@@ -132,7 +132,7 @@ class ControllerConfigurationMountingActions(ResourceList):
             raise BadRequestError("timepoint parameter required")
         timepoint_str = request.args["timepoint"]
         try:
-            timepoint = dateutil.parser.parse(timepoint_str).replace(tzinfo=None)
+            timepoint = dateutil.parser.parse(timepoint_str)
         except dateutil.parser.ParserError:
             raise BadRequestError("timepoint must be ISO 8601")
 

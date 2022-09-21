@@ -113,7 +113,7 @@ class AbstractLocationActionValidator(abc.ABC):
     def _parse_datetime(date_as_string):
         """Parse the string representation of a datetime object to the actual object."""
         try:
-            return dateutil.parser.parse(date_as_string).replace(tzinfo=None)
+            return dateutil.parser.parse(date_as_string)
         except dateutil.parser.ParserError:
             raise BadRequestError(
                 f"'{date_as_string}' is not valid according to ISO 8601"
