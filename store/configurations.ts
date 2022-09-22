@@ -395,7 +395,9 @@ export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActio
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
   setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime) {
-    commit('setSelectedDate', selectedDate)
+    if (selectedDate) {
+      commit('setSelectedDate', selectedDate)
+    }
   },
   async searchConfigurationsPaginated ({
     commit,
