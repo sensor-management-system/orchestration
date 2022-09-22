@@ -1,3 +1,5 @@
+"""Tests for the permissions of platform attachments."""
+
 import json
 from unittest.mock import patch
 
@@ -5,13 +7,13 @@ from project import base_url
 from project.api.models import Platform, PlatformAttachment
 from project.api.models.base_model import db
 from project.extensions.instances import idl
-from project.tests.base import (BaseTestCase, create_token, fake,
-                                query_result_to_list)
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions import create_a_test_platform
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def prepare_platform_attachment_payload(platform):
+    """Prepare a payload to send to the backend."""
     payload = {
         "data": {
             "type": "platform_attachment",
@@ -154,6 +156,28 @@ class TesPlatformAttachment(BaseTestCase):
         self.assertEqual(attachment.platform_id, platform.id)
         self.assertEqual(str(attachment.platform_id), response.get_json()["data"]["id"])
 
+    def test_post_to_archived_platform_with_a_permission_group(self):
+        """Ensure that we can't add an attachment to an archived platform."""
+        platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
+        platform.archived = True
+        db.session.add(platform)
+        db.session.commit()
+
+        payload = prepare_platform_attachment_payload(platform)
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+
+                response = self.client.post(
+                    self.url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_post_to_a_platform_with_an_other_permission_group(self):
         """Post to a platform with a different permission Group from the user."""
         platform = create_a_test_platform([403])
@@ -230,9 +254,46 @@ class TesPlatformAttachment(BaseTestCase):
         self.assertEqual(attachment.url, data["data"]["attributes"]["url"])
         self.assertEqual(attachment.platform_id, platform.id)
 
-    def test_delete_to_a_platform_with_a_permission_group(self):
-        """Delete Custom field attached to platform with same group as user
-        (user is admin)."""
+    def test_patch_to_archived_platform(self):
+        """Ensure that we can't patch an attachment for an archived platform."""
+        platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
+
+        attachment = PlatformAttachment(
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform,
+        )
+        platform.archived = True
+        db.session.add_all([attachment, platform])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "id": attachment.id,
+                "type": "platform_attachment",
+                "attributes": {"label": "changed", "url": attachment.url},
+                "relationships": {
+                    "platform": {"data": {"type": "platform", "id": str(platform.id)}}
+                },
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url = self.url + "/" + str(attachment.id)
+
+                response = self.client.patch(
+                    url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
+    def test_delete_for_a_platform_with_a_permission_group(self):
+        """Delete attached to platform with same group as group admin."""
         platform = create_a_test_platform(
             IDL_USER_ACCOUNT.administrated_permission_groups
         )
@@ -267,9 +328,35 @@ class TesPlatformAttachment(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 200)
 
+    def test_delete_for_archived_platform(self):
+        """Ensure that we can't delete when the platform is archived."""
+        platform = create_a_test_platform(
+            IDL_USER_ACCOUNT.administrated_permission_groups
+        )
+        attachment = PlatformAttachment(
+            label=fake.pystr(),
+            url=fake.url(),
+            platform=platform,
+        )
+        platform.archived = True
+        db.session.add_all([attachment, platform])
+        db.session.commit()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url = self.url + "/" + str(attachment.id)
+
+                response = self.client.delete(
+                    url,
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_to_a_platform_with_a_permission_group_as_a_member(self):
-        """Delete Custom field attached to platform with same group as user
-        (user is member)."""
+        """Delete attachment of platform with same group as user (member)."""
         platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(platform.id is not None)
         count_platform_attachments = (

@@ -205,6 +205,24 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 200)
 
+    def test_delete_archived_configuration(self):
+        """Ensure we can't delete for an archived configuration."""
+        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
+        configuration_contact_role = generate_configuration_contact_role(group_id="2")
+        configuration_contact_role.configuration.archived = True
+        db.session.add(configuration_contact_role.configuration)
+        db.session.commit()
+
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            response = self.client.delete(
+                self.url + f"/{configuration_contact_role.id}", headers=access_headers
+            )
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_public_configuration_contact_role_admin_in_group(self):
         """Ensure that contact role for public configuration can be deleted by admin of group."""
         self.assertIn("1", IDL_USER_ACCOUNT.administrated_permission_groups)
@@ -425,6 +443,34 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
+
+    def test_patch_for_archived_configuration(self):
+        """Ensure we can't patch if the configuration is archived already."""
+        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
+        configuration_contact_role = generate_configuration_contact_role(group_id="2")
+        configuration_contact_role.configuration.archived = True
+        db.session.add(configuration_contact_role.configuration)
+        db.session.commit()
+
+        access_headers = create_token()
+        payload = {
+            "data": {
+                "type": self.object_type,
+                "id": str(configuration_contact_role.id),
+                "attributes": {"role_name": "new role"},
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            response = self.client.patch(
+                self.url + f"/{configuration_contact_role.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_patch_public_configuration_contact_role_admin_in_group(self):
         """Ensure that contact role for public configuration can be patched by admin of group."""
@@ -795,6 +841,50 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
+
+    def test_post_for_archived_configuration(self):
+        """Ensure we can't add contacts for archived configurations."""
+        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
+        configuration = generate_configuration(group_id="2")
+        configuration.archived = True
+        db.session.add(configuration)
+        db.session.commit()
+        contact = generate_contact()
+        payload = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "role_name": "dummy name",
+                    "role_uri": "dummy uri",
+                },
+                "relationships": {
+                    "configuration": {
+                        "data": {
+                            "id": str(configuration.id),
+                            "type": "configuration",
+                        },
+                    },
+                    "contact": {
+                        "data": {
+                            "id": str(contact.id),
+                            "type": "contact",
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_post_public_configuration_contact_role_admin_in_group(self):
         """Ensure that contact role for public configuration can be posted by admin of group."""

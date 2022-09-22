@@ -1,6 +1,7 @@
 """Tests for the device property endpoints."""
 
 import json
+from unittest import skip
 from unittest.mock import patch
 
 from project import base_url
@@ -14,6 +15,7 @@ from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def device_properties_model(public=True, private=False, internal=False, group_ids=None):
+    """Create and return entities for 2 devies & 3 device properties."""
     device1 = Device(
         short_name=fake.pystr(),
         is_public=public,
@@ -32,13 +34,19 @@ def device_properties_model(public=True, private=False, internal=False, group_id
     db.session.add(device2)
     db.session.commit()
     device_property1 = DeviceProperty(
-        label="device property1", property_name="device_property1", device=device1,
+        label="device property1",
+        property_name="device_property1",
+        device=device1,
     )
     device_property2 = DeviceProperty(
-        label="device property2", property_name="device_property2", device=device1,
+        label="device property2",
+        property_name="device_property2",
+        device=device1,
     )
     device_property3 = DeviceProperty(
-        label="device property3", property_name="device_property3", device=device2,
+        label="device property3",
+        property_name="device_property3",
+        device=device2,
     )
     db.session.add_all([device_property1, device_property2, device_property3])
     db.session.commit()
@@ -139,13 +147,49 @@ class TestDevicePropertyServices(BaseTestCase):
             str(device_property.device_id), response.get_json()["data"]["id"]
         )
 
+    def test_post_device_property_for_archived_device(self):
+        """Ensure that we can' add for an archived device."""
+        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device.archived = True
+        db.session.add(device)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "attributes": {
+                    "label": "device property1",
+                    "property_name": "device_property1",
+                    "compartment_name": "climate",
+                    "sampling_media_name": "air",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    self.url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_patch_device_property_api(self):
         """Ensure that we can update a device property."""
         device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         device2 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
 
         device_property1 = DeviceProperty(
-            label="property 1", property_name="device_property1", device=device1,
+            label="property 1",
+            property_name="device_property1",
+            device=device1,
         )
         db.session.add(device_property1)
         db.session.commit()
@@ -184,6 +228,91 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(device_property_reloaded.label, "property 2")
         self.assertEqual(device_property_reloaded.device_id, device2.id)
 
+    def test_patch_device_property_for_archived_source_device(self):
+        """Ensure we can't update a device property for an archived device."""
+        device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device2 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+
+        device_property1 = DeviceProperty(
+            label="property 1",
+            property_name="device_property1",
+            device=device1,
+        )
+        device1.archived = True
+        db.session.add_all([device_property1, device1])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "id": str(device_property1.id),
+                "attributes": {
+                    "label": "property 2",
+                    "property_name": "device_property2",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device2.id)}}
+                },
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url_patch = base_url + "/device-properties/" + str(device_property1.id)
+                response = self.client.patch(
+                    url_patch,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 409)
+
+    @skip("Checks for permissions currently only test for ")
+    def test_patch_device_property_for_archived_target_device(self):
+        """Ensure we can't update a device property for an archived target device."""
+        device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device2 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+
+        device_property1 = DeviceProperty(
+            label="property 1",
+            property_name="device_property1",
+            device=device1,
+        )
+        device2.archived = True
+        db.session.add_all([device_property1, device2])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "id": str(device_property1.id),
+                "attributes": {
+                    "label": "property 2",
+                    "property_name": "device_property2",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device2.id)}}
+                },
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url_patch = base_url + "/device-properties/" + str(device_property1.id)
+                response = self.client.patch(
+                    url_patch,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_device_property_api(self):
         """Ensure that we can delete a device property."""
         device = Device(
@@ -194,7 +323,9 @@ class TestDevicePropertyServices(BaseTestCase):
             group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
         )
         device_property = DeviceProperty(
-            label="device property1", property_name="device_property1", device=device,
+            label="device property1",
+            property_name="device_property1",
+            device=device,
         )
         db.session.add_all([device, device_property])
         db.session.commit()
@@ -213,3 +344,33 @@ class TestDevicePropertyServices(BaseTestCase):
         device_reloaded = db.session.query(Device).filter_by(id=device.id).first()
         msg = "delete;measured quantity"
         self.assertEqual(msg, device_reloaded.update_description)
+
+    def test_delete_device_property_for_archived_device(self):
+        """Ensure that we can't delete a device property for an archived device."""
+        device = Device(
+            short_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups,
+            archived=True,
+        )
+        device_property = DeviceProperty(
+            label="device property1",
+            property_name="device_property1",
+            device=device,
+        )
+        db.session.add_all([device, device_property])
+        db.session.commit()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.delete(
+                    self.url + "/" + str(device_property.id),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 409)

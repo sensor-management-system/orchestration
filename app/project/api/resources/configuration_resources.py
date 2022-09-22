@@ -1,12 +1,12 @@
-"""Configuration list resource."""
+"""Configuration resource classes."""
 
 import os
 
-from flask import g
+from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from sqlalchemy import or_
 
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import (
     cfg_permission_group_defined,
     check_deletion_permission,
@@ -14,6 +14,7 @@ from ..auth.permission_utils import (
     is_user_in_a_group,
 )
 from ..datalayers.esalchemy import (
+    AndFilter,
     EsSqlalchemyDataLayer,
     OrFilter,
     TermEqualsExactStringFilter,
@@ -26,7 +27,7 @@ from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class ConfigurationList(ResourceList):
@@ -48,7 +49,17 @@ class ConfigurationList(ResourceList):
             query = query.filter_by(is_public=True)
         else:
             if not g.user.is_superuser:
-                query = query.filter(or_(self.model.is_public, self.model.is_internal,))
+                query = query.filter(
+                    or_(
+                        self.model.is_public,
+                        self.model.is_internal,
+                    )
+                )
+        false_values = ["false"]
+        # hide archived must be disabled explicitly
+        hide_archived = request.args.get("hide_archived") not in false_values
+        if hide_archived:
+            query = query.filter_by(archived=False)
         return query
 
     def es_query(self, view_kwargs):
@@ -58,16 +69,29 @@ class ConfigurationList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        if g.user is None:
-            return TermEqualsExactStringFilter("is_public", True)
-        if not g.user.is_superuser:
-            return OrFilter(
-                [
-                    TermEqualsExactStringFilter("is_public", True),
-                    TermEqualsExactStringFilter("is_internal", True),
-                ]
-            )
-        return None
+        false_values = ["false"]
+        # hide archived must be disabled explicitly
+        hide_archived = request.args.get("hide_archived") not in false_values
+
+        def just_permissions():
+            if g.user is None:
+                return TermEqualsExactStringFilter("is_public", True)
+            if not g.user.is_superuser:
+                return OrFilter(
+                    [
+                        TermEqualsExactStringFilter("is_public", True),
+                        TermEqualsExactStringFilter("is_internal", True),
+                    ]
+                )
+            return None
+
+        permission_filter = just_permissions()
+        if not hide_archived:
+            return permission_filter
+        archived_filter = TermEqualsExactStringFilter("archived", False)
+        if permission_filter:
+            return AndFilter([permission_filter, archived_filter])
+        return archived_filter
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -131,8 +155,10 @@ class ConfigurationList(ResourceList):
 
 class ConfigurationDetail(ResourceDetail):
     """
-    provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete a Device
+    Detail resource class for the configurations.
+
+    Provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a Configuration.
     """
 
     def before_get(self, args, kwargs):
@@ -145,7 +171,12 @@ class ConfigurationDetail(ResourceDetail):
                     raise UnauthorizedError("Authentication required.")
 
     def before_patch(self, args, kwargs, data):
-        """check if a user has the permission to change this configuration"""
+        """Check if a user has the permission to change this configuration."""
+        configuration = (
+            db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
+        )
+        if configuration and configuration.archived:
+            raise ConflictError("It is not allowed to edit archived devices.")
         if not is_superuser():
             configuration = (
                 db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
@@ -159,6 +190,7 @@ class ConfigurationDetail(ResourceDetail):
         add_updated_by_id(data)
 
     def after_patch(self, result):
+        """Run some updates after the successful patch."""
         result_id = result["data"]["id"]
         configuration = db.session.query(Configuration).filter_by(id=result_id).first()
         msg = "update;basic data"
@@ -168,12 +200,14 @@ class ConfigurationDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
-        """Checks for permission"""
+        """Check for permission."""
         check_deletion_permission(kwargs, Configuration)
 
     def delete(self, *args, **kwargs):
         """
-        Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
+        Try to delete an object through sqlalchemy.
+
+        If could not be done give a ConflictError.
         :param args: args from the resource view
         :param kwargs: kwargs from the resource view
         :return:
@@ -182,6 +216,9 @@ class ConfigurationDetail(ResourceDetail):
         urls = [a.url for a in configuration.configuration_attachments]
         try:
             super().delete(*args, **kwargs)
+        except ForbiddenError as e:
+            # Just re-raise it
+            raise e
         except JsonApiException as e:
             raise ConflictError("Deletion failed for the configuration.", str(e))
 

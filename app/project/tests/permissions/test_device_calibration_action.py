@@ -15,6 +15,7 @@ from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def add_device_and_contact(group_ids):
+    """Add a device & a contact to the database & return them as tuple."""
     userinfo = generate_userinfo_data()
     device = Device(
         short_name=fake.pystr(),
@@ -35,6 +36,7 @@ def add_device_and_contact(group_ids):
 
 
 def prepare_calibration_payload(object_type, group_ids):
+    """Create some example payload to create calibration actions."""
     device, contact = add_device_and_contact(group_ids)
     data = {
         "data": {
@@ -108,6 +110,30 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 201)
 
+    def test_post_device_calibration_action_for_archived_device(self):
+        """Create DeviceCalibrationAction."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        data = prepare_calibration_payload(
+            self.object_type, group_id_test_user_is_member_in_2
+        )
+        device = db.session.query(Device).order_by("created_at").first()
+        device.archived = True
+        db.session.add(device)
+        db.session.commit()
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,contact",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_update_device_calibration_action(self):
         """Update DeviceCalibration."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
@@ -154,8 +180,49 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
         self.assertEqual(device_calibration_action.device_id, device.id)
 
+    def test_update_device_calibration_action_for_archived_device(self):
+        """Ensure we can't update a device calibration action for archived devices."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device, contact = add_device_and_contact(group_id_test_user_is_member_in_2)
+        device.archived = True
+        device_calibration_action = DeviceCalibrationAction(
+            description=fake.pystr(),
+            formula=fake.pystr(),
+            value=fake.pyfloat(),
+            current_calibration_date=fake.date(),
+            next_calibration_date=fake.date(),
+            device=device,
+            contact=contact,
+        )
+        db.session.add_all([device_calibration_action, device])
+        db.session.commit()
+        device_calibration_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": device_calibration_action.id,
+                "attributes": {
+                    "description": "updated",
+                },
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url = f"{self.url}/{device_calibration_action.id}"
+
+                response = self.client.patch(
+                    url,
+                    data=json.dumps(device_calibration_action_updated),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_device_calibration_action(self):
-        """Delete DeviceCalibrationAction should fail as a member."""
+        """Delete DeviceCalibrationAction should succeed as a admin."""
         group_id_test_user_is_member_in_2 = (
             IDL_USER_ACCOUNT.administrated_permission_groups
         )
@@ -183,6 +250,37 @@ class TestDeviceCalibrationAction(BaseTestCase):
                     headers=access_headers,
                 )
             self.assertEqual(response.status_code, 200)
+
+    def test_delete_device_calibration_action_for_archived_devices(self):
+        """Ensure that we can't update calibrations for archived devices."""
+        group_id_test_user_is_member_in_2 = (
+            IDL_USER_ACCOUNT.administrated_permission_groups
+        )
+        device, contact = add_device_and_contact(group_id_test_user_is_member_in_2)
+        device.archived = True
+        device_calibration_action = DeviceCalibrationAction(
+            description=fake.pystr(),
+            formula=fake.pystr(),
+            value=fake.pyfloat(),
+            current_calibration_date=fake.date(),
+            next_calibration_date=fake.date(),
+            device=device,
+            contact=contact,
+        )
+        db.session.add_all([device_calibration_action, device])
+        db.session.commit()
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.delete(
+                    f"{self.url}/{device_calibration_action.id}",
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 409)
 
     def test_delete_device_calibration_action_as_member(self):
         """Delete DeviceCalibrationAction."""

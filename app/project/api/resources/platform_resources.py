@@ -2,11 +2,16 @@
 
 import os
 
-from flask import g
+from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from ...api.auth.permission_utils import (
+    get_es_query_with_permissions,
+    get_query_with_permissions,
+    set_default_permission_view_to_internal_if_not_exists_or_all_false,
+)
+from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
@@ -16,12 +21,7 @@ from ..models.contact_role import PlatformContactRole
 from ..models.platform import Platform
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
-from ...api.auth.permission_utils import (
-    get_es_query_with_permissions,
-    get_query_with_permissions,
-    set_default_permission_view_to_internal_if_not_exists_or_all_false,
-)
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class PlatformList(ResourceList):
@@ -38,7 +38,10 @@ class PlatformList(ResourceList):
         :param view_kwargs:
         :return: queryset
         """
-        return get_query_with_permissions(self.model)
+        false_values = ["false"]
+        # hide archived must be disabled explicitly
+        hide_archived = request.args.get("hide_archived") not in false_values
+        return get_query_with_permissions(self.model, hide_archived=hide_archived)
 
     def es_query(self, view_kwargs):
         """
@@ -47,7 +50,10 @@ class PlatformList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        return get_es_query_with_permissions()
+        false_values = ["false"]
+        # hide archived must be disabled explicitly
+        hide_archived = request.args.get("hide_archived") not in false_values
+        return get_es_query_with_permissions(hide_archived=hide_archived)
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -108,12 +114,14 @@ class PlatformList(ResourceList):
 
 class PlatformDetail(ResourceDetail):
     """
-    provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete an Event
+    Detail resource for the platforms.
+
+    Provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a platform.
     """
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if platform not found"""
+        """Return a 404 response if the platform was not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     def before_patch(self, args, kwargs, data):
@@ -126,6 +134,11 @@ class PlatformDetail(ResourceDetail):
         add_updated_by_id(data)
 
     def after_patch(self, result):
+        """
+        Run some updates after the patch.
+
+        For example here we can update the update description.
+        """
         result_id = result["data"]["id"]
         platform = db.session.query(Platform).filter_by(id=result_id).first()
         msg = "update;basic data"
@@ -136,7 +149,9 @@ class PlatformDetail(ResourceDetail):
 
     def delete(self, *args, **kwargs):
         """
-        Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
+        Try to delete an object through sqlalchemy.
+
+        If could not be done give a ConflictError.
         :param args: args from the resource view
         :param kwargs: kwargs from the resource view
         :return:

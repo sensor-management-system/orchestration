@@ -76,7 +76,7 @@ def assert_current_user_is_superuser_or_owner_of_object(object_):
             )
 
 
-def get_query_with_permissions(model):
+def get_query_with_permissions(model, hide_archived=True):
     """
     Filter a model query for those data that the user is allowed to see.
 
@@ -101,42 +101,55 @@ def get_query_with_permissions(model):
                     ),
                 )
             )
+    if hide_archived:
+        query = query.filter_by(archived=False)
     return query
 
 
-def get_es_query_with_permissions():
+def get_es_query_with_permissions(hide_archived=True):
     """
     Filter a model query for those data that the user is allowed to see.
 
     :return set: queryset for the model
     """
-    if g.user is None:
-        return TermEqualsExactStringFilter("is_public", True)
-    if not g.user.is_superuser:
-        user_id = g.user.id
-        return OrFilter(
-            [
-                AndFilter(
-                    [
-                        TermEqualsExactStringFilter("is_private", True),
-                        TermEqualsExactStringFilter("created_by_id", user_id),
-                    ]
-                ),
-                OrFilter(
-                    [
-                        TermEqualsExactStringFilter("is_public", True),
-                        TermEqualsExactStringFilter("is_internal", True),
-                    ]
-                ),
-            ]
-        )
-    return None
+
+    def just_permissions():
+        if g.user is None:
+            return TermEqualsExactStringFilter("is_public", True)
+        if not g.user.is_superuser:
+            user_id = g.user.id
+            return OrFilter(
+                [
+                    AndFilter(
+                        [
+                            TermEqualsExactStringFilter("is_private", True),
+                            TermEqualsExactStringFilter("created_by_id", user_id),
+                        ]
+                    ),
+                    OrFilter(
+                        [
+                            TermEqualsExactStringFilter("is_public", True),
+                            TermEqualsExactStringFilter("is_internal", True),
+                        ]
+                    ),
+                ]
+            )
+        return None
+
+    permission_filter = just_permissions()
+    if not hide_archived:
+        return permission_filter
+    archived_filter = TermEqualsExactStringFilter("archived", False)
+    if permission_filter:
+        return AndFilter([permission_filter, archived_filter])
+    return archived_filter
 
 
 def check_post_permission():
     """
     Check if a user has the permission to assign a group to the object.
-    Also forbidden private Object to be assigned to a group.
+
+    It also forbids to assign private objects to a group.
     """
     if not g.user:
         raise UnauthorizedError("Authentication required.")
@@ -163,10 +176,10 @@ def check_patch_permission(data, object_to_patch):
     :param data:
     :param object_to_patch:
     """
+    object_ = db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
+    if object_ and object_.archived:
+        raise ConflictError("It is not possible to change archived objects")
     if not is_superuser():
-        object_ = (
-            db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
-        )
         if object_:
             if object_.is_private:
                 assert_current_user_is_superuser_or_owner_of_object(object_)
@@ -190,29 +203,16 @@ def check_deletion_permission(kwargs, object_to_delete):
     :param kwargs:
     :param object_to_delete:
     """
+    object_ = (
+        db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
+    )
+    if getattr(object_, "persistent_identifier", None):
+        raise ConflictError("Deletion of objects with PID is not possible")
     if not is_superuser():
-        object_ = (
-            db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
-        )
-        if object_to_delete == Configuration:
-            group_id = (
-                db.session.query(object_to_delete)
-                .filter_by(id=kwargs["id"])
-                .one_or_none()
-                .cfg_permission_group
-            )
-            group_ids = [group_id] if group_id else []
-        else:
-            group_ids = (
-                db.session.query(object_to_delete)
-                .filter_by(id=kwargs["id"])
-                .one_or_none()
-                .group_ids
-            )
-        if group_ids is None:
+        if getattr(object_, "is_private", False):
             assert_current_user_is_superuser_or_owner_of_object(object_)
-        if not is_user_admin_in_a_group(group_ids):
-            raise ForbiddenError("User is not part of any group to delete this object.")
+        else:
+            raise ForbiddenError("User is not allowed to delete")
 
 
 def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
@@ -312,8 +312,9 @@ def allow_only_admin_in_a_permission_group_to_remove_it_from_an_object(group_ids
 
 def check_permissions_for_related_objects(model_class, id_):
     """
-    check if a user has the permission to view a related object by checking
-    the object permission.
+    Check if a user has the permission to view a related object.
+
+    It does that by checking the main object permission (device/platform).
 
     :param id_:
     :param model_class: class model
@@ -330,49 +331,46 @@ def check_permissions_for_related_objects(model_class, id_):
 
 
 def check_post_permission_for_related_objects():
-    """
-    check if a user has the permission to patch a related object.
-    """
+    """Check if a user has the permission to patch a related object."""
     data = decode_json_request_data()
     related_object = None
+    if "device" in data["relationships"]:
+        object_id = data["relationships"]["device"]["data"]["id"]
+        related_object = db.session.query(Device).filter_by(id=object_id).one_or_none()
+    if "platform" in data["relationships"]:
+        object_id = data["relationships"]["platform"]["data"]["id"]
+        related_object = (
+            db.session.query(Platform).filter_by(id=object_id).one_or_none()
+        )
+    if related_object is None:
+        raise ObjectNotFound("Object not found!")
+    if related_object.archived:
+        raise ConflictError("Posting for archived entity is not allowed")
     if not is_superuser():
-        if "device" in data["relationships"]:
-            object_id = data["relationships"]["device"]["data"]["id"]
-            related_object = (
-                db.session.query(Device).filter_by(id=object_id).one_or_none()
-            )
-        if "platform" in data["relationships"]:
-            object_id = data["relationships"]["platform"]["data"]["id"]
-            related_object = (
-                db.session.query(Platform).filter_by(id=object_id).one_or_none()
-            )
-        if related_object is not None:
-            if related_object.is_private:
-                assert_current_user_is_superuser_or_owner_of_object(related_object)
-            else:
-                group_ids = related_object.group_ids
-                if not is_user_in_a_group(group_ids):
-                    raise ForbiddenError(
-                        "User is not part of any group to edit this object."
-                    )
+        if related_object.is_private:
+            assert_current_user_is_superuser_or_owner_of_object(related_object)
         else:
-            raise ObjectNotFound("Object not found!")
+            group_ids = related_object.group_ids
+            if not is_user_in_a_group(group_ids):
+                raise ForbiddenError(
+                    "User is not part of any group to edit this object."
+                )
 
 
 def check_patch_and_delete_permission_for_related_objects(data, object_to_patch):
     """
-    check if a user has the permission to patch a related object.
+    Check if a user has the permission to patch a related object.
 
     :param data:
     :param object_to_patch:
     """
+    object_ = db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
+    if object_ is None:
+        raise ObjectNotFound("Object not found!")
+    related_object = object_.get_parent()
+    if related_object.archived:
+        raise ConflictError("Not possible to modify entries for archived entities")
     if not is_superuser():
-        object_ = (
-            db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
-        )
-        if object_ is None:
-            raise ObjectNotFound("Object not found!")
-        related_object = object_.get_parent()
         if related_object.is_private:
             assert_current_user_is_superuser_or_owner_of_object(related_object)
         else:
@@ -384,8 +382,11 @@ def check_patch_and_delete_permission_for_related_objects(data, object_to_patch)
 
 
 def get_query_with_permissions_for_related_objects(model):
-    """Retrieve a collection of related objects through sqlalchemy by checking
-    the object permission.
+    """
+    Return the query for elements that depends on platform / devices permissions.
+
+    It retrieves a collection of related objects through sqlalchemy by
+    checking the permission of the platform / device.
 
     :param model:
     :return set: list of objects
@@ -414,8 +415,11 @@ def get_query_with_permissions_for_related_objects(model):
 
 
 def get_query_with_permissions_for_configuration_related_objects(model):
-    """Retrieve a collection of related objects to a configuration through sqlalchemy by checking
-    the object permission.
+    """
+    Return the query for elements that depend on configuration permissions.
+
+    It retrieves a collection of related objects of a configuration
+    through sqlalchemy by checking the object permission.
 
     :param model:
     :return set: list of objects
@@ -439,8 +443,9 @@ def get_query_with_permissions_for_configuration_related_objects(model):
 
 def check_permissions_for_configuration_related_objects(model_class, id_):
     """
-    check if a user has the permission to view a related object by checking
-    the configuration permission.
+    Check if user has the permission to view related object.
+
+    This depends on the permissions of the configuration.
 
     :param id_:
     :param model_class: class model
@@ -463,40 +468,39 @@ def cfg_permission_group_defined(group_id):
 
 
 def check_post_permission_for_configuration_related_objects():
-    """
-    check if a user has the permission to patch a related object to a configuration.
-    """
+    """Check if a user has the permission to patch a related object of a configuration."""
     data = decode_json_request_data()
+    object_id = data["relationships"]["configuration"]["data"]["id"]
+    configuration = (
+        db.session.query(Configuration).filter_by(id=object_id).one_or_none()
+    )
+    if configuration is None:
+        raise ObjectNotFound("Object not found!")
+    if configuration.archived:
+        raise ConflictError("Posting for archived entities is not allowed")
     if not is_superuser():
-        object_id = data["relationships"]["configuration"]["data"]["id"]
-        configuration = (
-            db.session.query(Configuration).filter_by(id=object_id).one_or_none()
-        )
-        if configuration is not None:
-            group_id = configuration.cfg_permission_group
-            if cfg_permission_group_defined(group_id):
-                if not is_user_in_a_group([group_id]):
-                    raise ForbiddenError(
-                        "User is not part of the configuration-group to edit this object."
-                    )
-        else:
-            raise ObjectNotFound("Object not found!")
+        group_id = configuration.cfg_permission_group
+        if cfg_permission_group_defined(group_id):
+            if not is_user_in_a_group([group_id]):
+                raise ForbiddenError(
+                    "User is not part of the configuration-group to edit this object."
+                )
 
 
 def check_patch_permission_for_configuration_related_objects(data, object_to_patch):
     """
-    check if a user has the permission to patch a related object to a configuration.
+    Check if a user has the permission to patch a related object to a configuration.
 
     :param data:
     :param object_to_patch:
     """
+    object_ = db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
+    if object_ is None:
+        raise ObjectNotFound("Object not found!")
+    configuration = object_.get_parent()
+    if configuration.archived:
+        raise ConflictError("Patching for archived entities is not allowed")
     if not is_superuser():
-        object_ = (
-            db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
-        )
-        if object_ is None:
-            raise ObjectNotFound("Object not found!")
-        configuration = object_.get_parent()
         group_id = configuration.cfg_permission_group
         if cfg_permission_group_defined(group_id):
             if not is_user_in_a_group([group_id]):
@@ -509,20 +513,23 @@ def check_deletion_permission_for_configuration_related_objects(
     kwargs, object_to_delete
 ):
     """
-    check if a user has the permission to delete related object to a configuration.
+    Check if a user has the permission to delete related object to a configuration.
+
     Note: both Member and Admin in a group should have the right
     to make the deletion.
 
     :param kwargs:
     :param object_to_delete:
     """
+    object_ = (
+        db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
+    )
+    if object_ is None:
+        raise ObjectNotFound("Object not found!")
+    configuration = object_.get_parent()
+    if configuration.archived:
+        raise ConflictError("Deleting for archived entities is not allowed")
     if not is_superuser():
-        object_ = (
-            db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
-        )
-        if object_ is None:
-            raise ObjectNotFound("Object not found!")
-        configuration = object_.get_parent()
         group_id = configuration.cfg_permission_group
         if cfg_permission_group_defined(group_id):
             if not is_user_in_a_group([group_id]):
@@ -535,6 +542,10 @@ def check_parent_group_before_change_a_relationship(
     string_to_split_after, parent_model
 ):
     """
+    Run checks to ensure that the user can edit the relationship.
+
+    It checks the status of the main associated element
+    (device, platform, configuration).
 
     :param parent_model:
     :param string_to_split_after:

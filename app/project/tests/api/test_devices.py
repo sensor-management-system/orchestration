@@ -5,10 +5,12 @@ from unittest.mock import patch
 
 from project import base_url, idl
 from project.api.models.base_model import db
+from project.api.models.contact import Contact
 from project.api.models.customfield import CustomField
 from project.api.models.device import Device
 from project.api.models.device_attachment import DeviceAttachment
 from project.api.models.device_property import DeviceProperty
+from project.api.models.user import User
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -38,6 +40,21 @@ class TestDeviceService(BaseTestCase):
     object_type = "device"
     json_data_url = os.path.join(test_file_path, "drafts", "devices_test_data.json")
     properties_url = base_url + "/device-properties"
+
+    def setUp(self):
+        """Set up for the tests."""
+        super().setUp()
+        contact1 = Contact(
+            given_name="test", family_name="user", email="test.user@localhost"
+        )
+        contact2 = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.normal_user = User(subject=contact1.email, contact=contact1)
+        self.super_user = User(
+            subject=contact2.email, contact=contact2, is_superuser=True
+        )
+        db.session.add_all([contact1, contact2, self.normal_user, self.super_user])
 
     def test_get_devices(self):
         """Ensure the GET /devices route behaves correctly."""
@@ -297,30 +314,31 @@ class TestDeviceService(BaseTestCase):
 
     def test_delete_device_with_calibration_action(self):
         """Ensure that a device with a calibration_action can be deleted."""
-
         device_calibration_action = add_device_calibration_action()
         device_id = device_calibration_action.device_id
-        _ = super().delete_object(
-            url=f"{self.device_url}/{device_id}",
-        )
+        # Only super users are allowed to delete
+        with self.run_requests_as(self.super_user):
+            _ = super().try_delete_object_with_status_code(
+                url=f"{self.device_url}/{device_id}", expected_status_code=200
+            )
 
     def test_delete_device_with_generic_action(self):
-        """Ensure that a device with  a generic action can be deleted."""
-
+        """Ensure that a device with a generic action can be deleted."""
         device_action_model = generate_device_action_model()
         device_id = device_action_model.device_id
-        _ = super().delete_object(
-            url=f"{self.device_url}/{device_id}",
-        )
+        with self.run_requests_as(self.super_user):
+            _ = super().try_delete_object_with_status_code(
+                url=f"{self.device_url}/{device_id}", expected_status_code=200
+            )
 
-    def test_delete_device_with_software_update__action(self):
+    def test_delete_device_with_software_update_action(self):
         """Ensure that a device with  a software update action can be deleted."""
-
         device_action_model = add_device_software_update_action_model()
         device_id = device_action_model.device_id
-        _ = super().delete_object(
-            url=f"{self.device_url}/{device_id}",
-        )
+        with self.run_requests_as(self.super_user):
+            _ = super().try_delete_object_with_status_code(
+                url=f"{self.device_url}/{device_id}", expected_status_code=200
+            )
 
     def test_update_description_after_creation(self):
         """Make sure that update description field is set after post."""
@@ -512,3 +530,57 @@ class TestDeviceService(BaseTestCase):
         msg = "update;measured quantity"
         self.assertEqual(msg, result_device.update_description)
         self.assertNotEqual(user.id, result_device.updated_by_id)
+
+    def test_get_list_no_archived_devices_by_default(self):
+        """Ensure that we don't list archived devices by default."""
+        visible_device = Device(
+            short_name="visible device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        archived_device = Device(
+            short_name="archived device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            archived=True,
+        )
+        db.session.add_all([visible_device, archived_device])
+
+        with self.client:
+            response = self.client.get(self.device_url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        # We have only one device, not the second one
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["attributes"]["short_name"], "visible device")
+        self.assertEqual(data[0]["attributes"]["archived"], False)
+
+    def test_get_list_with_archived_devices_by_flag(self):
+        """Ensure that we can list archived devices if wished."""
+        visible_device = Device(
+            short_name="visible device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        archived_device = Device(
+            short_name="archived device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            archived=True,
+        )
+        db.session.add_all([visible_device, archived_device])
+
+        with self.client:
+            response = self.client.get(self.device_url + "?hide_archived=false")
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        # We have only one device, not the second one
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]["attributes"]["short_name"], "visible device")
+        self.assertEqual(data[0]["attributes"]["archived"], False)
+        self.assertEqual(data[1]["attributes"]["short_name"], "archived device")
+        self.assertEqual(data[1]["attributes"]["archived"], True)

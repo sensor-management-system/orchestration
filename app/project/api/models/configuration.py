@@ -3,11 +3,16 @@
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from ..helpers.errors import ConflictError
 from .base_model import db
-from .mixin import AuditMixin, BeforeCommitValidatableMixin, SearchableMixin
+from .mixin import (
+    ArchivableMixin,
+    AuditMixin,
+    BeforeCommitValidatableMixin,
+    SearchableMixin,
+)
 
 
 class Configuration(
-    db.Model, AuditMixin, SearchableMixin, BeforeCommitValidatableMixin
+    db.Model, AuditMixin, ArchivableMixin, SearchableMixin, BeforeCommitValidatableMixin
 ):
     """Data model for the configurations."""
 
@@ -73,11 +78,12 @@ class Configuration(
             "device_mount_actions": [
                 d.to_search_entry() for d in self.device_mount_actions
             ],
+            "archived": self.archived,
             "is_internal": self.is_internal,
             "is_public": self.is_public,
             "created_by_id": self.created_by_id,
             "start_date": self.start_date,
-            "end_date": self.end_date
+            "end_date": self.end_date,
         }
 
     @staticmethod
@@ -96,17 +102,28 @@ class Configuration(
         type_text_full_searchable = ElasticSearchIndexTypes.text_full_searchable(
             analyzer="ngram_analyzer"
         )
-        type_keyword_and_full_searchable = ElasticSearchIndexTypes.keyword_and_full_searchable(
-            analyzer="ngram_analyzer"
+        type_keyword_and_full_searchable = (
+            ElasticSearchIndexTypes.keyword_and_full_searchable(
+                analyzer="ngram_analyzer"
+            )
         )
 
         return {
             "aliases": {},
             "mappings": {
                 "properties": {
-                    "is_internal": {"type": "boolean",},
-                    "is_public": {"type": "boolean",},
-                    "created_by_id": {"type": "integer",},
+                    "is_internal": {
+                        "type": "boolean",
+                    },
+                    "is_public": {
+                        "type": "boolean",
+                    },
+                    "archived": {
+                        "type": "boolean",
+                    },
+                    "created_by_id": {
+                        "type": "integer",
+                    },
                     "label": type_keyword_and_full_searchable,
                     "status": type_keyword_and_full_searchable,
                     "cfg_permission_group": type_keyword,
@@ -150,11 +167,15 @@ class Configuration(
                     },
                     "configuration_static_location_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable,},
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "configuration_dynamic_location_actions": {
                         "type": "nested",
-                        "properties": {"description": type_text_full_searchable,},
+                        "properties": {
+                            "description": type_text_full_searchable,
+                        },
                     },
                     "platform_mount_actions": {
                         "type": "nested",

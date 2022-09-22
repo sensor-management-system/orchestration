@@ -148,7 +148,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(data["data"][0]["id"], str(public_platform.id))
 
     def test_get_as_registered_user(self):
-        """Ensure that a registered user can see public, internal, and only his own private objects"""
+        """Ensure a registered user can see public, internal, and only his own private objects."""
         public_platform = Platform(
             id=15,
             short_name=fake.pystr(),
@@ -216,7 +216,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(len(data["data"]), 3)
 
     def test_add_platform_with_multiple_permission_values(self):
-        """Make sure that is a a platform can't have multiple True permission values at the same time"""
+        """Ensure that a platform can't have multiple True permission values at the same time."""
         platform_data = {
             "data": {
                 "type": "platform",
@@ -281,7 +281,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_add_groups_ids(self):
-        """Make sure that a platform with groups-ids can be created"""
+        """Make sure that a platform with groups ids can be created."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platform_data = {
             "data": {
@@ -318,9 +318,7 @@ class TestPlatformPermissions(BaseTestCase):
         )
 
     def test_get_an_internal_platforms_as_an_unregistered_user(self):
-        """An unregistered user should not be able to
-        retrieve an internal Platform."""
-
+        """An unregistered user should not be able to view an internal Platform."""
         internal_platform = Platform(
             short_name=fake.pystr(),
             is_public=False,
@@ -334,9 +332,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertNotEqual(response.status, 200)
 
     def test_get_an_private_platform_as_not_owner_user(self):
-        """Make sure that a normal user is not allowed a retrieve a not owned
-        private platform."""
-
+        """Make sure that a normal user is not allowed a view not owned private platforms."""
         c = create_a_test_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
@@ -359,9 +355,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status, "403 FORBIDDEN")
 
     def test_get_an_private_platform_as_anonymous(self):
-        """Make sure that a normal user is not allowed a retrieve a
-        private platform."""
-
+        """Make sure that a anonymous user is not allowed to view private platforms."""
         c = create_a_test_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
@@ -383,8 +377,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status, "401 UNAUTHORIZED")
 
     def test_patch_platform_as_a_member_in_a_permission_group(self):
-        """Make sure that a member in a group (admin/member) can change
-        the platform data per patch request"""
+        """Make sure that a member in a group (admin/member) can patch a platform."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2
@@ -428,6 +421,53 @@ class TestPlatformPermissions(BaseTestCase):
                     platform_data_changed["data"]["attributes"]["short_name"],
                 )
 
+    def test_patch_archived_platform(self):
+        """Make sure that we can't patch an archived platform."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        platforms = preparation_of_public_and_internal_platform_data(
+            group_id_test_user_is_member_in_2
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            for platform_data in platforms:
+                with self.client:
+                    response = self.client.post(
+                        self.platform_url,
+                        data=json.dumps(platform_data),
+                        content_type="application/vnd.api+json",
+                        headers=access_headers,
+                    )
+
+                data = json.loads(response.data.decode())
+
+                self.assertEqual(response.status_code, 201)
+
+                self.assertIn(
+                    group_id_test_user_is_member_in_2[0],
+                    data["data"]["attributes"]["group_ids"],
+                )
+                platform = (
+                    db.session.query(Platform).filter_by(id=data["data"]["id"]).first()
+                )
+                platform.archived = True
+                db.session.add(platform)
+                db.session.commit()
+
+                platform_data_changed = {
+                    "data": {
+                        "type": "platform",
+                        "id": data["data"]["id"],
+                        "attributes": {"short_name": "Changed platform name"},
+                    }
+                }
+                url = f"{self.platform_url}/{data['data']['id']}"
+                _ = super().try_update_object_with_status_code(
+                    url, platform_data_changed, expected_status_code=409
+                )
+
     def test_patch_platform_user_not_in_any_permission_group(self):
         """Make sure that a user can only do changes in platforms, where he/she is involved."""
         public_platform = create_a_test_platform(
@@ -461,7 +501,7 @@ class TestPlatformPermissions(BaseTestCase):
             self.assertEqual(response.status, "403 FORBIDDEN")
 
     def test_delete_platform_access_forbidden(self):
-        """Make sure that only admins can delete a platform in the same permission group."""
+        """Make sure that a member in a permission group can't delete the platform."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_member_in_2
@@ -494,7 +534,11 @@ class TestPlatformPermissions(BaseTestCase):
                 self.assertEqual(delete_data["errors"][0]["status"], 403)
 
     def test_delete_platform_as_an_admin_in_a_permission_group(self):
-        """Make sure that a permission group admins are allowed to delete a platform."""
+        """
+        Make sure that a permission group admins are not allowed to delete a platform.
+
+        We need a super user to do that.
+        """
         group_id_test_user_is_member_in_1 = (
             IDL_USER_ACCOUNT.administrated_permission_groups
         )
@@ -525,10 +569,10 @@ class TestPlatformPermissions(BaseTestCase):
                 )
                 url = f"{self.platform_url}/{data['data']['id']}"
                 delete_response = self.client.delete(url, headers=access_headers)
-                self.assertEqual(delete_response.status_code, 200)
+                self.assertEqual(delete_response.status_code, 403)
 
     def test_delete_private_platform_as_superuser(self):
-        """Make sure that a superuser is allowed to delete not owned private platforms"""
+        """Make sure that a superuser is allowed to delete not owned private platforms."""
         platform_data = {
             "data": {
                 "type": "platform",
@@ -563,8 +607,11 @@ class TestPlatformPermissions(BaseTestCase):
             self.assertEqual(delete_response.status_code, 200)
 
     def test_delete_platform_as_superuser_not_involved_in_permission_group(self):
-        """Make sure that a superuser can delete a platform even if he/she is not admin in
-        the corresponding permission group."""
+        """
+        Make sure that a superuser can delete a platform.
+
+        It doesn't matter if the superuser is part of a group or not.
+        """
         group_id_test_user_is_not_included = ["40"]
         platforms = preparation_of_public_and_internal_platform_data(
             group_id_test_user_is_not_included
@@ -596,9 +643,45 @@ class TestPlatformPermissions(BaseTestCase):
                 delete_response = self.client.delete(url, headers=access_headers)
                 self.assertEqual(delete_response.status_code, 200)
 
+    def test_delete_platform_with_pid_as_superuser(self):
+        """Make sure that even a superuser can't delete a platform with pid."""
+        group_id_test_user_is_not_included = ["40"]
+        platforms = preparation_of_public_and_internal_platform_data(
+            group_id_test_user_is_not_included
+        )
+        access_headers = create_superuser_token()
+        for idx, platform_data in enumerate(platforms):
+            # Make sure that we set a pid
+            platform_data["data"]["attributes"][
+                "persistent_identifier"
+            ] = platform_data["data"]["attributes"]["short_name"] + str(idx)
+            with self.client:
+                response = self.client.post(
+                    self.platform_url,
+                    data=json.dumps(platform_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+
+            data = json.loads(response.data.decode())
+
+            self.assertEqual(response.status_code, 201)
+
+            self.assertEqual(
+                data["data"]["attributes"]["group_ids"],
+                group_id_test_user_is_not_included,
+            )
+
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                url = f"{self.platform_url}/{data['data']['id']}"
+                delete_response = self.client.delete(url, headers=access_headers)
+                self.assertEqual(delete_response.status_code, 409)
+
     def test_add_internal_platform_without_group(self):
-        """Ensure a new internal platfrom can only be added
-        with a group."""
+        """Ensure a new internal platfrom can't be added without a group."""
         platform_data = {
             "data": {
                 "type": "platform",
@@ -621,8 +704,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_add_public_platform_without_group(self):
-        """Ensure a new public platform can only be added
-        with a group."""
+        """Ensure a new public platform can't be added without a group."""
         platform_data = {
             "data": {
                 "type": "platform",
@@ -645,8 +727,7 @@ class TestPlatformPermissions(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_add_private_platform_without_group(self):
-        """Ensure a new private platform can only be added
-        with a group."""
+        """Ensure a new private platform can be added without a group."""
         platform_data = {
             "data": {
                 "type": "platform",
@@ -671,7 +752,7 @@ class TestPlatformPermissions(BaseTestCase):
 
 def preparation_of_public_and_internal_platform_data(group_ids):
     """
-    Data to add an internal and a public platform.
+    Prepare data to add an internal and a public platform.
 
     :param group_ids: list of permission groups
     :return: list of data for two platforms [public, internal]

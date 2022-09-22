@@ -2,8 +2,6 @@
 import dateutil.parser
 
 from project import base_url
-from project.api.models.base_model import db
-
 from project.api.models import (
     Configuration,
     Contact,
@@ -11,15 +9,9 @@ from project.api.models import (
     DeviceMountAction,
     DeviceProperty,
 )
-
+from project.api.models.base_model import db
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
-
-from project.tests.base import (
-    BaseTestCase,
-    create_token,
-    fake,
-    generate_userinfo_data,
-)
 
 
 class TestDevicePropertyValidator(BaseTestCase):
@@ -107,11 +99,6 @@ class TestDevicePropertyValidator(BaseTestCase):
             configuration.update_description, "create;dynamic location action"
         )
         access_headers = create_token()
-        _ = super().add_object(
-            url=self.url,
-            data_object=data,
-            object_type=self.object_type,
-        )
         # Check if we can delete the device property
         with self.client:
             response = self.client.delete(
@@ -120,3 +107,30 @@ class TestDevicePropertyValidator(BaseTestCase):
                 headers=access_headers,
             )
         self.assertEqual(response.status_code, 409)
+
+    def test_validate_property_dynamic_location_action_deletion_without_action(self):
+        """Ensure that a property not used by a dynamic_location_action can be deleted."""
+        device = Device(short_name="Device 69", is_public=True)
+        property = DeviceProperty(
+            device=device,
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test property",
+        )
+
+        db.session.add_all([device, property])
+        db.session.commit()
+        db.session.commit()
+
+        access_headers = create_token()
+        # Check if we can delete the device property
+        with self.client:
+            response = self.client.delete(
+                base_url + "/device-properties/" + str(property.id),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)

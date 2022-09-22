@@ -1,3 +1,5 @@
+"""Tests for the generic action models."""
+
 from project.api.models.base_model import db
 from project.api.models.contact import Contact
 from project.api.models.device import Device
@@ -14,8 +16,11 @@ from project.tests.models.test_configurations_model import generate_configuratio
 
 
 def generate_platform_action_model(
-    public=True, private=False, internal=False, group_ids=[]
+    public=True, private=False, internal=False, group_ids=None
 ):
+    """Generate a generic platform action instance."""
+    if not group_ids:
+        group_ids = []
     platform = Platform(
         short_name="short_name test",
         is_public=public,
@@ -46,8 +51,11 @@ def generate_platform_action_model(
 
 
 def generate_device_action_model(
-    public=True, private=False, internal=False, group_ids=[]
+    public=True, private=False, internal=False, group_ids=None
 ):
+    """Generate a generic device action model."""
+    if not group_ids:
+        group_ids = []
     d = Device(
         short_name="test device",
         is_public=public,
@@ -81,10 +89,14 @@ def generate_device_action_model(
 
 
 def generate_configuration_action_model(
-    is_public=False, is_private=False, is_internal=True
+    is_public=False, is_private=False, is_internal=True, cfg_permission_group=None
 ):
+    """Generate a generic configuration action instance."""
     config = generate_configuration_model(
-        is_public=is_public, is_private=is_private, is_internal=is_internal
+        is_public=is_public,
+        is_private=is_private,
+        is_internal=is_internal,
+        cfg_permission_group=cfg_permission_group,
     )
     userinfo = generate_userinfo_data()
     c1 = Contact(
@@ -110,12 +122,10 @@ def generate_configuration_action_model(
 
 
 class TestGenericActions(BaseTestCase):
-    """
-    Test Generic Actions
-    """
+    """Test for the generic action models."""
 
     def test_add_generic_platform_action_model(self):
-        """""Ensure Add generic platform action model """
+        """Ensure Add generic platform action model."""
         platform_action_model = generate_platform_action_model()
         generic_platform_action = (
             db.session.query(GenericPlatformAction)
@@ -127,7 +137,7 @@ class TestGenericActions(BaseTestCase):
         )
 
     def test_add_generic_device_action_model(self):
-        """""Ensure Add generic device action model """
+        """Ensure to add generic device action model."""
         device_action_model = generate_device_action_model()
         generic_device_action = (
             db.session.query(GenericDeviceAction)
@@ -139,7 +149,7 @@ class TestGenericActions(BaseTestCase):
         )
 
     def test_add_generic_configuration_action_model(self):
-        """""Ensure Add generic configuration action model """
+        """Ensure to add generic configuration action model."""
         configuration_action_model = generate_configuration_action_model()
         generic_configuration_action = (
             db.session.query(GenericConfigurationAction)

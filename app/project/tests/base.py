@@ -9,7 +9,7 @@ import flask_jwt_extended
 from faker import Faker
 from flask import request
 from flask_jwt_extended import JWTManager
-from flask_jwt_extended.exceptions import JWTDecodeError, WrongTokenError
+from flask_jwt_extended.exceptions import WrongTokenError
 from flask_testing import TestCase
 from jwt.exceptions import DecodeError
 
@@ -86,7 +86,7 @@ def generate_userinfo_data():
 
 def create_token(attributes=None):
     """
-    create a JWT token.
+    Create a JWT token.
 
     :param attributes: specified token attributes
     :return: authorization header as string
@@ -116,33 +116,52 @@ def get_userinfo():
 
 
 class LoginMechanismBySettingUserDirectly:
+    """Login mechanism for the tests."""
+
     def __init__(self, get_user_function):
+        """Init the object with a function to extract the user."""
         self.get_user_function = get_user_function
 
     def init_app(self, app):
+        """
+        Init the app.
+
+        Needed to fullfil the flask extension interface.
+        """
         pass
 
     @staticmethod
     def can_be_applied():
+        """Check if the login mechanism can be used."""
         return True
 
     def authenticate(self):
+        """Authenticate the user."""
         fun = self.get_user_function
         user = fun()
         return user
 
 
 class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
+    """Authorization mechanism using jwt for the Tests."""
+
     def init_app(self, app):
+        """
+        Init the app.
+
+        Needed to fullfil the flask extension interface.
+        """
         pass
 
     @staticmethod
     def can_be_applied():
+        """Check if we can use the jwt token authentification."""
         if request.headers.get("Authorization"):
             return True
         return False
 
     def authenticate(self):
+        """Authenticate by jwt token."""
         authorization_header = request.headers.get("Authorization")
         try:
             decode_token = flask_jwt_extended.decode_token(authorization_header)
@@ -174,16 +193,20 @@ class BaseTestCase(TestCase):
         return app
 
     def force_login(self, user):
+        """Set a user so that all the requests are run with the user."""
         self._base_test_current_user = user
 
     def logout(self):
+        """Unset a user."""
         self._base_test_current_user = None
 
     def get_current_user(self):
+        """Return the current user or none."""
         return self._base_test_current_user
 
     @contextmanager
     def run_requests_as(self, user):
+        """Set a user so that we can run the requests with this user."""
         previous_user = self._base_test_current_user
         self._base_test_current_user = user
         try:
@@ -301,6 +324,13 @@ class BaseTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Object successfully deleted", data["meta"]["message"])
         return data
+
+    def try_delete_object_with_status_code(self, url, expected_status_code):
+        """Try to delete an object and check the status code."""
+        with self.client:
+            response = self.client.delete(url, content_type="application/vnd.api+json")
+        self.assertEqual(response.status_code, expected_status_code)
+        return response
 
     def http_code_404_when_resource_not_found(self, url):
         """Ensure that the backend respond with 404 if resource not found."""

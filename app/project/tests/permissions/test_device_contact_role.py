@@ -380,7 +380,9 @@ class TestDeviceContactRolePermissions(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
         msg = "delete;contact"
-        device_reloaded = db.session.query(Device).filter_by(id=device_contact_role.device.id).first()
+        device_reloaded = (
+            db.session.query(Device).filter_by(id=device_contact_role.device.id).first()
+        )
         self.assertEqual(msg, device_reloaded.update_description)
 
     def test_delete_public_device_contact_role_member_in_group(self):
@@ -396,6 +398,23 @@ class TestDeviceContactRolePermissions(BaseTestCase):
                 self.url + f"/{device_contact_role.id}", headers=access_headers
             )
         self.assertEqual(response.status_code, 200)
+
+    def test_delete_public_device_contact_role_member_for_archived_device(self):
+        """Ensure the contact role can't be deleted if the device is archived."""
+        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
+        device_contact_role = generate_device_contact_role(group_ids=["2"])
+        device_contact_role.device.archived = True
+        db.session.add(device_contact_role.device)
+        db.session.commit()
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            response = self.client.delete(
+                self.url + f"/{device_contact_role.id}", headers=access_headers
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_delete_public_device_contact_role_admin_in_group(self):
         """Ensure that contact role for public device can be deleted by admin of group."""
@@ -700,6 +719,35 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "new role")
+
+    def test_patch_public_device_contact_role_member_for_archived_device(self):
+        """Ensure the contact role for an archived device can't be changes."""
+        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
+        device_contact_role = generate_device_contact_role(group_ids=["2"])
+
+        device_contact_role.device.archived = True
+        db.session.add(device_contact_role.device)
+        db.session.commit()
+
+        access_headers = create_token()
+        payload = {
+            "data": {
+                "type": self.object_type,
+                "id": str(device_contact_role.id),
+                "attributes": {"role_name": "new role"},
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            response = self.client.patch(
+                self.url + f"/{device_contact_role.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_patch_public_device_contact_role_admin_in_group(self):
         """Ensure that contact role for public device can be patched by admin of group."""
@@ -1196,6 +1244,50 @@ class TestDeviceContactRolePermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
+
+    def test_post_for_archived_device(self):
+        """Ensure we can't add contact role for archived devices."""
+        self.assertIn("2", IDL_USER_ACCOUNT.membered_permission_groups)
+        device = generate_device(group_ids=["2"])
+        device.archived = True
+        db.session.add(device)
+        db.session.commit()
+        contact = generate_contact()
+        payload = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "role_name": "dummy name",
+                    "role_uri": "dummy uri",
+                },
+                "relationships": {
+                    "device": {
+                        "data": {
+                            "id": str(device.id),
+                            "type": "device",
+                        },
+                    },
+                    "contact": {
+                        "data": {
+                            "id": str(contact.id),
+                            "type": "contact",
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            response = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_post_public_device_contact_role_admin_in_group(self):
         """Ensure that contact role for public device can be posted by admin of group."""

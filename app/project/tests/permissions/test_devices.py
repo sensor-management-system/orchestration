@@ -121,7 +121,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(data["data"][0]["id"], str(public_sensor.id))
 
     def test_get_as_registered_user(self):
-        """Ensure that a registered user can see public, internal, and only his own private objects"""
+        """Ensure a registered user can see public, internal, and only his own private objects."""
         public_sensor = create_a_test_device(
             public=True,
             private=False,
@@ -181,7 +181,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(len(data["data"]), 3)
 
     def test_add_device_with_multipel_true_status(self):
-        """Make Sure that is an object can't have tow True status at the same time"""
+        """Ensure an object can't have two True permission stati at the same time."""
         device_data = {
             "data": {
                 "type": "device",
@@ -242,7 +242,7 @@ class TestDevicePermissions(BaseTestCase):
             self.assertEqual(response_2.status_code, 409)
 
     def test_add_groups_ids(self):
-        """Make sure that a device with groups-ids can be created"""
+        """Ensure a device with groups ids can be created."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         access_headers = create_token()
         with patch.object(
@@ -278,9 +278,7 @@ class TestDevicePermissions(BaseTestCase):
         )
 
     def test_get_an_internal_device_as_an_unregistered_user(self):
-        """An unregistered user should not be able to
-        retrieve an internal Device."""
-
+        """Ensure an unregistered user can't view an internal device."""
         internal_sensor = Device(
             short_name=fake.pystr(),
             is_public=False,
@@ -294,9 +292,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertNotEqual(response.status_code, 200)
 
     def test_get_an_private_device_as_not_owner_user(self):
-        """Make sure that a normal user is not allowed a retrieve a not owned
-        private device."""
-
+        """Ensure a normal user is not allowed a view a not owned private device."""
         c = create_a_test_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
@@ -319,9 +315,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(response.status, "403 FORBIDDEN")
 
     def test_get_an_private_device_as_anonymous(self):
-        """Make sure that an anonymous user is not allowed a retrieve a
-        private device."""
-
+        """Ensure an anonymous user is not allowed to view a private device."""
         c = create_a_test_contact()
         user = User(subject="test_user1@test.test", contact=c)
 
@@ -343,8 +337,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(response.status, "401 UNAUTHORIZED")
 
     def test_patch_device_as_a_member_in_a_permission_group(self):
-        """Make sure that a member in a group (admin/member) can change
-        the device data per patch request"""
+        """Ensure a member in a group (admin/member) can change the device."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         devices = preparation_of_public_and_internal_device_data(
             group_id_test_user_is_member_in_2
@@ -391,8 +384,60 @@ class TestDevicePermissions(BaseTestCase):
                     device_data_changed["data"]["attributes"]["short_name"],
                 )
 
+    def test_patch_archived_device_as_a_member_in_a_permission_group(self):
+        """Ensure a member in a group (admin/member) can patch the device."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        devices = preparation_of_public_and_internal_device_data(
+            group_id_test_user_is_member_in_2
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            for device_data in devices:
+                with self.client:
+                    response = self.client.post(
+                        self.device_url,
+                        data=json.dumps(device_data),
+                        content_type="application/vnd.api+json",
+                        headers=access_headers,
+                    )
+
+                data = json.loads(response.data.decode())
+                # print(data)
+                self.assertEqual(response.status_code, 201)
+                device = (
+                    db.session.query(Device).filter_by(id=data["data"]["id"]).first()
+                )
+                device.archived = True
+                db.session.add(device)
+                db.session.commit()
+
+            self.assertIn(
+                group_id_test_user_is_member_in_2[0],
+                data["data"]["attributes"]["group_ids"],
+            )
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                device_data_changed = {
+                    "data": {
+                        "type": "device",
+                        "id": data["data"]["id"],
+                        "attributes": {
+                            "short_name": "Changed device name",
+                        },
+                    }
+                }
+                url = f"{self.device_url}/{data['data']['id']}"
+                _ = super().try_update_object_with_status_code(
+                    url, device_data_changed, expected_status_code=409
+                )
+
     def test_patch_device_user_not_in_any_permission_group(self):
-        """Make sure that a user can only do changes in devices, where he/she is involved."""
+        """Ensure a user can only do changes in devices, where he/she is involved."""
         public_sensor = create_a_test_device(
             public=True, private=False, internal=False, group_ids=["13"]
         )
@@ -424,8 +469,7 @@ class TestDevicePermissions(BaseTestCase):
             self.assertEqual(response.status, "403 FORBIDDEN")
 
     def test_add_internal_device_without_group(self):
-        """Ensure a new internal device can only be added
-        with a group."""
+        """Ensure a internal device can't be added without a group."""
         device_data = {
             "data": {
                 "type": "device",
@@ -448,8 +492,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_add_public_device_without_group(self):
-        """Ensure a new public device can only be added
-        with a group."""
+        """Ensure a public device can't be added without a group."""
         device_data = {
             "data": {
                 "type": "device",
@@ -472,8 +515,7 @@ class TestDevicePermissions(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_add_private_device_without_group(self):
-        """Ensure a new private device can only be added
-        with a group."""
+        """Ensure a new private device can be added without a group."""
         device_data = {
             "data": {
                 "type": "device",
@@ -495,8 +537,8 @@ class TestDevicePermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 201)
 
-    def test_delete_device_as_an_admin_in_a_permission_group(self):
-        """Make sure that an admin can delete a device in the same permission group."""
+    def test_delete_device_as_member_in_a_permission_group(self):
+        """Make sure that a normal member of a group can't delete a device."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         devices = preparation_of_public_and_internal_device_data(
             group_id_test_user_is_member_in_2
@@ -525,11 +567,12 @@ class TestDevicePermissions(BaseTestCase):
                 )
                 url = f"{self.device_url}/{data['data']['id']}"
                 delete_response = self.client.delete(url, headers=access_headers)
+                self.assertEqual(delete_response.status_code, 403)
                 delete_data = json.loads(delete_response.data.decode())
                 self.assertEqual(delete_data["errors"][0]["status"], 403)
 
     def test_delete_public_device_as_an_admin_in_a_permission_group(self):
-        """Make sure that a public device can be deleted as an admin in the permission group."""
+        """Make sure that a public device can't be deleted as an admin in the permission group."""
         group_id_test_user_is_admin_in_1 = (
             IDL_USER_ACCOUNT.administrated_permission_groups
         )
@@ -558,7 +601,7 @@ class TestDevicePermissions(BaseTestCase):
 
                 url = f"{self.device_url}/{data['data']['id']}"
                 delete_response = self.client.delete(url, headers=access_headers)
-                self.assertEqual(delete_response.status_code, 200)
+                self.assertEqual(delete_response.status_code, 403)
 
     def test_delete_private_device_as_superuser(self):
         """Make sure that a superuser is allowed to delete not owned private devices."""
@@ -595,8 +638,7 @@ class TestDevicePermissions(BaseTestCase):
             self.assertEqual(delete_response.status_code, 200)
 
     def test_delete_device_as_superuser_not_involved_in_permission_group(self):
-        """Make sure that a superuser can delete a device even if he/she is not admin in
-        the corresponding permission group."""
+        """Ensure a superuser can delete a device even if not admin in permission groups."""
         group_id_test_user_is_not_included = ["40"]
         device_data = {
             "data": {
@@ -633,10 +675,50 @@ class TestDevicePermissions(BaseTestCase):
             delete_response = self.client.delete(url, headers=access_headers)
             self.assertEqual(delete_response.status_code, 200)
 
+    def test_delete_device_with_pid_as_superuser(self):
+        """Make sure that even a superuser can't delete a device with pid."""
+        group_id_test_user_is_not_included = ["40"]
+        device_data = {
+            "data": {
+                "type": "device",
+                "attributes": {
+                    "short_name": fake.pystr(),
+                    "is_public": True,
+                    "is_internal": False,
+                    "is_private": False,
+                    "group_ids": group_id_test_user_is_not_included,
+                    "persistent_identifier": "pid0-0000-0001-1234",
+                },
+            }
+        }
+        access_headers = create_superuser_token()
+        with self.client:
+            response = self.client.post(
+                self.device_url,
+                data=json.dumps(device_data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+
+        data = json.loads(response.data.decode())
+
+        self.assertEqual(response.status_code, 201)
+
+        self.assertEqual(data["data"]["attributes"]["group_ids"], ["40"])
+
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            url = f"{self.device_url}/{data['data']['id']}"
+            delete_response = self.client.delete(url, headers=access_headers)
+            # Due to the pid, we can't delete it anymore
+            self.assertEqual(delete_response.status_code, 409)
+
 
 def preparation_of_public_and_internal_device_data(group_ids):
     """
-    Data to add an internal and a public device.
+    Prepare data to add an internal and a public device.
 
     :param group_ids: list of permission groups
     :return: list of data for two devices [public, internal]

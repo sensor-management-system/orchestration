@@ -3,6 +3,7 @@ import json
 from unittest.mock import patch
 
 from project import base_url
+from project.api.models.base_model import db
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_software_update_actions_model import (
@@ -13,6 +14,7 @@ from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def prepare_software_update_action_payload(object_type, platform, contact):
+    """Create some example payload to post to the backend."""
     data = {
         "data": {
             "type": object_type,
@@ -66,7 +68,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         self.assertEqual(len(response.json["data"]), 1)
 
     def test_post_action_with_a_permission_group(self):
-        """Post to device,with permission Group."""
+        """Post to platform,with permission Group."""
         platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(platform.id is not None)
         contact = create_a_test_contact()
@@ -87,8 +89,32 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-    def test_post_action__user_not_in_the_permission_group(self):
-        """Post to device,with permission Group different from the user group."""
+    def test_post_action_archived_platform(self):
+        """Ensure we can't add a action if the platform is archived."""
+        platform = create_a_test_platform(IDL_USER_ACCOUNT.membered_permission_groups)
+        platform.archived = True
+        db.session.add(platform)
+        db.session.commit()
+        contact = create_a_test_contact()
+        payload = prepare_software_update_action_payload(
+            self.object_type, platform, contact
+        )
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    self.url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 409)
+
+    def test_post_action_user_not_in_the_permission_group(self):
+        """Post to platform,with permission Group different from the user group."""
         platform = create_a_test_platform([403])
         self.assertTrue(platform.id is not None)
         contact = create_a_test_contact()
@@ -101,7 +127,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
             test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
             with self.client:
                 response = self.client.post(
-                    f"{self.url}?include=device,contact",
+                    f"{self.url}?include=platform,contact",
                     data=json.dumps(payload),
                     content_type="application/vnd.api+json",
                     headers=create_token(),
@@ -109,21 +135,21 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_patch_action_with_a_permission_group(self):
-        """Post to device,with permission Group."""
-        device_software_update_action = add_platform_software_update_action_model(
+        """Post to platform,with permission Group."""
+        platform_software_update_action = add_platform_software_update_action_model(
             group_ids=IDL_USER_ACCOUNT.membered_permission_groups
         )
-        self.assertTrue(device_software_update_action.id is not None)
-        device_software_update_action_updated = {
+        self.assertTrue(platform_software_update_action.id is not None)
+        platform_software_update_action_updated = {
             "data": {
                 "type": self.object_type,
-                "id": device_software_update_action.id,
+                "id": platform_software_update_action.id,
                 "attributes": {
                     "description": "updated",
                 },
             }
         }
-        url = f"{self.url}/{device_software_update_action.id}"
+        url = f"{self.url}/{platform_software_update_action.id}"
         with patch.object(
             idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
@@ -131,28 +157,31 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
             with self.client:
                 response = self.client.patch(
                     url,
-                    data=json.dumps(device_software_update_action_updated),
+                    data=json.dumps(platform_software_update_action_updated),
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
 
-    def test_patch_action__user_is_not_part_from_permission_group(self):
-        """Post to device,with permission Group."""
-        device_software_update_action = add_platform_software_update_action_model(
-            group_ids=[403]
+    def test_patch_action_for_archived_platform(self):
+        """Ensure that we can't change if the platform is archived."""
+        platform_software_update_action = add_platform_software_update_action_model(
+            group_ids=IDL_USER_ACCOUNT.membered_permission_groups
         )
-        self.assertTrue(device_software_update_action.id is not None)
-        device_software_update_action_updated = {
+        platform_software_update_action.platform.archived = True
+        db.session.add(platform_software_update_action.platform)
+        db.session.commit()
+        self.assertTrue(platform_software_update_action.id is not None)
+        platform_software_update_action_updated = {
             "data": {
                 "type": self.object_type,
-                "id": device_software_update_action.id,
+                "id": platform_software_update_action.id,
                 "attributes": {
                     "description": "updated",
                 },
             }
         }
-        url = f"{self.url}/{device_software_update_action.id}"
+        url = f"{self.url}/{platform_software_update_action.id}"
         with patch.object(
             idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
@@ -160,18 +189,47 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
             with self.client:
                 response = self.client.patch(
                     url,
-                    data=json.dumps(device_software_update_action_updated),
+                    data=json.dumps(platform_software_update_action_updated),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
+    def test_patch_action__user_is_not_part_from_permission_group(self):
+        """Post to platform,with permission Group."""
+        platform_software_update_action = add_platform_software_update_action_model(
+            group_ids=[403]
+        )
+        self.assertTrue(platform_software_update_action.id is not None)
+        platform_software_update_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": platform_software_update_action.id,
+                "attributes": {
+                    "description": "updated",
+                },
+            }
+        }
+        url = f"{self.url}/{platform_software_update_action.id}"
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.patch(
+                    url,
+                    data=json.dumps(platform_software_update_action_updated),
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 403)
 
     def test_delete_software_update_action(self):
-        """Delete DeviceSoftwareUpdateAction."""
-        device_software_update_action = add_platform_software_update_action_model(
+        """Delete PlatformSoftwareUpdateAction."""
+        platform_software_update_action = add_platform_software_update_action_model(
             group_ids=IDL_USER_ACCOUNT.administrated_permission_groups
         )
-        url = f"{self.url}/{device_software_update_action.id}"
+        url = f"{self.url}/{platform_software_update_action.id}"
         with patch.object(
             idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
@@ -184,12 +242,33 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 200)
 
+    def test_delete_software_update_action_for_archived_platform(self):
+        """Ensure that we can't delete if the platform is archived."""
+        platform_software_update_action = add_platform_software_update_action_model(
+            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups
+        )
+        platform_software_update_action.platform.archived = True
+        db.session.add(platform_software_update_action.platform)
+        db.session.commit()
+        url = f"{self.url}/{platform_software_update_action.id}"
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.delete(
+                    url,
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_software_update_action_as_member(self):
-        """Delete DeviceSoftwareUpdateAction as member."""
-        device_software_update_action = add_platform_software_update_action_model(
+        """Delete PlatformSoftwareUpdateAction as member."""
+        platform_software_update_action = add_platform_software_update_action_model(
             group_ids=IDL_USER_ACCOUNT.membered_permission_groups
         )
-        url = f"{self.url}/{device_software_update_action.id}"
+        url = f"{self.url}/{platform_software_update_action.id}"
         with patch.object(
             idl, "get_all_permission_groups_for_a_user"
         ) as test_get_all_permission_groups_for_a_user:
