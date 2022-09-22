@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -130,9 +130,8 @@ permissions and limitations under the Licence.
       </h2>
       <p>
         You have to give copyright attribution accordingly when using a Service and publishing the contents
-        in public or even for further internal use. The copyright information is referenced in the metadata of the
-        Services itself (for example the fields “accessConstraints”, “useConstraints” or “useLimitation”) or the
-        corresponding metadata documents. You are not allowed to remove any copyright marks.
+        in public or even for further internal use.
+        You are not allowed to remove any copyright marks.
       </p>
     </section>
     <section class="mb-6">
@@ -141,10 +140,12 @@ permissions and limitations under the Licence.
       </h2>
       <p>
         If You use the Services and/or data sets in a presentation or publication, for instance by linking in your
-        website, then You have to acknowledge the Sercvies as the source of the material. The Services or data sources
-        can be cited as defined by the copyright attributions of the metadata of the Service or underlying datasets.
+        website, then You have to acknowledge the Sercvies as the source of the material.
+        The Services or data sources can be cited as defined by the copyright attributions of the metadata
+        of the Service or underlying datasets.
         You may not use the Services in a way that suggests any official status or that GFZ endorses any particular
-        application of the Services by You. You may not mislead others or misrepresent the Services and its sources.
+        application of the Services by You.
+        You may not mislead others or misrepresent the Services and its sources.
       </p>
     </section>
     <section class="mb-6">
