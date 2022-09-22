@@ -65,6 +65,8 @@ import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 import { Attachment } from '@/models/Attachment'
 import { ConfigurationAttachmentSerializer } from '@/serializers/jsonapi/ConfigurationAttachmentSerializer'
+import { GenericAction } from '@/models/GenericAction'
+import { GenericConfigurationActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -451,6 +453,21 @@ export class ConfigurationApi {
     return await this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new ConfigurationAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
+  }
+
+  async findRelatedGenericActions (configurationId: string): Promise<GenericAction[]> {
+    const url = this.basePath + '/' + configurationId + '/generic-configuration-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'generic_configuration_action_attachments.attachment'
+      ].join(',')
+    }
+    const result = await this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new GenericConfigurationActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+    return result
   }
 
   removeContact (configurationContactRoleId: string): Promise<void> {
