@@ -46,7 +46,7 @@ class OpenIdConnectAuthMechanism(CreateNewUserByUserinfoMixin):
             headers={"Authorization": authorization},
         )
         if not resp_userinfo.ok:
-            raise AuthenticationFailedError()
+            raise AuthenticationFailedError("User could not be authenticated by openidconnect.", detail=resp_userinfo.text)
             # It can be that there are changes on the IDP config.
             # However, those should not affect our get userinfo endpoint.
             # So if we can't authenticate here, we let another mechanism
