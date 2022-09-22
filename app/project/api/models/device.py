@@ -1,17 +1,23 @@
 """Model for the devices."""
 
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
-from .base_model import db
 from ..models.mixin import (
+    ArchivableMixin,
     AuditMixin,
-    SearchableMixin,
     IndirectSearchableMixin,
     PermissionMixin,
+    SearchableMixin,
 )
+from .base_model import db
 
 
 class Device(
-    db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin, PermissionMixin
+    db.Model,
+    AuditMixin,
+    ArchivableMixin,
+    SearchableMixin,
+    IndirectSearchableMixin,
+    PermissionMixin,
 ):
     """Device class."""
 
@@ -52,6 +58,7 @@ class Device(
             "manufacturer_name": self.manufacturer_name,
             "manufacturer_uri": self.manufacturer_uri,
             "dual_use": self.dual_use,
+            "archived": self.archived,
             "model": self.model,
             "inventory_number": self.inventory_number,
             "persistent_identifier": self.persistent_identifier,
@@ -122,10 +129,19 @@ class Device(
             "manufacturer_uri": type_keyword,
             # dual use is a boolean
             "dual_use": {"type": "boolean"},
-            "is_internal": {"type": "boolean",},
-            "is_public": {"type": "boolean",},
-            "is_private": {"type": "boolean",},
-            "created_by_id": {"type": "integer",},
+            "archived": {"type": "boolean"},
+            "is_internal": {
+                "type": "boolean",
+            },
+            "is_public": {
+                "type": "boolean",
+            },
+            "is_private": {
+                "type": "boolean",
+            },
+            "created_by_id": {
+                "type": "integer",
+            },
             # Model should be both keyword & text.
             "model": type_keyword_and_full_searchable,
             # Inventory number is the same as serial number.

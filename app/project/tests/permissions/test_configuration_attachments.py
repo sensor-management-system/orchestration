@@ -158,6 +158,29 @@ class TesConfigurationAttachment(BaseTestCase):
             str(attachment.configuration_id), response.get_json()["data"]["id"]
         )
 
+    def test_post_to_archived_configuration(self):
+        """Ensure that we can't post for an archived configuration."""
+        configuration = create_a_test_configuration(
+            IDL_USER_ACCOUNT.membered_permission_groups[0]
+        )
+        configuration.archived = True
+        db.session.add(configuration)
+        db.session.commit()
+        payload = prepare_configuration_attachment_payload(configuration)
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+
+                response = self.client.post(
+                    self.url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_post_to_a_configuration_with_an_other_permission_group(self):
         """Post to a configuration with a different permission Group from the user."""
         configuration = create_a_test_configuration(403)
@@ -238,6 +261,46 @@ class TesConfigurationAttachment(BaseTestCase):
         self.assertEqual(attachment.url, data["data"]["attributes"]["url"])
         self.assertEqual(attachment.configuration_id, configuration.id)
 
+    def test_patch_to_archived_configuration(self):
+        """Ensure that we can't patch if the configuration is archived."""
+        configuration = create_a_test_configuration(
+            IDL_USER_ACCOUNT.membered_permission_groups[0]
+        )
+        attachment = ConfigurationAttachment(
+            label=fake.pystr(),
+            url=fake.url(),
+            configuration=configuration,
+        )
+        configuration.archived = True
+        db.session.add_all([attachment, configuration])
+        db.session.commit()
+        payload = {
+            "data": {
+                "id": attachment.id,
+                "type": "configuration_attachment",
+                "attributes": {"label": "changed", "url": attachment.url},
+                "relationships": {
+                    "configuration": {
+                        "data": {"type": "configuration", "id": str(configuration.id)}
+                    }
+                },
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url = self.url + "/" + str(attachment.id)
+
+                response = self.client.patch(
+                    url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_to_a_configuration_with_a_permission_group(self):
         """Delete attachment of configuration with same group as user (user is admin)."""
         configuration = create_a_test_configuration(
@@ -273,6 +336,33 @@ class TesConfigurationAttachment(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_delete_for_archived_configuration(self):
+        """Ensure we can't delete for an archived configuration."""
+        configuration = create_a_test_configuration(
+            IDL_USER_ACCOUNT.administrated_permission_groups[0]
+        )
+        attachment = ConfigurationAttachment(
+            label=fake.pystr(),
+            url=fake.url(),
+            configuration=configuration,
+        )
+        configuration.archived = True
+        db.session.add_all([attachment, configuration])
+        db.session.commit()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url = self.url + "/" + str(attachment.id)
+
+                response = self.client.delete(
+                    url,
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
 
     def test_delete_to_a_configuration_with_a_permission_group_as_a_member(self):
         """Delete attachment of configuration with same group as user (user is member)."""

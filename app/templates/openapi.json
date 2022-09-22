@@ -60,6 +60,9 @@
           },
           {
             "$ref": "#/components/parameters/filter"
+          },
+          {
+            "$ref": "#/components/parameters/hide_archived"
           }
         ],
         "responses": {
@@ -770,6 +773,9 @@
           },
           {
             "$ref": "#/components/parameters/filter"
+          },
+          {
+            "$ref": "#/components/parameters/hide_archived"
           }
         ],
         "responses": {
@@ -2237,6 +2243,9 @@
           },
           {
             "$ref": "#/components/parameters/filter"
+          },
+          {
+            "$ref": "#/components/parameters/hide_archived"
           }
         ],
         "responses": {
@@ -4519,6 +4528,9 @@
                         },
                         "is_public": {
                           "type": "boolean"
+                        },
+                        "archived": {
+                          "type": "boolean"
                         }
                       }
                     }
@@ -4531,7 +4543,8 @@
                       "status": "draft",
                       "cfg_permission_group": "0",
                       "is_public": false,
-                      "is_internal": true
+                      "is_internal": true,
+                      "archived": false
                     },
                     "type": "configuration"
                   }
@@ -5668,6 +5681,9 @@
                   },
                   "is_public": {
                     "type": "boolean"
+                  },
+                  "archived": {
+                    "type": "boolean"
                   }
                 }
               }
@@ -5681,7 +5697,8 @@
                 "status": "draft",
                 "cfg_permission_group": "0",
                 "is_public": false,
-                "is_internal": true
+                "is_internal": true,
+                "archived": false
               },
               "type": "configuration"
             }
@@ -6138,6 +6155,9 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "archived": {
+                    "type": "boolean"
                   }
                 }
               },
@@ -6167,6 +6187,7 @@
                 "is_internal": true,
                 "is_public": false,
                 "is_private": false,
+                "archived": false,
                 "group_ids": [
                   "1",
                   "2"
@@ -6375,6 +6396,7 @@
                             "platform_type_uri": "https://localhost.localdomain/cv/api/v1/platformtypes/2/",
                             "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/2/",
                             "is_public": false,
+                            "archived": false,
                             "long_name": "",
                             "serial_number": "",
                             "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/23/",
@@ -6577,6 +6599,7 @@
                                 "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
                                 "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
                                 "is_public": false,
+                                "archived": false,
                                 "long_name": "",
                                 "serial_number": "55se321de",
                                 "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
@@ -6786,6 +6809,7 @@
                             "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
                             "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
                             "is_public": false,
+                            "archived": false,
                             "long_name": "",
                             "serial_number": "",
                             "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
@@ -6914,6 +6938,7 @@
                         "platform_type_uri": "https://localhost.localdomain/cv/api/v1/platformtypes/2/",
                         "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/2/",
                         "is_public": false,
+                        "archived": false,
                         "long_name": "",
                         "serial_number": "",
                         "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/23/",
@@ -6944,6 +6969,7 @@
                         "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
                         "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
                         "is_public": false,
+                        "archived": false,
                         "long_name": "",
                         "serial_number": "55se321de",
                         "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
@@ -6973,6 +6999,7 @@
                         "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
                         "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
                         "is_public": false,
+                        "archived": false,
                         "long_name": "",
                         "serial_number": "",
                         "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
@@ -7605,7 +7632,8 @@
                       "status": "draft",
                       "cfg_permission_group": "1",
                       "is_public": false,
-                      "is_internal": true
+                      "is_internal": true,
+                      "archived": false
                     },
                     "type": "configuration",
                     "id": "0",
@@ -7800,7 +7828,8 @@
                       ],
                       "is_public": false,
                       "is_internal": true,
-                      "is_private": false
+                      "is_private": false,
+                      "archived": false
                     },
                     "type": "device",
                     "id": "0",
@@ -8004,7 +8033,8 @@
                       ],
                       "is_public": false,
                       "is_internal": true,
-                      "is_private": false
+                      "is_private": false,
+                      "archived": false
                     },
                     "type": "platform",
                     "id": "0",
@@ -8109,7 +8139,8 @@
                       ],
                       "is_public": false,
                       "is_internal": true,
-                      "is_private": false
+                      "is_private": false,
+                      "archived": false
                     },
                     "type": "platform",
                     "id": "0",
@@ -8908,6 +8939,16 @@
         "required": true,
         "schema": {
           "type": "string"
+        }
+      },
+      "hide_archived": {
+        "name": "hide_archived",
+        "description": "In general we hide archived objects. With this parameter those can be shown in the list search together with the non archived ones.",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": "true"
         }
       },
       {% for component in parameter_components %}

@@ -2,10 +2,15 @@
 
 import os
 
-from flask import g
+from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from ...api.auth.permission_utils import (
+    get_es_query_with_permissions,
+    get_query_with_permissions,
+    set_default_permission_view_to_internal_if_not_exists_or_all_false,
+)
+from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
@@ -15,12 +20,7 @@ from ..models.contact_role import DeviceContactRole
 from ..models.device import Device
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
-from ...api.auth.permission_utils import (
-    get_es_query_with_permissions,
-    get_query_with_permissions,
-    set_default_permission_view_to_internal_if_not_exists_or_all_false,
-)
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class DeviceList(ResourceList):
@@ -37,7 +37,10 @@ class DeviceList(ResourceList):
         :param view_kwargs:
         :return: queryset
         """
-        return get_query_with_permissions(self.model)
+        false_values = ["false"]
+        # hide archived must be disabled explicitly
+        hide_archived = request.args.get("hide_archived") not in false_values
+        return get_query_with_permissions(self.model, hide_archived=hide_archived)
 
     def es_query(self, view_kwargs):
         """
@@ -46,7 +49,10 @@ class DeviceList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        return get_es_query_with_permissions()
+        false_values = ["false"]
+        # hide archived must be disabled explicitly
+        hide_archived = request.args.get("hide_archived") not in false_values
+        return get_es_query_with_permissions(hide_archived=hide_archived)
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -86,7 +92,7 @@ class DeviceList(ResourceList):
         msg = "create;basic data"
         device.update_description = msg
         device.updated_by_id = g.user.id
-        
+
         save_to_db(device)
         return result
 
@@ -106,13 +112,16 @@ class DeviceList(ResourceList):
 
 class DeviceDetail(ResourceDetail):
     """
-    provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete a Device
+    Detail resource class for devices.
+
+    Provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a Device.
     """
 
     def delete(self, *args, **kwargs):
         """
         Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
+
         :param args: args from the resource view
         :param kwargs: kwargs from the resource view
         :return:
@@ -141,6 +150,7 @@ class DeviceDetail(ResourceDetail):
         add_updated_by_id(data)
 
     def after_patch(self, result):
+        """Run some update logic after the change by the patch request."""
         result_id = result["data"]["id"]
         device = db.session.query(Device).filter_by(id=result_id).first()
         msg = "update;basic data"

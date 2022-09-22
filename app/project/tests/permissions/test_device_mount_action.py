@@ -30,9 +30,12 @@ def payload_data(
     contact,
     device,
     parent_platform,
-    begin_date=fake.future_datetime().__str__(),
+    begin_date=None,
     end_date=None,
 ):
+    """Create some example payload to create device mounts."""
+    if not begin_date:
+        begin_date = fake.future_datetime().__str__()
     data = {
         "data": {
             "type": object_type,
@@ -265,8 +268,7 @@ class TestMountDevicePermissions(BaseTestCase):
         self.assertEqual(len(data["data"]), 2)
 
     def test_post_action_as_not_a_group_member(self):
-        """Ensure mounting a device in a group fails
-        if it mounted as someone not member in the group."""
+        """Ensure mounting a device in a group fails if not done by member of group."""
         device = create_a_test_device(
             group_ids=[222],
         )
@@ -294,8 +296,7 @@ class TestMountDevicePermissions(BaseTestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_post_action_as_a_group_member(self):
-        """Ensure mounting a device in a group success
-        if it mounted from a group member."""
+        """Ensure mounting a device in a group succeeds if done by group member."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
@@ -330,6 +331,120 @@ class TestMountDevicePermissions(BaseTestCase):
                     headers=access_headers,
                 )
             self.assertEqual(response.status_code, 201)
+
+    def test_post_action_for_archived_device(self):
+        """Ensure we can't mount an archived device."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        device.archived = True
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 409)
+
+    def test_post_action_for_archived_configuration(self):
+        """Ensure we can't mount on an archived configuration."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        configuration.archived = True
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 409)
+
+    def test_post_action_for_archived_parent_platform(self):
+        """Ensure we can't mount on an archived parent platform."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        parent_platform.archived = True
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+            self.assertEqual(response.status_code, 409)
 
     def test_delete_action_as_a_group_member(self):
         """Ensure mounted device groups can be deleted."""
@@ -374,8 +489,149 @@ class TestMountDevicePermissions(BaseTestCase):
                 )
                 self.assertEqual(delete_response_user_is_a_member.status_code, 200)
 
+    def test_delete_for_archived_device(self):
+        """Ensure we can't delete the device mount for an archived device."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response.status_code, 201)
+                data = json.loads(response.data.decode())
+                url = f"{self.url}/{data['data']['id']}"
+                device.archived = True
+                db.session.add(device)
+                db.session.commit()
+
+                delete_response_user_is_a_member = self.client.delete(
+                    url, headers=access_headers
+                )
+                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+
+    def test_delete_for_archived_configuration(self):
+        """Ensure we can't delete the device mount for an archived configuration."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response.status_code, 201)
+                data = json.loads(response.data.decode())
+                url = f"{self.url}/{data['data']['id']}"
+                configuration.archived = True
+                db.session.add(configuration)
+                db.session.commit()
+
+                delete_response_user_is_a_member = self.client.delete(
+                    url, headers=access_headers
+                )
+                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+
+    def test_delete_for_archived_parent_platform(self):
+        """Ensure we can't delete the device mount for an archived parent platform."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response.status_code, 201)
+                data = json.loads(response.data.decode())
+                url = f"{self.url}/{data['data']['id']}"
+                parent_platform.archived = True
+                db.session.add(configuration)
+                db.session.commit()
+
+                delete_response_user_is_a_member = self.client.delete(
+                    url, headers=access_headers
+                )
+                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+
     def test_mount_a_device_in_two_configuration_at_different_time(self):
-        """Ensure mounting a device in more than one configuration at the different time will success."""
+        """Ensure mounting a device in > 1 configurations at the different time will succeed."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
@@ -449,7 +705,7 @@ class TestMountDevicePermissions(BaseTestCase):
                 self.assertEqual(mount_response_2.status_code, 201)
 
     def test_mount_a_device_in_two_configuration_at_same_time(self):
-        """Ensure mounting a device in more than one configuration at the same time won't success."""
+        """Ensure mounting devices in > 1 configuration at the same time won't success."""
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         device = create_a_test_device(
             group_ids=group_id_test_user_is_member_in_2,
@@ -522,8 +778,10 @@ class TestMountDevicePermissions(BaseTestCase):
 
     def test_mount_a_device_with_time_interval_between_two_mount_actions(self):
         """
+        Check that we can add two mount actions if they don't overlap.
+
         Ensure mounting a device between two mount actions if
-        end_date M1 < Mount interval < begin_date of M2 will success.
+        end_date M1 < Mount interval < begin_date of M2 will succeed.
         """
         group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
         device = create_a_test_device(
@@ -563,7 +821,8 @@ class TestMountDevicePermissions(BaseTestCase):
             ]
         )
         db.session.commit()
-        # Mount a device in this intervall ["2022-04-05 00:21:34", "2022-05-05 00:21:34"]
+        # Mount a device in this interval
+        # ["2022-04-05 00:21:34", "2022-05-05 00:21:34"]
         data = payload_data(
             self.object_type,
             first_configuration,
@@ -573,7 +832,8 @@ class TestMountDevicePermissions(BaseTestCase):
             begin_date="2022-04-05 00:21:34",
             end_date="2022-05-05 00:21:34",
         )
-        # Mount the previous device in this intervall ["2022-07-05 00:21:34", None]
+        # Mount the previous device in this interval
+        # ["2022-07-05 00:21:34", None]
         data_2 = payload_data(
             self.object_type,
             second_configuration,
@@ -582,7 +842,8 @@ class TestMountDevicePermissions(BaseTestCase):
             parent_platform,
             begin_date="2022-07-05 00:21:34",
         )
-        # Mount the previous device in this intervall ["2022-06-05 00:21:34", "2022-06-28 00:21:34"]
+        # Mount the previous device in this interval
+        # ["2022-06-05 00:21:34", "2022-06-28 00:21:34"]
         data_3 = payload_data(
             self.object_type,
             second_configuration,
@@ -624,6 +885,8 @@ class TestMountDevicePermissions(BaseTestCase):
 
     def test_mount_a_device_with_time_interval_overlap_a_mount_actions(self):
         """
+        Ensure we don't alow overlapping mounts.
+
         Ensure mounting a device between two mount actions if
         Mount interval overlap begin_date of M2 will Fail.
         """
@@ -696,7 +959,8 @@ class TestMountDevicePermissions(BaseTestCase):
             parent_platform,
             begin_date="2022-06-05 00:21:34",
         )
-        # Mount the previous device in this intervall ["2022-06-05 00:21:34", "2022-08-05 00:21:34"]
+        # Mount the previous device in this interval
+        # ["2022-06-05 00:21:34", "2022-08-05 00:21:34"]
         data_4 = payload_data(
             self.object_type,
             second_configuration,
@@ -706,7 +970,8 @@ class TestMountDevicePermissions(BaseTestCase):
             begin_date="2022-06-05 00:21:34",
             end_date="2022-08-05 00:21:34",
         )
-        # Mount the previous device in this intervall ["2022-04-20 00:21:34", "2022-06-06 00:21:34"]
+        # Mount the previous device in this interval
+        # ["2022-04-20 00:21:34", "2022-06-06 00:21:34"]
         data_5 = payload_data(
             self.object_type,
             second_configuration,
@@ -761,3 +1026,174 @@ class TestMountDevicePermissions(BaseTestCase):
                 headers=access_headers,
             )
             self.assertEqual(response_5.status_code, 409)
+
+    def test_patch_for_archived_device(self):
+        """Ensure we can't patch the device mount for an archived device."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response.status_code, 201)
+                data = json.loads(response.data.decode())
+                url = f"{self.url}/{data['data']['id']}"
+                device.archived = True
+                db.session.add(device)
+                db.session.commit()
+
+                payload = {
+                    "data": {
+                        "type": "device_mount_action",
+                        "id": str(data["data"]["id"]),
+                        "attributes": {"begin_description": "some new description"},
+                    }
+                }
+                patch_response_user_is_a_member = self.client.patch(
+                    url,
+                    data=json.dumps(payload),
+                    headers=access_headers,
+                    content_type="application/vnd.api+json",
+                )
+                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+
+    def test_patch_for_archived_configuration(self):
+        """Ensure we can't patch the device mount for an archived configuration."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response.status_code, 201)
+                data = json.loads(response.data.decode())
+                url = f"{self.url}/{data['data']['id']}"
+                configuration.archived = True
+                db.session.add(configuration)
+                db.session.commit()
+
+                payload = {
+                    "data": {
+                        "type": "device_mount_action",
+                        "id": str(data["data"]["id"]),
+                        "attributes": {"begin_description": "some new description"},
+                    }
+                }
+                patch_response_user_is_a_member = self.client.patch(
+                    url,
+                    data=json.dumps(payload),
+                    headers=access_headers,
+                    content_type="application/vnd.api+json",
+                )
+                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+
+    def test_patch_for_archived_parent_platform(self):
+        """Ensure we can't patch the device mount for an archived parent platform."""
+        group_id_test_user_is_member_in_2 = IDL_USER_ACCOUNT.membered_permission_groups
+        device = create_a_test_device(
+            group_ids=group_id_test_user_is_member_in_2,
+        )
+        parent_platform = create_a_test_platform()
+        mock_jwt = generate_userinfo_data()
+        contact = create_a_test_contact(mock_jwt)
+        configuration = generate_configuration_model()
+        parent_platform_mount1 = PlatformMountAction(
+            configuration=configuration,
+            platform=parent_platform,
+            begin_contact=contact,
+            begin_date=datetime.datetime(year=1970, month=1, day=1),
+        )
+        db.session.add_all(
+            [device, parent_platform, contact, configuration, parent_platform_mount1]
+        )
+        db.session.commit()
+        data = payload_data(
+            self.object_type, configuration, contact, device, parent_platform
+        )
+        access_headers = create_token()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    f"{self.url}?include=device,begin_contact,parent_platform,configuration",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response.status_code, 201)
+                data = json.loads(response.data.decode())
+                url = f"{self.url}/{data['data']['id']}"
+                parent_platform.archived = True
+                db.session.add(configuration)
+                db.session.commit()
+
+                payload = {
+                    "data": {
+                        "type": "device_mount_action",
+                        "id": str(data["data"]["id"]),
+                        "attributes": {"begin_description": "some new description"},
+                    }
+                }
+                patch_response_user_is_a_member = self.client.patch(
+                    url,
+                    data=json.dumps(payload),
+                    headers=access_headers,
+                    content_type="application/vnd.api+json",
+                )
+                self.assertEqual(patch_response_user_is_a_member.status_code, 409)

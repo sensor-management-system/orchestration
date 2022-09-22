@@ -4,7 +4,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 from project import base_url, db
-from project.api.models import GenericPlatformAction
+from project.api.models import GenericPlatformAction, Platform
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_actions_models import (
@@ -14,12 +14,14 @@ from project.tests.permissions import create_a_test_contact, create_a_test_platf
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
-def make_generic_platform_action_data(object_type, group_ids=[]):
+def make_generic_platform_action_data(object_type, group_ids=None):
     """
     Create the json payload for a generic platform action.
 
     This also creates some associated objects in the database.
     """
+    if not group_ids:
+        group_ids = []
     platform = create_a_test_platform(group_ids)
     contact = create_a_test_contact()
 
@@ -63,7 +65,7 @@ class TestGenericPlatformActionPermissions(BaseTestCase):
         self.assertEqual(len(response.json["data"]), 1)
 
     def test_an_internal_generic_platform_action(self):
-        """Ensure a public generic platform action won't be listed unless user provide a valid JWT."""
+        """Ensure a public generic platform action won't be listed for anonymous."""
         generic_platform_action = generate_platform_action_model(
             public=False, private=False, internal=True
         )
@@ -100,6 +102,28 @@ class TestGenericPlatformActionPermissions(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 201)
+
+    def test_post_for_archived_platform(self):
+        """Ensure we can't post for archived platforms."""
+        payload = make_generic_platform_action_data(
+            self.object_type, group_ids=IDL_USER_ACCOUNT.membered_permission_groups
+        )
+        platform = db.session.query(Platform).order_by("created_at").first()
+        platform.archived = True
+        db.session.add(platform)
+        db.session.commit()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    self.url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
 
     def test_post_generic_platform_action_data_user_not_in_the_permission_group(self):
         """Post to platform,with permission Group different from the user group."""
@@ -145,6 +169,38 @@ class TestGenericPlatformActionPermissions(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_patch_archived_platform(self):
+        """Ensure that we can't patch for an archived platform."""
+        payload = generate_platform_action_model(
+            group_ids=IDL_USER_ACCOUNT.membered_permission_groups
+        )
+        platform = db.session.query(Platform).order_by("created_at").first()
+        platform.archived = True
+        db.session.add(platform)
+        db.session.commit()
+        generic_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": payload.id,
+                "attributes": {
+                    "description": "updated",
+                },
+            }
+        }
+        url = f"{self.url}/{payload.id}"
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.patch(
+                    url,
+                    data=json.dumps(generic_platform_action_updated),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
 
     def test_patch_generic_platform_action_data_user_is_not_part_from_permission_group(
         self,
@@ -192,6 +248,28 @@ class TestGenericPlatformActionPermissions(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_delete_archived_platform(self):
+        """Ensure that we can't delete for archived platforms."""
+        generic_platform_action = generate_platform_action_model(
+            group_ids=IDL_USER_ACCOUNT.administrated_permission_groups
+        )
+        platform = db.session.query(Platform).order_by("created_at").first()
+        platform.archived = True
+        db.session.add(platform)
+        db.session.commit()
+        url = f"{self.url}/{generic_platform_action.id}"
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.delete(
+                    url,
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
 
     def test_delete_generic_platform_action_data_as_member(self):
         """Delete generic_platform_action_data as member."""
