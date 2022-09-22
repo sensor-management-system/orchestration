@@ -42,6 +42,7 @@ import { RootState } from '@/store'
 import { Configuration } from '@/models/Configuration'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { ContactRole } from '@/models/ContactRole'
+
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
@@ -60,6 +61,7 @@ import {
   DynamicLocationBeginTimelineAction,
   DynamicLocationEndTimelineAction,
   ITimelineAction,
+  GenericTimelineAction,
   PlatformMountTimelineAction,
   PlatformUnmountTimelineAction,
   StaticLocationBeginTimelineAction,
@@ -68,6 +70,8 @@ import {
 import { dateToDateTimeStringHHMM, sortCriteriaAscending } from '@/utils/dateHelper'
 import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
 import { Attachment } from '@/models/Attachment'
+import { GenericAction } from '@/models/GenericAction'
+import { IActionType } from '@/models/ActionType'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -81,6 +85,12 @@ export enum MountingTypes {
   platform_mount = 'platform_mount',
   device_unmount = 'device_unmount',
   platform_unmount = 'platform_unmount'
+}
+
+const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
+
+export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
+  kind: typeof KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
 }
 
 const PAGE_SIZES = [
@@ -102,6 +112,9 @@ export interface ConfigurationsState {
   deviceMountAction: DeviceMountAction | null
   platformMountAction: PlatformMountAction | null
   configurationLocationActionTimepoints: []
+  configurationGenericActions: GenericAction[]
+  configurationGenericAction: GenericAction | null
+  chosenKindOfConfigurationAction: IOptionsForActionType | null
   selectedTimepointItem: ILocationTimepoint| null
   staticLocationAction: StaticLocationAction|null
   dynamicLocationAction: DynamicLocationAction|null
@@ -129,6 +142,9 @@ const state = (): ConfigurationsState => ({
   deviceMountAction: null,
   platformMountAction: null,
   configurationLocationActionTimepoints: [],
+  configurationGenericActions: [],
+  configurationGenericAction: null,
+  chosenKindOfConfigurationAction: null,
   selectedTimepointItem: null,
   staticLocationAction: null,
   dynamicLocationAction: null,
@@ -192,6 +208,10 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
       if (dynamicLocationAction.endDate !== null) {
         result.push(new DynamicLocationEndTimelineAction(dynamicLocationAction))
       }
+    }
+
+    for (const genericAction of state.configurationGenericActions) {
+      result.push(new GenericTimelineAction(genericAction))
     }
 
     (result as IWithDate[]).sort(byDateOldestLast)
@@ -324,12 +344,16 @@ export type AddStaticLocationEndActionAction = (params: {configurationId: string
 export type AddDynamicLocationBeginActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
 export type AddDynamicLocationEndActionAction = (params: { configurationId: string, dynamicLocationAction: DynamicLocationAction }) => Promise<string>
 export type AddConfigurationAttachmentAction = (params: { configurationId: string, attachment: Attachment }) => Promise<Attachment>
+export type AddConfigurationGenericAction = (params: { configurationId: string, genericAction: GenericAction }) => Promise<GenericAction>
 
 export type DeleteDynamicLocationActionAction = (id: string) => Promise<void>
 export type DeleteStaticLocationActionAction = (id: string) => Promise<void>
+export type DeleteConfigurationGenericAction = (genericActionId: string) => Promise<void>
 
+// TODO: load generic or load all
 export type LoadConfigurationAction = IdParamReturnsVoidPromiseAction
 export type LoadConfigurationContactRolesAction = IdParamReturnsVoidPromiseAction
+export type LoadConfigurationGenericAction = IdParamReturnsVoidPromiseAction
 export type LoadDeviceMountActionsAction = IdParamReturnsVoidPromiseAction
 export type LoadMountingActionsAction = IdParamReturnsVoidPromiseAction
 export type LoadMountingConfigurationForDateAction = (params: { id: string, timepoint: DateTime }) => Promise<void>
@@ -344,6 +368,10 @@ export type LoadConfigurationAttachmentsAction = (id: string) => Promise<void>
 export type LoadConfigurationAttachmentAction = (id: string) => Promise<void>
 
 export type DeleteConfigurationAttachmentAction = (attachmentId: string) => Promise<void>
+export type LoadConfigurationGenericActionsAction = IdParamReturnsVoidPromiseAction
+export type LoadConfigurationGenericActionAction = IdParamReturnsVoidPromiseAction
+
+export type LoadAllConfigurationActionsAction = IdParamReturnsVoidPromiseAction
 
 export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
@@ -357,9 +385,13 @@ export type SetPlatformMountActionAction = (action: PlatformMountAction) => void
 export type UpdateStaticLocationActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
 export type UpdateDynamicLocationActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
 export type UpdateConfigurationAttachmentAction = (params: { configurationId: string, attachment: Attachment }) => Promise<Attachment>
+export type UpdateConfigurationGenericActionAction = (params: {configurationId: string,
+  genericAction: GenericAction
+}) => Promise<string>
 
 export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
-export type SetSelectedLocationDateAction = (newVal: DateTime|null) => void
+export type SetSelectedLocationDateAction = (newVal: DateTime | null) => void
+export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActionType | null) => void
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
   setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime) {
@@ -394,6 +426,14 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
       includeUpdatedBy: true
     })
     commit('setConfiguration', configuration)
+  },
+  async loadConfigurationGenericActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const configurationGenericActions = await this.$api.configurations.findRelatedGenericActions(id)
+    commit('setConfigurationGenericActions', configurationGenericActions)
+  },
+  async loadConfigurationGenericAction ({ commit }: { commit: Commit }, actionId: string): Promise<void> {
+    const configurationGenericAction = await this.$api.genericConfigurationActions.findById(actionId)
+    commit('setConfigurationGenericAction', configurationGenericAction)
   },
   async loadConfigurationContactRoles ({ commit }: { commit: Commit }, id: string) {
     const configurationContactRoles = await this.$api.configurations.findRelatedContactRoles(id)
@@ -478,6 +518,15 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async loadLocationActionTimepoints ({ commit }: {commit: Commit}, id: string) {
     commit('setConfigurationLocationActionTimepoints', await this.$api.configurations.findRelatedLocationActions(id))
   },
+  async loadAllConfigurationActions ({ dispatch }: { dispatch: Dispatch }, id: string) {
+    await Promise.all([
+      dispatch('loadDeviceMountActions', id),
+      dispatch('loadPlatformMountActions', id),
+      dispatch('loadConfigurationDynamicLocationActions', id),
+      dispatch('loadConfigurationStaticLocationActions', id),
+      dispatch('loadConfigurationGenericActions', id)
+    ])
+  },
   async deleteConfiguration (_context, id: string) {
     await this.$api.configurations.deleteById(id)
   },
@@ -511,6 +560,29 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   ): Promise<string> {
     return this.$api.configurations.deviceMountActionApi.add(configurationId, deviceMountAction)
   },
+  addPlatformMountAction (_context,
+    {
+      configurationId,
+      platformMountAction
+    }: { configurationId: string, platformMountAction: PlatformMountAction }
+  ): Promise<string> {
+    return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
+  },
+  addConfigurationGenericAction (_, {
+    configurationId,
+    genericAction
+  }: { configurationId: string, genericAction: GenericAction }): Promise<GenericAction> {
+    return this.$api.genericConfigurationActions.add(configurationId, genericAction)
+  },
+  updateConfigurationGenericAction (_, {
+    configurationId,
+    genericAction
+  }: { configurationId: string, genericAction: GenericAction }): Promise<GenericAction> {
+    return this.$api.genericConfigurationActions.update(configurationId, genericAction)
+  },
+  deleteConfigurationGenericAction (_, genericActionId: string): Promise<void> {
+    return this.$api.genericConfigurationActions.deleteById(genericActionId)
+  },
   updateDeviceMountAction (
     _context,
     {
@@ -526,14 +598,6 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   setPlatformMountAction ({ commit }: { commit: Commit }, action: PlatformMountAction): void {
     commit('setPlatformMountAction', action)
-  },
-  addPlatformMountAction (_context,
-    {
-      configurationId,
-      platformMountAction
-    }: { configurationId: string, platformMountAction: PlatformMountAction }
-  ): Promise<string> {
-    return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
   },
   updatePlatformMountAction (_context,
     {
@@ -599,6 +663,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   setSelectedLocationDate ({ commit }: { commit: Commit }, newval: DateTime|null) {
     commit('setSelectedLocationDate', newval)
+  },
+  setChosenKindOfConfigurationAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
+    commit('setChosenKindOfConfigurationAction', newval)
   }
 }
 
@@ -669,11 +736,20 @@ const mutations = {
   setPlatformMountAction (state: ConfigurationsState, platformMountAction: PlatformMountAction | null) {
     state.platformMountAction = platformMountAction
   },
+  setConfigurationGenericActions (state: ConfigurationsState, configurationGenericActions: []) {
+    state.configurationGenericActions = configurationGenericActions
+  },
+  setConfigurationGenericAction (state: ConfigurationsState, configurationGenericAction: GenericAction) {
+    state.configurationGenericAction = configurationGenericAction
+  },
   setDeviceMountActionsForDynamicLocation (state: ConfigurationsState, deviceMountActionsForDynamicLocation: []) {
     state.deviceMountActionsForDynamicLocation = deviceMountActionsForDynamicLocation
   },
   setSelectedLocationDate (state: ConfigurationsState, newVal: DateTime|null) {
     state.selectedLocationDate = newVal
+  },
+  setChosenKindOfConfigurationAction (state: ConfigurationsState, newVal: IOptionsForActionType | null) {
+    state.chosenKindOfConfigurationAction = newVal
   }
 }
 

@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -33,39 +34,48 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-expansion-panels>
-    <v-expansion-panel
-      v-if="action"
-    >
-      <v-expansion-panel-header class="py-0 pl-0">
-        <v-container class="pa-0">
-          <v-row no-gutters>
-            <v-col cols="12">
-              <v-card-subtitle class="pb-0">
-                {{ action.date | dateToDateTimeString }}
-                <span class="text-caption text--secondary">(UTC)</span>
-              </v-card-subtitle>
-            </v-col>
-          </v-row>
-          <v-row no-gutters>
-            <v-col cols="12">
-              <v-card-title class="pt-0 pb-0">
-                {{ action.title }}
-              </v-card-title>
-            </v-col>
-          </v-row>
-          <v-row no-gutters>
-            <v-col cols="12">
-              <v-card-subtitle class="pt-0">
-                {{ contactName | orDefault }}
-              </v-card-subtitle>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-expansion-panel-header>
-      <v-expansion-panel-content>
-        <v-card-text
-          class="text--primary"
+  <div v-if="action">
+    <base-expandable-list-item v-if="action" :expandable-color="'grey lighten-5'">
+      <template #header>
+        <v-card-subtitle class="pb-0">
+          <span>{{ action.date | dateToDateTimeString }}</span>
+          <span v-if="action.endDate"> - {{ action.endDate | dateToDateTimeString }}</span>
+        </v-card-subtitle>
+      </template>
+      <v-row no-gutters>
+        <v-col cols="12">
+          <v-card-title class="text--primary pt-0 pb-0">
+            {{ action.title }}
+          </v-card-title>
+        </v-col>
+      </v-row>
+      <v-row no-gutters>
+        <v-col>
+          <v-card-subtitle class="text--primary pt-0">
+            {{ contactName | orDefault }}
+          </v-card-subtitle>
+        </v-col>
+      </v-row>
+      <template v-if="action.genericAction" #dot-menu-items>
+        <DotMenuActionDelete
+          :readonly="!editable"
+          @click="initDeleteDialogGenericAction(action.genericAction)"
+        />
+      </template>
+      <template v-if="action.genericAction" #actions>
+        <v-btn
+          v-if="editable"
+          :to="'/configurations/' + configurationId + '/actions/generic-configuration-actions/' + action.genericAction.id + '/edit'"
+          color="primary"
+          text
+          @click.stop.prevent
+        >
+          Edit
+        </v-btn>
+      </template>
+      <template #expandable>
+        <div
+          class="text--primary pt-0 px-3"
         >
           <div v-if="action.mountInfo">
             <v-row
@@ -177,36 +187,103 @@ permissions and limitations under the Licence.
               {{ action.description | orDefault }}
             </v-col>
           </v-row>
-        </v-card-text>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
-  </v-expansion-panels>
+        </div>
+      </template>
+    </base-expandable-list-item>
+    <ActionDeleteDialog
+      v-model="showDeleteDialog"
+      :action-to-delete="genericActionToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteGenericAction"
+    />
+  </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
+
+import {
+  DeleteConfigurationGenericAction,
+  LoadAllConfigurationActionsAction
+} from '@/store/configurations'
+
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import DotMenu from '@/components/DotMenu.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
 
 import { ITimelineAction } from '@/utils/configurationInterfaces'
 import { dateToDateTimeString } from '@/utils/dateHelper'
+import { GenericAction } from '@/models/GenericAction'
 
 @Component({
   filters: {
     dateToDateTimeString
-  }
+  },
+  components: {
+    BaseExpandableListItem,
+    DotMenu,
+    DotMenuActionDelete,
+    ActionDeleteDialog
+  },
+  methods: mapActions('configurations', ['deleteConfigurationGenericAction', 'loadAllConfigurationActions'])
 })
 export default class ConfigurationsTimelineActionCard extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   @Prop({
     required: true,
     type: Object
   })
-  // @ts-ignore
   readonly action!: ITimelineAction
+
+  private isSaving: boolean = false
+  private showDeleteDialog: boolean = false
+  private genericActionToDelete: GenericAction | null = null
+
+  // vuex definition for typescript check
+  deleteConfigurationGenericAction!: DeleteConfigurationGenericAction
+  loadAllConfigurationActions!: LoadAllConfigurationActionsAction
+
+  get configurationId (): string {
+    return this.$route.params.configurationId
+  }
 
   get contactName () {
     if (this.action.contact) {
       return this.action.contact.toString()
     }
     return ''
+  }
+
+  initDeleteDialogGenericAction (action: GenericAction) {
+    this.showDeleteDialog = true
+    this.genericActionToDelete = action
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.genericActionToDelete = null
+  }
+
+  async deleteGenericAction () {
+    if (this.genericActionToDelete === null || this.genericActionToDelete.id === null) {
+      return
+    }
+
+    try {
+      this.isSaving = true
+      await this.deleteConfigurationGenericAction(this.genericActionToDelete.id)
+      this.loadAllConfigurationActions(this.configurationId)
+      this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
+    } finally {
+      this.isSaving = false
+      this.closeDialog()
+    }
   }
 }
 </script>

@@ -33,6 +33,7 @@ import { IAttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerialize
 import { AbstractActionAttachmentSerializer } from '@/serializers/jsonapi/ActionAttachmentSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
+import { ConfigurationAttachmentSerializer } from '@/serializers/jsonapi/ConfigurationAttachmentSerializer'
 
 export class GenericDeviceActionAttachmentSerializer extends AbstractActionAttachmentSerializer {
   private _attachmentSerializer: IAttachmentSerializer
@@ -85,6 +86,35 @@ export class GenericPlatformActionAttachmentSerializer extends AbstractActionAtt
 
   getAttachmentTypeName (): string {
     return 'platform_attachment'
+  }
+
+  get attachmentSerializer (): IAttachmentSerializer {
+    return this._attachmentSerializer
+  }
+}
+
+export class GenericConfigurationActionAttachmentSerializer extends AbstractActionAttachmentSerializer {
+  private _attachmentSerializer: IAttachmentSerializer
+
+  constructor () {
+    super()
+    this._attachmentSerializer = new ConfigurationAttachmentSerializer()
+  }
+
+  getActionTypeName (): string {
+    return 'generic_configuration_action'
+  }
+
+  getActionAttachmentTypeName (): string {
+    return 'generic_configuration_action_attachment'
+  }
+
+  getActionAttachmentTypeNamePlural (): string {
+    return this.getActionAttachmentTypeName() + 's'
+  }
+
+  getAttachmentTypeName (): string {
+    return 'configuration_attachment'
   }
 
   get attachmentSerializer (): IAttachmentSerializer {

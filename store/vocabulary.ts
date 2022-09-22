@@ -3,10 +3,11 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -47,11 +48,13 @@ import { EpsgCode } from '@/models/EpsgCode'
 import { ElevationDatum } from '@/models/ElevationDatum'
 import { CvContactRole } from '@/models/CvContactRole'
 
-import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
+import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeApi'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
+
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 
 export interface VocabularyState {
@@ -61,6 +64,7 @@ export interface VocabularyState {
   platformtypes: PlatformType[],
   platformGenericActionTypes: ActionType[],
   deviceGenericActionTypes: ActionType[],
+  configurationGenericActionTypes: ActionType[],
   compartments: Compartment[],
   samplingMedia: SamplingMedia[],
   properties: Property[],
@@ -78,6 +82,7 @@ const state = (): VocabularyState => ({
   platformtypes: [],
   platformGenericActionTypes: [],
   deviceGenericActionTypes: [],
+  configurationGenericActionTypes: [],
   compartments: [],
   samplingMedia: [],
   properties: [],
@@ -95,6 +100,7 @@ export type GetEquipmentstatusByUriGetter = (uri: string) => Status | undefined
 export type GetManufacturerByUriGetter = (uri: string) => Manufacturer | undefined
 export type PlatformActionTypeItemsGetter = ActionTypeItem[]
 export type DeviceActionTypeItemsGetter = ActionTypeItem[]
+export type ConfigurationActionTypeItemsGetter = ActionTypeItem[]
 
 const getters: GetterTree<VocabularyState, RootState> = {
   getPlatformTypeByUri: (state: VocabularyState) => (uri: string): PlatformType | undefined => {
@@ -158,6 +164,18 @@ const getters: GetterTree<VocabularyState, RootState> = {
         }
       })
     ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+  },
+  configurationActionTypeItems: (state: VocabularyState) => {
+    return [
+      ...state.configurationGenericActionTypes.map((actionType) => {
+        return {
+          id: actionType.id,
+          name: actionType.name,
+          uri: actionType.uri,
+          kind: KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
+        }
+      })
+    ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
   }
 }
 
@@ -167,6 +185,7 @@ export type LoadDevicetypesAction = () => Promise<void>
 export type LoadPlatformtypesAction = () => Promise<void>
 export type LoadPlatformGenericActionTypesAction = () => Promise<void>
 export type LoadDeviceGenericActionTypesAction = () => Promise<void>
+export type LoadConfigurationGenericActionTypesAction = () => Promise<void>
 export type LoadCompartmentsAction = () => Promise<void>
 export type LoadSamplingMediaAction = () => Promise<void>
 export type LoadPropertiesAction = () => Promise<void>
@@ -199,6 +218,9 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadDeviceGenericActionTypes ({ commit }: { commit: Commit }): Promise<void> {
     commit('setDeviceGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_DEVICE).build().findMatchingAsList())
+  },
+  async loadConfigurationGenericActionTypes ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setConfigurationGenericActionTypes', await this.$api.actionTypes.newSearchBuilder().onlyType(ACTION_TYPE_API_FILTER_CONFIGURATION).build().findMatchingAsList())
   },
   async loadCompartments ({ commit }: { commit: Commit }): Promise<void> {
     commit('setCompartments', await this.$api.compartments.findAll())
@@ -242,8 +264,11 @@ const mutations = {
   setPlatformGenericActionTypes (state: VocabularyState, platformGenericActionTypes: ActionType[]) {
     state.platformGenericActionTypes = platformGenericActionTypes
   },
-  setDeviceGenericActionTypes (state: VocabularyState, deviceGenericACtionTypes: ActionType[]) {
-    state.deviceGenericActionTypes = deviceGenericACtionTypes
+  setDeviceGenericActionTypes (state: VocabularyState, deviceGenericActionTypes: ActionType[]) {
+    state.deviceGenericActionTypes = deviceGenericActionTypes
+  },
+  setConfigurationGenericActionTypes (state: VocabularyState, configurationGenericActionTypes: ActionType[]) {
+    state.configurationGenericActionTypes = configurationGenericActionTypes
   },
   setCompartments (state: VocabularyState, compartments: Compartment[]) {
     state.compartments = compartments

@@ -3,9 +3,10 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -36,6 +37,7 @@ import { GenericAction } from '@/models/GenericAction'
 import { Contact } from '@/models/Contact'
 
 import {
+  GenericConfigurationActionSerializer,
   GenericDeviceActionSerializer,
   GenericPlatformActionSerializer
 } from '@/serializers/jsonapi/GenericActionSerializer'
@@ -947,6 +949,27 @@ describe('GenericActionSerializer', () => {
       it('should return a correction action attachment type name', () => {
         const serializer = new GenericPlatformActionSerializer()
         expect(serializer.getActionAttachmentTypeName()).toEqual('generic_platform_action_attachment')
+      })
+    })
+  })
+
+  describe('GenericConfigurationActionSerializer', () => {
+    describe('constructing and types', () => {
+      it('should return \'configuration\' as its type', () => {
+        const serializer = new GenericConfigurationActionSerializer()
+        expect(serializer.targetType).toEqual('configuration')
+      })
+      it('should return a correct action type name', () => {
+        const serializer = new GenericConfigurationActionSerializer()
+        expect(serializer.getActionTypeName()).toEqual('generic_configuration_action')
+      })
+      it('should return a the plural form of the action type name', () => {
+        const serializer = new GenericConfigurationActionSerializer()
+        expect(serializer.getActionTypeNamePlural()).toEqual('generic_configuration_actions')
+      })
+      it('should return a correction action attachment type name', () => {
+        const serializer = new GenericConfigurationActionSerializer()
+        expect(serializer.getActionAttachmentTypeName()).toEqual('generic_configuration_action_attachment')
       })
     })
   })
