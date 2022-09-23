@@ -8,9 +8,12 @@ from sqlalchemy import and_, or_
 
 from ... import db
 from ..models import (
+    Configuration,
     ConfigurationDynamicLocationBeginAction,
+    Device,
     DeviceMountAction,
     DeviceProperty,
+    Platform,
     PlatformMountAction,
 )
 from ..models.mixin import utc_now
@@ -46,6 +49,7 @@ def not_str_equal(id1, id2):
       not_str_equal(1, 2) => True
       not_str_equal("1", "2") => True
       not_str_equal(None, None) => False
+
     """
     return not str_equal(id1, id2)
 
@@ -69,10 +73,27 @@ class AbstractMountActionValidator(abc.ABC):
         - parent platform provided for the date time range (if parent platform needed)
         """
         object_id = self._extract_object_id_to_mount(payload_dict)
+        object_ = self._query_existing_object(object_id)
+        if not object_:
+            raise NotFoundError("Object to mount not found")
+        if object_.archived:
+            raise ConflictError("Object to mount is already archived")
+
         expected_date_time_range = self._extract_begin_and_end_dates(payload_dict)
         configuration_id = self._extract_configuration_id(payload_dict)
+        configuration = self._query_existing_configuration(configuration_id)
+        if not configuration:
+            raise NotFoundError("Configuration not found")
+        if configuration.archived:
+            raise ConflictError("Configuration is already archived")
         parent_platform_id = self._extract_parent_platform_id(payload_dict)
-        # First we check if we have the an existing mount action for the
+        if parent_platform_id:
+            parent_platform = self._query_existing_platform(parent_platform_id)
+            if not parent_platform:
+                raise NotFoundError("Parent platform not found")
+            if parent_platform.archived:
+                raise ConflictError("Parent platform is already archived")
+        # Then we check if we have the an existing mount action for the
         # object that we want to mount.
         overlapping_mount = self._get_overlapping_mount(
             object_id, expected_date_time_range, ignore_id=None
@@ -112,12 +133,27 @@ class AbstractMountActionValidator(abc.ABC):
         updated_object_id = self._extract_updated_object_id(
             payload_dict, existing_mount
         )
+        updated_object = self._query_existing_object(updated_object_id)
+        if not updated_object:
+            raise NotFoundError("No object found to mount")
+        if updated_object.archived:
+            raise ConflictError("Object of the mount is archived")
         updated_configuration_id = self._extract_updated_configuration_id(
             payload_dict, existing_mount
         )
+        configuration = self._query_existing_configuration(updated_configuration_id)
+        if not configuration:
+            raise NotFoundError("Configuration not found")
+        if configuration.archived:
+            raise ConflictError("Configuration is archived")
         updated_parent_platform_id = self._extract_updated_parent_platform_id(
             payload_dict, existing_mount
         )
+        updated_parent_platform = self._query_existing_platform(
+            updated_parent_platform_id
+        )
+        if updated_parent_platform and updated_parent_platform.archived:
+            raise ConflictError("Parent platform is archived")
         expected_date_time_range = self._extract_updated_begin_and_end_dates(
             payload_dict, existing_mount
         )
@@ -171,6 +207,23 @@ class AbstractMountActionValidator(abc.ABC):
         object_id = self._extract_updated_object_id(
             {"relationships": {}}, existing_mount
         )
+        object_ = self._query_existing_object(object_id)
+        if not object_:
+            raise NotFoundError("Object for mount not found")
+        if object_.archived:
+            raise ConflictError(
+                "Deleting a mount for an archived object is not allowed"
+            )
+        parent_platform = existing_mount.parent_platform
+        if parent_platform and parent_platform.archived:
+            raise ConflictError(
+                "Deleting a mount for an archived parent platform is not allowed"
+            )
+        configuration = existing_mount.configuration
+        if configuration.archived:
+            raise ConflictError(
+                "Deleting a mount for an archived configuration is not allowed"
+            )
         # Main point is that both are the very same. No real action
         # can be covered by those.
         start_and_end = utc_now()
@@ -239,7 +292,7 @@ class AbstractMountActionValidator(abc.ABC):
     def _parse_datetime(date_as_string):
         """Parse the string representation of a datetime object to the actual object."""
         try:
-            return dateutil.parser.parse(date_as_string).replace(tzinfo=None)
+            return dateutil.parser.parse(date_as_string)
         except dateutil.parser.ParserError:
             raise BadRequestError(
                 f"'{date_as_string}' is not valid according to ISO 8601"
@@ -387,9 +440,27 @@ class AbstractMountActionValidator(abc.ABC):
         """Return a string with an error if we would get an orphanized object with the change."""
         pass
 
+    @abc.abstractmethod
+    def _query_existing_object(self, object_id):
+        """Return the platform or the device with the id."""
+        pass
+
+    @staticmethod
+    def _query_existing_configuration(configuration_id):
+        """Return the configuration with the id."""
+        return db.session.query(Configuration).filter_by(id=configuration_id).first()
+
+    @staticmethod
+    def _query_existing_platform(platform_id):
+        """Return the platform with the id."""
+        return db.session.query(Platform).filter_by(id=platform_id).first()
+
 
 class DeviceMountActionValidator(AbstractMountActionValidator):
     """Validator subclass for the device mount actions."""
+
+    def _query_existing_object(self, object_id):
+        return db.session.query(Device).filter_by(id=object_id).first()
 
     def _get_first_orphan(
         self,
@@ -507,6 +578,9 @@ class DeviceMountActionValidator(AbstractMountActionValidator):
 
 class PlatformMountActionValidator(AbstractMountActionValidator):
     """Validator subclass for the platform mount actions."""
+
+    def _query_existing_object(self, object_id):
+        return db.session.query(Platform).filter_by(id=object_id).first()
 
     def _get_first_orphan(
         self,

@@ -1,3 +1,4 @@
+"""Tests for the configuration api of our app."""
 import datetime
 import os
 
@@ -16,7 +17,6 @@ from project.tests.base import (
     generate_userinfo_data,
     test_file_path,
 )
-from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_generic_actions_models import (
     generate_configuration_action_model,
 )
@@ -43,6 +43,22 @@ class TestConfigurationsService(BaseTestCase):
     device_mount_url = base_url + "/device-mount-actions"
     platform_mount_url = base_url + "/platform-mount-actions"
 
+    def setUp(self):
+        """Set up for the tests."""
+        super().setUp()
+        contact1 = Contact(
+            given_name="test", family_name="user", email="test.user@localhost"
+        )
+        contact2 = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.normal_user = User(subject=contact1.email, contact=contact1)
+        self.super_user = User(
+            subject=contact2.email, contact=contact2, is_superuser=True
+        )
+        db.session.add_all([contact1, contact2, self.normal_user, self.super_user])
+        db.session.commit()
+
     def test_get_configurations(self):
         """Ensure the GET /configurations route behaves correctly."""
         response = self.client.get(self.configurations_url)
@@ -52,7 +68,6 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_add_configuration(self):
         """Ensure POST a new configuration can be added to the database."""
-
         # we want to run the very same test with multiple dates
         calibration_dates = {
             "20201111": {
@@ -95,8 +110,10 @@ class TestConfigurationsService(BaseTestCase):
             },
         }
         for (
-            input_calibration_date,
-            expected_output_calibration_date,
+            # Note: As those values are never used, it should be checked
+            # if the test still does something useful.
+            _input_calibration_date,
+            _expected_output_calibration_date,
         ) in calibration_dates.items():
             # set up for each single run
             self.setUp()
@@ -224,12 +241,7 @@ class TestConfigurationsService(BaseTestCase):
             self.assertEqual(data["attributes"]["label"], config1.label)
 
     def test_delete_configuration_which_still_contains_actions(self):
-        """
-        Ensure that we can delete a configuration and it's
-        included actions.
-
-        """
-        userinfo = generate_userinfo_data()
+        """Ensure that we can delete a configuration and its included actions."""
         device = Device(
             short_name=fake.linux_processor(),
             is_public=False,
@@ -254,17 +266,11 @@ class TestConfigurationsService(BaseTestCase):
             is_private=False,
             is_internal=True,
         )
-        contact = Contact(
-            given_name=userinfo["given_name"],
-            family_name=userinfo["family_name"],
-            email=userinfo["email"],
-        )
-        user = User(subject="test_user@test.test", contact=contact)
         configuration = Configuration(
             label=fake.linux_processor(),
             is_public=False,
             is_internal=True,
-            created_by=user,
+            created_by=self.normal_user,
         )
         begin_date = fake.future_datetime()
         # We need the parent platform mount; otherwise we get an 409.
@@ -272,13 +278,13 @@ class TestConfigurationsService(BaseTestCase):
             begin_date=begin_date,
             configuration=configuration,
             platform=device_parent_platform,
-            begin_contact=contact,
+            begin_contact=self.normal_user.contact,
         )
         platform_parent_platform_mount = PlatformMountAction(
             begin_date=begin_date,
             configuration=configuration,
             platform=parent_platform,
-            begin_contact=contact,
+            begin_contact=self.normal_user.contact,
         )
         db.session.add_all(
             [
@@ -288,9 +294,7 @@ class TestConfigurationsService(BaseTestCase):
                 parent_platform,
                 device_parent_platform_mount,
                 platform_parent_platform_mount,
-                contact,
                 configuration,
-                user,
             ]
         )
         db.session.commit()
@@ -307,7 +311,9 @@ class TestConfigurationsService(BaseTestCase):
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": device.id}},
-                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {
+                        "data": {"type": "contact", "id": self.normal_user.contact.id}
+                    },
                     "parent_platform": {
                         "data": {"type": "platform", "id": device_parent_platform.id}
                     },
@@ -318,7 +324,8 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=f"{self.device_mount_url}?include=device,begin_contact,parent_platform,configuration",
+            url=f"{self.device_mount_url}?include="
+            + "device,begin_contact,parent_platform,configuration",
             data_object=device_mount_data,
             object_type="device_mount_action",
         )
@@ -335,7 +342,9 @@ class TestConfigurationsService(BaseTestCase):
                 },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": platform.id}},
-                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "begin_contact": {
+                        "data": {"type": "contact", "id": self.normal_user.contact.id}
+                    },
                     "parent_platform": {
                         "data": {"type": "platform", "id": parent_platform.id}
                     },
@@ -346,31 +355,22 @@ class TestConfigurationsService(BaseTestCase):
             }
         }
         _ = super().add_object(
-            url=f"{self.platform_mount_url}?include=platform,begin_contact,parent_platform,configuration",
+            url=f"{self.platform_mount_url}?include="
+            + "platform,begin_contact,parent_platform,configuration",
             data_object=platform_mount_data,
             object_type="platform_mount_action",
         )
         url = f"{self.configurations_url}/{configuration.id}"
-        self.delete_as_owner(contact, user, url)
+        self.delete_as_superuser(url)
 
-    def delete_as_owner(self, contact, user, url):
-        token_data = {
-            "sub": user.subject,
-            "iss": "SMS unittest",
-            "family_name": contact.family_name,
-            "given_name": contact.given_name,
-            "email": contact.email,
-            "aud": "SMS",
-        }
-        access_headers = create_token(token_data)
-        with self.client:
-            response = self.client.delete(
-                url, content_type="application/vnd.api+json", headers=access_headers
-            )
+    def delete_as_superuser(self, url):
+        """Deletan element as superuser."""
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(url, content_type="application/vnd.api+json")
         self.assertEqual(response.status_code, 200)
 
     def test_delete_configuration_with_static_begin_location_action(self):
-        """Ensure a configuration with a static_begin_location_action can be deleted"""
+        """Ensure a configuration with a static_begin_location_action can be deleted."""
         configuration, contact, user = self.add_a_configuration_model()
         action_data = {
             "data": {
@@ -422,10 +422,10 @@ class TestConfigurationsService(BaseTestCase):
             )
         # And we want to make sure that we can delete it together with
         # the static location action.
-        _ = self.delete_as_owner(contact, user, url_)
+        _ = self.delete_as_superuser(url_)
 
     def test_delete_configuration_with_static_end_location_action(self):
-        """Ensure a configuration with a static_end_location_action can be deleted"""
+        """Ensure a configuration with a static_end_location_action can be deleted."""
         configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
@@ -453,10 +453,10 @@ class TestConfigurationsService(BaseTestCase):
             object_type="configuration_static_location_action",
         )
         url = f"{self.configurations_url}/{configuration.id}"
-        _ = self.delete_as_owner(contact, user, url)
+        _ = self.delete_as_superuser(url)
 
     def test_delete_configuration_with_dynamic_begin_location_action(self):
-        """Ensure a configuration with a dynamic_begin_location_action can be deleted"""
+        """Ensure a configuration with a dynamic_begin_location_action can be deleted."""
         configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
@@ -506,10 +506,10 @@ class TestConfigurationsService(BaseTestCase):
             )
         # And we want to make sure that we can delete it together with
         # the dynamic location action.
-        _ = self.delete_as_owner(contact, user, url)
+        _ = self.delete_as_superuser(url)
 
     def test_delete_configuration_with_dynamic_end_location_action(self):
-        """Ensure a configuration with a dynamic_end_location_action can be deleted"""
+        """Ensure a configuration with a dynamic_end_location_action can be deleted."""
         configuration, contact, user = self.add_a_configuration_model()
 
         action_data = {
@@ -537,19 +537,21 @@ class TestConfigurationsService(BaseTestCase):
             object_type="configuration_dynamic_location_action",
         )
         url = f"{self.configurations_url}/{configuration.id}"
-        _ = self.delete_as_owner(contact, user, url)
+        _ = self.delete_as_superuser(url)
 
     def test_delete_configuration_with_generic_action(self):
-        """Ensure a configuration with a generic action can be deleted"""
-
+        """Ensure a configuration with a generic action can be deleted."""
         configuration_action = generate_configuration_action_model()
         config_id = configuration_action.configuration_id
-        _ = super().delete_object(
-            url=f"{self.configurations_url}/{config_id}",
-        )
+        _ = self.delete_as_superuser(f"{self.configurations_url}/{config_id}")
 
     @staticmethod
     def add_a_contact():
+        """
+        Add a contact to the db with some fake data.
+
+        Returns the new contact object.
+        """
         userinfo = generate_userinfo_data()
         contact = Contact(
             given_name=userinfo["given_name"],
@@ -561,6 +563,11 @@ class TestConfigurationsService(BaseTestCase):
         return contact
 
     def add_a_configuration(self):
+        """
+        Add just a configuration with some fixed payload.
+
+        Returns just the configuration id.
+        """
         config_data = {
             "data": {
                 "attributes": {
@@ -588,6 +595,12 @@ class TestConfigurationsService(BaseTestCase):
         _ = super().http_code_404_when_resource_not_found(url)
 
     def add_a_configuration_model(self):
+        """
+        Add a configuration model to the database.
+
+        This will add a contact, a user and the configuration.
+        Result is a tuple with configuration, contact & user.
+        """
         contact = create_a_test_contact()
 
         user = User(subject=fake.email(), contact=contact)
@@ -658,3 +671,53 @@ class TestConfigurationsService(BaseTestCase):
         # payload, we just test that we have the entry updated in the db
         # for the next queries.
         self.assertEqual(config.update_description, "update;basic data")
+
+    def test_get_list_no_archived_configurations_by_default(self):
+        """Ensure that we don't list archived configurations by default."""
+        visible_configuration = Configuration(
+            label="visible configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        archived_configuration = Configuration(
+            label="archived configuration",
+            is_public=True,
+            is_internal=False,
+            archived=True,
+        )
+        db.session.add_all([visible_configuration, archived_configuration])
+
+        with self.client:
+            response = self.client.get(self.configurations_url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        # We have only one configuration, not the second one
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["attributes"]["label"], "visible configuration")
+        self.assertEqual(data[0]["attributes"]["archived"], False)
+
+    def test_get_list_with_archived_configurations_by_flag(self):
+        """Ensure that we can list archived configurations if wished."""
+        visible_configuration = Configuration(
+            label="visible configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        archived_configuration = Configuration(
+            label="archived configuration",
+            is_public=True,
+            is_internal=False,
+            archived=True,
+        )
+        db.session.add_all([visible_configuration, archived_configuration])
+
+        with self.client:
+            response = self.client.get(self.configurations_url + "?hide_archived=false")
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        # We have only one configuration, not the second one
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]["attributes"]["label"], "visible configuration")
+        self.assertEqual(data[0]["attributes"]["archived"], False)
+        self.assertEqual(data[1]["attributes"]["label"], "archived configuration")
+        self.assertEqual(data[1]["attributes"]["archived"], True)

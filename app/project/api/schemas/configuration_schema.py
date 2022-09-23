@@ -26,6 +26,7 @@ class ConfigurationSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     is_internal = fields.Boolean(allow_none=True)
     is_public = fields.Boolean(allow_none=True)
+    archived = fields.Boolean(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     update_description = fields.Str(dump_only=True)

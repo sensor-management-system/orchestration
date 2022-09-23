@@ -5,7 +5,7 @@ import json
 
 from project import base_url, db
 from project.api.models import Configuration, Contact
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configuration_static_action_model import (
     add_static_location_begin_action_model,
 )
@@ -72,6 +72,27 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             url=self.url,
             data_object=data,
             expected_status_code=409,  # 409 => ConflictError
+        )
+
+    def test_post_configuration_static_begin_location_action_for_archived_configuration(
+        self,
+    ):
+        """Ensure we can't add a location to an archived configuration."""
+        data, _ = self.prepare_request_data(
+            "test configuration_static_location_begin_action"
+        )
+
+        configuration_id = data["data"]["relationships"]["configuration"]["data"]["id"]
+
+        configuration = (
+            db.session.query(Configuration).filter_by(id=configuration_id).first()
+        )
+        configuration.archived = True
+        db.session.add(configuration)
+        db.session.commit()
+
+        _ = super().try_add_object_with_status_code(
+            url=self.url, data_object=data, expected_status_code=409
         )
 
     def prepare_request_data(self, description):
@@ -160,6 +181,50 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         )
         self.assertEqual(
             configuration.update_description, "update;static location action"
+        )
+
+    def test_update_for_archived_configuration(self):
+        """Ensure a configuration_static_begin_location_action can be updated."""
+        static_location_begin_action = add_static_location_begin_action_model()
+
+        userinfo = generate_userinfo_data()
+        contact_data = {
+            "data": {
+                "type": "contact",
+                "attributes": {
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
+                    "website": fake.url(),
+                },
+            }
+        }
+        contact = super().add_object(
+            url=self.contact_url, data_object=contact_data, object_type="contact"
+        )
+        new_data = {
+            "data": {
+                "type": self.object_type,
+                "id": static_location_begin_action.id,
+                "attributes": {
+                    "end_description": "changed",
+                    "end_date": "2023-10-22T10:00:50.542Z",
+                },
+                "relationships": {
+                    "end_contact": {
+                        "data": {"type": "contact", "id": contact["data"]["id"]}
+                    },
+                },
+            }
+        }
+        static_location_begin_action.configuration.archived = True
+        db.session.add(static_location_begin_action.configuration)
+        db.session.commit()
+
+        _ = super().try_update_object_with_status_code(
+            url=f"{self.url}/{static_location_begin_action.id}",
+            data_object=new_data,
+            expected_status_code=409,
         )
 
     def test_update_configuration_static_begin_location_action_set_end_contact_to_none(
@@ -272,6 +337,24 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         self.assertEqual(
             configuration.update_description, "delete;static location action"
         )
+
+    def test_delete_for_archived_configuration(self):
+        """Ensure we can't delete a location for an archived configuration."""
+        static_location_begin_action = add_static_location_begin_action_model()
+        configuration = static_location_begin_action.configuration
+
+        configuration.archived = True
+        db.session.add(configuration)
+        db.session.commit()
+
+        with self.client:
+            access_headers = create_token()
+            response = self.client.delete(
+                f"{self.url}/{static_location_begin_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_filtered_by_configuration(self):
         """Ensure that filter by a specific configuration works well."""

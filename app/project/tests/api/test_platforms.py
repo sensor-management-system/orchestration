@@ -3,8 +3,10 @@ import os
 
 from project import base_url
 from project.api.models.base_model import db
+from project.api.models.contact import Contact
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
+from project.api.models.user import User
 from project.tests.base import (
     BaseTestCase,
     fake,
@@ -29,9 +31,24 @@ class TestPlatformServices(BaseTestCase):
     object_type = "platform"
     json_data_url = os.path.join(test_file_path, "drafts", "platforms_test_data.json")
 
+    def setUp(self):
+        """Set up some data to test with."""
+        super().setUp()
+        contact1 = Contact(
+            given_name="test", family_name="user", email="test.user@localhost"
+        )
+        contact2 = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.normal_user = User(subject=contact1.email, contact=contact1)
+        self.super_user = User(
+            subject=contact2.email, contact=contact2, is_superuser=True
+        )
+        db.session.add_all([contact1, contact2, self.normal_user, self.super_user])
+        db.session.commit()
+
     def test_add_platform(self):
         """Ensure a new platform can be added to the database."""
-
         platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
 
         platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
@@ -160,22 +177,22 @@ class TestPlatformServices(BaseTestCase):
         _ = super().http_code_404_when_resource_not_found(url)
 
     def test_delete_platform_with_a_software_update_action(self):
-        """Ensure a platform with software_update_action can be deleted"""
-
+        """Ensure a platform with software_update_action can be deleted."""
         platform_software_update_action = add_platform_software_update_action_model()
         platform_id = platform_software_update_action.platform_id
-        _ = super().delete_object(
-            url=f"{self.platform_url}/{platform_id}",
-        )
+        with self.run_requests_as(self.super_user):
+            _ = super().try_delete_object_with_status_code(
+                url=f"{self.platform_url}/{platform_id}", expected_status_code=200
+            )
 
     def test_delete_platform_with_a_generic_action(self):
-        """Ensure a platform with generic action can be deleted"""
-
+        """Ensure a platform with generic action can be deleted."""
         platform_software_update_action = add_generic_platform_action_attachment_model()
         platform_id = platform_software_update_action.platform_id
-        _ = super().delete_object(
-            url=f"{self.platform_url}/{platform_id}",
-        )
+        with self.run_requests_as(self.super_user):
+            _ = super().try_delete_object_with_status_code(
+                url=f"{self.platform_url}/{platform_id}", expected_status_code=200
+            )
 
     def test_update_description_after_creation(self):
         """Make sure that update description field is set after post."""
@@ -232,3 +249,57 @@ class TestPlatformServices(BaseTestCase):
 
         msg = "update;basic data"
         self.assertEqual(msg, platform.update_description)
+
+    def test_get_list_no_archived_platforms_by_default(self):
+        """Ensure that we don't list archived platforms by default."""
+        visible_platform = Platform(
+            short_name="visible platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        archived_platform = Platform(
+            short_name="archived platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            archived=True,
+        )
+        db.session.add_all([visible_platform, archived_platform])
+
+        with self.client:
+            response = self.client.get(self.platform_url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        # We have only one platform, not the second one
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["attributes"]["short_name"], "visible platform")
+        self.assertEqual(data[0]["attributes"]["archived"], False)
+
+    def test_get_list_with_archived_platforms_by_flag(self):
+        """Ensure that we can list archived platforms if wished."""
+        visible_platform = Platform(
+            short_name="visible platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        archived_platform = Platform(
+            short_name="archived platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            archived=True,
+        )
+        db.session.add_all([visible_platform, archived_platform])
+
+        with self.client:
+            response = self.client.get(self.platform_url + "?hide_archived=false")
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        # We have only one platform, not the second one
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]["attributes"]["short_name"], "visible platform")
+        self.assertEqual(data[0]["attributes"]["archived"], False)
+        self.assertEqual(data[1]["attributes"]["short_name"], "archived platform")
+        self.assertEqual(data[1]["attributes"]["archived"], True)

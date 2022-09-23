@@ -14,6 +14,7 @@ from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
 def prepare_custom_field_payload(device):
+    """Create some payload to send to the backend."""
     payload = {
         "data": {
             "type": "customfield",
@@ -176,6 +177,29 @@ class TestCustomFieldServices(BaseTestCase):
         self.assertEqual(customfield.device_id, device.id)
         self.assertEqual(str(customfield.device_id), response.get_json()["data"]["id"])
 
+    def test_post_for_archived_device(self):
+        """Ensure we can't post for an archived device."""
+        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        device.archived = True
+        db.session.add(device)
+        db.session.commit()
+        payload = prepare_custom_field_payload(device)
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url_post = base_url + "/customfields"
+
+                response = self.client.post(
+                    url_post,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 409)
+
     def test_post_to_a_device_with_an_other_permission_group(self):
         """Post to a device with a different permission Group from the user."""
         device = create_a_test_device([66])
@@ -256,9 +280,45 @@ class TestCustomFieldServices(BaseTestCase):
         self.assertEqual(customfield.key, data["data"]["attributes"]["key"])
         self.assertEqual(customfield.device_id, device.id)
 
+    def test_patch_for_archived_device(self):
+        """Ensure we can't patch for an archived device."""
+        device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
+        customfield = CustomField(
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            device=device,
+        )
+        device.archived = True
+        db.session.add_all([customfield, device])
+        db.session.commit()
+        payload = {
+            "data": {
+                "id": customfield.id,
+                "type": "customfield",
+                "attributes": {"value": "changed", "key": customfield.key},
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url = base_url + "/customfields/" + str(customfield.id)
+
+                response = self.client.patch(
+                    url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_to_a_device_with_a_permission_group(self):
-        """Delete Custom field attached to device with same group as user
-        (user is admin)."""
+        """Delete customfield for device with same group as user (admin)."""
         device = create_a_test_device(IDL_USER_ACCOUNT.administrated_permission_groups)
         self.assertTrue(device.id is not None)
         count_customfields = (
@@ -293,9 +353,33 @@ class TestCustomFieldServices(BaseTestCase):
         reloaded_device = db.session.query(Device).filter_by(id=device.id).first()
         self.assertEqual(reloaded_device.update_description, "delete;custom field")
 
+    def test_delete_for_archived_device(self):
+        """Ensure we can't delete for an archived device."""
+        device = create_a_test_device(IDL_USER_ACCOUNT.administrated_permission_groups)
+        customfield = CustomField(
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            device=device,
+        )
+        device.archived = True
+        db.session.add_all([customfield, device])
+        db.session.commit()
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups_for_a_user:
+            test_get_all_permission_groups_for_a_user.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                url = base_url + "/customfields/" + str(customfield.id)
+
+                response = self.client.delete(
+                    url,
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 409)
+
     def test_delete_to_a_device_with_a_permission_group_as_a_member(self):
-        """Delete Custom field attached to device with same group as user
-        (user is member)."""
+        """Delete customfield for device with same group as user (member)."""
         device = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
         self.assertTrue(device.id is not None)
         count_customfields = (

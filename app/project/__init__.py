@@ -18,7 +18,15 @@ from .api.models.base_model import db
 from .config import env
 from .extensions.instances import auth, idl, well_known_url_config_loader
 from .urls import api
-from .views import upload_routes, docs_routes, login_routes, sensor_ml_routes
+from .views import (
+    additional_configuration_routes,
+    additional_devices_routes,
+    additional_platforms_routes,
+    docs_routes,
+    login_routes,
+    sensor_ml_routes,
+    upload_routes,
+)
 
 migrate = Migrate()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
@@ -85,6 +93,9 @@ def create_app():
     health.add_check(health_check_minio)
     app.add_url_rule(base_url + "/health", "health", view_func=lambda: health.run())
 
+    app.register_blueprint(additional_devices_routes)
+    app.register_blueprint(additional_platforms_routes)
+    app.register_blueprint(additional_configuration_routes)
     # upload_routes
     app.register_blueprint(upload_routes)
     # docs_routes

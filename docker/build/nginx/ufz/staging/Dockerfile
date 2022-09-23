@@ -26,7 +26,7 @@
 # implied. See the Licence for the specific language governing 
 # permissions and limitations under the Licence.
 
-FROM nginx:1.21.6-alpine
+FROM nginx:1.23-alpine
 
 COPY ./docker/build/nginx/ufz/staging/default.conf /etc/nginx/conf.d/default.conf
 

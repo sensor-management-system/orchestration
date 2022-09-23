@@ -27,7 +27,6 @@ class AuditMixin:
     """Audit mixin to save information about creation & updates."""
 
     created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
-    # define 'updated at' to be populated with datetime.utcnow()
     updated_at = db.Column(db.DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
     @declared_attr
@@ -67,6 +66,12 @@ class AuditMixin:
             primaryjoin="User.id == %s.updated_by_id" % self.__name__,
             remote_side="User.id",
         )
+
+
+class ArchivableMixin:
+    """Mixin to archive entities."""
+
+    archived = db.Column(db.Boolean, default=False)
 
 
 class IndirectSearchableMixin:

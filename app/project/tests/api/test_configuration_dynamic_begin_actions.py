@@ -47,10 +47,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         )
 
     def test_add_configuration_dynamic_begin_location_action(self):
-        """
-        Ensure POST a new configuration dynamic location begin action
-        can be added to the database.
-        """
+        """Ensure a new configuration dynamic location can be added to the database."""
         device = Device(
             short_name="Device 555",
             is_public=False,
@@ -168,6 +165,224 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             configuration.update_description, "create;dynamic location action"
         )
 
+    def test_add_for_archived_configuration(self):
+        """Ensure we can't add a location for an archived configuration."""
+        device = Device(
+            short_name="Device 555",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        x_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test x_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        y_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test y_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        z_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test z_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        config = generate_configuration_model()
+        config.archived = True
+        userinfo = generate_userinfo_data()
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        db.session.add_all(
+            [device, x_property, y_property, z_property, contact, config]
+        )
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "begin_date": "2021-08-22T10:00:50.542Z",
+                    "end_date": "2021-10-22T10:00:50.542Z",
+                    "begin_description": "beginning",
+                    "end_description": "finishing",
+                },
+                "relationships": {
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "end_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "x_property": {
+                        "data": {"type": "device_property", "id": x_property.id}
+                    },
+                    "y_property": {
+                        "data": {"type": "device_property", "id": y_property.id}
+                    },
+                    "z_property": {
+                        "data": {"type": "device_property", "id": z_property.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config.id}
+                    },
+                },
+            }
+        }
+        # Make sure that we have the device mount action for the xyz properties.
+        device_mount_action = DeviceMountAction(
+            device=device,
+            configuration=config,
+            begin_contact=contact,
+            begin_date=dateutil.parser.parse(data["data"]["attributes"]["begin_date"]),
+        )
+        db.session.add(device_mount_action)
+        db.session.commit()
+
+        _ = super().try_add_object_with_status_code(
+            url=self.url, data_object=data, expected_status_code=409
+        )
+
+    def test_add_for_archived_device(self):
+        """Ensure we can't add a location for an archived configuration."""
+        device = Device(
+            short_name="Device 555",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+            archived=True,
+        )
+        x_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test x_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        y_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test y_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        z_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test z_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        config = generate_configuration_model()
+        userinfo = generate_userinfo_data()
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        db.session.add_all(
+            [device, x_property, y_property, z_property, contact, config]
+        )
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "begin_date": "2021-08-22T10:00:50.542Z",
+                    "end_date": "2021-10-22T10:00:50.542Z",
+                    "begin_description": "beginning",
+                    "end_description": "finishing",
+                },
+                "relationships": {
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "end_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "x_property": {
+                        "data": {"type": "device_property", "id": x_property.id}
+                    },
+                    "y_property": {
+                        "data": {"type": "device_property", "id": y_property.id}
+                    },
+                    "z_property": {
+                        "data": {"type": "device_property", "id": z_property.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config.id}
+                    },
+                },
+            }
+        }
+        # Make sure that we have the device mount action for the xyz properties.
+        device_mount_action = DeviceMountAction(
+            device=device,
+            configuration=config,
+            begin_contact=contact,
+            begin_date=dateutil.parser.parse(data["data"]["attributes"]["begin_date"]),
+        )
+        db.session.add(device_mount_action)
+        db.session.commit()
+
+        _ = super().try_add_object_with_status_code(
+            url=self.url, data_object=data, expected_status_code=409
+        )
+
     def test_add_configuration_dynamic_begin_location_action_without_mount_action(self):
         """
         Ensure POST fails if there is no mount action for the xyz properties.
@@ -278,6 +493,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def prepare_request_data_with_config(self, description):
+        """Create some request data to add a location action."""
         device = Device(
             short_name="Device 555",
             is_public=False,
@@ -389,6 +605,141 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             configuration.update_description, "update;dynamic location action"
         )
 
+    def test_update_archived_configuration(self):
+        """Ensure that we can't change for archived configurations."""
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model()
+        dynamic_location_begin_action.configuration.archived = True
+        db.session.add(dynamic_location_begin_action.configuration)
+        db.session.commit()
+
+        userinfo = generate_userinfo_data()
+        contact_data = {
+            "data": {
+                "type": "contact",
+                "attributes": {
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
+                    "website": fake.url(),
+                },
+            }
+        }
+        contact = super().add_object(
+            url=self.contact_url, data_object=contact_data, object_type="contact"
+        )
+        # This block for the device mount actions is just to make sure
+        # that all the device properties have mounts for the timepoints.
+        device_mounts_by_device_ids = {}
+        contact_instance = (
+            db.session.query(Contact).filter_by(id=contact["data"]["id"]).one()
+        )
+        for device_property in [
+            dynamic_location_begin_action.x_property,
+            dynamic_location_begin_action.y_property,
+            dynamic_location_begin_action.z_property,
+        ]:
+            if device_property:
+                device = device_property.device
+                device_id = device.id
+                if device_id not in device_mounts_by_device_ids.keys():
+                    mount_action = DeviceMountAction(
+                        device=device,
+                        configuration=dynamic_location_begin_action.configuration,
+                        begin_date=dynamic_location_begin_action.begin_date,
+                        begin_contact=contact_instance,
+                    )
+                    db.session.add(mount_action)
+                    db.session.commit()
+                    device_mounts_by_device_ids[device_id] = mount_action
+        new_data = {
+            "data": {
+                "type": self.object_type,
+                "id": dynamic_location_begin_action.id,
+                "attributes": {
+                    "end_description": "stopped",
+                    "end_date": "2021-10-22T10:00:50.542Z",
+                },
+                "relationships": {
+                    "end_contact": {
+                        "data": {"type": "contact", "id": contact["data"]["id"]}
+                    },
+                },
+            }
+        }
+
+        _ = super().try_update_object_with_status_code(
+            url=f"{self.url}/{dynamic_location_begin_action.id}",
+            data_object=new_data,
+            expected_status_code=409,
+        )
+
+    def test_update_archived_device(self):
+        """Ensure that we can't change for archived devices."""
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model()
+        dynamic_location_begin_action.x_property.device.archived = True
+        db.session.add(dynamic_location_begin_action.x_property.device)
+        db.session.commit()
+        userinfo = generate_userinfo_data()
+        contact_data = {
+            "data": {
+                "type": "contact",
+                "attributes": {
+                    "given_name": userinfo["given_name"],
+                    "family_name": userinfo["family_name"],
+                    "email": userinfo["email"],
+                    "website": fake.url(),
+                },
+            }
+        }
+        contact = super().add_object(
+            url=self.contact_url, data_object=contact_data, object_type="contact"
+        )
+        # This block for the device mount actions is just to make sure
+        # that all the device properties have mounts for the timepoints.
+        device_mounts_by_device_ids = {}
+        contact_instance = (
+            db.session.query(Contact).filter_by(id=contact["data"]["id"]).one()
+        )
+        for device_property in [
+            dynamic_location_begin_action.x_property,
+            dynamic_location_begin_action.y_property,
+            dynamic_location_begin_action.z_property,
+        ]:
+            if device_property:
+                device = device_property.device
+                device_id = device.id
+                if device_id not in device_mounts_by_device_ids.keys():
+                    mount_action = DeviceMountAction(
+                        device=device,
+                        configuration=dynamic_location_begin_action.configuration,
+                        begin_date=dynamic_location_begin_action.begin_date,
+                        begin_contact=contact_instance,
+                    )
+                    db.session.add(mount_action)
+                    db.session.commit()
+                    device_mounts_by_device_ids[device_id] = mount_action
+        new_data = {
+            "data": {
+                "type": self.object_type,
+                "id": dynamic_location_begin_action.id,
+                "attributes": {
+                    "end_description": "stopped",
+                    "end_date": "2021-10-22T10:00:50.542Z",
+                },
+                "relationships": {
+                    "end_contact": {
+                        "data": {"type": "contact", "id": contact["data"]["id"]}
+                    },
+                },
+            }
+        }
+
+        _ = super().try_update_object_with_status_code(
+            url=f"{self.url}/{dynamic_location_begin_action.id}",
+            data_object=new_data,
+            expected_status_code=409,
+        )
+
     def test_update_configuration_dynamic_begin_location_action_fail(self):
         """Ensure we validate the mounts for the xzy properties."""
         dynamic_location_begin_action = add_dynamic_location_begin_action_model()
@@ -497,8 +848,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         )
 
     def test_delete_configuration_dynamic_begin_location_action(self):
-        """Ensure a configuration_dynamic_begin_location_action can be deleted"""
-
+        """Ensure a configuration_dynamic_begin_location_action can be deleted."""
         dynamic_location_begin_action = add_dynamic_location_begin_action_model()
         configuration_id = dynamic_location_begin_action.configuration_id
 
@@ -511,6 +861,38 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         self.assertEqual(
             configuration.update_description, "delete;dynamic location action"
         )
+
+    def test_delete_archived_configuration(self):
+        """Ensure we can't delete for an archived configuration."""
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model()
+        dynamic_location_begin_action.configuration.archived = True
+        db.session.add(dynamic_location_begin_action.configuration)
+        db.session.commit()
+
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{dynamic_location_begin_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
+
+    def test_delete_archived_device(self):
+        """Ensure we can't delete for an archived device."""
+        dynamic_location_begin_action = add_dynamic_location_begin_action_model()
+        dynamic_location_begin_action.x_property.device.archived = True
+        db.session.add(dynamic_location_begin_action.x_property.device)
+        db.session.commit()
+
+        access_headers = create_token()
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{dynamic_location_begin_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_filtered_by_configuration(self):
         """Ensure that filter by a specific configuration works."""
@@ -555,6 +937,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         )
 
     def prepare_request_data_with_x_property(self, description):
+        """Prepare some payloads to add/update an x property."""
         device = Device(
             short_name="Device 575",
             is_public=False,
@@ -609,7 +992,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         return data, x_property
 
     def ensure_device_mount_action_exists(self, data1, x_property1):
-        """Helper to add a device mount action for the dynamic location property."""
+        """Help to add a device mount action for the dynamic location property."""
         # As we use a device property here, we need to make sure that
         # its device is also mounted on the configuration.
         configuration = (

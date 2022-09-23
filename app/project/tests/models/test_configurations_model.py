@@ -1,15 +1,20 @@
-from project.api.models import User, Contact
+"""Tests for the configuration model."""
+
+from project.api.models import Contact
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.device import Device
 from project.api.models.platform import Platform
-from project.tests.base import BaseTestCase
-from project.tests.base import fake, generate_userinfo_data
+from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
 def generate_configuration_model(
-    is_public=False, is_private=False, is_internal=True,
+    is_public=False,
+    is_private=False,
+    is_internal=True,
+    cfg_permission_group=None,
 ):
+    """Generate some instances & return a configruation."""
     userinfo = generate_userinfo_data()
     device = Device(
         short_name=fake.linux_processor(),
@@ -43,7 +48,8 @@ def generate_configuration_model(
     configuration = Configuration(
         label="Config1",
         is_public=is_public,
-        is_internal=is_internal
+        is_internal=is_internal,
+        cfg_permission_group=cfg_permission_group,
     )
     db.session.add_all(
         [
@@ -63,8 +69,7 @@ class TestConfigurationsModel(BaseTestCase):
     """Tests for the Configurations Model."""
 
     def test_add_configuration_model(self):
-        """""Ensure Add Configuration model """
-
+        """Ensure to add a configuration model instance."""
         generate_configuration_model()
 
         c = db.session.query(Configuration).filter_by(label="Config1").first()

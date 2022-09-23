@@ -12,6 +12,7 @@ from ..auth.permission_utils import (
     check_post_permission_for_configuration_related_objects,
     get_query_with_permissions_for_configuration_related_objects,
 )
+from ..helpers.errors import ConflictError
 from ..helpers.location_checks import DynamicLocationActionValidator
 from ..helpers.resource_mixin import (
     add_created_by_id,
@@ -121,6 +122,7 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
         return query_
 
     def before_post(self, args, kwargs, data=None):
+        """Run some checks before posting."""
         check_post_permission_for_configuration_related_objects()
 
     def after_post(self, result):
@@ -154,7 +156,7 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
     validator = DynamicLocationActionValidator()
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if ConfigurationDynamicLocationBeginAction not found"""
+        """Return 404 Responses if ConfigurationDynamicLocationBeginAction ccan't be found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
         check_permissions_for_configuration_related_objects(
             self._data_layer.model, kwargs["id"]
@@ -182,6 +184,7 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Run some checks before deleting."""
         check_deletion_permission_for_configuration_related_objects(
             kwargs, self._data_layer.model
         )
@@ -192,6 +195,12 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
         )
         if location_action is None:
             raise ObjectNotFound("Object not found!")
+        for x in ["x_property", "y_property", "z_property"]:
+            xyz_property = getattr(location_action, x)
+            if xyz_property:
+                device = xyz_property.device
+                if device.archived:
+                    raise ConflictError("Device for property is archived")
         configuration = location_action.get_parent()
         msg = "delete;dynamic location action"
         set_update_description_text_and_update_by_user(configuration, msg)

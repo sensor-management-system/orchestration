@@ -50,6 +50,9 @@ class AbstractLocationActionValidator(abc.ABC):
             raise ConflictError(
                 self._build_error_message_non_available_device_property()
             )
+        archived_device = self._find_first_archived_device(payload_dict)
+        if archived_device:
+            raise ConflictError("Usage of archived devices is not allowed")
 
     def validate_update(self, payload_dict, existing_location_id):
         """
@@ -91,6 +94,11 @@ class AbstractLocationActionValidator(abc.ABC):
             raise ConflictError(
                 self._build_error_message_non_available_device_property()
             )
+        archived_device = self._find_first_archived_device(
+            payload_dict, existing_location
+        )
+        if archived_device:
+            raise ConflictError("Usage of archived devices is not allowed")
 
     def _extract_begin_and_end_dates(self, payload_dict):
         """
@@ -113,7 +121,7 @@ class AbstractLocationActionValidator(abc.ABC):
     def _parse_datetime(date_as_string):
         """Parse the string representation of a datetime object to the actual object."""
         try:
-            return dateutil.parser.parse(date_as_string).replace(tzinfo=None)
+            return dateutil.parser.parse(date_as_string)
         except dateutil.parser.ParserError:
             raise BadRequestError(
                 f"'{date_as_string}' is not valid according to ISO 8601"
@@ -181,6 +189,11 @@ class AbstractLocationActionValidator(abc.ABC):
             end_date = existing_location.end_date
         return DateTimeRange(begin_date, end_date)
 
+    @abc.abstractmethod
+    def _find_first_archived_device(self, payload_dict, existing_location=None):
+        """Return an archived device or none."""
+        pass
+
 
 class StaticLocationActionValidator(AbstractLocationActionValidator):
     """Concrete validator implementation for the static location actions."""
@@ -239,6 +252,10 @@ class StaticLocationActionValidator(AbstractLocationActionValidator):
             .first()
         )
 
+    @staticmethod
+    def _find_first_archived_device(payload_dict, existing_location=None):
+        return None
+
 
 class DynamicLocationActionValidator(AbstractLocationActionValidator):
     """Concrete validator implementation for the dynamic location actions."""
@@ -266,9 +283,9 @@ class DynamicLocationActionValidator(AbstractLocationActionValidator):
             if x in payload_dict.get("relationships", {}).keys():
                 if "data" in payload_dict["relationships"][x].keys():
                     if payload_dict["relationships"][x]["data"]:
-                        device_property_id = payload_dict["relationships"][x]["data"].get(
-                            "id"
-                        )
+                        device_property_id = payload_dict["relationships"][x][
+                            "data"
+                        ].get("id")
                         if device_property_id:
                             device_property_ids_to_check.append(device_property_id)
             elif existing_location_action is not None:
@@ -344,3 +361,31 @@ class DynamicLocationActionValidator(AbstractLocationActionValidator):
             .filter_by(id=existing_location_id)
             .first()
         )
+
+    @staticmethod
+    def _find_first_archived_device(payload_dict, existing_location=None):
+        device_property_ids_to_check = []
+        for x in ["x_property", "y_property", "z_property"]:
+            if x in payload_dict.get("relationships", {}).keys():
+                if "data" in payload_dict["relationships"][x].keys():
+                    if payload_dict["relationships"][x]["data"]:
+                        device_property_id = payload_dict["relationships"][x][
+                            "data"
+                        ].get("id")
+                        if device_property_id:
+                            device_property_ids_to_check.append(device_property_id)
+            if existing_location:
+                existing_device_property = getattr(existing_location, x, None)
+                if existing_device_property:
+                    device_property_ids_to_check.append(existing_device_property.id)
+        for device_property_id in device_property_ids_to_check:
+            device_property = (
+                db.session.query(DeviceProperty)
+                .filter_by(id=device_property_id)
+                .first()
+            )
+            if device_property:
+                device = device_property.device
+                if device.archived:
+                    return device
+        return None

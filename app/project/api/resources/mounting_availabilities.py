@@ -159,13 +159,9 @@ def extract_time_range_from_request():
     if "to" in request.args.keys():
         to_time_point_str = request.args["to"]
     try:
-        from_time_point = dateutil.parser.parse(from_time_point_str).replace(
-            tzinfo=None
-        )
+        from_time_point = dateutil.parser.parse(from_time_point_str)
         if to_time_point_str:
-            to_time_point = dateutil.parser.parse(to_time_point_str).replace(
-                tzinfo=None
-            )
+            to_time_point = dateutil.parser.parse(to_time_point_str)
         else:
             to_time_point = None
     except dateutil.parser.ParserError:
