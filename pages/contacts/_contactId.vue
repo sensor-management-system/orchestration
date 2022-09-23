@@ -33,7 +33,9 @@ permissions and limitations under the Licence.
     <ProgressIndicator
       v-model="isLoading"
     />
-    <NuxtChild />
+    <NuxtChild
+      v-if="contact"
+    />
   </div>
 </template>
 <script lang="ts">

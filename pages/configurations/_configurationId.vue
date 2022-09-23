@@ -35,7 +35,9 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild />
+      <NuxtChild
+        v-if="configuration"
+      />
       <modification-info
         v-if="configuration"
         v-model="configuration"
