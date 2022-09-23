@@ -169,7 +169,11 @@ export default class ConfigurationShowLocationPage extends Vue {
   private hasActiveDevicesWithPropertiesForDate!: HasActiveDevicesWithPropertiesForDate
 
   created () {
-    this.selectedDate = currentAsUtcDateSecondsAsZeros()
+    if (this.selectedTimepoint) {
+      this.selectTimepoint()
+    } else {
+      this.selectedDate = currentAsUtcDateSecondsAsZeros()
+    }
   }
 
   get selectedTimepoint () {

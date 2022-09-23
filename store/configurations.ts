@@ -230,7 +230,7 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     }
     if (state.deviceMountActionsForDynamicLocation.length > 0) {
       return state.deviceMountActionsForDynamicLocation.filter((value) => {
-        return selectedDate >= value.beginDate && (!value.endDate || selectedDate <= value.endDate)
+        return selectedDate >= value.beginDate && (!value.endDate || selectedDate <= value.endDate) && value.device.properties.length > 0
       }
       ).map((value) => {
         return value.device
