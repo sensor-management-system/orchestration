@@ -218,7 +218,7 @@ build-deploy-image-ufz:
   script:
     - |
         docker build --tag "$UFZ_LATEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
-          --build-arg BASE_URL_ARG="/sms/frontend/" \
+          --build-arg BASE_URL_ARG="/sms/" \
           --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
