@@ -128,11 +128,13 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row
-          v-if="$auth.loggedIn"
           dense
         >
-          <v-col cols="12" md="3">
+          <v-col v-if="$auth.loggedIn" cols="12" md="3">
             <v-checkbox v-model="onlyOwnDevices" label="Only own devices" />
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="includeArchivedDevices" label="Include archived devices" />
           </v-col>
         </v-row>
         <v-row
@@ -309,6 +311,14 @@ permissions and limitations under the Licence.
                 v-if="$auth.loggedIn"
                 :path="'/devices/copy/' + item.id"
               />
+              <DotMenuActionArchive
+                v-if="canArchiveEntity(item)"
+                @click="initArchiveDialog(item)"
+              />
+              <DotMenuActionRestore
+                v-if="canRestoreEntity(item)"
+                @click="runRestoreDevice(item)"
+              />
               <DotMenuActionDelete
                 v-if="$auth.loggedIn && canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
@@ -330,6 +340,12 @@ permissions and limitations under the Licence.
       :device-to-delete="deviceToDelete"
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
+    />
+    <DeviceArchiveDialog
+      v-model="showArchiveDialog"
+      :device-to-archive="deviceToArchive"
+      @cancel-archiving="closeArchiveDialog"
+      @submit-archiving="archiveAndCloseDialog"
     />
   </div>
 </template>
@@ -358,14 +374,20 @@ import {
   ExportAsCsvAction,
   DeleteDeviceAction,
   PageSizesGetter,
-  ExportAsSensorMLAction
+  ArchiveDeviceAction,
+  RestoreDeviceAction,
+  ExportAsSensorMLAction,
+  LoadDeviceAction,
+  ReplaceDeviceInDevicesAction
 } from '@/store/devices'
 
 import {
   PermissionsState,
   CanAccessEntityGetter,
   CanDeleteEntityGetter,
-  LoadPermissionGroupsAction
+  CanArchiveEntityGetter,
+  LoadPermissionGroupsAction,
+  CanRestoreEntityGetter
 } from '@/store/permissions'
 
 import { Device } from '@/models/Device'
@@ -381,8 +403,11 @@ import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DeviceArchiveDialog from '@/components/devices/DeviceArchiveDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
+import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
@@ -397,6 +422,9 @@ import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelec
     DotMenuActionCopy,
     DotMenuActionSensorML,
     DeviceDeleteDialog,
+    DotMenuActionArchive,
+    DotMenuActionRestore,
+    DeviceArchiveDialog,
     DeviceTypeSelect,
     ManufacturerSelect,
     StatusSelect,
@@ -404,15 +432,15 @@ import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelec
     PermissionGroupSearchSelect
   },
   computed: {
-    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups']),
+    ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
     ...mapState('appbar', ['activeTab']),
     ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
-    ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages']),
+    ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages', 'device']),
     ...mapGetters('devices', ['pageSizes'])
   },
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
-    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'exportAsSensorML']),
+    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'loadDevice', 'replaceDeviceInDevices']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
@@ -426,10 +454,14 @@ export default class SearchDevicesPage extends Vue {
   private selectedSearchDeviceTypes: DeviceType[] = []
   private selectedSearchPermissionGroups: PermissionGroup[] = []
   private onlyOwnDevices: boolean = false
+  private includeArchivedDevices: boolean = false
   private searchText: string | null = null
 
   private showDeleteDialog: boolean = false
   private deviceToDelete: Device | null = null
+
+  private showArchiveDialog: boolean = false
+  private deviceToArchive: Device | null = null
 
   // vuex definition for typescript check
   devices!: DevicesState['devices']
@@ -447,16 +479,23 @@ export default class SearchDevicesPage extends Vue {
   searchDevicesPaginated!: SearchDevicesPaginatedAction
   exportAsCsv!: ExportAsCsvAction
   deleteDevice!: DeleteDeviceAction
+  archiveDevice!: ArchiveDeviceAction
+  restoreDevice!: RestoreDeviceAction
   devicetypes!: VocabularyState['devicetypes']
   manufacturers!: VocabularyState['manufacturers']
   equipmentstatus!: VocabularyState['equipmentstatus']
   canAccessEntity!: CanAccessEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  canArchiveEntity!: CanArchiveEntityGetter
+  canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   activeTab!: IAppbarState['activeTab']
   setActiveTab!: SetActiveTabAction
   exportAsSensorML!: ExportAsSensorMLAction
+  loadDevice!: LoadDeviceAction
+  replaceDeviceInDevices!: ReplaceDeviceInDevicesAction
+  device!: DevicesState['device']
 
   async created () {
     this.initializeAppBar()
@@ -516,7 +555,8 @@ export default class SearchDevicesPage extends Vue {
       states: this.selectedSearchStates,
       types: this.selectedSearchDeviceTypes,
       permissionGroups: this.selectedSearchPermissionGroups,
-      onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn
+      onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn,
+      includeArchivedDevices: this.includeArchivedDevices
     }
   }
 
@@ -525,7 +565,8 @@ export default class SearchDevicesPage extends Vue {
       !!this.selectedSearchStates.length ||
       !!this.selectedSearchDeviceTypes.length ||
       !!this.selectedSearchManufacturers.length ||
-      !!this.selectedSearchPermissionGroups.length
+      !!this.selectedSearchPermissionGroups.length ||
+      this.includeArchivedDevices === true
   }
 
   async runInitialSearch (): Promise<void> {
@@ -543,6 +584,7 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchDeviceTypes = []
     this.selectedSearchPermissionGroups = []
     this.onlyOwnDevices = false
+    this.includeArchivedDevices = false
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
@@ -565,6 +607,7 @@ export default class SearchDevicesPage extends Vue {
     this.selectedSearchDeviceTypes = []
     this.selectedSearchPermissionGroups = []
     this.onlyOwnDevices = false
+    this.includeArchivedDevices = false
     this.initUrlQueryParams()
   }
 
@@ -623,6 +666,58 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
+  initArchiveDialog (device: Device) {
+    this.showArchiveDialog = true
+    this.deviceToArchive = device
+  }
+
+  closeArchiveDialog () {
+    this.showArchiveDialog = false
+    this.deviceToArchive = null
+  }
+
+  async archiveAndCloseDialog () {
+    if (this.deviceToArchive === null || this.deviceToArchive.id === null) {
+      return
+    }
+    try {
+      this.loading = true
+      await this.archiveDevice(this.deviceToArchive.id)
+      await this.loadDevice({
+        deviceId: this.deviceToArchive.id,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
+      })
+      await this.replaceDeviceInDevices(this.device!)
+      this.$store.commit('snackbar/setSuccess', 'Device archived')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Device could not be archived')
+    } finally {
+      this.loading = false
+      this.closeArchiveDialog()
+    }
+  }
+
+  async runRestoreDevice (device: Device) {
+    if (device.id) {
+      this.loading = true
+      try {
+        await this.restoreDevice(device.id)
+        await this.loadDevice({
+          deviceId: device.id,
+          includeCreatedBy: true,
+          includeUpdatedBy: true
+        })
+        await this.replaceDeviceInDevices(this.device!)
+        this.$store.commit('snackbar/setSuccess', 'Device restored')
+      } catch (error) {
+        this.$store.commit('snackbar/setError', 'Device could not be restored')
+      } finally {
+        this.loading = false
+      }
+    }
+  }
+
   initSearchQueryParams (): void {
     const searchParamsObject = (new DeviceSearchParamsSerializer({
       states: this.equipmentstatus,
@@ -637,6 +732,9 @@ export default class SearchDevicesPage extends Vue {
     }
     if (searchParamsObject.onlyOwnDevices) {
       this.onlyOwnDevices = searchParamsObject.onlyOwnDevices
+    }
+    if (searchParamsObject.includeArchivedDevices) {
+      this.includeArchivedDevices = searchParamsObject.includeArchivedDevices
     }
     if (searchParamsObject.manufacturer) {
       this.selectedSearchManufacturers = searchParamsObject.manufacturer

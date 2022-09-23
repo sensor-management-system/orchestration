@@ -60,6 +60,14 @@ permissions and limitations under the Licence.
               :readonly="!deletable"
               @click="initDeleteDialog"
             />
+            <DotMenuActionArchive
+              :readonly="!archivable"
+              @click="initArchiveDialog"
+            />
+            <DotMenuActionRestore
+              :readonly="!restoreable"
+              @click="runRestore"
+            />
           </template>
         </DotMenu>
       </v-card-actions>
@@ -86,6 +94,14 @@ permissions and limitations under the Licence.
             <DotMenuActionSensorML
               @click="openSensorML"
             />
+            <DotMenuActionArchive
+              :readonly="!archivable"
+              @click="initArchiveDialog"
+            />
+            <DotMenuActionRestore
+              :readonly="!restoreable"
+              @click="runRestore"
+            />
             <DotMenuActionDelete
               v-if="$auth.loggedIn"
               :readonly="!deletable"
@@ -100,6 +116,13 @@ permissions and limitations under the Licence.
         @cancel-deletion="closeDialog"
         @submit-deletion="deleteAndCloseDialog"
       />
+      <ConfigurationArchiveDialog
+        v-if="configuration"
+        v-model="showArchiveDialog"
+        :configuration-to-archive="configuration"
+        @cancel-archiving="closeArchiveDialog"
+        @submit-archiving="archiveAndCloseDialog"
+      />
     </v-card>
   </div>
 </template>
@@ -111,17 +134,35 @@ import { mapActions, mapState } from 'vuex'
 import ConfigurationsBasicData from '@/components/configurations/ConfigurationsBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import ConfigurationArchiveDialog from '@/components/configurations/ConfigurationArchiveDialog.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
+import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import { IConfiguration } from '@/models/Configuration'
-
-import { ExportAsSensorMLAction } from '@/store/configurations'
+import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction } from '@/store/configurations'
 
 @Component({
-  components: { ProgressIndicator, ConfigurationsDeleteDialog, DotMenuActionDelete, DotMenuActionSensorML, DotMenu, ConfigurationsBasicData },
+  components: {
+    ProgressIndicator,
+    ConfigurationsDeleteDialog,
+    DotMenuActionDelete,
+    DotMenuActionSensorML,
+    DotMenu,
+    ConfigurationsBasicData,
+    ConfigurationArchiveDialog,
+    DotMenuActionArchive,
+    DotMenuActionRestore
+  },
   computed: mapState('configurations', ['configuration']),
-  methods: mapActions('configurations', ['deleteConfiguration', 'exportAsSensorML'])
+  methods: mapActions('configurations', [
+    'deleteConfiguration',
+    'loadConfiguration',
+    'archiveConfiguration',
+    'restoreConfiguration',
+    'exportAsSensorML'
+  ])
 })
 export default class ConfigurationShowBasicPage extends Vue {
   @InjectReactive()
@@ -130,13 +171,23 @@ export default class ConfigurationShowBasicPage extends Vue {
   @InjectReactive()
     deletable!: boolean
 
+  @InjectReactive()
+    archivable!: boolean
+
+  @InjectReactive()
+    restoreable!: boolean
+
   private isSaving = false
 
   private showDeleteDialog: boolean = false
+  private showArchiveDialog: boolean = false
 
   // vuex definition for typescript check
   configuration!: IConfiguration
   deleteConfiguration!: (id: string) => void
+  loadConfiguration!: LoadConfigurationAction
+  archiveConfiguration!: ArchiveConfigurationAction
+  restoreConfiguration!: RestoreConfigurationAction
   exportAsSensorML!: ExportAsSensorMLAction
 
   get configurationId () {
@@ -173,6 +224,48 @@ export default class ConfigurationShowBasicPage extends Vue {
       this.$router.push('/configurations')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  initArchiveDialog () {
+    this.showArchiveDialog = true
+  }
+
+  closeArchiveDialog () {
+    this.showArchiveDialog = false
+  }
+
+  async archiveAndCloseDialog () {
+    this.showArchiveDialog = false
+    if (this.configuration === null || this.configuration.id === null) {
+      return
+    }
+    try {
+      this.isSaving = true
+      await this.archiveConfiguration(this.configuration.id)
+      await this.loadConfiguration(this.configurationId)
+      this.$store.commit('snackbar/setSuccess', 'Configuration archived')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Configuration could not be archived')
+    } finally {
+      this.isSaving = false
+      this.showArchiveDialog = false
+    }
+  }
+
+  async runRestore () {
+    if (this.configuration === null || this.configuration.id === null) {
+      return
+    }
+    this.isSaving = true
+    try {
+      await this.restoreConfiguration(this.configuration.id)
+      await this.loadConfiguration(this.configurationId)
+      this.$store.commit('snackbar/setSuccess', 'Configuration restored')
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Configuration could not be restored')
     } finally {
       this.isSaving = false
     }

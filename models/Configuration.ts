@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -44,6 +44,7 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   endDate: DateTime | null
   label: string
   status: string
+  archived: boolean
   contacts: IContact[]
   createdAt: DateTime | null
   updatedAt: DateTime | null
@@ -66,6 +67,7 @@ export class Configuration implements IConfiguration, IVisible {
   private _endDate: DateTime | null = null
   private _label: string = ''
   private _status: string = ''
+  private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
   private _deviceMountActions: DeviceMountAction[] = []
   private _platformMountActions: PlatformMountAction[] = []
@@ -214,6 +216,14 @@ export class Configuration implements IConfiguration, IVisible {
     return this._visibility === Visibility.Public
   }
 
+  get archived (): boolean {
+    return this._archived
+  }
+
+  set archived (newValue: boolean) {
+    this._archived = newValue
+  }
+
   get type (): string {
     return 'configuration'
   }
@@ -243,6 +253,7 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.createdByUserId = someObject.createdByUserId
 
     newObject.visibility = someObject.visibility
+    newObject.archived = someObject.archived
 
     return newObject
   }

@@ -182,7 +182,8 @@ describe('DeviceSerializer', () => {
             status_name: null,
             dual_use: false,
             persistent_identifier: null,
-            manufacturer_uri: null
+            manufacturer_uri: null,
+            archived: true
           },
           relationships: {
             updated_by: {
@@ -253,7 +254,8 @@ describe('DeviceSerializer', () => {
             status_name: null,
             dual_use: false,
             persistent_identifier: null,
-            manufacturer_uri: null
+            manufacturer_uri: null,
+            archived: false
           },
           relationships: {
             updated_by: {
@@ -322,6 +324,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.manufacturerUri = ''
       expectedDevice1.contacts = []
       expectedDevice1.createdByUserId = '123'
+      expectedDevice1.archived = true
 
       const expectedDevice2 = new Device()
       expectedDevice2.id = '44'
@@ -346,6 +349,7 @@ describe('DeviceSerializer', () => {
       expectedDevice2.persistentIdentifier = ''
       expectedDevice2.manufacturerUri = ''
       expectedDevice2.contacts = []
+      expectedDevice2.archived = false
 
       const serializer = new DeviceSerializer()
       const devicesWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
@@ -390,7 +394,8 @@ describe('DeviceSerializer', () => {
             status_name: null,
             dual_use: false,
             persistent_identifier: '0000001',
-            manufacturer_uri: null
+            manufacturer_uri: null,
+            archived: true
           },
           relationships: {
             updated_by: {
@@ -452,6 +457,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
+      expectedDevice.archived = true
 
       const serializer = new DeviceSerializer()
       const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -481,7 +487,8 @@ describe('DeviceSerializer', () => {
             status_name: null,
             dual_use: true,
             persistent_identifier: '0000001',
-            manufacturer_uri: null
+            manufacturer_uri: null,
+            archived: false
           },
           relationships: {
             updated_by: {
@@ -809,6 +816,7 @@ describe('DeviceSerializer', () => {
           familyName: 'Mustermann'
         })
       ]
+      expectedDevice.archived = false
 
       const serializer = new DeviceSerializer()
       const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -841,7 +849,8 @@ describe('DeviceSerializer', () => {
           status_name: null,
           dual_use: false,
           persistent_identifier: '0000001',
-          manufacturer_uri: null
+          manufacturer_uri: null,
+          archived: false
         },
         relationships: {
           updated_by: {
@@ -897,6 +906,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
+      expectedDevice.archived = false
 
       const included: any[] = []
 
@@ -934,7 +944,8 @@ describe('DeviceSerializer', () => {
           status_name: null,
           dual_use: false,
           persistent_identifier: '0000001',
-          manufacturer_uri: null
+          manufacturer_uri: null,
+          archived: true
         },
         relationships: {
           updated_by: {
@@ -990,6 +1001,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
+      expectedDevice.archived = true
 
       const included: any[] = []
 

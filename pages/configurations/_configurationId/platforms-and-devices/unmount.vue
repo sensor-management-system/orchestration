@@ -243,13 +243,35 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
       this.nodeCanBeUnmounted = false
       return false
     }
-    if (node.isPlatform() && node.canHaveChildren() && node.children.length > 0) {
-      this.errorMessage = 'The selected node still has active children. Please unmount them first.'
-      this.nodeCanBeUnmounted = false
-      return false
+    if (node.isPlatform()) {
+      if (node.canHaveChildren() && node.children.length > 0) {
+        this.errorMessage = 'The selected node still has active children. Please unmount them first.'
+        this.nodeCanBeUnmounted = false
+        return false
+      }
+      if (node.unpack().platform.archived) {
+        this.errorMessage = 'The selected platform is archived. Please restore it first.'
+        this.nodeCanBeUnmounted = false
+        return false
+      }
+      if (node.unpack().parentPlatform && node.unpack().parentPlatform?.archived) {
+        this.errorMessage = 'The parent platform is archived. Please restore it first.'
+        this.nodeCanBeUnmounted = false
+        return false
+      }
     }
-    // check device mount actions against dynamic location actions
     if (node.isDevice()) {
+      if (node.unpack().device.archived) {
+        this.errorMessage = 'The selected device is archived. Please restore it first.'
+        this.nodeCanBeUnmounted = false
+        return false
+      }
+      if (node.unpack().parentPlatform && node.unpack().parentPlatform?.archived) {
+        this.errorMessage = 'The parent platform is archived. Please restore it first.'
+        this.nodeCanBeUnmounted = false
+        return false
+      }
+      // check device mount actions against dynamic location actions
       // load the full action (with device properties)
       await this.loadDeviceMountAction(node.unpack().id)
       if (this.deviceMountAction) {

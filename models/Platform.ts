@@ -61,6 +61,8 @@ export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationI
   website: string
   persistentIdentifier: string
 
+  archived: boolean
+
   createdAt: DateTime | null
   updatedAt: DateTime | null
 
@@ -105,6 +107,7 @@ export class Platform implements IPlatform, IVisible {
   private _serialNumber: string = ''
   private _website: string = ''
   private _persistentIdentifier: string = ''
+  private _archived: boolean = false
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
 
@@ -332,6 +335,14 @@ export class Platform implements IPlatform, IVisible {
     return this._visibility === Visibility.Public
   }
 
+  get archived (): boolean {
+    return this._archived
+  }
+
+  set archived (newValue: boolean) {
+    this._archived = newValue
+  }
+
   get type (): string {
     return 'platform'
   }
@@ -378,6 +389,8 @@ export class Platform implements IPlatform, IVisible {
     newObject.createdByUserId = someObject.createdByUserId
 
     newObject.visibility = someObject.visibility
+
+    newObject.archived = someObject.archived
 
     return newObject
   }

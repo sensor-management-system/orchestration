@@ -67,6 +67,7 @@ export class PlatformBasicDataSerializer {
       result.serialNumber = attributes.serial_number || ''
       result.persistentIdentifier = attributes.persistent_identifier || ''
 
+      result.archived = attributes.archived || false
       // TODO
       // result.events = []
     }

@@ -111,7 +111,7 @@ export interface ConfigurationsState {
   configurationPlatformMountActions: PlatformMountAction[]
   deviceMountAction: DeviceMountAction | null
   platformMountAction: PlatformMountAction | null
-  configurationLocationActionTimepoints: []
+  configurationLocationActionTimepoints: ILocationTimepoint[]
   configurationGenericActions: GenericAction[]
   configurationGenericAction: GenericAction | null
   chosenKindOfConfigurationAction: IOptionsForActionType | null
@@ -378,6 +378,9 @@ export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 
 export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
+export type ArchiveConfigurationAction = (id: string) => Promise<void>
+export type RestoreConfigurationAction = (id: string) => Promise<void>
+
 export type LoadDeviceMountActionAction = IdParamReturnsVoidPromiseAction
 export type SetDeviceMountActionAction = (action: DeviceMountAction) => void
 export type LoadPlatformMountActionAction = IdParamReturnsVoidPromiseAction
@@ -391,6 +394,8 @@ export type UpdateConfigurationGenericActionAction = (params: {configurationId: 
 
 export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
 export type SetSelectedLocationDateAction = (newVal: DateTime | null) => void
+export type ReplaceConfigurationInConfigurationsAction = (newConfig: Configuration) => void
+
 export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActionType | null) => void
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
@@ -410,6 +415,7 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
       .setSearchText(searchParams.searchText)
       .setSearchedStates(searchParams.states)
       .setSearchPermissionGroups(searchParams.permissionGroups)
+      .setSearchIncludeArchivedConfigurations(searchParams.includeArchivedConfigurations)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,
@@ -531,6 +537,12 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   async deleteConfiguration (_context, id: string) {
     await this.$api.configurations.deleteById(id)
+  },
+  async archiveConfiguration (_, id: string): Promise<void> {
+    await this.$api.configurations.archiveById(id)
+  },
+  async restoreConfiguration (_, id: string): Promise<void> {
+    await this.$api.configurations.restoreById(id)
   },
   saveConfiguration (_context, configuration: Configuration): Promise<Configuration> {
     return this.$api.configurations.save(configuration)
@@ -665,6 +677,17 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   setSelectedLocationDate ({ commit }: { commit: Commit }, newval: DateTime|null) {
     commit('setSelectedLocationDate', newval)
+  },
+  replaceConfigurationInConfigurations ({ commit, state }: {commit: Commit, state: ConfigurationsState}, newConfiguration: Configuration) {
+    const result = []
+    for (const oldConfiguration of state.configurations) {
+      if (oldConfiguration.id !== newConfiguration.id) {
+        result.push(oldConfiguration)
+      } else {
+        result.push(newConfiguration)
+      }
+    }
+    commit('setConfigurations', result)
   },
   setChosenKindOfConfigurationAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfConfigurationAction', newval)

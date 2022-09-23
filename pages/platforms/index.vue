@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -234,6 +234,14 @@ permissions and limitations under the Licence.
                 v-if="$auth.loggedIn"
                 :path="'/platforms/copy/' + item.id"
               />
+              <DotMenuActionArchive
+                v-if="canArchiveEntity(item)"
+                @click="initArchiveDialog(item)"
+              />
+              <DotMenuActionRestore
+                v-if="canRestoreEntity(item)"
+                @click="runRestorePlatform(item)"
+              />
               <DotMenuActionDelete
                 v-if="$auth.loggedIn && canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
@@ -256,6 +264,12 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
+    <PlatformArchiveDialog
+      v-model="showArchiveDialog"
+      :platform-to-archive="platformToArchive"
+      @cancel-archiving="closeArchiveDialog"
+      @submit-archiving="archiveAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -274,17 +288,24 @@ import {
   ExportAsCsvAction,
   DeletePlatformAction,
   PageSizesGetter,
-  ExportAsSensorMLAction
+  ArchivePlatformAction,
+  RestorePlatformAction,
+  ExportAsSensorMLAction,
+  LoadPlatformAction,
+  ReplacePlatformInPlatformsAction
 } from 'store/platforms'
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 
-import { CanAccessEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+import { CanAccessEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
+import PlatformArchiveDialog from '@/components/platforms/PlatformArchiveDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
+import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import BaseList from '@/components/shared/BaseList.vue'
@@ -312,15 +333,18 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     ManufacturerSelect,
     PlatformTypeSelect,
     StatusSelect,
-    PageSizeSelect
+    PageSizeSelect,
+    PlatformArchiveDialog,
+    DotMenuActionArchive,
+    DotMenuActionRestore
   },
   computed: {
-    ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages']),
+    ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages', 'platform']),
     ...mapGetters('platforms', ['pageSizes']),
-    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity'])
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
-    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'exportAsSensorML']),
+    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'loadPlatform', 'replacePlatformInPlatforms']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
@@ -329,8 +353,10 @@ export default class SearchPlatformsPage extends Vue {
   private processing: boolean = false
 
   private showDeleteDialog: boolean = false
+  private showArchiveDialog: boolean = false
 
   private platformToDelete: Platform | null = null
+  private platformToArchive: Platform | null = null
   // vuex definition for typescript check
   platforms!: PlatformsState['platforms']
   pageNumber!: PlatformsState['pageNumber']
@@ -346,7 +372,14 @@ export default class SearchPlatformsPage extends Vue {
   canDeleteEntity!: CanDeleteEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  archivePlatform!: ArchivePlatformAction
+  restorePlatform!: RestorePlatformAction
+  canArchiveEntity!: CanArchiveEntityGetter
+  canRestoreEntity!: CanRestoreEntityGetter
   exportAsSensorML!: ExportAsSensorMLAction
+  loadPlatform!: LoadPlatformAction
+  replacePlatformInPlatforms!: ReplacePlatformInPlatformsAction
+  platform!: PlatformsState['platform']
 
   created () {
     this.initializeAppBar()
@@ -433,6 +466,58 @@ export default class SearchPlatformsPage extends Vue {
     } finally {
       this.loading = false
       this.closeDialog()
+    }
+  }
+
+  initArchiveDialog (platform: Platform) {
+    this.showArchiveDialog = true
+    this.platformToArchive = platform
+  }
+
+  closeArchiveDialog () {
+    this.showArchiveDialog = false
+    this.platformToArchive = null
+  }
+
+  async archiveAndCloseDialog () {
+    if (this.platformToArchive === null || this.platformToArchive.id === null) {
+      return
+    }
+    try {
+      this.loading = true
+      await this.archivePlatform(this.platformToArchive.id)
+      await this.loadPlatform({
+        platformId: this.platformToArchive.id,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
+      })
+      await this.replacePlatformInPlatforms(this.platform!)
+      this.$store.commit('snackbar/setSuccess', 'Platform archived')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Platform could not be archived')
+    } finally {
+      this.loading = false
+      this.closeArchiveDialog()
+    }
+  }
+
+  async runRestorePlatform (platform: Platform) {
+    if (platform.id) {
+      this.loading = true
+      try {
+        await this.restorePlatform(platform.id)
+        await this.loadPlatform({
+          platformId: platform.id,
+          includeCreatedBy: true,
+          includeUpdatedBy: true
+        })
+        await this.replacePlatformInPlatforms(this.platform!)
+        this.$store.commit('snackbar/setSuccess', 'Platform restored')
+      } catch (error) {
+        this.$store.commit('snackbar/setError', 'Platform could not be restored')
+      } finally {
+        this.loading = false
+      }
     }
   }
 

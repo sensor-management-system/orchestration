@@ -193,11 +193,14 @@ export type RemoveDeviceContactRoleAction = (params: { deviceContactRoleId: stri
 export type SaveDeviceAction = (device: Device) => Promise<Device>
 export type CopyDeviceAction = (params: {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean, originalDeviceId: string}) => Promise<string>
 export type DeleteDeviceAction = (id: string) => Promise<void>
+export type ArchiveDeviceAction = (id: string) => Promise<void>
+export type RestoreDeviceAction = (id: string) => Promise<void>
 export type ExportAsCsvAction = (searchParams: IDeviceSearchParams) => Promise<Blob>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
 export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
+export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
 
 const actions: ActionTree<DevicesState, RootState> = {
   async searchDevicesPaginated ({
@@ -219,6 +222,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedDeviceTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchIncludeArchivedDevices(searchParams.includeArchivedDevices)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,
@@ -494,6 +498,12 @@ const actions: ActionTree<DevicesState, RootState> = {
   async deleteDevice (_, id: string): Promise<void> {
     await this.$api.devices.deleteById(id)
   },
+  async archiveDevice (_, id: string): Promise<void> {
+    await this.$api.devices.archiveById(id)
+  },
+  async restoreDevice (_, id: string): Promise<void> {
+    await this.$api.devices.restoreById(id)
+  },
   async exportAsSensorML (_, id: string): Promise<Blob> {
     return await this.$api.devices.getSensorML(id)
   },
@@ -510,6 +520,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedDeviceTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchIncludeArchivedDevices(searchParams.includeArchivedDevices)
       .searchMatchingAsCsvBlob()
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
@@ -520,6 +531,17 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   setChosenKindOfDeviceAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfDeviceAction', newval)
+  },
+  replaceDeviceInDevices ({ commit, state }: {commit: Commit, state: DevicesState}, newDevice: Device) {
+    const result = []
+    for (const oldDevice of state.devices) {
+      if (oldDevice.id !== newDevice.id) {
+        result.push(oldDevice)
+      } else {
+        result.push(newDevice)
+      }
+    }
+    commit('setDevices', result)
   }
 }
 

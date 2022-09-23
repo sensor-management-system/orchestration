@@ -91,6 +91,7 @@ export class ConfigurationSerializer {
     if (attributes) {
       configuration.label = attributes.label || ''
       configuration.status = attributes.status || ''
+      configuration.archived = attributes.archived || false
 
       configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
       configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null

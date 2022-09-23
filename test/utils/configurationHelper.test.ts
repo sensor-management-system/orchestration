@@ -75,7 +75,8 @@ describe('#addNewMountAction', () => {
       updatedBy: null,
       createdByUserId: null,
       permissionGroups: [],
-      visibility: Visibility.Internal
+      visibility: Visibility.Internal,
+      archived: false
     })
     const device1 = Device.createFromObject({
       shortName: 'device 1',
@@ -105,7 +106,8 @@ describe('#addNewMountAction', () => {
       updatedBy: null,
       createdByUserId: null,
       permissionGroups: [],
-      visibility: Visibility.Internal
+      visibility: Visibility.Internal,
+      archived: false
     })
     const contact1 = Contact.createFromObject({
       id: '111111',
@@ -158,7 +160,8 @@ describe('#addNewMountAction', () => {
       updateDescription: '',
       createdBy: null,
       updatedBy: null,
-      createdByUserId: null
+      createdByUserId: null,
+      archived: false
     })
 
     const selectedDate = DateTime.utc(2021, 12, 15, 9, 15, 0)

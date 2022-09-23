@@ -41,6 +41,7 @@ export interface IConfigurationBasicSearchParams {
 export interface IConfigurationSearchParams extends IConfigurationBasicSearchParams {
   states: string[]
   permissionGroups: PermissionGroup[]
+  includeArchivedConfigurations: boolean
 }
 
 /**
@@ -77,6 +78,9 @@ export class ConfigurationSearchParamsSerializer {
     if (params.permissionGroups) {
       result.permissionGroups = params.permissionGroups.map(p => p.id)
     }
+    if (params.includeArchivedConfigurations) {
+      result.includeArchivedConfigurations = String(params.includeArchivedConfigurations)
+    }
     return result
   }
 
@@ -108,7 +112,8 @@ export class ConfigurationSearchParamsSerializer {
     return {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
       states,
-      permissionGroups
+      permissionGroups,
+      includeArchivedConfigurations: typeof params.includeArchivedConfigurations !== 'undefined' && params.includeArchivedConfigurations === 'true'
     }
   }
 }

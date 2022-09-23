@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,6 +34,21 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
+      <center>
+        <v-alert
+          v-if="platform && platform.archived"
+          icon="mdi-alert"
+          type="warning"
+          color="orange"
+          text
+          border="left"
+          dense
+          outlined
+          prominent
+        >
+          The platform is archived. It is not possible to change the values. To edit it, ask a group administrator to restore the entity.
+        </v-alert>
+      </center>
       <NuxtChild
         v-if="platform"
       />
@@ -51,7 +66,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { PlatformsState, LoadPlatformAction } from '@/store/platforms'
-import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import ModificationInfo from '@/components/ModificationInfo.vue'
@@ -63,7 +78,7 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   computed: {
     ...mapState('platforms', ['platform']),
-    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity'])
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform']),
@@ -79,6 +94,12 @@ export default class PlatformPage extends Vue {
   @ProvideReactive()
     deletable: boolean = false
 
+  @ProvideReactive()
+    archivable: boolean = false
+
+  @ProvideReactive()
+    restoreable: boolean = false
+
   // vuex definition for typescript check
   platform!: PlatformsState['platform']
   loadPlatform!: LoadPlatformAction
@@ -86,6 +107,8 @@ export default class PlatformPage extends Vue {
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  canArchiveEntity!: CanArchiveEntityGetter
+  canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
 
@@ -109,8 +132,8 @@ export default class PlatformPage extends Vue {
         this.$store.commit('snackbar/setError', 'You\'re not allowed to access this platform.')
         return
       }
-      this.editable = this.canModifyEntity(this.platform)
-      this.deletable = this.canDeleteEntity(this.platform)
+
+      this.updatePermissions(this.platform)
 
       if (this.isBasePath()) {
         this.$router.replace('/platforms/' + this.platformId + '/basic')
@@ -156,10 +179,20 @@ export default class PlatformPage extends Vue {
     return this.$route.path === '/platforms/' + this.platformId || this.$route.path === '/platforms/' + this.platformId + '/'
   }
 
+  updatePermissions (platform: PlatformsState['platform']) {
+    if (platform) {
+      this.editable = this.canModifyEntity(platform)
+      this.deletable = this.canDeleteEntity(platform)
+      this.archivable = this.canArchiveEntity(platform)
+      this.restoreable = this.canRestoreEntity(platform)
+    }
+  }
+
   @Watch('platform', { immediate: true, deep: true })
   onPlatformChanged (val: PlatformsState['platform']) {
     if (val && val.id) {
       this.setTitle(val.shortName)
+      this.updatePermissions(val)
     }
   }
 }

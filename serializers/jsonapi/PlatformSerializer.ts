@@ -117,6 +117,7 @@ export class PlatformSerializer {
       if (attributes.is_public) {
         result.visibility = Visibility.Public
       }
+      result.archived = attributes.archived || false
 
       // TODO
       // result.events = []

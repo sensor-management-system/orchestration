@@ -106,6 +106,7 @@ export class ConfigurationApi {
   private _searchPermissionGroups: PermissionGroup[] = []
   private _searchText: string | null = null
   private _searchedUserMail: string | null = null
+  private _searchedIncludeArchivedConfigurations: boolean = false
   private filterSettings: any[] = []
 
   private serializer: ConfigurationSerializer
@@ -200,6 +201,15 @@ export class ConfigurationApi {
     return this
   }
 
+  get searchIncludeArchivedConfigurations (): boolean {
+    return this._searchedIncludeArchivedConfigurations
+  }
+
+  setSearchIncludeArchivedConfigurations (value: boolean) {
+    this._searchedIncludeArchivedConfigurations = value
+    return this
+  }
+
   private get commonParams (): any {
     const result: any = {
       filter: JSON.stringify(this.filterSettings)
@@ -208,6 +218,9 @@ export class ConfigurationApi {
       result.q = this.searchText
     }
     result.sort = 'label'
+    if (this.searchIncludeArchivedConfigurations) {
+      result.hide_archived = false
+    }
     return result
   }
 
@@ -256,7 +269,8 @@ export class ConfigurationApi {
           'page[size]': amount,
           'page[number]': 1,
           sort: '-updated_at',
-          include: 'updated_by.contact'
+          include: 'updated_by.contact',
+          hide_archived: false
         }
       }
 
@@ -341,6 +355,14 @@ export class ConfigurationApi {
   // eslint-disable-next-line
   deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
+  }
+
+  archiveById (id: string): Promise<void> {
+    return this.axiosApi.post(this.basePath + '/' + id + '/archive')
+  }
+
+  restoreById (id: string): Promise<void> {
+    return this.axiosApi.post(this.basePath + '/' + id + '/restore')
   }
 
   async save (configuration: Configuration): Promise<Configuration> {

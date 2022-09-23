@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -118,7 +118,8 @@ describe('PlatformSerializer', () => {
             status_name: 'in use',
             platform_type_name: 'Station',
             persistent_identifier: 'boeken_BF1',
-            manufacturer_uri: 'manufacturer/xyz'
+            manufacturer_uri: 'manufacturer/xyz',
+            archived: true
           },
           relationships: {
             updated_by: {
@@ -176,7 +177,8 @@ describe('PlatformSerializer', () => {
             status_name: null,
             platform_type_name: 'Station',
             persistent_identifier: null,
-            manufacturer_uri: null
+            manufacturer_uri: null,
+            archived: false
           },
           relationships: {
             updated_by: {
@@ -319,6 +321,7 @@ describe('PlatformSerializer', () => {
         familyName: 'Mustermann'
       })]
       expectedPlatform1.createdByUserId = '42'
+      expectedPlatform1.archived = true
 
       const expectedPlatform2 = new Platform()
       expectedPlatform2.id = '52'
@@ -340,6 +343,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform2.persistentIdentifier = ''
       expectedPlatform2.manufacturerUri = ''
       expectedPlatform2.contacts = []
+      expectedPlatform2.archived = false
 
       const serializer = new PlatformSerializer()
 
@@ -383,7 +387,8 @@ describe('PlatformSerializer', () => {
             status_name: 'in use',
             platform_type_name: 'Station',
             persistent_identifier: 'boeken_BF1',
-            manufacturer_uri: 'manufacturer/xyz'
+            manufacturer_uri: 'manufacturer/xyz',
+            archived: true
           },
           relationships: {
             updated_by: {
@@ -528,6 +533,7 @@ describe('PlatformSerializer', () => {
         website: '',
         familyName: 'Mustermann'
       })]
+      expectedPlatform.archived = true
 
       const serializer = new PlatformSerializer()
 
@@ -561,7 +567,8 @@ describe('PlatformSerializer', () => {
           status_name: 'in use',
           platform_type_name: 'Station',
           persistent_identifier: 'boeken_BF1',
-          manufacturer_uri: 'manufacturer/xyz'
+          manufacturer_uri: 'manufacturer/xyz',
+          archived: false
         },
         relationships: {
           updated_by: {
@@ -705,6 +712,7 @@ describe('PlatformSerializer', () => {
         website: '',
         familyName: 'Mustermann'
       })]
+      expectedPlatform.archived = false
 
       const serializer = new PlatformSerializer()
       const platfromWithMeta = serializer.convertJsonApiDataToModel(jsonApiData, included)
