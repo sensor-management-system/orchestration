@@ -44,6 +44,14 @@ export interface IPermissionableMultipleGroups {
   permissionGroups: IPermissionGroup[]
 }
 
+export interface IPersistentlyIdentifiable {
+  persistentIdentifier?: string
+}
+
+export interface IArchivable {
+  archived: boolean
+}
+
 export type IPermissionable = IPermissionableSingleGroup | IPermissionableMultipleGroups
 
 export class PermissionGroup implements IPermissionGroup {

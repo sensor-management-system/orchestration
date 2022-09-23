@@ -6,6 +6,7 @@
  * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -45,8 +46,10 @@ import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
 import { DeviceCalibrationActionApi } from '@/services/sms/DeviceCalibrationActionApi'
 import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
+import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachmentApi'
 import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
-import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
+import { GenericConfigurationActionApi } from '@/services/sms/GenericConfigurationActionApi'
+import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi, GenericConfigurationActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
 import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
 import { PlatformSoftwareUpdateActionApi } from '@/services/sms/PlatformSoftwareUpdateActionApi'
 import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
@@ -93,11 +96,15 @@ export class Api {
   private readonly _customfieldsApi: CustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
+  private readonly _configurationAttachmentApi: ConfigurationAttachmentApi
   private readonly _devicePropertyApi: DevicePropertyApi
   private readonly _genericDeviceActionApi: GenericDeviceActionApi
+  private readonly _genericConfigurationActionApi: GenericConfigurationActionApi
   private readonly _genericPlatformActionApi: GenericPlatformActionApi
   private readonly _genericDeviceActionAttachmentApi: GenericDeviceActionAttachmentApi
   private readonly _genericPlatformActionAttachmentApi: GenericPlatformActionAttachmentApi
+  private readonly _genericConfigurationActionAttachmentApi: GenericConfigurationActionAttachmentApi
+
   private readonly _deviceSoftwareUpdateActionApi: DeviceSoftwareUpdateActionApi
   private readonly _deviceSoftwareUpdateActionAttachmentApi: DeviceSoftwareUpdateActionAttachmentApi
   private readonly _platformSoftwareUpdateActionApi: PlatformSoftwareUpdateActionApi
@@ -233,6 +240,11 @@ export class Api {
       '/platform-attachments'
     )
 
+    this._configurationAttachmentApi = new ConfigurationAttachmentApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/configuration-attachments'
+    )
+
     this._devicePropertyApi = new DevicePropertyApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-properties'
@@ -247,6 +259,16 @@ export class Api {
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/generic-device-actions',
       this._genericDeviceActionAttachmentApi
+    )
+
+    this._genericConfigurationActionAttachmentApi = new GenericConfigurationActionAttachmentApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/generic-configuration-action-attachments'
+    )
+    this._genericConfigurationActionApi = new GenericConfigurationActionApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/generic-configuration-actions',
+      this._genericConfigurationActionAttachmentApi
     )
 
     this._genericPlatformActionAttachmentApi = new GenericPlatformActionAttachmentApi(
@@ -399,6 +421,10 @@ export class Api {
     return this._platformAttachmentApi
   }
 
+  get configurationAttachments (): ConfigurationAttachmentApi {
+    return this._configurationAttachmentApi
+  }
+
   get deviceProperties (): DevicePropertyApi {
     return this._devicePropertyApi
   }
@@ -409,6 +435,10 @@ export class Api {
 
   get genericPlatformActions (): GenericPlatformActionApi {
     return this._genericPlatformActionApi
+  }
+
+  get genericConfigurationActions (): GenericConfigurationActionApi {
+    return this._genericConfigurationActionApi
   }
 
   get genericDeviceActionAttachments (): GenericDeviceActionAttachmentApi {

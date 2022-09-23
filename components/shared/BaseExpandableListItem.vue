@@ -36,6 +36,7 @@ permissions and limitations under the Licence.
     <v-card
       :elevation="hover ? 6 : 2"
       class="ma-2"
+      :color="backgroundColor"
     >
       <v-card-text
         class="py-2 px-3"
@@ -125,6 +126,13 @@ export default class BaseExpandableListItem extends Vue {
     type: String
   })
   private expandableColor!: string
+
+  @Prop({
+    default: 'white',
+    required: false,
+    type: String
+  })
+  private backgroundColor!: string
 
   private show: boolean = false
 }

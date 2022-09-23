@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020 - 2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -58,9 +59,8 @@ permissions and limitations under the Licence.
       :list-items="platformAttachments"
     >
       <template #list-item="{item}">
-        <PlatformsAttachmentListItem
+        <AttachmentListItem
           :attachment="item"
-          :platform-id="platformId"
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
@@ -80,7 +80,7 @@ permissions and limitations under the Licence.
               Edit
             </v-btn>
           </template>
-        </PlatformsAttachmentListItem>
+        </AttachmentListItem>
       </template>
     </BaseList>
     <v-card-actions
@@ -95,7 +95,7 @@ permissions and limitations under the Licence.
         Add Attachment
       </v-btn>
     </v-card-actions>
-    <PlatformsAttachmentDeleteDialog
+    <AttachmentDeleteDialog
       v-model="showDeleteDialog"
       :attachment-to-delete="attachmentToDelete"
       @cancel-deletion="closeDialog"
@@ -115,12 +115,12 @@ import { Attachment } from '@/models/Attachment'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
-import PlatformsAttachmentListItem from '@/components/platforms/PlatformsAttachmentListItem.vue'
+import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import PlatformsAttachmentDeleteDialog from '@/components/platforms/PlatformsAttachmentDeleteDialog.vue'
+import AttachmentDeleteDialog from '@/components/shared/AttachmentDeleteDialog.vue'
 
 @Component({
-  components: { PlatformsAttachmentDeleteDialog, DotMenuActionDelete, PlatformsAttachmentListItem, BaseList, HintCard, ProgressIndicator },
+  components: { AttachmentDeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, ProgressIndicator },
   computed: mapState('platforms', ['platformAttachments']),
   methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment'])
 })

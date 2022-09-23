@@ -59,7 +59,8 @@ describe('PlatformBasicDataSerializer', () => {
           status_name: 'in use',
           platform_type_name: 'Station',
           persistent_identifier: 'boeken_BF1',
-          manufacturer_uri: 'manufacturer/xyz'
+          manufacturer_uri: 'manufacturer/xyz',
+          archived: true
         },
         id: '37'
       }
@@ -82,6 +83,7 @@ describe('PlatformBasicDataSerializer', () => {
       expectedPlatform.platformTypeName = 'Station'
       expectedPlatform.persistentIdentifier = 'boeken_BF1'
       expectedPlatform.manufacturerUri = 'manufacturer/xyz'
+      expectedPlatform.archived = true
 
       const serializer = new PlatformBasicDataSerializer()
       const platform = serializer.convertJsonApiDataToModel(jsonApiData)

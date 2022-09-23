@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -38,7 +38,24 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
-      <NuxtChild />
+      <center>
+        <v-alert
+          v-if="device && device.archived"
+          icon="mdi-alert"
+          type="warning"
+          color="orange"
+          text
+          border="left"
+          dense
+          outlined
+          prominent
+        >
+          The device is archived. It is not possible to change the values. To edit it, ask a group administrator to restore the entity.
+        </v-alert>
+      </center>
+      <NuxtChild
+        v-if="device"
+      />
       <modification-info
         v-if="device"
         v-model="device"
@@ -53,7 +70,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { DevicesState, LoadDeviceAction } from '@/store/devices'
-import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import ModificationInfo from '@/components/ModificationInfo.vue'
@@ -65,7 +82,7 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   computed: {
     ...mapState('devices', ['device']),
-    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity'])
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
     ...mapActions('devices', ['loadDevice']),
@@ -80,6 +97,12 @@ export default class DevicePage extends Vue {
   @ProvideReactive()
     deletable: boolean = false
 
+  @ProvideReactive()
+    archivable: boolean = false
+
+  @ProvideReactive()
+    restoreable: boolean = false
+
   private isLoading: boolean = false
 
   // vuex definition for typescript check
@@ -88,6 +111,8 @@ export default class DevicePage extends Vue {
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  canArchiveEntity!: CanArchiveEntityGetter
+  canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
 
@@ -114,8 +139,7 @@ export default class DevicePage extends Vue {
         return
       }
 
-      this.editable = this.canModifyEntity(this.device)
-      this.deletable = this.canDeleteEntity(this.device)
+      this.updatePermissions(this.device)
 
       if (this.isBasePath()) {
         this.$router.replace('/devices/' + this.deviceId + '/basic')
@@ -167,10 +191,20 @@ export default class DevicePage extends Vue {
     }
   }
 
+  updatePermissions (device: DevicesState['device']) {
+    if (device) {
+      this.editable = this.canModifyEntity(device)
+      this.deletable = this.canDeleteEntity(device)
+      this.restoreable = this.canRestoreEntity(device)
+      this.archivable = this.canArchiveEntity(device)
+    }
+  }
+
   @Watch('device', { immediate: true, deep: true })
   onDeviceChanged (val: DevicesState['device']) {
     if (val && val.id) {
       this.setTitle(val.shortName)
+      this.updatePermissions(val)
     }
   }
 }

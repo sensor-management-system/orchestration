@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -61,6 +61,7 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
   serialNumber: string
   inventoryNumber: string
   dualUse: boolean
+  archived: boolean
 
   createdAt: DateTime | null
   updatedAt: DateTime | null
@@ -108,6 +109,7 @@ export class Device implements IDevice, IVisible {
   private _serialNumber: string = ''
   private _inventoryNumber: string = ''
   private _dualUse: boolean = false
+  private _archived: boolean = false
 
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -362,6 +364,14 @@ export class Device implements IDevice, IVisible {
     return this._visibility === Visibility.Public
   }
 
+  get archived (): boolean {
+    return this._archived
+  }
+
+  set archived (newValue: boolean) {
+    this._archived = newValue
+  }
+
   get type (): string {
     return 'device'
   }
@@ -405,6 +415,8 @@ export class Device implements IDevice, IVisible {
     newObject.createdByUserId = someObject.createdByUserId
 
     newObject.visibility = someObject.visibility
+
+    newObject.archived = someObject.archived
 
     return newObject
   }

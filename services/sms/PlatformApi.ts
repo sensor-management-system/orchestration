@@ -98,6 +98,7 @@ export class PlatformApi {
   private _searchedPermissionGroups: PermissionGroup[] = []
   private _searchedUserMail: string | null = null
   private _searchedCreatorId: string | null = null
+  private _searchedIncludeArchivedPlatforms = false
   private _searchText: string | null = null
   private filterSettings: any[] = []
 
@@ -173,6 +174,15 @@ export class PlatformApi {
     return this
   }
 
+  get searchIncludeArchivedPlatforms (): boolean {
+    return this._searchedIncludeArchivedPlatforms
+  }
+
+  setSearchIncludeArchivedPlatforms (value: boolean) {
+    this._searchedIncludeArchivedPlatforms = value
+    return this
+  }
+
   private get commonParams (): any {
     const result: any = {
       filter: JSON.stringify(this.filterSettings)
@@ -181,6 +191,9 @@ export class PlatformApi {
       result.q = this.searchText
     }
     result.sort = 'short_name'
+    if (this.searchIncludeArchivedPlatforms) {
+      result.hide_archived = false
+    }
     return result
   }
 
@@ -260,7 +273,8 @@ export class PlatformApi {
           'page[size]': amount,
           'page[number]': 1,
           sort: '-updated_at',
-          include: 'updated_by.contact'
+          include: 'updated_by.contact',
+          hide_archived: false
         }
       }
 
@@ -421,6 +435,14 @@ export class PlatformApi {
 
   deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
+  }
+
+  archiveById (id: string): Promise<void> {
+    return this.axiosApi.post(this.basePath + '/' + id + '/archive')
+  }
+
+  restoreById (id: string): Promise<void> {
+    return this.axiosApi.post(this.basePath + '/' + id + '/restore')
   }
 
   save (platform: Platform): Promise<Platform> {

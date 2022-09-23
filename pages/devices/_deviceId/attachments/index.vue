@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -55,9 +56,8 @@ permissions and limitations under the Licence.
       :list-items="deviceAttachments"
     >
       <template #list-item="{item}">
-        <DevicesAttachmentListItem
+        <AttachmentListItem
           :attachment="item"
-          :device-id="deviceId"
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
@@ -77,7 +77,7 @@ permissions and limitations under the Licence.
               Edit
             </v-btn>
           </template>
-        </DevicesAttachmentListItem>
+        </AttachmentListItem>
       </template>
     </BaseList>
     <v-card-actions
@@ -93,7 +93,7 @@ permissions and limitations under the Licence.
         Add Attachment
       </v-btn>
     </v-card-actions>
-    <DevicesAttachmentDeleteDialog
+    <AttachmentDeleteDialog
       v-model="showDeleteDialog"
       :attachment-to-delete="attachmentToDelete"
       @cancel-deletion="closeDialog"
@@ -111,14 +111,14 @@ import { LoadDeviceAttachmentsAction, DeleteDeviceAttachmentAction, DevicesState
 import { Attachment } from '@/models/Attachment'
 
 import BaseList from '@/components/shared/BaseList.vue'
-import DevicesAttachmentListItem from '@/components/devices/DevicesAttachmentListItem.vue'
-import DevicesAttachmentDeleteDialog from '@/components/devices/DevicesAttachmentDeleteDialog.vue'
+import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
+import AttachmentDeleteDialog from '@/components/shared/AttachmentDeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DevicesAttachmentDeleteDialog, DevicesAttachmentListItem, BaseList },
+  components: { ProgressIndicator, DotMenuActionDelete, HintCard, AttachmentDeleteDialog, AttachmentListItem, BaseList },
   computed: mapState('devices', ['deviceAttachments']),
   methods: mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment'])
 })

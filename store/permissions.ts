@@ -38,11 +38,11 @@ import { Commit, GetterTree, ActionTree } from 'vuex'
 import { RootState } from '@/store'
 
 import { UserInfo } from '@/models/UserInfo'
-import { PermissionGroup, IPermissionable } from '@/models/PermissionGroup'
+import { PermissionGroup, IPermissionable, IArchivable, IPersistentlyIdentifiable } from '@/models/PermissionGroup'
 import { IVisible } from '@/models/Visibility'
 import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
 
-export type PermissionHandable = IPermissionable & IVisible & IMetaCreationInfo
+export type PermissionHandable = IPermissionable & IVisible & IMetaCreationInfo & IArchivable & IPersistentlyIdentifiable
 
 const isInternalAndHasNotPermissionGroups = (entity: PermissionHandable): boolean => {
   return entity.isInternal && (('permissionGroups' in entity && entity.permissionGroups.length === 0) || ('permissionGroup' in entity && entity.permissionGroup === null))
@@ -75,6 +75,8 @@ const state = (): PermissionsState => ({
 export type CanAccessEntityGetter = (entity: PermissionHandable) => boolean
 export type CanModifyEntityGetter = (entity: PermissionHandable) => boolean
 export type CanDeleteEntityGetter = (entity: PermissionHandable) => boolean
+export type CanArchiveEntityGetter = (entity: PermissionHandable) => boolean
+export type CanRestoreEntityGetter = (entity: PermissionHandable) => boolean
 export type MemberedPermissionGroupsGetter = PermissionGroup[]
 export type AdministradedPermissionGroupsGetter = PermissionGroup[]
 export type UserGroupsGetter = PermissionGroup[]
@@ -108,6 +110,9 @@ const getters: GetterTree<PermissionsState, RootState> = {
     return false
   },
   canModifyEntity: (state: PermissionsState, getters: any) => (entity: PermissionHandable): boolean => {
+    if (entity.archived) {
+      return false
+    }
     if (!state.userInfo) {
       return false
     }
@@ -131,7 +136,54 @@ const getters: GetterTree<PermissionsState, RootState> = {
     // in case that we missed a check, restrict access
     return false
   },
-  canDeleteEntity: (state: PermissionsState, getters: any) => (entity: PermissionHandable): boolean => {
+  canDeleteEntity: (state: PermissionsState) => (entity: PermissionHandable): boolean => {
+    if (entity.persistentIdentifier) {
+      return false
+    }
+    if (!state.userInfo) {
+      return false
+    }
+    if (!state.userInfo.active) {
+      return false
+    }
+    if (state.userInfo.isSuperUser) {
+      return true
+    }
+    // if the entity is private, check if the user that created the entity matches the current user
+    if (userIsCreatorOfPrivateEntity(entity, state.userInfo)) {
+      return true
+    }
+    // in case that we missed a check, restrict access
+    return false
+  },
+  canArchiveEntity: (state: PermissionsState, getters: any) => (entity: PermissionHandable): boolean => {
+    if (entity.archived) {
+      return false
+    }
+    if (!state.userInfo) {
+      return false
+    }
+    if (!state.userInfo.active) {
+      return false
+    }
+    if (state.userInfo.isSuperUser) {
+      return true
+    }
+    // if the entity is private, check if the user that created the entity matches the current user
+    if (userIsCreatorOfPrivateEntity(entity, state.userInfo)) {
+      return true
+    }
+    // if the entity is internal or public, check if the user is admin of at least one of the permission groups of the entity
+    if (!entity.isPrivate && userHasAtLeastOneGroupCommonWithEntity(entity, getters.administradedPermissionGroups)) {
+      return true
+    }
+    // in case that we missed a check, restrict access
+    return false
+  },
+  canRestoreEntity: (state: PermissionsState, getters: any) => (entity: PermissionHandable): boolean => {
+    if (!entity.archived) {
+      return false
+    }
     if (!state.userInfo) {
       return false
     }

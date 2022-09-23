@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -31,7 +31,8 @@ permissions and limitations under the Licence.
 -->
 <template>
   <base-expandable-list-item
-    expandable-color="grey lighten-5"
+    :expandable-color="configuration.archived ? 'brown lighten-3' : 'grey lighten-5'"
+    :background-color="configuration.archived ? 'brown lighten-4 ' : 'white'"
   >
     <template #header>
       <div class="text-caption mr-1">
@@ -64,6 +65,14 @@ permissions and limitations under the Licence.
       </v-btn>
     </template>
     <template #default>
+      <v-tooltip v-if="configuration.archived" right>
+        <template #activator="{ on, attrs }">
+          <v-icon v-bind="attrs" v-on="on">
+            mdi-archive-lock
+          </v-icon>
+        </template>
+        <span>Archived</span>
+      </v-tooltip>
       <span>{{ getTextOrDefault(configuration.label, 'Configuration') }}</span>
     </template>
     <template #expandable>

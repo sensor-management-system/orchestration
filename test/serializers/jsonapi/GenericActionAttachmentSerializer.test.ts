@@ -3,9 +3,10 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -32,6 +33,7 @@
 import { Attachment } from '@/models/Attachment'
 
 import {
+  GenericConfigurationActionAttachmentSerializer,
   GenericDeviceActionAttachmentSerializer,
   GenericPlatformActionAttachmentSerializer
 } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
@@ -307,6 +309,31 @@ describe('GenericActionAttachmentSerializer', () => {
       })
       it('should return an attachment serializer', () => {
         const serializer = new GenericPlatformActionAttachmentSerializer()
+        expect(typeof serializer.attachmentSerializer).toBe('object')
+      })
+    })
+  })
+
+  describe('GenericConfigurationActionAttachmentSerializer', () => {
+    describe('constructing and types', () => {
+      it('should return a correct action type name', () => {
+        const serializer = new GenericConfigurationActionAttachmentSerializer()
+        expect(serializer.getActionTypeName()).toEqual('generic_configuration_action')
+      })
+      it('should return a correct action attachment type name', () => {
+        const serializer = new GenericConfigurationActionAttachmentSerializer()
+        expect(serializer.getActionAttachmentTypeName()).toEqual('generic_configuration_action_attachment')
+      })
+      it('should return a the plural form of the action attachment type name', () => {
+        const serializer = new GenericConfigurationActionAttachmentSerializer()
+        expect(serializer.getActionAttachmentTypeNamePlural()).toEqual('generic_configuration_action_attachments')
+      })
+      it('should return a correct attachment type name', () => {
+        const serializer = new GenericConfigurationActionAttachmentSerializer()
+        expect(serializer.getAttachmentTypeName()).toEqual('configuration_attachment')
+      })
+      it('should return an attachment serializer', () => {
+        const serializer = new GenericConfigurationActionAttachmentSerializer()
         expect(typeof serializer.attachmentSerializer).toBe('object')
       })
     })

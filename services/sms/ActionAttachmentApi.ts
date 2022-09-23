@@ -57,6 +57,6 @@ export abstract class AbstractActionAttachmentApi implements IActionAttachmentAp
   }
 
   async delete (id: string): Promise<void> {
-    return await this.axiosApi.delete<string, void>(id)
+    return await this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 }

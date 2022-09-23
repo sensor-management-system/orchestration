@@ -121,11 +121,13 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row
-          v-if="$auth.loggedIn"
           dense
         >
-          <v-col cols="12" md="3">
+          <v-col v-if="$auth.loggedIn" cols="12" md="3">
             <v-checkbox v-model="selectOnlyOwnPlatforms" label="Only own platforms" />
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="selectIncludeArchivedPlatforms" label="Include archived platforms" />
           </v-col>
         </v-row>
         <v-row
@@ -184,7 +186,8 @@ import {
   SetSelectedSearchPlatformTypesAction,
   SetSelectedSearchPermissionGroupsAction,
   SetOnlyOwnPlatformsAction,
-  SetSearchTextAction
+  SetSearchTextAction,
+  SetIncludeArchivedPlatformsAction
 } from '@/store/platforms'
 
 import { PlatformSearchParamsSerializer } from '@/modelUtils/PlatformSearchParams'
@@ -206,6 +209,7 @@ import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permission
       'selectedSearchPlatformTypes',
       'selectedSearchPermissionGroups',
       'onlyOwnPlatforms',
+      'includeArchivedPlatforms',
       'searchText'
     ]),
     ...mapGetters('platforms', ['searchParams']),
@@ -222,6 +226,7 @@ import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permission
       'setSelectedSearchPlatformTypes',
       'setSelectedSearchPermissionGroups',
       'setOnlyOwnPlatforms',
+      'setIncludeArchivedPlatforms',
       'setSearchText'
     ]),
     ...mapActions('permissions', ['loadPermissionGroups'])
@@ -237,11 +242,13 @@ export default class PlatformSearch extends Vue {
   selectedSearchPermissionGroups!: PlatformsState['selectedSearchPermissionGroups']
   onlyOwnPlatforms!: PlatformsState['onlyOwnPlatforms']
   searchText!: PlatformsState['searchText']
+  includeArchivedPlatforms!: PlatformsState['includeArchivedPlatforms']
   setSelectedSearchManufacturers!: SetSelectedSearchManufacturersAction
   setSelectedSearchStates!: SetSelectedSearchStatesAction
   setSelectedSearchPlatformTypes!: SetSelectedSearchPlatformTypesAction
   setSelectedSearchPermissionGroups!: SetSelectedSearchPermissionGroupsAction
   setOnlyOwnPlatforms!: SetOnlyOwnPlatformsAction
+  setIncludeArchivedPlatforms!: SetIncludeArchivedPlatformsAction
   setSearchText!: SetSearchTextAction
   loadEquipmentstatus!: LoadEquipmentstatusAction
   loadPlatformtypes!: LoadPlatformtypesAction
@@ -300,6 +307,14 @@ export default class PlatformSearch extends Vue {
     this.setOnlyOwnPlatforms(newVal)
   }
 
+  get selectIncludeArchivedPlatforms () {
+    return this.includeArchivedPlatforms
+  }
+
+  set selectIncludeArchivedPlatforms (newValue: boolean) {
+    this.setIncludeArchivedPlatforms(newValue)
+  }
+
   get searchedText () {
     return this.searchText
   }
@@ -344,6 +359,7 @@ export default class PlatformSearch extends Vue {
     this.selectedStates = []
     this.selectedPlatformTypes = []
     this.selectOnlyOwnPlatforms = false
+    this.selectIncludeArchivedPlatforms = false
     this.$emit('basic-search')
     this.runSearch()
   }
@@ -365,6 +381,7 @@ export default class PlatformSearch extends Vue {
     this.selectedPlatformTypes = []
     this.selectedPermissionGroups = []
     this.selectOnlyOwnPlatforms = false
+    this.selectIncludeArchivedPlatforms = false
     this.$emit('clear-extended-search')
   }
 
@@ -397,6 +414,9 @@ export default class PlatformSearch extends Vue {
     }
     if (searchParamsObject.onlyOwnPlatforms) {
       this.selectOnlyOwnPlatforms = searchParamsObject.onlyOwnPlatforms
+    }
+    if (searchParamsObject.includeArchivedPlatforms) {
+      this.selectIncludeArchivedPlatforms = searchParamsObject.includeArchivedPlatforms
     }
     if (searchParamsObject.manufacturer) {
       this.selectedManufacturers = searchParamsObject.manufacturer

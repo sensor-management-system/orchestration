@@ -63,6 +63,10 @@ import {
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
+import { Attachment } from '@/models/Attachment'
+import { ConfigurationAttachmentSerializer } from '@/serializers/jsonapi/ConfigurationAttachmentSerializer'
+import { GenericAction } from '@/models/GenericAction'
+import { GenericConfigurationActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -102,6 +106,7 @@ export class ConfigurationApi {
   private _searchPermissionGroups: PermissionGroup[] = []
   private _searchText: string | null = null
   private _searchedUserMail: string | null = null
+  private _searchedIncludeArchivedConfigurations: boolean = false
   private filterSettings: any[] = []
 
   private serializer: ConfigurationSerializer
@@ -196,6 +201,15 @@ export class ConfigurationApi {
     return this
   }
 
+  get searchIncludeArchivedConfigurations (): boolean {
+    return this._searchedIncludeArchivedConfigurations
+  }
+
+  setSearchIncludeArchivedConfigurations (value: boolean) {
+    this._searchedIncludeArchivedConfigurations = value
+    return this
+  }
+
   private get commonParams (): any {
     const result: any = {
       filter: JSON.stringify(this.filterSettings)
@@ -204,6 +218,9 @@ export class ConfigurationApi {
       result.q = this.searchText
     }
     result.sort = 'label'
+    if (this.searchIncludeArchivedConfigurations) {
+      result.hide_archived = false
+    }
     return result
   }
 
@@ -252,7 +269,8 @@ export class ConfigurationApi {
           'page[size]': amount,
           'page[number]': 1,
           sort: '-updated_at',
-          include: 'updated_by.contact'
+          include: 'updated_by.contact',
+          hide_archived: false
         }
       }
 
@@ -323,7 +341,6 @@ export class ConfigurationApi {
     }
 
     const include = getIncludeParams(includes)
-
     return this.axiosApi.get(this.basePath + '/' + id, {
       params: {
         include
@@ -338,6 +355,14 @@ export class ConfigurationApi {
   // eslint-disable-next-line
   deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
+  }
+
+  archiveById (id: string): Promise<void> {
+    return this.axiosApi.post(this.basePath + '/' + id + '/archive')
+  }
+
+  restoreById (id: string): Promise<void> {
+    return this.axiosApi.post(this.basePath + '/' + id + '/restore')
   }
 
   async save (configuration: Configuration): Promise<Configuration> {
@@ -440,6 +465,31 @@ export class ConfigurationApi {
 
   async findRelatedStaticLocationActions (configurationId: string): Promise<StaticLocationAction[]> {
     return await this.staticLocationActionApi.getRelatedActions(configurationId)
+  }
+
+  async findRelatedConfigurationAttachments (configurationId: string): Promise<Attachment[]> {
+    const url = this.basePath + '/' + configurationId + '/configuration-attachments'
+    const params = {
+      'page[size]': 10000
+    }
+    return await this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new ConfigurationAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  async findRelatedGenericActions (configurationId: string): Promise<GenericAction[]> {
+    const url = this.basePath + '/' + configurationId + '/generic-configuration-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'generic_configuration_action_attachments.attachment'
+      ].join(',')
+    }
+    const result = await this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new GenericConfigurationActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+    return result
   }
 
   removeContact (configurationContactRoleId: string): Promise<void> {

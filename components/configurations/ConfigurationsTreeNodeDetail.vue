@@ -39,6 +39,8 @@ permissions and limitations under the Licence.
         <base-mount-info
           :mount-action="node.unpack()"
           :editable="editable"
+          :disabled="node.unpack().platform.archived"
+          :warning="node.unpack().platform.archived ? 'Platform is archived. Restore it to edit the mount.' : ''"
         />
       </template>
     </PlatformMountListItem>
@@ -51,6 +53,8 @@ permissions and limitations under the Licence.
         <base-mount-info
           :mount-action="node.unpack()"
           :editable="editable"
+          :disabled="node.unpack().device.archived"
+          :warning="node.unpack().device.archived ? 'Device is archived. Restore it to edit the mount.' : ''"
         />
       </template>
     </DevicesMountListItem>

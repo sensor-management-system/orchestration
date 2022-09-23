@@ -3,9 +3,10 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -51,7 +52,8 @@ import { IActionAttachmentSerializer } from '@/serializers/jsonapi/ActionAttachm
 
 import {
   GenericDeviceActionAttachmentSerializer,
-  GenericPlatformActionAttachmentSerializer
+  GenericPlatformActionAttachmentSerializer,
+  GenericConfigurationActionAttachmentSerializer
 } from '@/serializers/jsonapi/GenericActionAttachmentSerializer'
 
 export interface IMissingGenericActionData {
@@ -288,6 +290,23 @@ export class GenericPlatformActionSerializer extends AbstractGenericActionSerial
 
   get targetType (): string {
     return 'platform'
+  }
+
+  get attachmentSerializer (): IActionAttachmentSerializer {
+    return this._attachmentSerializer
+  }
+}
+
+export class GenericConfigurationActionSerializer extends AbstractGenericActionSerializer {
+  private _attachmentSerializer: IActionAttachmentSerializer
+
+  constructor () {
+    super()
+    this._attachmentSerializer = new GenericConfigurationActionAttachmentSerializer()
+  }
+
+  get targetType (): string {
+    return 'configuration'
   }
 
   get attachmentSerializer (): IActionAttachmentSerializer {

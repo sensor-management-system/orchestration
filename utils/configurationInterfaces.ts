@@ -3,11 +3,12 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences
  *   (GFZ, https://www.gfz-potsdam.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -42,6 +43,7 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
+import { GenericAction } from '@/models/GenericAction'
 
 export interface IActionDateWithText {
   date: DateTime
@@ -112,7 +114,19 @@ export interface IDynamicLocationTimelineAction {
   dynamicLocationInfo: IDynamicLocationInfo | null
 }
 
-export type ITimelineAction = IMountTimelineAction | IStaticLocationTimelineAction | IDynamicLocationTimelineAction
+export interface IGenericTimelineAction {
+  key: string
+  color: string
+  icon?: string
+  date: DateTime
+  endDate: DateTime | null
+  title: string
+  contact: Contact
+  description: string | null
+  type: string
+}
+
+export type ITimelineAction = IMountTimelineAction | IStaticLocationTimelineAction | IDynamicLocationTimelineAction | IGenericTimelineAction
 
 export class PlatformMountTimelineAction implements IMountTimelineAction {
   private mountAction: PlatformMountAction
@@ -486,5 +500,45 @@ export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelin
 
   get dynamicLocationInfo (): null {
     return null
+  }
+}
+
+export class GenericTimelineAction implements IGenericTimelineAction {
+  private genericAction: GenericAction
+
+  constructor (genericAction: GenericAction) {
+    this.genericAction = genericAction
+  }
+
+  get key (): string {
+    return 'Generic-action-' + this.genericAction.id
+  }
+
+  get color (): string {
+    return 'blue'
+  }
+
+  get title (): string {
+    return this.genericAction.actionTypeName
+  }
+
+  get description (): string | null {
+    return this.genericAction.description
+  }
+
+  get contact (): Contact {
+    return this.genericAction.contact!
+  }
+
+  get date (): DateTime {
+    return this.genericAction.beginDate!
+  }
+
+  get endDate (): DateTime | null {
+    return this.genericAction.endDate
+  }
+
+  get type (): string {
+    return 'generic_configuration_action'
   }
 }

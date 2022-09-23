@@ -2,12 +2,15 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020, 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -30,73 +33,37 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-dialog
-    v-model="showDialog"
-    max-width="290"
-    @click:outside="$emit('cancel-deletion')"
+  <v-list-item
+    :disabled="readonly"
+    dense
+    @click="$emit('click')"
   >
-    <v-card v-if="hasAttachmentToDelete">
-      <v-card-title class="headline">
-        Delete Attachment
-      </v-card-title>
-      <v-card-text>
-        Do you really want to delete the attachment <em>{{ attachmentToDelete.label }}</em>?
-      </v-card-text>
-      <v-card-actions>
-        <v-btn
-          text
-          @click="$emit('cancel-deletion')"
+    <v-list-item-content>
+      <v-list-item-title
+        :class="readonly ? 'grey--text' : 'black--text'"
+      >
+        <v-icon
+          left
+          small
+          :color="readonly ? 'grey' : 'black'"
         >
-          No
-        </v-btn>
-        <v-spacer />
-        <v-btn
-          color="error"
-          text
-          @click="$emit('submit-deletion')"
-        >
-          <v-icon left>
-            mdi-delete
-          </v-icon>
-          Delete
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+          mdi-archive-lock-open
+        </v-icon>
+        Restore
+      </v-list-item-title>
+    </v-list-item-content>
+  </v-list-item>
 </template>
-
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
-import { Attachment } from '@/models/Attachment'
-
 @Component
-export default class PlatformsAttachmentDeleteDialog extends Vue {
+export default class DotMenuActionRestore extends Vue {
   @Prop({
-    required: true,
+    default: false,
     type: Boolean
   })
-  readonly value!: boolean
-
-  @Prop({
-    type: Object
-  })
-  readonly attachmentToDelete!: Attachment
-
-  get showDialog (): boolean {
-    return this.value
-  }
-
-  set showDialog (value: boolean) {
-    this.$emit('input', value)
-  }
-
-  get hasAttachmentToDelete () {
-    return this.attachmentToDelete !== null
-  }
+  // @ts-ignore
+  readonly readonly: boolean
 }
 </script>
-
-<style scoped>
-
-</style>

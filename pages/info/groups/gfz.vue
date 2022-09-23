@@ -62,7 +62,7 @@ permissions and limitations under the Licence.
       <v-card-title>Roles</v-card-title>
       <v-card-text>
         <p class="mb-0">
-          We have four roles with their permissions in the groups:
+          We have five roles with their permissions in the groups:
         </p>
       </v-card-text>
     </v-card>
@@ -81,6 +81,12 @@ permissions and limitations under the Licence.
             </v-col>
             <v-col>
               <permission-info :value="false" label="edit" />
+            </v-col>
+            <v-col>
+              <permission-info :value="false" label="archive" />
+            </v-col>
+            <v-col>
+              <permission-info :value="false" label="restore" />
             </v-col>
             <v-col>
               <permission-info :value="false" label="delete" />
@@ -102,6 +108,12 @@ permissions and limitations under the Licence.
               <permission-info :value="false" label="edit" />
             </v-col>
             <v-col>
+              <permission-info :value="false" label="archive" />
+            </v-col>
+            <v-col>
+              <permission-info :value="false" label="restore" />
+            </v-col>
+            <v-col>
               <permission-info :value="false" label="delete" />
             </v-col>
           </v-row>
@@ -121,6 +133,12 @@ permissions and limitations under the Licence.
               <permission-info :value="true" label="edit" />
             </v-col>
             <v-col>
+              <permission-info :value="false" label="archive" />
+            </v-col>
+            <v-col>
+              <permission-info :value="false" label="restore" />
+            </v-col>
+            <v-col>
               <permission-info :value="false" label="delete" />
             </v-col>
           </v-row>
@@ -138,6 +156,37 @@ permissions and limitations under the Licence.
             </v-col>
             <v-col>
               <permission-info :value="true" label="edit" />
+            </v-col>
+            <v-col>
+              <permission-info :value="true" label="archive" />
+            </v-col>
+            <v-col>
+              <permission-info :value="true" label="restore" />
+            </v-col>
+            <v-col>
+              <permission-info :value="false" label="delete" />
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <v-card flat>
+        <v-card-subtitle>Super user</v-card-subtitle>
+        <v-card-text>
+          <v-row>
+            <v-col>
+              <permission-info :value="true" label="view" />
+            </v-col>
+            <v-col>
+              <permission-info :value="true" label="create" />
+            </v-col>
+            <v-col>
+              <permission-info :value="true" label="edit" />
+            </v-col>
+            <v-col>
+              <permission-info :value="true" label="archive" />
+            </v-col>
+            <v-col>
+              <permission-info :value="true" label="restore" />
             </v-col>
             <v-col>
               <permission-info :value="true" label="delete" />
@@ -191,6 +240,7 @@ import PermissionInfo from '@/components/PermissionInfo.vue'
 })
 export default class GfzGroupInfoPage extends Vue {
   created () {
+    this.$store.dispatch('appbar/setDefaults')
     this.$store.commit('appbar/setTitle', 'Group information')
   }
 

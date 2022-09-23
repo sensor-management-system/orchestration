@@ -118,6 +118,13 @@ permissions and limitations under the Licence.
         <v-row
           dense
         >
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="includeArchivedConfigurations" label="Include archived configurations" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
           <v-col
             cols="5"
             align-self="center"
@@ -219,6 +226,14 @@ permissions and limitations under the Licence.
               <DotMenuActionSensorML
                 @click="openSensorML(item.id)"
               />
+              <DotMenuActionArchive
+                v-if="canArchiveEntity(item)"
+                @click="initArchiveDialog(item)"
+              />
+              <DotMenuActionRestore
+                v-if="canRestoreEntity(item)"
+                @click="runRestoreConfiguration(item)"
+              />
               <DotMenuActionDelete
                 v-if="$auth.loggedIn && canDeleteEntity(item)"
                 @click="initDeleteDialog(item)"
@@ -241,6 +256,12 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
+    <ConfigurationArchiveDialog
+      v-model="showArchiveDialog"
+      :configuration-to-archive="configurationToArchive"
+      @cancel-archiving="closeArchiveDialog"
+      @submit-archiving="archiveAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -249,17 +270,20 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
-import { ExportAsSensorMLAction } from '@/store/configurations'
-import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState } from '@/store/permissions'
+import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
+import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, LoadConfigurationAction, ConfigurationsState, ReplaceConfigurationInConfigurationsAction } from '@/store/configurations'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
+import ConfigurationArchiveDialog from '@/components/configurations/ConfigurationArchiveDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import StringSelect from '@/components/StringSelect.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
+import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
+import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 
 import { Configuration } from '@/models/Configuration'
 import { PermissionGroup } from '@/models/PermissionGroup'
@@ -274,16 +298,19 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ConfigurationsListItem,
     BaseList,
     PageSizeSelect,
-    PermissionGroupSearchSelect
+    PermissionGroupSearchSelect,
+    DotMenuActionArchive,
+    DotMenuActionRestore,
+    ConfigurationArchiveDialog
   },
   computed: {
-    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates']),
+    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'configuration']),
     ...mapState('appbar', ['activeTab']),
     ...mapGetters('configurations', ['pageSizes']),
-    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups'])
+    ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
-    ...mapActions('configurations', ['searchConfigurationsPaginated', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'exportAsSensorML']),
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'loadConfiguration', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'archiveConfiguration', 'restoreConfiguration', 'exportAsSensorML', 'replaceConfigurationInConfigurations']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
@@ -295,9 +322,13 @@ export default class SearchConfigurationsPage extends Vue {
   private searchText: string | null = null
   private selectedConfigurationStates: string[] = []
   private selectedPermissionGroups: PermissionGroup[] = []
+  private includeArchivedConfigurations: boolean = false
 
   private showDeleteDialog: boolean = false
   private configurationToDelete: Configuration | null = null
+
+  private showArchiveDialog: boolean = false
+  private configurationToArchive: Configuration | null = null
 
   // vuex definition for typescript check
   canDeleteEntity!: CanDeleteEntityGetter
@@ -320,6 +351,13 @@ export default class SearchConfigurationsPage extends Vue {
   setActiveTab!: SetActiveTabAction
   exportAsSensorML!: ExportAsSensorMLAction
   permissionGroups!: PermissionsState['permissionGroups']
+  archiveConfiguration!: ArchiveConfigurationAction
+  restoreConfiguration!: RestoreConfigurationAction
+  canArchiveEntity!: CanArchiveEntityGetter
+  canRestoreEntity!: CanRestoreEntityGetter
+  loadConfiguration!: LoadConfigurationAction
+  configuration!: ConfigurationsState['configuration']
+  replaceConfigurationInConfigurations!: ReplaceConfigurationInConfigurationsAction
 
   async created () {
     try {
@@ -371,13 +409,15 @@ export default class SearchConfigurationsPage extends Vue {
     return {
       searchText: this.searchText,
       states: this.selectedConfigurationStates,
-      permissionGroups: this.selectedPermissionGroups
+      permissionGroups: this.selectedPermissionGroups,
+      includeArchivedConfigurations: this.includeArchivedConfigurations
     }
   }
 
   isExtendedSearch (): boolean {
     return !!this.selectedPermissionGroups.length ||
-      !!this.selectedConfigurationStates.length
+      !!this.selectedConfigurationStates.length ||
+      this.includeArchivedConfigurations === true
   }
 
   async runInitialSearch () {
@@ -391,6 +431,7 @@ export default class SearchConfigurationsPage extends Vue {
   basicSearch () {
     this.selectedConfigurationStates = []
     this.selectedPermissionGroups = []
+    this.includeArchivedConfigurations = false
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
   }
@@ -409,6 +450,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.clearBasicSearch()
     this.selectedConfigurationStates = []
     this.selectedPermissionGroups = []
+    this.includeArchivedConfigurations = false
     this.initUrlQueryParams()
   }
 
@@ -454,6 +496,50 @@ export default class SearchConfigurationsPage extends Vue {
     }
   }
 
+  initArchiveDialog (configuration: Configuration) {
+    this.showArchiveDialog = true
+    this.configurationToArchive = configuration
+  }
+
+  closeArchiveDialog () {
+    this.showArchiveDialog = false
+    this.configurationToArchive = null
+  }
+
+  async archiveAndCloseDialog () {
+    if (this.configurationToArchive === null || this.configurationToArchive.id === null) {
+      return
+    }
+    try {
+      this.loading = true
+      await this.archiveConfiguration(this.configurationToArchive.id)
+      await this.loadConfiguration(this.configurationToArchive.id)
+      await this.replaceConfigurationInConfigurations(this.configuration!)
+      this.$store.commit('snackbar/setSuccess', 'Configuration archived')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Configuration could not be archived')
+    } finally {
+      this.loading = false
+      this.closeArchiveDialog()
+    }
+  }
+
+  async runRestoreConfiguration (configuration: Configuration) {
+    if (configuration.id) {
+      this.loading = true
+      try {
+        await this.restoreConfiguration(configuration.id)
+        await this.loadConfiguration(configuration.id)
+        await this.replaceConfigurationInConfigurations(this.configuration!)
+        this.$store.commit('snackbar/setSuccess', 'Configuration restored')
+      } catch (error) {
+        this.$store.commit('snackbar/setError', 'Configuration could not be restored')
+      } finally {
+        this.loading = false
+      }
+    }
+  }
+
   initSearchQueryParams (): void {
     const searchParamsObject = (new ConfigurationSearchParamsSerializer({
       states: this.configurationStates,
@@ -469,6 +555,9 @@ export default class SearchConfigurationsPage extends Vue {
     }
     if (searchParamsObject.permissionGroups) {
       this.selectedPermissionGroups = searchParamsObject.permissionGroups
+    }
+    if (searchParamsObject.includeArchivedConfigurations) {
+      this.includeArchivedConfigurations = searchParamsObject.includeArchivedConfigurations
     }
   }
 
