@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -37,6 +37,7 @@ export interface IConfigurationBasicData {
   endDate: DateTime | null
   label: string
   status: string
+  archived: boolean
 }
 
 export class ConfigurationBasicData implements IConfigurationBasicData {
@@ -45,6 +46,7 @@ export class ConfigurationBasicData implements IConfigurationBasicData {
   private _endDate: DateTime | null = null
   private _label: string = ''
   private _status: string = ''
+  private _archived: boolean = false
 
   get id (): string {
     return this._id
@@ -86,6 +88,14 @@ export class ConfigurationBasicData implements IConfigurationBasicData {
     this._status = newStatus
   }
 
+  get archived (): boolean {
+    return this._archived
+  }
+
+  set archived (newValue: boolean) {
+    this._archived = newValue
+  }
+
   static createFromObject (someObject: IConfigurationBasicData): ConfigurationBasicData {
     const newObject = new ConfigurationBasicData()
 
@@ -95,6 +105,7 @@ export class ConfigurationBasicData implements IConfigurationBasicData {
 
     newObject.label = someObject.label
     newObject.status = someObject.status
+    newObject.archived = someObject.archived
 
     return newObject
   }

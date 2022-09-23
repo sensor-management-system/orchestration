@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -35,6 +35,21 @@ permissions and limitations under the Licence.
       v-model="isLoading"
     />
     <v-card flat>
+      <center>
+        <v-alert
+          v-if="configuration && configuration.archived"
+          icon="mdi-alert"
+          type="warning"
+          color="orange"
+          text
+          border="left"
+          dense
+          outlined
+          prominent
+        >
+          The configuration is archived. It is not possible to change the values. To edit it, ask a group administrator to restore the entity.
+        </v-alert>
+      </center>
       <NuxtChild
         v-if="configuration"
       />
@@ -51,12 +66,13 @@ import { Component, ProvideReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
-import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter } from '@/store/permissions'
+import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
 import { Configuration } from '@/models/Configuration'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import ModificationInfo from '@/components/ModificationInfo.vue'
+import { ConfigurationsState } from '@/store/configurations'
 
 @Component({
   components: {
@@ -65,7 +81,7 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   computed: {
     ...mapState('configurations', ['configuration']),
-    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity'])
+    ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
     ...mapActions('configurations', ['loadConfiguration']),
@@ -82,12 +98,20 @@ export default class ConfigurationsIdPage extends Vue {
   @ProvideReactive()
     deletable: boolean = false
 
+  @ProvideReactive()
+    archivable: boolean = false
+
+  @ProvideReactive()
+    restoreable: boolean = false
+
   // vuex definition for typescript check
   configuration!: Configuration | null
   loadConfiguration!: (id: string) => void
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
+  canArchiveEntity!: CanArchiveEntityGetter
+  canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
 
@@ -107,8 +131,7 @@ export default class ConfigurationsIdPage extends Vue {
         return
       }
 
-      this.editable = this.canModifyEntity(this.configuration)
-      this.deletable = this.canDeleteEntity(this.configuration)
+      this.updatePermissions(this.configuration)
 
       if (this.isBasePath()) {
         this.$router.replace('/configurations/' + this.configurationId + '/basic')
@@ -159,10 +182,20 @@ export default class ConfigurationsIdPage extends Vue {
       this.$route.path === '/configurations/' + this.configurationId + '/'
   }
 
+  updatePermissions (configuration: ConfigurationsState['configuration']) {
+    if (configuration) {
+      this.editable = this.canModifyEntity(configuration)
+      this.deletable = this.canDeleteEntity(configuration)
+      this.archivable = this.canArchiveEntity(configuration)
+      this.restoreable = this.canRestoreEntity(configuration)
+    }
+  }
+
   @Watch('configuration', { immediate: true, deep: true })
   onConfigurationChanged (val: Configuration): void {
     if (val && val.id) {
       this.setTitle(val.label || 'Configuration')
+      this.updatePermissions(val)
     }
   }
 }

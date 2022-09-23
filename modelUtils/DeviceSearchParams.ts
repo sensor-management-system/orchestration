@@ -44,6 +44,7 @@ export interface IDeviceSearchParams {
   types: DeviceType[]
   permissionGroups: PermissionGroup[]
   onlyOwnDevices: boolean
+  includeArchivedDevices: boolean
 }
 
 /**
@@ -84,6 +85,9 @@ export class DeviceSearchParamsSerializer {
     }
     if (params.onlyOwnDevices) {
       result.onlyOwnDevices = String(params.onlyOwnDevices)
+    }
+    if (params.includeArchivedDevices) {
+      result.includeArchivedDevices = String(params.includeArchivedDevices)
     }
     if (params.manufacturer) {
       result.manufacturer = params.manufacturer.map(m => m.id)
@@ -147,7 +151,8 @@ export class DeviceSearchParamsSerializer {
       states,
       types,
       permissionGroups,
-      onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true'
+      onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true',
+      includeArchivedDevices: typeof params.includeArchivedDevices !== 'undefined' && params.includeArchivedDevices === 'true'
     }
   }
 }

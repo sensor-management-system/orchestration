@@ -55,7 +55,8 @@ describe('ConfigurationSerializer', () => {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
             label: 'Tereno NO Boeken',
-            status: 'draft'
+            status: 'draft',
+            archived: true
           },
           relationships: {
             created_by: {
@@ -72,7 +73,8 @@ describe('ConfigurationSerializer', () => {
           attributes: {
             // no start and no end date
             // no field for label
-            status: 'draft'
+            status: 'draft',
+            archived: false
           },
           relationships: {
             // no contacts, as we expect an empty case here
@@ -256,18 +258,22 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration1.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration1.label = 'Tereno NO Boeken'
+      expectedConfiguration1.archived = true
       expectedConfiguration1.status = 'draft'
       expectedConfiguration1.createdByUserId = '123456'
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
       expectedConfiguration2.status = 'draft'
+      expectedConfiguration2.archived = false
 
       const expectedConfiguration3 = new Configuration()
       expectedConfiguration3.id = '3'
+      expectedConfiguration2.archived = false
 
       const expectedConfiguration4 = new Configuration()
       expectedConfiguration4.id = '4'
+      expectedConfiguration2.archived = false
 
       const serializer = new ConfigurationSerializer()
       const configurationsWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)

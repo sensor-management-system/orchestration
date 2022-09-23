@@ -54,6 +54,14 @@ permissions and limitations under the Licence.
             v-if="$auth.loggedIn"
             :path="'/devices/copy/' + deviceId"
           />
+          <DotMenuActionArchive
+            :readonly="!archivable"
+            @click="initArchiveDialog"
+          />
+          <DotMenuActionRestore
+            :readonly="!restoreable"
+            @click="runRestore"
+          />
           <DotMenuActionDelete
             v-if="$auth.loggedIn"
             :readonly="!deletable"
@@ -86,6 +94,14 @@ permissions and limitations under the Licence.
             v-if="$auth.loggedIn"
             :path="'/devices/copy/' + deviceId"
           />
+          <DotMenuActionArchive
+            :readonly="!archivable"
+            @click="initArchiveDialog"
+          />
+          <DotMenuActionRestore
+            :readonly="!restoreable"
+            @click="runRestore"
+          />
           <DotMenuActionDelete
             v-if="$auth.loggedIn"
             :readonly="!deletable"
@@ -101,6 +117,13 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
+    <DeviceArchiveDialog
+      v-if="device"
+      v-model="showArchiveDialog"
+      :device-to-archive="device"
+      @cancel-archiving="closeArchiveDialog"
+      @submit-archiving="archiveAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -108,13 +131,16 @@ permissions and limitations under the Licence.
 import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { DeleteDeviceAction, DevicesState, ExportAsSensorMLAction } from '@/store/devices'
+import { ArchiveDeviceAction, DeleteDeviceAction, DevicesState, LoadDeviceAction, RestoreDeviceAction, ExportAsSensorMLAction } from '@/store/devices'
 
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DeviceArchiveDialog from '@/components/devices/DeviceArchiveDialog.vue'
 import DeviceBasicData from '@/components/DeviceBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
+import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -126,10 +152,13 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     DotMenuActionSensorML,
     DotMenu,
     DeviceDeleteDialog,
-    DeviceBasicData
+    DeviceBasicData,
+    DotMenuActionRestore,
+    DotMenuActionArchive,
+    DeviceArchiveDialog
   },
   computed: mapState('devices', ['device']),
-  methods: mapActions('devices', ['deleteDevice', 'exportAsSensorML'])
+  methods: mapActions('devices', ['loadDevice', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML'])
 })
 export default class DeviceShowBasicPage extends Vue {
   @InjectReactive()
@@ -138,13 +167,23 @@ export default class DeviceShowBasicPage extends Vue {
   @InjectReactive()
     deletable!: boolean
 
+  @InjectReactive()
+    archivable!: boolean
+
+  @InjectReactive()
+    restoreable!: boolean
+
   private isSaving = false
 
   private showDeleteDialog: boolean = false
+  private showArchiveDialog: boolean = false
 
   // vuex definition for typescript check
   device!: DevicesState['device']
+  loadDevice!: LoadDeviceAction
   deleteDevice!: DeleteDeviceAction
+  archiveDevice!: ArchiveDeviceAction
+  restoreDevice!: RestoreDeviceAction
   exportAsSensorML!: ExportAsSensorMLAction
 
   get deviceId () {
@@ -181,6 +220,64 @@ export default class DeviceShowBasicPage extends Vue {
       this.$router.push('/devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  initArchiveDialog () {
+    this.showArchiveDialog = true
+  }
+
+  closeArchiveDialog () {
+    this.showArchiveDialog = false
+  }
+
+  async archiveAndCloseDialog () {
+    this.showArchiveDialog = false
+    if (this.device === null || this.device.id === null) {
+      return
+    }
+    try {
+      this.isSaving = true
+      await this.archiveDevice(this.device.id)
+      await this.loadDevice({
+        deviceId: this.deviceId,
+        includeContacts: false,
+        includeCustomFields: false,
+        includeDeviceProperties: false,
+        includeDeviceAttachments: false,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
+      })
+      this.$store.commit('snackbar/setSuccess', 'Device archived')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Device could not be archived')
+    } finally {
+      this.isSaving = false
+      this.showArchiveDialog = false
+    }
+  }
+
+  async runRestore () {
+    if (this.device === null || this.device.id === null) {
+      return
+    }
+    this.isSaving = true
+    try {
+      await this.restoreDevice(this.device.id)
+      await this.loadDevice({
+        deviceId: this.deviceId,
+        includeContacts: false,
+        includeCustomFields: false,
+        includeDeviceProperties: false,
+        includeDeviceAttachments: false,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
+      })
+      this.$store.commit('snackbar/setSuccess', 'Device restored')
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Device could not be restored')
     } finally {
       this.isSaving = false
     }

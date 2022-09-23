@@ -44,6 +44,7 @@ export interface IPlatformSearchParams {
   types: PlatformType[]
   permissionGroups: PermissionGroup[]
   onlyOwnPlatforms: boolean
+  includeArchivedPlatforms: boolean
 }
 
 /**
@@ -84,6 +85,9 @@ export class PlatformSearchParamsSerializer {
     }
     if (params.onlyOwnPlatforms) {
       result.onlyOwnPlatforms = String(params.onlyOwnPlatforms)
+    }
+    if (params.includeArchivedPlatforms) {
+      result.includeArchivedPlatforms = String(params.includeArchivedPlatforms)
     }
     if (params.manufacturer) {
       result.manufacturer = params.manufacturer.map(m => m.id)
@@ -147,7 +151,8 @@ export class PlatformSearchParamsSerializer {
       states,
       types,
       permissionGroups,
-      onlyOwnPlatforms: typeof params.onlyOwnPlatforms !== 'undefined' && params.onlyOwnPlatforms === 'true'
+      onlyOwnPlatforms: typeof params.onlyOwnPlatforms !== 'undefined' && params.onlyOwnPlatforms === 'true',
+      includeArchivedPlatforms: typeof params.includeArchivedPlatforms !== 'undefined' && params.includeArchivedPlatforms === 'true'
     }
   }
 }

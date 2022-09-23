@@ -132,10 +132,19 @@ permissions and limitations under the Licence.
           small
           color="primary"
           nuxt
+          :disabled="disabled"
           :to="editLink"
         >
           Edit mount information
         </v-btn>
+        <v-tooltip v-if="warning" right>
+          <template #activator="{ on, attrs }">
+            <v-icon v-bind="attrs" v-on="on">
+              mdi-alert
+            </v-icon>
+          </template>
+          <span>{{ warning }}</span>
+        </v-tooltip>
       </v-col>
     </v-row>
   </div>
@@ -171,6 +180,20 @@ export default class BaseMountInfo extends Vue {
     type: Boolean
   })
   private editable!: boolean
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private disabled!: boolean
+
+  @Prop({
+    default: '',
+    required: false,
+    type: String
+  })
+  private warning!: string
 
   get editLink (): RawLocation {
     return {

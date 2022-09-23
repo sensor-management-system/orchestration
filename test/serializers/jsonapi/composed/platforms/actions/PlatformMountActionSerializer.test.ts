@@ -117,7 +117,8 @@ describe('PlatformMountActionSerializer', () => {
               start_date: '2020-08-28T13:49:48.015620+00:00',
               end_date: '2020-08-29T13:49:48.015620+00:00',
               label: 'Tereno NO Boeken',
-              status: 'draft'
+              status: 'draft',
+              archived: true
             }
           },
           {
@@ -159,7 +160,8 @@ describe('PlatformMountActionSerializer', () => {
               status_name: 'in use',
               platform_type_name: 'Station',
               persistent_identifier: 'boeken_BF1',
-              manufacturer_uri: 'manufacturer/xyz'
+              manufacturer_uri: 'manufacturer/xyz',
+              archived: true
             }
           }
         ]
@@ -184,7 +186,8 @@ describe('PlatformMountActionSerializer', () => {
         persistentIdentifier: 'boeken_BF1',
         manufacturerUri: 'manufacturer/xyz',
         updatedByUserId: null,
-        createdByUserId: null
+        createdByUserId: null,
+        archived: true
       })
 
       const expectedCt1 = ContactBasicData.createFromObject({
@@ -207,7 +210,8 @@ describe('PlatformMountActionSerializer', () => {
         startDate: DateTime.utc(2020, 8, 28, 13, 49, 48, 15),
         endDate: DateTime.utc(2020, 8, 29, 13, 49, 48, 15),
         label: 'Tereno NO Boeken',
-        status: 'draft'
+        status: 'draft',
+        archived: true
       })
 
       const expectedPm1 = PlatformMountActionBasicData.createFromObject({

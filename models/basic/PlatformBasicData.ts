@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -59,6 +59,8 @@ export interface IPlatformBasicData {
 
   createdByUserId: number | null
   updatedByUserId: number | null
+
+  archived: boolean
 }
 
 export class PlatformBasicData implements IPlatformBasicData {
@@ -88,6 +90,8 @@ export class PlatformBasicData implements IPlatformBasicData {
 
   private _createdByUserId: number | null = null
   private _updatedByUserId: number | null = null
+
+  private _archived: boolean = false
 
   get id (): string | null {
     return this._id
@@ -241,6 +245,14 @@ export class PlatformBasicData implements IPlatformBasicData {
     this._updatedByUserId = newUpdatedByUserId
   }
 
+  get archived (): boolean {
+    return this._archived
+  }
+
+  set archived (newValue: boolean) {
+    this._archived = newValue
+  }
+
   static createEmpty (): PlatformBasicData {
     return new PlatformBasicData()
   }
@@ -276,6 +288,8 @@ export class PlatformBasicData implements IPlatformBasicData {
 
     newObject.createdByUserId = someObject.createdByUserId
     newObject.updatedByUserId = someObject.updatedByUserId
+
+    newObject.archived = someObject.archived
 
     return newObject
   }

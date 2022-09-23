@@ -86,6 +86,7 @@ export interface PlatformsState {
   selectedSearchPlatformTypes: PlatformType[],
   selectedSearchPermissionGroups: PermissionGroup[],
   onlyOwnPlatforms: boolean,
+  includeArchivedPlatforms: boolean,
   searchText: string | null
   pageNumber: number,
   pageSize: number,
@@ -110,6 +111,7 @@ const state = (): PlatformsState => ({
   selectedSearchPlatformTypes: [],
   selectedSearchPermissionGroups: [],
   onlyOwnPlatforms: false,
+  includeArchivedPlatforms: false,
   searchText: null,
   totalPages: 1,
   pageNumber: 1,
@@ -129,7 +131,8 @@ const getters: GetterTree<PlatformsState, RootState> = {
       states: state.selectedSearchStates,
       types: state.selectedSearchPlatformTypes,
       permissionGroups: state.selectedSearchPermissionGroups,
-      onlyOwnPlatforms: state.onlyOwnPlatforms && isLoggedIn
+      onlyOwnPlatforms: state.onlyOwnPlatforms && isLoggedIn,
+      includeArchivedPlatforms: state.includeArchivedPlatforms
     }
   },
   actions: (state: PlatformsState): ActionsGetter => {
@@ -186,6 +189,8 @@ export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boo
 export type ExportAsCsvAction = () => Promise<Blob>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type DeletePlatformAction = (id: string) => Promise<void>
+export type ArchivePlatformAction = (id: string) => Promise<void>
+export type RestorePlatformAction = (id: string) => Promise<void>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
 export type SetChosenKindOfPlatformActionAction = (newval: IOptionsForActionType | null) => void
@@ -194,7 +199,9 @@ export type SetSelectedSearchStatesAction = (selectedSearchStates: Status[]) => 
 export type SetSelectedSearchPlatformTypesAction = (selectedSearchPlatformTypes: PlatformType[]) => void
 export type SetSelectedSearchPermissionGroupsAction = (selectedSearchPermissionGroups: PermissionGroup[]) => void
 export type SetOnlyOwnPlatformsAction = (onlyOwnPlatforms: boolean) => void
+export type SetIncludeArchivedPlatformsAction = (includeArchivedPlatforms: boolean) => void
 export type SetSearchTextAction = (searchText: string | null) => void
+export type ReplacePlatformInPlatformsAction = (newPlatform: Platform) => void
 
 const actions: ActionTree<PlatformsState, RootState> = {
   async searchPlatformsPaginated ({
@@ -215,6 +222,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedPlatformTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchIncludeArchivedPlatforms(searchParams.includeArchivedPlatforms)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,
@@ -390,10 +398,17 @@ const actions: ActionTree<PlatformsState, RootState> = {
       .setSearchedPlatformTypes(searchParams.types)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchIncludeArchivedPlatforms(searchParams.includeArchivedPlatforms)
       .searchMatchingAsCsvBlob()
   },
   async deletePlatform (_: {}, id: string): Promise<void> {
     await this.$api.platforms.deleteById(id)
+  },
+  async archivePlatform (_, id: string): Promise<void> {
+    await this.$api.platforms.archiveById(id)
+  },
+  async restorePlatform (_, id: string): Promise<void> {
+    await this.$api.platforms.restoreById(id)
   },
   setPageNumber ({ commit }: { commit: Commit }, newPageNumber: number) {
     commit('setPageNumber', newPageNumber)
@@ -419,8 +434,22 @@ const actions: ActionTree<PlatformsState, RootState> = {
   setOnlyOwnPlatforms ({ commit }: { commit: Commit }, onlyOwnPlatforms: boolean) {
     commit('setOnlyOwnPlatforms', onlyOwnPlatforms)
   },
+  setIncludeArchivedPlatforms ({ commit }: { commit: Commit }, includeArchivedPlatforms: boolean) {
+    commit('setIncludeArchivedPlatforms', includeArchivedPlatforms)
+  },
   setSearchText ({ commit }: { commit: Commit }, searchText: string|null) {
     commit('setSearchText', searchText)
+  },
+  replacePlatformInPlatforms ({ commit, state }: {commit: Commit, state: PlatformsState}, newPlatform: Platform) {
+    const result = []
+    for (const oldPlatform of state.platforms) {
+      if (oldPlatform.id !== newPlatform.id) {
+        result.push(oldPlatform)
+      } else {
+        result.push(newPlatform)
+      }
+    }
+    commit('setPlatforms', result)
   }
 
 }
@@ -482,6 +511,9 @@ const mutations = {
   },
   setOnlyOwnPlatforms (state: PlatformsState, onlyOwnPlatforms: boolean) {
     state.onlyOwnPlatforms = onlyOwnPlatforms
+  },
+  setIncludeArchivedPlatforms (state: PlatformsState, includeArchivedPlatforms: boolean) {
+    state.includeArchivedPlatforms = includeArchivedPlatforms
   },
   setSearchText (state: PlatformsState, searchText: string|null) {
     state.searchText = searchText

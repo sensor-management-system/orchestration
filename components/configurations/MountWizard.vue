@@ -74,7 +74,7 @@ permissions and limitations under the Licence.
       </v-stepper-content>
 
       <v-stepper-step
-        :complete="isStep2Complete()"
+        :complete="isStep2Complete() && (!isSelectedNodeAlreadyArchived())"
         editable
         step="2"
         :rules="[rules.validateMountingTimeRange]"
@@ -92,11 +92,21 @@ permissions and limitations under the Licence.
           <v-row class="mb-6">
             <v-btn
               color="primary"
-              :disabled="!isStep2Complete()"
+              :disabled="!isStep2Complete() || isSelectedNodeAlreadyArchived()"
               @click="step++"
             >
               Continue
             </v-btn>
+            <div v-if="isSelectedNodeAlreadyArchived()">
+              <v-tooltip right>
+                <template #activator="{ on, attrs }">
+                  <v-icon v-bind="attrs" v-on="on">
+                    mdi-alert
+                  </v-icon>
+                </template>
+                <span>The selected parent platform is already archived.</span>
+              </v-tooltip>
+            </div>
           </v-row>
         </v-container>
       </v-stepper-content>
@@ -584,6 +594,18 @@ export default class MountWizard extends Vue {
 
   isStep2Complete (): boolean {
     return this.selectedNode !== null && this.rules.validateMountingTimeRange() === true && this.rules.validateMountingDates() === true
+  }
+
+  isSelectedNodeAlreadyArchived (): boolean {
+    if (this.selectedNode !== null) {
+      if (this.selectedNode.isPlatform() && this.selectedNode.unpack().platform.archived) {
+        return true
+      }
+      if (this.selectedNode.isDevice() && this.selectedNode.unpack().device.archived) {
+        return true
+      }
+    }
+    return false
   }
 
   @Watch('selectedDate', {

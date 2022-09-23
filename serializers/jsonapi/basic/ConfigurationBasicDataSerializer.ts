@@ -49,6 +49,7 @@ export class ConfigurationBasicDataSerializer {
 
       configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
       configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
+      configuration.archived = attributes.archived || false
     }
 
     return configuration

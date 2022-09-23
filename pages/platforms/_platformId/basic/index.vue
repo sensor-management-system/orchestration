@@ -57,6 +57,14 @@ permissions and limitations under the Licence.
             v-if="$auth.loggedIn"
             :path="'/platforms/copy/' + platformId"
           />
+          <DotMenuActionArchive
+            :readonly="!archivable"
+            @click="initArchiveDialog"
+          />
+          <DotMenuActionRestore
+            :readonly="!restoreable"
+            @click="runRestore"
+          />
           <DotMenuActionDelete
             v-if="$auth.loggedIn"
             :readonly="!deletable"
@@ -89,6 +97,14 @@ permissions and limitations under the Licence.
             v-if="$auth.loggedIn"
             :path="'/platforms/copy/' + platformId"
           />
+          <DotMenuActionArchive
+            :readonly="!archivable"
+            @click="initArchiveDialog"
+          />
+          <DotMenuActionRestore
+            :readonly="!restoreable"
+            @click="runRestore"
+          />
           <DotMenuActionDelete
             v-if="$auth.loggedIn"
             :readonly="!deletable"
@@ -104,6 +120,13 @@ permissions and limitations under the Licence.
       @cancel-deletion="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
     />
+    <PlatformArchiveDialog
+      v-if="platform"
+      v-model="showArchiveDialog"
+      :platform-to-archive="platform"
+      @cancel-archiving="closeArchiveDialog"
+      @submit-archiving="archiveAndCloseDialog"
+    />
   </div>
 </template>
 
@@ -111,12 +134,15 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { PlatformsState, DeletePlatformAction, ExportAsSensorMLAction } from '@/store/platforms'
+import { PlatformsState, DeletePlatformAction, ArchivePlatformAction, LoadPlatformAction, RestorePlatformAction, ExportAsSensorMLAction } from '@/store/platforms'
 
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
+import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import PlatformArchiveDialog from '@/components/platforms/PlatformArchiveDialog.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -129,12 +155,15 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     DotMenuActionSensorML,
     DotMenuActionCopy,
     DotMenu,
-    PlatformBasicData
+    PlatformBasicData,
+    DotMenuActionArchive,
+    DotMenuActionRestore,
+    PlatformArchiveDialog
   },
   computed: {
     ...mapState('platforms', ['platform'])
   },
-  methods: mapActions('platforms', ['deletePlatform', 'exportAsSensorML'])
+  methods: mapActions('platforms', ['deletePlatform', 'loadPlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML'])
 })
 export default class PlatformShowBasicPage extends Vue {
   @InjectReactive()
@@ -143,12 +172,22 @@ export default class PlatformShowBasicPage extends Vue {
   @InjectReactive()
     deletable!: boolean
 
+  @InjectReactive()
+    archivable!: boolean
+
+  @InjectReactive()
+    restoreable!: boolean
+
   private isSaving = false
   private showDeleteDialog: boolean = false
+  private showArchiveDialog: boolean = false
 
   // vuex definition for typescript check
   platform!: PlatformsState['platform']
+  loadPlatform!: LoadPlatformAction
   deletePlatform!: DeletePlatformAction
+  archivePlatform!: ArchivePlatformAction
+  restorePlatform!: RestorePlatformAction
   exportAsSensorML!: ExportAsSensorMLAction
 
   get platformId () {
@@ -186,6 +225,58 @@ export default class PlatformShowBasicPage extends Vue {
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
+    } finally {
+      this.isSaving = false
+    }
+  }
+
+  initArchiveDialog () {
+    this.showArchiveDialog = true
+  }
+
+  closeArchiveDialog () {
+    this.showArchiveDialog = false
+  }
+
+  async archiveAndCloseDialog () {
+    this.showArchiveDialog = false
+    if (this.platform === null || this.platform.id === null) {
+      return
+    }
+    try {
+      this.isSaving = true
+      await this.archivePlatform(this.platform.id)
+      await this.loadPlatform({
+        platformId: this.platformId,
+        includeContacts: false,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
+      })
+      this.$store.commit('snackbar/setSuccess', 'Platform archived')
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Platform could not be archived')
+    } finally {
+      this.isSaving = false
+      this.showArchiveDialog = false
+    }
+  }
+
+  async runRestore () {
+    if (this.platform === null || this.platform.id === null) {
+      return
+    }
+    this.isSaving = true
+    try {
+      await this.restorePlatform(this.platform.id)
+      await this.loadPlatform({
+        platformId: this.platformId,
+        includeContacts: false,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
+      })
+      this.$store.commit('snackbar/setSuccess', 'Platform restored')
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Platform could not be restored')
     } finally {
       this.isSaving = false
     }

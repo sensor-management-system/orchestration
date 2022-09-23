@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
             <device-property-hierarchy-select
               :value="value.x"
               :devices="devices"
-              :device-select-rules="[rules.required]"
+              :device-select-rules="[rules.required, deviceNotArchived]"
               :property-select-rules="[rules.required]"
               class="required"
               device-select-label="Device that measures x"
@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
             <device-property-hierarchy-select
               :value="value.y"
               :devices="devices"
-              :device-select-rules="[rules.required]"
+              :device-select-rules="[rules.required, deviceNotArchived]"
               :property-select-rules="[rules.required]"
               class="required"
               device-select-label="Device that measures y"
@@ -81,6 +81,7 @@ permissions and limitations under the Licence.
             <device-property-hierarchy-select
               :value="value.z"
               :devices="devices"
+              :device-select-rules="[deviceNotArchived]"
               device-select-label="Device that measures z"
               property-select-label="Measured quantity for z"
               @input="update('z', $event)"
@@ -283,6 +284,16 @@ export default class DynamicLocationActionDataForm extends mixins(Rules) {
       return `The end date can not be after "${dateToDateTimeStringHHMM(this.earliestEndDateOfRelatedDeviceOfDynamicAction(this.value))}" because of a planned unmount.`
     }
     return null
+  }
+
+  deviceNotArchived (device: Device | null) {
+    if (!device) {
+      return true
+    }
+    if (device.archived) {
+      return 'The device must not be archived'
+    }
+    return true
   }
 
   update (key: string, value: any): void {

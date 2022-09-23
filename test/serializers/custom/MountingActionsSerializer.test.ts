@@ -110,7 +110,8 @@ describe('MountingActionsSerializer', () => {
                 status_name: 'in use',
                 platform_type_name: 'Station',
                 persistent_identifier: 'boeken_BF1',
-                manufacturer_uri: 'manufacturer/xyz'
+                manufacturer_uri: 'manufacturer/xyz',
+                archived: false
               },
               relationships: {
                 created_by: {
@@ -174,7 +175,8 @@ describe('MountingActionsSerializer', () => {
                 device_type_name: 'Device',
                 persistent_identifier: 'boeken_BF11',
                 manufacturer_uri: 'manufacturer/xy',
-                dualuse: false
+                dualuse: false,
+                archived: false
               },
               relationships: {
                 created_by: {
@@ -245,6 +247,7 @@ describe('MountingActionsSerializer', () => {
             updatedBy: null,
             permissionGroups: [],
             visibility: Visibility.Internal,
+            archived: false,
             attachments: []
           }),
           parentPlatform: null
@@ -291,7 +294,8 @@ describe('MountingActionsSerializer', () => {
             attachments: [],
             customFields: [],
             properties: [],
-            dualUse: false
+            dualUse: false,
+            archived: false
           }),
           parentPlatform: null
         })
@@ -355,7 +359,8 @@ describe('MountingActionsSerializer', () => {
                 status_name: 'in use',
                 platform_type_name: 'Station',
                 persistent_identifier: 'boeken_BF1',
-                manufacturer_uri: 'manufacturer/xyz'
+                manufacturer_uri: 'manufacturer/xyz',
+                archived: false
               },
               relationships: {
                 created_by: {
@@ -424,7 +429,8 @@ describe('MountingActionsSerializer', () => {
                     device_type_name: 'Device',
                     persistent_identifier: 'boeken_BF11',
                     manufacturer_uri: 'manufacturer/xy',
-                    dualuse: false
+                    dualuse: false,
+                    archived: false
                   },
                   relationships: {
                     created_by: {
@@ -485,6 +491,7 @@ describe('MountingActionsSerializer', () => {
         updatedBy: null,
         permissionGroups: [],
         visibility: Visibility.Internal,
+        archived: false,
         attachments: []
       })
       const deviceMountNode = new DeviceNode(
@@ -524,6 +531,7 @@ describe('MountingActionsSerializer', () => {
             updatedBy: null,
             permissionGroups: [],
             visibility: Visibility.Internal,
+            archived: false,
             attachments: [],
             customFields: [],
             properties: [],
