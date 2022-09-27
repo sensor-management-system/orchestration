@@ -94,8 +94,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   DevicesState,
@@ -127,10 +129,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
   methods: mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment'])
 })
 // @ts-ignore
-export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) {
-  @InjectReactive()
-    editable!: boolean
-
+export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, CheckEditAccess) {
   private isSaving = false
   private isLoading = false
   private valueCopy: Attachment = new Attachment()
@@ -140,6 +139,28 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) 
   loadDeviceAttachment!: LoadDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
   updateDeviceAttachment!: UpdateDeviceAttachmentAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/devices/' + this.deviceId + '/attachments'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this device.'
+  }
 
   async fetch (): Promise<void> {
     try {
@@ -185,17 +206,6 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) 
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
     } finally {
       this.isSaving = false
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/attachments', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
     }
   }
 }

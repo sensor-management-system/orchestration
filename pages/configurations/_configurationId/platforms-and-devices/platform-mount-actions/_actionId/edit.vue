@@ -77,10 +77,12 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
 
 import { RawLocation } from 'vue-router'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   ConfigurationsState,
@@ -120,10 +122,7 @@ import MountActionEditForm from '@/components/configurations/MountActionEditForm
     ...mapActions('contacts', ['loadAllContacts'])
   }
 })
-export default class ConfigurationEditPlatformMountActionsPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class ConfigurationEditPlatformMountActionsPage extends mixins(CheckEditAccess) {
   configuration!: ConfigurationsState['configuration']
   configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
   selectedDate!: ConfigurationsState['selectedDate']
@@ -145,12 +144,26 @@ export default class ConfigurationEditPlatformMountActionsPage extends Vue {
   private endDateErrorMessage: string = ''
   private availabilities: Availability[] = []
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-    }
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/platforms-and-devices'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
   }
 
   async fetch () {

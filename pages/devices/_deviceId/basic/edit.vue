@@ -67,11 +67,13 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { DevicesState, LoadDeviceAction, SaveDeviceAction } from '@/store/devices'
 
@@ -93,11 +95,8 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
   computed: mapState('devices', ['device']),
   methods: mapActions('devices', ['saveDevice', 'loadDevice'])
 })
-export default class DeviceEditBasicPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
-  private deviceCopy: Device = new Device()
+export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
+  private deviceCopy: Device | null = null
   private isSaving: boolean = false
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
@@ -107,6 +106,28 @@ export default class DeviceEditBasicPage extends Vue {
   device!: DevicesState['device']
   saveDevice!: SaveDeviceAction
   loadDevice!: LoadDeviceAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/devices/' + this.deviceId + '/basic'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this device.'
+  }
 
   created () {
     if (this.device) {
@@ -119,10 +140,16 @@ export default class DeviceEditBasicPage extends Vue {
   }
 
   get deviceHasBeenEdited () {
+    if (!this.deviceCopy) {
+      return false
+    }
     return (JSON.stringify(this.device) !== JSON.stringify(this.deviceCopy))
   }
 
   async save () {
+    if (!this.deviceCopy) {
+      return
+    }
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -158,17 +185,6 @@ export default class DeviceEditBasicPage extends Vue {
       }
     } else {
       return next()
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
     }
   }
 }
