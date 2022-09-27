@@ -72,8 +72,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   LoadDeviceCalibrationActionAction,
@@ -101,10 +103,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   computed: mapState('devices', ['deviceCalibrationAction', 'deviceAttachments', 'deviceMeasuredQuantities']),
   methods: mapActions('devices', ['loadDeviceCalibrationAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'loadDeviceMeasuredQuantities', 'updateDeviceCalibrationAction'])
 })
-export default class DeviceCalibrationActionEditPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAccess) {
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()
   private isSaving = false
   private isLoading = false
@@ -118,6 +117,28 @@ export default class DeviceCalibrationActionEditPage extends Vue {
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
   updateDeviceCalibrationAction!: UpdateDeviceCalibrationAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/devices/' + this.deviceId + '/actions'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this device.'
+  }
 
   async fetch (): Promise<void> {
     try {
@@ -167,17 +188,6 @@ export default class DeviceCalibrationActionEditPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
       this.isLoading = false
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/actions', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
     }
   }
 }

@@ -70,10 +70,12 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { PlatformsState, LoadPlatformAction, SavePlatformAction } from '@/store/platforms'
 
@@ -95,11 +97,8 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
   computed: mapState('platforms', ['platform']),
   methods: mapActions('platforms', ['loadPlatform', 'savePlatform'])
 })
-export default class PlatformEditBasicPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
-  private platformCopy: Platform = new Platform()
+export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
+  private platformCopy: Platform | null = null
   private isSaving: boolean = false
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
@@ -109,6 +108,28 @@ export default class PlatformEditBasicPage extends Vue {
   platform!: PlatformsState['platform']
   savePlatform!: SavePlatformAction
   loadPlatform!: LoadPlatformAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/platforms/' + this.platformId + '/basic'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this platform.'
+  }
 
   created () {
     if (this.platform) {
@@ -121,10 +142,16 @@ export default class PlatformEditBasicPage extends Vue {
   }
 
   get platformHasBeenEdited () {
+    if (!this.platformCopy) {
+      return false
+    }
     return (JSON.stringify(this.platform) !== JSON.stringify(this.platformCopy))
   }
 
   async save () {
+    if (!this.platformCopy) {
+      return
+    }
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -161,17 +188,6 @@ export default class PlatformEditBasicPage extends Vue {
       }
     } else {
       return next()
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/platforms/' + this.platformId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
-      })
     }
   }
 }

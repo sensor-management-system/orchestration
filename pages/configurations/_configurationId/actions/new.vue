@@ -60,8 +60,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { ConfigurationActionTypeItemsGetter, LoadConfigurationGenericActionTypesAction } from '@/store/vocabulary'
 import {
@@ -84,10 +86,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ...mapActions('configurations', ['setChosenKindOfConfigurationAction', 'loadConfigurationAttachments'])
   }
 })
-export default class ActionAddPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class ActionAddPage extends mixins(CheckEditAccess) {
   private isLoading: boolean = false
 
   // vuex definition for typescript check
@@ -98,12 +97,26 @@ export default class ActionAddPage extends Vue {
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   setChosenKindOfConfigurationAction!: SetChosenKindOfConfigurationActionAction
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/actions', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-    }
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/actions'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
   }
 
   async fetch (): Promise<void> {

@@ -73,8 +73,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   PlatformsState,
@@ -101,10 +103,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   computed: mapState('platforms', ['platformGenericAction', 'platformAttachments']),
   methods: mapActions('platforms', ['loadPlatformGenericAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformGenericAction'])
 })
-export default class EditPlatformAction extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class EditPlatformAction extends mixins(CheckEditAccess) {
   private action: GenericAction = new GenericAction()
   private isSaving = false
   private isLoading = false
@@ -116,6 +115,28 @@ export default class EditPlatformAction extends Vue {
   loadPlatformGenericAction!: LoadPlatformGenericActionAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
   updatePlatformGenericAction!: UpdatePlatformGenericActionAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/platforms/' + this.platformId + '/actions'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this platform.'
+  }
 
   async fetch (): Promise<void> {
     try {
@@ -162,17 +183,6 @@ export default class EditPlatformAction extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
       this.isSaving = false
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/platforms/' + this.platformId + '/actions', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
-      })
     }
   }
 }

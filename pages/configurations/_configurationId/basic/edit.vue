@@ -74,11 +74,12 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
 import { mapActions, mapState } from 'vuex'
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { SetTitleAction } from '@/store/appbar'
 
@@ -98,10 +99,7 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
     ...mapActions('appbar', ['setTitle'])
   }
 })
-export default class ConfigurationEditBasicPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) {
   private configurationCopy: Configuration = new Configuration()
   private isLoading: boolean = false
   private hasSaved: boolean = false
@@ -113,6 +111,28 @@ export default class ConfigurationEditBasicPage extends Vue {
   saveConfiguration!: (configuration: Configuration) => void
   loadConfiguration!: (id: string) => void
   setTitle!: SetTitleAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/basic'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
+  }
 
   created () {
     if (this.configuration) {
@@ -170,17 +190,6 @@ export default class ConfigurationEditBasicPage extends Vue {
   onConfigurationChanged (value: Configuration | null): void {
     if (value) {
       this.configurationCopy = Configuration.createFromObject(value)
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined): void {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/configurations/' + this.configurationId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
     }
   }
 }

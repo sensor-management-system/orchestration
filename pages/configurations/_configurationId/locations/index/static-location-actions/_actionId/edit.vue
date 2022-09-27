@@ -56,8 +56,9 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 import {
@@ -76,10 +77,7 @@ import StaticLocationActionDataForm from '@/components/configurations/StaticLoca
     ...mapActions('configurations', ['loadStaticLocationAction', 'updateStaticLocationAction', 'loadLocationActionTimepoints'])
   }
 })
-export default class StaticLocationActionEdit extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class StaticLocationActionEdit extends mixins(CheckEditAccess) {
   private valueCopy: StaticLocationAction = new StaticLocationAction()
   private isSaving: boolean = false
   private isLoading: boolean = false
@@ -90,13 +88,29 @@ export default class StaticLocationActionEdit extends Vue {
   updateStaticLocationAction!: UpdateStaticLocationActionAction
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
 
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/locations'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
+  }
+
   async created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/locations', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-      return
-    }
     try {
       this.isLoading = true
       await this.loadStaticLocationAction(this.actionId)

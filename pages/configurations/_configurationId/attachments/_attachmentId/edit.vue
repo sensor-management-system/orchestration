@@ -96,8 +96,9 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, mixins, Watch } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   ConfigurationsState,
@@ -129,10 +130,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
   methods: mapActions('configurations', ['loadConfigurationAttachment', 'loadConfigurationAttachments', 'updateConfigurationAttachment'])
 })
 // @ts-ignore
-export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) {
-  @InjectReactive()
-    editable!: boolean
-
+export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, CheckEditAccess) {
   private isSaving = false
   private isLoading = false
   private valueCopy: Attachment = new Attachment()
@@ -143,12 +141,26 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) 
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   updateConfigurationAttachment!: UpdateConfigurationAttachmentAction
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/attachments', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-    }
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/attachments'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
   }
 
   async fetch (): Promise<void> {
