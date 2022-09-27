@@ -144,10 +144,10 @@ permissions and limitations under the Licence.
               <permission-info :value="true" label="edit" />
             </v-col>
             <v-col>
-              <permission-info :value="false" label="archive" />
+              <permission-info :value="true" label="archive" />
             </v-col>
             <v-col>
-              <permission-info :value="false" label="restore" />
+              <permission-info :value="true" label="restore" />
             </v-col>
             <v-col>
               <permission-info :value="false" label="delete" />
