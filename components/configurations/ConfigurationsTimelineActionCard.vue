@@ -187,6 +187,16 @@ permissions and limitations under the Licence.
               {{ action.description | orDefault }}
             </v-col>
           </v-row>
+          <v-row v-if="action.genericAction && action.genericAction.attachments.length > 0" dense>
+            <v-col>
+              <label>Attachments</label>
+              <div v-for="(attachment, index) in action.genericAction.attachments" :key="index">
+                <v-icon small class="text-decoration-none">
+                  mdi-open-in-new
+                </v-icon> <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
+              </div>
+            </v-col>
+          </v-row>
         </div>
       </template>
     </base-expandable-list-item>
