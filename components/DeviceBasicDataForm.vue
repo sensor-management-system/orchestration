@@ -41,7 +41,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="6">
         <visibility-switch
           :value="value.visibility"
-          :rules="[pageRules.validateVisibility]"
+          :rules="privateRules"
           :readonly="readonly"
           :entity-name="entityName"
           @input="update('visibility', $event)"
@@ -49,7 +49,6 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="6">
         <permission-group-select
-          v-show="!value.isPrivate"
           :value="value.permissionGroups"
           :readonly="readonly"
           :entity-name="entityName"
@@ -339,9 +338,14 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
 
   get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
     return {
-      validateVisibility: Validator.validateVisibility(this.value.permissionGroups, this.entityName),
       validatePermissionGroups: Validator.validatePermissionGroups(this.value.isPrivate, this.entityName)
     }
+  }
+
+  get privateRules () {
+    return [
+      Validator.validateVisibility(this.value.visibility, this.value.permissionGroups, this.entityName)
+    ]
   }
 
   mounted () {

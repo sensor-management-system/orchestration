@@ -190,17 +190,16 @@ export default {
    *
    * If the entity is private, then it is not allowed to have permission groups.
    *
+   * @param {Visibility} visibility - the visibility of the entity
    * @param {PermissionGroup[]} groups - the permission groups of the entity
    * @param {string} entityName - the entity name
-   * @returns {(visibility: Visibility) => boolean | string} a function that validates the visibility of an entity
+   * @returns string or boolean that informs the user that he can't set a group in private visibility
    */
-  validateVisibility (groups: IPermissionGroup[], entityName: string): (visibility: Visibility) => boolean | string {
-    return function (visibility: Visibility) {
-      if (visibility === Visibility.Private && groups.length) {
-        return `You are not allowed to set the visibility to private as long as the ${entityName} has permission groups.`
-      }
-      return true
+  validateVisibility (visibility: Visibility, groups: IPermissionGroup[], entityName: string): boolean | string {
+    if (visibility === Visibility.Private && groups.length) {
+      return `You are not allowed to set the visibility to private as long as the ${entityName} has permission groups.`
     }
+    return true
   },
   canNotStartAnActionAfterAnActiveAction (dateToValidate: DateTime | null, locationTimepoints: ILocationTimepoint[]) {
     const activeAction = getActiveActionOrNull(locationTimepoints)
