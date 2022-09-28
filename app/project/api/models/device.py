@@ -27,7 +27,7 @@ class Device(
     long_name = db.Column(db.String(256), nullable=True)
     serial_number = db.Column(db.String(256), nullable=True)
     manufacturer_uri = db.Column(db.String(256), nullable=True)
-    manufacturer_name = db.Column(db.String(256), nullable=False)
+    manufacturer_name = db.Column(db.String(256), nullable=True)
     dual_use = db.Column(db.Boolean, default=False)
     model = db.Column(db.String(256), nullable=True)
     inventory_number = db.Column(db.String(256), nullable=True)
