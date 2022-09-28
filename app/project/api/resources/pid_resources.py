@@ -225,64 +225,64 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> (list, obje
         instrument = (
             db.session.query(Device).filter_by(id=instrument_instance["id"]).first()
         )
-        role = (
-            db.session.query(DeviceContactRole)
-            .filter(
-                and_(
-                    DeviceContactRole.device_id == instrument_instance["id"],
-                    DeviceContactRole.role_name == "Owner",
-                )
-            )
-            .first()
-        )
+        # role = (
+        #     db.session.query(DeviceContactRole)
+        #     .filter(
+        #         and_(
+        #             DeviceContactRole.device_id == instrument_instance["id"],
+        #             DeviceContactRole.role_name == "Owner",
+        #         )
+        #     )
+        #     .first()
+        # )
     elif instrument_instance["type"] == "platform":
         instrument = (
             db.session.query(Platform).filter_by(id=instrument_instance["id"]).first()
         )
-        role = (
-            db.session.query(PlatformContactRole)
-            .filter_by(platform_id=instrument_instance["id"], role_name="Owner")
-            .first()
-        )
+        # role = (
+        #     db.session.query(PlatformContactRole)
+        #     .filter_by(platform_id=instrument_instance["id"], role_name="Owner")
+        #     .first()
+        # )
     else:
         raise BadRequestError("Type Not Implemented.")
     try:
         instrument_data = [
             {"type": "URL", "parsed_data": instrument_instance["source_uri"]},
-            {"type": "LandingPage", "parsed_data": instrument_instance["source_uri"]},
-            {"type": "Identifier", "parsed_data": str(instrument.id)},
-            {"type": "IdentifierType", "parsed_data": instrument.identifier_type},
-            {"type": "SchemaVersion", "parsed_data": instrument.schema_version},
-            {"type": "Name", "parsed_data": instrument.short_name},
-            {"type": "Owner", "parsed_data": role.contact.email},
-            {
-                "type": "OwnerName",
-                "parsed_data": f"{role.contact.given_name} {role.contact.family_name}",
-            },
-            {"type": "Manufacturer", "parsed_data": instrument.manufacturer_uri},
-            {
-                "type": "Description",
-                "parsed_data": instrument.description if hasattr(instrument, 'description') else None
-            },
-            {"type": "ManufacturerName", "parsed_data": instrument.manufacturer_name},
-            {"type": "Model", "parsed_data": instrument.model if hasattr(instrument, 'model') else None},
-            {"type": "Modelname", "parsed_data": instrument.modelname if hasattr(instrument, 'modelname') else None},
-            {
-                "type": "AlternateIdentifier",
-                "parsed_data": instrument.alternateidentifier if hasattr(instrument,'alternateidentifier') else None
-            },
-            {
-                "type": "InstrumentType",
-                "parsed_data": instrument.instrumenttype if hasattr(instrument, 'instrumenttype') else None
-            },
-            {
-                "type": "InstrumentTypeName",
-                "parsed_data": instrument.instrumenttypename if hasattr(instrument, 'instrumenttypename') else None
-            },
-            {
-                "type": "MeasuredVariable",
-                "parsed_data": instrument.measuredvariable if hasattr(instrument, "measuredvariable") else None
-            }
+            # {"type": "LandingPage", "parsed_data": instrument_instance["source_uri"]},
+            # {"type": "Identifier", "parsed_data": str(instrument.id)},
+            # {"type": "IdentifierType", "parsed_data": instrument.identifier_type},
+            # {"type": "SchemaVersion", "parsed_data": instrument.schema_version},
+            # {"type": "Name", "parsed_data": instrument.short_name},
+            # {"type": "Owner", "parsed_data": role.contact.email},
+            # {
+            #     "type": "OwnerName",
+            #     "parsed_data": f"{role.contact.given_name} {role.contact.family_name}",
+            # },
+            # {"type": "Manufacturer", "parsed_data": instrument.manufacturer_uri},
+            # {
+            #     "type": "Description",
+            #     "parsed_data": instrument.description if hasattr(instrument, 'description') else None
+            # },
+            # {"type": "ManufacturerName", "parsed_data": instrument.manufacturer_name},
+            # {"type": "Model", "parsed_data": instrument.model if hasattr(instrument, 'model') else None},
+            # {"type": "Modelname", "parsed_data": instrument.modelname if hasattr(instrument, 'modelname') else None},
+            # {
+            #     "type": "AlternateIdentifier",
+            #     "parsed_data": instrument.alternateidentifier if hasattr(instrument,'alternateidentifier') else None
+            # },
+            # {
+            #     "type": "InstrumentType",
+            #     "parsed_data": instrument.instrumenttype if hasattr(instrument, 'instrumenttype') else None
+            # },
+            # {
+            #     "type": "InstrumentTypeName",
+            #     "parsed_data": instrument.instrumenttypename if hasattr(instrument, 'instrumenttypename') else None
+            # },
+            # {
+            #     "type": "MeasuredVariable",
+            #     "parsed_data": instrument.measuredvariable if hasattr(instrument, "measuredvariable") else None
+            # }
         ]
     except AttributeError as e:
         raise BadRequestError(repr(e))
@@ -302,62 +302,62 @@ def make_instrument_data_from_request(instrument_data: dict) -> list:
     try:
         instrument_data = [
             {"type": "URL", "parsed_data": instrument_data["source_object_url"]},
-            {
-                "type": "LandingPage",
-                "parsed_data": instrument_data["source_object_url"],
-            },
-            {"type": "Identifier", "parsed_data": str(instrument_data["id"])},
-            {
-                "type": "IdentifierType",
-                "parsed_data": instrument_data["identifier_type"],
-            },
-            {
-                "type": "SchemaVersion",
-                "parsed_data": instrument_data["schema_version"],
-            },
-            {"type": "Name", "parsed_data": instrument_data["short_name"]},
-            {"type": "Owner", "parsed_data": instrument_data["contact_email"]},
-            {
-                "type": "OwnerName",
-                "parsed_data": f"{instrument_data['given_name']} {instrument_data['family_name']}",
-            },
-            {
-                "type": "Manufacturer",
-                "parsed_data": instrument_data["manufacturer_uri"],
-            },
-            {
-                "type": "Description",
-                "parsed_data": instrument_data["description"] if hasattr(instrument_data, 'description') else None
-            },
-            {
-                "type": "ManufacturerName",
-                "parsed_data": instrument_data["manufacturer_name"],
-            },
-            {"type": "Model", "parsed_data": instrument_data["model"] if hasattr(instrument_data, 'model') else None},
-            {
-                "type": "Modelname",
-                "parsed_data": instrument_data["modelname"] if hasattr(instrument_data, 'modelname') else None
-            },
-            {
-                "type": "AlternateIdentifier",
-                "parsed_data": instrument_data["alternateidentifier"] if hasattr(instrument_data, 'alternateidentifier')
-                else None
-            },
-            {
-                "type": "InstrumentType",
-                "parsed_data": instrument_data["instrumenttype"] if hasattr(instrument_data, 'instrumenttype')
-                else None
-            },
-            {
-                "type": "InstrumentTypeName",
-                "parsed_data": instrument_data["instrumenttypename"] if hasattr(instrument_data, 'instrumenttypename')
-                else None
-            },
-            {
-                "type": "MeasuredVariable",
-                "parsed_data": instrument_data["measuredvariable"] if hasattr(instrument_data, "measuredvariable")
-                else None
-            }
+            # {
+            #     "type": "LandingPage",
+            #     "parsed_data": instrument_data["source_object_url"],
+            # },
+            # {"type": "Identifier", "parsed_data": str(instrument_data["id"])},
+            # {
+            #     "type": "IdentifierType",
+            #     "parsed_data": instrument_data["identifier_type"],
+            # },
+            # {
+            #     "type": "SchemaVersion",
+            #     "parsed_data": instrument_data["schema_version"],
+            # },
+            # {"type": "Name", "parsed_data": instrument_data["short_name"]},
+            # {"type": "Owner", "parsed_data": instrument_data["contact_email"]},
+            # {
+            #     "type": "OwnerName",
+            #     "parsed_data": f"{instrument_data['given_name']} {instrument_data['family_name']}",
+            # },
+            # {
+            #     "type": "Manufacturer",
+            #     "parsed_data": instrument_data["manufacturer_uri"],
+            # },
+            # {
+            #     "type": "Description",
+            #     "parsed_data": instrument_data["description"] if hasattr(instrument_data, 'description') else None
+            # },
+            # {
+            #     "type": "ManufacturerName",
+            #     "parsed_data": instrument_data["manufacturer_name"],
+            # },
+            # {"type": "Model", "parsed_data": instrument_data["model"] if hasattr(instrument_data, 'model') else None},
+            # {
+            #     "type": "Modelname",
+            #     "parsed_data": instrument_data["modelname"] if hasattr(instrument_data, 'modelname') else None
+            # },
+            # {
+            #     "type": "AlternateIdentifier",
+            #     "parsed_data": instrument_data["alternateidentifier"] if hasattr(instrument_data, 'alternateidentifier')
+            #     else None
+            # },
+            # {
+            #     "type": "InstrumentType",
+            #     "parsed_data": instrument_data["instrumenttype"] if hasattr(instrument_data, 'instrumenttype')
+            #     else None
+            # },
+            # {
+            #     "type": "InstrumentTypeName",
+            #     "parsed_data": instrument_data["instrumenttypename"] if hasattr(instrument_data, 'instrumenttypename')
+            #     else None
+            # },
+            # {
+            #     "type": "MeasuredVariable",
+            #     "parsed_data": instrument_data["measuredvariable"] if hasattr(instrument_data, "measuredvariable")
+            #     else None
+            # }
         ]
     except KeyError as e:
         raise BadRequestError(repr(e))
