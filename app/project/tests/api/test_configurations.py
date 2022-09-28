@@ -170,18 +170,21 @@ class TestConfigurationsService(BaseTestCase):
         # in test_add_configuration_model
         platform1 = Platform(
             short_name="Platform 1",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform2 = Platform(
             short_name="Platform 2",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         platform3 = Platform(
             short_name="Platform 3",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -193,18 +196,21 @@ class TestConfigurationsService(BaseTestCase):
 
         device1 = Device(
             short_name="Device 1",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device2 = Device(
             short_name="Device 2",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device3 = Device(
             short_name="Device 3",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
