@@ -6,7 +6,7 @@
                     xmlns:gco="http://www.isotc211.org/2005/gco"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xmlns:xlink="http://www.w3.org/1999/xlink"
-                    xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorml/2.0/sensorML.xsd">
+                    xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 https://schemas.opengis.net/sensorML/2.0/sensorML.xsd">
     {% block description %}
     {% if obj.description %}
     <!-- ========================================================================= -->
@@ -132,25 +132,9 @@
     </sml:documentation>
     {% endif %}
     {% endblock %}
-    {% block contacts %}
-    <!-- ========================================================================= -->
-    <!--                 Contacts                                                  -->
-    <!-- ========================================================================= -->
-    <sml:contacts>
-        <sml:ContactList>
-            {% for contact in obj.contacts %}
-            <sml:contact xlink:arcrole="http://sensorml.com/ont/swe/property/Manufacturer">
-                <gmd:CI_ResponsibleParty>
-                    <gmd:individualName>
-                        <gco:CharacterString>{{contact.given_name}} {{contact.family_name}}</gco:CharacterString>
-                    </gmd:individualName>
-                    {% block contcat_role %}{% endblock %}
-                </gmd:CI_ResponsibleParty>
-            </sml:contact>
-            {% endfor %}
-        </sml:ContactList>
-    </sml:contacts>
-    {% endblock %}
+
+    {% include 'contact_sensorml_template.xml' %}
+
     {% block outputs %}{% endblock %}
     {% block history %}{% endblock %}
 </sml:PhysicalSystem>

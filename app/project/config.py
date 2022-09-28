@@ -43,10 +43,11 @@ class BaseConfig:
     OIDC_TOKEN_CACHING_SECONDS = env.int("OIDC_TOKEN_CACHING_SECONDS", 600)
     PKCE_SCOPES = env("PKCE_SCOPES", "openid profile email auth_context")
     PKCE_CLIENT_ID = env("PKCE_CLIENT_ID", "rdmsms-pkce-flow")
-    SMS_BACKEND_URL = env("SMS_BACKEND_URL", "https://localhost.localdomain"
+    SMS_BACKEND_URL = env(
+        "SMS_BACKEND_URL", "https://localhost.localdomain"
     )
-    SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain"
-    )
+    SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain")
+    CV_URL = env("CV_URL", "https://localhost.localdomain/backend/api/v1")
     # PID service
     PID_SERVICE_URL = env(
         "PID_SERVICE_URL", "http://vm04.pid.gwdg.de:8081/handles/21.T11998/"
