@@ -183,7 +183,7 @@ describe('DeviceSerializer', () => {
             dual_use: false,
             persistent_identifier: null,
             manufacturer_uri: null,
-            archived: true
+            archived: false
           },
           relationships: {
             updated_by: {
@@ -395,7 +395,7 @@ describe('DeviceSerializer', () => {
             dual_use: false,
             persistent_identifier: '0000001',
             manufacturer_uri: null,
-            archived: true
+            archived: false
           },
           relationships: {
             updated_by: {
@@ -948,7 +948,7 @@ describe('DeviceSerializer', () => {
           dual_use: false,
           persistent_identifier: '0000001',
           manufacturer_uri: null,
-          archived: true
+          archived: false
         },
         relationships: {
           updated_by: {

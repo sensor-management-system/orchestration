@@ -131,6 +131,8 @@ export class DeviceSerializer {
         result.visibility = Visibility.Public
       }
 
+      result.archived = attributes.archived || false
+
       if (result.persistentIdentifier && this._PID_BASE_URL) {
         result.persistentIdentifierUrl = this._PID_BASE_URL + '/' + result.persistentIdentifier
       }
