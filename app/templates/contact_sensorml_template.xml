@@ -1,0 +1,30 @@
+<!-- ========================================================================= -->
+<!--                 Contacts                                                  -->
+<!-- ========================================================================= -->
+<sml:contacts>
+    <sml:ContactList>
+        {% for contact_role in contact_roles %}
+        <sml:contact {% if contact_role.role_uri %}xlink:arcrole="{{contact_role.role_uri}}"{% endif %}>
+            <gmd:CI_ResponsibleParty>
+                <gmd:individualName>
+                    <gco:CharacterString>{{contact_role.contact.given_name}} {{contact_role.contact.family_name}}</gco:CharacterString>
+                </gmd:individualName>
+                <gmd:contactInfo>
+                  <gmd:CI_Contact>
+                    <gmd:address>
+                      <gmd:CI_Address>
+                        <gmd:electronicMailAddress>
+                          <gco:CharacterString>{{contact_role.contact.email}}</gco:CharacterString>
+                        </gmd:electronicMailAddress>
+                      </gmd:CI_Address>
+                    </gmd:address>
+                  </gmd:CI_Contact>
+                </gmd:contactInfo>
+                <gmd:role>
+                    <gmd:CI_RoleCode codeList="{{cv_url}}/contactroles" codeListValue="{{contact_role.role_uri.strip("/").split("/")[-1] if contact_role.role_uri else ""}}">{{contact_role.role_name}}</gmd:CI_RoleCode>
+                </gmd:role>
+            </gmd:CI_ResponsibleParty>
+        </sml:contact>
+        {% endfor %}
+    </sml:ContactList>
+</sml:contacts>

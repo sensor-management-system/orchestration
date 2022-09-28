@@ -109,4 +109,5 @@ def create_app():
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.trim_blocks = True
     app.register_blueprint(sensor_ml_routes)
+
     return app
