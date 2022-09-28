@@ -99,8 +99,8 @@ services:
       DJANGO_DB_PORT: 5432
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
-      VO_ADMIN_CONVENTIONS: '*:gfz.sms.admin'
-      VO_MEMBER_CONVENTIONS: '*:datahub.default.member'
+      VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'
+      VO_MEMBER_CONVENTIONS: '*:gfz-sms-member'
     volumes:
       - idl-static-files:/static/idl
     networks:
@@ -201,6 +201,9 @@ services:
       ELASTICSEARCH_URL: http://elastic-search:9200
       HTTP_ORIGINS: ${HTTP_ORIGINS}
       CV_URL: https://rz-vm64.gfz-potsdam.de/cv/api/v1
+      SMS_BACKEND_URL: /backend/api/v1
+      PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
+      PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: gfz
     depends_on:
       - backend-db
