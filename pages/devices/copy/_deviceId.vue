@@ -7,6 +7,7 @@ Copyright (C) 2022
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -88,6 +89,10 @@ permissions and limitations under the Licence.
         :serial-number-placeholder="serialNumberPlaceholder"
         :inventory-number-placeholder="inventoryNumberPlaceholder"
       />
+      <NonModelOptionsForm
+        v-model="copyOptions"
+        :entity="deviceToCopy"
+      />
       <v-alert
         border="left"
         colored-border
@@ -139,19 +144,21 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
-import { LoadDeviceAction, CopyDeviceAction, DevicesState } from '@/store/devices'
+import { LoadDeviceAction, CopyDeviceAction, DevicesState, CreatePidAction } from '@/store/devices'
 
 import { Device } from '@/models/Device'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     DeviceBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: {
@@ -159,7 +166,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ...mapState('devices', ['device'])
   },
   methods: {
-    ...mapActions('devices', ['copyDevice', 'loadDevice']),
+    ...mapActions('devices', ['copyDevice', 'loadDevice', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
@@ -168,6 +175,9 @@ export default class DeviceCopyPage extends Vue {
   private deviceToCopy: Device = new Device()
   private isSaving = false
   private isLoading = false
+  private copyOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   private copyContacts: boolean = true
   private copyMeasuredQuantities: boolean = true
@@ -187,6 +197,7 @@ export default class DeviceCopyPage extends Vue {
   copyDevice!: CopyDeviceAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  createPid!: CreatePidAction
 
   async created () {
     this.initializeAppBar()

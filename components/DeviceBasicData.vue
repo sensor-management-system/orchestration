@@ -2,11 +2,14 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -48,7 +51,32 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="6">
         <label>Persistent identifier (PID)</label>
-        {{ value.persistentIdentifier | orDefault }}
+        <v-tooltip
+          :disabled="!value.persistentIdentifier"
+          :color="pidTooltipColor"
+          bottom
+        >
+          <template #activator="{ on, attrs }">
+            <span
+              class="clickable"
+              v-bind="attrs"
+              v-on="on"
+              @click="copyPidToClipboard"
+              @mouseenter="resetPidTooltip"
+            >{{ value.persistentIdentifier | orDefault }}</span>
+          </template>
+          <span>{{ pidTooltipText }}</span>
+        </v-tooltip>
+        <a
+          v-if="value.persistentIdentifier"
+          :href="value.persistentIdentifierUrl"
+          target="_blank"
+          class="text-decoration-none"
+        >
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
     </v-row>
     <v-row>
@@ -142,6 +170,8 @@ export default class DeviceBasicData extends Vue {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
   private deviceTypes: DeviceType[] = []
+  private pidTooltipText: string = 'Copy PID-URL'
+  private pidTooltipColor: string = 'default'
 
   @Prop({
     default: () => new Device(),
@@ -207,9 +237,35 @@ export default class DeviceBasicData extends Vue {
   get deviceURN () {
     return createDeviceUrn(this.value, this.manufacturers)
   }
+
+  /**
+   * copies the PID-URL to the clipboard and changes the tooltip's text and color
+   *
+   * @returns {void}
+   */
+  copyPidToClipboard (): void {
+    if (!this.value.persistentIdentifier) { return }
+    navigator.clipboard.writeText(this.value.persistentIdentifierUrl)
+    this.pidTooltipText = 'Copied!'
+    this.pidTooltipColor = 'green'
+  }
+
+  /**
+   * resets the PID tooltip's color and text
+   *
+   * @returns {void}
+   */
+  resetPidTooltip (): void {
+    this.pidTooltipText = 'Click to copy PID-URL'
+    this.pidTooltipColor = 'default'
+  }
 }
 </script>
 
 <style lang="scss">
 @import "@/assets/styles/_readonly_views.scss";
+
+.clickable {
+    cursor: pointer;
+}
 </style>

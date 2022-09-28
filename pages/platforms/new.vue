@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -52,6 +53,10 @@ permissions and limitations under the Licence.
         ref="basicForm"
         v-model="platform"
       />
+      <NonModelOptionsForm
+        v-model="createOptions"
+        :entity="platform"
+      />
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
@@ -69,11 +74,12 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
-import { SavePlatformAction } from '@/store/platforms'
+import { CreatePidAction, SavePlatformAction } from '@/store/platforms'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 import { Platform } from '@/models/Platform'
 
@@ -81,11 +87,12 @@ import { Platform } from '@/models/Platform'
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   methods: {
-    ...mapActions('platforms', ['savePlatform']),
+    ...mapActions('platforms', ['savePlatform', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
@@ -93,11 +100,15 @@ import { Platform } from '@/models/Platform'
 export default class PlatformNewPage extends Vue {
   private platform: Platform = new Platform()
   private isLoading: boolean = false
+  private createOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   savePlatform!: SavePlatformAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  createPid!: CreatePidAction
 
   created () {
     this.initializeAppBar()
@@ -112,6 +123,9 @@ export default class PlatformNewPage extends Vue {
     try {
       this.isLoading = true
       const savedPlatform = await this.savePlatform(this.platform)
+      if (this.createOptions.persistentIdentifierShouldBeCreated) {
+        savedPlatform.persistentIdentifier = await this.createPid(savedPlatform.id)
+      }
       this.$store.commit('snackbar/setSuccess', 'Platform created')
       this.$router.push('/platforms/' + savedPlatform.id)
     } catch (e) {

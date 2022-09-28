@@ -60,6 +60,7 @@ export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationI
   serialNumber: string
   website: string
   persistentIdentifier: string
+  persistentIdentifierUrl: string
 
   archived: boolean
 
@@ -107,6 +108,8 @@ export class Platform implements IPlatform, IVisible {
   private _serialNumber: string = ''
   private _website: string = ''
   private _persistentIdentifier: string = ''
+  private _persistentIdentifierUrl: string = ''
+
   private _archived: boolean = false
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -251,6 +254,14 @@ export class Platform implements IPlatform, IVisible {
     this._persistentIdentifier = newPersistentIdentifier
   }
 
+  get persistentIdentifierUrl (): string {
+    return this._persistentIdentifierUrl
+  }
+
+  set persistentIdentifierUrl (persistentIdentifierUrl: string) {
+    this._persistentIdentifierUrl = persistentIdentifierUrl
+  }
+
   get createdAt (): DateTime | null {
     return this._createdAt
   }
@@ -376,6 +387,7 @@ export class Platform implements IPlatform, IVisible {
     newObject.serialNumber = someObject.serialNumber
     newObject.website = someObject.website
     newObject.persistentIdentifier = someObject.persistentIdentifier
+    newObject.persistentIdentifierUrl = someObject.persistentIdentifierUrl
 
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt

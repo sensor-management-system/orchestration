@@ -53,7 +53,6 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :entity-name="entityName"
           :rules="[pageRules.validatePermissionGroups]"
-          required
           @input="update('permissionGroups', $event)"
         />
       </v-col>
@@ -70,11 +69,22 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="6">
         <v-text-field
           :value="value.persistentIdentifier"
+          readonly
           disabled
           label="Persistent identifier (PID)"
           :placeholder="persistentIdentifierPlaceholder"
-          @input="update('persistentIdentifier', $event)"
-        />
+        >
+          <template #append>
+            <a
+              v-if="value.persistentIdentifier"
+              :href="value.persistentIdentifierUrl"
+              target="_blank"
+              class="text-decoration-none"
+            >
+              <v-icon small> mdi-open-in-new </v-icon>
+            </a>
+          </template>
+        </v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -290,7 +300,7 @@ import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 import Validator from '@/utils/validator'
 
-type StatusSelectValue = Status | string | undefined
+type StatusSelectValue = Status | string | undefined;
 
 @Component({
   components: {
@@ -370,9 +380,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     const newObj = Device.createFromObject(this.value)
 
     switch (key) {
-      case 'persistentIdentifier':
-        newObj.persistentIdentifier = value as string
-        break
       case 'shortName':
         newObj.shortName = value as string
         break

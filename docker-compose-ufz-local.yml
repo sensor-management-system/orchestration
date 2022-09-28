@@ -42,6 +42,7 @@ services:
       INSTITUTE: "ufz"
       SMS_BACKEND_URL: "http://localhost:5000/rdm/svm-api/v1"
       CV_BACKEND_URL: "http://localhost:8000/api/v1"
+      NUXT_ENV_PID_BASE_URL: "https://hdl.handle.net"
       NUXT_ENV_CLIENT_ID: "rdmsms-pkce-flow"
       NUXT_ENV_OIDC_WELL_KNOWN: "https://webapp-stage.intranet.ufz.de/idp/oidc/v1/.well-known/openid-configuration"
       NUXT_ENV_SCOPE: "openid profile email offline_access"

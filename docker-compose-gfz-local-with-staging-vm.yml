@@ -45,6 +45,7 @@ services:
       SMS_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:3001/backend/api/v1"
       CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:3001/cv/api/v1"
       IDL_SYNC_URL: "http://rz-vm64.gfz-potsdam.de:3001/idl/api/hifis/sync-groups"
+      NUXT_ENV_PID_BASE_URL: "https://hdl.handle.net"
       STAY_WITH_HTTP: "true"
       INSTITUTE: "gfz"
       NUXT_ENV_SCOPE: "profile openid email eduperson_principal_name"

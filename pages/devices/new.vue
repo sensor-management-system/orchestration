@@ -2,11 +2,14 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -49,6 +52,10 @@ permissions and limitations under the Licence.
         ref="basicForm"
         v-model="device"
       />
+      <NonModelOptionsForm
+        v-model="createOptions"
+        :entity="device"
+      />
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
@@ -66,10 +73,11 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
-import { SaveDeviceAction } from '@/store/devices'
+import { CreatePidAction, SaveDeviceAction } from '@/store/devices'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 import { Device } from '@/models/Device'
@@ -78,11 +86,12 @@ import { Device } from '@/models/Device'
   components: {
     SaveAndCancelButtons,
     DeviceBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   methods: {
-    ...mapActions('devices', ['saveDevice']),
+    ...mapActions('devices', ['saveDevice', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
@@ -90,11 +99,15 @@ import { Device } from '@/models/Device'
 export default class DeviceNewPage extends Vue {
   private device: Device = new Device()
   private isLoading: boolean = false
+  private createOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   saveDevice!: SaveDeviceAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  createPid!: CreatePidAction
 
   created () {
     this.initializeAppBar()
@@ -109,6 +122,9 @@ export default class DeviceNewPage extends Vue {
     try {
       this.isLoading = true
       const savedDevice = await this.saveDevice(this.device)
+      if (this.createOptions.persistentIdentifierShouldBeCreated) {
+        savedDevice.persistentIdentifier = await this.createPid(savedDevice.id)
+      }
       this.$store.commit('snackbar/setSuccess', 'Device created')
       this.$router.push('/devices/' + savedDevice.id)
     } catch (e) {

@@ -7,6 +7,7 @@ Copyright (C) 2022
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -83,6 +84,10 @@ permissions and limitations under the Licence.
         :serial-number-placeholder="serialNumberPlaceholder"
         :inventory-number-placeholder="inventoryNumberPlaceholder"
       />
+      <NonModelOptionsForm
+        v-model="copyOptions"
+        :entity="platformToCopy"
+      />
       <v-alert
         border="left"
         colored-border
@@ -128,19 +133,21 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
-import { PlatformsState, LoadPlatformAction, CopyPlatformAction } from '@/store/platforms'
+import { PlatformsState, LoadPlatformAction, CopyPlatformAction, CreatePidAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
-    ProgressIndicator
+    ProgressIndicator,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: {
@@ -148,7 +155,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
     ...mapState('platforms', ['platform'])
   },
   methods: {
-    ...mapActions('platforms', ['loadPlatform', 'copyPlatform']),
+    ...mapActions('platforms', ['loadPlatform', 'copyPlatform', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
@@ -157,6 +164,9 @@ export default class PlatformCopyPage extends Vue {
   private platformToCopy: Platform = new Platform()
   private isSaving = false
   private isLoading = false
+  private copyOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   private copyContacts: boolean = true
   private copyAttachments: boolean = false
@@ -174,6 +184,7 @@ export default class PlatformCopyPage extends Vue {
   userGroups!: UserGroupsGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  createPid!: CreatePidAction
 
   created () {
     this.initializeAppBar()
@@ -255,6 +266,9 @@ export default class PlatformCopyPage extends Vue {
         copyAttachments: this.copyAttachments,
         originalPlatformId: this.platformId
       })
+      if (this.copyOptions.persistentIdentifierShouldBeCreated) {
+        this.platformToCopy.persistentIdentifier = await this.createPid(savedPLatformId)
+      }
       this.$store.commit('snackbar/setSuccess', 'Platform copied')
       this.$router.push('/platforms/' + savedPLatformId)
     } catch (_error) {
