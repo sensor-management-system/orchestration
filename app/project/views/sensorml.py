@@ -40,8 +40,13 @@ def device_to_sensor_ml(device_id):
     if device is None:
         raise NotFoundError({"pointer": ""}, "Object Not Found")
     else:
-        gmlId = device.persistent_identifier or f"device_{device.id}"
-        template = render_template("device_sensorml_template.xml", gmlId=gmlId,obj=device)
+        gmlId = f"device_{device.id}"
+        template = render_template(
+            "device_sensorml_template.xml",
+            gmlId=gmlId,obj=device,
+            contact_roles=device.device_contact_roles,
+            cv_url=current_app.config["CV_URL"]
+        )
         response = make_response(template)
         response.headers["Content-Type"] = "application/xml"
         return response
@@ -60,8 +65,14 @@ def platform_to_sensor_ml(platform_id):
     if platform is None:
         raise NotFoundError({"pointer": ""}, "Object Not Found")
     else:
-        gmlId = platform.persistent_identifier or f"platform_{platform.id}"
-        template = render_template("platform_sensorml_template.xml", gmlId=gmlId, obj=platform)
+        gmlId = f"platform_{platform.id}"
+        template = render_template(
+            "platform_sensorml_template.xml",
+            gmlId=gmlId,
+            obj=platform,
+            contact_roles=platform.platform_contact_roles,
+            cv_url=current_app.config["CV_URL"]
+        )
         response = make_response(template)
         response.headers["Content-Type"] = "application/xml"
         return response
@@ -126,8 +137,10 @@ def configuration_to_sensor_ml(configuration_id):
             "configuration_sensorml_template.xml",
             gmlId=gmlId,
             obj=configuration,
+            contact_roles=configuration.configuration_contact_roles,
             tree=top_level_mounts,
             frontend_url=current_app.config["SMS_FRONTEND_URL"],
+            cv_url=current_app.config["CV_URL"]
         )
         response = make_response(template)
         response.headers["Content-Type"] = "application/xml"

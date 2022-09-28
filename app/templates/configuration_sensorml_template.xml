@@ -2,18 +2,22 @@
     {% if element.action_type == 'platform_mount' %}
         {% with %}
             {% set obj = element.entity %}
-                <sml:component xlink:href="{{frontend_url}}/platforms/{{obj.id}}" name='{{obj.short_name}}' xlink:title="Link To Platform {{obj.id}}">
-                    <!-- Component Device / Platform  -  -->
+            {% set contact_roles = obj.platform_contact_roles %}
+            {% set gmlId = 'platform_' ~ obj.id %}
+                <sml:component xlink:href="{{frontend_url}}/platforms/{{obj.id}}" name='{{obj.short_name.replace(" ", "_")}}' xlink:title="Link To Platform {{obj.id}}">
+                    <!-- Component Device / Platform  -->
                     {% include 'platform_sensorml_template.xml' %}
                     {% for child in element.children %}
                     {% set obj = child %}
                         {{build_tree(child)}}
                     {% endfor %}
                 </sml:component>
-            {% endwith %}
+        {% endwith %}
     {% else %}
             {% set obj = element.entity %}
-            <sml:component xlink:href="{{frontend_url}}/devices/{{obj.id}}" name='{{obj.short_name}}' xlink:title="Link To Device {{obj.id}}">
+            {% set contact_roles = obj.device_contact_roles %}
+            {% set gmlId = 'device_' ~ obj.id %}
+            <sml:component xlink:href="{{frontend_url}}/devices/{{obj.id}}" name='{{obj.short_name.replace(" ", "_")}}' xlink:title="Link To Device {{obj.id}}">
                      {% include 'device_sensorml_template.xml' %}
             </sml:component>
     {% endif %}
@@ -26,33 +30,35 @@
                 <sml:ClassifierList>
                     <sml:classifier>
                         <sml:Term definition="#">
-                            <sml:label>"{{event_name}}"</sml:label>
+                            <sml:label>{{event_name}}</sml:label>
+                            <sml:value>{{event_name}}</sml:value>
                         </sml:Term>
                     </sml:classifier>
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
-                <gml:TimePeriod gml:id="TimePeriodFor{{event_name}}_{{event.id}}_of_{{event.get_parent().short_name or event.get_parent().label}}">
-                    <gml:description>TimePeriod</gml:description>
+                <gml:TimePeriod gml:id="TimePeriodFor{{event_name}}_{{event.id}}_of_{{event.get_parent().id}}">
+                    <gml:description>{{event.description}}</gml:description>
                     <gml:begin>
                         <gml:TimeInstant>
                             <gml:timePosition>{{event.begin_date}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:begin>
                     <gml:end>
+                      {% if event.end_date %}
                         <gml:TimeInstant>
                             <gml:timePosition>{{event.end_date}}</gml:timePosition>
                         </gml:TimeInstant>
+                      {% endif %}
                     </gml:end>
                 </gml:TimePeriod>
             </sml:time>
-            <gml:description>{{event.description}}</gml:description>
         </sml:Event>
     </sml:event>
 {%- endmacro %}
 
 
-<sml:PhysicalSystem gml:id='SMS_ID_{{obj.id}}'
+<sml:PhysicalSystem gml:id='{{gmlId}}'
                     xmlns:sml="http://www.opengis.net/sensorml/2.0"
                     xmlns:swe="http://www.opengis.net/swe/2.0"
                     xmlns:gml="http://www.opengis.net/gml/3.2"
@@ -60,7 +66,7 @@
                     xmlns:gco="http://www.isotc211.org/2005/gco"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     xmlns:xlink="http://www.w3.org/1999/xlink"
-                    xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 http://schemas.opengis.net/sensorml/2.0/sensorML.xsd">
+                    xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 https://schemas.opengis.net/sensorML/2.0/sensorML.xsd">
     <!-- ========================================================================= -->
     <!--                      System Description                                   -->
     <!-- ========================================================================= -->
@@ -77,30 +83,10 @@
     </sml:validTime>
     {% endif %}
 
-    <!-- ========================================================================= -->
-    <!--                 Contacts                                                  -->
-    <!-- ========================================================================= -->
-    <sml:contacts>
-        <sml:ContactList>
-            {% for contact in obj.contacts %}
-            <sml:contact xlink:arcrole="http://sensorml.com/ont/swe/property/Manufacturer">
-                <gmd:CI_ResponsibleParty>
-                    <gmd:individualName>
-                        <gco:CharacterString>{{contact.given_name}} {{contact.family_name}}</gco:CharacterString>
-                    </gmd:individualName>
-                    {% for role in obj.configuration_contact_roles %}
-                        <gmd:role gco:nilReason="contact_role">
-                             <gmd:CI_RoleCode codeList="" codeListValue="">{{role.role_name}}</gmd:CI_RoleCode>
-                        </gmd:role>
-                    {% endfor %}
-                </gmd:CI_ResponsibleParty>
-            </sml:contact>
-            {% endfor %}
-        </sml:ContactList>
-    </sml:contacts>
+    {% include 'contact_sensorml_template.xml' %}
 
     <!-- ========================================================================= -->
-    <!--                 History                                                  -->
+    <!--                 History                                                   -->
     <!-- ========================================================================= -->
 <sml:history>
     <sml:EventList>
@@ -108,13 +94,13 @@
     {% block mount_actions %}
     {% for event in obj.device_mount_actions %}
     <!-- ========================================================================= -->
-    <!--                Device Mount action   id:{{event.id}}                     -->
+    <!--                Device Mount action   id:{{event.id}}                      -->
     <!-- ========================================================================= -->
         {{mount_event(event, "DeviceMountAction")}}
     {% endfor %}
     {% for event in obj.platform_mount_actions %}
     <!-- ========================================================================= -->
-    <!--                Platform Mount action   id:{{event.id}}                  -->
+    <!--                Platform Mount action   id:{{event.id}}                    -->
     <!-- ========================================================================= -->
         {{mount_event(event, "PlatformMountAction")}}
     {% endfor %}
@@ -123,7 +109,7 @@
      {% block static_location_actions %}
         {% for event in obj.configuration_static_location_begin_actions %}
         <!-- ========================================================================= -->
-        <!--               Static Location action   id:{{event.id}}                  -->
+        <!--               Static Location action   id:{{event.id}}                    -->
         <!-- ========================================================================= -->
         {{mount_event(event, "StaticLocationAction")}}
         {% endfor %}
@@ -131,7 +117,7 @@
      {% block dynamic_location_actions %}
         {% for event in obj.configuration_dynamic_location_begin_actions %}
         <!-- ========================================================================= -->
-        <!--               Dynamic Location action   id:{{event.id}}                 -->
+        <!--               Dynamic Location action   id:{{event.id}}                   -->
         <!-- ========================================================================= -->
         {{mount_event(event, "DynamicLocationAction")}}
         {% endfor %}
@@ -140,13 +126,13 @@
 
 </sml:EventList>
 </sml:history>
-    <!-- ======================================= -->
-    <!--        Components              -->
+    <!-- ======================================== -->
+    <!--        Components                        -->
     <!-- ======================================== -->
     <sml:components>
         <sml:ComponentList>
             {% for element in tree %}
-            <!-- Component 1 -  -->
+            <!-- Component 1 -->
                 {{build_tree(element)}}
             {% endfor %}
         </sml:ComponentList>
