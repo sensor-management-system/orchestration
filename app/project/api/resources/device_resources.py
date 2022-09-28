@@ -2,14 +2,14 @@
 
 import os
 
-from flask import g, request
+from flask import g, current_app, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
-from ...api.auth.permission_utils import (
-    get_es_query_with_permissions,
-    get_query_with_permissions,
-    set_default_permission_view_to_internal_if_not_exists_or_all_false,
+from .base_resource import (
+    check_if_object_not_found,
+    delete_attachments_in_minio_by_url,
 )
+
 from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
@@ -20,7 +20,15 @@ from ..models.contact_role import DeviceContactRole
 from ..models.device import Device
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url, add_pid
+
+from ...api.auth.permission_utils import (
+    get_es_query_with_permissions,
+    get_query_with_permissions,
+    set_default_permission_view_to_internal_if_not_exists_or_all_false,
+)
+from ...extensions.instances import pid
+from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceList(ResourceList):
@@ -94,6 +102,12 @@ class DeviceList(ResourceList):
         device.updated_by_id = g.user.id
 
         save_to_db(device)
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
+            source_object_url = f"{sms_frontend_url}/devices/{str(device.id)}"
+            add_pid(device, source_object_url)
+
         return result
 
     schema = DeviceSchema
@@ -127,6 +141,12 @@ class DeviceDetail(ResourceDetail):
         :return:
         """
         device = check_if_object_not_found(Device, kwargs)
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            pid_to_delete = device.persistent_identifier
+            if pid_to_delete and pid.get(pid_to_delete).status_code == 200:
+                pid.delete(pid_to_delete)
+
         urls = [a.url for a in device.device_attachments]
         try:
             super().delete(*args, **kwargs)
@@ -135,6 +155,8 @@ class DeviceDetail(ResourceDetail):
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
+
+
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result

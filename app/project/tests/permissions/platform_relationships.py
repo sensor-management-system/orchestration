@@ -7,6 +7,7 @@ from project.api.models import Platform
 from project.api.models.base_model import db
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token
+from project.tests.base import fake
 from project.tests.permissions import create_a_test_contact, create_a_test_platform
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
@@ -190,6 +191,7 @@ class TestPlatformRelationshipPermissions(BaseTestCase):
         contact = create_a_test_contact()
         public_platform = Platform(
             short_name="test",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,

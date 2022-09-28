@@ -18,24 +18,28 @@ def generate_configuration_model(
     userinfo = generate_userinfo_data()
     device = Device(
         short_name=fake.linux_processor(),
+        manufacturer_name=fake.company(),
         is_public=is_public,
         is_private=is_private,
         is_internal=is_internal,
     )
     device_parent_platform = Platform(
         short_name="device parent platform",
+        manufacturer_name=fake.company(),
         is_public=is_public,
         is_private=is_private,
         is_internal=is_internal,
     )
     platform = Platform(
         short_name=fake.linux_processor(),
+        manufacturer_name=fake.company(),
         is_public=is_public,
         is_private=is_private,
         is_internal=is_internal,
     )
     parent_platform = Platform(
         short_name="platform parent-platform",
+        manufacturer_name=fake.company(),
         is_public=is_public,
         is_private=is_private,
         is_internal=is_internal,

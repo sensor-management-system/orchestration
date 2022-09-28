@@ -20,7 +20,7 @@ def add_a_contact():
 
 
 def add_a_device():
-    device = Device(short_name=fake.pystr(), is_public=True)
+    device = Device(short_name=fake.pystr(), manufacturer_name=fake.company(),is_public=True)
     db.session.add(device)
     db.session.commit()
     return device

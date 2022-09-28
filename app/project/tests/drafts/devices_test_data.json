@@ -1,54 +1,46 @@
 {
-  "devices": [
-    {
-      "description": "device_test1_description",
-      "short_name": "device_short_name_test1",
-      "long_name": "device_long_name_test1",
-      "serial_number": "device_serial_number_test1",
-      "manufacturer_name": "device_manufacturer_name_test1",
-      "model": "device_model_test1",
-      "inventory_number": "device_inventory_number_test1",
-      "persistent_identifier": "device_persistent_identifier1",
-      "website": "http://device.website1.de",
-      "is_public": false,
-      "is_internal": false,
-      "is_private": true
-    },
-    {
-      "description": "device_test2_description",
-      "short_name": "device_short_name_test2",
-      "long_name": "device_long_name_test2",
-      "serial_number": "device_serial_number_test2",
-      "manufacturer_name": "device_manufacturer_name_test2",
-      "model": "device_model_test2",
-      "inventory_number": "device_inventory_number_test2",
-      "persistent_identifier": "device_persistent_identifier2",
-      "website": "http://device.website2.de",
-      "is_public": false,
-      "is_internal": true,
-      "is_private": false,
-      "group_ids": [
-        "3"
-      ]
-    },
-    {
-      "description": "device_test1_changed",
-      "short_name": "changed",
-      "long_name": "device_long_name_test1",
-      "serial_number": "device_serial_number_test1",
-      "manufacturer_name": "device_manufacturer_name_test1",
-      "model": "device_model_test1",
-      "inventory_number": "device_inventory_number_test1",
-      "persistent_identifier": "device_persistent_identifier1",
-      "website": "http://device.website1.de",
-      "is_public": false,
-      "is_internal": true,
-      "is_private": false,
-      "group_ids": [
-        "5",
-        "6"
-      ]
-    }
-  ],
-  "relationships": []
+    "devices": [
+        {
+            "description": "device_test1_description",
+            "short_name": "device_short_name_test1",
+            "long_name": "device_long_name_test1",
+            "serial_number": "device_serial_number_test1",
+            "manufacturer_name": "device_manufacturer_name_test1",
+            "model": "device_model_test1",
+            "inventory_number": "device_inventory_number_test1",
+            "website": "http://device.website1.de",
+            "is_public": false,
+            "is_internal": false,
+            "is_private": true
+        },
+        {
+            "description": "device_test2_description",
+            "short_name": "device_short_name_test2",
+            "long_name": "device_long_name_test2",
+            "serial_number": "device_serial_number_test2",
+            "manufacturer_name": "device_manufacturer_name_test2",
+            "model": "device_model_test2",
+            "inventory_number": "device_inventory_number_test2",
+            "website": "http://device.website2.de",
+            "is_public": false,
+            "is_internal": true,
+            "is_private": false,
+            "group_ids": ["3"]
+        },
+        {
+            "description": "device_test1_changed",
+            "short_name": "changed",
+            "long_name": "device_long_name_test1",
+            "serial_number": "device_serial_number_test1",
+            "manufacturer_name": "device_manufacturer_name_test1",
+            "model": "device_model_test1",
+            "inventory_number": "device_inventory_number_test1",
+            "website": "http://device.website1.de",
+            "is_public": false,
+            "is_internal": true,
+            "is_private": false,
+            "group_ids": ["5", "6"]
+        }
+    ],
+    "relationships": []
 }

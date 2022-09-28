@@ -13,6 +13,7 @@ from .api.helpers.health_checks import (
     health_check_elastic_search,
     health_check_migrations,
     health_check_minio,
+    health_check_pid_handler,
 )
 from .api.models.base_model import db
 from .config import env
@@ -91,6 +92,8 @@ def create_app():
     health.add_check(health_check_db)
     health.add_check(health_check_migrations)
     health.add_check(health_check_minio)
+    if app.config["INSTITUTE"] == "ufz":
+        health.add_check(health_check_pid_handler)
     app.add_url_rule(base_url + "/health", "health", view_func=lambda: health.run())
 
     app.register_blueprint(additional_devices_routes)

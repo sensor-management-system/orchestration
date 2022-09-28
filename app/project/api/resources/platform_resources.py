@@ -2,26 +2,26 @@
 
 import os
 
-from flask import g, request
+from flask import g, current_app, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
     get_query_with_permissions,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
 from ...frj_csv_export.resource import ResourceList
-from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
+from ...extensions.instances import pid
 from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.contact_role import PlatformContactRole
 from ..models.platform import Platform
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class PlatformList(ResourceList):
@@ -157,6 +157,12 @@ class PlatformDetail(ResourceDetail):
         :return:
         """
         platform = db.session.query(Platform).filter_by(id=kwargs["id"]).first()
+
+        if current_app.config["INSTITUTE"] == "ufz":
+            pid_to_delete = platform.persistent_identifier
+            if pid_to_delete and pid.get(pid_to_delete).status_code == 200:
+                pid.delete(pid_to_delete)
+
         if platform is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
         urls = [a.url for a in platform.platform_attachments]
@@ -167,6 +173,7 @@ class PlatformDetail(ResourceDetail):
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
+
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result

@@ -49,6 +49,13 @@ services:
       PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile email}
       SMS_BACKEND_URL: ${SMS_BACKEND_URL:-https://localhost.localdomain/backend/api/v1}
       PKCE_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
+      SMS_FRONTEND_URL: ${SMS_FRONTEND_URL:-https://localhost.localdomain}
+      PID_SERVICE_URL: ${PID_SERVICE_URL:-http://vm04.pid.gwdg.de:8081/handles/21.T11998/}
+      PID_SERVICE_USER: ${PID_SERVICE_USER}
+      PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
+      SCHEMA_VERSION: ${SCHEMA_VERSION:-0.1}
+      IDENTIFIER_TYPE: ${IDENTIFIER_TYPE:-Handler}
+      PID_SUFFIX: ${PID_SUFFIX:-SMS}
     depends_on:
       - db
     command: >
