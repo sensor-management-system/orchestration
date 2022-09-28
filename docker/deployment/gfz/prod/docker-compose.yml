@@ -160,6 +160,9 @@ services:
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
       CV_URL: https://sensors.gfz-potsdam.de/cv/api/v1
+      SMS_BACKEND_URL: /backend/api/v1
+      PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
+      PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: gfz
     depends_on:
       - backend-db
