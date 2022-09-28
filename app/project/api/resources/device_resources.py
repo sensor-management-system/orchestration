@@ -20,7 +20,7 @@ from ..models.contact_role import DeviceContactRole
 from ..models.device import Device
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url, add_pid
 
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
