@@ -26,7 +26,7 @@ class Platform(
     short_name = db.Column(db.String(256), nullable=False)
     long_name = db.Column(db.String(256), nullable=True)
     manufacturer_uri = db.Column(db.String(256), nullable=True)
-    manufacturer_name = db.Column(db.String(256), nullable=False)
+    manufacturer_name = db.Column(db.String(256), nullable=True)
     model = db.Column(db.String(256), nullable=True)
     platform_type_uri = db.Column(db.String(256), nullable=True)
     platform_type_name = db.Column(db.String(256), nullable=True)
