@@ -129,6 +129,7 @@ build-deploy-static-files-gfz:
     SMS_BACKEND_URL: ${GFZ_STAGING_DEVELOP_BACKEND_URL}
     CV_BACKEND_URL: ${GFZ_STAGING_DEVELOP_SMS_CV_URL}
     CLIENT_ID: ${GFZ_STAGING_HIFIS_DEV_CLIENT_ID}
+    PID_BASE_URL: ""
     OIDC_REFRESH_TOKEN: "refresh_token"
     OIDC_REFRESH_EXPIRE: 28800
     OIDC_RESPONSE_TYPE: "code"
@@ -150,6 +151,7 @@ build-deploy-static-files-gfz:
           --env SMS_BACKEND_URL \
           --env CV_BACKEND_URL \
           --env INSTITUTE="gfz" \
+          --env NUXT_ENV_PID_BASE_URL=$PID_BASE_URL \
           --env NUXT_ENV_CLIENT_ID=$CLIENT_ID \
           --env NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
           --env NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
@@ -205,6 +207,7 @@ build-deploy-image-ufz:
     CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}
     # HOST: ${UFZ_STAGING_HOST}
     CLIENT_ID: ${UFZ_STAGING_PKCE_CLIENT_ID}
+    PID_BASE_URL: "https://hdl.handle.net"
     OIDC_SCHEME: "true"
     OIDC_WELL_KNOWN: ${UFZ_STAGING_OIDC_WELL_KNOWN}
     OIDC_SCOPES: "profile openid email offline_access"
@@ -222,6 +225,7 @@ build-deploy-image-ufz:
           --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
           --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg NUXT_ENV_PID_BASE_URL=$PID_BASE_URL \
           --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
           --build-arg NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
           --build-arg NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \

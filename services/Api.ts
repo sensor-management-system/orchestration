@@ -7,8 +7,11 @@
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -57,6 +60,7 @@ import { StaticLocationActionApi } from '@/services/sms/StaticLocationActionApi'
 import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
 import { UploadApi } from '@/services/sms/UploadApi'
 import { PermissionGroupApi } from '@/services/sms/PermissionGroupApi'
+import { PidApi } from '@/services/sms/PidApi'
 
 import { CompartmentApi } from '@/services/cv/CompartmentApi'
 import { CvContactRoleApi } from '@/services/cv/CvContactRoleApi'
@@ -118,6 +122,7 @@ export class Api {
   private readonly _locationActionTimepointControllerApi: LocationActionTimepointControllerApi
   private readonly _uploadApi: UploadApi
   private readonly _statisticsApi: StatisticsApi
+  private readonly _pidApi: PidApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -328,6 +333,11 @@ export class Api {
 
     this._statisticsApi = new StatisticsApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '')
 
+    this._pidApi = new PidApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/pids'
+    )
+
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
       headers: {
@@ -471,6 +481,10 @@ export class Api {
 
   get upload (): UploadApi {
     return this._uploadApi
+  }
+
+  get pids (): PidApi {
+    return this._pidApi
   }
 
   get manufacturer (): ManufacturerApi {

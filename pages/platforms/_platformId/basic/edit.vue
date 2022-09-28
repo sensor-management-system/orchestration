@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -50,6 +51,10 @@ permissions and limitations under the Licence.
       ref="basicForm"
       v-model="platformCopy"
     />
+    <NonModelOptionsForm
+      v-model="editOptions"
+      :entity="platformCopy"
+    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -77,7 +82,7 @@ import { mapActions, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { PlatformsState, LoadPlatformAction, SavePlatformAction } from '@/store/platforms'
+import { PlatformsState, LoadPlatformAction, SavePlatformAction, CreatePidAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
 
@@ -85,17 +90,19 @@ import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator,
-    NavigationGuardDialog
+    NavigationGuardDialog,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: mapState('platforms', ['platform']),
-  methods: mapActions('platforms', ['loadPlatform', 'savePlatform'])
+  methods: mapActions('platforms', ['loadPlatform', 'savePlatform', 'createPid'])
 })
 export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
   private platformCopy: Platform | null = null
@@ -103,11 +110,15 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
+  private editOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   platform!: PlatformsState['platform']
   savePlatform!: SavePlatformAction
   loadPlatform!: LoadPlatformAction
+  createPid!: CreatePidAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -159,8 +170,11 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
 
     try {
       this.isSaving = true
-      await this.savePlatform(this.platformCopy)
-      this.loadPlatform({
+      const savedPlatform = await this.savePlatform(this.platformCopy)
+      if (this.editOptions.persistentIdentifierShouldBeCreated) {
+        savedPlatform.persistentIdentifier = await this.createPid(savedPlatform.id)
+      }
+      await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: false,
         includePlatformAttachments: false

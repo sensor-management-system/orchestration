@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -69,11 +70,21 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="6">
         <v-text-field
           :value="value.persistentIdentifier"
+          readonly
           disabled
           label="Persistent identifier (PID)"
-          :placeholder="persistentIdentifierPlaceholder"
-          @input="update('persistentIdentifier', $event)"
-        />
+        >
+          <template #append>
+            <a
+              v-if="value.persistentIdentifier"
+              :href="value.persistentIdentifierUrl"
+              target="_blank"
+              class="text-decoration-none"
+            >
+              <v-icon small> mdi-open-in-new </v-icon>
+            </a>
+          </template>
+        </v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -354,9 +365,6 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     const newObj = Platform.createFromObject(this.value)
 
     switch (key) {
-      case 'persistentIdentifier':
-        newObj.persistentIdentifier = value
-        break
       case 'shortName':
         newObj.shortName = value
         break

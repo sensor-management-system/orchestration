@@ -43,6 +43,7 @@ import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
 export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInfo {
   id: string | null
   persistentIdentifier: string
+  persistentIdentifierUrl: string
   shortName: string
   longName: string
 
@@ -90,6 +91,7 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
 export class Device implements IDevice, IVisible {
   private _id: string | null = null
   private _persistentIdentifier: string = ''
+  private _persistentIdentifierUrl: string = ''
   private _shortName: string = ''
   private _longName: string = ''
 
@@ -142,6 +144,14 @@ export class Device implements IDevice, IVisible {
 
   set persistentIdentifier (persistentIdentifier: string) {
     this._persistentIdentifier = persistentIdentifier
+  }
+
+  get persistentIdentifierUrl (): string {
+    return this._persistentIdentifierUrl
+  }
+
+  set persistentIdentifierUrl (persistentIdentifierUrl: string) {
+    this._persistentIdentifierUrl = persistentIdentifierUrl
   }
 
   get shortName (): string {
@@ -381,6 +391,7 @@ export class Device implements IDevice, IVisible {
 
     newObject.id = someObject.id
     newObject.persistentIdentifier = someObject.persistentIdentifier
+    newObject.persistentIdentifierUrl = someObject.persistentIdentifierUrl
     newObject.shortName = someObject.shortName
     newObject.longName = someObject.longName
 
