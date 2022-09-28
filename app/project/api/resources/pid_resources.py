@@ -340,7 +340,8 @@ def make_instrument_data_from_request(instrument_data: dict) -> list:
             # },
             # {
             #     "type": "AlternateIdentifier",
-            #     "parsed_data": instrument_data["alternateidentifier"] if hasattr(instrument_data, 'alternateidentifier')
+            #     "parsed_data":
+            #       instrument_data["alternateidentifier"] if hasattr(instrument_data, 'alternateidentifier')
             #     else None
             # },
             # {
