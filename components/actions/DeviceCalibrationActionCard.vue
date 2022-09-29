@@ -82,13 +82,13 @@ permissions and limitations under the Licence.
               <label>
                 Formula
               </label>
-              {{ value.formula }}
+              {{ value.formula | orDefault }}
             </v-col>
             <v-col cols="12" md="4">
               <label>
                 Value
               </label>
-              {{ value.value }}
+              {{ value.value | orDefault }}
             </v-col>
             <v-col v-if="value.nextCalibrationDate != null" cols="12" md="4">
               <label>
@@ -108,7 +108,18 @@ permissions and limitations under the Licence.
           </div>
           <div v-if="value.description">
             <label>Description</label>
-            {{ value.description }}
+            {{ value.description | orDefault }}
+          </div>
+        </v-card-text>
+        <v-card-text
+          v-if="value.attachments.length > 0"
+          class="grey lighten-5 text--primary pt-2"
+        >
+          <label>Attachments</label>
+          <div v-for="(attachment, index) in value.attachments" :key="index">
+            <v-icon small class="text-decoration-none">
+              mdi-open-in-new
+            </v-icon> <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
           </div>
         </v-card-text>
       </div>
