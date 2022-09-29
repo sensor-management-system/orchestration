@@ -40,6 +40,7 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         userinfo = generate_userinfo_data()
         platform = Platform(
             short_name="Platform 111",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,

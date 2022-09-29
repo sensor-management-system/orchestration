@@ -7,6 +7,7 @@ from project import base_url, db
 from project.api.models import Contact, Platform, PlatformContactRole, User
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
+from project.tests.base import fake
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -21,6 +22,7 @@ def generate_platform(
         group_ids = []
     platform = Platform(
         short_name="short_name test",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,

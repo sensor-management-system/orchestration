@@ -42,6 +42,7 @@ class TestDevicePropertyCalibration(BaseTestCase):
         """Create DevicePropertyCalibration."""
         device = Device(
             short_name="Device 200",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -109,6 +110,7 @@ class TestDevicePropertyCalibration(BaseTestCase):
         userinfo = generate_userinfo_data()
         device = Device(
             short_name="Device 300",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -162,6 +164,7 @@ class TestDevicePropertyCalibration(BaseTestCase):
         """Create some devices, properties, & device property calibrations."""
         device1 = Device(
             short_name="sample device",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -169,6 +172,7 @@ class TestDevicePropertyCalibration(BaseTestCase):
         db.session.add(device1)
         device2 = Device(
             short_name="sample device II",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

@@ -42,12 +42,20 @@ class TestPlatformMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform2)
 
@@ -134,7 +142,7 @@ class TestPlatformMountAction(BaseTestCase):
         configuration2 = Configuration(
             label="sample configuration II",
             is_public=True,
-            is_internal=False,
+            is_internal=False
         )
         db.session.add(configuration2)
 
@@ -144,12 +152,20 @@ class TestPlatformMountAction(BaseTestCase):
         db.session.add(contact)
 
         platform1 = Platform(
-            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False
         )
         db.session.add(platform1)
 
         platform2 = Platform(
-            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False
         )
         db.session.add(platform2)
 
@@ -233,19 +249,35 @@ class TestPlatformMountAction(BaseTestCase):
         )
 
         platform1 = Platform(
-            short_name="platform1", is_public=True, is_private=False, is_internal=False,
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         platform2 = Platform(
-            short_name="Platform2", is_public=True, is_private=False, is_internal=False,
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         platform3 = Platform(
-            short_name="platform3", is_public=True, is_private=False, is_internal=False,
+            short_name="platform3",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         platform4 = Platform(
-            short_name="Platform4", is_public=True, is_private=False, is_internal=False,
+            short_name="Platform4",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
         )
 
         action1 = PlatformMountAction(
@@ -344,12 +376,14 @@ class TestPlatformMountAction(BaseTestCase):
         """Create PlatformMountAction."""
         platform = Platform(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         parent_platform = Platform(
             short_name="platform parent-platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -469,9 +503,7 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {
-                    "begin_description": "updated",
-                },
+                "attributes": {"begin_description": "updated",},
                 "relationships": {
                     "end_contact": {
                         "data": None,
@@ -618,6 +650,7 @@ class TestPlatformMountAction(BaseTestCase):
         """Make sure parent platform id con be add if it is None."""
         p = Platform(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -643,6 +676,7 @@ class TestPlatformMountAction(BaseTestCase):
 
         p_p = Platform(
             short_name="platform parent platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -722,6 +756,7 @@ class TestPlatformMountAction(BaseTestCase):
         """Make sure platform con not be unmounted."""
         p = Platform(
             short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -760,6 +795,7 @@ class TestPlatformMountAction(BaseTestCase):
 
         p_p = Platform(
             short_name="platform parent platform",
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,

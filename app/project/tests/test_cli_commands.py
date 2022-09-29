@@ -8,8 +8,10 @@ from project import db
 from project.api.models import Device
 from project.api.models import User, Contact
 from project.tests.base import BaseTestCase
+from project.tests.base import fake
 
 # import manage packages onto the path
+
 sys.path.append(os.path.abspath(os.path.join('..', 'manage')))
 
 
@@ -66,6 +68,7 @@ class TestCliCommands(BaseTestCase):
             user1 = User(subject="testuser1@ufz.test", contact=contact1)
             user2 = User(subject="testuser2@ufz.test", contact=contact2)
             device = Device(short_name="device_short_name test", created_by_id=user1.id,
+                            manufacturer_name=fake.company(),
                             is_public=False,
                             is_private=False,
                             is_internal=True,

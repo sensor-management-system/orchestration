@@ -191,12 +191,14 @@ class TestMountDevicePermissions(BaseTestCase):
         """Ensure that a registered user can see public, internal."""
         public_device = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         internal_device = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

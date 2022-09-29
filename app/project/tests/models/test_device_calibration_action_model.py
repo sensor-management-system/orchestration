@@ -16,6 +16,7 @@ def add_device_calibration_action(
         group_ids = []
     device = Device(
         short_name="Device 12",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,
@@ -44,6 +45,7 @@ def add_device_calibration_action(
 def add_device_property_calibration_model():
     device = Device(
         short_name="Device 20",
+        manufacturer_name=fake.company(),
         is_public=False,
         is_private=False,
         is_internal=True,

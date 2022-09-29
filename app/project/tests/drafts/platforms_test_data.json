@@ -23,7 +23,6 @@
       "manufacturer_name": "platform_manufacturer_name_test2",
       "model": "platform_model_test2",
       "inventory_number": "platform_inventory_number_test2",
-      "persistent_identifier": "platform_persistent_identifier2",
       "website": "http://device.wepsite2.de",
       "platform_type_name": "platform_type_name_test2",
       "is_public": false,

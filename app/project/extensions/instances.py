@@ -6,6 +6,7 @@ from .auth.mechanisms.openidconnect import OpenIdConnectAuthMechanism
 from .auth.mechanisms.session import SessionAuthMechanism
 from .idl import Idl
 from .openidconnect import WellKnownUrlConfigLoader
+from .pid import Pid
 
 well_known_url_config_loader = WellKnownUrlConfigLoader()
 session_auth_mechanism = SessionAuthMechanism()
@@ -19,3 +20,4 @@ auth = Auth(
     ]
 )
 idl = Idl()
+pid = Pid()

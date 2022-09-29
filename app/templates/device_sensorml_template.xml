@@ -3,15 +3,7 @@
         {% block description %}{{super()}}{% endblock %}
 
         {% block identifiers %}{{super()}}{% endblock %}
-        {% block contcat_role %}
-         {{super()}}
-         {% for role in obj.device_contact_roles %}
-                    <gmd:role gco:nilReason="contact_role">
-                         <gmd:CI_RoleCode codeList="" codeListValue="">{{role.role_name}}</gmd:CI_RoleCode>
-                    </gmd:role>
-        {% endfor %}
-        {% endblock %}
-
+        
         {% block outputs %}
         {% if obj.device_properties  %}
         <!-- ========================================================================= -->
@@ -47,7 +39,7 @@
     {% block mount_actions %}
     {% for action in obj.device_mount_actions %}
     <!-- ========================================================================= -->
-    <!--                 Mount action   id:{{action.id}}                         -->
+    <!--                 Mount action   id:{{action.id}}                           -->
     <!-- ========================================================================= -->
     <sml:event>
         <sml:Event>
@@ -55,27 +47,29 @@
                 <sml:ClassifierList>
                     <sml:classifier>
                         <sml:Term definition="Mount">
-                            <sml:label>MountAction</sml:label>
+                            <sml:label>Mounted on {{action.configuration.label}}</sml:label>
+                            <sml:value>MountAction</sml:value>
                         </sml:Term>
                     </sml:classifier>
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
-                <gml:TimePeriod gml:id="TimePeriodForMountAction_{{action.id}}_of_Device_{{gmlId}}">
-                    <gml:description>TimePeriod</gml:description>
+                <gml:TimePeriod gml:id="TimePeriodForMountAction_{{action.id}}_of_{{gmlId}}">
+                    <gml:description>{{action.description}}</gml:description>
                     <gml:begin>
                         <gml:TimeInstant>
                             <gml:timePosition>{{action.begin_date}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:begin>
                     <gml:end>
+                        {% if action.end_date %}
                         <gml:TimeInstant>
                             <gml:timePosition>{{action.end_date}}</gml:timePosition>
                         </gml:TimeInstant>
+                        {% endif %}
                     </gml:end>
                 </gml:TimePeriod>
             </sml:time>
-            <gml:description>{{action.description}}</gml:description>
         </sml:Event>
     </sml:event>
     {% endfor %}
@@ -86,7 +80,7 @@
     {% for action in obj.device_calibration_actions %}
 
     <!-- ========================================================================= -->
-    <!--                 Calibration actions   id:{{action.id}}                  -->
+    <!--                 Calibration actions   id:{{action.id}}                    -->
     <!-- ========================================================================= -->
     <sml:event>
         <sml:Event>
@@ -94,6 +88,7 @@
                 <sml:ClassifierList>
                     <sml:classifier>
                         <sml:Term>
+                            <sml:label>Calibration</sml:label>
                             <sml:value>{{action.value}}</sml:value>
                             <sml:formula>{{action.formula}}</sml:formula>
                         </sml:Term>
@@ -101,21 +96,22 @@
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
-                <gml:TimePeriod gml:id="TimePeriodForCalibration_{{action.id}}_of_Device_{{gmlId}}">
-                    <gml:description>TimePeriod</gml:description>
+                <gml:TimePeriod gml:id="TimePeriodForCalibration_{{action.id}}_of_{{gmlId}}">
+                    <gml:description>{{action.description}}</gml:description>
                     <gml:current>
                         <gml:TimeInstant>
                             <gml:timePosition>{{action.current_calibration_date}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:current>
+                    {% if action.next_calibration_date %}
                     <gml:next>
                         <gml:TimeInstant>
                             <gml:timePosition>{{action.next_calibration_date}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:next>
+                    {% endif %}
                 </gml:TimePeriod>
             </sml:time>
-            <gml:description>{{action.description}}</gml:description>
         </sml:Event>
     </sml:event>
     {% endfor %}
@@ -124,7 +120,7 @@
     {% block generic_actions %}
     {% for action in obj.generic_device_actions %}
     <!-- ========================================================================= -->
-    <!--           Generic actions: {{action.action_type_name}} id:{{action.id}} -->
+    <!--           Generic actions: {{action.action_type_name}} id:{{action.id}}   -->
     <!-- ========================================================================= -->
 
     <sml:event>
@@ -134,27 +130,30 @@
                     <sml:classifier>
                         <sml:Term definition="{{action.action_type_uri}}">
                             <sml:label>{{action.action_type_name}}</sml:label>
+                            <sml:value>{{action.action_type_name}}</sml:value>
                         </sml:Term>
                     </sml:classifier>
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
                 <gml:TimePeriod
-                        gml:id="TimePeriodFor{{action.action_type_name.replace(' ', '')}}_{{action.id}}_of_Device_{{gmlId}}">
-                    <gml:description>TimePeriod</gml:description>
+                        gml:id="TimePeriodFor{{action.action_type_name.replace(' ', '')}}_{{action.id}}_of_{{gmlId}}">
+                    <gml:description>{{action.description}}</gml:description>
                     <gml:begin>
                         <gml:TimeInstant>
                             <gml:timePosition>{{action.begin_date}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:begin>
                     <gml:end>
+                        {% if action.end_date %}
                         <gml:TimeInstant>
                             <gml:timePosition>{{action.end_date}}</gml:timePosition>
                         </gml:TimeInstant>
+                        {% endif %}
                     </gml:end>
+
                 </gml:TimePeriod>
             </sml:time>
-            <gml:description>{{action.description}}</gml:description>
         </sml:Event>
     </sml:event>
     {% endfor %}
@@ -163,7 +162,7 @@
     {% block software_update_actions %}
     {% for action in obj.device_software_update_actions %}
     <!-- ========================================================================= -->
-    <!--                 Software Update actions   id:{{action.id}}              -->
+    <!--                 Software Update actions   id:{{action.id}}                -->
     <!-- ========================================================================= -->
 
     <sml:event>
@@ -173,14 +172,15 @@
                     <sml:classifier>
                         <sml:Term definition="{{action.software_type_uri}}">
                             <sml:label>{{action.software_type_name}}</sml:label>
+                            <sml:value>{{action.software_type_name}}</sml:value>
                         </sml:Term>
                     </sml:classifier>
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
                 <gml:TimePeriod
-                        gml:id="TimePeriodFor{{action.software_type_name.replace(' ', '')}}_{{action.id}}_of_Device_{{gmlId}}">
-                    <gml:description>TimePeriod</gml:description>
+                        gml:id="TimePeriodFor{{action.software_type_name.replace(' ', '')}}_{{action.id}}_of_{{gmlId}}">
+                    <gml:description>{{action.description}}</gml:description>
                     <gml:begin>
                         <gml:TimeInstant>
                             <gml:timePosition>{{action.update_date}}</gml:timePosition>
@@ -188,7 +188,6 @@
                     </gml:begin>
                 </gml:TimePeriod>
             </sml:time>
-            <gml:description>{{action.description}}</gml:description>
         </sml:Event>
     </sml:event>
 
@@ -199,4 +198,4 @@
 </sml:EventList>
 </sml:history>
 
-        {% endblock %}
+{% endblock %}
