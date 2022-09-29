@@ -66,6 +66,7 @@ export class PlatformSerializer {
   private attachmentSerializer: PlatformAttachmentSerializer = new PlatformAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private _permissionGroups: PermissionGroup[] = []
+  private _PID_BASE_URL = process.env.pidBaseUrl
 
   set permissionGroups (groups: PermissionGroup[]) {
     this._permissionGroups = groups
@@ -118,6 +119,10 @@ export class PlatformSerializer {
         result.visibility = Visibility.Public
       }
       result.archived = attributes.archived || false
+
+      if (result.persistentIdentifier && this._PID_BASE_URL) {
+        result.persistentIdentifierUrl = this._PID_BASE_URL + '/' + result.persistentIdentifier
+      }
 
       // TODO
       // result.events = []

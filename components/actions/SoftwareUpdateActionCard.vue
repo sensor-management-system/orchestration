@@ -84,7 +84,7 @@ permissions and limitations under the Licence.
               <label>
                 Version
               </label>
-              {{ value.version }}
+              {{ value.version | orDefault }}
             </v-col>
             <v-col cols="12" md="4">
               <label>
@@ -95,7 +95,18 @@ permissions and limitations under the Licence.
             </v-col>
           </v-row>
           <label>Description</label>
-          {{ value.description }}
+          {{ value.description | orDefault }}
+        </v-card-text>
+        <v-card-text
+          v-if="value.attachments.length > 0"
+          class="grey lighten-5 text--primary pt-2"
+        >
+          <label>Attachments</label>
+          <div v-for="(attachment, index) in value.attachments" :key="index">
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon> <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
+          </div>
         </v-card-text>
       </div>
     </v-expand-transition>

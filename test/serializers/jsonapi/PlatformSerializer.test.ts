@@ -312,6 +312,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform1.statusName = 'in use'
       expectedPlatform1.platformTypeName = 'Station'
       expectedPlatform1.persistentIdentifier = 'boeken_BF1'
+      expectedPlatform1.persistentIdentifierUrl = ''
       expectedPlatform1.manufacturerUri = 'manufacturer/xyz'
       expectedPlatform1.contacts = [Contact.createFromObject({
         id: '1',
@@ -525,6 +526,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform.statusName = 'in use'
       expectedPlatform.platformTypeName = 'Station'
       expectedPlatform.persistentIdentifier = 'boeken_BF1'
+      expectedPlatform.persistentIdentifierUrl = ''
       expectedPlatform.manufacturerUri = 'manufacturer/xyz'
       expectedPlatform.contacts = [Contact.createFromObject({
         id: '1',
@@ -704,6 +706,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform.statusName = 'in use'
       expectedPlatform.platformTypeName = 'Station'
       expectedPlatform.persistentIdentifier = 'boeken_BF1'
+      expectedPlatform.persistentIdentifierUrl = ''
       expectedPlatform.manufacturerUri = 'manufacturer/xyz'
       expectedPlatform.contacts = [Contact.createFromObject({
         id: '1',

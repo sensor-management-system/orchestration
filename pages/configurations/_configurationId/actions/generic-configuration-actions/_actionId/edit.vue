@@ -73,8 +73,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   LoadConfigurationGenericActionAction,
@@ -101,10 +103,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
   computed: mapState('configurations', ['configurationGenericAction', 'configurationAttachments']),
   methods: mapActions('configurations', ['loadConfigurationGenericAction', 'loadAllConfigurationActions', 'loadConfigurationAttachments', 'updateConfigurationGenericAction'])
 })
-export default class GenericConfigurationActionEditPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class GenericConfigurationActionEditPage extends mixins(CheckEditAccess) {
   private action: GenericAction = new GenericAction()
   private isSaving = false
   private isLoading = false
@@ -117,12 +116,26 @@ export default class GenericConfigurationActionEditPage extends Vue {
   updateConfigurationGenericAction!: UpdateConfigurationGenericActionAction
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/actions', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-    }
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/actions'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
   }
 
   async fetch (): Promise<void> {

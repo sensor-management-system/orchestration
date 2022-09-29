@@ -7,8 +7,11 @@
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -202,6 +205,7 @@ export type SetOnlyOwnPlatformsAction = (onlyOwnPlatforms: boolean) => void
 export type SetIncludeArchivedPlatformsAction = (includeArchivedPlatforms: boolean) => void
 export type SetSearchTextAction = (searchText: string | null) => void
 export type ReplacePlatformInPlatformsAction = (newPlatform: Platform) => void
+export type CreatePidAction = (id: string | null) => Promise<string>
 
 const actions: ActionTree<PlatformsState, RootState> = {
   async searchPlatformsPaginated ({
@@ -349,6 +353,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
   },
   savePlatform (_: {}, platform: Platform): Promise<Platform> {
     return this.$api.platforms.save(platform)
+  },
+  createPid (_, id: string | null): Promise<string> {
+    return this.$api.pids.create(id, 'platform')
   },
   async copyPlatform ({ dispatch }: { dispatch: Dispatch }, { platform, copyContacts, copyAttachments, originalPlatformId }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, originalPlatformId: string}): Promise<string> {
     // Todo, prüfen ob man eventuell etwas vereinfachen kann

@@ -90,8 +90,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   DevicesState,
@@ -120,10 +122,7 @@ import BaseList from '@/components/shared/BaseList.vue'
   },
   methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity'])
 })
-export default class DevicePropertyEditPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class DevicePropertyEditPage extends mixins(CheckEditAccess) {
   private isSaving = false
   private isLoading = false
 
@@ -140,6 +139,28 @@ export default class DevicePropertyEditPage extends Vue {
   loadDeviceMeasuredQuantity!: LoadDeviceMeasuredQuantityAction
   updateDeviceMeasuredQuantity!: UpdateDeviceMeasuredQuantityAction
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/devices/' + this.deviceId + '/measuredquantities'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this device.'
+  }
 
   async created () {
     try {
@@ -187,17 +208,6 @@ export default class DevicePropertyEditPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     } finally {
       this.isSaving = false
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
     }
   }
 }

@@ -87,8 +87,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { AddDeviceMeasuredQuantityAction, DevicesState, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
 import {
@@ -121,10 +123,7 @@ import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasu
     ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits'])
   }
 })
-export default class DevicePropertyAddPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class DevicePropertyAddPage extends mixins(CheckEditAccess) {
   private isSaving = false
   private valueCopy: DeviceProperty = new DeviceProperty()
 
@@ -142,6 +141,28 @@ export default class DevicePropertyAddPage extends Vue {
   loadMeasuredQuantityUnits!: LoadMeasuredQuantityUnitsAction
   addDeviceMeasuredQuantity!: AddDeviceMeasuredQuantityAction
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/devices/' + this.deviceId + '/measuredquantities'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this device.'
+  }
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -166,17 +187,6 @@ export default class DevicePropertyAddPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     } finally {
       this.isSaving = false
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/measuredquantities', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
     }
   }
 }

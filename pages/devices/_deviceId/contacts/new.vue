@@ -46,8 +46,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
 import { LoadDeviceContactRolesAction, AddDeviceContactRoleAction, DevicesState } from '@/store/devices'
@@ -76,10 +78,7 @@ import ContactRoleAssignmentForm from '@/components/shared/ContactRoleAssignment
     ...mapActions('vocabulary', ['loadCvContactRoles'])
   }
 })
-export default class DeviceAssignContactPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class DeviceAssignContactPage extends mixins(CheckEditAccess) {
   private selectedContact: Contact | null = null
   private isLoading: boolean = false
   private isSaving: boolean = false
@@ -91,6 +90,28 @@ export default class DeviceAssignContactPage extends Vue {
   addDeviceContactRole!: AddDeviceContactRoleAction
   loadAllContacts!: LoadAllContactsAction
   loadCvContactRoles!: LoadCvContactRolesAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/devices/' + this.deviceId + '/contacts'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this device.'
+  }
 
   async fetch (): Promise<void> {
     try {
@@ -132,17 +153,6 @@ export default class DeviceAssignContactPage extends Vue {
       } finally {
         this.isSaving = false
       }
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/contacts', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
     }
   }
 }

@@ -2,10 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -50,6 +51,10 @@ permissions and limitations under the Licence.
       ref="basicForm"
       v-model="platformCopy"
     />
+    <NonModelOptionsForm
+      v-model="editOptions"
+      :entity="platformCopy"
+    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -70,12 +75,14 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 import { mapActions, mapState } from 'vuex'
 
-import { PlatformsState, LoadPlatformAction, SavePlatformAction } from '@/store/platforms'
+import CheckEditAccess from '@/mixins/CheckEditAccess'
+
+import { PlatformsState, LoadPlatformAction, SavePlatformAction, CreatePidAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
 
@@ -83,32 +90,57 @@ import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator,
-    NavigationGuardDialog
+    NavigationGuardDialog,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: mapState('platforms', ['platform']),
-  methods: mapActions('platforms', ['loadPlatform', 'savePlatform'])
+  methods: mapActions('platforms', ['loadPlatform', 'savePlatform', 'createPid'])
 })
-export default class PlatformEditBasicPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
-  private platformCopy: Platform = new Platform()
+export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
+  private platformCopy: Platform | null = null
   private isSaving: boolean = false
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
+  private editOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   platform!: PlatformsState['platform']
   savePlatform!: SavePlatformAction
   loadPlatform!: LoadPlatformAction
+  createPid!: CreatePidAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/platforms/' + this.platformId + '/basic'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this platform.'
+  }
 
   created () {
     if (this.platform) {
@@ -121,10 +153,16 @@ export default class PlatformEditBasicPage extends Vue {
   }
 
   get platformHasBeenEdited () {
+    if (!this.platformCopy) {
+      return false
+    }
     return (JSON.stringify(this.platform) !== JSON.stringify(this.platformCopy))
   }
 
   async save () {
+    if (!this.platformCopy) {
+      return
+    }
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -132,8 +170,11 @@ export default class PlatformEditBasicPage extends Vue {
 
     try {
       this.isSaving = true
-      await this.savePlatform(this.platformCopy)
-      this.loadPlatform({
+      const savedPlatform = await this.savePlatform(this.platformCopy)
+      if (this.editOptions.persistentIdentifierShouldBeCreated) {
+        savedPlatform.persistentIdentifier = await this.createPid(savedPlatform.id)
+      }
+      await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: false,
         includePlatformAttachments: false
@@ -161,17 +202,6 @@ export default class PlatformEditBasicPage extends Vue {
       }
     } else {
       return next()
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/platforms/' + this.platformId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this platform.')
-      })
     }
   }
 }

@@ -83,6 +83,17 @@ permissions and limitations under the Licence.
           <label>Description</label>
           {{ value.description }}
         </v-card-text>
+        <v-card-text
+          v-if="value.attachments.length > 0"
+          class="grey lighten-5 text--primary pt-2"
+        >
+          <label>Attachments</label>
+          <div v-for="(attachment, index) in value.attachments" :key="index">
+            <v-icon small class="text-decoration-none">
+              mdi-open-in-new
+            </v-icon> <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
+          </div>
+        </v-card-text>
       </div>
     </v-expand-transition>
   </v-card>

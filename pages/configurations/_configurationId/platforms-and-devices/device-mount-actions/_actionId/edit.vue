@@ -79,7 +79,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
 
 import * as VueRouter from 'vue-router'
@@ -93,18 +93,20 @@ import {
 import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
 
 import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { Availability } from '@/models/Availability'
 
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
-import { Availability } from '@/models/Availability'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import MountActionEditForm from '@/components/configurations/MountActionEditForm.vue'
-import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 @Component({
   components: {
@@ -126,10 +128,7 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
     ...mapActions('contacts', ['loadAllContacts'])
   }
 })
-export default class ConfigurationEditDeviceMountActionsPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class ConfigurationEditDeviceMountActionsPage extends mixins(CheckEditAccess) {
   private configuration!: ConfigurationsState['configuration']
   private configurationMountingActionsForDate!: ConfigurationsState['configurationMountingActionsForDate']
   private selectedDate!: ConfigurationsState['selectedDate']
@@ -152,12 +151,26 @@ export default class ConfigurationEditDeviceMountActionsPage extends Vue {
   private endDateErrorMessage: string = ''
   private availabilities: Availability[] = []
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-    }
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/platforms-and-devices'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
   }
 
   async fetch () {

@@ -2,11 +2,14 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -47,6 +50,10 @@ permissions and limitations under the Licence.
       ref="basicForm"
       v-model="deviceCopy"
     />
+    <NonModelOptionsForm
+      v-model="editOptions"
+      :entity="deviceCopy"
+    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -67,13 +74,15 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, InjectReactive, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
 import { mapActions, mapState } from 'vuex'
 
-import { DevicesState, LoadDeviceAction, SaveDeviceAction } from '@/store/devices'
+import CheckEditAccess from '@/mixins/CheckEditAccess'
+
+import { CreatePidAction, DevicesState, LoadDeviceAction, SaveDeviceAction } from '@/store/devices'
 
 import { Device } from '@/models/Device'
 
@@ -81,32 +90,57 @@ import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     DeviceBasicDataForm,
     ProgressIndicator,
-    NavigationGuardDialog
+    NavigationGuardDialog,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: mapState('devices', ['device']),
-  methods: mapActions('devices', ['saveDevice', 'loadDevice'])
+  methods: mapActions('devices', ['saveDevice', 'loadDevice', 'createPid'])
 })
-export default class DeviceEditBasicPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
-  private deviceCopy: Device = new Device()
+export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
+  private deviceCopy: Device | null = null
   private isSaving: boolean = false
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
+  private editOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   device!: DevicesState['device']
   saveDevice!: SaveDeviceAction
   loadDevice!: LoadDeviceAction
+  createPid!: CreatePidAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/devices/' + this.deviceId + '/basic'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this device.'
+  }
 
   created () {
     if (this.device) {
@@ -119,24 +153,33 @@ export default class DeviceEditBasicPage extends Vue {
   }
 
   get deviceHasBeenEdited () {
+    if (!this.deviceCopy) {
+      return false
+    }
     return (JSON.stringify(this.device) !== JSON.stringify(this.deviceCopy))
   }
 
   async save () {
+    if (!this.deviceCopy) {
+      return
+    }
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
     try {
       this.isSaving = true
-      await this.saveDevice(this.deviceCopy)
-      this.loadDevice({
+      const savedDevice = await this.saveDevice(this.deviceCopy)
+      if (this.editOptions.persistentIdentifierShouldBeCreated) {
+        savedDevice.persistentIdentifier = await this.createPid(savedDevice.id)
+      }
+      await this.loadDevice({
         deviceId: this.deviceId,
         includeContacts: false,
         includeCustomFields: false,
         includeDeviceProperties: false,
         includeDeviceAttachments: false
-      }) // Todo eventuell gibt es eine besser möglichkeit die Änderungen nachzuladen/eventuell das gespeicherte Device als das device im store setzen
+      })
       this.hasSaved = true
       this.$store.commit('snackbar/setSuccess', 'Device updated')
       this.$router.push('/devices/' + this.deviceId + '/basic')
@@ -158,17 +201,6 @@ export default class DeviceEditBasicPage extends Vue {
       }
     } else {
       return next()
-    }
-  }
-
-  @Watch('editable', {
-    immediate: true
-  })
-  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
-    if (!value && typeof oldValue !== 'undefined') {
-      this.$router.replace('/devices/' + this.deviceId + '/basic', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this device.')
-      })
     }
   }
 }

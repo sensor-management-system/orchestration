@@ -3,12 +3,13 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021, 2022
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences
  *   (GFZ, https://www.gfz-potsdam.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -190,17 +191,16 @@ export default {
    *
    * If the entity is private, then it is not allowed to have permission groups.
    *
+   * @param {Visibility} visibility - the visibility of the entity
    * @param {PermissionGroup[]} groups - the permission groups of the entity
    * @param {string} entityName - the entity name
-   * @returns {(visibility: Visibility) => boolean | string} a function that validates the visibility of an entity
+   * @returns string or boolean that informs the user that he can't set a group in private visibility
    */
-  validateVisibility (groups: IPermissionGroup[], entityName: string): (visibility: Visibility) => boolean | string {
-    return function (visibility: Visibility) {
-      if (visibility === Visibility.Private && groups.length) {
-        return `You are not allowed to set the visibility to private as long as the ${entityName} has permission groups.`
-      }
-      return true
+  validateVisibility (visibility: Visibility, groups: IPermissionGroup[], entityName: string): boolean | string {
+    if (visibility === Visibility.Private && groups.length) {
+      return `You are not allowed to set the visibility to private as long as the ${entityName} has permission groups.`
     }
+    return true
   },
   canNotStartAnActionAfterAnActiveAction (dateToValidate: DateTime | null, locationTimepoints: ILocationTimepoint[]) {
     const activeAction = getActiveActionOrNull(locationTimepoints)

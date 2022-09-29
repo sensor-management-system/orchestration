@@ -183,7 +183,7 @@ describe('DeviceSerializer', () => {
             dual_use: false,
             persistent_identifier: null,
             manufacturer_uri: null,
-            archived: true
+            archived: false
           },
           relationships: {
             updated_by: {
@@ -324,7 +324,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.manufacturerUri = ''
       expectedDevice1.contacts = []
       expectedDevice1.createdByUserId = '123'
-      expectedDevice1.archived = true
+      expectedDevice1.archived = false
 
       const expectedDevice2 = new Device()
       expectedDevice2.id = '44'
@@ -395,7 +395,7 @@ describe('DeviceSerializer', () => {
             dual_use: false,
             persistent_identifier: '0000001',
             manufacturer_uri: null,
-            archived: true
+            archived: false
           },
           relationships: {
             updated_by: {
@@ -455,9 +455,10 @@ describe('DeviceSerializer', () => {
       expectedDevice.statusName = ''
       expectedDevice.dualUse = false
       expectedDevice.persistentIdentifier = '0000001'
+      expectedDevice.persistentIdentifierUrl = ''
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
-      expectedDevice.archived = true
+      expectedDevice.archived = false
 
       const serializer = new DeviceSerializer()
       const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -806,6 +807,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.statusName = ''
       expectedDevice.dualUse = true
       expectedDevice.persistentIdentifier = '0000001'
+      expectedDevice.persistentIdentifierUrl = ''
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = [
         Contact.createFromObject({
@@ -904,6 +906,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.statusName = ''
       expectedDevice.dualUse = false
       expectedDevice.persistentIdentifier = '0000001'
+      expectedDevice.persistentIdentifierUrl = ''
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
       expectedDevice.archived = false
@@ -945,7 +948,7 @@ describe('DeviceSerializer', () => {
           dual_use: false,
           persistent_identifier: '0000001',
           manufacturer_uri: null,
-          archived: true
+          archived: false
         },
         relationships: {
           updated_by: {
@@ -999,9 +1002,10 @@ describe('DeviceSerializer', () => {
       expectedDevice.statusName = ''
       expectedDevice.dualUse = false
       expectedDevice.persistentIdentifier = '0000001'
+      expectedDevice.persistentIdentifierUrl = ''
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
-      expectedDevice.archived = true
+      expectedDevice.archived = false
 
       const included: any[] = []
 

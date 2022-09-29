@@ -120,10 +120,12 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   UpdateDeviceMountActionAction,
@@ -174,10 +176,7 @@ import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSe
     ])
   }
 })
-export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(CheckEditAccess) {
   private selectedNode: ConfigurationsTreeNode | null = null
   private tree: ConfigurationsTree = ConfigurationsTree.fromArray([])
 
@@ -200,12 +199,26 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends Vue {
   private loadDeviceMountAction!: LoadDeviceMountActionAction
   private loadMountingActions!: LoadMountingActionsAction
 
-  created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/platforms-and-devices', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-    }
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/platforms-and-devices'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
   }
 
   async fetch () {

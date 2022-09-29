@@ -99,6 +99,11 @@ permissions and limitations under the Licence.
                         @selectEntity="setDeviceSelection($event)"
                       />
                     </div>
+                    <div v-else-if="devices.length <=0 && hasSearchedDevice">
+                      <v-subheader>
+                        There are no devices that match your search criteria.
+                      </v-subheader>
+                    </div>
                   </v-container>
                 </v-card>
               </v-tab-item>
@@ -152,6 +157,11 @@ permissions and limitations under the Licence.
                         :availabilities="platformAvailabilities"
                         @selectEntity="setPlatformSelection($event)"
                       />
+                    </div>
+                    <div v-else-if="platforms.length <=0 && hasSearchedPlatform">
+                      <v-subheader>
+                        There are no platforms that match your search criteria.
+                      </v-subheader>
                     </div>
                   </v-container>
                 </v-card>
@@ -262,12 +272,17 @@ export default class MountWizardEntitySelect extends Vue {
   private searchTextPlatforms: string = ''
   private searchTextDevices: string = ''
 
+  private hasSearchedDevice = false
+  private hasSearchedPlatform = false
+
   clearBasicSearchPlatforms () {
     this.searchTextPlatforms = ''
+    this.hasSearchedPlatform = false
   }
 
   clearBasicSearchDevices () {
     this.searchTextPlatforms = ''
+    this.hasSearchedDevice = false
   }
 
   async searchDevicesForMount () {
@@ -279,6 +294,7 @@ export default class MountWizardEntitySelect extends Vue {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
       this.isLoading = false
+      this.hasSearchedDevice = true
     }
   }
 
@@ -291,6 +307,7 @@ export default class MountWizardEntitySelect extends Vue {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
       this.isLoading = false
+      this.hasSearchedPlatform = true
     }
   }
 

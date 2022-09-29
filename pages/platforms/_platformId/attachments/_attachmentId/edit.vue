@@ -98,8 +98,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, mixins, InjectReactive } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   PlatformsState,
@@ -127,10 +129,7 @@ import { Rules } from '@/mixins/Rules'
   methods: mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment'])
 })
 // @ts-ignore
-export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) {
-  @InjectReactive()
-    editable!: boolean
-
+export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, CheckEditAccess) {
   private isSaving = false
   private isLoading = false
   private valueCopy: Attachment = new Attachment()
@@ -140,6 +139,28 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin) 
   loadPlatformAttachment!: LoadPlatformAttachmentAction
   updatePlatformAttachment!: UpdatePlatformAttachmentAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/platforms/' + this.platformId + '/attachments'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this platform.'
+  }
 
   async fetch () {
     try {

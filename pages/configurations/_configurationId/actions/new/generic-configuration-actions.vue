@@ -64,8 +64,10 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
+
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   AddConfigurationGenericAction,
@@ -85,10 +87,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   computed: mapState('configurations', ['configurationAttachments', 'chosenKindOfConfigurationAction']),
   methods: mapActions('configurations', ['addConfigurationGenericAction', 'loadAllConfigurationActions'])
 })
-export default class NewGenericConfigurationAction extends Vue {
-  @InjectReactive()
-    editable!: boolean
-
+export default class NewGenericConfigurationAction extends mixins(CheckEditAccess) {
   private genericConfigurationAction: GenericAction = new GenericAction()
   private isSaving: boolean = false
 
@@ -98,12 +97,29 @@ export default class NewGenericConfigurationAction extends Vue {
   addConfigurationGenericAction!: AddConfigurationGenericAction
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
 
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/configurations/' + this.configurationId + '/actions'
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this configuration.'
+  }
+
   created () {
-    if (!this.editable) {
-      this.$router.replace('/configurations/' + this.configurationId + '/actions', () => {
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this configuration.')
-      })
-    }
     if (this.chosenKindOfConfigurationAction === null) {
       this.$router.push('/configurations/' + this.configurationId + '/actions')
     }

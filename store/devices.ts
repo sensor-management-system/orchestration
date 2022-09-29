@@ -7,8 +7,11 @@
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -201,6 +204,7 @@ export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
 export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
 export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
+export type CreatePidAction = (id: string | null) => Promise<string>
 
 const actions: ActionTree<DevicesState, RootState> = {
   async searchDevicesPaginated ({
@@ -441,6 +445,9 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   saveDevice (_, device: Device): Promise<Device> {
     return this.$api.devices.save(device)
+  },
+  createPid (_, id: string | null): Promise<string> {
+    return this.$api.pids.create(id, 'device')
   },
   async copyDevice (
     { dispatch }: { dispatch: Dispatch },
