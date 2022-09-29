@@ -8,8 +8,18 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ...api.auth.permission_utils import (
+    get_es_query_with_permissions,
+    get_query_with_permissions,
+    set_default_permission_view_to_internal_if_not_exists_or_all_false,
+)
+from ...frj_csv_export.resource import ResourceList
+from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
 from ..helpers.db import save_to_db
+from ...extensions.instances import pid
 from ..helpers.resource_mixin import add_updated_by_id
 from ..models.base_model import db
 from ..models.contact_role import PlatformContactRole
