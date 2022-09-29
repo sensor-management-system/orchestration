@@ -426,3 +426,14 @@ api.route(
 
 # Usage statistics
 api.route(UsageStatistics, "usage_statistics", "/usage-statistics")
+# PIDs
+api.route(
+    PidList,
+    "pid_list",
+    "/pids"
+)
+api.route(
+    PidDetail,
+    "pid_detail",
+    "/pids/<pid>"
+)

@@ -13,6 +13,7 @@ def add_device_software_update_action_model(public=True, private=False, internal
     userinfo = generate_userinfo_data()
     d = Device(
         short_name="Device 1",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,
@@ -45,6 +46,7 @@ def add_platform_software_update_action_model(
     userinfo = generate_userinfo_data()
     p = Platform(
         short_name="Platform 1",
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,

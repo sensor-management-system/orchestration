@@ -50,6 +50,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         """Ensure a new configuration dynamic location can be added to the database."""
         device = Device(
             short_name="Device 555",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -496,6 +497,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         """Create some request data to add a location action."""
         device = Device(
             short_name="Device 555",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -940,6 +942,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         """Prepare some payloads to add/update an x property."""
         device = Device(
             short_name="Device 575",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,

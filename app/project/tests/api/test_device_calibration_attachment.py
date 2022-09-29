@@ -40,7 +40,7 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         """Create DeviceCalibrationAttachment"""
         userinfo = generate_userinfo_data()
         device = Device(
-            short_name="Device 1", is_public=False, is_private=False, is_internal=True,
+            short_name="Device 1", manufacturer_name=fake.company(),is_public=False, is_private=False, is_internal=True,
         )
 
         contact = Contact(
@@ -90,6 +90,7 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         device_calibration_attachment = add_device_calibration_attachment()
         device = Device(
             short_name="Device new",
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

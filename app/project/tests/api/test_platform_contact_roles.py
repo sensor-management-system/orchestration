@@ -20,7 +20,7 @@ def add_a_contact():
 
 
 def add_a_platform():
-    platform = Platform(short_name=fake.pystr(), is_public=True)
+    platform = Platform(short_name=fake.pystr(), manufacturer_name=fake.company(), is_public=True)
     db.session.add(platform)
     db.session.commit()
     return platform

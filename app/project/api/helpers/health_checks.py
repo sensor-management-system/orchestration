@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from ..models.base_model import db
 from ... import minio
+from ...extensions.instances import pid
 
 
 def health_check_elastic_search():
@@ -82,3 +83,17 @@ def health_check_minio():
     except requests.exceptions.RequestException as s3err:
         logging.error("Error" + repr(s3err))
         return False, "Error connecting to MinIO server."
+
+
+def health_check_pid_handler():
+    """
+    Check health status of the pid-Handler
+
+    :return: boolean and a Message
+    """
+    try:
+        pid.list()
+        return True, "Handler server is ok"
+    except requests.exceptions.HTTPError as e:
+        logging.error("Error" + repr(e))
+        return False, "Error connecting to Handler server"

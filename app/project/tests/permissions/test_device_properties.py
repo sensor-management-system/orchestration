@@ -18,6 +18,7 @@ def device_properties_model(public=True, private=False, internal=False, group_id
     """Create and return entities for 2 devies & 3 device properties."""
     device1 = Device(
         short_name=fake.pystr(),
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,
@@ -25,6 +26,7 @@ def device_properties_model(public=True, private=False, internal=False, group_id
     )
     device2 = Device(
         short_name=fake.pystr(),
+        manufacturer_name=fake.company(),
         is_public=public,
         is_private=private,
         is_internal=internal,
@@ -317,6 +319,7 @@ class TestDevicePropertyServices(BaseTestCase):
         """Ensure that we can delete a device property."""
         device = Device(
             short_name=fake.pystr(),
+            manufacturer_name=fake.company(),
             is_public=False,
             is_private=False,
             is_internal=True,

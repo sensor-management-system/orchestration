@@ -1,4 +1,6 @@
-from flask import g
+import datetime
+
+from flask import current_app, g
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ..helpers.db import save_to_db
@@ -93,7 +95,6 @@ def check_if_object_not_found(model_class, kwargs):
     else:
         return object_to_be_checked
 
-
 def set_update_description_text_and_update_by_user(obj_, msg):
     obj_.update_description = msg
     obj_.updated_by_id = g.user.id
@@ -124,6 +125,9 @@ def query_platform_and_set_update_description_text(msg, result_id):
 
 def query_configuration_and_set_update_description_text(msg, result_id):
     """
+    obj_.persistent_identifier = pid.create(source_object_url)
+    obj_.schema_version = current_app.config["SCHEMA_VERSION"]
+    obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
     Get the configuration and add update_description text to it.
 
     :param msg: a text of what did change.
@@ -131,3 +135,20 @@ def query_configuration_and_set_update_description_text(msg, result_id):
     """
     configuration = db.session.query(Configuration).filter_by(id=result_id).first()
     set_update_description_text_and_update_by_user(configuration, msg)
+
+
+def add_pid(obj_, pid_string):
+    """
+    Add PID to an existed object.
+
+    :param obj_: the existed object.
+    :param pid_string: pid of the entity.
+    """
+    obj_.persistent_identifier = pid_string
+    # Set the datetime and user how did ask to
+    # add a pid to the entity
+    obj_.updated_at = datetime.datetime.utcnow()
+    obj_.updated_by = g.user
+
+    db.session.add(obj_)
+    db.session.commit()

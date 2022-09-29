@@ -44,12 +44,19 @@ class BaseConfig:
     PKCE_SCOPES = env("PKCE_SCOPES", "openid profile email auth_context")
     PKCE_CLIENT_ID = env("PKCE_CLIENT_ID", "rdmsms-pkce-flow")
     SMS_BACKEND_URL = env(
-        "SMS_BACKEND_URL", "https://localhost.localdomain/backend/api/v1"
-    )
-    SMS_FRONTEND_URL = env(
-        "SMS_FRONTEND_URL", "https://localhost.localdomain"
+        "SMS_BACKEND_URL", "https://localhost.localdomain"
     )
     SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain")
+    CV_URL = env("CV_URL", "https://localhost.localdomain/backend/api/v1")
+    # PID service
+    PID_SERVICE_URL = env(
+        "PID_SERVICE_URL", "http://vm04.pid.gwdg.de:8081/handles/21.T11998/"
+    )
+    PID_SERVICE_USER = env("PID_SERVICE_USER", None)
+    PID_SERVICE_PASSWORD = env("PID_SERVICE_PASSWORD", None)
+    PID_SUFFIX = env("PID_SUFFIX", "SMS")
+    PID_PREFIX = env("PID_PREFIX", "STAGE-TEST")
+
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration"""
@@ -77,6 +84,8 @@ class TestingConfig(BaseConfig):
     # https://github.com/jarus/flask-testing/issues/21
     # AssertionError: Popped wrong request context
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    INSTITUTE = None
+    PID_SERVICE_URL = None
     SQLALCHEMY_ENGINE_OPTIONS = {
          "connect_args": {
             "options": "-c timezone=utc"

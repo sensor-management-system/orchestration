@@ -19,6 +19,7 @@ class TestCustomFieldServices(BaseTestCase):
         # First we need to make sure that we have a device
         device = Device(
             short_name="Very new device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -87,6 +88,7 @@ class TestCustomFieldServices(BaseTestCase):
         """Ensure that we don't add a customfield with missing key."""
         device = Device(
             short_name="Very new device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -158,12 +160,14 @@ class TestCustomFieldServices(BaseTestCase):
         """Ensure that we can get a list of customfields."""
         device1 = Device(
             short_name="Just a device",
+            manufacturer_name=fake.pystr(),
             is_public=True,
             is_private=False,
             is_internal=False,
         )
         device2 = Device(
             short_name="Another device",
+            manufacturer_name=fake.pystr(),
             is_public=True,
             is_private=False,
             is_internal=False,
@@ -273,12 +277,14 @@ class TestCustomFieldServices(BaseTestCase):
         """Ensure that we can update a customfield by changing the device."""
         device1 = Device(
             short_name="Just a device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
         )
         device2 = Device(
             short_name="Another device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
@@ -331,6 +337,7 @@ class TestCustomFieldServices(BaseTestCase):
         """Ensure that we can update a customfield by changing key & value."""
         device = Device(
             short_name="Just a device",
+            manufacturer_name=fake.pystr(),
             is_public=False,
             is_private=False,
             is_internal=True,
