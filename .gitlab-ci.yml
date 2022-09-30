@@ -207,7 +207,7 @@ build-deploy-image-ufz:
     CV_BACKEND_URL: ${UFZ_STAGING_SMS_CV_BACKEND_URL}
     # HOST: ${UFZ_STAGING_HOST}
     CLIENT_ID: ${UFZ_STAGING_PKCE_CLIENT_ID}
-    PID_BASE_URL: "https://hdl.handle.net"
+    PID_BASE_URL: ""
     OIDC_SCHEME: "true"
     OIDC_WELL_KNOWN: ${UFZ_STAGING_OIDC_WELL_KNOWN}
     OIDC_SCOPES: "profile openid email offline_access"
