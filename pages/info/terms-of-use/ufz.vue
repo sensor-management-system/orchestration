@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
       <h1 class="mb-3">
         Terms of Use for Sensor Management System
       </h1>
-      <p>By using the offered services at sensors.ufz.de (“Services”) you agree to the following Terms of Use of the
+      <p>By using the offered services at webapp.ufz.de/sms (“Services”) you agree to the following Terms of Use of the
         Helmholtz Centre for Environmental Research (“UFZ”), a limited liability company (“Gesellschaft mit beschränkter
         Haftung“) incorporated under German law, 04318 Leipzig, Germany, e-mail: <a href="mailto:sms-administration@ufz.de">sms-administration@ufz.de</a></p>
     </section>
