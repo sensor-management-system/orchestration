@@ -199,7 +199,7 @@ trigger-build-on-orchestration-gfz:
     branch: main
     strategy: depend
 
-build-deploy-image-ufz:
+build-deploy-image-ufz-staging:
   stage: build
   extends: .docker_build
   variables:
@@ -220,25 +220,75 @@ build-deploy-image-ufz:
     OIDC_REFRESH_INTERVAL_TIME: ${UFZ_STAGING_OIDC_REFRESH_INTERVAL_TIME}
   script:
     - |
-        docker build --tag "$UFZ_LATEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
-          --build-arg BASE_URL_ARG="/sms/" \
-          --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
-          --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
-          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          --build-arg NUXT_ENV_PID_BASE_URL=$PID_BASE_URL \
-          --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
-          --build-arg NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
-          --build-arg NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
-          --build-arg NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
-          --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
-          --build-arg NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
-          --build-arg NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
-          --build-arg NUXT_ENV_OIDC_LOGIN_PARAMS="$OIDC_LOGIN_PARAMS" \
-          --build-arg NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME=$OIDC_REFRESH_INTERVAL_TIME \
-          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
-          --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-          --build-arg VCS_REF=$CI_COMMIT_SHA \
-          .
+      docker build --tag "$UFZ_LATEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
+        --build-arg BASE_URL_ARG="/sms/" \
+        --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+        --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+        --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+        --build-arg NUXT_ENV_PID_BASE_URL=$PID_BASE_URL \
+        --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
+        --build-arg NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
+        --build-arg NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
+        --build-arg NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
+        --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
+        --build-arg NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
+        --build-arg NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
+        --build-arg NUXT_ENV_OIDC_LOGIN_PARAMS="$OIDC_LOGIN_PARAMS" \
+        --build-arg NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME=$OIDC_REFRESH_INTERVAL_TIME \
+        --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+        --build-arg VCS_REF=$CI_COMMIT_SHA \
+        .
+    - docker push "$UFZ_LATEST_IMAGE"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+
+build-deploy-image-ufz-prod:
+  stage: build
+  extends: .docker_build
+  variables:
+    SMS_BACKEND_URL: ${UFZ_PROD_BACKEND_URL}
+    CV_BACKEND_URL: ${UFZ_PROD_SMS_CV_BACKEND_URL}
+    # HOST: ${UFZ_STAGING_HOST}
+    CLIENT_ID: ${UFZ_STAGING_PKCE_CLIENT_ID}
+    PID_BASE_URL: ""
+    OIDC_SCHEME: "true"
+    OIDC_WELL_KNOWN: ${UFZ_STAGING_OIDC_WELL_KNOWN}
+    OIDC_SCOPES: "profile openid email offline_access"
+    OIDC_REFRESH_TOKEN: "refresh_token"
+    OIDC_REFRESH_EXPIRE: 28800
+    OIDC_RESPONSE_TYPE: "code"
+    OIDC_GRANT_TYPE: "authorization_code"
+    OIDC_CHALLANGE: "S256"
+    OIDC_LOGIN_PARAMS: ${UFZ_STAGING_OIDC_LOGIN_PARAMS}
+    OIDC_REFRESH_INTERVAL_TIME: ${UFZ_STAGING_OIDC_REFRESH_INTERVAL_TIME}
+  script:
+    - |
+      docker build --tag "$UFZ_LATEST_IMAGE" -f docker/deployment/ufz/Dockerfile \
+        --build-arg BASE_URL_ARG="/sms/" \
+        --build-arg SMS_BACKEND_URL_ARG=$SMS_BACKEND_URL \
+        --build-arg CV_BACKEND_URL_ARG=$CV_BACKEND_URL \
+        --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+        --build-arg NUXT_ENV_PID_BASE_URL=$PID_BASE_URL \
+        --build-arg NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
+        --build-arg NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
+        --build-arg NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
+        --build-arg NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
+        --build-arg NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
+        --build-arg NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
+        --build-arg NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
+        --build-arg NUXT_ENV_OIDC_LOGIN_PARAMS="$OIDC_LOGIN_PARAMS" \
+        --build-arg NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME=$OIDC_REFRESH_INTERVAL_TIME \
+        --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+        --build-arg VCS_REF=$CI_COMMIT_SHA \
+        .
     - docker push "$UFZ_LATEST_IMAGE"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -255,7 +305,7 @@ release-ufz-tag-image:
     - docker pull $UFZ_LATEST_IMAGE
     - docker tag $UFZ_LATEST_IMAGE $UFZ_RELEASE_TAG_IMAGE
     - docker push $UFZ_RELEASE_TAG_IMAGE
-  needs: ["build-deploy-image-ufz"]
+  needs: ["build-deploy-image-ufz-staging","build-deploy-image-ufz-prod"]
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-.*/'
 
