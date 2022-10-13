@@ -80,7 +80,7 @@ permissions and limitations under the Licence.
       </h2>
       <p>
         Responsible editor for the contents of this internet presence with regard to media law is<br>
-        Martin Hammitzsch (Head of <a href="https://www.gfz-potsdam.de/en/centre/escience-centre" target="_blank">eScience-Centre</a>)<br>
+        Martin Hammitzsch (Head of <a href="https://www.gfz-potsdam.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
         Phone: +49 331 288-1717<br>
         E-Mail: <a href="mailto:martin.hammitzsch@gfz-potsdam.de">martin.hammitzsch@gfz-potsdam.de</a>
       </p>
