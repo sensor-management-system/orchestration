@@ -212,8 +212,13 @@ export default class DeviceCalibationActionForm extends Vue {
     this.$emit('input', this.actionCopy)
   }
 
-  setValue (value: number | null) {
-    this.actionCopy.value = value
+  setValue (value: any) {
+    // The input mostly gives back strings
+    if (value === null || value === '') {
+      this.actionCopy.value = null
+    } else {
+      this.actionCopy.value = parseFloat(value)
+    }
     this.$emit('input', this.actionCopy)
   }
 
