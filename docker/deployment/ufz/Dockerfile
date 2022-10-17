@@ -26,7 +26,7 @@
 # implied. See the Licence for the specific language governing
 # permissions and limitations under the Licence.
 
-FROM node:16.0.0-buster as js-builder
+FROM node:16.17.1-buster as js-builder
 
 # First the urls for sms backend and cv backend
 ARG SMS_BACKEND_URL_ARG

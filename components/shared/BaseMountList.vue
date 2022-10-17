@@ -47,7 +47,9 @@ permissions and limitations under the Licence.
           >
             <template #default="{ active }">
               <v-list-item-content>
-                <v-list-item-title v-text="item.shortName" />
+                <v-list-item-title>
+                  {{ item.shortName }}
+                </v-list-item-title>
               </v-list-item-content>
 
               <v-list-item-action>
