@@ -13,7 +13,9 @@ class User(db.Model):
     subject = db.Column(db.String(256), nullable=False, unique=True)
     contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
     # uselist: To convert one-to-many into one-to-one
-    contact = db.relationship("Contact", backref=db.backref("user", uselist=False))
+    contact = db.relationship(
+        "Contact", backref=db.backref("user", uselist=False), foreign_keys=[contact_id]
+    )
     active = db.Column(db.Boolean, default=True)
     is_superuser = db.Column(db.Boolean, default=False)
     apikey = db.Column(db.String(256), unique=True)
