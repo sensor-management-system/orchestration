@@ -46,8 +46,10 @@ permissions and limitations under the Licence.
     <p>The purpose of this application is to help scientists and technicans to manage sensors, measurement setups and campaigns.</p>
     <p>In this context, the data will not be provided to third parties. The data is processed exclusively within the scope of the specified purpose. The legal basis for the processing of the data transmitted is the consent you have given us in accordance with Article 6 para. 1 lit. a) GDPR.</p>
     <p>Your personal data will always be deleted as soon as they are no longer required to achieve the purpose for which they were collected. The personal data collected for managing sensor and measurement campaign informations will be deleted as soon as linked entity has been deleted. Continued processing will only take place if you have given us your consent to continued processing. You can revoke your consent at any time for the future. In addition, the following user-related data is processed when contact is made via e-mail or the web forms:</p>
-    <p>Users are authenticated using the IdP of their respective institute. Passwords are not stored in the database.<br />
-      The user-related data collected for the purpose of running the application encompasses the following:</p>
+    <p>
+      Users are authenticated using the IdP of their respective institute. Passwords are not stored in the database.<br>
+      The user-related data collected for the purpose of running the application encompasses the following:
+    </p>
     <p>
       <ul>
         <li>First name, last name;</li>
@@ -55,8 +57,10 @@ permissions and limitations under the Licence.
         <li>Website (if available).</li>
       </ul>
     </p>
-    <p>In case of using the actions forms, the application also stores information about which user performed the respective action and when.<br />
-      Data about times and users is stored when setting up/modifying the following:</p>
+    <p>
+      In case of using the actions forms, the application also stores information about which user performed the respective action and when.<br>
+      Data about times and users is stored when setting up/modifying the following:
+    </p>
     <p>
       <ul>
         <li>Devices;</li>

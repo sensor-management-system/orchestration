@@ -43,7 +43,9 @@ permissions and limitations under the Licence.
         :key="index"
       >
         <v-list-item-content>
-          <v-list-item-title v-text="item.shortName" />
+          <v-list-item-title>
+            {{ item.shortName }}
+          </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
       <v-card-text

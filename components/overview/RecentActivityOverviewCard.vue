@@ -69,9 +69,13 @@ permissions and limitations under the Licence.
               :to="getEntityURL(entity)"
               style="text-decoration: none;"
             >
-              <v-list-item-title v-if="entity.type === 'device' || entity.type === 'platform'" v-text="entity.shortName" />
-              <v-list-item-title v-else-if="entity.type === 'configuration'" v-text="entity.label" />
-              <v-list-item-subtitle v-text="getEntitySubtitle(entity)" />
+              <v-list-item-title v-if="entity.type === 'device' || entity.type === 'platform'">
+                {{ entity.shortName }}
+              </v-list-item-title>
+              <v-list-item-title v-else-if="entity.type === 'configuration'">
+                {{ entity.label }}
+              </v-list-item-title>
+              <v-list-item-subtitle>{{ getEntitySubtitle(entity) }}</v-list-item-subtitle>
             </nuxt-link>
           </v-list-item-content>
         </v-list-item>
