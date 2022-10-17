@@ -1,7 +1,7 @@
 """Model for contacts & reference tables."""
 
 from .base_model import db
-from ..models.mixin import SearchableMixin, IndirectSearchableMixin
+from ..models.mixin import SearchableMixin, IndirectSearchableMixin, AuditMixin
 
 from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
 
@@ -31,7 +31,7 @@ configuration_contacts = db.Table(
 )
 
 
-class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
+class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     """Contact class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -67,6 +67,7 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
             "family_name": self.family_name,
             "website": self.website,
             "email": self.email,
+            "created_by_id": self.created_by_id,
         }
 
     @staticmethod
@@ -86,6 +87,9 @@ class Contact(db.Model, SearchableMixin, IndirectSearchableMixin):
             # Not necessary to allow exact search for the personal website.
             "website": type_text_full_searchable,
             "email": type_keyword_and_full_searchable,
+            "created_by_id": {
+                "type": "integer",
+            }
         }
 
     @classmethod

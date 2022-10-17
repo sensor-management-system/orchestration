@@ -49,7 +49,10 @@ class UserInfo(ResourceList):
                     "is_superuser": g.user.is_superuser,
                     "apikey": g.user.apikey,
                 },
-            }
+                "relationships": {
+                    "contact": {"data": {"type": "contact", "id": g.user.contact_id}}
+                },
+            },
         }
         return data
 
