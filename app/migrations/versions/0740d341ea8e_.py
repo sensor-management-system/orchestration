@@ -93,7 +93,7 @@ def upgrade():
     for row in platform_unmount_actions:
         key = (row["configuration_id"], row["platform_id"])
         mount_actions = platform_mount_data_lookup[key]
-        mount_actions = [a for a in mount_actions["begin_date"] <= row["end_date"]]
+        mount_actions = [a for a in mount_actions if a["begin_date"] <= row["end_date"]]
         mount_actions.sort(key=lambda x: x["begin_date"])
         mount_action = mount_actions[-1]
         update_query = text(
@@ -135,7 +135,7 @@ def upgrade():
         key = (row["configuration_id"], row["device_id"])
         mount_actions = device_mount_data_lookup.get(key)
         if mount_actions:
-            mount_actions = [a for a in mount_actions["begin_date"] <= row["end_date"]]
+            mount_actions = [a for a in mount_actions if a["begin_date"] <= row["end_date"]]
             mount_actions.sort(key=lambda x: x["begin_date"])
             mount_action = mount_actions[-1]
             update_query = text(
