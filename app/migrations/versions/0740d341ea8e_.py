@@ -99,10 +99,10 @@ def upgrade():
         update_query = text(
             """
         update platform_mount_action
+        set end_date = :end_date,
+            end_contact_id = :contact_id,
+            end_description = :description
         where id = :id
-        update set end_date = :end_date,
-                   end_contact_id = :contact_id
-                   end_description = :description
         """
         )
         conn.execute(
@@ -141,10 +141,10 @@ def upgrade():
             update_query = text(
                 """
             update device_mount_action
+            set end_date = :end_date,
+                end_contact_id = :contact_id,
+                end_description = :description
             where id = :id
-            update set end_date = :end_date,
-                    end_contact_id = :contact_id
-                    end_description = :description
             """
             )
             conn.execute(
@@ -152,7 +152,7 @@ def upgrade():
                 {
                     "id": mount_action["id"],
                     "end_date": row["end_date"],
-                    "end_contact_id": row["contact_id"],
+                    "contact_id": row["contact_id"],
                     "description": row["description"],
                 },
             )
