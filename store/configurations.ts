@@ -53,7 +53,7 @@ import { ConfigurationMountingAction } from '@/models/ConfigurationMountingActio
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
-import { byDateOldestLast, IWithDate } from '@/modelUtils/mountHelpers'
+import { byDateOldestLast } from '@/modelUtils/mountHelpers'
 
 import {
   DeviceMountTimelineAction,
@@ -181,8 +181,26 @@ function formatMountActionString (value: ConfigurationMountingAction): string {
 
 const getters: GetterTree<ConfigurationsState, RootState> = {
   timelineActions: (state: ConfigurationsState): ITimelineAction[] => {
-    const result: ITimelineAction[] = []
+    const byDateOldestAndUnmountBeforeMount = (a: ITimelineAction, b: ITimelineAction): number => {
+      const result = byDateOldestLast(a, b)
+      if (result !== 0) {
+        return result
+      }
+      if (!('isUnmountAction' in a) || !('isUnmountAction' in b)) {
+        return result
+      }
+      // display unmount above mount action when dates are the same
+      if (a.isUnmountAction && !b.isUnmountAction) {
+        return -1
+      }
+      // display mount below unmount action when dates are the same
+      if (!a.isUnmountAction && b.isUnmountAction) {
+        return 1
+      }
+      return 0
+    }
 
+    const result: ITimelineAction[] = []
     const devices = state.configurationDeviceMountActions.map(a => a.device)
     for (const platformMountAction of state.configurationPlatformMountActions) {
       result.push(new PlatformMountTimelineAction(platformMountAction))
@@ -214,7 +232,7 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
       result.push(new GenericTimelineAction(genericAction))
     }
 
-    (result as IWithDate[]).sort(byDateOldestLast)
+    result.sort(byDateOldestAndUnmountBeforeMount)
 
     return result
   },
