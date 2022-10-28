@@ -90,6 +90,7 @@ export interface IMountTimelineAction {
   contact: IContact | null
   mountInfo: IMountInfo | null
   description: string
+  isUnmountAction: boolean
 }
 
 export interface IStaticLocationTimelineAction {
@@ -171,6 +172,10 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
   get description (): string {
     return this.mountAction.beginDescription
   }
+
+  get isUnmountAction (): boolean {
+    return false
+  }
 }
 
 export class DeviceMountTimelineAction implements IMountTimelineAction {
@@ -216,6 +221,10 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
   get description (): string {
     return this.mountAction.beginDescription
   }
+
+  get isUnmountAction (): boolean {
+    return false
+  }
 }
 
 export class PlatformUnmountTimelineAction implements IMountTimelineAction {
@@ -256,6 +265,10 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
   get description (): string {
     return this.mountAction.endDescription || ''
   }
+
+  get isUnmountAction (): boolean {
+    return true
+  }
 }
 
 export class DeviceUnmountTimelineAction implements IMountTimelineAction {
@@ -295,6 +308,10 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
 
   get description (): string {
     return this.mountAction.endDescription || ''
+  }
+
+  get isUnmountAction (): boolean {
+    return true
   }
 }
 

@@ -42,10 +42,19 @@ import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 
 export interface IWithDate {
-  date: DateTime
+  date: DateTime | null
 }
 
 export function byDateOldestFirst (a: IWithDate, b: IWithDate): number {
+  if (!a.date && !b.date) {
+    return 0
+  }
+  if (!a.date) {
+    return -1
+  }
+  if (!b.date) {
+    return 1
+  }
   if (a.date < b.date) {
     return -1
   } else if (a.date > b.date) {
@@ -55,6 +64,15 @@ export function byDateOldestFirst (a: IWithDate, b: IWithDate): number {
 }
 
 export function byDateOldestLast (a: IWithDate, b: IWithDate): number {
+  if (!a.date && !b.date) {
+    return 0
+  }
+  if (!a.date) {
+    return 1
+  }
+  if (!b.date) {
+    return -1
+  }
   if (a.date < b.date) {
     return 1
   } else if (a.date > b.date) {
