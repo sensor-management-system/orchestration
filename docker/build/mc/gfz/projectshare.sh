@@ -22,7 +22,7 @@ do
     # We want to know what our latest file is.
     LATEST_DUMP=$(ls -Art /srv/docker/service/${SERVICE}/backups | tail -n 1)
     # Now we check if we have enough space left on the project share.
-    SIZE_LATEST_DUMP=$(du -Pk /srv/docker/service/${SERVICE}/backups/${LATEST_DUMP} | awk 'print $1')
+    SIZE_LATEST_DUMP=$(du -Pk /srv/docker/service/${SERVICE}/backups/${LATEST_DUMP} | awk '{print $1}')
     CURRENT_SPACE_ON_TARGET=$(df -Pk /mnt/sms-backup | awk '/[0-9]%/{print $(NF-2)}')
     if [ $CURRENT_SPACE_ON_TARGET -lt $SIZE_LATEST_DUMP ]
     then
