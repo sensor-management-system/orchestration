@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <v-combobox
           :items="states"
-          item-name="name"
+          item-text="name"
           :value="valueStatusItem"
           :readonly="readonly"
           :disabled="readonly"
