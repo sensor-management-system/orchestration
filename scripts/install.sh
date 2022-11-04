@@ -2,7 +2,7 @@
 
 # Install essential packages from Apt
 apt-get update -y
-apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo curl python3-distutils
+apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo curl python3-distutils g++
 
 apt-get clean
 
