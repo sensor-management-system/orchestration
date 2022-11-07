@@ -43,6 +43,7 @@ services:
       - /etc/ssl/dfn-ca-global-g2-chain.pem:/etc/ssl/chain.pem:ro
       - vocabulary-static-files:/usr/share/nginx/html/static/cv:ro
       - backend-static-files:/usr/share/nginx/html/static/backend:ro
+      - idl-static-files:/usr/share/nginx/html/static/idl:ro
     networks:
       - nginx
 
@@ -80,6 +81,44 @@ services:
     shm_size: 128M
     networks:
       - vocabulary-db
+
+  idl:
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.1.0
+    restart: unless-stopped
+    environment:
+      DJANGO_DEBUG: 'false'
+      DJANGO_ALLOWED_HOSTS: 'https://sensors.gfz-potsdam.de https://sensor.gfz-potsdam.de https://rz-vm257.gfz-potsdam.de idl'
+      DJANGO_BASE_PATH: idl/
+      DJANGO_STATIC_URL: /static/idl/
+      DJANGO_STATIC_ROOT: /static/idl/
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: idl
+      DJANGO_DB_USER: $IDL_DB_USER
+      DJANGO_DB_PASSWORD: $IDL_DB_PASSWORD
+      DJANGO_DB_HOST: idl-db
+      DJANGO_DB_PORT: 5432
+      IDL_TOKEN: $IDL_TOKEN
+      OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
+      VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'
+      VO_MEMBER_CONVENTIONS: '*:gfz-sms-member'
+    volumes:
+      - idl-static-files:/static/idl
+    networks:
+      - nginx
+      - idl-db
+
+  idl-db:
+    image: postgres:12-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: $IDL_DB_PASSWORD
+      POSTGRES_USER: $IDL_DB_USER
+      POSTGRES_DB: idl
+    volumes:
+      - "idl-db-data:/var/lib/postgresql/data"
+    shm_size: 128M
+    networks:
+      - idl-db
 
   elastic-search:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
@@ -159,6 +198,8 @@ services:
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
+      SMS_IDL_TOKEN: $IDL_TOKEN
+      IDL_URL: http://idl:8000/idl/api/idl
       CV_URL: https://sensors.gfz-potsdam.de/cv/api/v1
       SMS_BACKEND_URL: /backend/api/v1
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
@@ -175,6 +216,8 @@ services:
 volumes:
   vocabulary-db-data:
   vocabulary-static-files:
+  idl-db-data:
+  idl-static-files:
   elasticsearch-data:
   minio-data:
   backend-db-data:
@@ -183,3 +226,4 @@ networks:
   vocabulary-db:
   nginx:
   backend:
+  idl-db:

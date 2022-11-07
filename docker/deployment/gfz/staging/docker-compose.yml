@@ -200,6 +200,8 @@ services:
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
       HTTP_ORIGINS: ${HTTP_ORIGINS}
+      SMS_IDL_TOKEN: $IDL_TOKEN
+      IDL_URL: http://idl:8000/idl/api/idl
       CV_URL: https://rz-vm64.gfz-potsdam.de/cv/api/v1
       SMS_BACKEND_URL: /backend/api/v1
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
