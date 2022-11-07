@@ -297,6 +297,10 @@ export class ConfigurationApi {
     return new Blob([response.data], { type: 'text/xml' })
   }
 
+  getSensorMLUrl (configurationId: string): string {
+    return this.axiosApi.defaults.baseURL + this.basePath + '/' + configurationId + '/sensorml'
+  }
+
   resetFilterSetting () {
     this.filterSettings = []
   }

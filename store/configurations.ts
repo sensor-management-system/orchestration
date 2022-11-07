@@ -393,6 +393,7 @@ export type LoadAllConfigurationActionsAction = IdParamReturnsVoidPromiseAction
 
 export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
+export type GetSensorMLUrlAction = (id: string) => string
 
 export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
@@ -415,6 +416,8 @@ export type SetSelectedLocationDateAction = (newVal: DateTime | null) => void
 export type ReplaceConfigurationInConfigurationsAction = (newConfig: Configuration) => void
 
 export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActionType | null) => void
+
+export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
   setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime) {
@@ -506,6 +509,12 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   async loadDeviceMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setConfigurationDeviceMountActions', await this.$api.configurations.findRelatedDeviceMountActions(id))
+  },
+  async downloadAttachment (_, attachmentUrl: string): Promise<Blob> {
+    return await this.$api.configurationAttachments.getFile(attachmentUrl)
+  },
+  getSensorMLUrl (_, id: string): string {
+    return this.$api.configurations.getSensorMLUrl(id)
   },
   async exportAsSensorML (_, id: string): Promise<Blob> {
     return await this.$api.configurations.getSensorML(id)

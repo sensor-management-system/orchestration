@@ -141,7 +141,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import { IConfiguration } from '@/models/Configuration'
-import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction } from '@/store/configurations'
+import { Visibility } from '@/models/Visibility'
+import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, GetSensorMLUrlAction } from '@/store/configurations'
 
 @Component({
   components: {
@@ -161,7 +162,8 @@ import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurati
     'loadConfiguration',
     'archiveConfiguration',
     'restoreConfiguration',
-    'exportAsSensorML'
+    'exportAsSensorML',
+    'getSensorMLUrl'
   ])
 })
 export default class ConfigurationShowBasicPage extends Vue {
@@ -189,6 +191,7 @@ export default class ConfigurationShowBasicPage extends Vue {
   archiveConfiguration!: ArchiveConfigurationAction
   restoreConfiguration!: RestoreConfigurationAction
   exportAsSensorML!: ExportAsSensorMLAction
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   get configurationId () {
     return this.$route.params.configurationId
@@ -203,12 +206,17 @@ export default class ConfigurationShowBasicPage extends Vue {
   }
 
   async openSensorML () {
-    try {
-      const blob = await this.exportAsSensorML(this.configurationId)
-      const url = window.URL.createObjectURL(blob)
+    if (this.configuration?.visibility === Visibility.Public) {
+      const url = await this.getSensorMLUrl(this.configurationId)
       window.open(url)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(this.configurationId)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+      }
     }
   }
 

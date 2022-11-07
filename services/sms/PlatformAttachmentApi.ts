@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -77,5 +77,13 @@ export class PlatformAttachmentApi {
         return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
       })
     })
+  }
+
+  async getFile (url: string): Promise<Blob> {
+    const response = await this.axiosApi.get(url,
+      { responseType: 'blob' }
+    )
+    const contentType = response.headers['content-type']
+    return new Blob([response.data], { type: contentType })
   }
 }

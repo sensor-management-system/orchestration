@@ -64,6 +64,7 @@ export class PlatformAttachmentSerializer implements IAttachmentSerializer {
     if (attributes) {
       newEntry.url = attributes.url || ''
       newEntry.label = attributes.label || ''
+      newEntry.isUpload = attributes.is_upload || false
     }
 
     return newEntry
@@ -140,6 +141,7 @@ export class PlatformAttachmentSerializer implements IAttachmentSerializer {
       attributes: {
         url: attachment.url,
         label: attachment.label
+        // is_upload is readonly field
       },
       relationships: {
         platform: {

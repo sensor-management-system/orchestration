@@ -56,6 +56,7 @@ import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 import { IncludedRelationships } from '@/services/sms/PlatformApi'
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { Availability } from '@/models/Availability'
+import { getLastPathElement } from '@/utils/urlHelpers'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -190,6 +191,7 @@ export type UpdatePlatformAction = (platform: Platform) => void
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
 export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, originalPlatformId: string}) => Promise<string>
 export type ExportAsCsvAction = () => Promise<Blob>
+export type GetSensorMLUrlAction = (id: string) => string
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type DeletePlatformAction = (id: string) => Promise<void>
 export type ArchivePlatformAction = (id: string) => Promise<void>
@@ -206,6 +208,7 @@ export type SetIncludeArchivedPlatformsAction = (includeArchivedPlatforms: boole
 export type SetSearchTextAction = (searchText: string | null) => void
 export type ReplacePlatformInPlatformsAction = (newPlatform: Platform) => void
 export type CreatePidAction = (id: string | null) => Promise<string>
+export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
 
 const actions: ActionTree<PlatformsState, RootState> = {
   async searchPlatformsPaginated ({
@@ -382,11 +385,24 @@ const actions: ActionTree<PlatformsState, RootState> = {
       const attachments = platform.attachments.map(Attachment.createFromObject)
       for (const attachment of attachments) {
         attachment.id = null
+        if (attachment.isUpload) {
+          const blob = await dispatch('downloadAttachment', attachment.url)
+          const filename = getLastPathElement(attachment.url)
+          const uplaodResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
+          const newUrl = uplaodResult.url
+          attachment.url = newUrl
+        }
         related.push(dispatch('addPlatformAttachment', { platformId: savedPlatformId, attachment }))
       }
     }
     await Promise.all(related)
     return savedPlatformId
+  },
+  async downloadAttachment (_, attachmentUrl: string): Promise<Blob> {
+    return await this.$api.platformAttachments.getFile(attachmentUrl)
+  },
+  getSensorMLUrl (_, id: string): string {
+    return this.$api.platforms.getSensorMLUrl(id)
   },
   async exportAsSensorML (_, id: string): Promise<Blob> {
     return await this.$api.platforms.getSensorML(id)

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2-21
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -56,7 +56,8 @@ describe('AttachmentsMixin', () => {
       const attachment = Attachment.createFromObject({
         id: '1',
         url: 'https://foo.pdf',
-        label: 'Manual'
+        label: 'Manual',
+        isUpload: false
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'foo.pdf'
@@ -66,7 +67,8 @@ describe('AttachmentsMixin', () => {
       const attachment = Attachment.createFromObject({
         id: '1',
         url: '',
-        label: 'Manual'
+        label: 'Manual',
+        isUpload: false
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'unknown filename'
@@ -76,7 +78,8 @@ describe('AttachmentsMixin', () => {
       const attachment = Attachment.createFromObject({
         id: '1',
         url: 'https://server/very/fancy/images/abc.jpeg',
-        label: 'Manual'
+        label: 'Manual',
+        isUpload: false
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'abc.jpeg'
@@ -86,7 +89,8 @@ describe('AttachmentsMixin', () => {
       const attachment = Attachment.createFromObject({
         id: '1',
         url: 'https://server/very/fancy/images/abc.jpeg/',
-        label: 'Manual'
+        label: 'Manual',
+        isUpload: false
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'abc.jpeg'

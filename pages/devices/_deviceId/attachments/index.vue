@@ -58,6 +58,8 @@ permissions and limitations under the Licence.
       <template #list-item="{item}">
         <AttachmentListItem
           :attachment="item"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
@@ -106,7 +108,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { LoadDeviceAttachmentsAction, DeleteDeviceAttachmentAction, DevicesState } from '@/store/devices'
+import { LoadDeviceAttachmentsAction, DeleteDeviceAttachmentAction, DevicesState, DownloadAttachmentAction } from '@/store/devices'
 
 import { Attachment } from '@/models/Attachment'
 
@@ -116,11 +118,12 @@ import AttachmentDeleteDialog from '@/components/shared/AttachmentDeleteDialog.v
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: { ProgressIndicator, DotMenuActionDelete, HintCard, AttachmentDeleteDialog, AttachmentListItem, BaseList },
-  computed: mapState('devices', ['deviceAttachments']),
-  methods: mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment'])
+  computed: mapState('devices', ['deviceAttachments', 'device']),
+  methods: mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment', 'downloadAttachment'])
 })
 export default class DeviceAttachmentShowPage extends Vue {
   @InjectReactive()
@@ -132,8 +135,10 @@ export default class DeviceAttachmentShowPage extends Vue {
 
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
+  device!: DevicesState['device']
   deleteDeviceAttachment!: DeleteDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  downloadAttachment!: DownloadAttachmentAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -155,15 +160,31 @@ export default class DeviceAttachmentShowPage extends Vue {
     }
     try {
       this.isSaving = true
-      await this.deleteDeviceAttachment(this.attachmentToDelete.id)
-      this.loadDeviceAttachments(this.deviceId)
+      const attachmentId = this.attachmentToDelete.id
+      this.closeDialog()
+
+      await this.deleteDeviceAttachment(attachmentId)
+      await this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
       this.isSaving = false
-      this.closeDialog()
     }
+  }
+
+  async openAttachment (attachment: Attachment) {
+    try {
+      const blob = await this.downloadAttachment(attachment.url)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
+    }
+  }
+
+  get isPublic () {
+    return this.device?.visibility === Visibility.Public
   }
 }
 </script>

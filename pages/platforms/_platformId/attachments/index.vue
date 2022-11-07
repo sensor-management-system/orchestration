@@ -61,6 +61,8 @@ permissions and limitations under the Licence.
       <template #list-item="{item}">
         <AttachmentListItem
           :attachment="item"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
@@ -108,9 +110,10 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { PlatformsState, LoadPlatformAttachmentsAction, DeletePlatformAttachmentAction } from '@/store/platforms'
+import { PlatformsState, LoadPlatformAttachmentsAction, DeletePlatformAttachmentAction, DownloadAttachmentAction } from '@/store/platforms'
 
 import { Attachment } from '@/models/Attachment'
+import { Visibility } from '@/models/Visibility'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import HintCard from '@/components/HintCard.vue'
@@ -121,8 +124,8 @@ import AttachmentDeleteDialog from '@/components/shared/AttachmentDeleteDialog.v
 
 @Component({
   components: { AttachmentDeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, ProgressIndicator },
-  computed: mapState('platforms', ['platformAttachments']),
-  methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment'])
+  computed: mapState('platforms', ['platformAttachments', 'platform']),
+  methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment', 'downloadAttachment'])
 })
 export default class PlatformAttachmentShowPage extends Vue {
   @InjectReactive()
@@ -134,8 +137,10 @@ export default class PlatformAttachmentShowPage extends Vue {
 
   // vuex definition for typescript check
   platformAttachments!: PlatformsState['platformAttachments']
+  platform!: PlatformsState['platform']
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
   deletePlatformAttachment!: DeletePlatformAttachmentAction
+  downloadAttachment!: DownloadAttachmentAction
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -157,15 +162,30 @@ export default class PlatformAttachmentShowPage extends Vue {
     }
     try {
       this.isSaving = true
-      await this.deletePlatformAttachment(this.attachmentToDelete.id)
+      const attachmentId = this.attachmentToDelete.id
+      this.closeDialog()
+      await this.deletePlatformAttachment(attachmentId)
       this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
       this.isSaving = false
-      this.closeDialog()
     }
+  }
+
+  async openAttachment (attachment: Attachment) {
+    try {
+      const blob = await this.downloadAttachment(attachment.url)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
+    }
+  }
+
+  get isPublic () {
+    return this.platform?.visibility === Visibility.Public
   }
 }
 </script>

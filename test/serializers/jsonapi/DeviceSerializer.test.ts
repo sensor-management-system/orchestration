@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -86,12 +86,14 @@ const createTestDevice = () => {
     Attachment.createFromObject({
       id: '2',
       label: 'GFZ',
-      url: 'http://www.gfz-potsdam.de'
+      url: 'http://www.gfz-potsdam.de',
+      isUpload: false
     }),
     Attachment.createFromObject({
       id: '1',
       label: 'UFZ',
-      url: 'http://www.ufz.de'
+      url: 'http://www.ufz.de',
+      isUpload: false
     })
   ]
 
@@ -786,7 +788,8 @@ describe('DeviceSerializer', () => {
       expectedDevice.attachments = [Attachment.createFromObject({
         label: 'test label',
         url: 'http://test.test',
-        id: '1'
+        id: '1',
+        isUpload: false
       })]
       expectedDevice.statusUri = ''
       expectedDevice.website = ''

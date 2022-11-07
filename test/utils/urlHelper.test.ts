@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { protocolsInUrl, removeBaseUrl, removeFirstSlash, removeTrailingSlash, toRouterPath } from '@/utils/urlHelpers'
+import { getLastPathElement, protocolsInUrl, removeBaseUrl, removeFirstSlash, removeTrailingSlash, toRouterPath } from '@/utils/urlHelpers'
 
 describe('removeBaseUrl', () => {
   it('should return the url if the base url is undefined', () => {
@@ -121,5 +121,15 @@ describe('protocolsInUrl', () => {
     const allowedProtocols = ['http', 'https']
     const url = 'ftp://www.heise.de'
     expect(protocolsInUrl(allowedProtocols, url)).toBeFalsy()
+  })
+})
+describe('getLastPathElement', () => {
+  it('should work with basic file names', () => {
+    const url = 'http://downloads/data/README.md'
+    expect(getLastPathElement(url)).toEqual('README.md')
+  })
+  it('should also work with a trailing slash', () => {
+    const url = 'http://files/folder/abc.csv/'
+    expect(getLastPathElement(url)).toEqual('abc.csv')
   })
 })

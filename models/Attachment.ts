@@ -33,6 +33,7 @@ export interface IAttachment {
   id: string | null
   url: string
   label: string
+  isUpload: boolean
 }
 
 export class Attachment implements IAttachment {
@@ -50,6 +51,8 @@ export class Attachment implements IAttachment {
   private _id: string | null = null
   private _url: string = ''
   private _label: string = ''
+  private _isUpload: boolean = false
+
   // @TODO: add an _uploadedAt field
   static createEmpty (): Attachment {
     return new Attachment()
@@ -67,6 +70,7 @@ export class Attachment implements IAttachment {
     attachment.id = someObject.id || null
     attachment.url = someObject.url || ''
     attachment.label = someObject.label || ''
+    attachment.isUpload = someObject.isUpload
     return attachment
   }
 
@@ -92,5 +96,13 @@ export class Attachment implements IAttachment {
 
   set label (label: string) {
     this._label = label
+  }
+
+  get isUpload (): boolean {
+    return this._isUpload
+  }
+
+  set isUpload (isUpload: boolean) {
+    this._isUpload = isUpload
   }
 }

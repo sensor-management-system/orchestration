@@ -45,10 +45,22 @@ export class UploadApi {
     this.basePath = basePath
   }
 
-  async file (file: File): Promise<IUploadResult> {
+  async file (file: File, fileName?: string): Promise<IUploadResult> {
     const url = this.basePath
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('file', file, fileName)
+    const result = await this.axiosApi.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return result.data as IUploadResult
+  }
+
+  async blob (blob: Blob, fileName?: string): Promise<IUploadResult> {
+    const url = this.basePath
+    const formData = new FormData()
+    formData.append('file', blob, fileName)
     const result = await this.axiosApi.post(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

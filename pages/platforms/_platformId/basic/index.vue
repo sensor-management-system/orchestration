@@ -134,7 +134,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { PlatformsState, DeletePlatformAction, ArchivePlatformAction, LoadPlatformAction, RestorePlatformAction, ExportAsSensorMLAction } from '@/store/platforms'
+import { PlatformsState, DeletePlatformAction, ArchivePlatformAction, LoadPlatformAction, RestorePlatformAction, ExportAsSensorMLAction, GetSensorMLUrlAction } from '@/store/platforms'
 
 import PlatformBasicData from '@/components/PlatformBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
@@ -146,6 +146,7 @@ import PlatformArchiveDialog from '@/components/platforms/PlatformArchiveDialog.
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
@@ -163,7 +164,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   computed: {
     ...mapState('platforms', ['platform'])
   },
-  methods: mapActions('platforms', ['deletePlatform', 'loadPlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML'])
+  methods: mapActions('platforms', ['deletePlatform', 'loadPlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'getSensorMLUrl'])
 })
 export default class PlatformShowBasicPage extends Vue {
   @InjectReactive()
@@ -189,6 +190,7 @@ export default class PlatformShowBasicPage extends Vue {
   archivePlatform!: ArchivePlatformAction
   restorePlatform!: RestorePlatformAction
   exportAsSensorML!: ExportAsSensorMLAction
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   get platformId () {
     return this.$route.params.platformId
@@ -203,12 +205,17 @@ export default class PlatformShowBasicPage extends Vue {
   }
 
   async openSensorML () {
-    try {
-      const blob = await this.exportAsSensorML(this.platformId)
-      const url = window.URL.createObjectURL(blob)
+    if (this.platform?.visibility === Visibility.Public) {
+      const url = await this.getSensorMLUrl(this.platformId)
       window.open(url)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(this.platformId)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+      }
     }
   }
 

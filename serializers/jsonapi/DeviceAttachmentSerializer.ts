@@ -60,6 +60,7 @@ export class DeviceAttachmentSerializer implements IAttachmentSerializer {
     if (attributes) {
       newEntry.url = attributes.url || ''
       newEntry.label = attributes.label || ''
+      newEntry.isUpload = attributes.is_upload || false
     }
 
     return newEntry
@@ -140,6 +141,7 @@ export class DeviceAttachmentSerializer implements IAttachmentSerializer {
       attributes: {
         url: attachment.url,
         label: attachment.label
+        // no need to set 'is_upload' - it is a read only field
       },
       relationships: {
         device: {

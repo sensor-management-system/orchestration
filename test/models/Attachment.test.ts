@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,10 +33,16 @@ import { Attachment } from '@/models/Attachment'
 
 describe('Attachment Models', () => {
   test('create a Attachment from an object', () => {
-    const attachment = Attachment.createFromObject({ id: '1', url: 'https://foo/test.png', label: 'Testpicture' })
+    const attachment = Attachment.createFromObject({
+      id: '1',
+      url: 'https://foo/test.png',
+      label: 'Testpicture',
+      isUpload: true
+    })
     expect(typeof attachment).toBe('object')
     expect(attachment).toHaveProperty('id', '1')
     expect(attachment).toHaveProperty('url', 'https://foo/test.png')
     expect(attachment).toHaveProperty('label', 'Testpicture')
+    expect(attachment).toHaveProperty('isUpload', true)
   })
 })

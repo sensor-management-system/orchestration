@@ -264,6 +264,10 @@ export class PlatformApi {
     return new Blob([response.data], { type: 'text/xml' })
   }
 
+  getSensorMLUrl (platformId: string): string {
+    return this.axiosApi.defaults.baseURL + this.basePath + '/' + platformId + '/sensorml'
+  }
+
   async searchRecentlyUpdated (amount: number) {
     this.prepareSearch()
     return await this.axiosApi.get(

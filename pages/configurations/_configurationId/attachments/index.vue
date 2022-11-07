@@ -58,6 +58,8 @@ permissions and limitations under the Licence.
       <template #list-item="{item}">
         <AttachmentListItem
           :attachment="item"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
@@ -106,9 +108,10 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { LoadConfigurationAttachmentsAction, DeleteConfigurationAttachmentAction, ConfigurationsState } from '@/store/configurations'
+import { LoadConfigurationAttachmentsAction, DeleteConfigurationAttachmentAction, ConfigurationsState, DownloadAttachmentAction } from '@/store/configurations'
 
 import { Attachment } from '@/models/Attachment'
+import { Visibility } from '@/models/Visibility'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
@@ -119,8 +122,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator, DotMenuActionDelete, HintCard, AttachmentDeleteDialog, AttachmentListItem, BaseList },
-  computed: mapState('configurations', ['configurationAttachments']),
-  methods: mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment'])
+  computed: mapState('configurations', ['configurationAttachments', 'configuration']),
+  methods: mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment', 'downloadAttachment'])
 })
 export default class ConfigurationAttachmentShowPage extends Vue {
   @InjectReactive()
@@ -132,8 +135,10 @@ export default class ConfigurationAttachmentShowPage extends Vue {
 
   // vuex definition for typescript check
   configurationAttachments!: ConfigurationsState['configurationAttachments']
+  configuration!: ConfigurationsState['configuration']
   deleteConfigurationAttachment!: DeleteConfigurationAttachmentAction
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
+  downloadAttachment!: DownloadAttachmentAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -155,15 +160,30 @@ export default class ConfigurationAttachmentShowPage extends Vue {
     }
     try {
       this.isSaving = true
-      await this.deleteConfigurationAttachment(this.attachmentToDelete.id)
+      const attachmendId = this.attachmentToDelete.id
+      this.closeDialog()
+      await this.deleteConfigurationAttachment(attachmendId)
       this.loadConfigurationAttachments(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
       this.isSaving = false
-      this.closeDialog()
     }
+  }
+
+  async openAttachment (attachment: Attachment) {
+    try {
+      const blob = await this.downloadAttachment(attachment.url)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
+    }
+  }
+
+  get isPublic () {
+    return this.configuration?.visibility === Visibility.Public
   }
 }
 </script>
