@@ -1,8 +1,12 @@
 """Tests for the configuration attachment endpoints."""
 
 import json
+from unittest.mock import patch
+
+from flask import url_for
 
 from project import base_url
+from project.api import minio
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.configuration_attachment import ConfigurationAttachment
@@ -412,3 +416,116 @@ class TestConfigurationAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         self.assertEqual(response.status_code, 422)
+
+    def test_post_minio_url(self):
+        """
+        Test when we post an attachment with a minio url.
+
+        The system should replace the original url with an internal
+        one & should set the is_upload entry.
+        """
+        configuration = Configuration(
+            label="a new configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration)
+        db.session.commit()
+        self.assertTrue(configuration.id is not None)
+
+        with patch.object(minio, "download_endpoint") as mock:
+            mock.return_value = "http://minio:8080"
+            payload = {
+                "data": {
+                    "type": "configuration_attachment",
+                    "attributes": {
+                        "url": "http://minio:8080/some-bucket/somefile.txt",
+                        "label": "Some upload",
+                    },
+                    "relationships": {
+                        "configuration": {
+                            "data": {
+                                "type": "configuration",
+                                "id": str(configuration.id),
+                            }
+                        }
+                    },
+                }
+            }
+            with self.client:
+                url_post = base_url + "/configuration-attachments"
+                response = self.client.post(
+                    url_post,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 201)
+        data = response.json
+        attachment = (
+            db.session.query(ConfigurationAttachment)
+            .filter_by(id=data["data"]["id"])
+            .first()
+        )
+        self.assertTrue(attachment.is_upload)
+        self.assertTrue(data["data"]["attributes"]["is_upload"])
+        self.assertEqual(
+            attachment.internal_url, "http://minio:8080/some-bucket/somefile.txt"
+        )
+        self.assertFalse("internal_url" in data["data"]["attributes"].keys())
+        expected_url = url_for(
+            "download.get_configuration_attachment_content",
+            id=attachment.id,
+            filename="somefile.txt",
+            _external=True,
+        )
+        self.assertEqual(expected_url, attachment.url)
+        self.assertEqual(attachment.url, data["data"]["attributes"]["url"])
+
+    def test_patch_url_for_uploads(self):
+        """Ensure that we can't change the url for uploaded files."""
+        configuration = Configuration(
+            label="a new configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        attachment = ConfigurationAttachment(
+            configuration=configuration,
+            label="File upload",
+            url="http://localhost/.../file",
+            internal_url="http://minio/.../file"
+        )
+        db.session.add_all([configuration, attachment])
+        db.session.commit()
+
+        self.assertTrue(attachment.is_upload)
+
+        payload = {
+            "data": {
+                "type": "configuration_attachment",
+                "id": str(attachment.id),
+                "attributes": {
+                    "label": "UFZ",
+                    "url": "https://www.ufz.de",
+                },
+                "relationships": {
+                    "configuration": {
+                        "data": {"type": "configuration", "id": str(configuration.id)}
+                    }
+                },
+            }
+        }
+        with self.client:
+            url_patch = (
+                base_url
+                + "/configuration-attachments/"
+                + str(attachment.id)
+            )
+            response = self.client.patch(
+                url_patch,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+
+        self.assertEqual(response.status_code, 409)

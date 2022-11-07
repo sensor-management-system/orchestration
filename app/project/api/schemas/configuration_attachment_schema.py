@@ -1,11 +1,11 @@
+"""Schema class for configuration attachments."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class ConfigurationAttachmentSchema(Schema):
-    """
-    Explicit schema for configuration attachments.
-    """
+    """Explicit schema for configuration attachments."""
 
     class Meta:
         """Meta class for the ConfigurationAttachmentSchema."""
@@ -17,6 +17,7 @@ class ConfigurationAttachmentSchema(Schema):
     id = fields.Integer(as_string=True)
     label = fields.Str(required=True)
     url = fields.Str(required=True)
+    is_upload = fields.Bool(dump_only=True)
 
     configuration = Relationship(
         related_view="api.configuration_detail",

@@ -1,3 +1,5 @@
+"""Schema class for the platform attachments."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
@@ -15,6 +17,7 @@ class PlatformAttachmentSchema(Schema):
     id = fields.Integer(as_string=True)
     label = fields.Str(required=True)
     url = fields.Str(required=True)
+    is_upload = fields.Bool(dump_only=True)
 
     platform = Relationship(
         related_view="api.platform_detail",

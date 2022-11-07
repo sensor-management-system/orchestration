@@ -1,20 +1,25 @@
 """Module for the platform attachment list resource."""
+import pathlib
+
+from flask import url_for
 from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import \
-    get_query_with_permissions_for_related_objects
+from ...api import minio
+from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.platform_attachment import PlatformAttachment
 from ..schemas.platform_attachment_schema import PlatformAttachmentSchema
 from ..token_checker import token_required
-from .base_resource import (check_if_object_not_found,
-                            delete_attachments_in_minio_by_url,
-                            query_platform_and_set_update_description_text,
-                            set_update_description_text_and_update_by_user)
+from .base_resource import (
+    check_if_object_not_found,
+    delete_attachments_in_minio_by_url,
+    query_platform_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class PlatformAttachmentList(ResourceList):
@@ -40,7 +45,10 @@ class PlatformAttachmentList(ResourceList):
                 self.session.query(Platform).filter_by(id=platform_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Platform: {} not found".format(platform_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Platform: {} not found".format(platform_id),
                 )
             else:
                 query_ = query_.filter(PlatformAttachment.platform_id == platform_id)
@@ -53,12 +61,27 @@ class PlatformAttachmentList(ResourceList):
         :param result:
         :return:
         """
-        result_id = result[0]["data"]["relationships"]["platform"]["data"]["id"]
+        platform_id = result[0]["data"]["relationships"]["platform"]["data"]["id"]
+        attachment_id = result[0]["data"]["id"]
         msg = "create;attachment"
-        query_platform_and_set_update_description_text(msg, result_id)
+        query_platform_and_set_update_description_text(msg, platform_id)
+
+        data = db.session.query(PlatformAttachment).filter_by(id=attachment_id).first()
+        if data and data.url.startswith(minio.download_endpoint(internal=True)):
+            data.internal_url = data.url
+            last_part_url = pathlib.Path(data.internal_url).name
+            data.url = url_for(
+                "download.get_platform_attachment_content",
+                id=attachment_id,
+                filename=last_part_url,
+                _external=True,
+            )
+            db.session.add(data)
+            db.session.commit()
+            result[0]["data"]["attributes"]["url"] = data.url
+            result[0]["data"]["attributes"]["is_upload"] = True
 
         return result
-
 
     schema = PlatformAttachmentSchema
     decorators = (token_required,)
@@ -80,11 +103,21 @@ class PlatformAttachmentDetail(ResourceDetail):
     """
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if PlatformAttachment not found"""
+        """Return 404 Responses if PlatformAttachment not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def before_patch(self, args, kwargs, data):
+        """Run some checks before updating the data."""
+        attachment = (
+            db.session.query(self._data_layer.model).filter_by(id=kwargs["id"]).first()
+        )
+        if attachment and attachment.is_upload:
+            if data["url"] and data["url"] != attachment.url:
+                raise ConflictError("It is not allowed to change the url of uploads")
+
     def after_patch(self, result):
         """
-        Add update description to related device.
+        Add update description to related platform.
 
         :param result:
         :return:
@@ -95,29 +128,33 @@ class PlatformAttachmentDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
-        device_attachment = (
-            db.session.query(PlatformAttachment).filter_by(id=kwargs["id"]).one_or_none()
+        """Update the platform update description text."""
+        platform_attachment = (
+            db.session.query(PlatformAttachment)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
         )
-        if device_attachment is None:
+        if platform_attachment is None:
             raise ObjectNotFound("Object not found!")
-        platform = device_attachment.get_parent()
+        platform = platform_attachment.get_parent()
         msg = "delete;attachment"
         set_update_description_text_and_update_by_user(platform, msg)
 
     def delete(self, *args, **kwargs):
         """
-        Try to delete an object through sqlalchemy. If could not be done give a ConflictError.
+        Try to delete an object through sqlalchemy.
+
+        If could not be done give a ConflictError.
         :param args: args from the resource view
         :param kwargs: kwargs from the resource view
         :return:
         """
-
         attachment = (
             db.session.query(PlatformAttachment).filter_by(id=kwargs["id"]).first()
         )
         if attachment is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
-        url = attachment.url
+        internal_url = attachment.internal_url
         try:
             super().delete(*args, **kwargs)
         except JsonApiException as e:
@@ -125,7 +162,8 @@ class PlatformAttachmentDetail(ResourceDetail):
                 "Deletion failed as the attachment is still in use.", str(e)
             )
 
-        delete_attachments_in_minio_by_url(url)
+        if internal_url:
+            delete_attachments_in_minio_by_url(internal_url)
         final_result = {"meta": {"message": "Object successfully deleted"}}
 
         return final_result

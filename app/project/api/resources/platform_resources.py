@@ -107,7 +107,7 @@ class PlatformList(ResourceList):
 
         save_to_db(platform)
 
-        #if current_app.config["INSTITUTE"] == "ufz":
+        # if current_app.config["INSTITUTE"] == "ufz":
         #    sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
         #    source_object_url = f"{sms_frontend_url}/platforms/{str(platform.id)}"
         #    add_pid(platform, source_object_url)
@@ -172,7 +172,7 @@ class PlatformDetail(ResourceDetail):
 
         if platform is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
-        urls = [a.url for a in platform.platform_attachments]
+        urls = [a.internal_url for a in platform.platform_attachments if a.internal_url]
         try:
             super().delete(*args, **kwargs)
         except JsonApiException as e:
@@ -180,7 +180,6 @@ class PlatformDetail(ResourceDetail):
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
-
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
@@ -191,6 +190,7 @@ class PlatformDetail(ResourceDetail):
         "session": db.session,
         "model": Platform,
     }
+
     def before_patch(self, args, kwargs, data):
         """
         Run logic before the patch.

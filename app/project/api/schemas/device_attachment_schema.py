@@ -1,3 +1,5 @@
+"""Schema class for device attachments."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
@@ -20,6 +22,7 @@ class DeviceAttachmentSchema(Schema):
     id = fields.Integer(as_string=True)
     label = fields.Str(required=True)
     url = fields.Str(required=True)
+    is_upload = fields.Bool(dump_only=True)
 
     device = Relationship(
         related_view="api.device_detail",

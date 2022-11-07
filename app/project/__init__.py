@@ -5,6 +5,7 @@ from flask import Blueprint, Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from healthcheck import HealthCheck
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .api import minio
 from .api.auth.permission_manager import permission_manager
@@ -27,6 +28,7 @@ from .views import (
     login_routes,
     sensor_ml_routes,
     upload_routes,
+    download_routes,
 )
 
 migrate = Migrate()
@@ -56,6 +58,8 @@ def create_app():
     # set config
     app_settings = env("APP_SETTINGS")
     app.config.from_object(app_settings)
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     # instantiate the db
     db.init_app(app)
@@ -101,6 +105,8 @@ def create_app():
     app.register_blueprint(additional_configuration_routes)
     # upload_routes
     app.register_blueprint(upload_routes)
+    # download routes
+    app.register_blueprint(download_routes)
     # docs_routes
     app.register_blueprint(docs_routes)
     # login_routes
