@@ -25,6 +25,7 @@ from .views import (
     additional_devices_routes,
     additional_platforms_routes,
     docs_routes,
+    free_text_field_routes,
     login_routes,
     sensor_ml_routes,
     upload_routes,
@@ -111,6 +112,8 @@ def create_app():
     app.register_blueprint(docs_routes)
     # login_routes
     app.register_blueprint(login_routes)
+    # Routes for the free text field introspection
+    app.register_blueprint(free_text_field_routes)
     # sensor_ml_routes
     app.jinja_env.lstrip_blocks = True
     app.jinja_env.trim_blocks = True
