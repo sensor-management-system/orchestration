@@ -305,7 +305,7 @@ permissions and limitations under the Licence.
               #dot-menu-items
             >
               <DotMenuActionSensorML
-                @click="openSensorML(item.id)"
+                @click="openSensorML(item)"
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
@@ -378,7 +378,8 @@ import {
   RestoreDeviceAction,
   ExportAsSensorMLAction,
   LoadDeviceAction,
-  ReplaceDeviceInDevicesAction
+  ReplaceDeviceInDevicesAction,
+  GetSensorMLUrlAction
 } from '@/store/devices'
 
 import {
@@ -413,6 +414,7 @@ import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
@@ -440,7 +442,7 @@ import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelec
   },
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
-    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'loadDevice', 'replaceDeviceInDevices']),
+    ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'loadDevice', 'replaceDeviceInDevices', 'getSensorMLUrl']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
@@ -496,6 +498,7 @@ export default class SearchDevicesPage extends Vue {
   loadDevice!: LoadDeviceAction
   replaceDeviceInDevices!: ReplaceDeviceInDevicesAction
   device!: DevicesState['device']
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   async created () {
     this.initializeAppBar()
@@ -809,13 +812,18 @@ export default class SearchDevicesPage extends Vue {
     this.setTitle('Devices')
   }
 
-  async openSensorML (deviceId: string) {
-    try {
-      const blob = await this.exportAsSensorML(deviceId)
-      const url = window.URL.createObjectURL(blob)
+  async openSensorML (device: Device) {
+    if (device.visibility === Visibility.Public) {
+      const url = await this.getSensorMLUrl(device.id!)
       window.open(url)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(device.id!)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+      }
     }
   }
 }

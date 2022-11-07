@@ -806,12 +806,14 @@ describe('GenericActionSerializer', () => {
         const attachment1 = Attachment.createFromObject({
           id: '51',
           label: 'Foo.de',
-          url: 'https://foo.de'
+          url: 'https://foo.de',
+          isUpload: false
         })
         const attachment2 = Attachment.createFromObject({
           id: '52',
           label: 'Bar.baz',
-          url: 'https://bar.baz'
+          url: 'https://bar.baz',
+          isUpload: false
         })
         const expectedAction1 = new GenericAction()
         expectedAction1.id = '4'

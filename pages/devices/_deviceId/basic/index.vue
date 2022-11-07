@@ -131,7 +131,7 @@ permissions and limitations under the Licence.
 import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { ArchiveDeviceAction, DeleteDeviceAction, DevicesState, LoadDeviceAction, RestoreDeviceAction, ExportAsSensorMLAction } from '@/store/devices'
+import { ArchiveDeviceAction, DeleteDeviceAction, DevicesState, LoadDeviceAction, RestoreDeviceAction, ExportAsSensorMLAction, GetSensorMLUrlAction } from '@/store/devices'
 
 import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
 import DeviceArchiveDialog from '@/components/devices/DeviceArchiveDialog.vue'
@@ -143,6 +143,7 @@ import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
@@ -158,7 +159,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     DeviceArchiveDialog
   },
   computed: mapState('devices', ['device']),
-  methods: mapActions('devices', ['loadDevice', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML'])
+  methods: mapActions('devices', ['loadDevice', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'getSensorMLUrl'])
 })
 export default class DeviceShowBasicPage extends Vue {
   @InjectReactive()
@@ -185,6 +186,7 @@ export default class DeviceShowBasicPage extends Vue {
   archiveDevice!: ArchiveDeviceAction
   restoreDevice!: RestoreDeviceAction
   exportAsSensorML!: ExportAsSensorMLAction
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   get deviceId () {
     return this.$route.params.deviceId
@@ -199,12 +201,17 @@ export default class DeviceShowBasicPage extends Vue {
   }
 
   async openSensorML () {
-    try {
-      const blob = await this.exportAsSensorML(this.deviceId)
-      const url = window.URL.createObjectURL(blob)
+    if (this.device?.visibility === Visibility.Public) {
+      const url = await this.getSensorMLUrl(this.deviceId)
       window.open(url)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(this.deviceId)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+      }
     }
   }
 

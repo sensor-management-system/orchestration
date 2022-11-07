@@ -224,7 +224,7 @@ permissions and limitations under the Licence.
               #dot-menu-items
             >
               <DotMenuActionSensorML
-                @click="openSensorML(item.id)"
+                @click="openSensorML(item)"
               />
               <DotMenuActionArchive
                 v-if="canArchiveEntity(item)"
@@ -271,7 +271,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
 import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
-import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, LoadConfigurationAction, ConfigurationsState, ReplaceConfigurationInConfigurationsAction } from '@/store/configurations'
+import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, LoadConfigurationAction, ConfigurationsState, ReplaceConfigurationInConfigurationsAction, GetSensorMLUrlAction } from '@/store/configurations'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
@@ -287,6 +287,7 @@ import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 
 import { Configuration } from '@/models/Configuration'
 import { PermissionGroup } from '@/models/PermissionGroup'
+import { Visibility } from '@/models/Visibility'
 import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { QueryParams } from '@/modelUtils/QueryParams'
 @Component({
@@ -310,7 +311,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
-    ...mapActions('configurations', ['searchConfigurationsPaginated', 'loadConfiguration', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'archiveConfiguration', 'restoreConfiguration', 'exportAsSensorML', 'replaceConfigurationInConfigurations']),
+    ...mapActions('configurations', ['searchConfigurationsPaginated', 'loadConfiguration', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'archiveConfiguration', 'restoreConfiguration', 'exportAsSensorML', 'replaceConfigurationInConfigurations', 'getSensorMLUrl']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups'])
   }
@@ -358,6 +359,7 @@ export default class SearchConfigurationsPage extends Vue {
   loadConfiguration!: LoadConfigurationAction
   configuration!: ConfigurationsState['configuration']
   replaceConfigurationInConfigurations!: ReplaceConfigurationInConfigurationsAction
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   async created () {
     try {
@@ -620,13 +622,18 @@ export default class SearchConfigurationsPage extends Vue {
     this.setTitle('Configurations')
   }
 
-  async openSensorML (cinfigurationId: string) {
-    try {
-      const blob = await this.exportAsSensorML(cinfigurationId)
-      const url = window.URL.createObjectURL(blob)
+  async openSensorML (configuration: Configuration) {
+    if (configuration.visibility === Visibility.Public) {
+      const url = await this.getSensorMLUrl(configuration.id!)
       window.open(url)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(configuration.id)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+      }
     }
   }
 }

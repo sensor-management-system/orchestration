@@ -56,6 +56,7 @@ import { IDateCompareable } from '@/modelUtils/Compareables'
 
 import { IncludedRelationships } from '@/services/sms/DeviceApi'
 import { Availability } from '@/models/Availability'
+import { getLastPathElement } from '@/utils/urlHelpers'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
@@ -199,12 +200,14 @@ export type DeleteDeviceAction = (id: string) => Promise<void>
 export type ArchiveDeviceAction = (id: string) => Promise<void>
 export type RestoreDeviceAction = (id: string) => Promise<void>
 export type ExportAsCsvAction = (searchParams: IDeviceSearchParams) => Promise<Blob>
+export type GetSensorMLUrlAction = (id: string) => string
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
 export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
 export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
 export type CreatePidAction = (id: string | null) => Promise<string>
+export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
 
 const actions: ActionTree<DevicesState, RootState> = {
   async searchDevicesPaginated ({
@@ -478,6 +481,13 @@ const actions: ActionTree<DevicesState, RootState> = {
       const attachments = device.attachments.map(Attachment.createFromObject)
       for (const attachment of attachments) {
         attachment.id = null
+        if (attachment.isUpload) {
+          const blob = await dispatch('downloadAttachment', attachment.url)
+          const filename = getLastPathElement(attachment.url)
+          const uplaodResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
+          const newUrl = uplaodResult.url
+          attachment.url = newUrl
+        }
         related.push(dispatch('addDeviceAttachment', { deviceId: savedDeviceId, attachment }))
       }
     }
@@ -510,6 +520,12 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   async restoreDevice (_, id: string): Promise<void> {
     await this.$api.devices.restoreById(id)
+  },
+  async downloadAttachment (_, attachmentUrl: string): Promise<Blob> {
+    return await this.$api.deviceAttachments.getFile(attachmentUrl)
+  },
+  getSensorMLUrl (_, id: string): string {
+    return this.$api.devices.getSensorMLUrl(id)
   },
   async exportAsSensorML (_, id: string): Promise<Blob> {
     return await this.$api.devices.getSensorML(id)

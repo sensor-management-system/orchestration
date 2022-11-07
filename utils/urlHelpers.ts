@@ -59,6 +59,12 @@ export function removeTrailingSlash (str: string): string {
   return str
 }
 
+export function getLastPathElement (str: string): string {
+  const cleanedUrl = removeTrailingSlash(str)
+  const splitted = cleanedUrl.split('/')
+  return splitted[splitted.length - 1]
+}
+
 export function toRouterPath (callbackUri: string, routeBase = '/') {
   if (callbackUri) {
     const domainStartsAt = '://'

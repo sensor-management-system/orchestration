@@ -78,4 +78,12 @@ export class DeviceAttachmentApi {
       })
     })
   }
+
+  async getFile (url: string): Promise<Blob> {
+    const response = await this.axiosApi.get(url,
+      { responseType: 'blob' }
+    )
+    const contentType = response.headers['content-type']
+    return new Blob([response.data], { type: contentType })
+  }
 }

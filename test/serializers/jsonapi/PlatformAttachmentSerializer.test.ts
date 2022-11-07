@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -42,7 +42,8 @@ describe('PlatformAttachmentSerializer', () => {
           type: 'platform_attachment',
           attributes: {
             url: 'https://www.gfz-potsdam.de',
-            label: 'GFZ Homepage'
+            label: 'GFZ Homepage',
+            is_upload: false
           },
           relationships: {}
         }, {
@@ -50,7 +51,8 @@ describe('PlatformAttachmentSerializer', () => {
           type: 'platform_attachment',
           attributes: {
             url: 'https://www.ufz.de',
-            label: 'UFZ Homepage'
+            label: 'UFZ Homepage',
+            is_upload: true
           },
           relationships: {}
         }],
@@ -63,9 +65,11 @@ describe('PlatformAttachmentSerializer', () => {
       expect(models[0].id).toEqual('123')
       expect(models[0].url).toEqual('https://www.gfz-potsdam.de')
       expect(models[0].label).toEqual('GFZ Homepage')
+      expect(models[0].isUpload).not.toBeTruthy()
       expect(models[1].id).toEqual('456')
       expect(models[1].url).toEqual('https://www.ufz.de')
       expect(models[1].label).toEqual('UFZ Homepage')
+      expect(models[1].isUpload).toBeTruthy()
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -76,7 +80,8 @@ describe('PlatformAttachmentSerializer', () => {
           type: 'platform_attachment',
           attributes: {
             url: 'https://www.gfz-potsdam.de',
-            label: 'GFZ Homepage'
+            label: 'GFZ Homepage',
+            is_upload: true
           },
           relationships: {}
         },
@@ -89,6 +94,7 @@ describe('PlatformAttachmentSerializer', () => {
       expect(model.id).toEqual('123')
       expect(model.url).toEqual('https://www.gfz-potsdam.de')
       expect(model.label).toEqual('GFZ Homepage')
+      expect(model.isUpload).toBeTruthy()
     })
     it('should also fill the attributes with empty strings if missing', () => {
       const data = {
@@ -107,6 +113,7 @@ describe('PlatformAttachmentSerializer', () => {
       expect(model.id).toEqual('123')
       expect(model.url).toEqual('')
       expect(model.label).toEqual('')
+      expect(model.isUpload).not.toBeTruthy()
     })
   })
   describe('#convertModelToJsonApiData', () => {
@@ -114,7 +121,8 @@ describe('PlatformAttachmentSerializer', () => {
       const attachment = Attachment.createFromObject({
         id: '123',
         url: 'https://www.ufz.de',
-        label: 'UFZ Homepage'
+        label: 'UFZ Homepage',
+        isUpload: false
       })
       const serializer = new PlatformAttachmentSerializer()
       const platformId = '456'
@@ -143,7 +151,8 @@ describe('PlatformAttachmentSerializer', () => {
       const attachment = Attachment.createFromObject({
         id: null,
         url: 'https://www.ufz.de',
-        label: 'UFZ Homepage'
+        label: 'UFZ Homepage',
+        isUpload: true
       })
       const serializer = new PlatformAttachmentSerializer()
       const platformId = '456'

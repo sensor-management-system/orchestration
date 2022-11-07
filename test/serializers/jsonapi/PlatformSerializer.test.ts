@@ -65,12 +65,14 @@ const createTestPlatform = () => {
     Attachment.createFromObject({
       id: '2',
       label: 'GFZ',
-      url: 'http://www.gfz-potsdam.de'
+      url: 'http://www.gfz-potsdam.de',
+      isUpload: false
     }),
     Attachment.createFromObject({
       id: null,
       label: 'UFZ',
-      url: 'http://www.ufz.de'
+      url: 'http://www.ufz.de',
+      isUpload: false
     })
   ]
 
@@ -298,7 +300,8 @@ describe('PlatformSerializer', () => {
       expectedPlatform1.attachments = [Attachment.createFromObject({
         id: '12',
         label: 'test label',
-        url: 'http://test.test'
+        url: 'http://test.test',
+        isUpload: false
       })]
       expectedPlatform1.platformTypeUri = 'type/Station'
       expectedPlatform1.statusUri = 'status/inuse'
@@ -512,7 +515,8 @@ describe('PlatformSerializer', () => {
       expectedPlatform.attachments = [Attachment.createFromObject({
         id: '12',
         label: 'GFZ',
-        url: 'http://www.gfz-potsdam.de'
+        url: 'http://www.gfz-potsdam.de',
+        isUpload: false
       })]
       expectedPlatform.platformTypeUri = 'type/Station'
       expectedPlatform.statusUri = 'status/inuse'
@@ -691,7 +695,8 @@ describe('PlatformSerializer', () => {
       expectedPlatform.attachments = [Attachment.createFromObject({
         id: '12',
         label: 'GFZ',
-        url: 'http://www.gfz-potsdam.de'
+        url: 'http://www.gfz-potsdam.de',
+        isUpload: false
       })]
 
       expectedPlatform.platformTypeUri = 'type/Station'
@@ -854,7 +859,8 @@ describe('PlatformSerializer', () => {
       const attachment = Attachment.createFromObject({
         id: '1',
         label: 'GFZ',
-        url: 'https://www.gfz-potsdam.de'
+        url: 'https://www.gfz-potsdam.de',
+        isUpload: false
       })
 
       platform.attachments = [attachment]
@@ -877,7 +883,8 @@ describe('PlatformSerializer', () => {
       const attachment = Attachment.createFromObject({
         id: '1',
         label: 'GFZ',
-        url: 'https://www.gfz-potsdam.de'
+        url: 'https://www.gfz-potsdam.de',
+        isUpload: false
       })
 
       platform.attachments = [attachment]

@@ -48,6 +48,9 @@ const getters: GetterTree<IFilesState, RootState> = {
 const actions: ActionTree<IFilesState, RootState> = {
   async uploadFile (_nonUsedContext, file: File): Promise<IUploadResult> {
     return await this.$api.upload.file(file)
+  },
+  async uploadBlob (_nonUsedContext, { blob, filename }: {blob: Blob, filename: string}): Promise<IUploadResult> {
+    return await this.$api.upload.blob(blob, filename)
   }
 }
 const mutations = {

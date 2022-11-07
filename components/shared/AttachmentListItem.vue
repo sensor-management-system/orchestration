@@ -60,9 +60,16 @@ permissions and limitations under the Licence.
               {{ filetypeIcon(attachment) }}
             </v-icon>
             <span class="text-caption">
-              <a :href="attachment.url" target="_blank">
-                {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
-              </a>
+              <template v-if="isPublic || !attachment.isUpload">
+                <a :href="attachment.url" target="_blank">
+                  {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
+                </a>
+              </template>
+              <template v-else>
+                <span>
+                  {{ attachment.label }}&nbsp;<v-icon small @click="openAttachment">mdi-link-lock</v-icon>
+                </span>
+              </template>
             </span>
           </v-col>
           <v-col
@@ -99,5 +106,16 @@ export default class AttachmentListItem extends mixins(AttachmentsMixin) {
     type: Object
   })
   private attachment!: Attachment
+
+  @Prop({
+    required: false,
+    type: Boolean,
+    default: false
+  })
+  private isPublic!: boolean
+
+  openAttachment () {
+    this.$emit('open-attachment', this.attachment)
+  }
 }
 </script>

@@ -318,6 +318,10 @@ export class DeviceApi {
     return new Blob([response.data], { type: 'text/xml' })
   }
 
+  getSensorMLUrl (deviceId: string): string {
+    return this.axiosApi.defaults.baseURL + this.basePath + '/' + deviceId + '/sensorml'
+  }
+
   prepareSearch () {
     this.resetFilterSetting()
     this.prepareManufacturers()

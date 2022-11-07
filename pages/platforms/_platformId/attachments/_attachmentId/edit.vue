@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2021
+Copyright (C) 2020-2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -64,6 +64,16 @@ permissions and limitations under the Licence.
             </v-icon>
             <v-form ref="attachmentsEditForm" class="pb-2" @submit.prevent>
               <v-text-field
+                v-model="valueCopy.url"
+                :label="valueCopy.isUpload ? 'File': 'URL'"
+                required
+                class="required"
+                type="url"
+                placeholder="https://"
+                :rules="valueCopy.isUpload ? [] : [rules.required, rules.validUrl]"
+                :disabled="valueCopy.isUpload"
+              />
+              <v-text-field
                 v-model="valueCopy.label"
                 label="Label"
                 required
@@ -71,25 +81,6 @@ permissions and limitations under the Licence.
                 :rules="[rules.required]"
               />
             </v-form>
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <v-btn
-              :href="valueCopy.url"
-              target="_blank"
-              text
-              small
-              nuxt
-            >
-              <v-icon
-                small
-              >
-                mdi-open-in-new
-              </v-icon>
-              Open in new tab
-            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>

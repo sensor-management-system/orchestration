@@ -228,7 +228,7 @@ permissions and limitations under the Licence.
               #dot-menu-items
             >
               <DotMenuActionSensorML
-                @click="openSensorML(item.id)"
+                @click="openSensorML(item)"
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
@@ -292,7 +292,8 @@ import {
   RestorePlatformAction,
   ExportAsSensorMLAction,
   LoadPlatformAction,
-  ReplacePlatformInPlatformsAction
+  ReplacePlatformInPlatformsAction,
+  GetSensorMLUrlAction
 } from 'store/platforms'
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 
@@ -315,6 +316,7 @@ import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSear
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
 import { Platform } from '@/models/Platform'
+import { Visibility } from '@/models/Visibility'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
@@ -344,7 +346,7 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
-    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'loadPlatform', 'replacePlatformInPlatforms']),
+    ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'loadPlatform', 'replacePlatformInPlatforms', 'getSensorMLUrl']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
@@ -380,6 +382,7 @@ export default class SearchPlatformsPage extends Vue {
   loadPlatform!: LoadPlatformAction
   replacePlatformInPlatforms!: ReplacePlatformInPlatformsAction
   platform!: PlatformsState['platform']
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   created () {
     this.initializeAppBar()
@@ -573,13 +576,18 @@ export default class SearchPlatformsPage extends Vue {
     this.setTitle('Platforms')
   }
 
-  async openSensorML (platformId: string) {
-    try {
-      const blob = await this.exportAsSensorML(platformId)
-      const url = window.URL.createObjectURL(blob)
+  async openSensorML (platform: Platform) {
+    if (platform.visibility === Visibility.Public) {
+      const url = await this.getSensorMLUrl(platform.id!)
       window.open(url)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(platform.id!)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+      }
     }
   }
 }
