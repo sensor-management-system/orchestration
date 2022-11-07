@@ -1,4 +1,4 @@
-from .configuration_attachment_resurces import (  # noqa: F401
+from .configuration_attachment_resources import (  # noqa: F401
     ConfigurationAttachmentDetail,
     ConfigurationAttachmentList,
 )

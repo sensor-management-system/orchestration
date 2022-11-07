@@ -1,10 +1,14 @@
+"""Minio related classes to handle uploads."""
+
+import hashlib
 import mimetypes
 import os
+import pathlib
 import random
 import time
 
 import minio
-from flask import _app_ctx_stack, current_app, make_response, g
+from flask import _app_ctx_stack, current_app, g, make_response
 from minio.error import S3Error
 from urllib3.exceptions import MaxRetryError, ResponseError
 
@@ -12,10 +16,13 @@ from .helpers.errors import ConflictError, NotFoundError, ServiceIsUnreachableEr
 
 
 class MinioNotAvailableException(Exception):
+    """Exception to indicate that minio is not available to work with."""
+
     pass
 
 
 def search_a_list_of_dictionaries(lod, default, **kw):
+    """Filter a list of dictionaries with the given keys & values."""
     result = list(
         filter(lambda item: (item[key] == value for (key, value) in kw.items()), lod)
     )
@@ -42,22 +49,20 @@ def set_file_extension(filename, content_type):
 
 
 def set_a_filename(uploaded_file):
-    act_year_month = time.strftime("%Y-%m")
-    filename_picked_by_user = os.path.splitext(uploaded_file.filename)
-    file_extension = set_file_extension(
-        filename_picked_by_user, uploaded_file.content_type
-    )
-    numbers = random.randint(0, 0x10000)
-    filename = "{}{}".format(
-        filename_picked_by_user[0].lower() + "_" + str(numbers),
-        file_extension,
-    )
-    ordered_filed = f"{act_year_month}/{filename}"
-    return ordered_filed
+    """Return a filename for the uploaded file."""
+    # By using the sha1, we get the same file path if we re-upload
+    # the same file with the same name.
+    # => That way we can save storage.
+    sha1 = hashlib.sha1(uploaded_file.read()).hexdigest()
+    uploaded_file.seek(0, 0)
+    filename_picked_by_user = pathlib.Path(uploaded_file.filename).name
+    return f"{sha1}/{filename_picked_by_user}"
 
 
 class FlaskMinio:
-    """The core Minio client object.
+    """
+    The core Minio client object.
+
     This class is a class based Flask extensions used to control
     the Minio integration to a Flask applications.
 
@@ -65,15 +70,17 @@ class FlaskMinio:
     """
 
     def __init__(self, app=None):
+        """Init the object."""
         self.app = app
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app):
         """
-         Do setup that requires a Flask app.
-         This method exists so that the FlaskMinio object can be
-         instantiated without requiring an app object.
+        Do setup that requires a Flask app.
+
+        This method exists so that the FlaskMinio object can be
+        instantiated without requiring an app object.
 
         :param app: The application to initialize
         """
@@ -87,10 +94,7 @@ class FlaskMinio:
         app.teardown_appcontext(self.teardown)
 
     def connect(self):
-        """
-        This method opens a connection to the storage server.
-        :return:
-        """
+        """Open the connection to the storage server."""
         if self._exception_on_creating_client is not None:
             raise MinioNotAvailableException(self._exception_on_creating_client)
 
@@ -108,6 +112,7 @@ class FlaskMinio:
             raise MinioNotAvailableException(self._exception_on_creating_client)
 
     def teardown(self, exception):
+        """Handle the teardown when the ap stops."""
         ctx = _app_ctx_stack.top
         if hasattr(ctx, "minio"):
             ctx.minio = None
@@ -115,6 +120,8 @@ class FlaskMinio:
     @property
     def connection(self):
         """
+        Return the connection.
+
         A property that on first access opens the client
         connection and stores it on the context.
         :return:
@@ -125,16 +132,44 @@ class FlaskMinio:
                 ctx.minio = self.connect()
             return ctx.minio
 
+    def download_endpoint(self, internal):
+        """
+        Return the download endpoint.
+
+        Allows to get either the internal one (can contain a docker
+        container name if it is inside a docker compose with the backend)
+        or the public one.
+        Using the internal one makes sure that the backend container can
+        access the file ifself, while for a public one it is not granted
+        (if the minio is inside the same docker compose as the backend
+        ifself).
+
+        If the minio server has its own setup then it shouldn't matter
+        which one will be used.
+        """
+        if internal:
+            protocol = "http"
+            if current_app.config["MINIO_SECURE"]:
+                protocol = "https"
+            return f"{protocol}://{current_app.config['MINIO_ENDPOINT']}"
+        return current_app.config["DOWNLOAD_ENDPOINT"]
+
     def upload_object(self, uploaded_file):
         """
-        Uploads a file as an object to the Minio Storage.
+        Upload a file as an object to the Minio Storage.
+
         :param uploaded_file: a file to upload.
         :return: jons:api response with a permanent url to reach that object.
         """
         size = os.fstat(uploaded_file.fileno()).st_size
 
         minio_bucket_name = current_app.config["MINIO_BUCKET_NAME"]
-        download_endpoint = current_app.config["DOWNLOAD_ENDPOINT"]
+        # When we use the internal link, we can query the file in the backend
+        # itself - even if the minio runs in a docker container.
+        # This way we can make the download more secure by replacing the
+        # url with something like /device-attachments/<id>/file and
+        # are sure that the other users can't access the file itself.
+        download_endpoint = self.download_endpoint(internal=True)
         try:
             found = self.connection.bucket_exists(minio_bucket_name)
             if not found:
@@ -166,19 +201,19 @@ class FlaskMinio:
                 return response
 
         except S3Error as s3err:
-            raise ConflictError(s3err.message)
+            raise ConflictError(str(s3err))
         except MaxRetryError as e:
             self._exception_on_creating_client = e
             raise MinioNotAvailableException(self._exception_on_creating_client)
 
     def remove_an_object(self, object_path):
         """
-        Removes an object form the Minio Storage by file path.
+        Remove an object form the Minio Storage by file path.
+
         :param object_path: a file url like:
             "http://172.16.238.10:9000/sms3/2021-02/860904cd822146b399a6d5ea48d39787.png"
         :return:
         """
-
         _bucket_name, _object_name = self.extract_bucket_and_file_names_from_url(
             object_path
         )
@@ -190,16 +225,17 @@ class FlaskMinio:
             except ResponseError as err:
                 raise ServiceIsUnreachableError(err)
 
-    @staticmethod
-    def extract_bucket_and_file_names_from_url(object_path):
+    def extract_bucket_and_file_names_from_url(self, object_path):
         """
-        Just in case that another bucket name is used, we extract the name directly
-        from the url.
+        Extract the names for bucket & file from the url.
+
+        Just in case that another bucket name is used, we extract the
+        name directly from the url.
         :param self:
         :param object_path:
         :return:
         """
-        minio_endpoint = current_app.config["DOWNLOAD_ENDPOINT"]
+        minio_endpoint = self.download_endpoint(internal=True)
         _start, _minio_endpoint, rest = object_path.partition(minio_endpoint + "/")
         _bucket_name, _first_slash, _object_name = rest.partition("/")
         return _bucket_name, _object_name

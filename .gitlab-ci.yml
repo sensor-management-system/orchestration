@@ -75,7 +75,7 @@ unittest-lint:
   image: $CONTAINER_TEST_IMAGE
   before_script:
     - apt-get update
-    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo
+    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo g++
   script:
     - cd $CI_PROJECT_DIR/app/ && tox
 

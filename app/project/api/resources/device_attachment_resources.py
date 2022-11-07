@@ -1,8 +1,12 @@
 """Module for the device attachment list resource."""
+import pathlib
+
+from flask import url_for
 from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...api import minio
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
 from ..models.base_model import db
@@ -57,9 +61,33 @@ class DeviceAttachmentList(ResourceList):
         :param result:
         :return:
         """
-        result_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
+        device_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
+        attachment_id = result[0]["data"]["id"]
         msg = "create;attachment"
-        query_device_and_set_update_description_text(msg, result_id)
+        query_device_and_set_update_description_text(msg, device_id)
+
+        data = db.session.query(DeviceAttachment).filter_by(id=attachment_id).first()
+        if data and data.url.startswith(minio.download_endpoint(internal=True)):
+            # If we uploaded with an internal filestorage url, we want
+            # to replace it, so that the user can query the file only
+            # via the backend (and with the permission checks that run).
+            # This way we can make sure that only those users that are
+            # allowed to see the content can actually see them.
+            #
+            # We do that by storing it as an internal url and give
+            # back a link that the user can use to retrieve it.
+            data.internal_url = data.url
+            last_part_url = pathlib.Path(data.internal_url).name
+            data.url = url_for(
+                "download.get_device_attachment_content",
+                id=attachment_id,
+                filename=last_part_url,
+                _external=True,
+            )
+            db.session.add(data)
+            db.session.commit()
+            result[0]["data"]["attributes"]["url"] = data.url
+            result[0]["data"]["attributes"]["is_upload"] = True
 
         return result
 
@@ -85,6 +113,15 @@ class DeviceAttachmentDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if DeviceAttachment not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def before_patch(self, args, kwargs, data):
+        """Run some checks before updating the data."""
+        attachment = (
+            db.session.query(self._data_layer.model).filter_by(id=kwargs["id"]).first()
+        )
+        if attachment and attachment.is_upload:
+            if data["url"] and data["url"] != attachment.url:
+                raise ConflictError("It is not allowed to change the url of uploads")
 
     def after_patch(self, result):
         """
@@ -123,7 +160,7 @@ class DeviceAttachmentDetail(ResourceDetail):
         )
         if attachment is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
-        url = attachment.url
+        internal_url = attachment.internal_url
         try:
             super().delete(*args, **kwargs)
         except JsonApiException as e:
@@ -131,7 +168,8 @@ class DeviceAttachmentDetail(ResourceDetail):
                 "Deletion failed as the attachment is still in use.", str(e)
             )
 
-        delete_attachments_in_minio_by_url(url)
+        if internal_url:
+            delete_attachments_in_minio_by_url(internal_url)
         final_result = {"meta": {"message": "Object successfully deleted"}}
 
         return final_result

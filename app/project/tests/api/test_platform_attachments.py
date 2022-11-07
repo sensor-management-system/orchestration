@@ -1,13 +1,16 @@
 """Tests for the platform attachment endpoints."""
 
 import json
+from unittest.mock import patch
+
+from flask import url_for
 
 from project import base_url
+from project.api import minio
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
 from project.api.models.platform_attachment import PlatformAttachment
-from project.tests.base import (BaseTestCase, create_token, fake,
-                                query_result_to_list)
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
 class TestPlatformAttachmentServices(BaseTestCase):
@@ -33,7 +36,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
 
         count_platform_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(platform_id=platform.id,)
+            .filter_by(
+                platform_id=platform.id,
+            )
             .count()
         )
         # However, this new platform for sure has no attachments
@@ -66,7 +71,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(response.status_code, 201)
         # And we want to inspect our attachment list
         platform_attachments = query_result_to_list(
-            db.session.query(PlatformAttachment).filter_by(platform_id=platform.id,)
+            db.session.query(PlatformAttachment).filter_by(
+                platform_id=platform.id,
+            )
         )
         # We now have one attachment
         self.assertEqual(len(platform_attachments), 1)
@@ -98,7 +105,10 @@ class TestPlatformAttachmentServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "platform_attachment",
-                "attributes": {"url": None, "label": "GFZ Homepage",},
+                "attributes": {
+                    "url": None,
+                    "label": "GFZ Homepage",
+                },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": str(platform.id)}}
                 },
@@ -117,7 +127,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertEqual(response.status_code, 422)
         count_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(platform_id=platform.id,)
+            .filter_by(
+                platform_id=platform.id,
+            )
             .count()
         )
         self.assertEqual(count_attachments, 0)
@@ -128,7 +140,10 @@ class TestPlatformAttachmentServices(BaseTestCase):
         payload = {
             "data": {
                 "type": "platform_attachment",
-                "attributes": {"url": "GFZ", "label": "GFZ Homepage",},
+                "attributes": {
+                    "url": "GFZ",
+                    "label": "GFZ Homepage",
+                },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": None}}
                 },
@@ -171,13 +186,19 @@ class TestPlatformAttachmentServices(BaseTestCase):
         db.session.commit()
 
         platform_attachment1 = PlatformAttachment(
-            label="GFZ", url="https://www.gfz-potsdam.de", platform=platform1,
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            platform=platform1,
         )
         platform_attachment2 = PlatformAttachment(
-            label="UFZ", url="https://www.ufz.de", platform=platform1,
+            label="UFZ",
+            url="https://www.ufz.de",
+            platform=platform1,
         )
         platform_attachment3 = PlatformAttachment(
-            label="PIK", url="https://www.pik-potsdam.de", platform=platform2,
+            label="PIK",
+            url="https://www.pik-potsdam.de",
+            platform=platform2,
         )
 
         db.session.add(platform_attachment1)
@@ -224,7 +245,8 @@ class TestPlatformAttachmentServices(BaseTestCase):
                         "related"
                     ]
                     resp_platform = self.client.get(
-                        platform_link, content_type="application/vnd.api+json",
+                        platform_link,
+                        content_type="application/vnd.api+json",
                     )
                     self.assertEqual(resp_platform.status_code, 200)
                     self.assertEqual(
@@ -285,7 +307,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
         db.session.commit()
 
         platform_attachment1 = PlatformAttachment(
-            label="GFZ", url="https://www.gfz-potsdam.de", platform=platform1,
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            platform=platform1,
         )
         db.session.add(platform_attachment1)
         db.session.commit()
@@ -294,7 +318,10 @@ class TestPlatformAttachmentServices(BaseTestCase):
             "data": {
                 "type": "platform_attachment",
                 "id": str(platform_attachment1.id),
-                "attributes": {"label": "UFZ", "url": "https://www.ufz.de",},
+                "attributes": {
+                    "label": "UFZ",
+                    "url": "https://www.ufz.de",
+                },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": str(platform2.id)}}
                 },
@@ -345,14 +372,19 @@ class TestPlatformAttachmentServices(BaseTestCase):
         self.assertTrue(platform.id is not None)
         count_platform_attachments = (
             db.session.query(PlatformAttachment)
-            .filter_by(platform_id=platform.id,)
+            .filter_by(
+                platform_id=platform.id,
+            )
             .count()
         )
         self.assertEqual(count_platform_attachments, 0)
         payload = {
             "data": {
                 "type": "platform_attachment",
-                "attributes": {"url": "https://www.ufz.de", "label": None,},
+                "attributes": {
+                    "url": "https://www.ufz.de",
+                    "label": None,
+                },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": str(platform.id)}}
                 },
@@ -367,3 +399,117 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         self.assertEqual(response.status_code, 403)
+
+    def test_post_minio_url(self):
+        """
+        Test when we post an attachment with a minio url.
+
+        The system should replace the original url with an internal
+        one & should set the is_upload entry.
+        """
+        platform = Platform(
+            short_name="a new platform",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform)
+        db.session.commit()
+        self.assertTrue(platform.id is not None)
+
+        with patch.object(minio, "download_endpoint") as mock:
+            mock.return_value = "http://minio:8080"
+            payload = {
+                "data": {
+                    "type": "platform_attachment",
+                    "attributes": {
+                        "url": "http://minio:8080/some-bucket/somefile.txt",
+                        "label": "Some upload",
+                    },
+                    "relationships": {
+                        "platform": {
+                            "data": {"type": "platform", "id": str(platform.id)}
+                        }
+                    },
+                }
+            }
+            with self.client:
+                url_post = base_url + "/platform-attachments"
+                response = self.client.post(
+                    url_post,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 201)
+        data = response.json
+        attachment = (
+            db.session.query(PlatformAttachment)
+            .filter_by(id=data["data"]["id"])
+            .first()
+        )
+        self.assertTrue(attachment.is_upload)
+        self.assertTrue(data["data"]["attributes"]["is_upload"])
+        self.assertEqual(
+            attachment.internal_url, "http://minio:8080/some-bucket/somefile.txt"
+        )
+        self.assertFalse("internal_url" in data["data"]["attributes"].keys())
+        expected_url = url_for(
+            "download.get_platform_attachment_content",
+            id=attachment.id,
+            filename="somefile.txt",
+            _external=True,
+        )
+        self.assertEqual(expected_url, attachment.url)
+        self.assertEqual(attachment.url, data["data"]["attributes"]["url"])
+
+    def test_patch_url_for_uploads(self):
+        """Ensure that we can't change the url for uploaded files."""
+        platform = Platform(
+            short_name="a new platform",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        attachment = PlatformAttachment(
+            platform=platform,
+            label="File upload",
+            url="http://localhost/.../file",
+            internal_url="http://minio/.../file"
+        )
+        db.session.add_all([platform, attachment])
+        db.session.commit()
+
+        self.assertTrue(attachment.is_upload)
+
+        payload = {
+            "data": {
+                "type": "platform_attachment",
+                "id": str(attachment.id),
+                "attributes": {
+                    "label": "UFZ",
+                    "url": "https://www.ufz.de",
+                },
+                "relationships": {
+                    "platform": {
+                        "data": {"type": "platform", "id": str(platform.id)}
+                    }
+                },
+            }
+        }
+        with self.client:
+            url_patch = (
+                base_url
+                + "/platform-attachments/"
+                + str(attachment.id)
+            )
+            response = self.client.patch(
+                url_patch,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+
+        self.assertEqual(response.status_code, 409)

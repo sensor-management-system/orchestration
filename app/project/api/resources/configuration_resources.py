@@ -213,7 +213,11 @@ class ConfigurationDetail(ResourceDetail):
         :return:
         """
         configuration = check_if_object_not_found(Configuration, kwargs)
-        urls = [a.url for a in configuration.configuration_attachments]
+        urls = [
+            a.internal_url
+            for a in configuration.configuration_attachments
+            if a.internal_url
+        ]
         try:
             super().delete(*args, **kwargs)
         except ForbiddenError as e:

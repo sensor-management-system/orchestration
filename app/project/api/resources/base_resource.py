@@ -1,29 +1,32 @@
+"""Some methods to use in various resource classes."""
+
 import datetime
 
-from flask import current_app, g
+from flask import g
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
+from ...api import minio
 from ..helpers.db import save_to_db
 from ..models import (
+    Configuration,
     ConfigurationAttachment,
     Contact,
+    Device,
     DeviceAttachment,
+    Platform,
     PlatformAttachment,
     User,
-    Device,
-    Platform, Configuration,
 )
 from ..models.base_model import db
-from ...api import minio
 
 
 def add_contact_to_object(entity_with_contact_list):
     """
-    Add created user to the object-contacts if it is not added in the data
+    Add created user to the object-contacts.
+
     :param entity_with_contact_list:
     :return:
     """
-
     user_entry = (
         db.session.query(User)
         .filter_by(id=entity_with_contact_list.created_by_id)
@@ -39,29 +42,33 @@ def add_contact_to_object(entity_with_contact_list):
     return contact_entry
 
 
-def delete_attachments_in_minio_by_url(url):
+def delete_attachments_in_minio_by_url(internal_url):
     """
     Use the minio class to delete an attachment.
 
     :param url: attachment url.
     """
     still_in_use = False
-    for model in [DeviceAttachment, PlatformAttachment, ConfigurationAttachment]:
-        possible_entry = db.session.query(model).filter_by(url=url).first()
-        if possible_entry:
-            still_in_use = True
-            break
+    if internal_url:
+        for model in [DeviceAttachment, PlatformAttachment, ConfigurationAttachment]:
+            possible_entry = (
+                db.session.query(model).filter_by(internal_url=internal_url).first()
+            )
+            if possible_entry:
+                still_in_use = True
+                break
 
     if not still_in_use:
-        minio.remove_an_object(url)
+        minio.remove_an_object(internal_url)
 
 
 def delete_attachments_in_minio_by_related_object_id(
     related_object_class, attachment_class, object_id_intended_for_deletion
 ):
     """
-    Delete an Attachment related to an object by Using the minio class
-     to delete it or a list of attachments.
+    Delete an Attachment related to an object.
+
+    Uses the minio class.
     :param object_id_intended_for_deletion:  object id.
     :param related_object_class: class od object the Attachment related to.
     :param attachment_class: attachment class.
@@ -95,7 +102,9 @@ def check_if_object_not_found(model_class, kwargs):
     else:
         return object_to_be_checked
 
+
 def set_update_description_text_and_update_by_user(obj_, msg):
+    """Set the update description & user and save it to the db."""
     obj_.update_description = msg
     obj_.updated_by_id = g.user.id
     save_to_db(obj_)
@@ -125,9 +134,6 @@ def query_platform_and_set_update_description_text(msg, result_id):
 
 def query_configuration_and_set_update_description_text(msg, result_id):
     """
-    obj_.persistent_identifier = pid.create(source_object_url)
-    obj_.schema_version = current_app.config["SCHEMA_VERSION"]
-    obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
     Get the configuration and add update_description text to it.
 
     :param msg: a text of what did change.
