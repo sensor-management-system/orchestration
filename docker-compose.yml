@@ -127,7 +127,7 @@ services:
     command: -p 5433
 
   vocabulary:
-    image: python:3-alpine
+    image: python:3.11-alpine
     container_name: sms_cv
     working_dir: /usr/cv/app
     volumes:
