@@ -35,9 +35,6 @@ permissions and limitations under the Licence.
     :background-color="configuration.archived ? 'brown lighten-4 ' : 'white'"
   >
     <template #header>
-      <div class="text-caption mr-1">
-        {{ configuration.projectName || 'no project' }}
-      </div>
       <status-chip
         :value="configuration.status"
       />
