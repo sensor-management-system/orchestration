@@ -27,7 +27,7 @@ components = {
                             "data": {
                                 "type": "object",
                                 "properties": {
-                                    "type": {"type": "string"},
+                                    "type": {"type": "string", "default": "user"},
                                     "id": {"type": "string"},
                                     "attributes": {
                                         "type": "object",
@@ -37,6 +37,26 @@ components = {
                                             "active": {"type": "boolean"},
                                             "is_superuser": {"type": "boolean"},
                                             "apikey": {"type": "string"},
+                                        },
+                                    },
+                                    "relationships": {
+                                        "type": "object",
+                                        "properties": {
+                                            "contact": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                                "default": "contact",
+                                                            },
+                                                            "id": {"type": "string"},
+                                                        },
+                                                    }
+                                                },
+                                            }
                                         },
                                     },
                                 },
@@ -49,6 +69,14 @@ components = {
                                         "active": True,
                                         "is_superuser": False,
                                         "apikey": "123456...",
+                                    },
+                                    "relationships": {
+                                        "contact": {
+                                            "data": {
+                                                "type": "contact",
+                                                "id": "123",
+                                            }
+                                        }
                                     },
                                 },
                             }
