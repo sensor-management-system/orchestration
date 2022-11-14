@@ -37,6 +37,7 @@ components = {
                                             "active": {"type": "boolean"},
                                             "is_superuser": {"type": "boolean"},
                                             "apikey": {"type": "string"},
+                                            "subject": {"type": "string"},
                                         },
                                     },
                                     "relationships": {
@@ -69,6 +70,7 @@ components = {
                                         "active": True,
                                         "is_superuser": False,
                                         "apikey": "123456...",
+                                        "subject": "user1234@localhost",
                                     },
                                     "relationships": {
                                         "contact": {
