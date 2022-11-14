@@ -133,3 +133,23 @@ class TestUserinfo(BaseTestCase):
                     )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["id"], str(user.id))
+
+    def test_get_includes_subject(self):
+        """Ensure we also give out the subject in the payload."""
+        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
+        user = User(subject="dummy", contact=contact)
+        db.session.add_all([contact, user])
+        db.session.commit()
+        with self.run_requests_as(user):
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups_for_a_user:
+                test_get_all_permission_groups_for_a_user.return_value = (
+                    IDL_USER_ACCOUNT
+                )
+                with self.client:
+                    response = self.client.get(
+                        self.url,
+                    )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["data"]["attributes"]["subject"], "dummy")

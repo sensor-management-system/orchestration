@@ -48,6 +48,7 @@ class UserInfo(ResourceList):
                     "active": g.user.active,
                     "is_superuser": g.user.is_superuser,
                     "apikey": g.user.apikey,
+                    "subject": g.user.subject,
                 },
                 "relationships": {
                     "contact": {
