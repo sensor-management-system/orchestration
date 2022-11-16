@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -38,52 +38,71 @@ permissions and limitations under the Licence.
     <v-card
       flat
     >
-      <v-card-actions>
-        <v-spacer />
-        <SaveAndCancelButtons
-          v-if="editable"
-          save-btn-text="Add"
-          :to="'/devices/' + deviceId + '/customfields'"
-          @save="save"
-        />
-      </v-card-actions>
       <v-card-text>
         <CustomFieldForm
           ref="customFieldForm"
           v-model="customField"
           :readonly="false"
-        />
+        >
+          <template #actions>
+            <SaveAndCancelButtons
+              v-if="editable"
+              save-btn-text="Add"
+              :to="'/devices/' + deviceId + '/customfields'"
+              @save="save"
+            />
+          </template>
+        </CustomFieldForm>
       </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <SaveAndCancelButtons
-          v-if="editable"
-          save-btn-text="Add"
-          :to="'/devices/' + deviceId + '/customfields'"
-          @save="save"
-        />
-      </v-card-actions>
     </v-card>
+    <template
+      v-if="deviceCustomFields.length"
+    >
+      <v-subheader>Existing custom fields</v-subheader>
+      <BaseList
+        :list-items="deviceCustomFields"
+      >
+        <template #list-item="{item}">
+          <CustomFieldListItem
+            :value="item"
+            :editable="false"
+          />
+        </template>
+      </BaseList>
+    </template>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { AddDeviceCustomFieldAction, LoadDeviceCustomFieldsAction } from '@/store/devices'
+import {
+  DevicesState,
+  AddDeviceCustomFieldAction,
+  LoadDeviceCustomFieldsAction
+} from '@/store/devices'
 
 import { CustomTextField } from '@/models/CustomTextField'
 
-import CustomFieldForm from '@/components/CustomFieldForm.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import BaseList from '@/components/shared/BaseList.vue'
+import CustomFieldForm from '@/components/shared/CustomFieldForm.vue'
+import CustomFieldListItem from '@/components/shared/CustomFieldListItem.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   middleware: ['auth'],
-  components: { ProgressIndicator, SaveAndCancelButtons, CustomFieldForm },
+  components: {
+    BaseList,
+    CustomFieldForm,
+    CustomFieldListItem,
+    ProgressIndicator,
+    SaveAndCancelButtons
+  },
+  computed: mapState('devices', ['deviceCustomField', 'deviceCustomFields']),
   methods: mapActions('devices', ['addDeviceCustomField', 'loadDeviceCustomFields'])
 })
 export default class DeviceCustomFieldAddPage extends mixins(CheckEditAccess) {
@@ -92,6 +111,7 @@ export default class DeviceCustomFieldAddPage extends mixins(CheckEditAccess) {
   private customField: CustomTextField = new CustomTextField()
 
   // vuex definition for typescript check
+  deviceCustomFields!: DevicesState['deviceCustomFields']
   loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
   addDeviceCustomField!: AddDeviceCustomFieldAction
 

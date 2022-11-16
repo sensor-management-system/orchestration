@@ -48,7 +48,7 @@ import { PermissionGroup } from '@/models/PermissionGroup'
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
 
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
-import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { CustomTextFieldEntityType, CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
@@ -523,7 +523,7 @@ export class DeviceApi {
       'page[size]': 10000
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
-      return new CustomTextFieldSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+      return new CustomTextFieldSerializer(CustomTextFieldEntityType.DEVICE).convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 

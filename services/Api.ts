@@ -45,11 +45,12 @@ import { DevicePropertyApi } from '@/services/sms/DevicePropertyApi'
 import { PlatformApi } from '@/services/sms/PlatformApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
-import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
+import { DeviceCustomfieldsApi } from '@/services/sms/DeviceCustomfieldsApi'
 import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
 import { DeviceCalibrationActionApi } from '@/services/sms/DeviceCalibrationActionApi'
 import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
 import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachmentApi'
+import { ConfigurationCustomfieldsApi } from '@/services/sms/ConfigurationCustomfieldsApi'
 import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
 import { GenericConfigurationActionApi } from '@/services/sms/GenericConfigurationActionApi'
 import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi, GenericConfigurationActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
@@ -97,7 +98,7 @@ export class Api {
   private readonly _platformApi: PlatformApi
   private readonly _configurationApi: ConfigurationApi
   private readonly _configurationStatesApi: ConfigurationStatusApi
-  private readonly _customfieldsApi: CustomfieldsApi
+  private readonly _deviceCustomfieldsApi: DeviceCustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
   private readonly _configurationAttachmentApi: ConfigurationAttachmentApi
@@ -108,6 +109,7 @@ export class Api {
   private readonly _genericDeviceActionAttachmentApi: GenericDeviceActionAttachmentApi
   private readonly _genericPlatformActionAttachmentApi: GenericPlatformActionAttachmentApi
   private readonly _genericConfigurationActionAttachmentApi: GenericConfigurationActionAttachmentApi
+  private readonly _configurationCustomfieldsApi: ConfigurationCustomfieldsApi
 
   private readonly _deviceSoftwareUpdateActionApi: DeviceSoftwareUpdateActionApi
   private readonly _deviceSoftwareUpdateActionAttachmentApi: DeviceSoftwareUpdateActionAttachmentApi
@@ -230,7 +232,7 @@ export class Api {
     )
     this._configurationStatesApi = new ConfigurationStatusApi()
 
-    this._customfieldsApi = new CustomfieldsApi(
+    this._deviceCustomfieldsApi = new DeviceCustomfieldsApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/customfields'
     )
@@ -248,6 +250,11 @@ export class Api {
     this._configurationAttachmentApi = new ConfigurationAttachmentApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/configuration-attachments'
+    )
+
+    this._configurationCustomfieldsApi = new ConfigurationCustomfieldsApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/configuration-customfields'
     )
 
     this._devicePropertyApi = new DevicePropertyApi(
@@ -419,8 +426,8 @@ export class Api {
     return this._configurationStatesApi
   }
 
-  get customfields (): CustomfieldsApi {
-    return this._customfieldsApi
+  get deviceCustomfields (): DeviceCustomfieldsApi {
+    return this._deviceCustomfieldsApi
   }
 
   get deviceAttachments (): DeviceAttachmentApi {
@@ -433,6 +440,10 @@ export class Api {
 
   get configurationAttachments (): ConfigurationAttachmentApi {
     return this._configurationAttachmentApi
+  }
+
+  get configurationCustomfields (): ConfigurationCustomfieldsApi {
+    return this._configurationCustomfieldsApi
   }
 
   get deviceProperties (): DevicePropertyApi {

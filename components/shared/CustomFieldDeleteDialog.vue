@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -33,19 +33,19 @@ permissions and limitations under the Licence.
   <v-dialog
     v-model="showDialog"
     max-width="290"
-    @click:outside="$emit('cancel-deletion')"
+    @click:outside="$emit('cancel')"
   >
     <v-card v-if="hasCustomFieldToDelete">
       <v-card-title class="headline">
         Delete Field
       </v-card-title>
       <v-card-text>
-        Do you really want to delete the field <em>{{ customFieldToDelete.key }}</em>-->{{ customFieldToDelete.value }}?
+        Do you really want to delete the field &quot;<em>{{ customField.key | shortenRight }}</em>&quot;?
       </v-card-text>
       <v-card-actions>
         <v-btn
           text
-          @click="$emit('cancel-deletion')"
+          @click="$emit('cancel')"
         >
           No
         </v-btn>
@@ -53,7 +53,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="error"
           text
-          @click="$emit('submit-deletion')"
+          @click="$emit('delete')"
         >
           <v-icon left>
             mdi-delete
@@ -71,7 +71,7 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { CustomTextField } from '@/models/CustomTextField'
 
 @Component
-export default class DevicesCustomFieldDeleteDialog extends Vue {
+export default class CustomFieldDeleteDialog extends Vue {
   @Prop({
     required: true,
     type: Boolean
@@ -81,7 +81,7 @@ export default class DevicesCustomFieldDeleteDialog extends Vue {
   @Prop({
     type: Object
   })
-  readonly customFieldToDelete!: CustomTextField
+  readonly customField!: CustomTextField
 
   get showDialog (): boolean {
     return this.value
@@ -92,7 +92,7 @@ export default class DevicesCustomFieldDeleteDialog extends Vue {
   }
 
   get hasCustomFieldToDelete () {
-    return this.customFieldToDelete !== null
+    return this.customField !== null
   }
 }
 </script>

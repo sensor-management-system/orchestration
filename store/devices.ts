@@ -186,7 +186,7 @@ export type DeleteDeviceCalibrationAction = (calibrationActionId: string) => Pro
 export type DeleteDeviceAttachmentAction = (attachmentId: string) => Promise<void>
 export type AddDeviceAttachmentAction = (params: { deviceId: string, attachment: Attachment }) => Promise<Attachment>
 export type UpdateDeviceAttachmentAction = (params: { deviceId: string, attachment: Attachment }) => Promise<Attachment>
-export type DeleteDeviceCustomFieldAction = (customField: string) => Promise<void>
+export type DeleteDeviceCustomFieldAction = (customFieldId: string) => Promise<void>
 export type AddDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
 export type UpdateDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
 export type DeleteDeviceMeasuredQuantityAction = (measuredQuantityId: string) => Promise<void>
@@ -330,7 +330,7 @@ const actions: ActionTree<DevicesState, RootState> = {
     commit('setDeviceCustomFields', deviceCustomFields)
   },
   async loadDeviceCustomField ({ commit }: {commit: Commit}, id: string): Promise<void> {
-    const deviceCustomField = await this.$api.customfields.findById(id)
+    const deviceCustomField = await this.$api.deviceCustomfields.findById(id)
     commit('setDeviceCustomField', deviceCustomField)
   },
   async loadDeviceAvailabilities ({ commit }: {commit: Commit}, {
@@ -405,20 +405,20 @@ const actions: ActionTree<DevicesState, RootState> = {
   }: { deviceId: string, attachment: Attachment }): Promise<Attachment> {
     return this.$api.deviceAttachments.update(deviceId, attachment)
   },
-  deleteDeviceCustomField (_, customField: string): Promise<void> {
-    return this.$api.customfields.deleteById(customField)
+  deleteDeviceCustomField (_, customFieldId: string): Promise<void> {
+    return this.$api.deviceCustomfields.deleteById(customFieldId)
   },
   addDeviceCustomField (_, {
     deviceId,
     deviceCustomField
   }: { deviceId: string, deviceCustomField: CustomTextField }): Promise<CustomTextField> {
-    return this.$api.customfields.add(deviceId, deviceCustomField)
+    return this.$api.deviceCustomfields.add(deviceId, deviceCustomField)
   },
   updateDeviceCustomField (_, {
     deviceId,
     deviceCustomField
   }: { deviceId: string, deviceCustomField: CustomTextField }): Promise<CustomTextField> {
-    return this.$api.customfields.update(deviceId, deviceCustomField)
+    return this.$api.deviceCustomfields.update(deviceId, deviceCustomField)
   },
   deleteDeviceMeasuredQuantity (_, measuredQuantityId: string): Promise<void> {
     return this.$api.deviceProperties.deleteById(measuredQuantityId)

@@ -35,38 +35,37 @@ import { AxiosInstance, Method } from 'axios'
 
 import { DateTime } from 'luxon'
 
-import { MountingActionsControllerApi } from './MountingActionsControllerApi'
-import { StaticLocationActionApi } from './StaticLocationActionApi'
-import { DynamicLocationActionApi } from './DynamicLocationActionApi'
+import { Attachment } from '@/models/Attachment'
+import { Configuration } from '@/models/Configuration'
+import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
+import { Contact } from '@/models/Contact'
+import { ContactRole } from '@/models/ContactRole'
+import { CustomTextField } from '@/models/CustomTextField'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { GenericAction } from '@/models/GenericAction'
+import { PermissionGroup } from '@/models/PermissionGroup'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { StaticLocationAction } from '@/models/StaticLocationAction'
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+
+import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
+import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
+import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
+import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
+import { StaticLocationActionApi } from '@/services/sms/StaticLocationActionApi'
+
 import {
   ConfigurationSerializer,
   configurationWithMetaToConfigurationByAddingDummyObjects,
   configurationWithMetaToConfigurationByThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/ConfigurationSerializer'
-
-import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
-
-import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
-import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
-
-import { Configuration } from '@/models/Configuration'
-import { ContactRole } from '@/models/ContactRole'
-import { PermissionGroup } from '@/models/PermissionGroup'
-import { Contact } from '@/models/Contact'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
-import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
-import {
-  ILocationTimepoint
-} from '@/serializers/controller/LocationActionTimepointSerializer'
-import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
-import { DynamicLocationAction } from '@/models/DynamicLocationAction'
-import { StaticLocationAction } from '@/models/StaticLocationAction'
-import { Attachment } from '@/models/Attachment'
 import { ConfigurationAttachmentSerializer } from '@/serializers/jsonapi/ConfigurationAttachmentSerializer'
-import { GenericAction } from '@/models/GenericAction'
+import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
+import { CustomTextFieldSerializer, CustomTextFieldEntityType } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { GenericConfigurationActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
+import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
+import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -478,6 +477,16 @@ export class ConfigurationApi {
     }
     return await this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new ConfigurationAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
+  }
+
+  findRelatedConfigurationCustomFields (configurationId: string): Promise<CustomTextField[]> {
+    const url = this.basePath + '/' + configurationId + '/configuration-customfields'
+    const params = {
+      'page[size]': 10000
+    }
+    return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new CustomTextFieldSerializer(CustomTextFieldEntityType.CONFIGURATION).convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
   }
 

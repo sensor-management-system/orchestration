@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,9 +29,16 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-form ref="customFieldForm" @submit.prevent>
+  <v-form
+    ref="customFieldForm"
+    @submit.prevent
+  >
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col
+        cols="12"
+        md="3"
+        align-self="center"
+      >
         <v-text-field
           label="Key"
           :value="value.key"
@@ -43,16 +50,26 @@ permissions and limitations under the Licence.
           @input="update('key', $event)"
         />
       </v-col>
-      <v-col cols="12" md="3">
-        <v-text-field
+      <v-col
+        cols="12"
+        md="7"
+      >
+        <v-textarea
           label="Value"
+          auto-grow
+          rows="1"
           :value="value.value"
           :readonly="readonly"
           :disabled="readonly"
           @input="update('value', $event)"
         />
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col
+        cols="12"
+        md="2"
+        align-self="center"
+        class="text-right"
+      >
         <slot name="actions" />
       </v-col>
     </v-row>

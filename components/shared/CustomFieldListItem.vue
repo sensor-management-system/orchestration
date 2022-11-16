@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -34,14 +34,17 @@ permissions and limitations under the Licence.
     <template #dot-menu-items>
       <slot name="dot-menu-items" />
     </template>
-    <template #actions>
+    <template
+      v-if="to"
+      #actions
+    >
       <v-btn
-        v-if="$auth.loggedIn"
+        v-if="editable"
         color="primary"
         text
         small
         nuxt
-        :to="'/devices/' + deviceId + '/customfields/' + customField.id + '/edit'"
+        :to="to"
       >
         Edit
       </v-btn>
@@ -50,19 +53,13 @@ permissions and limitations under the Licence.
       <v-row
         no-gutters
       >
-        <v-col
-          cols="12"
-          md="2"
-        >
+        <v-col>
           <label>Key:</label>
-          {{ customField.key }}
+          {{ value.key | shortenRight(40) }}
         </v-col>
-        <v-col
-          cols="12"
-          md="8"
-        >
+        <v-col>
           <label>Value:</label>
-          {{ customField.value }}
+          {{ value.value | shortenRight }}
         </v-col>
       </v-row>
     </template>
@@ -71,6 +68,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { RawLocation } from 'vue-router'
 
 import { CustomTextField } from '@/models/CustomTextField'
 
@@ -81,16 +79,25 @@ import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.v
     BaseExpandableListItem
   }
 })
-export default class DevicesCustomFieldListItem extends Vue {
+export default class CustomFieldListItem extends Vue {
   @Prop({
     required: true,
     type: Object
   })
-  private customField!: CustomTextField
+  private value!: CustomTextField
 
   @Prop({
-    required: true
+    default: null,
+    required: false,
+    type: [String, Object]
   })
-  private deviceId!: string
+  private to!: RawLocation | null
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private editable!: boolean
 }
 </script>

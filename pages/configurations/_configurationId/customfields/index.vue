@@ -41,22 +41,22 @@ permissions and limitations under the Licence.
       <v-btn
         color="primary"
         small
-        :to="'/devices/' + deviceId + '/customfields/new'"
+        :to="'/configurations/' + configurationId + '/customfields/new'"
       >
         Add Custom Field
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="deviceCustomFields.length === 0">
-      There are no custom fields for this device.
+    <hint-card v-if="configurationCustomFields.length === 0">
+      There are no custom fields for this configuration.
     </hint-card>
     <BaseList
-      :list-items="deviceCustomFields"
+      :list-items="configurationCustomFields"
     >
       <template #list-item="{item}">
         <CustomFieldListItem
           :value="item"
           :editable="editable"
-          :to="'/devices/' + deviceId + '/customfields/' + item.id + '/edit'"
+          :to="'/configurations/' + configurationId + '/customfields/' + item.id + '/edit'"
         >
           <template #dot-menu-items>
             <DotMenuActionDelete
@@ -68,14 +68,14 @@ permissions and limitations under the Licence.
       </template>
     </BaseList>
     <v-card-actions
-      v-if="deviceCustomFields.length > 3"
+      v-if="configurationCustomFields.length > 3"
     >
       <v-spacer />
       <v-btn
         v-if="editable"
         color="primary"
         small
-        :to="'/devices/' + deviceId + '/customfields/new'"
+        :to="'/configurations/' + configurationId + '/customfields/new'"
       >
         Add Custom Field
       </v-btn>
@@ -93,7 +93,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { DeleteDeviceCustomFieldAction, DevicesState, LoadDeviceCustomFieldsAction } from '@/store/devices'
+import { DeleteConfigurationCustomFieldAction, ConfigurationsState, LoadConfigurationCustomFieldsAction } from '@/store/configurations'
 
 import { CustomTextField } from '@/models/CustomTextField'
 
@@ -106,10 +106,10 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: { ProgressIndicator, HintCard, CustomFieldDeleteDialog, DotMenuActionDelete, CustomFieldListItem, BaseList },
-  computed: mapState('devices', ['deviceCustomFields']),
-  methods: mapActions('devices', ['deleteDeviceCustomField', 'loadDeviceCustomFields'])
+  computed: mapState('configurations', ['configurationCustomFields']),
+  methods: mapActions('configurations', ['deleteConfigurationCustomField', 'loadConfigurationCustomFields'])
 })
-export default class DeviceCustomFieldsShowPage extends Vue {
+export default class ConfigurationCustomFieldsShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
@@ -118,12 +118,12 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   private customFieldToDelete: CustomTextField | null = null
 
   // vuex definition for typescript check
-  deviceCustomFields!: DevicesState['deviceCustomFields']
-  loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
-  deleteDeviceCustomField!: DeleteDeviceCustomFieldAction
+  configurationCustomFields!: ConfigurationsState['configurationCustomFields']
+  loadConfigurationCustomFields!: LoadConfigurationCustomFieldsAction
+  deleteConfigurationCustomField!: DeleteConfigurationCustomFieldAction
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get configurationId (): string {
+    return this.$route.params.configurationId
   }
 
   initDeleteDialog (customField: CustomTextField) {
@@ -142,8 +142,8 @@ export default class DeviceCustomFieldsShowPage extends Vue {
     }
     try {
       this.isSaving = true
-      await this.deleteDeviceCustomField(this.customFieldToDelete.id)
-      this.loadDeviceCustomFields(this.deviceId)
+      await this.deleteConfigurationCustomField(this.customFieldToDelete.id)
+      this.loadConfigurationCustomFields(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Custom field deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete custom field')

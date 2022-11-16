@@ -6,6 +6,10 @@
  * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -29,51 +33,26 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import Vue from 'vue'
-import Vuetify from 'vuetify'
+import { AxiosInstance } from 'axios'
 
-import { mount, createLocalVue } from '@vue/test-utils'
-
-// @ts-ignore
-import CustomFieldForm from '@/components/shared/CustomFieldForm.vue'
 import { CustomTextField } from '@/models/CustomTextField'
+import {
+  CustomTextFieldSerializer,
+  CustomTextFieldEntityType,
+  CustomTextFieldRelationEntityType
+} from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { CustomfieldsApi } from '@/services/sms/CustomfieldsApi'
 
-Vue.use(Vuetify)
+export class ConfigurationCustomfieldsApi extends CustomfieldsApi {
+  constructor (axiosInstance: AxiosInstance, basePath: string) {
+    super(axiosInstance, basePath, new CustomTextFieldSerializer(CustomTextFieldEntityType.CONFIGURATION))
+  }
 
-describe('CustomFieldForm', () => {
-  let wrapper: any
+  add (configurationId: string, field: CustomTextField): Promise<CustomTextField> {
+    return super.addWithRelation(configurationId, CustomTextFieldRelationEntityType.CONFIGURATION, field)
+  }
 
-  /*
-   * setup
-   */
-
-  beforeEach(() => {
-    const localVue = createLocalVue()
-    const vuetify = new Vuetify()
-
-    wrapper = mount(CustomFieldForm, {
-      localVue,
-      vuetify,
-      propsData: {
-        value: CustomTextField.createFromObject({
-          id: '2',
-          key: 'foo',
-          value: 'bar'
-        })
-      }
-    })
-  })
-
-  /*
-   * initial state
-   */
-
-  it('should be a Vue instance', () => {
-    expect(wrapper.vm).toBeTruthy()
-  })
-
-  it('should trigger an input event on change', () => {
-    wrapper.get('input[type="text"]').setValue('baz')
-    expect(wrapper.emitted('input')).toBeTruthy()
-  })
-})
+  update (configurationId: string, field: CustomTextField): Promise<CustomTextField> {
+    return super.updateWithRelation(configurationId, CustomTextFieldRelationEntityType.CONFIGURATION, field)
+  }
+}
