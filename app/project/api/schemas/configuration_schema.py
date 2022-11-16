@@ -108,6 +108,16 @@ class ConfigurationSchema(Schema):
         type_="user",
         dump_only=True,
     )
+    configuration_customfields = Relationship(
+        related_view="api.configuration_customfield_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="ConfigurationCustomFieldSchema",
+        type_="configuration_customfield",
+        id_field="id",
+    )
     site = Relationship(
         related_view="api.site_detail",
         related_view_kwargs={"id": "<site_id>"},

@@ -134,8 +134,18 @@ paths = {
         endpoint="/controller/platform-software-update-action-repository-urls",
         description=(
             "Get the list of distinct repository urls of all ",
-            "platform software update actions."
+            "platform software update actions.",
         ),
         operation_id="controller_platform_software_update_action_repository_urls",
+    ),
+    **template(
+        endpoint="/controller/configuration-custom-field-keys",
+        description="Get the list of distinct configuration custom field keys of all devices.",
+        operation_id="controller_configuration_custom_field_keys",
+    ),
+    **template(
+        endpoint="/controller/configuration-custom-field-values",
+        description="Get the list of distinct configuration custom field values of all devices.",
+        operation_id="controller_configuration_custom_field_values",
     ),
 }
