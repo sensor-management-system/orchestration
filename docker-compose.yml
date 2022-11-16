@@ -113,7 +113,7 @@ services:
       - sms
 
   db:
-    image: postgres:12-alpine
+    image: postgis/postgis:12-3.3-alpine
     container_name: sms_db
     ports:
       - "5433:5433"
