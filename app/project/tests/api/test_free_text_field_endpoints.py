@@ -7,6 +7,7 @@ from flask import url_for
 from project import base_url
 from project.api.models import (
     Configuration,
+    ConfigurationCustomField,
     Contact,
     CustomField,
     Device,
@@ -2097,6 +2098,182 @@ class TestPlatformManufacturerNames(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json["data"]
         self.assertEqual(data, ["Alternative & Co", "Platform GmbH"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestConfigurationCustomFieldKeys(BaseTestCase):
+    """Tests for the endpoints for the configuration custom field key entries."""
+
+    url = f"{base_url}/controller/configuration-custom-field-keys"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_three_custom_fields(self):
+        """Ensure we get a list of keys."""
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        custom_field1 = ConfigurationCustomField(
+            key="key1", value="value1", configuration=configuration
+        )
+        custom_field2 = ConfigurationCustomField(
+            key="key1", value="value2", configuration=configuration
+        )
+        custom_field3 = ConfigurationCustomField(
+            key="key2", value="value2", configuration=configuration
+        )
+
+        db.session.add_all([configuration, custom_field1, custom_field2, custom_field3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["key1", "key2"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestConfigurationCustomFieldValues(BaseTestCase):
+    """Tests for the endpoints for the configuration custom field value entries."""
+
+    url = f"{base_url}/controller/configuration-custom-field-values"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_three_custom_fields(self):
+        """Ensure we get a list of values."""
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        custom_field1 = ConfigurationCustomField(
+            key="key1", value="value1", configuration=configuration
+        )
+        custom_field2 = ConfigurationCustomField(
+            key="key1", value="value2", configuration=configuration
+        )
+        custom_field3 = ConfigurationCustomField(
+            key="key2", value="value2", configuration=configuration
+        )
+
+        db.session.add_all([configuration, custom_field1, custom_field2, custom_field3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["value1", "value2"])
 
     def test_endpoint_is_in_openapi_spec(self):
         """Ensure that we documented that endpoint in the openAPI."""

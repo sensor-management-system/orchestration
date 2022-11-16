@@ -432,28 +432,24 @@ api.route(
     "controller_configuration_location_action_timepoints",
     "/controller/configurations/<int:configuration_id>/location-action-timepoints",
 )
+# Configuration CustomField
+api.route(
+    ConfigurationCustomFieldList,
+    "configuration_customfield_list",
+    "/configuration-customfields",
+    "/configurations/<int:configuration_id>/configuration-customfields",
+)
+api.route(
+    ConfigurationCustomFieldDetail,
+    "configuration_customfield_detail",
+    "/configuration-customfields/<int:id>",
+)
 # Sites
-api.route(
-    SiteList,
-    "site_list",
-    "/sites"
-)
-api.route(
-    SiteDetail,
-    "site_detail",
-    "/sites/<int:id>"
-)
+api.route(SiteList, "site_list", "/sites")
+api.route(SiteDetail, "site_detail", "/sites/<int:id>")
 
 # Usage statistics
 api.route(UsageStatistics, "usage_statistics", "/usage-statistics")
 # PIDs
-api.route(
-    PidList,
-    "pid_list",
-    "/pids"
-)
-api.route(
-    PidDetail,
-    "pid_detail",
-    "/pids/<pid>"
-)
+api.route(PidList, "pid_list", "/pids")
+api.route(PidDetail, "pid_detail", "/pids/<pid>")

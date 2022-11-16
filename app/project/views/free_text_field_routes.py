@@ -13,6 +13,7 @@ from flask import Blueprint, g
 from ..api.helpers.errors import ErrorResponse, UnauthorizedError
 from ..api.models import (
     Configuration,
+    ConfigurationCustomField,
     CustomField,
     Device,
     DeviceCalibrationAction,
@@ -78,6 +79,26 @@ class ConfigurationLabelEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct configuration labels."""
 
     field = Configuration.label
+
+
+@free_text_field_routes.route(
+    "/controller/configuration-custom-field-keys", methods=["GET"]
+)
+@class_based_view
+class ConfigurationCustomFieldKeyEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct configuration custom field keys."""
+
+    field = ConfigurationCustomField.key
+
+
+@free_text_field_routes.route(
+    "/controller/configuration-custom-field-values", methods=["GET"]
+)
+@class_based_view
+class ConfigurationCustomFieldValueEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct configuration custom field values."""
+
+    field = ConfigurationCustomField.value
 
 
 @free_text_field_routes.route(

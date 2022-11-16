@@ -27,6 +27,10 @@ from .configuration_static_location_begin_actions_resources import (  # noqa: F4
     ConfigurationStaticLocationBeginActionDetail,
     ConfigurationStaticLocationBeginActionList,
 )
+from .configuration_customfield_resources import (  # noqa: F401
+    ConfigurationCustomFieldDetail,
+    ConfigurationCustomFieldList,
+)
 from .contact_resources import ContactDetail, ContactList  # noqa: F401
 from .customfield_resources import CustomFieldDetail, CustomFieldList  # noqa: F401
 from .device_attachment_resources import (  # noqa: F401

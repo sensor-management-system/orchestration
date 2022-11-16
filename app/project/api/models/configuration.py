@@ -28,6 +28,9 @@ class Configuration(
     configuration_attachments = db.relationship(
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    configuration_customfields = db.relationship(
+        "ConfigurationCustomField", cascade="save-update, merge, delete, delete-orphan"
+    )
     site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=True)
     site = db.relationship("Site", backref="configurations")
 
@@ -79,6 +82,9 @@ class Configuration(
             ],
             "device_mount_actions": [
                 d.to_search_entry() for d in self.device_mount_actions
+            ],
+            "configuration_customfields": [
+                a.to_search_entry() for a in self.configuration_customfields
             ],
             "archived": self.archived,
             "is_internal": self.is_internal,
@@ -200,6 +206,16 @@ class Configuration(
                                 "type": "nested",
                                 "properties": Device.get_search_index_properties(),
                             },
+                        },
+                    },
+                    "customfields": {
+                        "type": "nested",
+                        "properties": {
+                            # The key should use keyword behaviour by default
+                            # but should also searchable as text.
+                            "key": type_keyword_and_full_searchable,
+                            # The same for the value.
+                            "value": type_keyword_and_full_searchable,
                         },
                     },
                     "site_id": {
