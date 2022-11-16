@@ -3,10 +3,11 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
- * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
  * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -54,7 +55,28 @@ export interface ICustomTextFieldsAndMissing {
   missing: IMissingCustomTextFieldData
 }
 
+export enum CustomTextFieldEntityType {
+  DEVICE = 'customfield',
+  CONFIGURATION = 'configuration_customfield'
+}
+
+export enum CustomTextFieldRelationEntityType {
+  DEVICE = 'device',
+  CONFIGURATION = 'configuration'
+}
+
+export interface ICustomTextFieldRelation {
+  entityType: CustomTextFieldRelationEntityType
+  id: string
+}
+
 export class CustomTextFieldSerializer {
+  private entityType: CustomTextFieldEntityType
+
+  constructor (entityType: CustomTextFieldEntityType = CustomTextFieldEntityType.DEVICE) {
+    this.entityType = entityType
+  }
+
   convertJsonApiElementToModel (customfield: IJsonApiAttributes): CustomTextField {
     const result = new CustomTextField()
     result.id = customfield.id.toString()
@@ -124,7 +146,7 @@ export class CustomTextFieldSerializer {
     const possibleCustomFields: {[key: string]: CustomTextField} = {}
     if (included && included.length > 0) {
       for (const includedEntry of included) {
-        if (includedEntry.type === 'customfield') {
+        if (includedEntry.type === this.entityType) {
           const customFieldId = includedEntry.id
           if (customFieldsIds.includes(customFieldId)) {
             const customTextField = this.convertJsonApiDataToModel(includedEntry)
@@ -167,25 +189,25 @@ export class CustomTextFieldSerializer {
       if (customfield.id !== null) {
         result.push({
           id: customfield.id,
-          type: 'customfield'
+          type: this.entityType
         })
       }
     }
     return result
   }
 
-  convertModelToJsonApiData (customField: ICustomTextField, deviceId: string): IJsonApiEntityWithOptionalId {
-    const data: any = {
-      type: 'customfield',
+  convertModelToJsonApiData (customField: ICustomTextField, relation: ICustomTextFieldRelation): IJsonApiEntityWithOptionalId {
+    const data: IJsonApiEntityWithOptionalId = {
+      type: this.entityType,
       attributes: {
         key: customField.key,
         value: customField.value
       },
       relationships: {
-        device: {
+        [relation.entityType]: {
           data: {
-            type: 'device',
-            id: deviceId
+            type: relation.entityType,
+            id: relation.id
           }
         }
       }

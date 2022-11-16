@@ -40,20 +40,21 @@ import { DateTime } from 'luxon'
 import { RootState } from '@/store'
 
 import { Configuration } from '@/models/Configuration'
-import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
+import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
 import { ContactRole } from '@/models/ContactRole'
-
+import { CustomTextField } from '@/models/CustomTextField'
+import { Device } from '@/models/Device'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
-import { DynamicLocationAction } from '@/models/DynamicLocationAction'
-import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
-import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
-import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
-import { Device } from '@/models/Device'
-import { DeviceProperty } from '@/models/DeviceProperty'
 
 import { byDateOldestLast } from '@/modelUtils/mountHelpers'
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+
+import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 
 import {
   DeviceMountTimelineAction,
@@ -124,6 +125,8 @@ export interface ConfigurationsState {
   configurationDynamicLocationActions: DynamicLocationAction[]
   configurationAttachments: Attachment[]
   configurationAttachment: Attachment | null
+  configurationCustomFields: CustomTextField[],
+  configurationCustomField: CustomTextField | null
   totalPages: number
   pageNumber: number
   pageSize: number
@@ -154,6 +157,8 @@ const state = (): ConfigurationsState => ({
   configurationDynamicLocationActions: [],
   configurationAttachments: [],
   configurationAttachment: null,
+  configurationCustomFields: [],
+  configurationCustomField: null,
   totalPages: 1,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0]
@@ -384,6 +389,8 @@ export type LoadDynamicLocationActionAction = IdParamReturnsVoidPromiseAction
 export type LoadDeviceMountActionsForDynamicLocationAction = IdParamReturnsVoidPromiseAction
 export type LoadConfigurationAttachmentsAction = (id: string) => Promise<void>
 export type LoadConfigurationAttachmentAction = (id: string) => Promise<void>
+export type LoadConfigurationCustomFieldsAction = (id: string) => Promise<void>
+export type LoadConfigurationCustomFieldAction = (id: string) => Promise<void>
 
 export type DeleteConfigurationAttachmentAction = (attachmentId: string) => Promise<void>
 export type LoadConfigurationGenericActionsAction = IdParamReturnsVoidPromiseAction
@@ -414,6 +421,10 @@ export type UpdateConfigurationGenericActionAction = (params: {configurationId: 
 export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
 export type SetSelectedLocationDateAction = (newVal: DateTime | null) => void
 export type ReplaceConfigurationInConfigurationsAction = (newConfig: Configuration) => void
+
+export type DeleteConfigurationCustomFieldAction = (customFieldId: string) => Promise<void>
+export type AddConfigurationCustomFieldAction = (params: { configurationId: string, configurationCustomField: CustomTextField }) => Promise<CustomTextField>
+export type UpdateConfigurationCustomFieldAction = (params: { configurationId: string, configurationCustomField: CustomTextField }) => Promise<CustomTextField>
 
 export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActionType | null) => void
 
@@ -718,6 +729,29 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   setChosenKindOfConfigurationAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfConfigurationAction', newval)
+  },
+  async loadConfigurationCustomFields ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    const configurationCustomFields = await this.$api.configurations.findRelatedConfigurationCustomFields(id)
+    commit('setConfigurationCustomFields', configurationCustomFields)
+  },
+  async loadConfigurationCustomField ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    const configurationCustomField = await this.$api.configurationCustomfields.findById(id)
+    commit('setConfigurationCustomField', configurationCustomField)
+  },
+  deleteConfigurationCustomField (_, customFieldId: string): Promise<void> {
+    return this.$api.configurationCustomfields.deleteById(customFieldId)
+  },
+  addConfigurationCustomField (_, {
+    configurationId,
+    configurationCustomField
+  }: { configurationId: string, configurationCustomField: CustomTextField }): Promise<CustomTextField> {
+    return this.$api.configurationCustomfields.add(configurationId, configurationCustomField)
+  },
+  updateConfigurationCustomField (_, {
+    configurationId,
+    configurationCustomField
+  }: { configurationId: string, configurationCustomField: CustomTextField }): Promise<CustomTextField> {
+    return this.$api.configurationCustomfields.update(configurationId, configurationCustomField)
   }
 }
 
@@ -802,6 +836,12 @@ const mutations = {
   },
   setChosenKindOfConfigurationAction (state: ConfigurationsState, newVal: IOptionsForActionType | null) {
     state.chosenKindOfConfigurationAction = newVal
+  },
+  setConfigurationCustomFields (state: ConfigurationsState, configurationCustomFields: CustomTextField[]) {
+    state.configurationCustomFields = configurationCustomFields
+  },
+  setConfigurationCustomField (state: ConfigurationsState, configurationCustomField: CustomTextField) {
+    state.configurationCustomField = configurationCustomField
   }
 }
 

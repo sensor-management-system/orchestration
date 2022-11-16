@@ -45,7 +45,7 @@ permissions and limitations under the Licence.
           <template #actions>
             <SaveAndCancelButtons
               save-btn-text="Apply"
-              :to="'/devices/' + deviceId + '/customfields'"
+              :to="'/configurations/' + configurationId + '/customfields'"
               @save="save"
             />
           </template>
@@ -53,12 +53,12 @@ permissions and limitations under the Licence.
       </v-card-text>
     </v-card>
     <template
-      v-if="deviceCustomFieldsExceptCurrent.length"
+      v-if="configurationCustomFieldsExceptCurrent.length"
     >
       <v-subheader>Existing custom fields</v-subheader>
       <BaseList
         v-if="valueCopy !== null"
-        :list-items="deviceCustomFieldsExceptCurrent"
+        :list-items="configurationCustomFieldsExceptCurrent"
       >
         <template #list-item="{item}">
           <CustomFieldListItem
@@ -78,11 +78,11 @@ import { mapActions, mapState } from 'vuex'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
-  DevicesState,
-  LoadDeviceCustomFieldAction,
-  LoadDeviceCustomFieldsAction,
-  UpdateDeviceCustomFieldAction
-} from '@/store/devices'
+  ConfigurationsState,
+  LoadConfigurationCustomFieldAction,
+  LoadConfigurationCustomFieldsAction,
+  UpdateConfigurationCustomFieldAction
+} from '@/store/configurations'
 
 import { CustomTextField } from '@/models/CustomTextField'
 
@@ -101,21 +101,21 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
     SaveAndCancelButtons
   },
   middleware: ['auth'],
-  computed: mapState('devices', ['deviceCustomField', 'deviceCustomFields']),
-  methods: mapActions('devices', ['loadDeviceCustomField', 'loadDeviceCustomFields', 'updateDeviceCustomField'])
+  computed: mapState('configurations', ['configurationCustomField', 'configurationCustomFields']),
+  methods: mapActions('configurations', ['loadConfigurationCustomField', 'loadConfigurationCustomFields', 'updateConfigurationCustomField'])
 })
-export default class DeviceCustomFieldsEditPage extends mixins(CheckEditAccess) {
+export default class ConfigurationCustomFieldsEditPage extends mixins(CheckEditAccess) {
   private isSaving = false
   private isLoading = false
 
   private valueCopy: CustomTextField = new CustomTextField()
 
   // vuex definition for typescript check
-  deviceCustomField!: DevicesState['deviceCustomField']
-  deviceCustomFields!: DevicesState['deviceCustomFields']
-  loadDeviceCustomField!: LoadDeviceCustomFieldAction
-  updateDeviceCustomField!: UpdateDeviceCustomFieldAction
-  loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
+  configurationCustomField!: ConfigurationsState['configurationCustomField']
+  configurationCustomFields!: ConfigurationsState['configurationCustomFields']
+  loadConfigurationCustomField!: LoadConfigurationCustomFieldAction
+  updateConfigurationCustomField!: UpdateConfigurationCustomFieldAction
+  loadConfigurationCustomFields!: LoadConfigurationCustomFieldsAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -125,7 +125,7 @@ export default class DeviceCustomFieldsEditPage extends mixins(CheckEditAccess) 
    * @returns {string} a valid route path
    */
   getRedirectUrl (): string {
-    return '/devices/' + this.deviceId + '/customfields'
+    return '/configurations/' + this.configurationId + '/customfields'
   }
 
   /**
@@ -136,15 +136,15 @@ export default class DeviceCustomFieldsEditPage extends mixins(CheckEditAccess) 
    * @returns {string} a message string
    */
   getRedirectMessage (): string {
-    return 'You\'re not allowed to edit this device.'
+    return 'You\'re not allowed to edit this configuration.'
   }
 
   async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadDeviceCustomField(this.customFieldId)
-      if (this.deviceCustomField) {
-        this.valueCopy = CustomTextField.createFromObject(this.deviceCustomField)
+      await this.loadConfigurationCustomField(this.customFieldId)
+      if (this.configurationCustomField) {
+        this.valueCopy = CustomTextField.createFromObject(this.configurationCustomField)
       }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load custom field')
@@ -153,8 +153,8 @@ export default class DeviceCustomFieldsEditPage extends mixins(CheckEditAccess) 
     }
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get configurationId (): string {
+    return this.$route.params.configurationId
   }
 
   get customFieldId (): string {
@@ -165,20 +165,20 @@ export default class DeviceCustomFieldsEditPage extends mixins(CheckEditAccess) 
     return this.isLoading || this.isSaving
   }
 
-  get deviceCustomFieldsExceptCurrent (): CustomTextField[] {
-    return this.deviceCustomFields.filter(i => i.id !== this.customFieldId)
+  get configurationCustomFieldsExceptCurrent (): CustomTextField[] {
+    return this.configurationCustomFields.filter(i => i.id !== this.customFieldId)
   }
 
   async save () {
     try {
       this.isSaving = true
-      await this.updateDeviceCustomField({
-        deviceId: this.deviceId,
-        deviceCustomField: this.valueCopy
+      await this.updateConfigurationCustomField({
+        configurationId: this.configurationId,
+        configurationCustomField: this.valueCopy
       })
-      this.loadDeviceCustomFields(this.deviceId)
+      this.loadConfigurationCustomFields(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Custom field updated')
-      this.$router.push('/devices/' + this.deviceId + '/customfields')
+      this.$router.push('/configurations/' + this.configurationId + '/customfields')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
     } finally {

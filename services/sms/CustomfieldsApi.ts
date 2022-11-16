@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,17 +32,21 @@
 import { AxiosInstance } from 'axios'
 
 import { CustomTextField } from '@/models/CustomTextField'
-import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import {
+  CustomTextFieldSerializer,
+  CustomTextFieldRelationEntityType
+} from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import { IJsonApiEntityWithOptionalId } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class CustomfieldsApi {
   private axiosApi: AxiosInstance
   readonly basePath: string
   private serializer: CustomTextFieldSerializer
 
-  constructor (axiosInstance: AxiosInstance, basePath: string) {
+  constructor (axiosInstance: AxiosInstance, basePath: string, serializer: CustomTextFieldSerializer) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
-    this.serializer = new CustomTextFieldSerializer()
+    this.serializer = serializer
   }
 
   findById (id: string): Promise<CustomTextField> {
@@ -58,15 +62,21 @@ export class CustomfieldsApi {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
-  add (deviceId: string, field: CustomTextField): Promise<CustomTextField> {
+  addWithRelation (entityId: string, entityType: CustomTextFieldRelationEntityType, field: CustomTextField): Promise<CustomTextField> {
     const url = this.basePath
-    const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
+    const data: IJsonApiEntityWithOptionalId = this.serializer.convertModelToJsonApiData(
+      field,
+      {
+        entityType,
+        id: entityId
+      }
+    )
     return this.axiosApi.post(url, { data }).then((serverResponse) => {
       return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
     })
   }
 
-  update (deviceId: string, field: CustomTextField): Promise<CustomTextField> {
+  updateWithRelation (entityId: string, entityType: CustomTextFieldRelationEntityType, field: CustomTextField): Promise<CustomTextField> {
     return new Promise<string>((resolve, reject) => {
       if (field.id) {
         resolve(field.id)
@@ -74,7 +84,13 @@ export class CustomfieldsApi {
         reject(new Error('no id for the CustomTextField'))
       }
     }).then((fieldId) => {
-      const data: any = this.serializer.convertModelToJsonApiData(field, deviceId)
+      const data: IJsonApiEntityWithOptionalId = this.serializer.convertModelToJsonApiData(
+        field,
+        {
+          entityType,
+          id: entityId
+        }
+      )
       return this.axiosApi.patch(this.basePath + '/' + fieldId, { data }).then((serverResponse) => {
         return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
       })

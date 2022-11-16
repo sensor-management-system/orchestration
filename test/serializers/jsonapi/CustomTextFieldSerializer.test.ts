@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,7 +31,11 @@
  */
 import { CustomTextField } from '@/models/CustomTextField'
 
-import { CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
+import {
+  CustomTextFieldEntityType,
+  CustomTextFieldRelationEntityType,
+  CustomTextFieldSerializer
+} from '@/serializers/jsonapi/CustomTextFieldSerializer'
 
 import {
   IJsonApiEntityListEnvelope
@@ -129,10 +133,16 @@ describe('CustomTextFieldSerializer', () => {
         key: 'some key',
         value: 'test test test'
       })
-      const serializer = new CustomTextFieldSerializer()
+      const serializer = new CustomTextFieldSerializer(CustomTextFieldEntityType.DEVICE)
       const deviceId = '456'
 
-      const jsonApiPayload = serializer.convertModelToJsonApiData(customfield, deviceId)
+      const jsonApiPayload = serializer.convertModelToJsonApiData(
+        customfield,
+        {
+          entityType: CustomTextFieldRelationEntityType.DEVICE,
+          id: deviceId
+        }
+      )
 
       expect(jsonApiPayload).toHaveProperty('id')
       expect(jsonApiPayload.id).toEqual('123')
@@ -152,16 +162,57 @@ describe('CustomTextFieldSerializer', () => {
       expect(deviceData).toHaveProperty('type')
       expect(deviceData.type).toEqual('device')
     })
+    it('should convert a simple model to a json:api payload with a configuration relation', () => {
+      const customfield = CustomTextField.createFromObject({
+        id: '123',
+        key: 'some key',
+        value: 'test test test'
+      })
+      const serializer = new CustomTextFieldSerializer(CustomTextFieldEntityType.CONFIGURATION)
+      const configurationId = '456'
+
+      const jsonApiPayload = serializer.convertModelToJsonApiData(
+        customfield,
+        {
+          entityType: CustomTextFieldRelationEntityType.CONFIGURATION,
+          id: configurationId
+        }
+      )
+
+      expect(jsonApiPayload).toHaveProperty('id')
+      expect(jsonApiPayload.id).toEqual('123')
+      expect(jsonApiPayload).toHaveProperty('type')
+      expect(jsonApiPayload.type).toEqual('configuration_customfield')
+      expect(jsonApiPayload).toHaveProperty('attributes')
+      expect(jsonApiPayload.attributes).toHaveProperty('key')
+      expect(jsonApiPayload.attributes.key).toEqual('some key')
+      expect(jsonApiPayload.attributes).toHaveProperty('value')
+      expect(jsonApiPayload.attributes.value).toEqual('test test test')
+      expect(jsonApiPayload).toHaveProperty('relationships')
+      expect(jsonApiPayload.relationships).toHaveProperty('configuration')
+      expect(jsonApiPayload.relationships!.configuration).toHaveProperty('data')
+      const configurationData: any = jsonApiPayload.relationships!.configuration.data
+      expect(configurationData).toHaveProperty('id')
+      expect(configurationData.id).toEqual('456')
+      expect(configurationData).toHaveProperty('type')
+      expect(configurationData.type).toEqual('configuration')
+    })
     it('should also be possible if there is no id yet', () => {
       const customfield = CustomTextField.createFromObject({
         id: null,
         key: 'some key',
         value: 'test test test'
       })
-      const serializer = new CustomTextFieldSerializer()
+      const serializer = new CustomTextFieldSerializer(CustomTextFieldEntityType.DEVICE)
       const deviceId = '456'
 
-      const jsonApiPayload = serializer.convertModelToJsonApiData(customfield, deviceId)
+      const jsonApiPayload = serializer.convertModelToJsonApiData(
+        customfield,
+        {
+          entityType: CustomTextFieldRelationEntityType.DEVICE,
+          id: deviceId
+        }
+      )
 
       expect(jsonApiPayload).not.toHaveProperty('id')
       expect(jsonApiPayload).toHaveProperty('type')
