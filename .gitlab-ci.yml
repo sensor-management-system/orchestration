@@ -81,7 +81,8 @@ unittest-lint:
 
 test-image:
   services:
-    - postgres:12.2-alpine
+    - name: postgis/postgis:12-3.3-alpine
+      alias: postgres
   variables:
     POSTGRES_DB: db_test
     POSTGRES_USER: postgres

@@ -1,7 +1,7 @@
 """Resources for the usage statistics."""
 from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import MethodNotAllowed
-from ..models import Configuration, Device, Platform, User
+from ..models import Configuration, Device, Platform, Site, User
 from ..models.base_model import db
 
 
@@ -20,6 +20,7 @@ class UsageStatistics(ResourceList):
             "platforms": Platform,
             "configurations": Configuration,
             "users": User,
+            "sites": Site,
         }
         counts = {}
         for model_name, model in models_to_query.items():

@@ -1,6 +1,7 @@
 """Tests for the configuration api of our app."""
 import datetime
 import os
+from unittest.mock import patch
 
 import pytz
 
@@ -10,6 +11,9 @@ from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
 from project.api.models.device import Device
 from project.api.models.platform import Platform
+from project.api.models.site import Site
+from project.extensions.idl.models.user_account import UserAccount
+from project.extensions.instances import idl
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -731,3 +735,341 @@ class TestConfigurationsService(BaseTestCase):
         self.assertEqual(data[0]["attributes"]["archived"], False)
         self.assertEqual(data[1]["attributes"]["label"], "archived configuration")
         self.assertEqual(data[1]["attributes"]["archived"], True)
+
+    def test_get_list_pre_filtered_for_sites(self):
+        """Ensure that we can prefilter by site."""
+        site1 = Site(label="site1", is_public=True, is_internal=False)
+        site2 = Site(label="site2", is_public=True, is_internal=False)
+        configuration1 = Configuration(
+            label="configuration1", is_public=True, is_internal=False, site=site1
+        )
+        configuration2 = Configuration(
+            label="configuration2", is_public=True, is_internal=False, site=site1
+        )
+        configuration3 = Configuration(
+            label="configuration3", is_public=True, is_internal=False, site=site2
+        )
+        db.session.add_all(
+            [site1, site2, configuration1, configuration2, configuration3]
+        )
+        db.session.commit()
+
+        resp_site1 = self.client.get(f"{base_url}/sites/{site1.id}/configurations")
+        self.assertEqual(resp_site1.status_code, 200)
+        self.assertEqual(len(resp_site1.json["data"]), 2)
+
+        resp_site2 = self.client.get(f"{base_url}/sites/{site2.id}/configurations")
+        self.assertEqual(resp_site2.status_code, 200)
+        self.assertEqual(len(resp_site2.json["data"]), 1)
+        self.assertEqual(
+            resp_site2.json["data"][0]["attributes"]["label"], "configuration3"
+        )
+
+    def test_post_with_site(self):
+        """Ensure we can create a config associated with a site."""
+        site = Site(label="site1", is_public=True, is_internal=False, group_ids=["123"])
+        db.session.add(site)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "attributes": {
+                    "label": "config",
+                    "is_internal": False,
+                    "is_public": True,
+                    "cfg_permission_group": "123",
+                },
+                "relationships": {
+                    "site": {"data": {"id": str(site.id), "type": "site"}}
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+                idl_mock.return_value = UserAccount(
+                    id="1234",
+                    username="User 1234",
+                    membered_permission_groups=["123"],
+                    administrated_permission_groups=["123"],
+                )
+                resp = self.client.post(
+                    self.configurations_url,
+                    json=payload,
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+        self.assertEqual(resp.status_code, 201)
+        data_entry = resp.json["data"]
+        self.assertEqual(
+            data_entry["relationships"]["site"]["data"]["id"], str(site.id)
+        )
+
+        configuration = (
+            db.session.query(Configuration).filter_by(id=data_entry["id"]).first()
+        )
+        self.assertEqual(configuration.site, site)
+
+    def test_post_with_archived_site(self):
+        """Ensure we can create a config associated with an archived site."""
+        site = Site(
+            label="site1",
+            is_public=True,
+            is_internal=False,
+            group_ids=["123"],
+            archived=True,
+        )
+        db.session.add(site)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "attributes": {
+                    "label": "config",
+                    "is_internal": False,
+                    "is_public": True,
+                    "cfg_permission_group": "123",
+                },
+                "relationships": {
+                    "site": {"data": {"id": str(site.id), "type": "site"}}
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+                idl_mock.return_value = UserAccount(
+                    id="1234",
+                    username="User 1234",
+                    membered_permission_groups=["123"],
+                    administrated_permission_groups=["123"],
+                )
+                resp = self.client.post(
+                    self.configurations_url,
+                    json=payload,
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+        self.assertEqual(resp.status_code, 201)
+
+    def test_patch_to_site(self):
+        """Ensure we can patch to link to a site."""
+        site = Site(label="site1", is_public=True, is_internal=False, group_ids=["123"])
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+        )
+        db.session.add_all([site, configuration])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "id": str(configuration.id),
+                "relationships": {
+                    "site": {"data": {"id": str(site.id), "type": "site"}}
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+                idl_mock.return_value = UserAccount(
+                    id="1234",
+                    username="User 1234",
+                    membered_permission_groups=["123"],
+                    administrated_permission_groups=["123"],
+                )
+                resp = self.client.patch(
+                    f"{self.configurations_url}/{configuration.id}",
+                    json=payload,
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+        self.assertEqual(resp.status_code, 200)
+        data_entry = resp.json["data"]
+        self.assertEqual(
+            data_entry["relationships"]["site"]["data"]["id"], str(site.id)
+        )
+
+        configuration = (
+            db.session.query(Configuration).filter_by(id=data_entry["id"]).first()
+        )
+        self.assertEqual(configuration.site, site)
+
+    def test_patch_to_archived_site(self):
+        """Ensure we can patch to link to an archived site."""
+        site = Site(
+            label="site1",
+            is_public=True,
+            is_internal=False,
+            group_ids=["123"],
+            archived=True,
+        )
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+        )
+        db.session.add_all([site, configuration])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "id": str(configuration.id),
+                "relationships": {
+                    "site": {"data": {"id": str(site.id), "type": "site"}}
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+                idl_mock.return_value = UserAccount(
+                    id="1234",
+                    username="User 1234",
+                    membered_permission_groups=["123"],
+                    administrated_permission_groups=["123"],
+                )
+                resp = self.client.patch(
+                    f"{self.configurations_url}/{configuration.id}",
+                    json=payload,
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+        self.assertEqual(resp.status_code, 200)
+
+    def test_patch_from_site_to_none(self):
+        """Ensure we can remove the link to a site."""
+        site = Site(label="site1", is_public=True, is_internal=False, group_ids=["123"])
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+            site=site,
+        )
+        db.session.add_all([site, configuration])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "id": str(configuration.id),
+                "relationships": {
+                    "site": {
+                        "data": None,
+                    }
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+                idl_mock.return_value = UserAccount(
+                    id="1234",
+                    username="User 1234",
+                    membered_permission_groups=["123"],
+                    administrated_permission_groups=["123"],
+                )
+                resp = self.client.patch(
+                    f"{self.configurations_url}/{configuration.id}",
+                    json=payload,
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+        self.assertEqual(resp.status_code, 200)
+        data_entry = resp.json["data"]
+        self.assertIsNone(data_entry["relationships"]["site"]["data"])
+
+        configuration = (
+            db.session.query(Configuration).filter_by(id=data_entry["id"]).first()
+        )
+        self.assertIsNone(configuration.site, None)
+
+    def test_patch_from_archived_site_to_none(self):
+        """Ensure we can remove the link for an archived site."""
+        site = Site(
+            label="site1",
+            is_public=True,
+            is_internal=False,
+            group_ids=["123"],
+            archived=True,
+        )
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+            site=site,
+        )
+        db.session.add_all([site, configuration])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "id": str(configuration.id),
+                "relationships": {
+                    "site": {
+                        "data": None,
+                    }
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+                idl_mock.return_value = UserAccount(
+                    id="1234",
+                    username="User 1234",
+                    membered_permission_groups=["123"],
+                    administrated_permission_groups=["123"],
+                )
+                resp = self.client.patch(
+                    f"{self.configurations_url}/{configuration.id}",
+                    json=payload,
+                    headers={"Content-Type": "application/vnd.api+json"},
+                )
+        self.assertEqual(resp.status_code, 200)
+
+    def test_delete_with_site(self):
+        """Ensure that we can delete a configuration with a site."""
+        site = Site(label="site1", is_public=True, is_internal=False, group_ids=["123"])
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+            site=site,
+        )
+        db.session.add_all([site, configuration])
+        db.session.commit()
+
+        with self.run_requests_as(self.super_user):
+            resp = self.client.delete(f"{self.configurations_url}/{configuration.id}")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_delete_with_archived_site(self):
+        """Ensure that we can delete a configuration with an archived site."""
+        site = Site(
+            label="site1",
+            is_public=True,
+            is_internal=False,
+            group_ids=["123"],
+            archived=True,
+        )
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+            site=site,
+        )
+        db.session.add_all([site, configuration])
+        db.session.commit()
+
+        with self.run_requests_as(self.super_user):
+            resp = self.client.delete(f"{self.configurations_url}/{configuration.id}")
+        self.assertEqual(resp.status_code, 200)

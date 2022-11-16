@@ -202,3 +202,18 @@ class AllDynamicLocationsForConfigurationAreFinishedInThePast(Precondition):
     def _to_conflict_end_date_not_in_the_past(location):
         """Create a conflict error from a location action that is still active now."""
         return ConflictError(f"Dynamic location action {location.id} not in the past")
+
+
+class SiteOfConfigurationIsNotArchived(Precondition):
+    """Precondition to check that the site of a configuration is not archived."""
+
+    def __init__(self):
+        """Init the object."""
+
+        def object_rule(object):
+            """Return a conflict error if a dynamic location doesn't end."""
+            site = object.site
+            if site and site.archived:
+                return ConflictError("Site of configuration is archved.")
+
+        super().__init__(object_rule)

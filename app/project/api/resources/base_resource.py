@@ -15,6 +15,7 @@ from ..models import (
     DeviceAttachment,
     Platform,
     PlatformAttachment,
+    Site,
     User,
 )
 from ..models.base_model import db
@@ -69,6 +70,7 @@ def delete_attachments_in_minio_by_related_object_id(
     Delete an Attachment related to an object.
 
     Uses the minio class.
+
     :param object_id_intended_for_deletion:  object id.
     :param related_object_class: class od object the Attachment related to.
     :param attachment_class: attachment class.
@@ -141,6 +143,12 @@ def query_configuration_and_set_update_description_text(msg, result_id):
     """
     configuration = db.session.query(Configuration).filter_by(id=result_id).first()
     set_update_description_text_and_update_by_user(configuration, msg)
+
+
+def query_site_and_set_update_description_text(msg, result_id):
+    """Get the configuration and add udpate description text."""
+    site = db.session.query(Site).filter_by(id=result_id).first()
+    set_update_description_text_and_update_by_user(site, msg)
 
 
 def add_pid(obj_, pid_string):

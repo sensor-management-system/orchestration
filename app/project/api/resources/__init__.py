@@ -1,3 +1,5 @@
+"""JSON API resource classes of our app."""
+
 from .configuration_attachment_resources import (  # noqa: F401
     ConfigurationAttachmentDetail,
     ConfigurationAttachmentList,
@@ -30,7 +32,7 @@ from .customfield_resources import CustomFieldDetail, CustomFieldList  # noqa: F
 from .device_attachment_resources import (  # noqa: F401
     DeviceAttachmentDetail,
     DeviceAttachmentList,
-) # noqa: F401
+)
 from .device_calibration_action_attachment_resources import (  # noqa: F401
     DeviceCalibrationAttachmentDetail,
     DeviceCalibrationAttachmentList,
@@ -85,7 +87,6 @@ from .generic_platform_action_resources import (  # noqa: F401
     GenericPlatformActionDetail,
     GenericPlatformActionList,
 )
-from .pid_resources import PidList, PidDetail  # noqa: F401
 from .mounting_availabilities import (  # noqa: F401
     DeviceAvailabilities,
     PlatformAvailabilities,
@@ -109,6 +110,14 @@ from .platform_software_update_action_attachment_resources import (  # noqa: F40
 from .platform_software_update_action_resource import (  # noqa: F401
     PlatformSoftwareUpdateActionDetail,
     PlatformSoftwareUpdateActionList,
+)
+from .site_resources import (  # noqa: F401
+    SiteDetail,
+    SiteList,
+)
+from .site_role_resources import (  # noqa: F401
+    SiteRoleDetail,
+    SiteRoleList,
 )
 from .usage_statistics import UsageStatistics  # noqa: F401
 from .user_info import UserInfo  # noqa: F401

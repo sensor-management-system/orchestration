@@ -8,7 +8,7 @@ from ...extensions.instances import idl
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
 from ..helpers.errors import ConflictError, ForbiddenError, UnauthorizedError
 from ..helpers.resource_mixin import add_created_by_id, decode_json_request_data
-from ..models import Configuration, Device, Platform
+from ..models import Configuration, Device, Platform, Site
 from ..models.base_model import db
 
 
@@ -213,6 +213,7 @@ def check_deletion_permission(kwargs, object_to_delete):
             assert_current_user_is_superuser_or_owner_of_object(object_)
         else:
             raise ForbiddenError("User is not allowed to delete")
+    return object_
 
 
 def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
@@ -441,6 +442,25 @@ def get_query_with_permissions_for_configuration_related_objects(model):
     return query
 
 
+def get_query_with_permissions_for_site_related_objects(model):
+    """
+    Return the query for elements that depend on site permissions.
+
+    It retrieves a collection of related objects of a site
+    through sqlalchemy by checking the object permission.
+
+    :param model:
+    :return set: list of objects
+    """
+    query = db.session.query(model)
+
+    related_object = model.site
+    if g.user is None:
+        query = query.filter(related_object.has(is_public=True))
+
+    return query
+
+
 def check_permissions_for_configuration_related_objects(model_class, id_):
     """
     Check if user has the permission to view related object.
@@ -459,6 +479,24 @@ def check_permissions_for_configuration_related_objects(model_class, id_):
             raise UnauthorizedError("Authentication required.")
 
 
+def check_permissions_for_site_related_objects(model_class, id_):
+    """
+    Check if user has the permission to view related object.
+
+    This depends on the permissions of the site.
+
+    :param id_:
+    :param model_class: class model
+    """
+    object_ = db.session.query(model_class).filter_by(id=id_).first()
+    if object_ is None:
+        raise ObjectNotFound("Object not found!")
+    related_object = object_.site
+    if not related_object.is_public:
+        if not g.user:
+            raise UnauthorizedError("Authentication required.")
+
+
 def cfg_permission_group_defined(group_id):
     """Return true if the permission group is defined."""
     # Due to the database this can be the value if it is undefined.
@@ -468,7 +506,7 @@ def cfg_permission_group_defined(group_id):
 
 
 def check_post_permission_for_configuration_related_objects():
-    """Check if a user has the permission to patch a related object of a configuration."""
+    """Check if a user has the permission to post a related object of a configuration."""
     data = decode_json_request_data()
     object_id = data["relationships"]["configuration"]["data"]["id"]
     configuration = (
@@ -487,9 +525,24 @@ def check_post_permission_for_configuration_related_objects():
                 )
 
 
+def check_post_permission_for_site_related_objects():
+    """Check if a user has the permission to post a related object of a site."""
+    data = decode_json_request_data()
+    object_id = data["relationships"]["site"]["data"]["id"]
+    site = db.session.query(Site).filter_by(id=object_id).one_or_none()
+    if site is None:
+        raise ObjectNotFound("Object not found!")
+    if site.archived:
+        raise ConflictError("Posting for archived entities is not allowed")
+    if not is_superuser():
+        group_ids = site.group_ids
+        if not is_user_in_a_group(group_ids):
+            raise ForbiddenError("User is not part of any group to edit this object.")
+
+
 def check_patch_permission_for_configuration_related_objects(data, object_to_patch):
     """
-    Check if a user has the permission to patch a related object to a configuration.
+    Check if a user has the permission to patch a related object of a configuration.
 
     :param data:
     :param object_to_patch:
@@ -507,6 +560,26 @@ def check_patch_permission_for_configuration_related_objects(data, object_to_pat
                 raise ForbiddenError(
                     "User is not part of the configuration-group to edit this object."
                 )
+
+
+def check_patch_permission_for_site_related_objects(data, object_to_patch):
+    """
+    Check if a user has the permission to patch a related object of a site.
+
+    :param data:
+    :param object_to_patch:
+    """
+    object_ = db.session.query(object_to_patch).filter_by(id=data["id"]).one_or_none()
+    if object_ is None:
+        raise ObjectNotFound("Object not found!")
+    site = object_.get_parent()
+    if site.archived:
+        raise ConflictError("Patching for archived entities is not allowed")
+    if not is_superuser():
+        group_ids = site.group_ids
+        if not is_user_in_a_group(group_ids):
+            raise ForbiddenError("User is not part of any group to edit this object.")
+        allow_only_admin_in_a_permission_group_to_remove_it_from_an_object(group_ids)
 
 
 def check_deletion_permission_for_configuration_related_objects(
@@ -536,6 +609,30 @@ def check_deletion_permission_for_configuration_related_objects(
                 raise ForbiddenError(
                     "User is not part of the configuration-group to delete this object."
                 )
+
+
+def check_deletion_permission_for_site_related_objects(kwargs, object_to_delete):
+    """
+    Check if a user has the permission to delete related object to a site.
+
+    Note: both Member and Admin in a group should have the right
+    to make the deletion.
+
+    :param kwargs:
+    :param object_to_delete:
+    """
+    object_ = (
+        db.session.query(object_to_delete).filter_by(id=kwargs["id"]).one_or_none()
+    )
+    if object_ is None:
+        raise ObjectNotFound("Object not found!")
+    site = object_.get_parent()
+    if site.archived:
+        raise ConflictError("Deleting for archived entities is not allowed")
+    if not is_superuser():
+        group_ids = site.group_ids
+        if not is_user_in_a_group(group_ids):
+            raise ForbiddenError("User is not part of any group to edit this object.")
 
 
 def check_parent_group_before_change_a_relationship(

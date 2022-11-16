@@ -64,7 +64,7 @@ services:
       && scripts/run.sh ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev} ${BACKEND_PORT:-5000}"
 
   db:
-    image: postgres:12-alpine
+    image: postgis/postgis:12-3.3-alpine
     ports:
       - "127.0.0.1:5433:5433"
     environment:
