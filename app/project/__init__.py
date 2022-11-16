@@ -24,6 +24,7 @@ from .views import (
     additional_configuration_routes,
     additional_devices_routes,
     additional_platforms_routes,
+    additional_site_routes,
     docs_routes,
     free_text_field_routes,
     login_routes,
@@ -104,6 +105,7 @@ def create_app():
     app.register_blueprint(additional_devices_routes)
     app.register_blueprint(additional_platforms_routes)
     app.register_blueprint(additional_configuration_routes)
+    app.register_blueprint(additional_site_routes)
     # upload_routes
     app.register_blueprint(upload_routes)
     # download routes

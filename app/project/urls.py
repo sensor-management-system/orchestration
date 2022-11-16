@@ -110,7 +110,6 @@ api.route(
     ContactDetail,
     "contact_detail",
     "/contacts/<int:id>",
-    "/device-contact-roles/<int:id>/contact",
 )
 api.route(
     ControllerConfigurationMountingActions,
@@ -154,6 +153,7 @@ api.route(
     ConfigurationList,
     "configuration_list",
     "/configurations",
+    "/sites/<int:site_id>/configurations",
 )
 api.route(
     ConfigurationDetail,
@@ -383,7 +383,6 @@ api.route(
     DeviceRoleList,
     "device_contact_role_list",
     "/device-contact-roles",
-    "/contacts/<int:contact_id>/device-contact-roles",
     "/devices/<int:device_id>/device-contact-roles",
 )
 api.route(
@@ -395,7 +394,6 @@ api.route(
     PlatformRoleList,
     "platform_contact_role_list",
     "/platform-contact-roles",
-    "/contacts/<int:contact_id>/platform-contact-roles",
     "/platforms/<int:platform_id>/platform-contact-roles",
 )
 api.route(
@@ -409,7 +407,6 @@ api.route(
     ConfigurationRoleList,
     "configuration_contact_role_list",
     "/configuration-contact-roles",
-    "/contacts/<int:contact_id>/configuration-contact-roles",
     "/configurations/<int:configuration_id>/configuration-contact-roles",
 )
 api.route(
@@ -417,11 +414,34 @@ api.route(
     "configuration_contact_role_detail",
     "/configuration-contact-roles/<int:id>",
 )
+# SiteRoles
+api.route(
+    SiteRoleList,
+    "site_contact_role_list",
+    "/site-contact-roles",
+    "/sites/<int:site_id>/site-contact-roles",
+)
+api.route(
+    SiteRoleDetail,
+    "site_contact_role_detail",
+    "/site-contact-roles/<int:id>",
+)
 
 api.route(
     ControllerConfigurationLocationActionTimepoints,
     "controller_configuration_location_action_timepoints",
     "/controller/configurations/<int:configuration_id>/location-action-timepoints",
+)
+# Sites
+api.route(
+    SiteList,
+    "site_list",
+    "/sites"
+)
+api.route(
+    SiteDetail,
+    "site_detail",
+    "/sites/<int:id>"
 )
 
 # Usage statistics

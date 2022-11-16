@@ -28,6 +28,8 @@ class Configuration(
     configuration_attachments = db.relationship(
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=True)
+    site = db.relationship("Site", backref="configurations")
 
     def validate(self):
         """
@@ -84,6 +86,7 @@ class Configuration(
             "created_by_id": self.created_by_id,
             "start_date": self.start_date,
             "end_date": self.end_date,
+            "site_id": self.site_id,
         }
 
     @staticmethod
@@ -198,6 +201,9 @@ class Configuration(
                                 "properties": Device.get_search_index_properties(),
                             },
                         },
+                    },
+                    "site_id": {
+                        "type": "integer",
                     },
                 }
             },

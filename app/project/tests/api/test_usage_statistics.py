@@ -1,7 +1,7 @@
 """Tests for the usage statistics."""
 
 from project import base_url
-from project.api.models import Configuration, Contact, Device, Platform, User
+from project.api.models import Configuration, Contact, Device, Platform, Site, User
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase
 
@@ -24,6 +24,7 @@ class TestUsageStatistics(BaseTestCase):
                 "platforms": 0,
                 "configurations": 0,
                 "users": 0,
+                "sites": 0,
             },
         )
 
@@ -49,6 +50,7 @@ class TestUsageStatistics(BaseTestCase):
                 "platforms": 0,
                 "configurations": 0,
                 "users": 0,
+                "sites": 0,
             },
         )
 
@@ -69,6 +71,7 @@ class TestUsageStatistics(BaseTestCase):
                 "platforms": 1,
                 "configurations": 0,
                 "users": 0,
+                "sites": 0,
             },
         )
 
@@ -89,6 +92,7 @@ class TestUsageStatistics(BaseTestCase):
                 "platforms": 0,
                 "configurations": 1,
                 "users": 0,
+                "sites": 0,
             },
         )
 
@@ -110,6 +114,28 @@ class TestUsageStatistics(BaseTestCase):
                 "platforms": 0,
                 "configurations": 0,
                 "users": 1,
+                "sites": 0,
+            },
+        )
+
+    def test_get_one_site(self):
+        """Test the count with one site."""
+        site = Site(label="Site", is_internal=True, is_public=False)
+        db.session.add(site)
+        db.session.commit()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        data = response.json
+        self.assertIn("counts", data.keys())
+        self.assertEqual(
+            data["counts"],
+            {
+                "devices": 0,
+                "platforms": 0,
+                "configurations": 0,
+                "users": 0,
+                "sites": 1,
             },
         )
 
@@ -126,6 +152,8 @@ class TestUsageStatistics(BaseTestCase):
         configuration2 = Configuration(label="second configuration")
         contact = Contact(given_name="N", family_name="B", email="nb@localhost")
         user = User(subject="nb", contact=contact)
+        site1 = Site(label="Site1", is_internal=True, is_public=False)
+        site2 = Site(label="Site2", is_internal=False, is_public=True)
         db.session.add_all(
             [
                 device1,
@@ -139,6 +167,8 @@ class TestUsageStatistics(BaseTestCase):
                 configuration2,
                 contact,
                 user,
+                site1,
+                site2,
             ]
         )
         db.session.commit()
@@ -154,5 +184,6 @@ class TestUsageStatistics(BaseTestCase):
                 "platforms": 3,
                 "configurations": 2,
                 "users": 1,
+                "sites": 2,
             },
         )

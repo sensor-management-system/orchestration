@@ -113,3 +113,21 @@ archive_configuration_preconditions = (
     & AllStaticLocationsForConfigurationAreFinishedInThePast()
     & AllDynamicLocationsForConfigurationAreFinishedInThePast()
 )
+
+archive_site_permissions = RequireUserForRequest() & (
+    RestrictObjectTo(
+        SuperUser()
+        | RoleInPermissionGroup(
+            PermissionGroupRole.ADMIN, GetPermissionGroupsFromDeviceOrPlatform()
+        )
+    )
+)
+
+restore_site_permissions = RequireUserForRequest() & (
+    RestrictObjectTo(
+        SuperUser()
+        | RoleInPermissionGroup(
+            PermissionGroupRole.ADMIN, GetPermissionGroupsFromDeviceOrPlatform()
+        )
+    )
+)

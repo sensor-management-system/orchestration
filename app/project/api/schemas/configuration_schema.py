@@ -1,3 +1,5 @@
+"""Schema class for configurations."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
@@ -6,12 +8,11 @@ from ..schemas.device_property_schema import InnerDevicePropertySchema
 
 
 class ConfigurationSchema(Schema):
-    """
-    This class create a schema for a configuration
-
-    """
+    """This class create a schema for a configuration."""
 
     class Meta:
+        """Meta class for the configuration schema."""
+
         type_ = "configuration"
         self_view = "api.configuration_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -106,6 +107,15 @@ class ConfigurationSchema(Schema):
         schema="UserSchema",
         type_="user",
         dump_only=True,
+    )
+    site = Relationship(
+        related_view="api.site_detail",
+        related_view_kwargs={"id": "<site_id>"},
+        include_resource_linkage=True,
+        type_="site",
+        schema="SiteSchema",
+        id_field="id",
+        allow_none=True,
     )
 
     @staticmethod

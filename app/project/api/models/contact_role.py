@@ -85,3 +85,21 @@ class ConfigurationContactRole(db.Model, Role, IndirectSearchableMixin):
     def get_parent(self):
         """Return the parent object (for permission management)."""
         return self.configuration
+
+
+class SiteContactRole(db.Model, Role, IndirectSearchableMixin):
+    """Contact role for a site."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    contact = db.relationship("Contact", backref="contact_site_roles")
+    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"))
+    site = db.relationship("Site", backref="site_contact_roles")
+    site_id = db.Column(db.Integer, db.ForeignKey("site.id"))
+
+    def get_parent_search_entities(self):
+        """Return the site."""
+        return [self.site]
+
+    def get_parent(self):
+        """Return the parent object (for permission management)."""
+        return self.site
