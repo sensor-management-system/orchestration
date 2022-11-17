@@ -58,6 +58,7 @@ export class UserInfoSerializer {
       if (Array.isArray(attributes?.admin) && attributes?.admin?.length) {
         newEntry.admin = attributes.admin.map(e => e.toString())
       }
+      newEntry.apikey = attributes.apikey || null
     }
 
     return newEntry

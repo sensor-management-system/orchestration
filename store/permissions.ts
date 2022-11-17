@@ -233,6 +233,18 @@ const getters: GetterTree<PermissionsState, RootState> = {
   },
   permissionGroups: (state: PermissionsState): PermissionGroup[] => {
     return state.permissionGroups
+  },
+  apikey: (state: PermissionsState): string | null => {
+    if (state.userInfo) {
+      return state.userInfo.apikey
+    }
+    return null
+  },
+  isSuperUser: (state: PermissionsState): boolean => {
+    if (state.userInfo) {
+      return state.userInfo.isSuperUser
+    }
+    return false
   }
 }
 
