@@ -37,6 +37,7 @@ export interface IUserInfo {
   id: string | null
   active: boolean
   isSuperUser: boolean
+  contactId: string | null
   member: PermissionGroupId[]
   admin: PermissionGroupId[]
   isMemberOf(group: PermissionGroup): boolean
@@ -49,6 +50,7 @@ export class UserInfo implements IUserInfo {
   private _id: string | null = null
   private _active: boolean = false
   private _isSuperUser: boolean = false
+  private _contactId: string | null = null
   private _member: PermissionGroupId[] = []
   private _admin: PermissionGroupId[] = []
 
@@ -74,6 +76,14 @@ export class UserInfo implements IUserInfo {
 
   set isSuperUser (isSuperUser: boolean) {
     this._isSuperUser = isSuperUser
+  }
+
+  get contactId () : string | null {
+    return this._contactId
+  }
+
+  set contactId (newContactId: string | null) {
+    this._contactId = newContactId
   }
 
   get member (): PermissionGroupId[] {
@@ -117,6 +127,9 @@ export class UserInfo implements IUserInfo {
     }
     if (someObject.isSuperUser) {
       userinfo.isSuperUser = someObject.isSuperUser
+    }
+    if (someObject.contactId) {
+      userinfo.contactId = someObject.contactId
     }
     if (someObject.member?.length) {
       userinfo.member = someObject.member.map(i => i)

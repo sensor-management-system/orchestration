@@ -967,7 +967,10 @@ describe('SoftwareUpdateActionSerializer', () => {
           givenName: 'Marc',
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
-          website: ''
+          website: '',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
         const expectedAction = new SoftwareUpdateAction()
         expectedAction.id = '3'
@@ -992,7 +995,10 @@ describe('SoftwareUpdateActionSerializer', () => {
           givenName: 'Marc',
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
-          website: ''
+          website: '',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
         const expectedAction = new SoftwareUpdateAction()
         expectedAction.id = '3'
@@ -1052,14 +1058,20 @@ describe('SoftwareUpdateActionSerializer', () => {
           givenName: 'Marc',
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
-          website: ''
+          website: '',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
         const contact2 = Contact.createFromObject({
           id: '3',
           givenName: 'Nils',
           familyName: 'Brinckmann',
           email: 'nils.brinckmann@gfz-potsdam.de',
-          website: 'https://www.gfz-potsdam.de/staff/nils-brinckmann/'
+          website: 'https://www.gfz-potsdam.de/staff/nils-brinckmann/',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
         const attachment1 = Attachment.createFromObject({
           id: '51',
@@ -1119,7 +1131,10 @@ describe('SoftwareUpdateActionSerializer', () => {
           givenName: 'Marc',
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
-          website: ''
+          website: '',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
 
         const action = new SoftwareUpdateAction()

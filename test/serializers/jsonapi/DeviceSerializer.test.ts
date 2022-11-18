@@ -148,14 +148,20 @@ const createTestDevice = () => {
       givenName: 'Max',
       familyName: 'Mustermann',
       email: 'max@mustermann.de',
-      website: ''
+      website: '',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     }),
     Contact.createFromObject({
       id: '5',
       givenName: 'Mux',
       familyName: 'Mastermunn',
       email: 'mux@mastermunn.de',
-      website: ''
+      website: '',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
   ]
   return device
@@ -818,7 +824,10 @@ describe('DeviceSerializer', () => {
           givenName: 'Max',
           email: 'test@test.test',
           website: '',
-          familyName: 'Mustermann'
+          familyName: 'Mustermann',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
       ]
       expectedDevice.archived = false
@@ -1243,7 +1252,10 @@ describe('deviceWithMetaToDeviceByThrowingErrorOnMissing', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     device.contacts.push(contact)
 
@@ -1304,7 +1316,10 @@ describe('deviceWithMetaToDeviceByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     device.contacts.push(contact)
     const missing = {
@@ -1347,7 +1362,10 @@ describe('deviceWithMetaToDeviceByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     device.contacts.push(contact)
 

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,12 +29,18 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+import { DateTime } from 'luxon'
+
 export interface IContact {
   id: string | null
   email: string
   givenName: string
   familyName: string
   website: string
+  createdAt: DateTime | null
+  updatedAt: DateTime | null
+  createdByUserId: string | null
 }
 
 export class Contact implements IContact {
@@ -43,6 +49,10 @@ export class Contact implements IContact {
   private _givenName: string = ''
   private _familyName: string = ''
   private _website: string = ''
+
+  private _createdAt: DateTime | null = null
+  private _updatedAt: DateTime | null = null
+  private _createdByUserId: string | null = null
 
   get id (): string | null {
     return this._id
@@ -88,6 +98,30 @@ export class Contact implements IContact {
     this._website = newWebsite
   }
 
+  get createdAt (): DateTime | null {
+    return this._createdAt
+  }
+
+  set createdAt (newCreatedAt: DateTime | null) {
+    this._createdAt = newCreatedAt
+  }
+
+  get updatedAt (): DateTime | null {
+    return this._updatedAt
+  }
+
+  set updatedAt (newUpdatedAt: DateTime | null) {
+    this._updatedAt = newUpdatedAt
+  }
+
+  get createdByUserId (): string | null {
+    return this._createdByUserId
+  }
+
+  set createdByUserId (newId: string | null) {
+    this._createdByUserId = newId
+  }
+
   toString (): string {
     if (this._givenName && this._familyName) {
       return this._givenName + ' ' + this._familyName
@@ -126,6 +160,9 @@ export class Contact implements IContact {
     newObject.givenName = someObject.givenName
     newObject.familyName = someObject.familyName
     newObject.website = someObject.website
+    newObject.createdAt = someObject.createdAt
+    newObject.updatedAt = someObject.updatedAt
+    newObject.createdByUserId = someObject.createdByUserId
     return newObject
   }
 }

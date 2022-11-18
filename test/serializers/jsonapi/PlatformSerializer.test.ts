@@ -82,14 +82,20 @@ const createTestPlatform = () => {
       givenName: 'Max',
       familyName: 'Mustermann',
       email: 'max@mustermann.de',
-      website: ''
+      website: '',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     }),
     Contact.createFromObject({
       id: '5',
       givenName: 'Mux',
       familyName: 'Mastermunn',
       email: 'mux@mastermunn.de',
-      website: ''
+      website: '',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
   ]
   return platform
@@ -322,7 +328,10 @@ describe('PlatformSerializer', () => {
         givenName: 'Max',
         email: 'test@test.test',
         website: '',
-        familyName: 'Mustermann'
+        familyName: 'Mustermann',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })]
       expectedPlatform1.createdByUserId = '42'
       expectedPlatform1.archived = true
@@ -537,7 +546,10 @@ describe('PlatformSerializer', () => {
         givenName: 'Max',
         email: 'test@test.test',
         website: '',
-        familyName: 'Mustermann'
+        familyName: 'Mustermann',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })]
       expectedPlatform.archived = true
 
@@ -718,7 +730,10 @@ describe('PlatformSerializer', () => {
         givenName: 'Max',
         email: 'test@test.test',
         website: '',
-        familyName: 'Mustermann'
+        familyName: 'Mustermann',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })]
       expectedPlatform.archived = false
 
@@ -927,7 +942,10 @@ describe('platformWithMetaToPlatformByThrowingErrorOnMissing', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     platform.contacts.push(contact)
 
@@ -988,7 +1006,10 @@ describe('platformWithMetaToPlatformByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     platform.contacts.push(contact)
     const missing = {
@@ -1031,7 +1052,10 @@ describe('platformWithMetaToPlatformByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     platform.contacts.push(contact)
 

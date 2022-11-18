@@ -41,6 +41,7 @@ import { UserInfo } from '@/models/UserInfo'
 import { PermissionGroup, IPermissionable, IArchivable, IPersistentlyIdentifiable } from '@/models/PermissionGroup'
 import { IVisible } from '@/models/Visibility'
 import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
+import { Contact } from '@/models/Contact'
 
 export type PermissionHandable = IPermissionable & IVisible & IMetaCreationInfo & IArchivable & IPersistentlyIdentifiable
 
@@ -62,6 +63,14 @@ const userIsCreatorOfPrivateEntity = (entity: PermissionHandable, userInfo: User
   return result
 }
 
+const userIsCreatorOfContact = (entity: Contact, userInfo: UserInfo) => {
+  return entity.createdByUserId === userInfo.id
+}
+
+const userIsContact = (entity: Contact, userInfo: UserInfo) => {
+  return entity.id && entity.id === userInfo.contactId
+}
+
 export interface PermissionsState {
   userInfo: UserInfo | null,
   permissionGroups: PermissionGroup[]
@@ -75,6 +84,9 @@ const state = (): PermissionsState => ({
 export type CanAccessEntityGetter = (entity: PermissionHandable) => boolean
 export type CanModifyEntityGetter = (entity: PermissionHandable) => boolean
 export type CanDeleteEntityGetter = (entity: PermissionHandable) => boolean
+export type CanDeleteContactGetter = (entity: Contact) => boolean
+export type CanModifyContactGetter = (entity: Contact) => boolean
+
 export type CanArchiveEntityGetter = (entity: PermissionHandable) => boolean
 export type CanRestoreEntityGetter = (entity: PermissionHandable) => boolean
 export type MemberedPermissionGroupsGetter = PermissionGroup[]
@@ -154,6 +166,37 @@ const getters: GetterTree<PermissionsState, RootState> = {
       return true
     }
     // in case that we missed a check, restrict access
+    return false
+  },
+  canDeleteContact: (state: PermissionsState) => (entity: Contact): boolean => {
+    if (!state.userInfo) {
+      return false
+    }
+    if (userIsContact(entity, state.userInfo)) {
+      // it doesn't make sense if the user tries to delete the own entry
+      return false
+    }
+    if (state.userInfo.isSuperUser) {
+      return true
+    }
+    if (userIsCreatorOfContact(entity, state.userInfo)) {
+      return true
+    }
+    return false
+  },
+  canModifyContact: (state: PermissionsState) => (entity: Contact): boolean => {
+    if (!state.userInfo) {
+      return false
+    }
+    if (state.userInfo.isSuperUser) {
+      return true
+    }
+    if (userIsContact(entity, state.userInfo)) {
+      return true
+    }
+    if (userIsCreatorOfContact(entity, state.userInfo)) {
+      return true
+    }
     return false
   },
   canArchiveEntity: (state: PermissionsState, getters: any) => (entity: PermissionHandable): boolean => {

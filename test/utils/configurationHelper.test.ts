@@ -116,7 +116,10 @@ describe('#addNewMountAction', () => {
       givenName: 'Homer',
       familyName: 'S',
       email: 'homer.j@s',
-      website: ''
+      website: '',
+      createdAt: null,
+      updatedAt: null,
+      createdByUserId: null
     })
     const platformMountAction1 = PlatformMountAction.createFromObject({
       id: '1111',

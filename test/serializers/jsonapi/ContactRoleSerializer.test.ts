@@ -116,7 +116,10 @@ describe('ContactRoleSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           website: '',
-          email: 'test@test.test'
+          email: 'test@test.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
       })
       const expectedContactRole2 = ContactRole.createFromObject({
@@ -128,7 +131,10 @@ describe('ContactRoleSerializer', () => {
           givenName: 'Erika',
           familyName: 'Mustermann',
           website: '',
-          email: 'test2@test.test'
+          email: 'test2@test.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
       })
 
@@ -152,7 +158,10 @@ describe('ContactRoleSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           website: '',
-          email: 'test@test.test'
+          email: 'test@test.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
       })
 
