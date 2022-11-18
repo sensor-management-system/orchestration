@@ -40,6 +40,7 @@ export interface IUserInfo {
   contactId: string | null
   member: PermissionGroupId[]
   admin: PermissionGroupId[]
+  apikey: string | null
   isMemberOf(group: PermissionGroup): boolean
   isAdminOf(group: PermissionGroup): boolean
 }
@@ -53,6 +54,7 @@ export class UserInfo implements IUserInfo {
   private _contactId: string | null = null
   private _member: PermissionGroupId[] = []
   private _admin: PermissionGroupId[] = []
+  private _apikey: string | null = null
 
   get id (): string | null {
     return this._id
@@ -110,6 +112,14 @@ export class UserInfo implements IUserInfo {
     return this.admin.find(someGroup => isGroupIdMatching(someGroup, group)) !== undefined
   }
 
+  get apikey (): string | null {
+    return this._apikey
+  }
+
+  set apikey (newApikey: string | null) {
+    this._apikey = newApikey
+  }
+
   /**
    * creates an instance from another object
    *
@@ -136,6 +146,9 @@ export class UserInfo implements IUserInfo {
     }
     if (someObject.admin?.length) {
       userinfo.admin = someObject.admin.map(i => i)
+    }
+    if (someObject.apikey) {
+      userinfo.apikey = someObject.apikey
     }
     return userinfo
   }

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2022
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -98,6 +98,60 @@ permissions and limitations under the Licence.
       </v-expand-transition>
     </v-card>
     <v-card class="ma-2">
+      <v-card-text @click.stop.prevent="toggleExtendedSection">
+        <v-row>
+          <v-col class="text-subtitle-1">
+            Extended
+          </v-col>
+          <v-col align-self="end" class="text-right">
+            <v-btn icon @click.stop.prevent="toggleExtendedSection">
+              <v-icon>
+                {{ isExtendedSectionVisible ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+              </v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-expand-transition>
+        <v-card v-show="isExtendedSectionVisible" flat tile color="grey lighten-5">
+          <v-card-text>
+            <v-row no-gutters>
+              <v-col class="text-subtitle-2" :cols="firstCol">
+                Apikey
+              </v-col>
+              <v-col align-self="end" :cols="secondCol">
+                {{ apikey }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="text-subtitle-2" :cols="firstCol">
+                Super user
+              </v-col>
+              <v-col align-self="end" :cols="secondCol">
+                {{ isSuperUser }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="text-subtitle-2" :cols="firstCol">
+                Membered permission groups
+              </v-col>
+              <v-col align-self="end" :cols="secondCol">
+                {{ memberedPermissionGroups | getNames }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="text-subtitle-2" :cols="firstCol">
+                Administrated permission groups
+              </v-col>
+              <v-col align-self="end" :cols="secondCol">
+                {{ administradedPermissionGroups | getNames }}
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-expand-transition>
+    </v-card>
+    <v-card class="ma-2">
       <v-card-text @click.stop.prevent="toggleOpenIdConnectSection">
         <v-row>
           <v-col class="text-subtitle-1">
@@ -127,62 +181,29 @@ permissions and limitations under the Licence.
         </v-card>
       </v-expand-transition>
     </v-card>
-    <v-card class="ma-2">
-      <v-card-text @click.stop.prevent="toggleTokenSection">
-        <v-row>
-          <v-col class="text-subtitle-1">
-            Token
-          </v-col>
-          <v-col align-self="end" class="text-right">
-            <v-btn icon @click.stop.prevent="toggleTokenSection">
-              <v-icon>
-                {{ isTokenSectionVisible ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-              </v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-expand-transition>
-        <v-card v-show="isTokenSectionVisible" flat tile color="grey lighten-5">
-          <v-card-text>
-            <v-row no-gutters>
-              <v-col class="text-subtitle-2" :cols="firstCol">
-                Authentification
-              </v-col>
-              <v-col align-self="end" :cols="secondCol">
-                {{ $auth.user.iat | timeStampToUTCDateTime }} <span class="text-caption text--secondary">(UTC)</span>
-              </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col class="text-subtitle-2" :cols="firstCol">
-                Your token expires
-              </v-col>
-              <v-col align-self="end" :cols="secondCol">
-                {{ $auth.user.exp | timeStampToUTCDateTime }} <span class="text-caption text--secondary">(UTC)</span>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-expand-transition>
-    </v-card>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 
-import { timeStampToUTCDateTime } from '@/utils/dateHelper'
+import { mapGetters } from 'vuex'
+
+import { PermissionGroup } from '@/models/PermissionGroup'
 
 @Component({
   filters: {
-    timeStampToUTCDateTime
+    getNames: (xs: PermissionGroup[]): string[] => {
+      return xs.map(x => x.name)
+    }
   },
-  middleware: ['auth']
+  middleware: ['auth'],
+  computed: mapGetters('permissions', ['memberedPermissionGroups', 'administradedPermissionGroups', 'apikey', 'isSuperUser'])
 })
 export default class ProfilePage extends Vue {
   private isOpenIdConnectSectionVisible: boolean = false
   private isPersonalSectionVisible: boolean = true
-  private isTokenSectionVisible: boolean = false
+  private isExtendedSectionVisible: boolean = false
   private firstCol = 3
   private secondCol = 9
 
@@ -216,8 +237,8 @@ export default class ProfilePage extends Vue {
     this.isPersonalSectionVisible = !this.isPersonalSectionVisible
   }
 
-  toggleTokenSection () {
-    this.isTokenSectionVisible = !this.isTokenSectionVisible
+  toggleExtendedSection () {
+    this.isExtendedSectionVisible = !this.isExtendedSectionVisible
   }
 }
 
