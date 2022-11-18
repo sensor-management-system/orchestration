@@ -30,43 +30,50 @@
  * permissions and limitations under the Licence.
  */
 import { UserInfo } from '@/models/UserInfo'
+import { UserInfoSerializer } from '@/serializers/jsonapi/UserInfoSerializer'
 
-import {
-  IJsonApiEntityEnvelope,
-  IJsonApiEntityWithOptionalAttributes,
-  IJsonApiEntityWithoutDetails
-} from '@/serializers/jsonapi/JsonApiTypes'
-
-export class UserInfoSerializer {
-  convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): UserInfo {
-    const data = jsonApiObject.data
-    return this.convertJsonApiDataToModel(data)
-  }
-
-  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): UserInfo {
-    const attributes = jsonApiData.attributes
-
-    const newEntry = new UserInfo()
-
-    newEntry.id = jsonApiData.id.toString()
-
-    if (attributes) {
-      newEntry.active = attributes.active || false
-      newEntry.isSuperUser = attributes.is_superuser || false
-      if (Array.isArray(attributes?.member) && attributes?.member?.length) {
-        newEntry.member = attributes.member.map(e => e.toString())
+describe('UserInfoSerializer', () => {
+  describe('#convertJsonApiDataToModel', () => {
+    it('should convert an entry to the model', () => {
+      const jsonApiObject: any = {
+        data: {
+          attributes: {
+            active: true,
+            is_superuser: false,
+            member: ['123', '456'],
+            admin: ['789']
+          },
+          id: '1',
+          links: {
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/'
+          },
+          relationships: {
+            contact: {
+              data: {
+                type: 'contact',
+                id: 1234
+              }
+            }
+          },
+          type: 'user'
+        },
+        included: []
       }
-      if (Array.isArray(attributes?.admin) && attributes?.admin?.length) {
-        newEntry.admin = attributes.admin.map(e => e.toString())
-      }
-    }
-    const relationships = jsonApiData.relationships
 
-    if (relationships && relationships.contact && relationships.contact.data) {
-      const data = relationships.contact.data as IJsonApiEntityWithoutDetails
-      newEntry.contactId = data.id != null ? String(data.id) : null
-    }
+      const expectedResult = UserInfo.createFromObject({
+        id: '1',
+        active: true,
+        isSuperUser: false,
+        member: ['123', '456'],
+        admin: ['789'],
+        contactId: '1234'
+      })
 
-    return newEntry
-  }
-}
+      const serializer = new UserInfoSerializer()
+
+      const userinfo = serializer.convertJsonApiDataToModel(jsonApiObject.data)
+
+      expect(userinfo).toEqual(expectedResult)
+    })
+  })
+})

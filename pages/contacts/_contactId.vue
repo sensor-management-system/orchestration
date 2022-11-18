@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -39,19 +39,21 @@ permissions and limitations under the Licence.
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, ProvideReactive } from 'nuxt-property-decorator'
 
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction } from '@/store/appbar'
 import { ContactsState, LoadContactAction } from '@/store/contacts'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { CanDeleteContactGetter, CanModifyContactGetter } from '@/store/permissions'
 
 @Component({
   components: { ProgressIndicator },
   computed: {
-    ...mapState('contacts', ['contact'])
+    ...mapState('contacts', ['contact']),
+    ...mapGetters('permissions', ['canModifyContact', 'canDeleteContact'])
   },
   methods: {
     ...mapActions('contacts', ['loadContact']),
@@ -59,18 +61,34 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   }
 })
 export default class ContactShowPage extends Vue {
+  @ProvideReactive()
+    editable: boolean = false
+
+  @ProvideReactive()
+    deletable: boolean = false
+
   private isLoading: boolean = false
 
   // vuex definition for typescript check
   contact!: ContactsState['contact']
   loadContact!: LoadContactAction
   setTitle!: SetTitleAction
+  canModifyContact!: CanModifyContactGetter
+  canDeleteContact!: CanDeleteContactGetter
 
   async created () {
+    if (!this.$auth.loggedIn) {
+      this.$router.replace('/', () => {
+        this.$store.commit('snackbar/setError', 'Login is required to see this page.')
+      })
+      return
+    }
+
     try {
       this.isLoading = true
       this.initializeAppBar()
       await this.loadContact(this.contactId)
+      this.updatePermissions(this.contact)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading contact failed')
     } finally {
@@ -88,10 +106,18 @@ export default class ContactShowPage extends Vue {
     }
   }
 
+  updatePermissions (contact: ContactsState['contact']) {
+    if (contact) {
+      this.editable = this.canModifyContact(contact)
+      this.deletable = this.canDeleteContact(contact)
+    }
+  }
+
   @Watch('contact', { immediate: true, deep: true })
   onContactChanged (val: ContactsState['contact'] | null): void {
     if (val && val.id) {
       this.setTitle(val?.toString())
+      this.updatePermissions(val)
     }
   }
 }

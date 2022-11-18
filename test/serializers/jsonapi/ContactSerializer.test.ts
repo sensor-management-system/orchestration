@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { Contact } from '@/models/Contact'
 import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { IJsonApiEntityWithoutDetailsDataDictList } from '@/serializers/jsonapi/JsonApiTypes'
@@ -139,13 +141,21 @@ describe('ContactSerializer', () => {
                 self: '/rdm/svm-api/v1/contacts/1/relationships/platforms',
                 related: '/rdm/svm-api/v1/contacts/1/platforms'
               }
+            },
+            created_by: {
+              data: {
+                type: 'user',
+                id: '123'
+              }
             }
           },
           attributes: {
             given_name: 'Max',
             email: 'test@test.test',
             website: null,
-            family_name: 'Mustermann'
+            family_name: 'Mustermann',
+            created_at: '2020-08-29T13:49:48.015620+00:00',
+            updated_at: '2021-08-29T13:49:48.015620+00:00'
           },
           id: '1',
           links: {
@@ -166,6 +176,9 @@ describe('ContactSerializer', () => {
       expectedContact.familyName = 'Mustermann'
       expectedContact.website = ''
       expectedContact.email = 'test@test.test'
+      expectedContact.createdAt = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
+      expectedContact.updatedAt = DateTime.utc(2021, 8, 29, 13, 49, 48, 15)
+      expectedContact.createdByUserId = '123'
 
       const serializer = new ContactSerializer()
       const contact = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -243,14 +256,20 @@ describe('ContactSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           email: 'max@mustermann.de',
-          website: ''
+          website: '',
+          createdAt: null,
+          updatedAt: null,
+          createdByUserId: null
         }),
         Contact.createFromObject({
           id: '5',
           givenName: 'Mux',
           familyName: 'Mastermunn',
           email: 'mux@mastermunn.de',
-          website: ''
+          website: '',
+          createdAt: null,
+          updatedAt: null,
+          createdByUserId: null
         })
       ]
 
@@ -322,7 +341,10 @@ describe('ContactSerializer', () => {
         givenName: 'AA',
         familyName: 'BB',
         email: 'AA@BB',
-        website: ''
+        website: '',
+        createdAt: null,
+        updatedAt: null,
+        createdByUserId: null
       })
 
       const serializer = new ContactSerializer()

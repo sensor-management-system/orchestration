@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          v-if="editable"
           save-btn-text="apply"
           :to="'/contacts/' + contactId"
           @save="save"
@@ -51,6 +52,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
+          v-if="editable"
           save-btn-text="apply"
           :to="'/contacts/' + contactId"
           @save="save"
@@ -60,7 +62,7 @@ permissions and limitations under the Licence.
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue, Watch } from 'nuxt-property-decorator'
+import { Component, mixins, Vue, Watch } from 'nuxt-property-decorator'
 
 import { mapActions, mapState } from 'vuex'
 
@@ -72,6 +74,7 @@ import { Contact } from '@/models/Contact'
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 @Component({
   components: {
@@ -86,7 +89,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
     ...mapActions('appbar', ['setTitle'])
   }
 })
-export default class ContactEditPage extends Vue {
+export default class ContactEditPage extends mixins(CheckEditAccess) {
   private isLoading: boolean = false
   private contactCopy: Contact = new Contact()
 
@@ -95,6 +98,28 @@ export default class ContactEditPage extends Vue {
   saveContact!: SaveContactAction
   loadContact!: LoadContactAction
   setTitle!: SetTitleAction
+
+  /**
+   * route to which the user is redirected when he is not allowed to access the page
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a valid route path
+   */
+  getRedirectUrl (): string {
+    return '/contacts/' + this.contactId
+  }
+
+  /**
+   * message which is displayed when the user is redirected
+   *
+   * is called by CheckEditAccess#created
+   *
+   * @returns {string} a message string
+   */
+  getRedirectMessage (): string {
+    return 'You\'re not allowed to edit this contact.'
+  }
 
   created () {
     if (this.contact) {

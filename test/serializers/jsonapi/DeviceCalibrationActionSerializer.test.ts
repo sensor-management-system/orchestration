@@ -161,7 +161,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -183,7 +186,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -208,7 +214,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -233,7 +242,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -258,7 +270,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -283,7 +298,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const attachment1 = Attachment.createFromObject({
         id: '11',
@@ -402,7 +420,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const measuredQuantity1 = DeviceProperty.createFromObject({
         id: '111',
@@ -581,7 +602,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'
@@ -629,7 +653,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'
@@ -677,7 +704,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'
@@ -725,7 +755,10 @@ describe('DeviceCalibrationActionSerializer', () => {
         givenName: 'Nils',
         familyName: 'Brinckmann',
         email: 'nils.brinckmann@gfz-potsdam.de',
-        website: ''
+        website: '',
+        createdByUserId: null,
+        createdAt: null,
+        updatedAt: null
       })
       const action = new DeviceCalibrationAction()
       action.id = '3'

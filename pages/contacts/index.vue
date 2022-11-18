@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -140,7 +140,7 @@ permissions and limitations under the Licence.
             :contact="item"
           >
             <template
-              v-if="$auth.loggedIn"
+              v-if="$auth.loggedIn && canDeleteContact(item)"
               #dot-menu-items
             >
               <DotMenuActionDelete
@@ -201,6 +201,7 @@ import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
+import { CanDeleteContactGetter } from '@/store/permissions'
 
 @Component({
   components: {
@@ -212,7 +213,8 @@ import { QueryParams } from '@/modelUtils/QueryParams'
   },
   computed: {
     ...mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'contacts']),
-    ...mapGetters('contacts', ['pageSizes'])
+    ...mapGetters('contacts', ['pageSizes']),
+    ...mapGetters('permissions', ['canDeleteContact'])
   },
   methods: {
     ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'setPageSize', 'deleteContact']),
@@ -236,8 +238,16 @@ export default class SearchContactsPage extends Vue {
   deleteContact!: DeleteContactAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  canDeleteContact!: CanDeleteContactGetter
 
   async created () {
+    if (!this.$auth.loggedIn) {
+      this.$router.replace('/', () => {
+        this.$store.commit('snackbar/setError', 'Login is required to see this page.')
+      })
+      return
+    }
+
     try {
       this.loading = true
       this.initializeAppBar()

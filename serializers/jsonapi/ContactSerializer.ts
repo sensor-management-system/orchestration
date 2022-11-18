@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
+
 import { Contact, IContact } from '@/models/Contact'
 
 import {
@@ -80,6 +82,15 @@ export class ContactSerializer {
       newEntry.familyName = attributes.family_name || ''
       newEntry.website = attributes.website || ''
       newEntry.email = attributes.email
+      newEntry.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
+      newEntry.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+    }
+
+    const relationships = jsonApiData.relationships
+    // just pick the contact from the relationships that is referenced by the created_by user
+    if (relationships && relationships.created_by?.data && 'id' in relationships.created_by?.data) {
+      const userId = (relationships.created_by.data as IJsonApiEntityWithoutDetails).id
+      newEntry.createdByUserId = userId
     }
 
     return newEntry

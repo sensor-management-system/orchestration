@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -393,14 +393,20 @@ describe('ConfigurationSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           website: '',
-          email: 'test@test.test'
+          email: 'test@test.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         }),
         Contact.createFromObject({
           id: '2',
           givenName: 'Mux',
           familyName: 'Mastermann',
           website: '',
-          email: 'test@tost.test'
+          email: 'test@tost.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
       ]
 
@@ -459,14 +465,20 @@ describe('ConfigurationSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           website: '',
-          email: 'test@test.test'
+          email: 'test@test.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         }),
         Contact.createFromObject({
           id: '2',
           givenName: 'Mux',
           familyName: 'Mastermann',
           website: '',
-          email: 'test@fost.test'
+          email: 'test@fost.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
         })
       ]
       const serializer = new ConfigurationSerializer()
@@ -553,7 +565,10 @@ describe('configurationWithMetaToConfigurationByThrowingErrorOnMissing', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     configuration.contacts.push(contact)
 
@@ -613,7 +628,10 @@ describe('configurationWithMetaToConfigurationByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     configuration.contacts.push(contact)
     const missing = {
@@ -637,7 +655,10 @@ describe('configurationWithMetaToConfigurationByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
-      email: 'max@mustermann.de'
+      email: 'max@mustermann.de',
+      createdByUserId: null,
+      createdAt: null,
+      updatedAt: null
     })
     configuration.contacts.push(contact)
     const missing = {

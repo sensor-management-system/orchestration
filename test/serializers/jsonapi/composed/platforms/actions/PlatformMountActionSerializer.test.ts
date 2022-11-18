@@ -195,14 +195,20 @@ describe('PlatformMountActionSerializer', () => {
         givenName: 'Max',
         familyName: 'Mustermann',
         website: '',
-        email: 'test@test.test'
+        email: 'test@test.test',
+        createdAt: null,
+        updatedAt: null,
+        createdByUserId: null
       })
       const expectedCt2 = ContactBasicData.createFromObject({
         id: 'ct2',
         givenName: 'Mux',
         familyName: 'Mastermann',
         website: '',
-        email: 'foo@bar.test'
+        email: 'foo@bar.test',
+        createdAt: null,
+        updatedAt: null,
+        createdByUserId: null
       })
 
       const expectedCf1 = ConfigurationBasicData.createFromObject({

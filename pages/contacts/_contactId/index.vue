@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -32,10 +32,22 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-card flat>
+      <center>
+        <v-alert
+          v-if="contact && ! editable"
+          type="info"
+          color="blue"
+          colored-border
+          border="left"
+          elevation="2"
+        >
+          You are not allowed to edit contact data of other users.
+        </v-alert>
+      </center>
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           color="primary"
           small
           nuxt
@@ -44,7 +56,7 @@ permissions and limitations under the Licence.
           Edit
         </v-btn>
         <DotMenu
-          v-if="$auth.loggedIn"
+          v-if="deletable"
         >
           <template #actions>
             <DotMenuActionDelete
@@ -60,7 +72,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <v-btn
-          v-if="$auth.loggedIn"
+          v-if="editable"
           color="primary"
           small
           nuxt
@@ -69,7 +81,7 @@ permissions and limitations under the Licence.
           Edit
         </v-btn>
         <DotMenu
-          v-if="$auth.loggedIn"
+          v-if="deletable"
         >
           <template #actions>
             <DotMenuActionDelete
@@ -89,7 +101,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 
 import { mapActions, mapState } from 'vuex'
 
@@ -108,6 +120,12 @@ import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
   }
 })
 export default class ContactIndexPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
+  @InjectReactive()
+    deletable!: boolean
+
   showDeleteDialog = false
 
   // vuex definition for typescript check

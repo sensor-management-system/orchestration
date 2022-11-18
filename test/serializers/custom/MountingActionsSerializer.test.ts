@@ -195,14 +195,20 @@ describe('MountingActionsSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           email: 'max@muster.mann',
-          website: ''
+          website: '',
+          createdAt: null,
+          updatedAt: null,
+          createdByUserId: null
         }),
         Contact.createFromObject({
           id: '8',
           givenName: 'Humer',
           familyName: 'Simson',
           email: 'humer@j.fuxnews',
-          website: ''
+          website: '',
+          createdAt: null,
+          updatedAt: null,
+          createdByUserId: null
         })
       ]
 
@@ -453,14 +459,20 @@ describe('MountingActionsSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           email: 'max@muster.mann',
-          website: ''
+          website: '',
+          createdAt: null,
+          updatedAt: null,
+          createdByUserId: null
         }),
         Contact.createFromObject({
           id: '8',
           givenName: 'Humer',
           familyName: 'Simson',
           email: 'humer@j.fuxnews',
-          website: ''
+          website: '',
+          createdAt: null,
+          updatedAt: null,
+          createdByUserId: null
         })
       ]
 
