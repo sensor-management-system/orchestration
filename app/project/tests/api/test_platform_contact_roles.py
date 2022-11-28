@@ -20,7 +20,9 @@ def add_a_contact():
 
 
 def add_a_platform():
-    platform = Platform(short_name=fake.pystr(), manufacturer_name=fake.company(), is_public=True)
+    platform = Platform(
+        short_name=fake.pystr(), manufacturer_name=fake.company(), is_public=True
+    )
     db.session.add(platform)
     db.session.commit()
     return platform
@@ -128,3 +130,35 @@ class TestPlatformContactRolesServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_delete_related_contact(self):
+        """Ensure we don't have orphans if we delete the contact."""
+        platform_contact_role = add_platform_contact_role()
+        platform_contact_role_id = platform_contact_role.id
+        self.assertIsNotNone(platform_contact_role_id)
+        db.session.delete(platform_contact_role.contact)
+        db.session.commit()
+
+        # It should remove the contact role as well.
+        reloaded = (
+            db.session.query(PlatformContactRole)
+            .filter_by(id=platform_contact_role_id)
+            .first()
+        )
+        self.assertIsNone(reloaded)
+
+    def test_delete_related_platform(self):
+        """Ensure we don't have orphans if we delete the platform."""
+        platform_contact_role = add_platform_contact_role()
+        platform_contact_role_id = platform_contact_role.id
+        self.assertIsNotNone(platform_contact_role_id)
+        db.session.delete(platform_contact_role.platform)
+        db.session.commit()
+
+        # It should remove the contact role as well.
+        reloaded = (
+            db.session.query(PlatformContactRole)
+            .filter_by(id=platform_contact_role_id)
+            .first()
+        )
+        self.assertIsNone(reloaded)

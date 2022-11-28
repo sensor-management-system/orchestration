@@ -757,3 +757,50 @@ class TestSiteContacts(BaseTestCase):
         site = db.session.query(Site).filter_by(id=self.public_site.id).first()
         self.assertEqual(site.update_description, "delete;contact")
         self.assertEqual(site.updated_by, self.super_user)
+
+    def test_delete_related_contact(self):
+        """Ensure we don't have orphans if we delete the contact."""
+        # We can't delete the normal contact here, as it is still needed
+        # for user relation.
+        dummy_contact = Contact(
+            given_name="Dummy J.",
+            family_name="Contact",
+            email="dj@dummy.contacts.localhost",
+        )
+        site_contact_role = SiteContactRole(
+            contact=dummy_contact,
+            site=self.public_site,
+            role_name="PI",
+        )
+        db.session.add_all([site_contact_role, dummy_contact])
+        db.session.commit()
+        site_contact_role_id = site_contact_role.id
+        self.assertIsNotNone(site_contact_role_id)
+        db.session.delete(site_contact_role.contact)
+        db.session.commit()
+
+        # It should remove the contact role as well.
+        reloaded = (
+            db.session.query(SiteContactRole).filter_by(id=site_contact_role_id).first()
+        )
+        self.assertIsNone(reloaded)
+
+    def test_delete_related_site(self):
+        """Ensure we don't have orphans if we delete the site."""
+        site_contact_role = SiteContactRole(
+            contact=self.normal_contact,
+            site=self.public_site,
+            role_name="PI",
+        )
+        db.session.add(site_contact_role)
+        db.session.commit()
+        site_contact_role_id = site_contact_role.id
+        self.assertIsNotNone(site_contact_role_id)
+        db.session.delete(site_contact_role.site)
+        db.session.commit()
+
+        # It should remove the contact role as well.
+        reloaded = (
+            db.session.query(SiteContactRole).filter_by(id=site_contact_role_id).first()
+        )
+        self.assertIsNone(reloaded)
