@@ -20,7 +20,9 @@ def add_a_contact():
 
 
 def add_a_device():
-    device = Device(short_name=fake.pystr(), manufacturer_name=fake.company(),is_public=True)
+    device = Device(
+        short_name=fake.pystr(), manufacturer_name=fake.company(), is_public=True
+    )
     db.session.add(device)
     db.session.commit()
     return device
@@ -127,3 +129,35 @@ class TestDeviceContactRolesServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_delete_related_contact(self):
+        """Ensure we don't have orphans if we delete the contact."""
+        device_contact_role = add_device_contact_role()
+        device_contact_role_id = device_contact_role.id
+        self.assertIsNotNone(device_contact_role_id)
+        db.session.delete(device_contact_role.contact)
+        db.session.commit()
+
+        # It should remove the contact role as well.
+        reloaded = (
+            db.session.query(DeviceContactRole)
+            .filter_by(id=device_contact_role_id)
+            .first()
+        )
+        self.assertIsNone(reloaded)
+
+    def test_delete_related_device(self):
+        """Ensure we don't have orphans if we delete the device."""
+        device_contact_role = add_device_contact_role()
+        device_contact_role_id = device_contact_role.id
+        self.assertIsNotNone(device_contact_role_id)
+        db.session.delete(device_contact_role.device)
+        db.session.commit()
+
+        # It should remove the contact role as well.
+        reloaded = (
+            db.session.query(DeviceContactRole)
+            .filter_by(id=device_contact_role_id)
+            .first()
+        )
+        self.assertIsNone(reloaded)
