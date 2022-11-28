@@ -1,3 +1,4 @@
+import io
 from csv import DictReader
 
 from project import base_url
@@ -70,3 +71,41 @@ class Test(BaseTestCase):
         names = set([row["short_name"] for row in rows])
         assert "device_short_name test" in names
         assert "device_short_name test2" in names
+
+    def test_cleanup_newlines(self):
+        """Test the csv export with multiline descriptions."""
+        super(Test, self).tearDown()
+        super(Test, self).setUp()
+        sensor1 = Device(
+            id=22,
+            short_name="device_short_name test",
+            description="Line1\n\nLine2\n\n\nLine3",
+            long_name="device_long_name test",
+            manufacturer_name="manufacturer_name test",
+            manufacturer_uri="http://cv/manufacturer_uri",
+            model="device_model test",
+            dual_use=True,
+            serial_number="device_serial_number test",
+            website="http://website/device",
+            inventory_number="inventory_number test",
+            persistent_identifier="persistent_identifier_test",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        db.session.add(sensor1)
+        db.session.commit()
+        response = self.client.get(
+            self.device_url,
+            headers={"Content-Type": "application/vnd.api+json", "Accept": "text/csv"},
+        )
+        dict_reader = DictReader(io.StringIO(response.text))
+        rows = list(dict_reader)
+        assert len(rows) == 1
+        # As it cause trouble when opening on windows (and opening in excel)
+        # we don't export mulitlines.
+        # Instead we replace them with spaces.
+        # The text will still be readable, but it looses a little bit
+        # of structure.
+        self.assertEqual(rows[0]["description"], "Line1 Line2 Line3")
