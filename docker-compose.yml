@@ -53,7 +53,7 @@ services:
       - sms
 
   backend:
-    image: python:3.9-slim-buster
+    image: python:3.11-slim-buster
     container_name: sms_backend
     working_dir: /usr/src/app
     volumes:
@@ -102,6 +102,7 @@ services:
         libffi-dev \
         musl-dev \
         cargo \
+        g++ \
       && apt-get clean
       && pip install --no-cache-dir --upgrade pip
       && pip install --no-cache-dir -r requirements.txt
@@ -112,7 +113,7 @@ services:
       - sms
 
   db:
-    image: postgres:12-alpine
+    image: postgis/postgis:12-3.3-alpine
     container_name: sms_db
     ports:
       - "5433:5433"
@@ -126,7 +127,7 @@ services:
     command: -p 5433
 
   vocabulary:
-    image: python:3-alpine
+    image: python:3.11-alpine
     container_name: sms_cv
     working_dir: /usr/cv/app
     volumes:
