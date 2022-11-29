@@ -345,6 +345,9 @@ backup-gfz-prod:
     BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
     BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
+    IDL_DB_USER: ${GFZ_PROD_IDL_POSTGRES_USER}
+    IDL_DB_PASSWORD: ${GFZ_PROD_IDL_POSTGRES_PASSWORD}
+    IDL_TOKEN: ${GFZ_PROD_IDL_TOKEN}
     DAYS_TO_CLEANUP: 30
     DAYS_TO_CLEANUP_PROJECTSHARE: 180
     # We want to make sure that we still have 1 GB left to do the backup
@@ -359,6 +362,7 @@ backup-gfz-prod:
     # we keep them for longer.
     - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - find /srv/docker/service/vocabulary-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - |-
       if [ $(df -Pk /srv/docker/service | awk '/[0-9]%/{print $(NF-2)}') -lt ${MINIMUM_STORAGE_LEFT} ]
@@ -368,6 +372,7 @@ backup-gfz-prod:
       fi
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml pull mc
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
+    - docker-compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T idl-db pg_dump -U $IDL_DB_USER -d idl -Fc > /srv/docker/service/idl-db/backups/idl_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - docker-compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - >
       docker-compose -f docker/deployment/gfz/prod/docker-compose.yml \
@@ -527,6 +532,9 @@ deploy-gfz-prod:
     BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
     BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
     PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
+    IDL_DB_USER: ${GFZ_PROD_IDL_POSTGRES_USER}
+    IDL_DB_PASSWORD: ${GFZ_PROD_IDL_POSTGRES_PASSWORD}
+    IDL_TOKEN: ${GFZ_PROD_IDL_TOKEN}
   before_script:
     - *docker_login_gitlab_registry
   script:
