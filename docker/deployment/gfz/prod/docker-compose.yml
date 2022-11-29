@@ -1,7 +1,8 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 # 
-# Copyright (C) 2020-2021
+# Copyright (C) 2020-2022
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -87,7 +88,7 @@ services:
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'
-      DJANGO_ALLOWED_HOSTS: 'https://sensors.gfz-potsdam.de https://sensor.gfz-potsdam.de https://rz-vm257.gfz-potsdam.de idl'
+      DJANGO_ALLOWED_HOSTS: 'https://sensors.gfz-potsdam.de https://sensor.gfz-potsdam.de https://rz-vm257.gfz-potsdam.de http://sensor.gfz-potsdam.de idl'
       DJANGO_BASE_PATH: idl/
       DJANGO_STATIC_URL: /static/idl/
       DJANGO_STATIC_ROOT: /static/idl/
@@ -166,7 +167,7 @@ services:
       - minio
     networks:
       - backend
-    entrypoint: '/create_bucket.sh'
+    entrypoint: ['/create_bucket.sh']
 
   backend-db:
     image: postgis/postgis:12-3.3-alpine
@@ -186,6 +187,7 @@ services:
     restart: unless-stopped
     environment:
       URL_PREFIX: /backend/api/v1
+      STATIC_URL: /static/backend
       APP_SETTINGS: project.config.ProductionConfig
       DATABASE_URL: postgresql://${BACKEND_DB_USER}:${BACKEND_DB_PASSWORD}@backend-db:5432/backend
       OIDC_USERNAME_CLAIM: eduperson_principal_name
@@ -198,6 +200,7 @@ services:
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
+      HTTP_ORIGINS: ${HTTP_ORIGINS}
       SMS_IDL_TOKEN: $IDL_TOKEN
       IDL_URL: http://idl:8000/idl/api/idl
       CV_URL: https://sensors.gfz-potsdam.de/cv/api/v1
@@ -205,6 +208,7 @@ services:
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
       PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: gfz
+      SMS_FRONTEND_URL: https://sensors.gfz-potsdam.de
     depends_on:
       - backend-db
     volumes:
