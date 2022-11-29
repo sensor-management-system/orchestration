@@ -1,7 +1,7 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 # 
-# Copyright (C) 2020-2021
+# Copyright (C) 2020-2022
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -27,11 +27,12 @@
 # implied. See the Licence for the specific language governing 
 # permissions and limitations under the Licence.
 
-FROM node:16.0.0-buster as js-builder
+FROM node:16.17.1-buster as js-builder
 
 # First the urls for sms backend and cv backend
 ENV SMS_BACKEND_URL /backend/api/v1
 ENV CV_BACKEND_URL /cv/api/v1
+ENV IDL_SYNC_URL /idl/api/hifis/sync-groups
 
 ENV INSTITUTE gfz
 
