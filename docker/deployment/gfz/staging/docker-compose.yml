@@ -207,6 +207,7 @@ services:
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
       PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: gfz
+      SMS_FRONTEND_URL: https://rz-vm64.gfz-potsdam.de
     depends_on:
       - backend-db
     volumes:
