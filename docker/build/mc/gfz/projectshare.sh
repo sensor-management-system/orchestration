@@ -5,7 +5,7 @@
 # This runs in a docker container in order to run with the
 # user and group ids of the project share technical account.
 
-for SERVICE in backend-db vocabulary-db minio
+for SERVICE in backend-db vocabulary-db idl-db minio
 do
 
     # We must make sure that our target folder exists.
