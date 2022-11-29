@@ -5,7 +5,8 @@
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for
-#   Geosciences (GFZ, https://www.gfz-potsdam.de) # 
+#   Geosciences (GFZ, https://www.gfz-potsdam.de)
+# 
 # Parts of this program were developed within the context of the
 # following publicly funded projects or measures:
 # - Helmholtz Earth and Environment DataHub
