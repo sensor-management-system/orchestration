@@ -1,7 +1,7 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 # 
-# Copyright (C) 2020-2021
+# Copyright (C) 2020-2022
 # - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -169,7 +169,7 @@ services:
     entrypoint: ['/create_bucket.sh']
 
   backend-db:
-    image: postgres:12-alpine
+    image: postgis/postgis:12-3.3-alpine
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: $BACKEND_DB_PASSWORD
@@ -200,6 +200,8 @@ services:
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
       HTTP_ORIGINS: ${HTTP_ORIGINS}
+      SMS_IDL_TOKEN: $IDL_TOKEN
+      IDL_URL: http://idl:8000/idl/api/idl
       CV_URL: https://rz-vm64.gfz-potsdam.de/cv/api/v1
       SMS_BACKEND_URL: /backend/api/v1
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
