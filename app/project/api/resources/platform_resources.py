@@ -107,7 +107,7 @@ class PlatformList(ResourceList):
 
         save_to_db(platform)
 
-        # if current_app.config["INSTITUTE"] == "ufz":
+        #if current_app.config["INSTITUTE"] == "ufz":
         #    sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
         #    source_object_url = f"{sms_frontend_url}/platforms/{str(platform.id)}"
         #    add_pid(platform, source_object_url)
@@ -180,6 +180,7 @@ class PlatformDetail(ResourceDetail):
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
+
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result

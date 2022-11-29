@@ -104,7 +104,6 @@ def check_if_object_not_found(model_class, kwargs):
     else:
         return object_to_be_checked
 
-
 def set_update_description_text_and_update_by_user(obj_, msg):
     """Set the update description & user and save it to the db."""
     obj_.update_description = msg
@@ -136,6 +135,9 @@ def query_platform_and_set_update_description_text(msg, result_id):
 
 def query_configuration_and_set_update_description_text(msg, result_id):
     """
+    obj_.persistent_identifier = pid.create(source_object_url)
+    obj_.schema_version = current_app.config["SCHEMA_VERSION"]
+    obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
     Get the configuration and add update_description text to it.
 
     :param msg: a text of what did change.
