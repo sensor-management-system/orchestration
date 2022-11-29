@@ -1,19 +1,23 @@
+"""Schema classes for contact role schemas."""
+
 from marshmallow_jsonapi import fields
-from marshmallow_jsonapi.flask import Schema, Relationship
+from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class RoleSchema:
+    """Mixin class for common role schema fields."""
+
     id = fields.Integer(as_string=True)
     role_name = fields.Str(required=True)
     role_uri = fields.Str(required=True)
 
 
 class DeviceRoleSchema(Schema, RoleSchema):
-    """
-    JSON API-compliant data für DeviceRole
-    """
+    """JSON-API compliant data for DeviceRole."""
 
     class Meta:
+        """Meta class for the device role schema."""
+
         type_ = "device_contact_role"
         self_view = "api.device_contact_role_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -42,11 +46,11 @@ class DeviceRoleSchema(Schema, RoleSchema):
 
 
 class PlatformRoleSchema(Schema, RoleSchema):
-    """
-    JSON API-compliant data für PlatformRole
-    """
+    """JSON-API compliant data for PlatformRole."""
 
     class Meta:
+        """Meta class for the platform role schema."""
+
         type_ = "platform_contact_role"
         self_view = "api.platform_contact_role_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -75,11 +79,11 @@ class PlatformRoleSchema(Schema, RoleSchema):
 
 
 class ConfigurationRoleSchema(Schema, RoleSchema):
-    """
-    JSON API-compliant data für ConfigurationRole
-    """
+    """JSON-API compliant data for ConfigurationRole."""
 
     class Meta:
+        """Meta class for the configuration role schema."""
+
         type_ = "configuration_contact_role"
         self_view = "api.configuration_contact_role_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -91,6 +95,35 @@ class ConfigurationRoleSchema(Schema, RoleSchema):
         include_resource_linkage=True,
         schema="ConfigurationSchema",
         type_="configuration",
+        id_field="id",
+    )
+    contact = Relationship(
+        related_view="api.contact_detail",
+        related_view_kwargs={"id": "<contact_id>"},
+        include_resource_linkage=True,
+        schema="ContactSchema",
+        type_="contact",
+        id_field="id",
+    )
+
+
+class SiteRoleSchema(Schema, RoleSchema):
+    """JSON-API compliant data for SiteRole."""
+
+    class Meta:
+        """Meta class for the site role schema."""
+
+        type_ = "site_contact_role"
+        self_view = "api.site_contact_role_detail"
+        self_view_kwargs = {"id": "<id>"}
+        self_view_many = "api.site_contact_role_list"
+
+    site = Relationship(
+        related_view="api.site_detail",
+        related_view_kwargs={"id": "<site_id>"},
+        include_resource_linkage=True,
+        schema="SiteSchema",
+        type_="site",
         id_field="id",
     )
     contact = Relationship(

@@ -179,7 +179,10 @@ class TestCustomFieldServices(BaseTestCase):
         self.assertEqual(customfield.value, payload["data"]["attributes"]["value"])
         self.assertEqual(customfield.key, payload["data"]["attributes"]["key"])
         self.assertEqual(customfield.device_id, device.id)
-        self.assertEqual(str(customfield.device_id), response.get_json()["data"]["id"])
+        self.assertEqual(
+            str(customfield.device_id),
+            response.get_json()["data"]["relationships"]["device"]["data"]["id"],
+        )
 
     def test_post_for_archived_device(self):
         """Ensure we can't post for an archived device."""

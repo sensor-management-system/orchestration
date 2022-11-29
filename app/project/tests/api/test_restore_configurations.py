@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration, Contact, User
+from project.api.models import Configuration, Contact, Site, User
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
@@ -177,3 +177,15 @@ class TestRestoreConfigurations(BaseTestCase):
         # But we don't change the entity
         self.assertEqual(reloaded_configuration.update_description, "create;basic data")
         self.assertIsNone(reloaded_configuration.updated_by_id)
+
+    def test_post_site_archived(self):
+        """Ensure to allow restoring when an associated site is archvived."""
+        site = Site(label="site", is_public=True, is_internal=False, archived=True)
+        self.configuration.site = site
+        db.session.add_all([site, self.configuration])
+
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                f"{self.configurations_url}/{self.configuration.id}/restore"
+            )
+        self.assertEqual(response.status_code, 204)

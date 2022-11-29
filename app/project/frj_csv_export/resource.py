@@ -3,6 +3,8 @@
 """This module contains the logic of resource management
 Modifications: Adopted form Custom content negotiation #171 ( miLibris /
 flask-rest-jsonapi ) """
+import re
+
 import pandas as pd
 from cherrypicker import CherryPicker
 from flask import request, url_for
@@ -24,7 +26,7 @@ from .content import parse_json, render_csv, render_json
 from .exceptions import InvalidAcceptType
 
 
-def transform_to_series(objects, schema):
+def transform_to_series(objects, schema, replace_newlines_with_spaces=False):
     """
     Convert list of dictionaries to a pandas DataFrame and returns a flat CSV file.
     :param schema: MarshmallowSchema for the object
@@ -37,6 +39,11 @@ def transform_to_series(objects, schema):
     for obj in objects:
         picker = CherryPicker(schema().nested_dict_serializer(obj))
         flat_dict = picker.flatten().get()
+        if replace_newlines_with_spaces:
+            for key, value in flat_dict.items():
+                if isinstance(value, str):
+                    clean_value = re.sub("\n+", " ", value)
+                    flat_dict[key] = clean_value
         list_of_flat_dicts.append(flat_dict)
 
     # json_normalize() works with lists of dictionaries (records) to convert the list
@@ -87,7 +94,9 @@ class Resource(ResourceBase):
         assert method is not None, "Unimplemented method {}".format(request.method)
 
         # Choose a renderer based on the Accept header
-        if len(request.accept_mimetypes) < 1  or request.accept_mimetypes == [('*/*', 1)]:
+        if len(request.accept_mimetypes) < 1 or request.accept_mimetypes == [
+            ("*/*", 1)
+        ]:
             # If the request doesn't specify a mimetype, assume JSON API
             accept_type = "application/vnd.api+json"
         elif request.accept_mimetypes.best not in self.response_renderers:
@@ -120,7 +129,9 @@ class ResourceList(with_metaclass(ResourceMetaBase, Resource)):
         if "HTTP_ACCEPT" in request.headers.environ:
             http_accept = request.headers.environ["HTTP_ACCEPT"]
             if http_accept == "text/csv":
-                return transform_to_series(objects, self.schema)
+                return transform_to_series(
+                    objects, self.schema, replace_newlines_with_spaces=True
+                )
         schema_kwargs = getattr(self, "get_schema_kwargs", dict())
         schema_kwargs.update({"many": True})
 

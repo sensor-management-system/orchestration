@@ -1,4 +1,6 @@
-from .configuration_attachment_resurces import (  # noqa: F401
+"""JSON API resource classes of our app."""
+
+from .configuration_attachment_resources import (  # noqa: F401
     ConfigurationAttachmentDetail,
     ConfigurationAttachmentList,
 )
@@ -24,6 +26,10 @@ from .configuration_role_resources import (  # noqa: F401
 from .configuration_static_location_begin_actions_resources import (  # noqa: F401
     ConfigurationStaticLocationBeginActionDetail,
     ConfigurationStaticLocationBeginActionList,
+)
+from .configuration_customfield_resources import (  # noqa: F401
+    ConfigurationCustomFieldDetail,
+    ConfigurationCustomFieldList,
 )
 from .contact_resources import ContactDetail, ContactList  # noqa: F401
 from .customfield_resources import CustomFieldDetail, CustomFieldList  # noqa: F401
@@ -109,6 +115,14 @@ from .platform_software_update_action_attachment_resources import (  # noqa: F40
 from .platform_software_update_action_resource import (  # noqa: F401
     PlatformSoftwareUpdateActionDetail,
     PlatformSoftwareUpdateActionList,
+)
+from .site_resources import (  # noqa: F401
+    SiteDetail,
+    SiteList,
+)
+from .site_role_resources import (  # noqa: F401
+    SiteRoleDetail,
+    SiteRoleList,
 )
 from .usage_statistics import UsageStatistics  # noqa: F401
 from .user_info import UserInfo  # noqa: F401

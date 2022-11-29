@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster as base
+FROM python:3.11-slim-buster as base
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y  --no-install-recommends \
         libffi-dev \
         musl-dev \
         cargo \
+        g++ \
     && apt-get clean\
     && pip install --upgrade pip \
     && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt

@@ -35,10 +35,14 @@ class DeviceContactRole(db.Model, Role, IndirectSearchableMixin):
     """Contact role for a device."""
 
     id = db.Column(db.Integer, primary_key=True)
-    contact = db.relationship("Contact", backref="contact_device_roles")
-    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"))
-    device = db.relationship("Device", backref="device_contact_roles")
-    device_id = db.Column(db.Integer, db.ForeignKey("device.id"))
+    contact = db.relationship(
+        "Contact", backref=db.backref("contact_device_roles", cascade="all,delete")
+    )
+    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    device = db.relationship(
+        "Device", backref=db.backref("device_contact_roles", cascade="all,delete")
+    )
+    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
 
     def get_parent_search_entities(self):
         """Return the device."""
@@ -53,10 +57,14 @@ class PlatformContactRole(db.Model, Role, IndirectSearchableMixin):
     """Contact role for a platform."""
 
     id = db.Column(db.Integer, primary_key=True)
-    contact = db.relationship("Contact", backref="contact_platform_roles")
-    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"))
-    platform = db.relationship("Platform", backref="platform_contact_roles")
-    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"))
+    contact = db.relationship(
+        "Contact", backref=db.backref("contact_platform_roles", cascade="all,delete")
+    )
+    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    platform = db.relationship(
+        "Platform", backref=db.backref("platform_contact_roles", cascade="all,delete")
+    )
+    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
 
     def get_parent_search_entities(self):
         """Return the platform."""
@@ -71,12 +79,18 @@ class ConfigurationContactRole(db.Model, Role, IndirectSearchableMixin):
     """Contact role for a configuration."""
 
     id = db.Column(db.Integer, primary_key=True)
-    contact = db.relationship("Contact", backref="contact_configuration_roles")
-    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"))
-    configuration = db.relationship(
-        "Configuration", backref="configuration_contact_roles"
+    contact = db.relationship(
+        "Contact",
+        backref=db.backref("contact_configuration_roles", cascade="all,delete"),
     )
-    configuration_id = db.Column(db.Integer, db.ForeignKey("configuration.id"))
+    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    configuration = db.relationship(
+        "Configuration",
+        backref=db.backref("configuration_contact_roles", cascade="all,delete"),
+    )
+    configuration_id = db.Column(
+        db.Integer, db.ForeignKey("configuration.id"), nullable=False
+    )
 
     def get_parent_search_entities(self):
         """Return the configuration."""
@@ -85,3 +99,25 @@ class ConfigurationContactRole(db.Model, Role, IndirectSearchableMixin):
     def get_parent(self):
         """Return the parent object (for permission management)."""
         return self.configuration
+
+
+class SiteContactRole(db.Model, Role, IndirectSearchableMixin):
+    """Contact role for a site."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    contact = db.relationship(
+        "Contact", backref=db.backref("contact_site_roles", cascade="all,delete")
+    )
+    contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    site = db.relationship(
+        "Site", backref=db.backref("site_contact_roles", cascade="all,delete")
+    )
+    site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=False)
+
+    def get_parent_search_entities(self):
+        """Return the site."""
+        return [self.site]
+
+    def get_parent(self):
+        """Return the parent object (for permission management)."""
+        return self.site

@@ -19,7 +19,11 @@ from ..models.contact_role import DeviceContactRole
 from ..models.device import Device
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url, add_pid
+from .base_resource import (
+    check_if_object_not_found,
+    delete_attachments_in_minio_by_url,
+    add_pid,
+)
 
 from ...api.auth.permission_utils import (
     get_es_query_with_permissions,
@@ -146,7 +150,7 @@ class DeviceDetail(ResourceDetail):
             if pid_to_delete and pid.get(pid_to_delete).status_code == 200:
                 pid.delete(pid_to_delete)
 
-        urls = [a.url for a in device.device_attachments]
+        urls = [a.internal_url for a in device.device_attachments if a.internal_url]
         try:
             super().delete(*args, **kwargs)
         except JsonApiException as e:

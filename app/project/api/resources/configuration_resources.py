@@ -4,7 +4,9 @@ import os
 
 from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
+from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy import or_
+from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import (
@@ -25,6 +27,7 @@ from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
+from ..models.site import Site
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
@@ -32,7 +35,7 @@ from .base_resource import check_if_object_not_found, delete_attachments_in_mini
 
 class ConfigurationList(ResourceList):
     """
-    Resource for the device list endpoint.
+    Resource for the configuration list endpoint.
 
     Supports GET (list) & POST (create) methods.
     """
@@ -55,6 +58,17 @@ class ConfigurationList(ResourceList):
                         self.model.is_internal,
                     )
                 )
+        site_id = view_kwargs.get("site_id")
+        if site_id is not None:
+            try:
+                self.session.query(Site).filter_by(id=site_id).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {"parameter": "id"}, "Site: {} not found".format(site_id)
+                )
+            else:
+                query = query.filter(Configuration.site_id == site_id)
+
         false_values = ["false"]
         # hide archived must be disabled explicitly
         hide_archived = request.args.get("hide_archived") not in false_values
@@ -69,29 +83,37 @@ class ConfigurationList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
+        and_filters = []
+        permission_filter = None
+        if g.user is None:
+            permission_filter = TermEqualsExactStringFilter("is_public", True)
+        elif g.user.is_superuser:
+            permission_filter = OrFilter(
+                [
+                    TermEqualsExactStringFilter("is_public", True),
+                    TermEqualsExactStringFilter("is_internal", True),
+                ]
+            )
+
+        if permission_filter:
+            and_filters.append(permission_filter)
+
+        site_id = view_kwargs.get("site_id")
+        if site_id is not None:
+            and_filters.append(TermEqualsExactStringFilter("site_id", site_id))
+
         false_values = ["false"]
         # hide archived must be disabled explicitly
         hide_archived = request.args.get("hide_archived") not in false_values
+        if hide_archived:
+            and_filters.append(TermEqualsExactStringFilter("archived", False))
 
-        def just_permissions():
-            if g.user is None:
-                return TermEqualsExactStringFilter("is_public", True)
-            if not g.user.is_superuser:
-                return OrFilter(
-                    [
-                        TermEqualsExactStringFilter("is_public", True),
-                        TermEqualsExactStringFilter("is_internal", True),
-                    ]
-                )
+        if len(and_filters) == 0:
             return None
+        if len(and_filters) == 1:
+            return and_filters[0]
 
-        permission_filter = just_permissions()
-        if not hide_archived:
-            return permission_filter
-        archived_filter = TermEqualsExactStringFilter("archived", False)
-        if permission_filter:
-            return AndFilter([permission_filter, archived_filter])
-        return archived_filter
+        return AndFilter(and_filters)
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -176,7 +198,7 @@ class ConfigurationDetail(ResourceDetail):
             db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
         )
         if configuration and configuration.archived:
-            raise ConflictError("It is not allowed to edit archived devices.")
+            raise ConflictError("It is not allowed to edit archived configurations.")
         if not is_superuser():
             configuration = (
                 db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
@@ -213,7 +235,11 @@ class ConfigurationDetail(ResourceDetail):
         :return:
         """
         configuration = check_if_object_not_found(Configuration, kwargs)
-        urls = [a.url for a in configuration.configuration_attachments]
+        urls = [
+            a.internal_url
+            for a in configuration.configuration_attachments
+            if a.internal_url
+        ]
         try:
             super().delete(*args, **kwargs)
         except ForbiddenError as e:

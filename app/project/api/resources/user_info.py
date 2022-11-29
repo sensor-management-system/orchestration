@@ -37,7 +37,7 @@ class UserInfo(ResourceList):
         data = {
             "data": {
                 "type": "user",
-                "id": g.user.id,
+                "id": str(g.user.id),
                 "attributes": {
                     "admin": idl_groups.administrated_permission_groups
                     if idl_groups
@@ -48,8 +48,14 @@ class UserInfo(ResourceList):
                     "active": g.user.active,
                     "is_superuser": g.user.is_superuser,
                     "apikey": g.user.apikey,
+                    "subject": g.user.subject,
                 },
-            }
+                "relationships": {
+                    "contact": {
+                        "data": {"type": "contact", "id": str(g.user.contact_id)}
+                    }
+                },
+            },
         }
         return data
 

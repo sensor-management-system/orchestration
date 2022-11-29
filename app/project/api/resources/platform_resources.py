@@ -172,7 +172,7 @@ class PlatformDetail(ResourceDetail):
 
         if platform is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
-        urls = [a.url for a in platform.platform_attachments]
+        urls = [a.internal_url for a in platform.platform_attachments if a.internal_url]
         try:
             super().delete(*args, **kwargs)
         except JsonApiException as e:
@@ -191,6 +191,7 @@ class PlatformDetail(ResourceDetail):
         "session": db.session,
         "model": Platform,
     }
+
     def before_patch(self, args, kwargs, data):
         """
         Run logic before the patch.

@@ -1,3 +1,11 @@
+"""
+File to collect all the models.
+
+This allows both easier access to the models,
+but it is also a need to work properly with alembic
+(as this is configured to only look into this module
+to check for db changes).
+"""
 from .calibration_actions import (  # noqa: F401
     DeviceCalibrationAction,
     DevicePropertyCalibration,
@@ -14,7 +22,9 @@ from .contact_role import (  # noqa: F401
     ConfigurationContactRole,
     DeviceContactRole,
     PlatformContactRole,
+    SiteContactRole,
 )
+from .configuration_customfield import ConfigurationCustomField # noqa: F401
 from .customfield import CustomField  # noqa: F401
 from .device import Device  # noqa: F401
 from .device_attachment import DeviceAttachment  # noqa: F401
@@ -32,6 +42,7 @@ from .generic_actions import (  # noqa: F401
 from .mount_actions import DeviceMountAction, PlatformMountAction  # noqa: F401
 from .platform import Platform  # noqa: F401
 from .platform_attachment import PlatformAttachment  # noqa: F401
+from .site import Site  # noqa: F401
 from .software_update_action_attachments import (  # noqa: F401
     DeviceSoftwareUpdateActionAttachment,
     PlatformSoftwareUpdateActionAttachment,

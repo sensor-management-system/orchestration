@@ -12,6 +12,7 @@ from flask_jwt_extended import JWTManager
 from flask_jwt_extended.exceptions import WrongTokenError
 from flask_testing import TestCase
 from jwt.exceptions import DecodeError
+from sqlalchemy import text
 
 from project import create_app
 from project.api.helpers.errors import UnauthorizedError
@@ -222,6 +223,9 @@ class BaseTestCase(TestCase):
         :return: None
         """
         db.drop_all()
+        # To make sure we have postgis ready.
+        db.session.connection().execute(text("create extension if not exists postgis"))
+        db.session.commit()
         db.create_all()
         db.session.commit()
 

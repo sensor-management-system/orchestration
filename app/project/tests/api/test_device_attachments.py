@@ -1,8 +1,12 @@
 """Tests for the device attachment endpoints."""
 
 import json
+from unittest.mock import patch
+
+from flask import url_for
 
 from project import base_url
+from project.api import minio
 from project.api.models.base_model import db
 from project.api.models.device import Device
 from project.api.models.device_attachment import DeviceAttachment
@@ -391,3 +395,113 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         self.assertEqual(response.status_code, 403)
+
+    def test_post_minio_url(self):
+        """
+        Test when we post an attachment with a minio url.
+
+        The system should replace the original url with an internal
+        one & should set the is_upload entry.
+        """
+        device = Device(
+            short_name="a new device",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device)
+        db.session.commit()
+        self.assertTrue(device.id is not None)
+
+        with patch.object(minio, "download_endpoint") as mock:
+            mock.return_value = "http://minio:8080"
+            payload = {
+                "data": {
+                    "type": "device_attachment",
+                    "attributes": {
+                        "url": "http://minio:8080/some-bucket/somefile.txt",
+                        "label": "Some upload",
+                    },
+                    "relationships": {
+                        "device": {"data": {"type": "device", "id": str(device.id)}}
+                    },
+                }
+            }
+            with self.client:
+                url_post = base_url + "/device-attachments"
+                response = self.client.post(
+                    url_post,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+        self.assertEqual(response.status_code, 201)
+        data = response.json
+        attachment = (
+            db.session.query(DeviceAttachment).filter_by(id=data["data"]["id"]).first()
+        )
+        self.assertTrue(attachment.is_upload)
+        self.assertTrue(data["data"]["attributes"]["is_upload"])
+        self.assertEqual(
+            attachment.internal_url, "http://minio:8080/some-bucket/somefile.txt"
+        )
+        self.assertFalse("internal_url" in data["data"]["attributes"].keys())
+        expected_url = url_for(
+            "download.get_device_attachment_content",
+            id=attachment.id,
+            filename="somefile.txt",
+            _external=True,
+        )
+        self.assertEqual(expected_url, attachment.url)
+        self.assertEqual(attachment.url, data["data"]["attributes"]["url"])
+
+    def test_patch_url_for_uploads(self):
+        """Ensure that we can't change the url for uploaded files."""
+        device = Device(
+            short_name="a new device",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        attachment = DeviceAttachment(
+            device=device,
+            label="File upload",
+            url="http://localhost/.../file",
+            internal_url="http://minio/.../file"
+        )
+        db.session.add_all([device, attachment])
+        db.session.commit()
+
+        self.assertTrue(attachment.is_upload)
+
+        payload = {
+            "data": {
+                "type": "device_attachment",
+                "id": str(attachment.id),
+                "attributes": {
+                    "label": "UFZ",
+                    "url": "https://www.ufz.de",
+                },
+                "relationships": {
+                    "device": {
+                        "data": {"type": "device", "id": str(device.id)}
+                    }
+                },
+            }
+        }
+        with self.client:
+            url_patch = (
+                base_url
+                + "/device-attachments/"
+                + str(attachment.id)
+            )
+            response = self.client.patch(
+                url_patch,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+                headers=create_token(),
+            )
+
+        self.assertEqual(response.status_code, 409)
