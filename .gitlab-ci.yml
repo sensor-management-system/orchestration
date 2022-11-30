@@ -288,9 +288,13 @@ backup-gfz-staging:
     - *docker_login_gitlab_registry
   script:
     # clean up & remove files older than x days
+    - mkdir -p /docker/service/backend-db/backups
     - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - mkdir -p /docker/service/vocabulary-db/backups
     - find /srv/docker/service/vocabulary-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - mkdir -p /docker/service/idl-db/backups
     - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - mkdir -p /docker/service/minio/backups
     - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - |-
       if [ $(df -Pk /srv/docker/service | awk '/[0-9]%/{print $(NF-2)}') -lt ${MINIMUM_STORAGE_LEFT} ]
@@ -363,9 +367,13 @@ backup-gfz-prod:
     # Note: We store the files of the latest x days on the machine
     # itself. But we also store the files on the projectshare, where
     # we keep them for longer.
+    - mkdir -p /docker/service/backend-db/backups
     - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - mkdir -p /docker/service/vocabulary-db/backups
     - find /srv/docker/service/vocabulary-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - mkdir -p /docker/service/idl-db/backups
     - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+    - mkdir -p /docker/service/minio/backups
     - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - |-
       if [ $(df -Pk /srv/docker/service | awk '/[0-9]%/{print $(NF-2)}') -lt ${MINIMUM_STORAGE_LEFT} ]
