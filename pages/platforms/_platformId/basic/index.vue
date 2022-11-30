@@ -113,13 +113,15 @@ permissions and limitations under the Licence.
         </template>
       </DotMenu>
     </v-card-actions>
-    <PlatformDeleteDialog
+    <DeleteDialog
       v-if="platform"
       v-model="showDeleteDialog"
-      :platform-to-delete="platform"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Platform"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the platform <em>{{ platform.shortName }}</em>?
+    </DeleteDialog>
     <PlatformArchiveDialog
       v-if="platform"
       v-model="showArchiveDialog"
@@ -144,14 +146,14 @@ import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import PlatformArchiveDialog from '@/components/platforms/PlatformArchiveDialog.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
-import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
     ProgressIndicator,
-    PlatformDeleteDialog,
+    DeleteDialog,
     DotMenuActionDelete,
     DotMenuActionSensorML,
     DotMenuActionCopy,

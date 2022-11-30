@@ -95,12 +95,15 @@ permissions and limitations under the Licence.
         Add Attachment
       </v-btn>
     </v-card-actions>
-    <AttachmentDeleteDialog
+    <DeleteDialog
+      v-if="attachmentToDelete"
       v-model="showDeleteDialog"
-      :attachment-to-delete="attachmentToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Attachment"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the attachment <em>{{ attachmentToDelete.label }}</em>?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -115,13 +118,13 @@ import { Visibility } from '@/models/Visibility'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
-import AttachmentDeleteDialog from '@/components/shared/AttachmentDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { ProgressIndicator, DotMenuActionDelete, HintCard, AttachmentDeleteDialog, AttachmentListItem, BaseList },
+  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList },
   computed: mapState('configurations', ['configurationAttachments', 'configuration']),
   methods: mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment', 'downloadAttachment'])
 })

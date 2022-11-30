@@ -169,12 +169,15 @@ permissions and limitations under the Licence.
         @input="runSearch"
       />
     </div>
-    <ContacsDeleteDialog
+    <DeleteDialog
+      v-if="contactToDelete"
       v-model="showDeleteDialog"
-      :contact-to-delete="contactToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Contact"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the contact <em>{{ contactToDelete.fullName }}</em>?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -195,7 +198,7 @@ import {
 import { Contact } from '@/models/Contact'
 
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
@@ -207,7 +210,7 @@ import { CanDeleteContactGetter } from '@/store/permissions'
   components: {
     ContactsListItem,
     BaseList,
-    ContacsDeleteDialog,
+    DeleteDialog,
     DotMenuActionDelete,
     PageSizeSelect
   },

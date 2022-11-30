@@ -80,12 +80,15 @@ permissions and limitations under the Licence.
         Add Custom Field
       </v-btn>
     </v-card-actions>
-    <CustomFieldDeleteDialog
+    <DeleteDialog
+      v-if="customFieldToDelete"
       v-model="showDeleteDialog"
-      :custom-field="customFieldToDelete"
+      title="Delete Custom Field"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
-    />
+    >
+      Do you really want to delete the field &quot;<em>{{ customFieldToDelete.key | shortenRight }}</em>&quot;?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -100,12 +103,12 @@ import { CustomTextField } from '@/models/CustomTextField'
 import BaseList from '@/components/shared/BaseList.vue'
 import CustomFieldListItem from '@/components/shared/CustomFieldListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import CustomFieldDeleteDialog from '@/components/shared/CustomFieldDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { ProgressIndicator, HintCard, CustomFieldDeleteDialog, DotMenuActionDelete, CustomFieldListItem, BaseList },
+  components: { ProgressIndicator, HintCard, DeleteDialog, DotMenuActionDelete, CustomFieldListItem, BaseList },
   computed: mapState('configurations', ['configurationCustomFields']),
   methods: mapActions('configurations', ['deleteConfigurationCustomField', 'loadConfigurationCustomFields'])
 })

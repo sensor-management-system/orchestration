@@ -250,12 +250,15 @@ permissions and limitations under the Licence.
         @input="runSearch"
       />
     </div>
-    <ConfigurationsDeleteDialog
+    <DeleteDialog
+      v-if="configurationToDelete"
       v-model="showDeleteDialog"
-      :configuration-to-delete="configurationToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Configuration"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the configuration <em>{{ configurationToDelete.label }}</em>?
+    </DeleteDialog>
     <ConfigurationArchiveDialog
       v-model="showArchiveDialog"
       :configuration-to-archive="configurationToArchive"
@@ -275,7 +278,7 @@ import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorM
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
-import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import ConfigurationArchiveDialog from '@/components/configurations/ConfigurationArchiveDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
@@ -295,7 +298,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     StringSelect,
     DotMenuActionDelete,
     DotMenuActionSensorML,
-    ConfigurationsDeleteDialog,
+    DeleteDialog,
     ConfigurationsListItem,
     BaseList,
     PageSizeSelect,

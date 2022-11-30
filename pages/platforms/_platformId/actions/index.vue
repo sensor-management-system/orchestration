@@ -114,12 +114,15 @@ permissions and limitations under the Licence.
         />
       </template>
     </PlatformActionTimeline>
-    <ActionDeleteDialog
+    <DeleteDialog
+      v-if="actionToDelete"
       v-model="showDeleteDialog"
-      :action-to-delete="actionToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Action"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the action?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -141,7 +144,7 @@ import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.
 import HintCard from '@/components/HintCard.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 import PlatformMountActionCard from '@/components/actions/PlatformMountActionCard.vue'
 import PlatformUnmountActionCard from '@/components/actions/PlatformUnmountActionCard.vue'
@@ -153,7 +156,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     PlatformUnmountActionCard,
     PlatformMountActionCard,
     SoftwareUpdateActionCard,
-    ActionDeleteDialog,
+    DeleteDialog,
     DotMenuActionDelete,
     GenericActionCard,
     HintCard,

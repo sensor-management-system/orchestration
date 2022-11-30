@@ -101,7 +101,7 @@ export default {
     if (startDate && startDate <= endDate) {
       return true
     }
-    return 'End date must not be before start date'
+    return 'End date must be after start date'
   },
 
   validateInputForLocationType (v: string): boolean | string {

@@ -134,12 +134,15 @@ permissions and limitations under the Licence.
         />
       </template>
     </DeviceActionTimeline>
-    <ActionDeleteDialog
+    <DeleteDialog
+      v-if="actionToDelete"
       v-model="showDeleteDialog"
-      :action-to-delete="actionToDelete"
-      @cancel-deletion="closeDialog"
+      title="Delete Action"
+      @cancel="closeDialog"
       @submit-deletion="deleteAndCloseDialog"
-    />
+    >
+      Do you really want to delete the action?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -166,7 +169,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DeviceMountActionCard from '@/components/actions/DeviceMountActionCard.vue'
 import DeviceUnmountActionCard from '@/components/actions/DeviceUnmountActionCard.vue'
 import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationActionCard.vue'
-import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
@@ -174,7 +177,7 @@ import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionC
   components: {
     SoftwareUpdateActionCard,
     ProgressIndicator,
-    ActionDeleteDialog,
+    DeleteDialog,
     DeviceCalibrationActionCard,
     DeviceUnmountActionCard,
     DeviceMountActionCard,

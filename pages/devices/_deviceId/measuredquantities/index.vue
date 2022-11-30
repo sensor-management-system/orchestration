@@ -102,13 +102,15 @@ permissions and limitations under the Licence.
         Add Measured Quantity
       </v-btn>
     </v-card-actions>
-    <DevicesMeasuredQuantitiesDeleteDialog
-      v-if="editable"
+    <DeleteDialog
+      v-if="editable && measuredQuantityToDelete"
       v-model="showDeleteDialog"
-      :measured-quantity="measuredQuantityToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Measured Quantity"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the measured quantity <em>{{ measuredQuantityToDelete.label }}</em>?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -122,7 +124,7 @@ import { VocabularyState } from '@/store/vocabulary'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
-import DevicesMeasuredQuantitiesDeleteDialog from '@/components/devices/DevicesMeasuredQuantitiesDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -134,7 +136,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
     ProgressIndicator,
     BaseList,
     HintCard,
-    DevicesMeasuredQuantitiesDeleteDialog,
+    DeleteDialog,
     DevicesMeasuredQuantitiesListItem
   },
   computed: {

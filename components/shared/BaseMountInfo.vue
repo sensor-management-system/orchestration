@@ -137,6 +137,16 @@ permissions and limitations under the Licence.
         >
           Edit mount information
         </v-btn>
+        <v-btn
+          v-if="deletable"
+          small
+          color="error"
+          text
+          :disabled="disabled"
+          @click="$emit('delete', mountAction)"
+        >
+          Delete mount action
+        </v-btn>
         <v-tooltip v-if="warning" right>
           <template #activator="{ on, attrs }">
             <v-icon v-bind="attrs" v-on="on">
@@ -180,6 +190,13 @@ export default class BaseMountInfo extends Vue {
     type: Boolean
   })
   private editable!: boolean
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private deletable!: boolean
 
   @Prop({
     default: false,

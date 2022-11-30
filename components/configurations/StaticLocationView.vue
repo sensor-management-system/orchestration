@@ -57,13 +57,15 @@ permissions and limitations under the Licence.
         </DotMenu>
       </template>
     </StaticLocationActionData>
-    <StaticLocationDeleteDialog
+    <DeleteDialog
       v-if="editable"
       v-model="showBeginDeleteDialog"
-      :action="action"
-      @cancel-deletion="closeBeginDeleteDialog"
-      @submit-deletion="deleteAndCloseBeginDeleteDialog"
-    />
+      title="Delete Static Location"
+      @cancel="closeBeginDeleteDialog"
+      @delete="deleteAndCloseBeginDeleteDialog"
+    >
+      Do you really want to delete the static location?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -81,9 +83,9 @@ import {
   LoadStaticLocationActionAction
 } from '@/store/configurations'
 import StaticLocationActionData from '@/components/configurations/StaticLocationActionData.vue'
-import StaticLocationDeleteDialog from '@/components/configurations/StaticLocationDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 @Component({
-  components: { StaticLocationDeleteDialog, StaticLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu, ProgressIndicator },
+  components: { DeleteDialog, StaticLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu, ProgressIndicator },
   middleware: ['auth'],
   methods: {
     ...mapActions('configurations', ['loadStaticLocationAction', 'updateStaticLocationAction', 'deleteStaticLocationAction', 'loadLocationActionTimepoints'])
