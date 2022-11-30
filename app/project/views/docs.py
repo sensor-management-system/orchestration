@@ -5,7 +5,7 @@ import json
 import os
 import pkgutil
 
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, current_app, render_template, url_for
 
 from ..config import env
 from . import openapi_parts
@@ -24,11 +24,12 @@ def swagger():
 @docs_routes.route("/openapi", methods=["GET"])
 def openapi():
     """Render the OpenAPI UI."""
+    redirect_url = url_for("docs.openapi_callback", _external=True)
     return render_template(
         "openapi.html",
         client_id=current_app.config["PKCE_CLIENT_ID"],
         scopes=current_app.config["PKCE_SCOPES"],
-        redirect_url=f'{current_app.config["SMS_BACKEND_URL"]}/login-callback',
+        redirect_url=redirect_url,
     )
 
 
