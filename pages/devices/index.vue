@@ -335,12 +335,15 @@ permissions and limitations under the Licence.
         @input="runSearch"
       />
     </div>
-    <DeviceDeleteDialog
+    <DeleteDialog
+      v-if="deviceToDelete"
       v-model="showDeleteDialog"
-      :device-to-delete="deviceToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Device"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the device <em>{{ deviceToDelete.shortName }}</em>?
+    </DeleteDialog>
     <DeviceArchiveDialog
       v-model="showArchiveDialog"
       :device-to-archive="deviceToArchive"
@@ -403,7 +406,7 @@ import { DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
 import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
-import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DeviceArchiveDialog from '@/components/devices/DeviceArchiveDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -423,7 +426,7 @@ import { Visibility } from '@/models/Visibility'
     DotMenuActionDelete,
     DotMenuActionCopy,
     DotMenuActionSensorML,
-    DeviceDeleteDialog,
+    DeleteDialog,
     DotMenuActionArchive,
     DotMenuActionRestore,
     DeviceArchiveDialog,

@@ -258,12 +258,15 @@ permissions and limitations under the Licence.
         @input="searchPlatformsPaginated"
       />
     </div>
-    <PlatformDeleteDialog
+    <DeleteDialog
+      v-if="platformToDelete"
       v-model="showDeleteDialog"
-      :platform-to-delete="platformToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Platform"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the platform <em>{{ platformToDelete.shortName }}</em>?
+    </DeleteDialog>
     <PlatformArchiveDialog
       v-model="showArchiveDialog"
       :platform-to-archive="platformToArchive"
@@ -302,7 +305,7 @@ import { CanAccessEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, C
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
-import PlatformDeleteDialog from '@/components/platforms/PlatformDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import PlatformArchiveDialog from '@/components/platforms/PlatformArchiveDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
@@ -331,7 +334,7 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     DotMenuActionDelete,
     DotMenuActionSensorML,
     DotMenuActionCopy,
-    PlatformDeleteDialog,
+    DeleteDialog,
     ManufacturerSelect,
     PlatformTypeSelect,
     StatusSelect,

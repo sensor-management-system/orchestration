@@ -90,12 +90,14 @@ permissions and limitations under the Licence.
           </template>
         </DotMenu>
       </v-card-actions>
-      <ContacsDeleteDialog
+      <DeleteDialog
         v-model="showDeleteDialog"
-        :contact-to-delete="contact"
-        @cancel-deletion="closeDialog"
-        @submit-deletion="deleteAndCloseDialog"
-      />
+        title="Delete Contact"
+        @cancel="closeDialog"
+        @delete="deleteAndCloseDialog"
+      >
+        Do you really want to delete the contact <em>{{ contact.fullName }}</em>?
+      </DeleteDialog>
     </v-card>
   </div>
 </template>
@@ -110,10 +112,10 @@ import { ContactsState, LoadContactAction, DeleteContactAction } from '@/store/c
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContactBasicData from '@/components/ContactBasicData.vue'
-import ContacsDeleteDialog from '@/components/contacts/ContacsDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 
 @Component({
-  components: { ContacsDeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
+  components: { DeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
   computed: mapState('contacts', ['contact']),
   methods: {
     ...mapActions('contacts', ['deleteContact', 'loadContact'])

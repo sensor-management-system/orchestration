@@ -200,12 +200,14 @@ permissions and limitations under the Licence.
         </div>
       </template>
     </base-expandable-list-item>
-    <ActionDeleteDialog
+    <DeleteDialog
       v-model="showDeleteDialog"
-      :action-to-delete="genericActionToDelete"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteGenericAction"
-    />
+      title="Delete Action"
+      @cancel="closeDialog"
+      @delete="deleteGenericAction"
+    >
+      Do you really want to delete the action?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -221,7 +223,7 @@ import {
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ActionDeleteDialog from '@/components/actions/ActionDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 
 import { ITimelineAction } from '@/utils/configurationInterfaces'
 import { dateToDateTimeString } from '@/utils/dateHelper'
@@ -235,7 +237,7 @@ import { GenericAction } from '@/models/GenericAction'
     BaseExpandableListItem,
     DotMenu,
     DotMenuActionDelete,
-    ActionDeleteDialog
+    DeleteDialog
   },
   methods: mapActions('configurations', ['deleteConfigurationGenericAction', 'loadAllConfigurationActions'])
 })

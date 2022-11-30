@@ -110,12 +110,14 @@ permissions and limitations under the Licence.
           </template>
         </DotMenu>
       </v-card-actions>
-      <ConfigurationsDeleteDialog
+      <DeleteDialog
         v-model="showDeleteDialog"
-        :configuration-to-delete="configuration"
-        @cancel-deletion="closeDialog"
-        @submit-deletion="deleteAndCloseDialog"
-      />
+        title="Delete Configuration"
+        @cancel="closeDialog"
+        @delete="deleteAndCloseDialog"
+      >
+        Do you really want to delete the configuration <em>{{ configuration.label }}</em>?
+      </DeleteDialog>
       <ConfigurationArchiveDialog
         v-if="configuration"
         v-model="showArchiveDialog"
@@ -136,7 +138,7 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ConfigurationArchiveDialog from '@/components/configurations/ConfigurationArchiveDialog.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
-import ConfigurationsDeleteDialog from '@/components/configurations/ConfigurationsDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
@@ -147,7 +149,7 @@ import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurati
 @Component({
   components: {
     ProgressIndicator,
-    ConfigurationsDeleteDialog,
+    DeleteDialog,
     DotMenuActionDelete,
     DotMenuActionSensorML,
     DotMenu,

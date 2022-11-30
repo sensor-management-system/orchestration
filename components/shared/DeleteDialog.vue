@@ -2,11 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -35,30 +35,32 @@ permissions and limitations under the Licence.
 <template>
   <v-dialog
     v-model="showDialog"
-    max-width="290"
-    @click:outside="$emit('cancel-deletion')"
+    max-width="360"
+    @click:outside="$emit('cancel')"
   >
-    <v-card v-if="hasPlatformToDelete">
+    <v-card>
       <v-card-title class="headline">
-        Delete platform
+        {{ title }}
       </v-card-title>
       <v-card-text>
-        Do you really want to delete the platform <em>{{ platformToDelete.shortName }}</em>?
+        <slot />
       </v-card-text>
       <v-card-actions>
         <v-btn
           text
-          @click="$emit('cancel-deletion')"
+          @click="$emit('cancel')"
         >
-          No
+          Cancel
         </v-btn>
         <v-spacer />
         <v-btn
           color="error"
           text
-          @click="$emit('submit-deletion')"
+          @click="$emit('delete')"
         >
-          <v-icon left>
+          <v-icon
+            left
+          >
             mdi-delete
           </v-icon>
           Delete
@@ -70,10 +72,9 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { Platform } from '@/models/Platform'
 
 @Component
-export default class PlatformDeleteDialog extends Vue {
+export default class DeleteDialog extends Vue {
   @Prop({
     required: true,
     type: Boolean
@@ -81,9 +82,11 @@ export default class PlatformDeleteDialog extends Vue {
   readonly value!: boolean
 
   @Prop({
-    type: Object
+    default: '',
+    required: false,
+    type: String
   })
-  readonly platformToDelete!: Platform
+  readonly title!: string
 
   get showDialog (): boolean {
     return this.value
@@ -92,13 +95,5 @@ export default class PlatformDeleteDialog extends Vue {
   set showDialog (value: boolean) {
     this.$emit('input', value)
   }
-
-  get hasPlatformToDelete () {
-    return this.platformToDelete !== null
-  }
 }
 </script>
-
-<style scoped>
-
-</style>

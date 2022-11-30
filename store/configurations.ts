@@ -133,7 +133,7 @@ export interface ConfigurationsState {
 }
 
 const state = (): ConfigurationsState => ({
-  selectedDate: DateTime.utc(),
+  selectedDate: DateTime.utc().set({ second: 0, millisecond: 0 }),
   configurations: [],
   configuration: null,
   configurationContactRoles: [],
@@ -362,6 +362,8 @@ export type SetSelectedDateAction = (params: DateTime) => void
 export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
 export type AddDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type AddPlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
+export type DeleteDeviceMountActionAction = IdParamReturnsVoidPromiseAction
+export type DeletePlatformMountActionAction = IdParamReturnsVoidPromiseAction
 export type AddStaticLocationBeginActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
 export type AddStaticLocationEndActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
 export type AddDynamicLocationBeginActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
@@ -619,6 +621,12 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     }: { configurationId: string, platformMountAction: PlatformMountAction }
   ): Promise<string> {
     return this.$api.configurations.platformMountActionApi.add(configurationId, platformMountAction)
+  },
+  deleteDeviceMountAction (_, actionId: string): Promise<void> {
+    return this.$api.configurations.deviceMountActionApi.deleteById(actionId)
+  },
+  deletePlatformMountAction (_, actionId: string): Promise<void> {
+    return this.$api.configurations.platformMountActionApi.deleteById(actionId)
   },
   addConfigurationGenericAction (_, {
     configurationId,

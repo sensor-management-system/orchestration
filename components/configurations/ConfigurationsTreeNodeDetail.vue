@@ -39,8 +39,10 @@ permissions and limitations under the Licence.
         <base-mount-info
           :mount-action="node.unpack()"
           :editable="editable"
+          :deletable="deletable"
           :disabled="node.unpack().platform.archived"
           :warning="node.unpack().platform.archived ? 'Platform is archived. Restore it to edit the mount.' : ''"
+          @delete="$emit('delete')"
         />
       </template>
     </PlatformMountListItem>
@@ -53,8 +55,10 @@ permissions and limitations under the Licence.
         <base-mount-info
           :mount-action="node.unpack()"
           :editable="editable"
+          :deletable="deletable"
           :disabled="node.unpack().device.archived"
           :warning="node.unpack().device.archived ? 'Device is archived. Restore it to edit the mount.' : ''"
+          @delete="$emit('delete')"
         />
       </template>
     </DevicesMountListItem>
@@ -93,6 +97,13 @@ export default class ConfigurationsTreeNodeDetail extends Vue {
     type: Boolean
   })
   private editable!: boolean
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private deletable!: boolean
 }
 </script>
 

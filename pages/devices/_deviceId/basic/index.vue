@@ -110,13 +110,15 @@ permissions and limitations under the Licence.
         </template>
       </DotMenu>
     </v-card-actions>
-    <DeviceDeleteDialog
+    <DeleteDialog
       v-if="device"
       v-model="showDeleteDialog"
-      :device-to-delete="device"
-      @cancel-deletion="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Device"
+      @cancel="closeDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the device <em>{{ device.shortName }}</em>?
+    </DeleteDialog>
     <DeviceArchiveDialog
       v-if="device"
       v-model="showArchiveDialog"
@@ -133,7 +135,7 @@ import { mapActions, mapState } from 'vuex'
 
 import { ArchiveDeviceAction, DeleteDeviceAction, DevicesState, LoadDeviceAction, RestoreDeviceAction, ExportAsSensorMLAction, GetSensorMLUrlAction } from '@/store/devices'
 
-import DeviceDeleteDialog from '@/components/devices/DeviceDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DeviceArchiveDialog from '@/components/devices/DeviceArchiveDialog.vue'
 import DeviceBasicData from '@/components/DeviceBasicData.vue'
 import DotMenu from '@/components/DotMenu.vue'
@@ -152,7 +154,7 @@ import { Visibility } from '@/models/Visibility'
     DotMenuActionCopy,
     DotMenuActionSensorML,
     DotMenu,
-    DeviceDeleteDialog,
+    DeleteDialog,
     DeviceBasicData,
     DotMenuActionRestore,
     DotMenuActionArchive,

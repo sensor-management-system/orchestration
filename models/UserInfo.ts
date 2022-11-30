@@ -80,7 +80,7 @@ export class UserInfo implements IUserInfo {
     this._isSuperUser = isSuperUser
   }
 
-  get contactId () : string | null {
+  get contactId (): string | null {
     return this._contactId
   }
 

@@ -102,7 +102,18 @@ permissions and limitations under the Licence.
                 v-if="selectedNode"
                 :node="selectedNode"
                 :editable="editable"
+                :deletable="isSelectedNodeDeletable"
+                @delete="isDeleteDialogShown = true"
               />
+              <delete-dialog
+                v-if="selectedNode"
+                v-model="isDeleteDialogShown"
+                title="Delete the Mount Action?"
+                @cancel="isDeleteDialogShown = false"
+                @delete="deleteSelectedNode"
+              >
+                <em>Please only delete mounts if you are sure that the {{ selectedNodeType }} is <strong> not being used effectively</strong> and <strong>no other software</strong> is referencing the mounted {{ selectedNodeType }}.</em>
+              </delete-dialog>
             </v-card-text>
           </v-card>
         </v-slide-x-reverse-transition>
@@ -121,27 +132,54 @@ import {
   LoadMountingActionsAction,
   LoadMountingConfigurationForDateAction,
   SetSelectedDateAction,
-  ConfigurationsState
+  ConfigurationsState,
+  DeleteDeviceMountActionAction,
+  DeletePlatformMountActionAction,
+  LoadConfigurationDynamicLocationActionsAction
 } from '@/store/configurations'
 
+import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
+
+import { MountActionValidator } from '@/utils/MountActionValidator'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsTreeNodeDetail from '@/components/configurations/ConfigurationsTreeNodeDetail.vue'
 import ConfigurationsTreeTitle from '@/components/configurations/ConfigurationsTreeTitle.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 
 @Component({
-  components: { ConfigurationsTreeNodeDetail, ConfigurationsTreeTitle, ConfigurationsTreeView, DateTimePicker, ProgressIndicator },
+  components: {
+    ConfigurationsTreeNodeDetail,
+    ConfigurationsTreeTitle,
+    ConfigurationsTreeView,
+    DateTimePicker,
+    ProgressIndicator,
+    DeleteDialog
+  },
   computed: {
-    ...mapState('configurations', ['selectedDate', 'configuration', 'configurationMountingActions', 'configurationMountingActionsForDate']),
+    ...mapState('configurations', [
+      'selectedDate',
+      'configuration',
+      'configurationMountingActions',
+      'configurationMountingActionsForDate',
+      'configurationDynamicLocationActions'
+    ]),
     ...mapGetters('configurations', ['mountActionDateItems'])
   },
-  methods: mapActions('configurations', ['setSelectedDate', 'loadMountingActions', 'loadMountingConfigurationForDate'])
+  methods: mapActions('configurations', [
+    'setSelectedDate',
+    'loadMountingActions',
+    'loadMountingConfigurationForDate',
+    'deleteDeviceMountAction',
+    'deletePlatformMountAction',
+    'loadConfigurationDynamicLocationActions'
+  ])
 })
 export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   @InjectReactive()
@@ -151,6 +189,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
   private isLoading: boolean = false
+  private isDeleteDialogShown: boolean = false
 
   // vuex definition for typescript check
   private configuration!: ConfigurationsState['configuration']
@@ -160,16 +199,24 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private configurationMountingActions!: ConfigurationsState['configurationMountingActions']
   private selectedDate!: ConfigurationsState['selectedDate']
   private setSelectedDate!: SetSelectedDateAction
+  private deleteDeviceMountAction!: DeleteDeviceMountActionAction
+  private deletePlatformMountAction!: DeletePlatformMountActionAction
+  private configurationDynamicLocationActions!: ConfigurationsState['configurationDynamicLocationActions']
+  private loadConfigurationDynamicLocationActions!: LoadConfigurationDynamicLocationActionsAction
 
-  async created () {
+  created () {
     if (this.$route.query.date) {
       this.setSelectedDate(DateTime.fromISO(this.$route.query.date.toString(), { zone: 'utc' }))
     }
+  }
+
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
       await Promise.all([
         this.loadMountingActions(this.configurationId),
-        this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+        this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate }),
+        this.loadConfigurationDynamicLocationActions(this.configurationId)
       ])
       this.createTreeWithConfigAsRootNode()
       this.setSelectedNodeFromUrlParam()
@@ -208,6 +255,68 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
     return this.$route.params.configurationId
   }
 
+  get isSelectedNodeDeletable (): boolean {
+    if (!this.selectedNode) {
+      return false
+    }
+    if (this.selectedNode.canHaveChildren() && this.selectedNode.children.length) {
+      return false
+    }
+    const action = this.selectedNode.unpack()
+    // check if dynamic location actions exist that use the device's properties
+    if ('isDeviceMountAction' in action && action.isDeviceMountAction()) {
+      if (this.getRelatedDynamicLocationActions().length) {
+        return false
+      }
+    }
+    return true
+  }
+
+  async deleteSelectedNode (): Promise<void> {
+    if (!this.selectedNode) {
+      return
+    }
+    const action = this.selectedNode.unpack()
+    if ('isDeviceMountAction' in action && action.isDeviceMountAction()) {
+      await this.deleteDeviceMountAction(action.id)
+    }
+    if ('isPlatformMountAction' in action && action.isPlatformMountAction()) {
+      await this.deletePlatformMountAction(action.id)
+    }
+    this.selectedNode = null
+    this.isDeleteDialogShown = false
+    await this.$router.replace({
+      params: {}
+    })
+    this.$fetch()
+  }
+
+  getRelatedDynamicLocationActions (): DynamicLocationAction[] {
+    if (!this.selectedNode) {
+      return []
+    }
+    const action = this.selectedNode.unpack()
+    if (!('isDeviceMountAction' in action) || !action.isDeviceMountAction()) {
+      return []
+    }
+    // filter all dynamic location actions, that are within the original time range
+    return MountActionValidator.getRelatedDynamicLocationActions(action, this.configurationDynamicLocationActions)
+  }
+
+  get selectedNodeType (): string {
+    if (!this.selectedNode) {
+      return ''
+    }
+    const action = this.selectedNode.unpack()
+    if ('isDeviceMountAction' in action && action.isDeviceMountAction()) {
+      return 'device'
+    }
+    if ('isPlatformMountAction' in action && action.isPlatformMountAction()) {
+      return 'platform'
+    }
+    return ''
+  }
+
   @Watch('selectedDate')
   async onPropertyChanged (_value: DateTime, _oldValue: DateTime) {
     try {
@@ -222,7 +331,3 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

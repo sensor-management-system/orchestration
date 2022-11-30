@@ -346,6 +346,15 @@ export class MountActionValidator {
         op: MountActionValidationResultOp.LESS_THAN
       })
     }
+    if (deviceMountAction.endDate && !dynamicLocationAction.endDate) {
+      return new MountActionValidationResult({
+        property: 'endDate',
+        targetProperty: 'endDate',
+        value: deviceMountAction.endDate,
+        targetValue: null,
+        op: MountActionValidationResultOp.EMPTY
+      })
+    }
     return true
   }
 

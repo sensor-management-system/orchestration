@@ -58,13 +58,15 @@ permissions and limitations under the Licence.
         </DotMenu>
       </template>
     </dynamic-location-action-data>
-    <DynamicLocationDeleteDialog
+    <DeleteDialog
       v-if="editable"
       v-model="showDeleteDialog"
-      :action="action"
-      @cancel-deletion="closeDeleteDialog"
-      @submit-deletion="deleteAndCloseDialog"
-    />
+      title="Delete Dynamic Location"
+      @cancel="closeDeleteDialog"
+      @delete="deleteAndCloseDialog"
+    >
+      Do you really want to delete the dynamic location?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -82,9 +84,9 @@ import {
   UpdateDynamicLocationActionAction
 } from '@/store/configurations'
 import DynamicLocationActionData from '@/components/configurations/DynamicLocationActionData.vue'
-import DynamicLocationDeleteDialog from '@/components/configurations/DynamicLocationDeleteDialog.vue'
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 @Component({
-  components: { DynamicLocationDeleteDialog, DynamicLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu, ProgressIndicator },
+  components: { DeleteDialog, DynamicLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu, ProgressIndicator },
   computed: {
     ...mapGetters('configurations', ['devicesForDynamicLocation'])
   },
