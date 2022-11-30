@@ -24,6 +24,7 @@ from ..api.models import (
     GenericPlatformAction,
     Platform,
     PlatformSoftwareUpdateAction,
+    Site,
 )
 from ..api.models.base_model import db
 from ..config import env
@@ -263,3 +264,67 @@ class PlatformSoftwareUpdateActionRepositoryUrlEndPoint(AbstractFreeTextFieldEnd
     """Endpoint for distinct platform software update action repository urls."""
 
     field = PlatformSoftwareUpdateAction.repository_url
+
+
+@free_text_field_routes.route("/controller/site-buildings", methods=["GET"])
+@class_based_view
+class SiteBuildingEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site buildings."""
+
+    field = Site.building
+
+
+@free_text_field_routes.route("/controller/site-cities", methods=["GET"])
+@class_based_view
+class SiteCityEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site cities."""
+
+    field = Site.city
+
+
+@free_text_field_routes.route("/controller/site-countries", methods=["GET"])
+@class_based_view
+class SiteCountryEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site countries."""
+
+    field = Site.country
+
+
+@free_text_field_routes.route("/controller/site-labels", methods=["GET"])
+@class_based_view
+class SiteLabelEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site labels."""
+
+    field = Site.label
+
+
+@free_text_field_routes.route("/controller/site-rooms", methods=["GET"])
+@class_based_view
+class SiteRoomEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site rooms."""
+
+    field = Site.room
+
+
+@free_text_field_routes.route("/controller/site-streets", methods=["GET"])
+@class_based_view
+class SiteStreetEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site streets."""
+
+    field = Site.street
+
+
+@free_text_field_routes.route("/controller/site-street-numbers", methods=["GET"])
+@class_based_view
+class SiteStreetNumberEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site street numbers."""
+
+    field = Site.street_number
+
+
+@free_text_field_routes.route("/controller/site-zip-codes", methods=["GET"])
+@class_based_view
+class SiteZipCodeEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site zip codes."""
+
+    field = Site.zip_code
