@@ -52,6 +52,13 @@ export class LocationActionTimepointSerializer {
       const locationAcionTimepoint = this.convertJsonApiDataToModel(entry)
       result.push(locationAcionTimepoint)
     }
+    result.sort((a, b) => {
+      if (a.timepoint && b.timepoint) {
+        return b.timepoint.toUnixInteger() - a.timepoint.toUnixInteger()
+      } else {
+        return 0
+      }
+    })
     return result
   }
 
