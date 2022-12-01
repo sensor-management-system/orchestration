@@ -102,7 +102,6 @@ permissions and limitations under the Licence.
           :items="configurationLocationActionTimepoints"
           :disabled="isDisabled"
           item-text="text"
-          clearable
           label="Dates defined by actions"
           hint="The referenced time zone is UTC."
           return-object
@@ -173,6 +172,7 @@ export default class ConfigurationShowLocationPage extends Vue {
       this.selectTimepoint()
     } else {
       this.selectedDate = currentAsUtcDateSecondsAsZeros()
+      this.updateTimepointItemWhenDateSelected()
     }
   }
 
@@ -229,12 +229,13 @@ export default class ConfigurationShowLocationPage extends Vue {
     const filteredList = this.configurationLocationActionTimepoints.filter((item: ILocationTimepoint) => {
       return item.timepoint <= this.selectedDate!
     })
+
     if (filteredList.length > 0) {
-      const lastEntry = filteredList[filteredList.length - 1]
-      if (this.isEndLocationAndTimepointIsBeforeSelectedDate(lastEntry)) {
+      const recentEntry = filteredList[0]
+      if (this.isEndLocationAndTimepointIsBeforeSelectedDate(recentEntry)) {
         this.selectedTimepoint = null
       } else {
-        this.selectedTimepoint = lastEntry
+        this.selectedTimepoint = recentEntry
       }
     } else {
       this.selectedTimepoint = null
