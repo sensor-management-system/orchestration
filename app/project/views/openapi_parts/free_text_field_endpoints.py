@@ -60,6 +60,11 @@ paths = {
         operation_id="controller_device_manufacturer_names",
     ),
     **template(
+        endpoint="/controller/device-serial-numbers",
+        description="Get the list of distinct serial numbers of all devices.",
+        operation_id="controller_device_serial_numbers",
+    ),
+    **template(
         endpoint="/controller/platform-manufacturer-names",
         description="Get the list of distinct manufacturer names of all platforms.",
         operation_id="controller_platform_manufacturer_names",
