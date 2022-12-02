@@ -50,6 +50,11 @@ paths = {
         operation_id="controller_platform_short_names",
     ),
     **template(
+        endpoint="/controller/platform-serial-numbers",
+        description="Get the list of distinct serial numbers of all devices.",
+        operation_id="controller_platform_serial_numbers",
+    ),
+    **template(
         endpoint="/controller/platform-long-names",
         description="Get the list of distinct long names of all platforms.",
         operation_id="controller_platform_long_names",

@@ -244,6 +244,14 @@ class PlatformManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
 
     field = Platform.manufacturer_name
 
+@free_text_field_routes.route(
+    "/controller/platform-serial-numbers", methods=["GET"]
+)
+@class_based_view
+class PlatformSerialNumberEndpoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct platform serial numbers."""
+
+    field = Platform.serial_number
 
 @free_text_field_routes.route("/controller/platform-short-names", methods=["GET"])
 @class_based_view
