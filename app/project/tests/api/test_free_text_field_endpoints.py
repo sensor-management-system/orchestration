@@ -722,7 +722,7 @@ class TestDeviceManufacturerNames(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
-class TestSerialNumberManufacturerNames(BaseTestCase):
+class TestSerialNumbers(BaseTestCase):
     """Tests for the endpoints for the device serial numbers."""
 
     url = f"{base_url}/controller/device-serial-numbers"
