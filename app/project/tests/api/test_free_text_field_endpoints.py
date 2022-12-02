@@ -753,7 +753,7 @@ class TestDeviceSerialNumbers(BaseTestCase):
         self.assertEqual(data, [])
 
     def test_get_for_three_serial_numbers(self):
-        """Ensure we get a list of manufacturer names."""
+        """Ensure we get a list of serial numbers."""
         device1 = Device(
             short_name="dummy",
             is_public=True,
