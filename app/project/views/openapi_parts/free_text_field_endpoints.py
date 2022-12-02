@@ -139,6 +139,46 @@ paths = {
         operation_id="controller_platform_software_update_action_repository_urls",
     ),
     **template(
+        endpoint="/controller/site-buildings",
+        description=("Get the list of distinct buildings of all sites"),
+        operation_id="controller_site_buildings",
+    ),
+    **template(
+        endpoint="/controller/site-cities",
+        description=("Get the list of distinct cities of all sites"),
+        operation_id="controller_site_cities",
+    ),
+    **template(
+        endpoint="/controller/site-countries",
+        description=("Get the list of distinct countries of all sites"),
+        operation_id="controller_site_countries",
+    ),
+    **template(
+        endpoint="/controller/site-labels",
+        description=("Get the list of distinct labels of all sites"),
+        operation_id="controller_site_labels",
+    ),
+    **template(
+        endpoint="/controller/site-rooms",
+        description=("Get the list of distinct rooms of all sites"),
+        operation_id="controller_site_rooms",
+    ),
+    **template(
+        endpoint="/controller/site-streets",
+        description=("Get the list of distinct streets of all sites"),
+        operation_id="controller_site_streets",
+    ),
+    **template(
+        endpoint="/controller/site-street-numbers",
+        description=("Get the list of distinct street numbers of all sites"),
+        operation_id="controller_site_street_numbers",
+    ),
+    **template(
+        endpoint="/controller/site-zip-codes",
+        description=("Get the list of distinct zip codes of all sites"),
+        operation_id="controller_site_zip_codes",
+    ),
+    **template(
         endpoint="/controller/configuration-custom-field-keys",
         description="Get the list of distinct configuration custom field keys of all devices.",
         operation_id="controller_configuration_custom_field_keys",

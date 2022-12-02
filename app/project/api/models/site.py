@@ -36,6 +36,12 @@ class Site(
     building = db.Column(db.String(256), nullable=True)
     room = db.Column(db.String(256), nullable=True)
     update_description = db.Column(db.String(256), nullable=True)
+    elevation = db.Column(db.Float, nullable=True)
+    elevation_datum_name = db.Column(db.String(256), default="MSL")  # mean sea level
+    elevation_datum_uri = db.Column(db.String(256), nullable=True)
+    site_type_uri = db.Column(db.String(256), nullable=True)
+    site_type_name = db.Column(db.String(256), nullable=True)
+
     # SiteContactRoles have a backref to the sites, so there is no need
     # to put it here explicitly.
     # Configurations also have the backrefs.
@@ -77,6 +83,8 @@ class Site(
             "country": self.country,
             "building": self.building,
             "room": self.room,
+            "site_type_name": self.site_type_name,
+            "site_type_uri": self.site_type_uri,
             "site_contact_roles": [
                 scr.to_search_entry() for scr in self.site_contact_roles
             ],
@@ -135,6 +143,8 @@ class Site(
                     "country": type_keyword_and_full_searchable,
                     "building": type_keyword_and_full_searchable,
                     "room": type_keyword_and_full_searchable,
+                    "site_type_name": type_keyword_and_full_searchable,
+                    "site_type_uri": type_keyword,
                     "site_contact_roles": {
                         "type": "nested",
                         "properties": {
