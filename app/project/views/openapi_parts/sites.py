@@ -137,6 +137,11 @@ components = {
                                             "is_public": False,
                                             "is_internal": True,
                                             "archived": False,
+                                            "elevation_datum_name": "MSL",
+                                            "elevation_datum_uri": "https://cv/elevation/123",
+                                            "elevation": 42.0,
+                                            "site_type_name": "example site",
+                                            "site_type_uri": "https://cv/sites/345",
                                         },
                                         "type": "site",
                                         "id": "0",
@@ -190,6 +195,11 @@ components = {
                                         "is_public": False,
                                         "is_internal": True,
                                         "archived": False,
+                                        "elevation_datum_name": "MSL",
+                                        "elevation_datum_uri": "https://cv/elevation/123",
+                                        "elevation": 42.0,
+                                        "site_type_name": "example site",
+                                        "site_type_uri": "https://cv/sites/345",
                                     },
                                     "type": "site",
                                     "id": "0",
@@ -248,6 +258,19 @@ components = {
                                             "is_internal": {"type": "boolean"},
                                             "is_public": {"type": "boolean"},
                                             "archived": {"type": "boolean"},
+                                            "elevation": {"type": "number"},
+                                            "elevation_datum_uri": {
+                                                "type": "string",
+                                            },
+                                            "elevation_datum_name": {
+                                                "type": "string",
+                                            },
+                                            "site_type_uri": {
+                                                "type": "string",
+                                            },
+                                            "site_type_name": {
+                                                "type": "string",
+                                            },
                                         },
                                     }
                                 },
@@ -267,6 +290,11 @@ components = {
                                         "groups_ids": ["1", "2", "3"],
                                         "is_public": False,
                                         "is_internal": True,
+                                        "elevation_datum_name": "MSL",
+                                        "elevation_datum_uri": "https://cv/elevation/123",
+                                        "elevation": 42.0,
+                                        "site_type_name": "example site",
+                                        "site_type_uri": "https://cv/sites/345",
                                     },
                                     "type": "site",
                                 },
@@ -314,6 +342,19 @@ components = {
                                 "is_internal": {"type": "boolean"},
                                 "is_public": {"type": "boolean"},
                                 "archived": {"type": "boolean"},
+                                "elevation": {"type": "number"},
+                                "elevation_datum_uri": {
+                                    "type": "string",
+                                },
+                                "elevation_datum_name": {
+                                    "type": "string",
+                                },
+                                "site_type_uri": {
+                                    "type": "string",
+                                },
+                                "site_type_name": {
+                                    "type": "string",
+                                },
                             },
                         },
                         "relationships": {
@@ -376,6 +417,11 @@ components = {
                             "is_public": False,
                             "is_internal": True,
                             "archived": False,
+                            "elevation_datum_name": "MSL",
+                            "elevation_datum_uri": "https://cv/elevation/123",
+                            "elevation": 42.0,
+                            "site_type_name": "example site",
+                            "site_type_uri": "https://cv/sites/345",
                         },
                         "type": "site",
                         "relationships": {

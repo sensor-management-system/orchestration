@@ -552,3 +552,62 @@ class TestSiteApi(BaseTestCase):
         with self.run_requests_as(self.super_user):
             resp = self.client.delete(f"{self.sites_url}/{site_id}")
         self.assertEqual(resp.status_code, 409)
+
+    def test_post_site_type(self):
+        """Ensure that we can post the site type."""
+        payload = {
+            "data": {
+                "type": "site",
+                "attributes": {
+                    "label": "some new site",
+                    "is_public": True,
+                    "site_type_name": "Example site",
+                    "site_type_uri": "https://cv/sites/123",
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.post(
+                self.sites_url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
+        self.assertEqual(resp.status_code, 201)
+        data_entry = resp.json["data"]
+        self.assertEqual(data_entry["attributes"]["site_type_name"], "Example site")
+        self.assertEqual(
+            data_entry["attributes"]["site_type_uri"], "https://cv/sites/123"
+        )
+
+    def test_post_elevation(self):
+        """Ensure that we can post the elevation."""
+        payload = {
+            "data": {
+                "type": "site",
+                "attributes": {
+                    "label": "some new site",
+                    "is_public": True,
+                    "elevation_datum_name": "mean sea level (Atlantic)",
+                    "elevation_datum_uri": "https://cv/elevation/45",
+                    "elevation": 42.0,
+                },
+            }
+        }
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.post(
+                self.sites_url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
+        self.assertEqual(resp.status_code, 201)
+        data_entry = resp.json["data"]
+        self.assertEqual(
+            data_entry["attributes"]["elevation_datum_name"],
+            "mean sea level (Atlantic)",
+        )
+        self.assertEqual(
+            data_entry["attributes"]["elevation_datum_uri"], "https://cv/elevation/45"
+        )
+        self.assertEqual(data_entry["attributes"]["elevation"], 42.0)
