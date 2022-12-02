@@ -722,7 +722,7 @@ class TestDeviceManufacturerNames(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
-class TestSerialNumbers(BaseTestCase):
+class TestDeviceSerialNumbers(BaseTestCase):
     """Tests for the endpoints for the device serial numbers."""
 
     url = f"{base_url}/controller/device-serial-numbers"
@@ -752,7 +752,7 @@ class TestSerialNumbers(BaseTestCase):
         data = resp.json["data"]
         self.assertEqual(data, [])
 
-    def test_get_for_three_manufacturers(self):
+    def test_get_for_three_serial_numbers(self):
         """Ensure we get a list of manufacturer names."""
         device1 = Device(
             short_name="dummy",
