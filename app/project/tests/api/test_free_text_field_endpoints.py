@@ -2285,7 +2285,7 @@ class TestPlatformSerialNumbers(BaseTestCase):
             resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 200)
         data = resp.json["data"]
-        self.assertEqual(data, ["69", "23"])
+        self.assertEqual(data, ["23", "69"])
 
     def test_endpoint_is_in_openapi_spec(self):
         """Ensure that we documented that endpoint in the openAPI."""
