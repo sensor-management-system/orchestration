@@ -155,8 +155,8 @@ class DeviceManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
 
 @free_text_field_routes.route("/controller/device-serial-numbers", methods=["GET"])
 @class_based_view
-class DeviceManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
-    """Endpoint for distinct device manufacturer names."""
+class DeviceSerialNumberEndpoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct device serial numbers."""
 
     field = Device.serial_number
 
