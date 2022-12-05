@@ -211,6 +211,44 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
         ]
         self.assertEqual(response.json, expected)
 
+    def test_get_active_platform_mount_with_same_dates(self):
+        """Ensure we get an one platform entry for the mount with the same begin and end dates."""
+        platform = Platform(
+            short_name="Some platform",
+            is_internal=True,
+            manufacturer_name="OTT HydroMet",
+            model="OTT CTD Sensor",
+            serial_number="345146",
+            platform_type_name="Sensor",
+        )
+        platform_mount_action = PlatformMountAction(
+            configuration=self.configuration,
+            platform=platform,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            begin_description="Some data",
+            begin_contact=self.u.contact,
+            begin_date=datetime.datetime(2022, 5, 18, 12, 0, 0),
+            end_date=datetime.datetime(2022, 5, 18, 12, 0, 0),
+        )
+        db.session.add_all([platform, platform_mount_action])
+        db.session.commit()
+        url = f"{base_url}/controller/configurations/{self.configuration.id}/mounting-actions"
+        with self.run_requests_as(self.u):
+            response = self.client.get(
+                url, query_string={"timepoint": datetime.datetime(2022, 5, 18, 12, 0, 0)}
+            )
+        self.assertEqual(response.status_code, 200)
+        expected = [
+            {
+                "action": PlatformMountActionSchema().dump(platform_mount_action),
+                "entity": PlatformSchema().dump(platform),
+                "children": [],
+            }
+        ]
+        self.assertEqual(response.json, expected)
+
     def test_get_inactive_platform_mount_before(self):
         """Ensure we get an empty result if we query for timepoint without data."""
         platform = Platform(
