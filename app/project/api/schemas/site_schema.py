@@ -35,6 +35,11 @@ class SiteSchema(Schema):
     country = fields.Str(allow_none=True)
     building = fields.Str(allow_none=True)
     room = fields.Str(allow_none=True)
+    site_type_uri = fields.Str(allow_none=True)
+    site_type_name = fields.Str(allow_none=True)
+    elevation = fields.Float(allow_none=True)
+    elevation_datum_name = fields.Str(allow_none=True)
+    elevation_datum_uri = fields.Str(allow_none=True)
 
     created_by = Relationship(
         attribute="created_by",
