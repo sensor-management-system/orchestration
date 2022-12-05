@@ -143,7 +143,7 @@ class ControllerConfigurationMountingActions(ResourceList):
                 or_(
                     # an is None check doesn't work for this filter.
                     DeviceMountAction.end_date == None,  # noqa: E711
-                    DeviceMountAction.end_date > timepoint,
+                    DeviceMountAction.end_date >= timepoint,
                 ),
             )
         )
@@ -154,7 +154,7 @@ class ControllerConfigurationMountingActions(ResourceList):
                 or_(
                     # an is None check doesn't work for this filter.
                     PlatformMountAction.end_date == None,  # noqa: E711
-                    PlatformMountAction.end_date > timepoint,
+                    PlatformMountAction.end_date >= timepoint,
                 ),
             )
         )
