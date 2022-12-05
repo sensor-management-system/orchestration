@@ -722,6 +722,7 @@ class TestDeviceManufacturerNames(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+
 class TestDeviceSerialNumbers(BaseTestCase):
     """Tests for the endpoints for the device serial numbers."""
 
@@ -815,6 +816,7 @@ class TestDeviceSerialNumbers(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
 
 class TestDeviceCustomFieldKeys(BaseTestCase):
     """Tests for the endpoints for the custom field key entries."""
@@ -2224,6 +2226,7 @@ class TestPlatformManufacturerNames(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+
 class TestPlatformSerialNumbers(BaseTestCase):
     """Tests for the endpoints for the platform serial numbers."""
 
@@ -2317,6 +2320,8 @@ class TestPlatformSerialNumbers(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+
 class TestConfigurationCustomFieldKeys(BaseTestCase):
     """Tests for the endpoints for the configuration custom field key entries."""
 
@@ -2491,6 +2496,7 @@ class TestConfigurationCustomFieldValues(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
 
 class TestSiteLabelEndpoint(BaseTestCase):
     """Tests for the free text field endpoint for site labels."""
@@ -3202,4 +3208,3 @@ class TestSiteRoomEndpoint(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
-
