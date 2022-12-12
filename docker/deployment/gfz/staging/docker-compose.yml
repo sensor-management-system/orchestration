@@ -100,7 +100,7 @@ services:
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'
-      VO_MEMBER_CONVENTIONS: '*:gfz-sms-member'
+      VO_MEMBER_CONVENTIONS: 'gfz:*,*:gfz-sms-member'
     volumes:
       - idl-static-files:/static/idl
     networks:
