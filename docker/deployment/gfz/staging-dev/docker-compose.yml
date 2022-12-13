@@ -63,6 +63,7 @@ services:
       SQL_HOST: vocabulary-db
       SQL_PORT: 5432
       CORS_ORIGIN_WHITELIST: ${HTTP_ORIGINS_VOCABULARY:-'https://rz-vm64.gfz-potsdam.de'}
+      EMAIL_HOST: 'mail.gfz-potsdam.de'
     volumes:
       - vocabulary-static-files:/static/cv
     networks:

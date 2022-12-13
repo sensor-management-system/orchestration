@@ -148,6 +148,7 @@ services:
       SQL_HOST: ${SQL_HOST:-db}
       SQL_PORT: ${SQL_PORT:-5433}
       CORS_ORIGIN_WHITELIST: ${CORS_ORIGIN_WHITELIST:-https://localhost.localdomain}
+      EMAIL_HOST: ${EMAIL_HOST}
     command: >
       sh -c "
       apk add --no-cache --virtual .build-deps \
