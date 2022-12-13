@@ -224,6 +224,69 @@ permissions and limitations under the Licence.
             The entity is visible for everyone. Edit and delete permissions are handled by the role memberships of the associated groups (similar to <code>Internal</code>).
           </v-col>
         </v-row>
+        <p />
+        <p>Visibility handling is inspired by Gitlab.</p>
+      </v-card-text>
+    </v-card>
+    <v-card flat>
+      <v-card-title>Sub-groups</v-card-title>
+      <v-card-text>
+        <p>
+          You can also use sub-groups for even finer granularity:
+          <v-treeview open-all dense :items="exampletreeview">
+            <template #prepend="{ item }">
+              <v-icon v-if="item.icon">
+                {{ item.icon }}
+              </v-icon>
+            </template>
+          </v-treeview>
+        </p>
+        <p>
+          This will make the <code>Moses:HydrEx</code> group available in the Sensor Management System.
+          <code>User A</code> will have the <code>member</code> role and <code>User B</code> the <code>admin</code> role accordingly.
+        </p>
+      </v-card-text>
+    </v-card>
+    <v-card flat>
+      <v-card-title>GFZ specific</v-card-title>
+      <v-card-text>
+        <p>
+          Additional to the pure HIFIS VO way of handling groups, you can also use
+          <a href="https://myprofile.gfz-potsdam.de/">MyProfile groups</a> for the group management
+          in the Sensor Management System.
+        </p>
+        <p>
+          However, there is a precondition that the group can be used for external systems. To do so, you need
+          administration permissions for the myprofile group itself - or you must ask your group administrator
+          to make the changes.
+        </p>
+        <p>
+          To allow external usage of a group, you need to
+          <ol>
+            <li>Open  <a href="https://myprofile.gfz-potsdam.de/">MyProfile</a></li>
+            <li>Go to the <code>Groups</code>tab</li>
+            <li>Click to open the <code>Management</code> sub tab</li>
+            <li>Select the group you want to use</li>
+            <li>Activate the checkbox for <code>External use</code></li>
+          </ol>
+        </p>
+        <p>
+          All members of those groups will have the <code>member</code> role in
+          the Sensor Management System.
+        </p>
+        <p>
+          Please note that section groups are exposed by default, so that you can use those without
+          further adjustments.
+        </p>
+        <p>
+          To give the <code>admin</code> role for MyProfile groups within the Sensor Management System,
+          you need to create a new MyProfile group with the same name as the base group and
+          an <code>.gfz-sms-admin</code> suffix. Members of those groups will have the <code>admin</code> role.
+          This will look like <code>cegit.gfz-sms-admin</code> for the <code>cegit</code> section group.
+        </p>
+        <p>
+          This handling is needed for the automatic section groups as well.
+        </p>
       </v-card-text>
     </v-card>
   </div>
@@ -254,6 +317,45 @@ export default class GfzGroupInfoPage extends Vue {
 
   get voPlaceHolder (): string {
     return '<vo-name>'
+  }
+
+  get exampletreeview (): any {
+    return [
+      {
+        id: 1,
+        name: 'Moses',
+        icon: 'mdi-account-group',
+        children: [
+          {
+            id: 2,
+            name: 'HydrEx',
+            icon: 'mdi-account-group',
+            children: [
+              {
+                id: 3,
+                name: 'gfz-sms-admin',
+                icon: 'mdi-account-group',
+                children: [{
+                  id: 4,
+                  name: 'User A',
+                  icon: 'mdi-account'
+                }]
+              },
+              {
+                id: 5,
+                name: 'gfz-sms-member',
+                icon: 'mdi-account-group',
+                children: [{
+                  id: 6,
+                  name: 'User B',
+                  icon: 'mdi-account'
+                }]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }
 </script>
