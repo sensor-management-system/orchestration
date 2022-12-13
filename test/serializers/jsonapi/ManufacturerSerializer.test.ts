@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -50,15 +50,19 @@ describe('ManufacturerSerializer', () => {
           links: {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/1/'
           },
-          relationships: {},
+          relationships: {
+            global_provenence: {
+              data: null
+            }
+          },
           type: 'Manufacturer'
         }, {
           attributes: {
-            category: null,
+            category: 'category',
             definition: 'Campbell Scientific Ltd.',
-            note: null,
-            provenance: null,
-            provenance_uri: null,
+            note: 'note',
+            provenance: 'provenance',
+            provenance_uri: 'provenance uri',
             status: 'Accepted',
             term: 'Campbell'
           },
@@ -66,7 +70,14 @@ describe('ManufacturerSerializer', () => {
           links: {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/'
           },
-          relationships: {},
+          relationships: {
+            global_provenance: {
+              data: {
+                id: '1',
+                type: 'GlobalProvenance'
+              }
+            }
+          },
           type: 'Manufacturer'
         }],
         included: [],
@@ -81,11 +92,23 @@ describe('ManufacturerSerializer', () => {
       const expectedManufacturer1 = Manufacturer.createFromObject({
         id: '1',
         name: 'ecoTech',
+        definition: 'ecoTech Umwelt-Meßsysteme GmbH',
+        provenance: '',
+        provenanceUri: '',
+        category: '',
+        note: '',
+        globalProvenanceId: null,
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/1/'
       })
       const expectedManufacturer2 = Manufacturer.createFromObject({
         id: '2',
         name: 'Campbell',
+        category: 'category',
+        definition: 'Campbell Scientific Ltd.',
+        note: 'note',
+        provenance: 'provenance',
+        provenanceUri: 'provenance uri',
+        globalProvenanceId: '1',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/'
       })
 
@@ -97,6 +120,47 @@ describe('ManufacturerSerializer', () => {
       expect(manufacturers.length).toEqual(2)
       expect(manufacturers[0]).toEqual(expectedManufacturer1)
       expect(manufacturers[1]).toEqual(expectedManufacturer2)
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should transform the model to json payload', () => {
+      const manufacturer = Manufacturer.createFromObject({
+        id: '2',
+        name: 'Some Coorp',
+        category: 'special',
+        definition: 'No idea what we want to put in there for manufacturers.',
+        provenance: 'website?',
+        provenanceUri: 'https://somewhere.at.net',
+        note: 'simple note',
+        globalProvenanceId: '1',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/manufacturers/2/'
+      })
+
+      const expectedResult = {
+        id: '2',
+        type: 'Manufacturer',
+        attributes: {
+          category: 'special',
+          definition: 'No idea what we want to put in there for manufacturers.',
+          provenance: 'website?',
+          provenance_uri: 'https://somewhere.at.net',
+          note: 'simple note',
+          term: 'Some Coorp'
+        },
+        relationships: {
+          global_provenance: {
+            data: {
+              id: '1',
+              type: 'GlobalProvenance'
+            }
+          }
+        }
+      }
+
+      const serializer = new ManufacturerSerializer()
+      const result = serializer.convertModelToJsonApiData(manufacturer)
+
+      expect(result).toEqual(expectedResult)
     })
   })
 })

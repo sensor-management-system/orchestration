@@ -58,6 +58,25 @@ export class CvContactRoleApi extends CVApi<CvContactRole> {
   findAllPaginated (pageSize: number = 100): Promise<CvContactRole[]> {
     return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
+
+  add (contactRole: CvContactRole): Promise<CvContactRole> {
+    const data = this.serializer.convertModelToJsonApiData(contactRole)
+
+    return this.axiosApi.post(
+      this.basePath,
+      {
+        data
+      },
+      {
+        headers: {
+          'Content-Type': 'application/vnd.api+json'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      return this.serializer.convertJsonApiDataToModel(response.data)
+    })
+  }
 }
 
 export class CvContactRoleSearchBuilder {

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -56,16 +56,25 @@ describe('PropertySerializer', () => {
                 type: 'SamplingMedium',
                 id: '5'
               }
+            },
+            global_provenance: {
+              data: null
+            },
+            aggregation_type: {
+              data: {
+                type: 'AggregationType',
+                id: '1'
+              }
             }
           },
           type: 'MeasuredQuantity'
         }, {
           attributes: {
-            category: null,
+            category: 'cat',
             definition: 'The depth of water if a snow cover is completely melted, expressed in units of depth, on a corresponding horizontal surface area.',
-            note: null,
+            note: 'note',
             provenance: 'Originally from the CUAHSI HIS VariableNameCV.  See: http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV.',
-            provenance_uri: null,
+            provenance_uri: 'uri',
             status: 'Accepted',
             term: 'Snow Water Equivalent'
           },
@@ -77,6 +86,18 @@ describe('PropertySerializer', () => {
             sampling_media: {
               data: {
                 type: 'SamplingMedium',
+                id: '2'
+              }
+            },
+            global_provenance: {
+              data: {
+                id: '1',
+                type: 'GlobalProvenance'
+              }
+            },
+            aggregation_type: {
+              data: {
+                type: 'AggregationType',
                 id: '2'
               }
             }
@@ -97,14 +118,26 @@ describe('PropertySerializer', () => {
         name: 'Snow Layer Hardness',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/1/',
         definition: 'Snow layers within the snowpack are a record of the winter’s weather. Like tree rings or strata of rock, layers can be traced to dates and conditions that formed them. One of the most important characteristics of a layer is its hardness. Harder snow is stronger and cohesive, while softer snow is weaker. ',
-        samplingMediaId: '5'
+        samplingMediaId: '5',
+        note: 'Added to support Critical Zone Observatory (CZO) data use cases. ',
+        category: '',
+        provenance: '',
+        provenanceUri: 'http://cbavalanchecenter.org/interpreting-snowpack-layers-and-hardness/',
+        globalProvenanceId: null,
+        aggregationTypeId: '1'
       })
       const expectedProperty2 = Property.createFromObject({
         id: '2',
         name: 'Snow Water Equivalent',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/',
         definition: 'The depth of water if a snow cover is completely melted, expressed in units of depth, on a corresponding horizontal surface area.',
-        samplingMediaId: '2'
+        samplingMediaId: '2',
+        category: 'cat',
+        note: 'note',
+        provenance: 'Originally from the CUAHSI HIS VariableNameCV.  See: http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV.',
+        provenanceUri: 'uri',
+        globalProvenanceId: '1',
+        aggregationTypeId: '2'
       })
 
       const serializer = new PropertySerializer()
@@ -115,6 +148,61 @@ describe('PropertySerializer', () => {
       expect(properties.length).toEqual(2)
       expect(properties[0]).toEqual(expectedProperty1)
       expect(properties[1]).toEqual(expectedProperty2)
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should transform the model to json payload', () => {
+      const cvProperty = Property.createFromObject({
+        id: '2',
+        name: 'Snow Water Equivalent',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/measuredquantities/2/',
+        definition: 'The depth of water if a snow cover is completely melted, expressed in units of depth, on a corresponding horizontal surface area.',
+        samplingMediaId: '2',
+        category: 'cat',
+        note: 'note',
+        provenance: 'Originally from the CUAHSI HIS VariableNameCV.  See: http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV.',
+        provenanceUri: 'uri',
+        globalProvenanceId: '1',
+        aggregationTypeId: '2'
+      })
+
+      const expectedResult = {
+        attributes: {
+          category: 'cat',
+          definition: 'The depth of water if a snow cover is completely melted, expressed in units of depth, on a corresponding horizontal surface area.',
+          note: 'note',
+          provenance: 'Originally from the CUAHSI HIS VariableNameCV.  See: http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=VariableNameCV.',
+          provenance_uri: 'uri',
+          term: 'Snow Water Equivalent'
+        },
+        id: '2',
+        relationships: {
+          sampling_media: {
+            data: {
+              type: 'SamplingMedium',
+              id: '2'
+            }
+          },
+          global_provenance: {
+            data: {
+              id: '1',
+              type: 'GlobalProvenance'
+            }
+          },
+          aggregation_type: {
+            data: {
+              type: 'AggregationType',
+              id: '2'
+            }
+          }
+        },
+        type: 'MeasuredQuantity'
+      }
+
+      const serializer = new PropertySerializer()
+      const result = serializer.convertModelToJsonApiData(cvProperty)
+
+      expect(result).toEqual(expectedResult)
     })
   })
 })

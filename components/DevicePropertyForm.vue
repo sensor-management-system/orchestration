@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -75,6 +75,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueCompartmentItem.definition }}</span>
               </v-tooltip>
+              <v-btn icon @click="showNewCompartmentDialog = true">
+                <v-icon>
+                  mdi-tooltip-plus-outline
+                </v-icon>
+              </v-btn>
             </template>
             <template #item="data">
               <template v-if="(typeof data.item) !== 'object'">
@@ -134,6 +139,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueSamplingMediaItem.definition }}</span>
               </v-tooltip>
+              <v-btn icon @click="showNewSamplingMediaDialog = true">
+                <v-icon>
+                  mdi-tooltip-plus-outline
+                </v-icon>
+              </v-btn>
             </template>
             <template #item="data">
               <template v-if="(typeof data.item) !== 'object'">
@@ -196,6 +206,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valuePropertyItem.definition }}</span>
               </v-tooltip>
+              <v-btn icon @click="showNewPropertyDialog = true">
+                <v-icon>
+                  mdi-tooltip-plus-outline
+                </v-icon>
+              </v-btn>
             </template>
             <template #item="data">
               <template v-if="(typeof data.item) !== 'object'">
@@ -258,6 +273,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueUnitItem.definition }}</span>
               </v-tooltip>
+              <v-btn icon :disabled="!valuePropertyItem || !valuePropertyItem.id" @click="showNewMeasuredQuantityUnitDialog = true">
+                <v-icon>
+                  mdi-tooltip-plus-outline
+                </v-icon>
+              </v-btn>
             </template>
             <template #item="data">
               <template v-if="(typeof data.item) !== 'object'">
@@ -380,6 +400,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueResolutionUnitItem.definition }}</span>
               </v-tooltip>
+              <v-btn icon @click="showNewUnitDialog = true">
+                <v-icon>
+                  mdi-tooltip-plus-outline
+                </v-icon>
+              </v-btn>
             </template>
             <template #item="data">
               <template v-if="(typeof data.item) !== 'object'">
@@ -413,6 +438,32 @@ permissions and limitations under the Licence.
         </v-col>
       </v-row>
     </v-form>
+    <compartment-dialog
+      v-model="showNewCompartmentDialog"
+      :initial-term="valueCompartmentItem ? valueCompartmentItem.name : null"
+      @aftersubmit="updateCompartment"
+    />
+    <sampling-media-dialog
+      v-model="showNewSamplingMediaDialog"
+      :initial-term="valueSamplingMediaItem ? valueSamplingMediaItem.name : null"
+      :initial-compartment-id="valueCompartmentItem ? valueCompartmentItem.id : null"
+      @aftersubmit="updateSamplingMedia"
+    />
+    <cv-property-dialog
+      v-model="showNewPropertyDialog"
+      :initial-term="valuePropertyItem ? valuePropertyItem.name : null"
+      :initial-sampling-media-id="valueSamplingMediaItem ? valueSamplingMediaItem.id : null"
+      @aftersubmit="updateProperty"
+    />
+    <measured-quantity-unit-dialog
+      v-model="showNewMeasuredQuantityUnitDialog"
+      :initial-measured-quantity-id="valuePropertyItem ? valuePropertyItem.id || null: null"
+      @aftersubmit="updateUnit"
+    />
+    <unit-dialog
+      v-model="showNewUnitDialog"
+      @aftersubmit="updateResolutionUnit"
+    />
   </div>
 </template>
 
@@ -423,13 +474,19 @@ permissions and limitations under the Licence.
  */
 import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 
+import CompartmentDialog from '@/components/devices/CompartmentDialog.vue'
+import CvPropertyDialog from '@/components/devices/CvPropertyDialog.vue'
+import SamplingMediaDialog from '@/components/devices/SamplingMediaDialog.vue'
+import MeasuredQuantityUnitDialog from '@/components/devices/MeasuredQuantityUnitDialog.vue'
+import UnitDialog from '@/components/devices/UnitDialog.vue'
+
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
-import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
+import { ICvSelectItem, hasDefinition, CvSelectItem } from '@/models/CvSelectItem'
 
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 
@@ -449,8 +506,22 @@ type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
  * A class component that renders a form for a device property
  * @extends Vue
  */
-@Component
+@Component({
+  components: {
+    CompartmentDialog,
+    CvPropertyDialog,
+    MeasuredQuantityUnitDialog,
+    SamplingMediaDialog,
+    UnitDialog
+  }
+})
 export default class DevicePropertyForm extends mixins(Rules) {
+  private showNewCompartmentDialog = false
+  private showNewSamplingMediaDialog = false
+  private showNewPropertyDialog = false
+  private showNewMeasuredQuantityUnitDialog = false
+  private showNewUnitDialog = false
+
   /**
    * a DeviceProperty
    */
@@ -865,11 +936,14 @@ export default class DevicePropertyForm extends mixins(Rules) {
     if (compartment) {
       return compartment
     }
-    return {
+
+    // Just there to have a toString method
+    return new CvSelectItem({
       name: this.value.compartmentName,
       uri: this.value.compartmentUri,
-      definition: ''
-    }
+      definition: '',
+      id: null
+    })
   }
 
   /**
@@ -884,7 +958,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
     let samplingMedias = this.samplingMedias
     // if a compartment is choosen, restrict the list of samplingMedias
     if (this.value.compartmentUri !== '') {
-      samplingMedias = samplingMedias.filter(s => s.compartmentId === '' || this.checkUriEndsWithId(this.value.compartmentUri, s.compartmentId))
+      samplingMedias = samplingMedias.filter(s => s.compartmentId === '' || this.checkUriEndsWithId(this.value.compartmentUri, s.compartmentId || ''))
     }
     return samplingMedias
   }
@@ -910,7 +984,8 @@ export default class DevicePropertyForm extends mixins(Rules) {
     return {
       name: this.value.samplingMediaName,
       uri: this.value.samplingMediaUri,
-      definition: ''
+      definition: '',
+      id: null
     }
   }
 
@@ -926,7 +1001,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
     let properties = this.properties
     // if a samplingMedia is choosen, restrict the list of properties
     if (this.value.samplingMediaUri !== '') {
-      properties = properties.filter(p => p.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, p.samplingMediaId))
+      properties = properties.filter(p => p.samplingMediaId === '' || this.checkUriEndsWithId(this.value.samplingMediaUri, p.samplingMediaId || ''))
     } else if (this.value.compartmentUri !== '') {
     // in case we have only a compartment, then we also just want
     // to select those properties that are hierachically
@@ -938,7 +1013,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
       for (const sm of samplingMediaItems) {
         samplingMediaIds.add(sm.id)
       }
-      properties = properties.filter(p => p.samplingMediaId === '' || samplingMediaIds.has(p.samplingMediaId))
+      properties = properties.filter(p => p.samplingMediaId === '' || samplingMediaIds.has(p.samplingMediaId || ''))
     }
     return properties
   }
@@ -964,7 +1039,8 @@ export default class DevicePropertyForm extends mixins(Rules) {
     return {
       name: this.value.propertyName,
       uri: this.value.propertyUri,
-      definition: ''
+      definition: '',
+      id: null
     }
   }
 
@@ -1011,7 +1087,8 @@ export default class DevicePropertyForm extends mixins(Rules) {
     return {
       name: this.value.unitName,
       uri: this.value.unitUri,
-      definition: ''
+      definition: '',
+      id: null
     }
   }
 
@@ -1036,7 +1113,8 @@ export default class DevicePropertyForm extends mixins(Rules) {
     return {
       name: this.value.resolutionUnitName,
       uri: this.value.resolutionUnitUri,
-      definition: ''
+      definition: '',
+      id: null
     }
   }
 

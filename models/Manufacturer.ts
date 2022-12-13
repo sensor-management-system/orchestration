@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,13 +32,25 @@
 export interface IManufacturer {
   id: string
   name: string
+  definition: string
+  provenance: string
+  provenanceUri: string
+  category: string
+  note: string
   uri: string
+  globalProvenanceId: string | null
 }
 
 export class Manufacturer implements IManufacturer {
   private _id: string = ''
   private _name: string = ''
+  private _definition: string = ''
+  private _provenance: string = ''
+  private _provenanceUri: string = ''
+  private _category: string = ''
+  private _note: string = ''
   private _uri: string = ''
+  private _globalProvenanceId: string | null = null
 
   get id (): string {
     return this._id
@@ -56,12 +68,60 @@ export class Manufacturer implements IManufacturer {
     this._name = newName
   }
 
+  get definition (): string {
+    return this._definition
+  }
+
+  set definition (newDefinition: string) {
+    this._definition = newDefinition
+  }
+
+  get provenance (): string {
+    return this._provenance
+  }
+
+  set provenance (newProvenance: string) {
+    this._provenance = newProvenance
+  }
+
+  get provenanceUri (): string {
+    return this._provenanceUri
+  }
+
+  set provenanceUri (newProvenanceUri: string) {
+    this._provenanceUri = newProvenanceUri
+  }
+
+  get category (): string {
+    return this._category
+  }
+
+  set category (newCategory: string) {
+    this._category = newCategory
+  }
+
+  get note (): string {
+    return this._note
+  }
+
+  set note (newNote: string) {
+    this._note = newNote
+  }
+
   get uri (): string {
     return this._uri
   }
 
   set uri (newUri: string) {
     this._uri = newUri
+  }
+
+  get globalProvenanceId (): string | null {
+    return this._globalProvenanceId
+  }
+
+  set globalProvenanceId (newId: string | null) {
+    this._globalProvenanceId = newId
   }
 
   toString (): string {
@@ -81,7 +141,13 @@ export class Manufacturer implements IManufacturer {
 
     newObject.id = someObject.id
     newObject.name = someObject.name
+    newObject.definition = someObject.definition
+    newObject.provenance = someObject.provenance
+    newObject.provenanceUri = someObject.provenanceUri
+    newObject.category = someObject.category
+    newObject.note = someObject.note
     newObject.uri = someObject.uri
+    newObject.globalProvenanceId = someObject.globalProvenanceId
 
     return newObject
   }

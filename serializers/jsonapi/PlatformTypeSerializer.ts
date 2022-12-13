@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,7 +33,8 @@ import { PlatformType } from '@/models/PlatformType'
 
 import {
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class PlatformTypeSerializer {
@@ -44,8 +45,66 @@ export class PlatformTypeSerializer {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): PlatformType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
+    const definition = jsonApiData.attributes.definition || ''
+    const provenance = jsonApiData.attributes.provenance || ''
+    const provenanceUri = jsonApiData.attributes.provenance_uri || ''
+    const category = jsonApiData.attributes.category || ''
+    const note = jsonApiData.attributes.note || ''
     const url = jsonApiData.links?.self || ''
 
-    return PlatformType.createWithData(id, name, url)
+    let globalProvenanceId = null
+
+    if (jsonApiData.relationships?.global_provenance?.data) {
+      const data = jsonApiData.relationships.global_provenance.data as IJsonApiEntityWithoutDetails
+      if (data.id) {
+        globalProvenanceId = data.id
+      }
+    }
+
+    return PlatformType.createFromObject({
+      id,
+      name,
+      definition,
+      provenance,
+      provenanceUri,
+      category,
+      note,
+      uri: url,
+      globalProvenanceId
+    })
+  }
+
+  convertModelToJsonApiData (platformType: PlatformType) {
+    const attributes = {
+      term: platformType.name,
+      definition: platformType.definition,
+      provenance: platformType.provenance,
+      provenance_uri: platformType.provenanceUri,
+      category: platformType.category,
+      note: platformType.note
+    }
+
+    const relationships: any = {}
+
+    if (platformType.globalProvenanceId) {
+      relationships.global_provenance = {
+        data: {
+          id: platformType.globalProvenanceId,
+          type: 'GlobalProvenance'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'PlatformType',
+      attributes,
+      relationships
+    }
+
+    if (platformType.id) {
+      wrapper.id = platformType.id
+    }
+
+    return wrapper
   }
 }

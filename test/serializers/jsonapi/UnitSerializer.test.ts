@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -51,22 +51,19 @@ describe('UnitSerializer', () => {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/'
           },
           relationships: {
-            unitstype: {
-              data: null,
-              links: {
-                self: 'http://rz-vm64.gfz-potsdam.de:5001/api/unit/Gray/unitstype'
-              }
+            global_provenance: {
+              data: null
             }
           },
           type: 'Unit'
         },
         {
           attributes: {
-            category: null,
+            category: 'cat',
             definition: 'Unit 2',
-            note: null,
+            note: 'note',
             provenance: 'ONE_PER_TIME',
-            provenance_uri: null,
+            provenance_uri: 'uri',
             status: 'ACCEPTED',
             term: '1/t'
           },
@@ -75,10 +72,10 @@ describe('UnitSerializer', () => {
             self: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/2/'
           },
           relationships: {
-            unitstype: {
-              data: null,
-              links: {
-                self: 'http://rz-vm64.gfz-potsdam.de:5001/api/unit/RAD/unitstype'
+            global_provenance: {
+              data: {
+                id: '1',
+                type: 'GlobalProvenance'
               }
             }
           },
@@ -97,14 +94,24 @@ describe('UnitSerializer', () => {
         id: '1',
         name: '1/m',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/',
-        definition: 'Unit 1'
+        definition: 'Unit 1',
+        category: '',
+        note: '',
+        provenance: 'ONE_PER_METER',
+        provenanceUri: '',
+        globalProvenanceId: null
       })
 
       const expectedUnit2 = Unit.createFromObject({
         id: '2',
         name: '1/t',
         uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/2/',
-        definition: 'Unit 2'
+        definition: 'Unit 2',
+        category: 'cat',
+        note: 'note',
+        provenance: 'ONE_PER_TIME',
+        provenanceUri: 'uri',
+        globalProvenanceId: '1'
       })
 
       const serializer = new UnitSerializer()
@@ -115,6 +122,47 @@ describe('UnitSerializer', () => {
       expect(units.length).toEqual(2)
       expect(units[0]).toEqual(expectedUnit1)
       expect(units[1]).toEqual(expectedUnit2)
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should transform the model to json payload', () => {
+      const unit = Unit.createFromObject({
+        id: '2',
+        name: '1/t',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/2/',
+        definition: 'Unit 2',
+        category: 'cat',
+        note: 'note',
+        provenance: 'ONE_PER_TIME',
+        provenanceUri: 'uri',
+        globalProvenanceId: '1'
+      })
+
+      const expectedResult = {
+        id: '2',
+        type: 'Unit',
+        attributes: {
+          category: 'cat',
+          definition: 'Unit 2',
+          note: 'note',
+          provenance: 'ONE_PER_TIME',
+          provenance_uri: 'uri',
+          term: '1/t'
+        },
+        relationships: {
+          global_provenance: {
+            data: {
+              id: '1',
+              type: 'GlobalProvenance'
+            }
+          }
+        }
+      }
+
+      const serializer = new UnitSerializer()
+      const result = serializer.convertModelToJsonApiData(unit)
+
+      expect(result).toEqual(expectedResult)
     })
   })
 })

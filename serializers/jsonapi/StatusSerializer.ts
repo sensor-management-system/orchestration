@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,7 +33,8 @@ import { Status } from '@/models/Status'
 
 import {
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class StatusSerializer {
@@ -46,7 +47,64 @@ export class StatusSerializer {
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
+    const provenance = jsonApiData.attributes.provenance || ''
+    const provenanceUri = jsonApiData.attributes.provenance_uri || ''
+    const category = jsonApiData.attributes.category || ''
+    const note = jsonApiData.attributes.note || ''
 
-    return Status.createWithData(id, name, url, definition)
+    let globalProvenanceId = null
+
+    if (jsonApiData.relationships?.global_provenance?.data) {
+      const data = jsonApiData.relationships.global_provenance.data as IJsonApiEntityWithoutDetails
+      if (data.id) {
+        globalProvenanceId = data.id
+      }
+    }
+
+    return Status.createFromObject({
+      id,
+      name,
+      definition,
+      provenance,
+      provenanceUri,
+      category,
+      note,
+      uri: url,
+      globalProvenanceId
+    })
+  }
+
+  convertModelToJsonApiData (status: Status) {
+    const attributes = {
+      term: status.name,
+      definition: status.definition,
+      provenance: status.provenance,
+      provenance_uri: status.provenanceUri,
+      category: status.category,
+      note: status.note
+    }
+
+    const relationships: any = {}
+
+    if (status.globalProvenanceId) {
+      relationships.global_provenance = {
+        data: {
+          id: status.globalProvenanceId,
+          type: 'GlobalProvenance'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'EquipmentStatus',
+      attributes,
+      relationships
+    }
+
+    if (status.id) {
+      wrapper.id = status.id
+    }
+
+    return wrapper
   }
 }

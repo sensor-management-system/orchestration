@@ -52,10 +52,23 @@ permissions and limitations under the Licence.
           persistent-hint
           return-object
           @change="updateRoute"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewActionTypeDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-select>
       </v-card-text>
     </v-card>
     <NuxtChild />
+    <action-type-dialog
+      v-model="showNewActionTypeDialog"
+      :initial-action-type-api-filter-type="selectedActionCategory"
+      @aftersubmit="setChosenKindOfConfigurationActionAndUpdateRoute"
+    />
   </div>
 </template>
 
@@ -63,19 +76,24 @@ permissions and limitations under the Licence.
 import { Component, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import ActionTypeDialog from '@/components/shared/ActionTypeDialog.vue'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
+
+import { ActionType } from '@/models/ActionType'
 
 import { ConfigurationActionTypeItemsGetter, LoadConfigurationGenericActionTypesAction } from '@/store/vocabulary'
 import {
   ConfigurationsState,
   SetChosenKindOfConfigurationActionAction,
-  LoadConfigurationAttachmentsAction
+  LoadConfigurationAttachmentsAction,
+  KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
 } from '@/store/configurations'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeApi'
 
 @Component({
-  components: { ProgressIndicator },
+  components: { ActionTypeDialog, ProgressIndicator },
   middleware: ['auth'],
   computed: {
     ...mapGetters('vocabulary', ['configurationActionTypeItems']),
@@ -88,6 +106,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 })
 export default class ActionAddPage extends mixins(CheckEditAccess) {
   private isLoading: boolean = false
+  private showNewActionTypeDialog = false
 
   // vuex definition for typescript check
   configurationActionTypeItems!: ConfigurationActionTypeItemsGetter
@@ -119,6 +138,10 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     return 'You\'re not allowed to edit this configuration.'
   }
 
+  get selectedActionCategory (): string {
+    return ACTION_TYPE_API_FILTER_CONFIGURATION
+  }
+
   async fetch (): Promise<void> {
     try {
       this.isLoading = true
@@ -144,6 +167,16 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
 
   set chosenKindOfAction (newVal) {
     this.setChosenKindOfConfigurationAction(newVal)
+  }
+
+  setChosenKindOfConfigurationActionAndUpdateRoute (newVal: ActionType) {
+    this.setChosenKindOfConfigurationAction({
+      kind: KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION,
+      id: newVal.id,
+      name: newVal.name,
+      uri: newVal.uri
+    })
+    this.updateRoute()
   }
 
   updateRoute () {

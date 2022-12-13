@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,7 +33,8 @@ import { DeviceType } from '@/models/DeviceType'
 
 import {
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class DeviceTypeSerializer {
@@ -44,8 +45,65 @@ export class DeviceTypeSerializer {
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntity): DeviceType {
     const id = jsonApiData.id.toString()
     const name = jsonApiData.attributes.term
+    const definition = jsonApiData.attributes.definition || ''
+    const provenance = jsonApiData.attributes.provenance || ''
+    const provenanceUri = jsonApiData.attributes.provenance_uri || ''
+    const category = jsonApiData.attributes.category || ''
+    const note = jsonApiData.attributes.note || ''
     const url = jsonApiData.links?.self || ''
 
-    return DeviceType.createWithData(id, name, url)
+    let globalProvenanceId = null
+
+    if (jsonApiData.relationships?.global_provenance?.data) {
+      const data = jsonApiData.relationships.global_provenance.data as IJsonApiEntityWithoutDetails
+      if (data.id) {
+        globalProvenanceId = data.id
+      }
+    }
+    return DeviceType.createFromObject({
+      id,
+      name,
+      definition,
+      provenance,
+      provenanceUri,
+      category,
+      note,
+      uri: url,
+      globalProvenanceId
+    })
+  }
+
+  convertModelToJsonApiData (deviceType: DeviceType) {
+    const attributes = {
+      term: deviceType.name,
+      definition: deviceType.definition,
+      provenance: deviceType.provenance,
+      provenance_uri: deviceType.provenanceUri,
+      category: deviceType.category,
+      note: deviceType.note
+    }
+
+    const relationships: any = {}
+
+    if (deviceType.globalProvenanceId) {
+      relationships.global_provenance = {
+        data: {
+          id: deviceType.globalProvenanceId,
+          type: 'GlobalProvenance'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'EquipmentType',
+      attributes,
+      relationships
+    }
+
+    if (deviceType.id) {
+      wrapper.id = deviceType.id
+    }
+
+    return wrapper
   }
 }

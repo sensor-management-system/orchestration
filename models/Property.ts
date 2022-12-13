@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,7 +34,13 @@ export interface IProperty {
   name: string
   uri: string
   definition: string
-  samplingMediaId: string
+  samplingMediaId: string | null
+  provenance: string
+  provenanceUri: string
+  category: string
+  note: string
+  globalProvenanceId: string | null
+  aggregationTypeId: string | null
 }
 
 export class Property implements IProperty {
@@ -42,7 +48,13 @@ export class Property implements IProperty {
   private _name: string = ''
   private _uri: string = ''
   private _definition: string = ''
-  private _samplingMediaId: string = ''
+  private _samplingMediaId: string | null = null
+  private _provenance: string = ''
+  private _provenanceUri: string = ''
+  private _category: string = ''
+  private _note: string = ''
+  private _globalProvenanceId: string | null = null
+  private _aggregationTypeId: string | null = null
 
   get id (): string {
     return this._id
@@ -76,12 +88,60 @@ export class Property implements IProperty {
     this._definition = newDefinition
   }
 
-  get samplingMediaId (): string {
+  get samplingMediaId (): string | null {
     return this._samplingMediaId
   }
 
-  set samplingMediaId (newSamplingMediaId: string) {
+  set samplingMediaId (newSamplingMediaId: string | null) {
     this._samplingMediaId = newSamplingMediaId
+  }
+
+  get provenance (): string {
+    return this._provenance
+  }
+
+  set provenance (newProvenance: string) {
+    this._provenance = newProvenance
+  }
+
+  get provenanceUri (): string {
+    return this._provenanceUri
+  }
+
+  set provenanceUri (newProvenanceUri: string) {
+    this._provenanceUri = newProvenanceUri
+  }
+
+  get category (): string {
+    return this._category
+  }
+
+  set category (newCategory: string) {
+    this._category = newCategory
+  }
+
+  get note (): string {
+    return this._note
+  }
+
+  set note (newNote: string) {
+    this._note = newNote
+  }
+
+  get globalProvenanceId (): string | null {
+    return this._globalProvenanceId
+  }
+
+  set globalProvenanceId (newId: string | null) {
+    this._globalProvenanceId = newId
+  }
+
+  get aggregationTypeId (): string | null {
+    return this._aggregationTypeId
+  }
+
+  set aggregationTypeId (newAggregationTypeId: string | null) {
+    this._aggregationTypeId = newAggregationTypeId
   }
 
   toString (): string {
@@ -103,9 +163,15 @@ export class Property implements IProperty {
 
     newObject.id = someObject.id
     newObject.name = someObject.name
-    newObject.uri = someObject.uri
     newObject.definition = someObject.definition
+    newObject.provenance = someObject.provenance
+    newObject.provenanceUri = someObject.provenanceUri
+    newObject.category = someObject.category
+    newObject.note = someObject.note
+    newObject.uri = someObject.uri
+    newObject.globalProvenanceId = someObject.globalProvenanceId
     newObject.samplingMediaId = someObject.samplingMediaId
+    newObject.aggregationTypeId = someObject.aggregationTypeId
 
     return newObject
   }

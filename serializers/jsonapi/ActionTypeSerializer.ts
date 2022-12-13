@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,7 +33,9 @@ import { ActionType } from '@/models/ActionType'
 
 import {
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetails,
+  IJsonApiEntityWithoutDetailsDataDict
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class ActionTypeSerializer {
@@ -46,7 +48,74 @@ export class ActionTypeSerializer {
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
+    const provenance = jsonApiData.attributes.provenance || ''
+    const provenanceUri = jsonApiData.attributes.provenance_uri || ''
+    const category = jsonApiData.attributes.category || ''
+    const note = jsonApiData.attributes.note || ''
+    const actionCategoryId = (jsonApiData.relationships && jsonApiData.relationships.action_category && (jsonApiData.relationships.action_category as IJsonApiEntityWithoutDetailsDataDict).data.id) || null
 
-    return ActionType.createWithData(id, name, url, definition)
+    let globalProvenanceId = null
+
+    if (jsonApiData.relationships?.global_provenance?.data) {
+      const data = jsonApiData.relationships.global_provenance.data as IJsonApiEntityWithoutDetails
+      if (data.id) {
+        globalProvenanceId = data.id
+      }
+    }
+
+    return ActionType.createFromObject({
+      id,
+      name,
+      uri: url,
+      definition,
+      provenance,
+      provenanceUri,
+      note,
+      category,
+      actionCategoryId,
+      globalProvenanceId
+    })
+  }
+
+  convertModelToJsonApiData (actionType: ActionType) {
+    const attributes = {
+      term: actionType.name,
+      definition: actionType.definition,
+      provenance: actionType.provenance,
+      provenance_uri: actionType.provenanceUri,
+      category: actionType.category,
+      note: actionType.note
+    }
+
+    const relationships: any = {}
+
+    if (actionType.globalProvenanceId) {
+      relationships.global_provenance = {
+        data: {
+          id: actionType.globalProvenanceId,
+          type: 'GlobalProvenance'
+        }
+      }
+    }
+    if (actionType.actionCategoryId) {
+      relationships.action_category = {
+        data: {
+          id: actionType.actionCategoryId,
+          type: 'ActionCategory'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'ActionType',
+      attributes,
+      relationships
+    }
+
+    if (actionType.id) {
+      wrapper.id = actionType.id
+    }
+
+    return wrapper
   }
 }

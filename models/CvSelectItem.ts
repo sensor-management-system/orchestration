@@ -37,6 +37,25 @@ export interface ICvSelectItem {
   uri: string
   name: string
   definition: string
+  id: string | null
+}
+
+export class CvSelectItem implements ICvSelectItem {
+  uri: string
+  name: string
+  definition: string
+  id: string | null
+
+  constructor (data: ICvSelectItem) {
+    this.uri = data.uri
+    this.name = data.name
+    this.definition = data.definition
+    this.id = data.id
+  }
+
+  toString (): string {
+    return this.name
+  }
 }
 
 /**

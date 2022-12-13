@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -47,10 +47,23 @@ permissions and limitations under the Licence.
           persistent-hint
           return-object
           @change="updateRoute"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewActionTypeDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-select>
       </v-card-text>
     </v-card>
     <NuxtChild />
+    <action-type-dialog
+      v-model="showNewActionTypeDialog"
+      :initial-action-type-api-filter-type="selectedActionCategory"
+      @aftersubmit="setChosenKindOfDeviceActionAndUpdateRoute"
+    />
   </div>
 </template>
 
@@ -58,7 +71,11 @@ permissions and limitations under the Licence.
 import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import ActionTypeDialog from '@/components/shared/ActionTypeDialog.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 import CheckEditAccess from '@/mixins/CheckEditAccess'
+import { ActionType } from '@/models/ActionType'
 
 import {
   LoadDeviceAttachmentsAction,
@@ -72,14 +89,14 @@ import {
   LoadDeviceGenericActionTypesAction
 } from '@/store/vocabulary'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
 
 @Component({
-  components: { ProgressIndicator },
+  components: { ActionTypeDialog, ProgressIndicator },
   middleware: ['auth'],
   computed: {
     ...mapGetters('vocabulary', ['deviceActionTypeItems']),
@@ -92,6 +109,7 @@ const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
 })
 export default class ActionAddPage extends mixins(CheckEditAccess) {
   private isLoading: boolean = false
+  private showNewActionTypeDialog = false
 
   // vuex definition for typescript check
   deviceActionTypeItems!: DeviceActionTypeItemsGetter
@@ -149,6 +167,20 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
 
   set chosenKindOfAction (newVal) {
     this.setChosenKindOfDeviceAction(newVal)
+  }
+
+  setChosenKindOfDeviceActionAndUpdateRoute (newVal: ActionType) {
+    this.setChosenKindOfDeviceAction({
+      kind: KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION,
+      id: newVal.id,
+      name: newVal.name,
+      uri: newVal.uri
+    })
+    this.updateRoute()
+  }
+
+  get selectedActionCategory (): string {
+    return ACTION_TYPE_API_FILTER_DEVICE
   }
 
   get deviceCalibrationChosen () {

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,7 +34,8 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import {
   IJsonApiEntityListEnvelope,
   IJsonApiEntity,
-  IJsonApiEntityWithoutDetailsDataDict
+  IJsonApiEntityWithoutDetailsDataDict,
+  IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class SamplingMediaSerializer {
@@ -47,8 +48,76 @@ export class SamplingMediaSerializer {
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
-    const compartmentId = (jsonApiData.relationships && jsonApiData.relationships.compartment && (jsonApiData.relationships.compartment as IJsonApiEntityWithoutDetailsDataDict).data.id) || ''
+    const provenance = jsonApiData.attributes.provenance || ''
+    const provenanceUri = jsonApiData.attributes.provenance_uri || ''
+    const category = jsonApiData.attributes.category || ''
+    const note = jsonApiData.attributes.note || ''
 
-    return SamplingMedia.createWithData(id, name, url, definition, compartmentId)
+    const compartmentId = (jsonApiData.relationships && jsonApiData.relationships.compartment && (jsonApiData.relationships.compartment as IJsonApiEntityWithoutDetailsDataDict).data.id) || null
+
+    let globalProvenanceId = null
+
+    if (jsonApiData.relationships?.global_provenance?.data) {
+      const data = jsonApiData.relationships.global_provenance.data as IJsonApiEntityWithoutDetails
+      if (data.id) {
+        globalProvenanceId = data.id
+      }
+    }
+
+    return SamplingMedia.createFromObject({
+      id,
+      name,
+      definition,
+      provenance,
+      provenanceUri,
+      category,
+      note,
+      uri: url,
+      globalProvenanceId,
+      compartmentId
+    })
+  }
+
+  convertModelToJsonApiData (samplingMedia: SamplingMedia) {
+    const attributes = {
+      term: samplingMedia.name,
+      definition: samplingMedia.definition,
+      provenance: samplingMedia.provenance,
+      provenance_uri: samplingMedia.provenanceUri,
+      category: samplingMedia.category,
+      note: samplingMedia.note
+    }
+
+    const relationships: any = {}
+
+    if (samplingMedia.globalProvenanceId) {
+      relationships.global_provenance = {
+        data: {
+          id: samplingMedia.globalProvenanceId,
+          type: 'GlobalProvenance'
+        }
+      }
+    }
+
+    if (samplingMedia.compartmentId) {
+      relationships.compartment = {
+        data: {
+          id: samplingMedia.compartmentId,
+          type: 'Compartment'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'SamplingMedium',
+      attributes,
+      relationships
+    }
+
+    if (samplingMedia.id) {
+      wrapper.id = samplingMedia.id
+    }
+
+    return wrapper
   }
 }

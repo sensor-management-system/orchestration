@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -48,26 +48,37 @@ describe('CompartmentSerializer', () => {
           },
           id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/1/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/compartments/1/'
           },
-          relationships: {},
-          type: 'Variabletype'
+          relationships: {
+            global_provenence: {
+              data: null
+            }
+          },
+          type: 'Compartment'
         }, {
           attributes: {
-            category: null,
+            category: 'category',
             definition: 'Variables associated with biological organisms',
-            note: null,
+            note: 'note',
             provenance: 'Originally from CUAHSI HIS GeneralCategoryCV. See http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=GeneralCategoryCV.',
-            provenance_uri: null,
+            provenance_uri: 'uri',
             status: 'ACCEPTED',
             term: 'Biota'
           },
           id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/2/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/compartments/2/'
           },
-          relationships: {},
-          type: 'Variabletype'
+          relationships: {
+            global_provenance: {
+              data: {
+                id: '1',
+                type: 'GlobalProvenance'
+              }
+            }
+          },
+          type: 'Compartment'
         }],
         included: [],
         jsonapi: {
@@ -81,14 +92,24 @@ describe('CompartmentSerializer', () => {
       const expectedCompartment1 = Compartment.createFromObject({
         id: '1',
         name: 'Age',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/1/',
-        definition: 'Variables associated with age'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/compartments/1/',
+        definition: 'Variables associated with age',
+        category: '',
+        note: '',
+        provenance: 'Originally from PetDB. Syntax modified to remove underscores.',
+        provenanceUri: '',
+        globalProvenanceId: null
       })
       const expectedCompartment2 = Compartment.createFromObject({
         id: '2',
         name: 'Biota',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/variabletypes/2/',
-        definition: 'Variables associated with biological organisms'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/compartments/2/',
+        definition: 'Variables associated with biological organisms',
+        category: 'category',
+        note: 'note',
+        provenance: 'Originally from CUAHSI HIS GeneralCategoryCV. See http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=GeneralCategoryCV.',
+        provenanceUri: 'uri',
+        globalProvenanceId: '1'
       })
 
       const serializer = new CompartmentSerializer()
@@ -99,6 +120,47 @@ describe('CompartmentSerializer', () => {
       expect(compartments.length).toEqual(2)
       expect(compartments[0]).toEqual(expectedCompartment1)
       expect(compartments[1]).toEqual(expectedCompartment2)
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should transform the model to json payload', () => {
+      const compartment = Compartment.createFromObject({
+        id: '2',
+        name: 'Biota',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/compartments/2/',
+        definition: 'Variables associated with biological organisms',
+        category: 'category',
+        note: 'note',
+        provenance: 'Originally from CUAHSI HIS GeneralCategoryCV. See http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=GeneralCategoryCV.',
+        provenanceUri: 'uri',
+        globalProvenanceId: '1'
+      })
+
+      const expectedResult = {
+        id: '2',
+        type: 'Compartment',
+        attributes: {
+          term: 'Biota',
+          definition: 'Variables associated with biological organisms',
+          category: 'category',
+          note: 'note',
+          provenance: 'Originally from CUAHSI HIS GeneralCategoryCV. See http://his.cuahsi.org/mastercvreg/edit_cv11.aspx?tbl=GeneralCategoryCV.',
+          provenance_uri: 'uri'
+        },
+        relationships: {
+          global_provenance: {
+            data: {
+              id: '1',
+              type: 'GlobalProvenance'
+            }
+          }
+        }
+      }
+
+      const serializer = new CompartmentSerializer()
+      const result = serializer.convertModelToJsonApiData(compartment)
+
+      expect(result).toEqual(expectedResult)
     })
   })
 })

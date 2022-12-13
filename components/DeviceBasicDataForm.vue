@@ -113,7 +113,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          :items="states"
+          :items="equipmentstatus"
           item-text="name"
           :value="valueStatusItem"
           :readonly="readonly"
@@ -139,6 +139,11 @@ permissions and limitations under the Licence.
               </template>
               <span>{{ valueStatusItem.definition }}</span>
             </v-tooltip>
+            <v-btn icon @click="showNewStatusDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
           </template>
           <template #item="data">
             <template v-if="typeof data.item !== 'object'">
@@ -178,7 +183,15 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           label="Device type"
           @input="update('deviceTypeName', $event)"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewDeviceTypeDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
@@ -188,7 +201,15 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           label="Manufacturer"
           @input="update('manufacturerName', $event)"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewManufacturerDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
@@ -277,10 +298,26 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
+    <device-type-dialog
+      v-model="showNewDeviceTypeDialog"
+      :initial-term="deviceTypeName"
+      @aftersubmit="setDeviceType"
+    />
+    <status-dialog
+      v-model="showNewStatusDialog"
+      :initial-term="deviceStatusName"
+      @aftersubmit="updateStatus"
+    />
+    <manufacturer-dialog
+      v-model="showNewManufacturerDialog"
+      :initial-term="deviceManufacturerName"
+      @aftersubmit="setManufacturer"
+    />
   </v-form>
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -295,26 +332,46 @@ import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
 
 import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
 import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
+import DeviceTypeDialog from '@/components/devices/DeviceTypeDialog.vue'
+import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
+import StatusDialog from '@/components/shared/StatusDialog.vue'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 import Validator from '@/utils/validator'
+import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersAction, VocabularyState } from '@/store/vocabulary'
 
 type StatusSelectValue = Status | string | undefined;
 
 @Component({
+  computed: {
+    ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus'])
+  },
+  methods: {
+    ...mapActions('vocabulary', ['loadDevicetypes', 'loadManufacturers', 'loadEquipmentstatus'])
+  },
   components: {
+    DeviceTypeDialog,
+    ManufacturerDialog,
     PermissionGroupSelect,
+    StatusDialog,
     VisibilitySwitch
   }
 })
 export default class DeviceBasicDataForm extends mixins(Rules) {
-  private states: Status[] = []
-  private manufacturers: Manufacturer[] = []
-  private deviceTypes: DeviceType[] = []
   private permissionGroups: PermissionGroup[] = []
   private userInfo: DetailedUserInfo | null = null
   private entityName: string = 'device'
+  private showNewDeviceTypeDialog = false
+  private showNewStatusDialog = false
+  private showNewManufacturerDialog = false
+  private devicetypes!: VocabularyState['devicetypes']
+  private manufacturers !: VocabularyState['manufacturers']
+  private equipmentstatus !: VocabularyState['equipmentstatus']
+
+  loadDevicetypes !: LoadDevicetypesAction
+  loadManufacturers !: LoadManufacturersAction
+  loadEquipmentstatus !: LoadEquipmentstatusAction
 
   @Prop({
     required: true,
@@ -358,22 +415,24 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     ]
   }
 
-  mounted () {
-    this.$api.states.findAllPaginated().then((foundStates) => {
-      this.states = foundStates
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of states failed')
-    })
-    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
-      this.manufacturers = foundManufacturers
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
-    })
-    this.$api.deviceTypes.findAllPaginated().then((foundDeviceTypes) => {
-      this.deviceTypes = foundDeviceTypes
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of device types failed')
-    })
+  async fetch () {
+    try {
+      await Promise.all([
+        this.loadEquipmentstatus(),
+        this.loadManufacturers(),
+        this.loadDevicetypes()
+      ])
+    } catch {
+      this.$store.commit('snackbar/setError', 'Loading of controlled vocabulary failed')
+    }
+  }
+
+  setDeviceType (deviceType: DeviceType) {
+    this.update('deviceTypeName', deviceType.name)
+  }
+
+  setManufacturer (manufacturer: Manufacturer) {
+    this.update('manufacturerName', manufacturer.name)
   }
 
   update (key: string, value: string|PermissionGroup[]) {
@@ -389,9 +448,9 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
       case 'deviceTypeName':
         newObj.deviceTypeName = value as string
         {
-          const deviceTypeIndex = this.deviceTypes.findIndex(t => t.name === value)
+          const deviceTypeIndex = this.devicetypes.findIndex(t => t.name === value)
           if (deviceTypeIndex > -1) {
-            newObj.deviceTypeUri = this.deviceTypes[deviceTypeIndex].uri
+            newObj.deviceTypeUri = this.devicetypes[deviceTypeIndex].uri
           } else {
             newObj.deviceTypeUri = ''
           }
@@ -469,7 +528,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
       if (typeof value === 'string') {
         newObj.statusName = value
         newObj.statusUri = ''
-        const state = this.states.find(s => s.name === value)
+        const state = this.equipmentstatus.find(s => s.name === value)
         if (state) {
           newObj.statusUri = state.uri
         }
@@ -491,11 +550,11 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   }
 
   get statusNames (): string[] {
-    return this.states.map(s => s.name)
+    return this.equipmentstatus.map(s => s.name)
   }
 
   get deviceTypeNames (): string[] {
-    return this.deviceTypes.map(t => t.name)
+    return this.devicetypes.map(t => t.name)
   }
 
   get deviceManufacturerName (): string {
@@ -507,17 +566,17 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   }
 
   get deviceStatusName () {
-    const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
+    const statusIndex = this.equipmentstatus.findIndex(s => s.uri === this.value.statusUri)
     if (statusIndex > -1) {
-      return this.states[statusIndex].name
+      return this.equipmentstatus[statusIndex].name
     }
     return this.value.statusName
   }
 
   get deviceTypeName () {
-    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.value.deviceTypeUri)
+    const deviceTypeIndex = this.devicetypes.findIndex(t => t.uri === this.value.deviceTypeUri)
     if (deviceTypeIndex > -1) {
-      return this.deviceTypes[deviceTypeIndex].name
+      return this.devicetypes[deviceTypeIndex].name
     }
     return this.value.deviceTypeName
   }
@@ -536,14 +595,15 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     if (!this.value.statusName && !this.value.statusUri) {
       return null
     }
-    const status = this.states.find(c => c.uri === this.value.statusUri)
+    const status = this.equipmentstatus.find(c => c.uri === this.value.statusUri)
     if (status) {
       return status
     }
     return {
       name: this.value.statusName,
       uri: this.value.statusUri,
-      definition: ''
+      definition: '',
+      id: null
     }
   }
 

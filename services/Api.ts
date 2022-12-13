@@ -75,6 +75,9 @@ import { UnitApi } from '@/services/cv/UnitApi'
 import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
 import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
 import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
+import { GlobalProvenanceApi } from '@/services/cv/GlobalProvenanceApi'
+import { AggregationTypeApi } from '@/services/cv/AggregationTypeApi'
+import { ActionCategoryApi } from '@/services/cv/ActionCategoryApi'
 
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
@@ -138,6 +141,9 @@ export class Api {
   private readonly _actionTypeApi: ActionTypeApi
   private readonly _softwareTypeApi: SoftwareTypeApi
   private readonly _cvContactRoleApi: CvContactRoleApi
+  private readonly _globalProvenanceApi: GlobalProvenanceApi
+  private readonly _aggregationTypeApi: AggregationTypeApi
+  private readonly _actionCategoryApi: ActionCategoryApi
 
   private readonly _elevationDatumApi: ElevationDatumApi
   private readonly _epsgCodeApi: EpsgCodeApi
@@ -353,43 +359,43 @@ export class Api {
     }
 
     this._compartmentApi = new CompartmentApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/compartments/'
     )
     this._deviceTypeApi = new DeviceTypeApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/equipmenttypes/'
     )
     this._manufacturerApi = new ManufacturerApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/manufacturers/'
     )
     this._platformTypeApi = new PlatformTypeApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/platformtypes/'
     )
     this._propertyApi = new PropertyApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/measuredquantities/'
     )
     this._samplingMediaApi = new SamplingMediaApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/samplingmedia/'
     )
     this._statusApi = new StatusApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/equipmentstatus/'
     )
     this._unitApi = new UnitApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/units/'
     )
     this._measuredQuantityUnitApi = new MeasuredQuantityUnitApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/measuredquantityunits/'
     )
     this._actionTypeApi = new ActionTypeApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/actiontypes/'
     )
     this._softwareTypeApi = new SoftwareTypeApi(
@@ -397,8 +403,20 @@ export class Api {
       '/softwaretypes/'
     )
     this._cvContactRoleApi = new CvContactRoleApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/contactroles/'
+    )
+    this._globalProvenanceApi = new GlobalProvenanceApi(
+      createAxios(cvBaseUrl, cvConfig),
+      '/globalprovenances/'
+    )
+    this._aggregationTypeApi = new AggregationTypeApi(
+      createAxios(cvBaseUrl, cvConfig),
+      '/aggregationtypes/'
+    )
+    this._actionCategoryApi = new ActionCategoryApi(
+      createAxios(cvBaseUrl, cvConfig),
+      '/actioncategories/'
     )
 
     this._elevationDatumApi = new ElevationDatumApi()
@@ -538,12 +556,24 @@ export class Api {
     return this._actionTypeApi
   }
 
+  get actionCategories (): ActionCategoryApi {
+    return this._actionCategoryApi
+  }
+
   get softwareTypes (): SoftwareTypeApi {
     return this._softwareTypeApi
   }
 
   get cvContactRoles (): CvContactRoleApi {
     return this._cvContactRoleApi
+  }
+
+  get globalProvenances (): GlobalProvenanceApi {
+    return this._globalProvenanceApi
+  }
+
+  get aggregationTypes (): AggregationTypeApi {
+    return this._aggregationTypeApi
   }
 
   get elevationData (): ElevationDatumApi {
