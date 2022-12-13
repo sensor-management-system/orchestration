@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -57,6 +57,25 @@ export class SamplingMediaApi extends CVApi<SamplingMedia> {
 
   findAllPaginated (pageSize: number = 100): Promise<SamplingMedia[]> {
     return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
+  }
+
+  add (samplingMedia: SamplingMedia): Promise<SamplingMedia> {
+    const data = this.serializer.convertModelToJsonApiData(samplingMedia)
+
+    return this.axiosApi.post(
+      this.basePath,
+      {
+        data
+      },
+      {
+        headers: {
+          'Content-Type': 'application/vnd.api+json'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      return this.serializer.convertJsonApiDataToModel(response.data)
+    })
   }
 }
 

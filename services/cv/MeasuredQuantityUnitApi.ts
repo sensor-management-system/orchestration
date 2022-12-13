@@ -58,6 +58,32 @@ export class MeasuredQuantityUnitApi extends CVApi<MeasuredQuantityUnit> {
   findAllPaginated (pageSize: number = 100): Promise<MeasuredQuantityUnit[]> {
     return this.newSearchBuilder().build().findMatchingAsPaginationLoader(pageSize).then(loader => this.loadPaginated(loader))
   }
+
+  async find (id: string): Promise<MeasuredQuantityUnit> {
+    const rawResponse = await this.axiosApi.get(this.basePath + id + '?include=unit')
+    const response = rawResponse.data
+    this.serializer.included = response.included
+    return this.serializer.convertJsonApiDataToModel(response.data)
+  }
+
+  async add (measuredQuantityUnit: MeasuredQuantityUnit): Promise<MeasuredQuantityUnit> {
+    const data = this.serializer.convertModelToJsonApiData(measuredQuantityUnit)
+
+    const rawResponse = await this.axiosApi.post(
+      this.basePath,
+      {
+        data
+      },
+      {
+        headers: {
+          'Content-Type': 'application/vnd.api+json'
+        }
+      }
+    )
+    const response = rawResponse.data
+    const id = response.data.id
+    return await this.find(id)
+  }
 }
 
 export class MeasuredQuantityUnitSearchBuilder {

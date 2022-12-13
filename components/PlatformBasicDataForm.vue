@@ -113,7 +113,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <v-combobox
-          :items="states"
+          :items="equipmentstatus"
           item-text="name"
           :value="valueStatusItem"
           :readonly="readonly"
@@ -139,6 +139,11 @@ permissions and limitations under the Licence.
               </template>
               <span>{{ valueStatusItem.definition }}</span>
             </v-tooltip>
+            <v-btn icon @click="showNewStatusDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
           </template>
           <template #item="data">
             <template v-if="typeof data.item !== 'object'">
@@ -178,7 +183,15 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           label="Platform type"
           @input="update('platformTypeName', $event)"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewPlatformTypeDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-combobox
@@ -188,7 +201,15 @@ permissions and limitations under the Licence.
           :disabled="readonly"
           label="Manufacturer"
           @input="update('manufacturerName', $event)"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewManufacturerDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
@@ -259,11 +280,26 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
+    <platform-type-dialog
+      v-model="showNewPlatformTypeDialog"
+      :initial-term="platformTypeName"
+      @aftersubmit="setPlatformType"
+    />
+    <status-dialog
+      v-model="showNewStatusDialog"
+      :initial-term="platformStatusName"
+      @aftersubmit="updateStatus"
+    />
+    <manufacturer-dialog
+      v-model="showNewManufacturerDialog"
+      :initial-term="platformManufacturerName"
+      @aftersubmit="setManufacturer"
+    />
   </v-form>
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -278,28 +314,48 @@ import { ICvSelectItem, hasDefinition } from '@/models/CvSelectItem'
 
 import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
 import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
+import PlatformTypeDialog from '@/components/platforms/PlatformTypeDialog.vue'
+import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
+import StatusDialog from '@/components/shared/StatusDialog.vue'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 import Validator from '@/utils/validator'
+import { LoadEquipmentstatusAction, LoadManufacturersAction, LoadPlatformtypesAction, VocabularyState } from '@/store/vocabulary'
 
 type StatusSelectValue = Status | string | undefined
 
 @Component({
   components: {
+    ManufacturerDialog,
     PermissionGroupSelect,
+    PlatformTypeDialog,
+    StatusDialog,
     VisibilitySwitch
   },
-  computed: mapGetters('permissions', ['userGroups'])
+  computed: {
+    ...mapGetters('permissions', ['userGroups']),
+    ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus'])
+  },
+  methods: {
+    ...mapActions('vocabulary', ['loadPlatformtypes', 'loadManufacturers', 'loadEquipmentstatus'])
+  }
 })
 export default class PlatformBasicDataForm extends mixins(Rules) {
-  private states: Status[] = []
-  private manufacturers: Manufacturer[] = []
-  private platformTypes: PlatformType[] = []
   private permissionGroups: PermissionGroup[] = []
   private isPermissionGroupsLoaded: boolean = false
   private userInfo: DetailedUserInfo | null = null
   private entityName = 'platform'
+  private platformtypes!: VocabularyState['platformtypes']
+  private manufacturers !: VocabularyState['manufacturers']
+  private equipmentstatus !: VocabularyState['equipmentstatus']
+  private showNewPlatformTypeDialog = false
+  private showNewStatusDialog = false
+  private showNewManufacturerDialog = false
+
+  loadPlatformtypes !: LoadPlatformtypesAction
+  loadManufacturers !: LoadManufacturersAction
+  loadEquipmentstatus !: LoadEquipmentstatusAction
 
   @Prop({
     required: true,
@@ -343,22 +399,24 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     ]
   }
 
-  mounted () {
-    this.$api.states.findAllPaginated().then((foundStates) => {
-      this.states = foundStates
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of states failed')
-    })
-    this.$api.manufacturer.findAllPaginated().then((foundManufacturers) => {
-      this.manufacturers = foundManufacturers
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of manufactures failed')
-    })
-    this.$api.platformTypes.findAllPaginated().then((foundPlatformTypes) => {
-      this.platformTypes = foundPlatformTypes
-    }).catch(() => {
-      this.$store.commit('snackbar/setError', 'Loading of platform types failed')
-    })
+  async fetch () {
+    try {
+      await Promise.all([
+        this.loadEquipmentstatus(),
+        this.loadManufacturers(),
+        this.loadPlatformtypes()
+      ])
+    } catch {
+      this.$store.commit('snackbar/setError', 'Loading of controlled vocabulary failed')
+    }
+  }
+
+  setPlatformType (platformType: PlatformType) {
+    this.update('platformTypeName', platformType.name)
+  }
+
+  setManufacturer (manufacturer: Manufacturer) {
+    this.update('manufacturerName', manufacturer.name)
   }
 
   update (key: string, value: any) {
@@ -374,9 +432,9 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
       case 'platformTypeName':
         newObj.platformTypeName = value
         {
-          const platformTypeIndex = this.platformTypes.findIndex(t => t.name === value)
+          const platformTypeIndex = this.platformtypes.findIndex(t => t.name === value)
           if (platformTypeIndex > -1) {
-            newObj.platformTypeUri = this.platformTypes[platformTypeIndex].uri
+            newObj.platformTypeUri = this.platformtypes[platformTypeIndex].uri
           } else {
             newObj.platformTypeUri = ''
           }
@@ -445,7 +503,7 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
       if (typeof value === 'string') {
         newObj.statusName = value
         newObj.statusUri = ''
-        const state = this.states.find(s => s.name === value)
+        const state = this.equipmentstatus.find(s => s.name === value)
         if (state) {
           newObj.statusUri = state.uri
         }
@@ -467,11 +525,11 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
   }
 
   get statusNames (): string[] {
-    return this.states.map(s => s.name)
+    return this.equipmentstatus.map(s => s.name)
   }
 
   get platformTypeNames (): string[] {
-    return this.platformTypes.map(t => t.name)
+    return this.platformtypes.map(t => t.name)
   }
 
   get platformManufacturerName (): string {
@@ -483,17 +541,17 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
   }
 
   get platformStatusName () {
-    const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
+    const statusIndex = this.equipmentstatus.findIndex(s => s.uri === this.value.statusUri)
     if (statusIndex > -1) {
-      return this.states[statusIndex].name
+      return this.equipmentstatus[statusIndex].name
     }
     return this.value.statusName
   }
 
   get platformTypeName () {
-    const platformTypeIndex = this.platformTypes.findIndex(t => t.uri === this.value.platformTypeUri)
+    const platformTypeIndex = this.platformtypes.findIndex(t => t.uri === this.value.platformTypeUri)
     if (platformTypeIndex > -1) {
-      return this.platformTypes[platformTypeIndex].name
+      return this.platformtypes[platformTypeIndex].name
     }
     return this.value.platformTypeName
   }
@@ -512,19 +570,20 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     if (!this.value.statusName && !this.value.statusUri) {
       return null
     }
-    const status = this.states.find(c => c.uri === this.value.statusUri)
+    const status = this.equipmentstatus.find(c => c.uri === this.value.statusUri)
     if (status) {
       return status
     }
     return {
       name: this.value.statusName,
       uri: this.value.statusUri,
-      definition: ''
+      definition: '',
+      id: null
     }
   }
 
   get platformURN () {
-    return createPlatformUrn(this.value, this.platformTypes)
+    return createPlatformUrn(this.value, this.platformtypes)
   }
 
   public validateForm (): boolean {

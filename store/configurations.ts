@@ -88,7 +88,7 @@ export enum MountingTypes {
   platform_unmount = 'platform_unmount'
 }
 
-const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
+export const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: typeof KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION

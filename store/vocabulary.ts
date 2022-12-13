@@ -34,6 +34,8 @@
 import { Commit, GetterTree, ActionTree } from 'vuex'
 import { RootState } from '@/store'
 
+import { ActionCategory } from '@/models/ActionCategory'
+import { AggregationType } from '@/models/AggregationType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { Status } from '@/models/Status'
 import { PlatformType } from '@/models/PlatformType'
@@ -48,7 +50,8 @@ import { EpsgCode } from '@/models/EpsgCode'
 import { ElevationDatum } from '@/models/ElevationDatum'
 import { CvContactRole } from '@/models/CvContactRole'
 
-import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeApi'
+import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION, ActionTypeApiFilterType } from '@/services/cv/ActionTypeApi'
+import { GlobalProvenance } from '@/models/GlobalProvenance'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
@@ -73,6 +76,9 @@ export interface VocabularyState {
   epsgCodes: EpsgCode[],
   elevationData: ElevationDatum[],
   cvContactRoles: CvContactRole[],
+  globalProvenances: GlobalProvenance[],
+  aggregationtypes: AggregationType[],
+  actionCategories: ActionCategory[]
 }
 
 const state = (): VocabularyState => ({
@@ -90,7 +96,10 @@ const state = (): VocabularyState => ({
   measuredQuantityUnits: [],
   epsgCodes: [],
   elevationData: [],
-  cvContactRoles: []
+  cvContactRoles: [],
+  globalProvenances: [],
+  aggregationtypes: [],
+  actionCategories: []
 })
 
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
@@ -194,6 +203,20 @@ export type LoadMeasuredQuantityUnitsAction = () => Promise<void>
 export type LoadEpsgCodesAction = () => Promise<void>
 export type LoadElevationDataAction = () => Promise<void>
 export type LoadCvContactRolesAction = () => Promise<void>
+export type LoadGlobalProvenancesAction = () => Promise<void>
+export type LoadAggregationtypesAction = () => Promise<void>
+export type LoadActionCategoriesAction = () => Promise<void>
+export type AddDeviceTypeAction = ({ devicetype }: {devicetype: DeviceType}) => Promise<DeviceType>
+export type AddPlatformTypeAction = ({ platformtype }: {platformtype: PlatformType}) => Promise<PlatformType>
+export type AddManufacturerAction = ({ manufacturer }: { manufacturer: Manufacturer}) => Promise<Manufacturer>
+export type AddEquipmentstatusAction = ({ status }: { status: Status }) => Promise<Status>
+export type AddCvContactRoleAction = ({ contactRole }: { contactRole: CvContactRole }) => Promise<CvContactRole>
+export type AddCompartmentAction = ({ compartment }: { compartment: Compartment }) => Promise<Compartment>
+export type AddSamplingMediaAction = ({ samplingMedium }: { samplingMedium: SamplingMedia}) => Promise<SamplingMedia>
+export type AddPropertyAction = ({ property }: { property: Property}) => Promise<Property>
+export type AddActiontypeAction = ({ actiontype, actionCategoryTerm }: {actiontype: ActionType, actionCategoryTerm: ActionTypeApiFilterType}) => Promise<ActionType>
+export type AddUnitAction = ({ unit }: {unit: Unit }) => Promise<Unit>
+export type AddMeasuredQuantityUnitAction = ({ measuredQuantityUnit }: {measuredQuantityUnit: MeasuredQuantityUnit }) => Promise<MeasuredQuantityUnit>
 
 const actions: ActionTree<VocabularyState, RootState> = {
   async loadManufacturers ({ commit }: { commit: Commit }): Promise<void> {
@@ -245,6 +268,89 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadCvContactRoles ({ commit }: {commit: Commit }): Promise<void> {
     commit('setCvContactRoles', await this.$api.cvContactRoles.findAll())
+  },
+  async loadGlobalProvenances ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setGlobalProvenances', await this.$api.globalProvenances.findAll())
+  },
+  async loadAggregationtypes ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setAggregationtypes', await this.$api.aggregationTypes.findAll())
+  },
+  async loadActionCategories ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setActionCategories', await this.$api.actionCategories.findAll())
+  },
+  async addDevicetype ({ commit, state }: {commit: Commit, state: VocabularyState }, { devicetype }: {devicetype: DeviceType }): Promise<DeviceType> {
+    const newDevicetype = await this.$api.deviceTypes.add(devicetype)
+    const devicetypes = [...state.devicetypes, newDevicetype]
+    await commit('setDevicetypes', devicetypes)
+    return newDevicetype
+  },
+  async addPlatformtype ({ commit, state }: {commit: Commit, state: VocabularyState }, { platformtype }: { platformtype: PlatformType }): Promise<PlatformType> {
+    const newPlatformtype = await this.$api.platformTypes.add(platformtype)
+    const platformtypes = [...state.platformtypes, newPlatformtype]
+    await commit('setPlatformtypes', platformtypes)
+    return newPlatformtype
+  },
+  async addManufacturer ({ commit, state }: {commit: Commit, state: VocabularyState }, { manufacturer }: { manufacturer: Manufacturer }): Promise<Manufacturer> {
+    const newManufacturer = await this.$api.manufacturer.add(manufacturer)
+    const manufacturers = [...state.manufacturers, newManufacturer]
+    await commit('setManufacturers', manufacturers)
+    return newManufacturer
+  },
+  async addEquipmentstatus ({ commit, state }: {commit: Commit, state: VocabularyState }, { status }: { status: Status }): Promise<Status> {
+    const newStatus = await this.$api.states.add(status)
+    const equipmentstatus = [...state.equipmentstatus, newStatus]
+    await commit('setEquipmentstatus', equipmentstatus)
+    return newStatus
+  },
+  async addCvContactRole ({ commit, state }: {commit: Commit, state: VocabularyState }, { contactRole }: { contactRole: CvContactRole }): Promise<CvContactRole> {
+    const newContactRole = await this.$api.cvContactRoles.add(contactRole)
+    const cvContactRoles = [...state.cvContactRoles, newContactRole]
+    await commit('setCvContactRoles', cvContactRoles)
+    return newContactRole
+  },
+  async addCompartment ({ commit, state }: {commit: Commit, state: VocabularyState }, { compartment }: { compartment: Compartment }): Promise<Compartment> {
+    const newCompartment = await this.$api.compartments.add(compartment)
+    const compartments = [...state.compartments, newCompartment]
+    await commit('setCompartments', compartments)
+    return newCompartment
+  },
+  async addSamplingMedia ({ commit, state }: {commit: Commit, state: VocabularyState}, { samplingMedium }: { samplingMedium: SamplingMedia}): Promise<SamplingMedia> {
+    const newSamplingMedium = await this.$api.samplingMedia.add(samplingMedium)
+    const samplingMedia = [...state.samplingMedia, newSamplingMedium]
+    await commit('setSamplingMedia', samplingMedia)
+    return samplingMedium
+  },
+  async addProperty ({ commit, state }: {commit: Commit, state: VocabularyState}, { property }: {property: Property}): Promise<Property> {
+    const newProperty = await this.$api.properties.add(property)
+    const properties = [...state.properties, newProperty]
+    await commit('setProperties', properties)
+    return newProperty
+  },
+  async addActiontype ({ commit, state }: { commit: Commit, state: VocabularyState}, { actiontype, actionCategoryTerm }: { actiontype: ActionType, actionCategoryTerm: ActionTypeApiFilterType}): Promise<ActionType> {
+    const newActiontype = await this.$api.actionTypes.add(actiontype)
+    if (actionCategoryTerm === ACTION_TYPE_API_FILTER_DEVICE) {
+      const deviceGenericActionTypes = [...state.deviceGenericActionTypes, newActiontype]
+      await commit('setDeviceGenericActionTypes', deviceGenericActionTypes)
+    } else if (actionCategoryTerm === ACTION_TYPE_API_FILTER_PLATFORM) {
+      const platformGenericActionTypes = [...state.platformGenericActionTypes, newActiontype]
+      await commit('setPlatformGenericActionTypes', platformGenericActionTypes)
+    } else if (actionCategoryTerm === ACTION_TYPE_API_FILTER_CONFIGURATION) {
+      const configurationGenericActionTypes = [...state.configurationGenericActionTypes, newActiontype]
+      await commit('setConfigurationGenericActionTypes', configurationGenericActionTypes)
+    }
+    return newActiontype
+  },
+  async addUnit ({ commit, state }: {commit: Commit, state: VocabularyState}, { unit }: {unit: Unit}): Promise<Unit> {
+    const newUnit = await this.$api.units.add(unit)
+    const units = [...state.units, newUnit]
+    await commit('setUnits', units)
+    return newUnit
+  },
+  async addMeasuredQuantityUnit ({ commit, state }: {commit: Commit, state: VocabularyState}, { measuredQuantityUnit }: {measuredQuantityUnit: MeasuredQuantityUnit}): Promise<MeasuredQuantityUnit> {
+    const newMeasuredQuantityUnit = await this.$api.measuredQuantityUnits.add(measuredQuantityUnit)
+    const measuredQuantityUnits = [...state.measuredQuantityUnits, newMeasuredQuantityUnit]
+    await commit('setMeasuredQuantityUnits', measuredQuantityUnits)
+    return newMeasuredQuantityUnit
   }
 }
 
@@ -293,6 +399,15 @@ const mutations = {
   },
   setCvContactRoles (state: VocabularyState, cvContactRoles: CvContactRole[]) {
     state.cvContactRoles = cvContactRoles
+  },
+  setGlobalProvenances (state: VocabularyState, globalProvenances: GlobalProvenance[]) {
+    state.globalProvenances = globalProvenances
+  },
+  setAggregationtypes (state: VocabularyState, aggregationtypes: AggregationType[]) {
+    state.aggregationtypes = aggregationtypes
+  },
+  setActionCategories (state: VocabularyState, actionCategories: ActionCategory[]) {
+    state.actionCategories = actionCategories
   }
 }
 

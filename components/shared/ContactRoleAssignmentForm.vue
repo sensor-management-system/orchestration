@@ -59,7 +59,15 @@ permissions and limitations under the Licence.
           label="Assign role"
           return-object
           :rules="[roleAndContactNotDuplicated]"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewContactRoleDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-autocomplete>
       </v-col>
       <v-col
         cols="12"
@@ -93,20 +101,32 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-col>
     </v-row>
+    <contact-role-dialog
+      v-model="showNewContactRoleDialog"
+      :initial-term="selectedRole ? selectedRole.name : null"
+      @aftersubmit="updateRole"
+    />
   </v-form>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
+import ContactRoleDialog from '@/components/shared/ContactRoleDialog.vue'
+
 import { Contact } from '@/models/Contact'
 import { ContactRole } from '@/models/ContactRole'
 import { CvContactRole } from '@/models/CvContactRole'
 
-@Component
+@Component({
+  components: {
+    ContactRoleDialog
+  }
+})
 export default class ContactRoleAssignmentForm extends Vue {
   private selectedContact: Contact | null = null
   private selectedRole: CvContactRole | null = null
+  private showNewContactRoleDialog = false
 
   @Prop({
     default: () => [] as Contact[],
@@ -140,6 +160,10 @@ export default class ContactRoleAssignmentForm extends Vue {
     if (this.contact) {
       this.selectedContact = this.contact
     }
+  }
+
+  updateRole (contactRole: CvContactRole) {
+    this.selectedRole = contactRole
   }
 
   /**

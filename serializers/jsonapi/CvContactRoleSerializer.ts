@@ -34,7 +34,8 @@ import { CvContactRole } from '@/models/CvContactRole'
 
 import {
   IJsonApiEntityListEnvelope,
-  IJsonApiEntity
+  IJsonApiEntity,
+  IJsonApiEntityWithoutDetails
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 export class CvContactRoleSerializer {
@@ -47,7 +48,64 @@ export class CvContactRoleSerializer {
     const name = jsonApiData.attributes.term
     const url = jsonApiData.links?.self || ''
     const definition = jsonApiData.attributes.definition
+    const provenance = jsonApiData.attributes.provenance || ''
+    const provenanceUri = jsonApiData.attributes.provenance_uri || ''
+    const category = jsonApiData.attributes.category || ''
+    const note = jsonApiData.attributes.note || ''
 
-    return CvContactRole.createWithData(id, name, url, definition)
+    let globalProvenanceId = null
+
+    if (jsonApiData.relationships?.global_provenance?.data) {
+      const data = jsonApiData.relationships.global_provenance.data as IJsonApiEntityWithoutDetails
+      if (data.id) {
+        globalProvenanceId = data.id
+      }
+    }
+
+    return CvContactRole.createFromObject({
+      id,
+      name,
+      definition,
+      provenance,
+      provenanceUri,
+      category,
+      note,
+      uri: url,
+      globalProvenanceId
+    })
+  }
+
+  convertModelToJsonApiData (contactRole: CvContactRole) {
+    const attributes = {
+      term: contactRole.name,
+      definition: contactRole.definition,
+      provenance: contactRole.provenance,
+      provenance_uri: contactRole.provenanceUri,
+      category: contactRole.category,
+      note: contactRole.note
+    }
+
+    const relationships: any = {}
+
+    if (contactRole.globalProvenanceId) {
+      relationships.global_provenance = {
+        data: {
+          id: contactRole.globalProvenanceId,
+          type: 'GlobalProvenance'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'ContactRole',
+      attributes,
+      relationships
+    }
+
+    if (contactRole.id) {
+      wrapper.id = contactRole.id
+    }
+
+    return wrapper
   }
 }

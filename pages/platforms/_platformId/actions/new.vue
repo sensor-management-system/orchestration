@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -51,10 +51,23 @@ permissions and limitations under the Licence.
           persistent-hint
           return-object
           @change="updateRoute"
-        />
+        >
+          <template #append-outer>
+            <v-btn icon @click="showNewActionTypeDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+        </v-select>
       </v-card-text>
     </v-card>
     <NuxtChild />
+    <action-type-dialog
+      v-model="showNewActionTypeDialog"
+      :initial-action-type-api-filter-type="selectedActionCategory"
+      @aftersubmit="setChosenKindOfPlatformActionAndUpdateRoute"
+    />
   </div>
 </template>
 
@@ -62,7 +75,13 @@ permissions and limitations under the Licence.
 import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
+import ActionTypeDialog from '@/components/shared/ActionTypeDialog.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
 import CheckEditAccess from '@/mixins/CheckEditAccess'
+import { ActionType } from '@/models/ActionType'
+
+import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 
 import { PlatformActionTypeItemsGetter, LoadPlatformGenericActionTypesAction } from '@/store/vocabulary'
 import {
@@ -71,13 +90,11 @@ import {
   SetChosenKindOfPlatformActionAction
 } from '@/store/platforms'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
 
 @Component({
-  components: { ProgressIndicator },
+  components: { ActionTypeDialog, ProgressIndicator },
   middleware: ['auth'],
   computed: {
     ...mapGetters('vocabulary', ['platformActionTypeItems']),
@@ -90,6 +107,7 @@ const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
 })
 export default class NewPlatformAction extends mixins(CheckEditAccess) {
   private isLoading: boolean = false
+  private showNewActionTypeDialog = false
 
   // vuex definition for typescript check
   platformActionTypeItems!: PlatformActionTypeItemsGetter
@@ -145,6 +163,20 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
 
   set chosenKindOfAction (newVal) {
     this.setChosenKindOfPlatformAction(newVal)
+  }
+
+  setChosenKindOfPlatformActionAndUpdateRoute (newVal: ActionType) {
+    this.setChosenKindOfPlatformAction({
+      kind: KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION,
+      id: newVal.id,
+      name: newVal.name,
+      uri: newVal.uri
+    })
+    this.updateRoute()
+  }
+
+  get selectedActionCategory (): string {
+    return ACTION_TYPE_API_FILTER_PLATFORM
   }
 
   get genericActionChosen (): boolean {

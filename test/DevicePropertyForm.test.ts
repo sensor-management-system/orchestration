@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,6 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import Vue from 'vue'
+import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 
 import { mount, createLocalVue } from '@vue/test-utils'
@@ -55,11 +56,28 @@ describe('DevicePropertyForm', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
+    localVue.use(Vuex)
     const vuetify = new Vuetify()
+
+    const vocabulary = {
+      state: {
+        // The dialogs to submit new entries use the vocabulary state.
+        globalProvenances: []
+      },
+      mutations: {
+      },
+      actions: {
+        loadGlobalProvenances: () => {}
+      }
+    }
+    const store = new Vuex.Store({
+      modules: { vocabulary }
+    })
 
     wrapper = mount(DevicePropertyForm, {
       localVue,
       vuetify,
+      store,
       propsData: {
         value: DeviceProperty.createFromObject({
           id: null,

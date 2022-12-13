@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -48,26 +48,37 @@ describe('StatusSerializer', () => {
           },
           id: '1',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/1/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmentstatus/1/'
           },
-          relationships: {},
-          type: 'Status'
+          relationships: {
+            global_provenence: {
+              data: null
+            }
+          },
+          type: 'EqauipmentStatus'
         }, {
           attributes: {
-            category: null,
+            category: 'a category',
             definition: 'Data collection is ongoing.  New data values will be added periodically.',
-            note: null,
-            provenance: null,
-            provenance_uri: null,
+            note: 'a note',
+            provenance: 'a provenance',
+            provenance_uri: 'https://provenance',
             status: 'Accepted',
             term: 'Ongoing'
           },
           id: '2',
           links: {
-            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/2/'
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmentstatus/2/'
           },
-          relationships: {},
-          type: 'Status'
+          relationships: {
+            global_provenance: {
+              data: {
+                id: '1',
+                type: 'GlobalProvenance'
+              }
+            }
+          },
+          type: 'EqauipmentStatus'
         }],
         included: [],
         jsonapi: {
@@ -81,14 +92,24 @@ describe('StatusSerializer', () => {
       const expectedStatus1 = Status.createFromObject({
         id: '1',
         name: 'Complete',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/1/',
-        definition: 'Data collection is complete. No new data values will be added.'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmentstatus/1/',
+        definition: 'Data collection is complete. No new data values will be added.',
+        category: '',
+        note: '',
+        provenance: '',
+        provenanceUri: '',
+        globalProvenanceId: null
       })
       const expectedStatus2 = Status.createFromObject({
         id: '2',
         name: 'Ongoing',
-        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/status/2/',
-        definition: 'Data collection is ongoing.  New data values will be added periodically.'
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmentstatus/2/',
+        definition: 'Data collection is ongoing.  New data values will be added periodically.',
+        category: 'a category',
+        note: 'a note',
+        provenance: 'a provenance',
+        provenanceUri: 'https://provenance',
+        globalProvenanceId: '1'
       })
 
       const serializer = new StatusSerializer()
@@ -99,6 +120,47 @@ describe('StatusSerializer', () => {
       expect(states.length).toEqual(2)
       expect(states[0]).toEqual(expectedStatus1)
       expect(states[1]).toEqual(expectedStatus2)
+    })
+  })
+  describe('#convertModelToJsonApiData', () => {
+    it('should transform the model to json payload', () => {
+      const status = Status.createFromObject({
+        id: '2',
+        name: 'Ongoing',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/equipmentstatus/2/',
+        definition: 'Data collection is ongoing.  New data values will be added periodically.',
+        category: 'a category',
+        note: 'a note',
+        provenance: 'a provenance',
+        provenanceUri: 'https://provenance',
+        globalProvenanceId: '1'
+      })
+
+      const expectedResult = {
+        id: '2',
+        type: 'EquipmentStatus',
+        attributes: {
+          term: 'Ongoing',
+          category: 'a category',
+          definition: 'Data collection is ongoing.  New data values will be added periodically.',
+          provenance: 'a provenance',
+          provenance_uri: 'https://provenance',
+          note: 'a note'
+        },
+        relationships: {
+          global_provenance: {
+            data: {
+              id: '1',
+              type: 'GlobalProvenance'
+            }
+          }
+        }
+      }
+
+      const serializer = new StatusSerializer()
+      const result = serializer.convertModelToJsonApiData(status)
+
+      expect(result).toEqual(expectedResult)
     })
   })
 })

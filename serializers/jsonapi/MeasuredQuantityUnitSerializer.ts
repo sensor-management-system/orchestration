@@ -71,4 +71,38 @@ export class MeasuredQuantityUnitSerializer {
 
     return MeasuredQuantityUnit.createWithData(id, name, url, definition, defaultLimitMin, defaultLimitMax, unitId, measuredQuantityId)
   }
+
+  convertModelToJsonApiData (measuredQuantityUnit: MeasuredQuantityUnit) {
+    const attributes = {
+      default_limit_min: measuredQuantityUnit.defaultLimitMin,
+      default_limit_max: measuredQuantityUnit.defaultLimitMax
+    }
+
+    const relationships = {
+      unit: {
+        data: {
+          id: measuredQuantityUnit.unitId,
+          type: 'Unit'
+        }
+      },
+      measured_quantity: {
+        data: {
+          id: measuredQuantityUnit.measuredQuantityId,
+          type: 'MeasuredQuantity'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'MeasuredQuantityUnit',
+      attributes,
+      relationships
+    }
+
+    if (measuredQuantityUnit.id) {
+      wrapper.id = measuredQuantityUnit.id
+    }
+
+    return wrapper
+  }
 }
