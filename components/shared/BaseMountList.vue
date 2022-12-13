@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
             <template #default="{ active }">
               <v-list-item-content>
                 <v-list-item-title>
-                  {{ item.shortName }}
+                  {{ item.shortName }} ({{ item.serialNumber ? item.serialNumber : 'no serial number' }})
                 </v-list-item-title>
               </v-list-item-content>
 
@@ -88,6 +88,7 @@ import { Availability } from '@/models/Availability'
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
 import { dateToString } from '@/utils/dateHelper'
+import { Configuration } from '@/models/Configuration'
 
 @Component
 export default class BaseMountList extends Vue {
@@ -108,6 +109,23 @@ export default class BaseMountList extends Vue {
   })
   private availabilities!: Availability[]
 
+  private availabilitiesWithConfigs: Availability[] = this.availabilities
+
+  async fetch () {
+    this.availabilitiesWithConfigs = await Promise.all(this.availabilities.map(async (availability) => {
+      if (availability.configurationID) {
+        const copy = Availability.createFromObject(availability)
+        const config = await this.findConfiguration(availability.configurationID)
+        copy.configuration = config
+        return copy
+      }
+      return availability
+    }))
+  }
+
+  async created () {
+  }
+
   get selectedEntities (): [Platform | Device] {
     return this.value
   }
@@ -118,6 +136,10 @@ export default class BaseMountList extends Vue {
 
   getAvailability (entity: Platform | Device): Availability | undefined {
     const availability = this.availabilities.find(availability => availability.id === entity.id)
+
+    if (availability && !availability.available) {
+      return this.availabilitiesWithConfigs.find(availabilityWithConfig => availabilityWithConfig.id === entity.id)
+    }
     return availability
   }
 
@@ -129,10 +151,21 @@ export default class BaseMountList extends Vue {
     return a.id === b.id
   }
 
+  async findConfiguration (id: string): Promise<Configuration> {
+    return await this.$api.configurations.findById(id)
+  }
+
   availabilityReason (availability?: Availability): string {
     if (!availability) {
       return 'Not available'
     }
+
+    let configString = availability.configurationID
+
+    if (availability.configuration) {
+      configString = availability.configuration.label
+    }
+
     let endString = ''
     if (!availability.endDate?.isValid) {
       endString = 'indefinitely'
@@ -145,7 +178,7 @@ export default class BaseMountList extends Vue {
       beginString = `from ${dateToString(availability.endDate as DateTime)}`
     }
 
-    return `Used in configuration ${availability.configurationID} ${beginString} ${endString}`
+    return `Used in configuration "${configString}" ${beginString} ${endString}`
   }
 }
 
