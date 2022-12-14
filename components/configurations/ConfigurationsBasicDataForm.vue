@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
         />
       </v-col>
       <v-col cols="12" md="3">
-        <v-combobox
+        <v-autocomplete
           :value="value.status"
           :items="configurationStates"
           label="Status"
