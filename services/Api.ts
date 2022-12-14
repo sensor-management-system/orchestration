@@ -344,7 +344,7 @@ export class Api {
       '/upload'
     )
 
-    this._statisticsApi = new StatisticsApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '')
+    this._statisticsApi = new StatisticsApi(createAxios(smsBaseUrl, smsConfig), '')
 
     this._pidApi = new PidApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
