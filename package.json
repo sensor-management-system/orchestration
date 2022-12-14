@@ -1,8 +1,48 @@
 {
-  "name": "sensor_management",
+  "name": "sensor_management_frontend",
   "version": "1.0.0",
-  "description": "a system to manage sensors and platforms",
-  "author": "Marc Hanisch",
+  "description": "An application to help scientists and technicans to manage sensors, measurement setups and campaigns.",
+  "license": "SEE LICENSE IN <LICENSE>",
+  "homepage": "https://gitlab.hzdr.de/hub-terra/sms",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.hzdr.de/hub-terra/sms/frontend"
+  },
+  "bugs": "https://gitlab.hzdr.de/hub-terra/sms/service-desk/-/issues",
+  "contributors": [
+    {
+      "name": "Nils Brinckmann",
+      "email": "nils.brinckmann@gfz-potsdam.de"
+    },
+    {
+      "name": "Tim Eder",
+      "email": "tim.eder@ufz.de"
+    },
+    {
+      "name": "Florian Gransee",
+      "email": "florian.gransee@ufz.de"
+    },
+    {
+      "name": "Marc Hanisch",
+      "email": "marc.hanisch@gfz-potsdam.de"
+    },
+    {
+      "name": "Tobias Kuhnert",
+      "email": "tobias.kuhnert@ufz.de"
+    },
+    {
+      "name": "Luca Johannes Nendel",
+      "email": "luca-johannes.nendel@ufz.de"
+    },
+    {
+      "name": "Maximilian Schaldach",
+      "email": "maximilian.schaldach@ufz.de"
+    },
+    {
+      "name": "Daniel Sielaff",
+      "email": "daniel.sielaff@ufz.de"
+    }
+  ],
   "private": true,
   "scripts": {
     "dev": "nuxt",
