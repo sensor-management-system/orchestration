@@ -35,12 +35,23 @@ permissions and limitations under the Licence.
       <v-card-text>
         <p>
           Groups and roles are handled using the <b>HIFIS virtual organizations</b>.
-          You can access them on
+          You have an overview at
           <a
             target="_blank"
             style="text-decoration: none"
+            href="https://hifis.net/doc/helmholtz-aai/list-of-vos/"
+          >
+            https://hifis.net/doc/helmholtz-aai/list-of-vos/
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon>
+          </a>.
+          Administrators can manage them on <a
+            target="_blank"
+            style="text-decoration: none"
             href="https://login.helmholtz.de/upman/"
-          >https://login.helmholtz.de/upman/
+          >
+            https://login.helmholtz.de/upman/
             <v-icon small>
               mdi-open-in-new
             </v-icon>
@@ -258,6 +269,9 @@ permissions and limitations under the Licence.
             href="https://myprofile.gfz-potsdam.de/"
           >
             MyProfile groups
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon>
           </a>
           for the group management
           in the Sensor Management System.
@@ -278,6 +292,9 @@ permissions and limitations under the Licence.
                 href="https://myprofile.gfz-potsdam.de/"
               >
                 MyProfile
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
               </a>
             </li>
             <li>Go to the <code>Groups</code>tab</li>
