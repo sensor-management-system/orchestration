@@ -252,7 +252,14 @@ permissions and limitations under the Licence.
       <v-card-text>
         <p>
           Additional to the pure HIFIS VO way of handling groups, you can also use
-          <a href="https://myprofile.gfz-potsdam.de/">MyProfile groups</a> for the group management
+          <a
+            target="_blank"
+            style="text-decoration: none"
+            href="https://myprofile.gfz-potsdam.de/"
+          >
+            MyProfile groups
+          </a>
+          for the group management
           in the Sensor Management System.
         </p>
         <p>
@@ -263,7 +270,16 @@ permissions and limitations under the Licence.
         <p>
           To allow external usage of a group, you need to
           <ol>
-            <li>Open  <a href="https://myprofile.gfz-potsdam.de/">MyProfile</a></li>
+            <li>
+              Open
+              <a
+                target="_blank"
+                style="text-decoration: none"
+                href="https://myprofile.gfz-potsdam.de/"
+              >
+                MyProfile
+              </a>
+            </li>
             <li>Go to the <code>Groups</code>tab</li>
             <li>Click to open the <code>Management</code> sub tab</li>
             <li>Select the group you want to use</li>
