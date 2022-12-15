@@ -24,6 +24,8 @@ class WktPolygonField(fields.Field):
             shape = shapely.wkt.loads(value)
             if shape.geom_type != "Polygon":
                 raise ValidationError("Geometry must be a polygon")
+            if not shape.is_valid:
+                raise ValidationError("Geometry must be valid wkt representation")
             return from_shape(shape)
         except WKTReadingError:
             raise ValidationError("Geometry must be valid wkt representation")

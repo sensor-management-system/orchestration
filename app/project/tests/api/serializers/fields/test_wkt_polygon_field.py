@@ -39,6 +39,17 @@ class TestWktPolygonField(BaseTestCase):
             with self.assertRaises(ValidationError):
                 self.field.deserialize(wkt_value)
 
+    def test_deserialize_no_valid_polygon(self):
+        """Ensure we raise an Exception if we don't get valid polygon (self overlapping)."""
+        wkt_values = [
+            "POLYGON ((11.614522933959963 52.0930603723938, 11.599245071411135 52.086626516165765, 11.615638732910156 52.08594088662689, 11.613750457763674 52.079084011853325, 11.594352722167969 52.0746528555776, 11.614522933959963 52.0930603723938))"
+            "POLYGON (())",
+            "bla",
+        ]
+        for wkt_value in wkt_values:
+            with self.assertRaises(ValidationError):
+                self.field.deserialize(wkt_value)
+
     def test_serialize_ok(self):
         """Ensure the serialization with a Geometry works."""
         wkt_value = "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))"
