@@ -1,0 +1,534 @@
+<!--
+Web client of the Sensor Management System software developed within the
+Helmholtz DataHub Initiative by GFZ and UFZ.
+
+Copyright (C) 2020 - 2022
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
+
+Parts of this program were developed within the context of the
+following publicly funded projects or measures:
+- Helmholtz Earth and Environment DataHub
+  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+
+Licensed under the HEESIL, Version 1.0 or - as soon they will be
+approved by the "Community" - subsequent versions of the HEESIL
+(the "Licence").
+
+You may not use this work except in compliance with the Licence.
+
+You may obtain a copy of the Licence at:
+https://gitext.gfz-potsdam.de/software/heesil
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Licence is distributed on an "AS IS" basis,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the Licence for the specific language governing
+permissions and limitations under the Licence.
+-->
+<template>
+  <div>
+    <v-tabs-items :value="activeTab" @input="setActiveTab">
+      <v-tab-item :eager="true">
+        <v-row dense>
+          <v-col cols="12" md="5">
+            <v-text-field
+              v-model="searchText"
+              label="Search term"
+              placeholder="Name of site"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="basicSearch"
+            />
+          </v-col>
+          <v-col cols="5" align-self="center">
+            <v-btn
+              color="primary"
+              small
+              @click="basicSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearBasicSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+          <v-col align-self="center" class="text-right">
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/sites/new"
+            >
+              New Site
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+    </v-tabs-items>
+
+    <v-progress-circular
+      v-if="loading"
+      class="progress-spinner"
+      color="primary"
+      indeterminate
+    />
+
+    <div v-if="sites.length <= 0 && !loading">
+      <p class="text-center">
+        There are no sites that match your search criteria.
+      </p>
+    </div>
+
+    <div v-if="sites.length > 0">
+      <v-row no-gutters class="mt-10">
+        <div v-if="sites.length <= 0 && !loading">
+          <p class="text-center">
+            There are no sites that match your search criteria.
+          </p>
+        </div>
+
+        <div v-if="sites.length > 0">
+          <v-subheader>
+            <template v-if="sites.length == 1">
+              1 site found
+            </template>
+            <template v-else>
+              {{ sites.length }} sites found
+            </template>
+            <v-spacer />
+
+            <template v-if="sites.length > 0">
+              <v-dialog v-model="processing" max-width="100">
+                <v-card>
+                  <v-card-text>
+                    <div class="text-center pt-2">
+                      <v-progress-circular indeterminate />
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-dialog>
+            </template>
+          </v-subheader>
+        </div>
+
+        <v-spacer />
+        <v-col
+          cols="4"
+        >
+          <v-pagination
+            v-model="page"
+            :disabled="loading"
+            :length="totalPages"
+            :total-visible="7"
+            @input="runSearch"
+          />
+        </v-col>
+        <v-col
+          cols="4"
+          class="flex-grow-1 flex-shrink-0"
+        >
+          <v-subheader>
+            <page-size-select
+              v-model="size"
+              :items="pageSizeItems"
+              label="Items per page"
+            />
+          </v-subheader>
+        </v-col>
+      </v-row>
+      <BaseList :list-items="sites">
+        <template #list-item="{ item }">
+          <SitesListItem :key="item.id" :site="item">
+            <template
+              #dot-menu-items
+            >
+              <DotMenuActionCopy
+                v-if="$auth.loggedIn"
+                :path="'/sites/copy/' + item.id"
+              />
+              <DotMenuActionArchive
+                v-if="canArchiveEntity(item)"
+                @click="initArchiveDialog(item)"
+              />
+              <DotMenuActionRestore
+                v-if="canRestoreEntity(item)"
+                @click="runRestoreSite(item)"
+              />
+              <DotMenuActionDelete
+                v-if="$auth.loggedIn && canDeleteEntity(item)"
+                @click="initDeleteDialog(item)"
+              />
+            </template>
+          </SitesListItem>
+        </template>
+      </BaseList>
+      <v-pagination
+        v-model="page"
+        :disabled="loading"
+        :length="totalPages"
+        :total-visible="7"
+        @input="runSearch"
+      />
+    </div>
+    <SiteDeleteDialog
+      v-model="showDeleteDialog"
+      :site-to-delete="siteToDelete"
+      @cancel-deletion="closeDialog"
+      @submit-deletion="deleteAndCloseDialog"
+    />
+    <SiteArchiveDialog
+      v-model="showArchiveDialog"
+      :site-to-archive="siteToArchive"
+      @cancel-archiving="closeArchiveDialog"
+      @submit-archiving="archiveAndCloseDialog"
+    />
+  </div>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from 'nuxt-property-decorator'
+import { mapState, mapActions, mapGetters } from 'vuex'
+import { SetActiveTabAction, SetTabsAction, SetTitleAction } from '@/store/appbar'
+
+import { Site } from '@/models/Site'
+
+import BaseList from '@/components/shared/BaseList.vue'
+import SitesListItem from '@/components/sites/SitesListItem.vue'
+import SiteDeleteDialog from '@/components/sites/SiteDeleteDialog.vue'
+import SiteArchiveDialog from '@/components/sites/SiteArchiveDialog.vue'
+import { SitesState, SearchSitesPaginatedAction, PageSizesGetter, SetPageNumberAction, SetPageSizeAction, LoadSiteAction, ArchiveSiteAction, DeleteSiteAction, RestoreSiteAction } from '@/store/sites'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
+import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
+import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
+
+import {
+  PermissionsState,
+  CanAccessEntityGetter,
+  CanDeleteEntityGetter,
+  CanArchiveEntityGetter,
+  LoadPermissionGroupsAction,
+  CanRestoreEntityGetter
+} from '@/store/permissions'
+import { PermissionGroup } from '@/models/PermissionGroup'
+import { QueryParams } from '@/modelUtils/QueryParams'
+import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
+
+@Component({
+  components: {
+    BaseList,
+    SitesListItem,
+    DotMenuActionDelete,
+    DotMenuActionCopy,
+    DotMenuActionSensorML,
+    DotMenuActionArchive,
+    DotMenuActionRestore,
+    PageSizeSelect,
+    SiteArchiveDialog,
+    SiteDeleteDialog
+  },
+  computed: {
+    ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
+    ...mapState('appbar', ['activeTab']),
+    ...mapState('sites', ['sites', 'pageNumber', 'pageSize', 'totalPages', 'site']),
+    ...mapGetters('sites', ['pageSizes'])
+  },
+  methods: {
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
+    ...mapActions('sites', ['searchSitesPaginated', 'setPageNumber', 'setPageSize', 'deleteSite', 'archiveSite', 'restoreSite', 'loadSite']),
+    ...mapActions('permissions', ['loadPermissionGroups'])
+
+  }
+})
+export default class SearchSitesPage extends Vue {
+  private loading = false
+  private processing = false
+  private selectedSearchPermissionGroups: PermissionGroup[] = []
+  private onlyOwnSites: boolean = false
+  private includeArchivedSites: boolean = false
+  private searchText: string | null = null
+  private showDeleteDialog: boolean = false
+  private siteToDelete: Site | null = null
+  private showArchiveDialog: boolean = false
+  private siteToArchive: Site | null = null
+
+  // vuex definition for typescript check
+  setTabs!: SetTabsAction
+  setTitle!: SetTitleAction
+  searchSitesPaginated!: SearchSitesPaginatedAction
+  pageSize!: SitesState['pageSize']
+  totalPages!: SitesState['totalPages']
+  pageNumber!: SitesState['pageNumber']
+  pageSizes!: PageSizesGetter
+  permissionGroups!: PermissionsState['permissionGroups']
+  loadPermissionGroups!: LoadPermissionGroupsAction
+  setActiveTab!: SetActiveTabAction
+  setPageNumber!: SetPageNumberAction
+  setPageSize!: SetPageSizeAction
+  loadSite!: LoadSiteAction
+  deleteSite!: DeleteSiteAction
+  archiveSite!: ArchiveSiteAction
+  restoreSite!: RestoreSiteAction
+  canAccessEntity!: CanAccessEntityGetter
+  canDeleteEntity!: CanDeleteEntityGetter
+  canArchiveEntity!: CanArchiveEntityGetter
+  canRestoreEntity!: CanRestoreEntityGetter
+  site!: SitesState['site']
+  sites!: SitesState['sites']
+
+  async created () {
+    this.initializeAppBar()
+    try {
+      this.loading = true
+      await this.loadPermissionGroups()
+      this.initSearchQueryParams()
+      await this.runInitialSearch()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of sites failed')
+    } finally {
+      this.loading = false
+    }
+  }
+
+  get searchParams () {
+    return {
+      searchText: this.searchText,
+      permissionGroups: [],
+      onlyOwnSites: false,
+      includeArchivedSites: false
+    }
+  }
+
+  get page () {
+    return this.pageNumber
+  }
+
+  set page (newVal) {
+    this.setPageNumber(newVal)
+    this.setPageInUrl(false)
+  }
+
+  get size (): number {
+    return this.pageSize
+  }
+
+  set size (newVal: number) {
+    const sizeChanged: boolean = this.size !== newVal
+
+    this.setPageSize(newVal)
+    this.setSizeInUrl(false)
+
+    if (sizeChanged) {
+      this.runSearch()
+    }
+  }
+
+  get pageSizeItems (): number[] {
+    const resultSet = new Set([
+      ...this.pageSizes,
+      this.getSizeFromUrl()
+    ])
+    return Array.from(resultSet).sort((a, b) => a - b)
+  }
+
+  async runInitialSearch (): Promise<void> {
+    this.page = this.getPageFromUrl()
+    this.size = this.getSizeFromUrl()
+
+    await this.runSearch()
+  }
+
+  basicSearch () {
+    this.selectedSearchPermissionGroups = []
+    this.onlyOwnSites = false
+    this.includeArchivedSites = false
+    this.page = 1 // Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
+  }
+
+  clearBasicSearch () {
+    this.searchText = null
+    this.initUrlQueryParams()
+  }
+
+  async runSearch (): Promise<void> {
+    try {
+      this.loading = true
+      this.initUrlQueryParams()
+      await this.searchSitesPaginated(this.searchParams)
+      this.setPageInUrl()
+      this.setSizeInUrl()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Loading of sites failed')
+    } finally {
+      this.loading = false
+    }
+  }
+
+  initDeleteDialog (site: Site) {
+    this.showDeleteDialog = true
+    this.siteToDelete = site
+  }
+
+  closeDialog () {
+    this.showDeleteDialog = false
+    this.siteToDelete = null
+  }
+
+  async deleteAndCloseDialog () {
+    if (this.siteToDelete === null || this.siteToDelete.id === null) {
+      return
+    }
+    try {
+      this.loading = true
+      await this.deleteSite(this.siteToDelete.id)
+      this.runSearch()
+      this.$store.commit('snackbar/setSuccess', 'Site deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Site could not be deleted')
+    } finally {
+      this.loading = false
+      this.closeDialog()
+    }
+  }
+
+  initArchiveDialog (site: Site) {
+    this.showArchiveDialog = true
+    this.siteToArchive = site
+  }
+
+  closeArchiveDialog () {
+    this.showArchiveDialog = false
+    this.siteToArchive = null
+  }
+
+  async archiveAndCloseDialog () {
+    if (this.siteToArchive === null || this.siteToArchive.id === null) {
+      return
+    }
+    try {
+      this.loading = true
+      await this.archiveSite(this.siteToArchive.id)
+      await this.loadSite({
+        siteId: this.siteToArchive.id
+      })
+      this.$store.commit('snackbar/setSuccess', 'Site archived')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Site could not be archived')
+    } finally {
+      this.loading = false
+      this.closeArchiveDialog()
+    }
+  }
+
+  async runRestoreSite (site: Site) {
+    if (site.id) {
+      this.loading = true
+      try {
+        await this.restoreSite(site.id)
+        await this.loadSite({
+          siteId: site.id
+        })
+        this.$store.commit('snackbar/setSuccess', 'Site restored')
+      } catch (error) {
+        this.$store.commit('snackbar/setError', 'Site could not be restored')
+      } finally {
+        this.loading = false
+      }
+    }
+  }
+
+  initSearchQueryParams (): void {
+    const searchParamsObject = (new SiteSearchParamsSerializer({
+      permissionGroups: this.permissionGroups
+    })).toSearchParams(this.$route.query)
+
+    // prefill the form by the serialized search params from the URL
+    if (searchParamsObject.searchText) {
+      this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.onlyOwnSites) {
+      this.onlyOwnSites = searchParamsObject.onlyOwnSites
+    }
+    if (searchParamsObject.includeArchivedSites) {
+      this.includeArchivedSites = searchParamsObject.includeArchivedSites
+    }
+
+    if (searchParamsObject.permissionGroups) {
+      this.selectedSearchPermissionGroups = searchParamsObject.permissionGroups
+    }
+  }
+
+  initUrlQueryParams (): void {
+    this.$router.push({
+      query: (new SiteSearchParamsSerializer()).toQueryParams(this.searchParams),
+      hash: this.$route.hash
+    })
+  }
+
+  getPageFromUrl (): number {
+    if ('page' in this.$route.query && typeof this.$route.query.page === 'string') {
+      return parseInt(this.$route.query.page) ?? 1
+    }
+    return 1
+  }
+
+  setPageInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.page) {
+      // add page to the current url params
+      query = {
+        ...this.$route.query,
+        page: String(this.page)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  getSizeFromUrl (): number {
+    if ('size' in this.$route.query && typeof this.$route.query.size === 'string') {
+      return parseInt(this.$route.query.size) ?? this.size
+    }
+    return this.size
+  }
+
+  setSizeInUrl (preserveHash: boolean = true): void {
+    let query: QueryParams = {}
+    if (this.size) {
+      // add size to the current url params
+      query = {
+        ...this.$route.query,
+        size: String(this.size)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  initializeAppBar () {
+    this.setTabs([
+      'Search'
+    ])
+    this.setTitle('Sites')
+  }
+}
+</script>
+
+<style lang="scss">
+@import "@/assets/styles/_search.scss";
+</style>

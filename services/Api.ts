@@ -92,6 +92,9 @@ import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
 import { UserInfoApi } from '@/services/sms/UserInfoApi'
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 
+import { SiteApi } from '@/services/sms/SiteApi'
+import { SiteConfigurationsApi } from '@/services/sms/SiteConfigurationsApi'
+
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
 
@@ -100,6 +103,7 @@ export class Api {
   private readonly _deviceApi: DeviceApi
   private readonly _platformApi: PlatformApi
   private readonly _configurationApi: ConfigurationApi
+  private readonly _siteApi: SiteApi
   private readonly _configurationStatesApi: ConfigurationStatusApi
   private readonly _deviceCustomfieldsApi: DeviceCustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
@@ -184,6 +188,33 @@ export class Api {
     this._deviceApi = new DeviceApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/devices',
+      // callback function to fetch permission groups
+      async (): Promise<PermissionGroup[]> => {
+        const api = new PermissionGroupApi(
+          createAxios(smsBaseUrl, smsConfig, getIdToken),
+          '/permission-groups'
+        )
+        return await api.findAll(true)
+      }
+    )
+
+    const siteConfigurationsApi = new SiteConfigurationsApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/configurations',
+      // callback function to fetch permission groups
+      async (): Promise<PermissionGroup[]> => {
+        const api = new PermissionGroupApi(
+          createAxios(smsBaseUrl, smsConfig, getIdToken),
+          '/permission-groups'
+        )
+        return await api.findAll(true)
+      }
+    )
+
+    this._siteApi = new SiteApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/sites',
+      siteConfigurationsApi,
       // callback function to fetch permission groups
       async (): Promise<PermissionGroup[]> => {
         const api = new PermissionGroupApi(
@@ -438,6 +469,10 @@ export class Api {
 
   get configurations (): ConfigurationApi {
     return this._configurationApi
+  }
+
+  get sites (): SiteApi {
+    return this._siteApi
   }
 
   get configurationStates (): ConfigurationStatusApi {

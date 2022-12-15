@@ -82,6 +82,16 @@ permissions and limitations under the Licence.
           </v-list-item-content>
         </v-list-item>
 
+        <!-- Sites -->
+        <v-list-item to="/sites" nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-map-marker-radius</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Sites</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
         <!-- Contacts -->
         <v-list-item v-if="isLoggedIn" to="/contacts" nuxt>
           <v-list-item-action>

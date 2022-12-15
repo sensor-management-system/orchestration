@@ -284,12 +284,23 @@ export interface IJsonApiEntityListEnvelope {
 export interface IJsonApiEntityWithoutDetailsDataDict {
   data: IJsonApiEntityWithoutDetails
 }
+/**
+ * a stripped down entity encapsulated in a data property or null
+ */
+export interface IJsonApiEntityWithoutDetailsDataNullable {
+  data: IJsonApiEntityWithoutDetails | null
+}
 
 /**
  * a stripped down entity encapsulated in a data property and wrapped in an
  * user defined entity (usually the type names are used)
  */
 export type IJsonApiTypedEntityWithoutDetailsDataDict = {[idx: string]: IJsonApiEntityWithoutDetailsDataDict}
+/**
+ * a stripped down entity encapsulated in a data property or null wrapped in an
+ * user defined entity (usually the type names are used)
+ */
+export type IJsonApiTypedEntityWithoutDetailsDataNullable = {[idx: string]: IJsonApiEntityWithoutDetailsDataNullable}
 
 /**
  * a stripped down list of entities encapsulated in a data property
@@ -309,7 +320,7 @@ export type IJsonApiTypedEntityWithoutDetailsDataDictList = {[idx: string]: IJso
  */
 export interface IJsonApiRelationshipsData {
   links?: IJsonApiLinkDict
-  data?: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[]
+  data?: IJsonApiEntityWithoutDetails | IJsonApiEntityWithoutDetails[] | null
 }
 
 /**

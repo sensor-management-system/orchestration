@@ -35,6 +35,7 @@ import { Configuration } from '@/models/Configuration'
 import { Contact } from '@/models/Contact'
 
 import {
+  IJsonApiEntityWithoutDetailsDataDict,
   IJsonApiEntityWithoutDetailsDataDictList
 } from '@/serializers/jsonapi/JsonApiTypes'
 
@@ -481,6 +482,7 @@ describe('ConfigurationSerializer', () => {
           updatedAt: null
         })
       ]
+      configuration.siteId = '1'
       const serializer = new ConfigurationSerializer()
 
       const jsonApiData = serializer.convertModelToJsonApiData(configuration)
@@ -504,6 +506,9 @@ describe('ConfigurationSerializer', () => {
       expect(jsonApiData.relationships).toHaveProperty('contacts')
       expect(typeof jsonApiData.relationships?.contacts).toEqual('object')
       expect(jsonApiData.relationships?.contacts).toHaveProperty('data')
+      expect(jsonApiData.relationships).toHaveProperty('site')
+      expect(typeof jsonApiData.relationships?.contacts).toEqual('object')
+      expect(jsonApiData.relationships?.contacts).toHaveProperty('data')
 
       // we test for the inner structure of the result anyway
       // this cast is just to tell typescript that
@@ -522,6 +527,14 @@ describe('ConfigurationSerializer', () => {
         id: '2',
         type: 'contact'
       })
+      const siteObject = jsonApiData.relationships?.site as IJsonApiEntityWithoutDetailsDataDict
+
+      const siteData = siteObject.data
+      expect(typeof siteData).toEqual('object')
+      expect(siteData).toEqual({
+        id: '1',
+        type: 'site'
+      })
     })
     it('should set an id if given for the configuration', () => {
       const configuration = new Configuration()
@@ -532,6 +545,84 @@ describe('ConfigurationSerializer', () => {
 
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('1')
+    })
+    it('should convert to json api model if not site was set', () => {
+      const configuration = new Configuration()
+      expect(configuration.id).toEqual('')
+      configuration.label = 'ABC'
+      configuration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
+      configuration.endDate = DateTime.utc(2021, 8, 28, 13, 49, 48, 15)
+      configuration.contacts = [
+        Contact.createFromObject({
+          id: '1',
+          givenName: 'Max',
+          familyName: 'Mustermann',
+          website: '',
+          email: 'test@test.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
+        }),
+        Contact.createFromObject({
+          id: '2',
+          givenName: 'Mux',
+          familyName: 'Mastermann',
+          website: '',
+          email: 'test@fost.test',
+          createdByUserId: null,
+          createdAt: null,
+          updatedAt: null
+        })
+      ]
+      const serializer = new ConfigurationSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(configuration)
+
+      expect(typeof jsonApiData).toEqual('object')
+
+      expect(jsonApiData).not.toHaveProperty('id')
+      expect(jsonApiData.type).toEqual('configuration')
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+
+      expect(attributes).toHaveProperty('label')
+      expect(attributes.label).toEqual('ABC')
+      expect(attributes).toHaveProperty('start_date')
+      expect(attributes.start_date).toEqual('2020-08-28T13:49:48.015Z')
+      expect(attributes).toHaveProperty('end_date')
+      expect(attributes.end_date).toEqual('2021-08-28T13:49:48.015Z')
+
+      expect(jsonApiData).toHaveProperty('relationships')
+      expect(typeof jsonApiData.relationships).toEqual('object')
+      expect(jsonApiData.relationships).toHaveProperty('contacts')
+      expect(typeof jsonApiData.relationships?.contacts).toEqual('object')
+      expect(jsonApiData.relationships?.contacts).toHaveProperty('data')
+      expect(jsonApiData.relationships).toHaveProperty('site')
+      expect(typeof jsonApiData.relationships?.contacts).toEqual('object')
+      expect(jsonApiData.relationships?.contacts).toHaveProperty('data')
+
+      // we test for the inner structure of the result anyway
+      // this cast is just to tell typescript that
+      // we have an array of data, so that it doesn't show
+      // typeerrors here
+      const contactObject = jsonApiData.relationships?.contacts as IJsonApiEntityWithoutDetailsDataDictList
+
+      const contactData = contactObject.data
+      expect(Array.isArray(contactData)).toBeTruthy()
+      expect(contactData.length).toEqual(2)
+      expect(contactData[0]).toEqual({
+        id: '1',
+        type: 'contact'
+      })
+      expect(contactData[1]).toEqual({
+        id: '2',
+        type: 'contact'
+      })
+      const siteObject = jsonApiData.relationships?.site as IJsonApiEntityWithoutDetailsDataDict
+
+      const siteData = siteObject.data
+      expect(typeof siteData).toEqual('object')
+      expect(siteData).toEqual(null)
     })
   })
   // in earlier versions, the test to serialize the configuration hierarchy
