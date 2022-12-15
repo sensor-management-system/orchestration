@@ -6,6 +6,7 @@
  * Copyright (C) 2020-2022
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -32,55 +33,62 @@
 import { DateTime } from 'luxon'
 
 import { IContact, Contact } from '@/models/Contact'
-import { IMountActions } from '@/models/IMountActions'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
-import { PlatformMountAction } from '@/models/PlatformMountAction'
-import { PermissionGroup, IPermissionGroup, IPermissionableSingleGroup } from '@/models/PermissionGroup'
-import { Visibility, IVisible } from '@/models/Visibility'
+import { PermissionGroup, IPermissionGroup, IPermissionableMultipleGroups } from '@/models/PermissionGroup'
 
-export interface IConfiguration extends IMountActions, IPermissionableSingleGroup {
-  id: string
-  startDate: DateTime | null
-  endDate: DateTime | null
-  label: string
-  status: string
-  archived: boolean
-  contacts: IContact[]
-  createdAt: DateTime | null
-  updatedAt: DateTime | null
-  updateDescription: string
-  createdBy: IContact | null
-  updatedBy: IContact | null
-  /*
-    You may wonder why there is an extra createdByUserId entry here.
-    The reason is that we use the createBy & updatedBy to show
-    information about the contact that are responsible for the changes.
-    Here we refer to the user object (which can have different ids).
-  */
-  createdByUserId: string | null
-  visibility: Visibility
-  siteId?: string
+import { Visibility, IVisible } from '@/models/Visibility'
+import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
+
+export interface ILatLng {
+  lat: number,
+  lng: number
 }
 
-export class Configuration implements IConfiguration, IVisible {
+export interface IAddress {
+  street?: string
+  streetNumber?: string
+  city?: string
+  zipCode?: string
+  country?: string
+  building?: string
+  room?: string
+}
+
+export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo {
+  id: string
+  label: string
+  geometry: ILatLng[]
+  description: string
+  epsgCode: string
+  address: IAddress
+  archived: boolean
+  contacts: IContact[]
+  configurationIds: string[]
+  createdAt: DateTime | null
+  updatedAt: DateTime | null
+  createdBy: IContact | null
+  updatedBy: IContact | null
+  createdByUserId: string | null
+  visibility: Visibility
+  permissionGroups: IPermissionGroup[]}
+
+export class Site implements ISite, IVisible {
   private _id: string = ''
-  private _startDate: DateTime | null = null
-  private _endDate: DateTime | null = null
   private _label: string = ''
-  private _status: string = ''
+  private _geometry: ILatLng[] = []
+  private _description: string = ''
+  private _epsgCode: string = '4326'
+  private _address: IAddress = {}
   private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
-  private _deviceMountActions: DeviceMountAction[] = []
-  private _platformMountActions: PlatformMountAction[] = []
-  private _permissionGroup: IPermissionGroup | null = null
+  private _configurationIds: string[] = []
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
-  private _updateDescription: string = ''
   private _createdBy: IContact | null = null
   private _updatedBy: IContact | null = null
   private _createdByUserId: string | null = null
+
   private _visibility: Visibility = Visibility.Internal
-  private _siteId: string = ''
+  private _permissionGroups: PermissionGroup[] = []
 
   get id (): string {
     return this._id
@@ -90,36 +98,44 @@ export class Configuration implements IConfiguration, IVisible {
     this._id = id
   }
 
-  get startDate (): DateTime | null {
-    return this._startDate
-  }
-
-  set startDate (date: DateTime | null) {
-    this._startDate = date
-  }
-
-  get endDate (): DateTime | null {
-    return this._endDate
-  }
-
-  set endDate (date: DateTime | null) {
-    this._endDate = date
-  }
-
   get label (): string {
     return this._label
   }
 
-  set label (newLabel: string) {
-    this._label = newLabel
+  set label (label: string) {
+    this._label = label
   }
 
-  get status (): string {
-    return this._status
+  get geometry (): ILatLng[] {
+    return this._geometry
   }
 
-  set status (newStatus: string) {
-    this._status = newStatus
+  set geometry (geometry: ILatLng[]) {
+    this._geometry = geometry
+  }
+
+  get description (): string {
+    return this._description
+  }
+
+  set description (newDescription: string) {
+    this._description = newDescription
+  }
+
+  get epsgCode (): string {
+    return this._epsgCode
+  }
+
+  set epsgCode (epsgCode: string) {
+    this._epsgCode = epsgCode
+  }
+
+  get address (): IAddress {
+    return this._address
+  }
+
+  set address (newAddress: IAddress) {
+    this._address = newAddress
   }
 
   get contacts (): IContact[] {
@@ -130,28 +146,12 @@ export class Configuration implements IConfiguration, IVisible {
     this._contacts = contacts
   }
 
-  get deviceMountActions (): DeviceMountAction[] {
-    return this._deviceMountActions
+  get configurationIds (): string[] {
+    return this._configurationIds
   }
 
-  set deviceMountActions (newDeviceMountActions: DeviceMountAction[]) {
-    this._deviceMountActions = newDeviceMountActions
-  }
-
-  get platformMountActions (): PlatformMountAction[] {
-    return this._platformMountActions
-  }
-
-  set platformMountActions (newPlatformMountActions: PlatformMountAction[]) {
-    this._platformMountActions = newPlatformMountActions
-  }
-
-  get permissionGroup (): IPermissionGroup | null {
-    return this._permissionGroup
-  }
-
-  set permissionGroup (permissionGroup: IPermissionGroup | null) {
-    this._permissionGroup = permissionGroup
+  set configurationIds (configurationIds: string[]) {
+    this._configurationIds = configurationIds
   }
 
   get createdAt (): DateTime | null {
@@ -168,14 +168,6 @@ export class Configuration implements IConfiguration, IVisible {
 
   set updatedAt (newUpdatedAt: DateTime | null) {
     this._updatedAt = newUpdatedAt
-  }
-
-  get updateDescription (): string {
-    return this._updateDescription
-  }
-
-  set updateDescription (newDescription: string) {
-    this._updateDescription = newDescription
   }
 
   get createdBy (): IContact | null {
@@ -210,6 +202,18 @@ export class Configuration implements IConfiguration, IVisible {
     this._visibility = visibility
   }
 
+  get permissionGroups (): PermissionGroup[] {
+    return this._permissionGroups
+  }
+
+  set permissionGroups (permissionGroups: PermissionGroup[]) {
+    this._permissionGroups = permissionGroups
+  }
+
+  // get isPrivate (): boolean {
+  //   return this._visibility === Visibility.Private
+  // }
+
   get isInternal (): boolean {
     return this._visibility === Visibility.Internal
   }
@@ -227,45 +231,25 @@ export class Configuration implements IConfiguration, IVisible {
   }
 
   get type (): string {
-    return 'configuration'
+    return 'site'
   }
 
-  get siteId (): string {
-    return this._siteId
-  }
-
-  set siteId (id: string) {
-    this._siteId = id
-  }
-
-  static createFromObject (someObject: IConfiguration): Configuration {
-    const newObject = new Configuration()
-
+  static createFromObject (someObject: ISite): Site {
+    const newObject = new Site()
     newObject.id = someObject.id
-    // luxon DateTime objects are immutable
-    newObject.startDate = someObject.startDate
-    newObject.endDate = someObject.endDate
-
     newObject.label = someObject.label
-    newObject.status = someObject.status
-
+    newObject.geometry = [...someObject.geometry]
+    newObject.description = someObject.description
+    newObject.epsgCode = someObject.epsgCode
+    newObject.address = { ...someObject.address }
+    newObject.archived = someObject.archived
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
-    newObject.deviceMountActions = someObject.deviceMountActions.map(DeviceMountAction.createFromObject)
-    newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
-
-    newObject.permissionGroup = someObject.permissionGroup ? PermissionGroup.createFromObject(someObject.permissionGroup) : null
-
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
-    newObject.updateDescription = someObject.updateDescription
     newObject.createdBy = someObject.createdBy ? Contact.createFromObject(someObject.createdBy) : null
     newObject.updatedBy = someObject.updatedBy ? Contact.createFromObject(someObject.updatedBy) : null
-    newObject.createdByUserId = someObject.createdByUserId
-
     newObject.visibility = someObject.visibility
-    newObject.archived = someObject.archived
-
-    newObject.siteId = someObject.siteId ?? ''
+    newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
 
     return newObject
   }

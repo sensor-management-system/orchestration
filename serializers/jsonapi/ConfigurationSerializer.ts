@@ -44,6 +44,7 @@ import {
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
+import { SiteSerializer } from '@/serializers/jsonapi/SiteSerializer'
 
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
@@ -59,6 +60,7 @@ export interface IConfigurationWithMeta {
 
 export class ConfigurationSerializer {
   private contactSerializer: ContactSerializer = new ContactSerializer()
+  private siteSerializer: SiteSerializer = new SiteSerializer()
   private _permissionGroups: PermissionGroup[] = []
 
   set permissionGroups (groups: PermissionGroup[]) {
@@ -127,6 +129,10 @@ export class ConfigurationSerializer {
       }
     }
 
+    if (relationships.site) {
+      configuration.siteId = this.siteSerializer.convertJsonApiRelationshipToId(relationships.site)
+    }
+
     // just pick the contact from the relationships that is referenced by the created_by user
     if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {
       const userId = (relationships.created_by.data as IJsonApiEntityWithoutDetails).id
@@ -170,6 +176,7 @@ export class ConfigurationSerializer {
 
   convertModelToJsonApiData (configuration: Configuration): IJsonApiEntityWithOptionalId {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
+    const sites = this.siteSerializer.convertIdToJsonApiRelationshipObject(configuration.siteId)
 
     const result: IJsonApiEntityWithOptionalId = {
       attributes: {
@@ -182,7 +189,8 @@ export class ConfigurationSerializer {
         cfg_permission_group: configuration.permissionGroup?.id
       },
       relationships: {
-        ...contacts
+        ...contacts,
+        ...sites
       },
       type: 'configuration'
     }

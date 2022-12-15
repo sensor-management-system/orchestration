@@ -122,7 +122,8 @@ export default {
   */
   css: [
     '@/assets/Roboto.css',
-    '@mdi/font/css/materialdesignicons.min.css'
+    '@mdi/font/css/materialdesignicons.min.css',
+    '@/assets/leaflet-geosearch@2.6.0.css'
   ],
   /*
   ** Plugins to load before mounting the App

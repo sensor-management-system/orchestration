@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -80,6 +80,16 @@ permissions and limitations under the Licence.
           @input="update('status',$event)"
         />
       </v-col>
+      <v-col cols="12" md="3">
+        <v-autocomplete
+          :item-value="(x) => x.id"
+          :item-text="(x) => x.label"
+          :items="sites"
+          label="Site"
+          :readonly="readonly"
+          @input="update('siteId',$event)"
+        />
+      </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
@@ -119,6 +129,7 @@ import Validator from '@/utils/validator'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
 import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
+import { SearchSitesAction, SitesState } from '@/store/sites'
 
 @Component({
   components: {
@@ -127,9 +138,13 @@ import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
     DateTimePicker
   },
   computed: {
-    ...mapState('configurations', ['configurationStates'])
+    ...mapState('configurations', ['configurationStates']),
+    ...mapState('sites', ['sites'])
   },
-  methods: mapActions('configurations', ['loadConfigurationsStates'])
+  methods: {
+    ...mapActions('configurations', ['loadConfigurationsStates']),
+    ...mapActions('sites', ['searchSites'])
+  }
 })
 export default class ConfigurationsBasicDataForm extends Vue {
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
@@ -144,9 +159,20 @@ export default class ConfigurationsBasicDataForm extends Vue {
 
   // vuex definition for typescript check
   loadConfigurationsStates!: () => void
+  sites!: SitesState['sites']
+  searchSites!: SearchSitesAction
 
   async created () {
-    await this.loadConfigurationsStates()
+    try {
+      await this.loadConfigurationsStates()
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Failed to load configuration states')
+    }
+    try {
+      await this.searchSites()
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Failed to load sites')
+    }
   }
 
   get configurationStates () {
@@ -154,7 +180,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   }
 
   update (
-    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'startDate' | 'endDate'>,
+    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'startDate' | 'endDate' | 'siteId'>,
     value: any
   ) {
     if (key in this.value) {

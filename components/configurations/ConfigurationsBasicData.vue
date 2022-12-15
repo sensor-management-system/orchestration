@@ -70,12 +70,19 @@ permissions and limitations under the Licence.
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
       </v-col>
+      <v-col cols="12" md="3">
+        <label>Site</label>
+        <span v-if="value.siteId && site">
+          <a :href="'/sites/' + value.siteId" target="_blank">{{ site.label }}</a><v-icon small>mdi-open-in-new</v-icon>
+        </span>
+      </v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 import { Configuration } from '@/models/Configuration'
 
@@ -84,6 +91,7 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import { LoadSiteAction, SitesState } from '@/store/sites'
 
 @Component({
   components: {
@@ -93,7 +101,9 @@ import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
   },
   filters: {
     dateToDateTimeString
-  }
+  },
+  computed: mapState('sites', ['site']),
+  methods: mapActions('sites', ['loadSite'])
 })
 export default class ConfigurationsBasicDataForm extends Vue {
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
@@ -104,8 +114,26 @@ export default class ConfigurationsBasicDataForm extends Vue {
   })
   readonly value!: Configuration
 
+  // vuex definition for typescript check
+  site!: SitesState['site']
+  loadSite!: LoadSiteAction
+
   async mounted () {
-    await this.$store.dispatch('configurations/loadConfigurationsStates')
+    try {
+      await this.$store.dispatch('configurations/loadConfigurationsStates')
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Failed to load configuration states')
+    }
+
+    if (this.value.siteId !== '') {
+      try {
+        await this.loadSite({
+          siteId: this.value.siteId
+        })
+      } catch (error) {
+        this.$store.commit('snackbar/setError', 'Failed to site')
+      }
+    }
   }
 
   get configurationStates () { return this.$store.state.configurations.configurationStates }
