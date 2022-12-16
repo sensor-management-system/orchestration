@@ -142,6 +142,8 @@ components = {
                                             "elevation": 42.0,
                                             "site_type_name": "example site",
                                             "site_type_uri": "https://cv/sites/345",
+                                            "site_usage_name": "example usage",
+                                            "site_usage_uri": "https://cv/usages/345",
                                         },
                                         "type": "site",
                                         "id": "0",
@@ -200,6 +202,8 @@ components = {
                                         "elevation": 42.0,
                                         "site_type_name": "example site",
                                         "site_type_uri": "https://cv/sites/345",
+                                        "site_usage_name": "example usage",
+                                        "site_usage_uri": "https://cv/usages/345",
                                     },
                                     "type": "site",
                                     "id": "0",
@@ -271,6 +275,12 @@ components = {
                                             "site_type_name": {
                                                 "type": "string",
                                             },
+                                            "site_usage_uri": {
+                                                "type": "string",
+                                            },
+                                            "site_usage_name": {
+                                                "type": "string",
+                                            },
                                         },
                                     }
                                 },
@@ -295,6 +305,8 @@ components = {
                                         "elevation": 42.0,
                                         "site_type_name": "example site",
                                         "site_type_uri": "https://cv/sites/345",
+                                        "site_usage_name": "example usage",
+                                        "site_usage_uri": "https://cv/usages/345",
                                     },
                                     "type": "site",
                                 },
@@ -353,6 +365,12 @@ components = {
                                     "type": "string",
                                 },
                                 "site_type_name": {
+                                    "type": "string",
+                                },
+                                "site_usage_uri": {
+                                    "type": "string",
+                                },
+                                "site_usage_name": {
                                     "type": "string",
                                 },
                             },
@@ -422,6 +440,8 @@ components = {
                             "elevation": 42.0,
                             "site_type_name": "example site",
                             "site_type_uri": "https://cv/sites/345",
+                            "site_usage_name": "example usage",
+                            "site_usage_uri": "https://cv/usages/345",
                         },
                         "type": "site",
                         "relationships": {

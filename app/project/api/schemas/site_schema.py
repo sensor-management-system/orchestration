@@ -37,6 +37,8 @@ class SiteSchema(Schema):
     room = fields.Str(allow_none=True)
     site_type_uri = fields.Str(allow_none=True)
     site_type_name = fields.Str(allow_none=True)
+    site_usage_uri = fields.Str(allow_none=True)
+    site_usage_name = fields.Str(allow_none=True)
     elevation = fields.Float(allow_none=True)
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)

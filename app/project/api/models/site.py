@@ -41,6 +41,8 @@ class Site(
     elevation_datum_uri = db.Column(db.String(256), nullable=True)
     site_type_uri = db.Column(db.String(256), nullable=True)
     site_type_name = db.Column(db.String(256), nullable=True)
+    site_usage_uri = db.Column(db.String(256), nullable=True)
+    site_usage_name = db.Column(db.String(256), nullable=True)
 
     # SiteContactRoles have a backref to the sites, so there is no need
     # to put it here explicitly.
@@ -85,6 +87,8 @@ class Site(
             "room": self.room,
             "site_type_name": self.site_type_name,
             "site_type_uri": self.site_type_uri,
+            "site_usage_name": self.site_usage_name,
+            "site_usage_uri": self.site_usage_uri,
             "site_contact_roles": [
                 scr.to_search_entry() for scr in self.site_contact_roles
             ],
@@ -145,6 +149,8 @@ class Site(
                     "room": type_keyword_and_full_searchable,
                     "site_type_name": type_keyword_and_full_searchable,
                     "site_type_uri": type_keyword,
+                    "site_usage_name": type_keyword_and_full_searchable,
+                    "site_usage_uri": type_keyword,
                     "site_contact_roles": {
                         "type": "nested",
                         "properties": {
