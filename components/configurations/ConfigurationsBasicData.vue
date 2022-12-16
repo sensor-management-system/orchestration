@@ -73,7 +73,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Site</label>
         <span v-if="value.siteId && site">
-          <a :href="'/sites/' + value.siteId" target="_blank">{{ site.label }}</a><v-icon small>mdi-open-in-new</v-icon>
+          <nuxt-link :to="'/sites/' + value.siteId" target="_blank">{{ site.label }}</nuxt-link><v-icon small>mdi-open-in-new</v-icon>
         </span>
       </v-col>
     </v-row>
