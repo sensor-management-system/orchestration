@@ -49,7 +49,8 @@ class TestPlatformAvailabilities(BaseTestCase):
             offset_z=fake.pyint(),
             begin_description=fake.text(),
             begin_contact=self.u.contact,
-            begin_date=begin_date or fake.date_time_this_month(),
+            begin_date=begin_date
+            or datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
             end_date=end_date,
             end_description=fake.text(),
             end_contact=self.u.contact,
@@ -134,7 +135,7 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": fake.date_time_this_month(),
+                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
@@ -162,7 +163,7 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": fake.date_time_this_month(),
+                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -326,7 +327,7 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": fake.date_time_this_month(),
+                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
@@ -340,7 +341,7 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": fake.date_time_this_month(),
+                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": available_platform.id,
                 },
@@ -361,7 +362,7 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": fake.date_time_this_month(),
+                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
                     "ids": f"{available_platform.id},{available_platform_2.id}",
                 },
