@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -314,7 +314,7 @@ permissions and limitations under the Licence.
           :class="iconLinksClass"
         >
           <v-btn
-            href="https://gitlab.hzdr.de/hub-terra/sms/"
+            href="https://codebase.helmholtz.cloud/hub-terra/sms/"
             target="_blank"
             title="Sensor Management System Repository"
             icon
