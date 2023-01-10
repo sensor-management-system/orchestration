@@ -86,6 +86,7 @@ import { DeviceCalibrationActionAttachmentApi } from '@/services/sms/DeviceCalib
 import { DeviceCalibrationDevicePropertyApi } from '@/services/sms/DeviceCalibrationDevicePropertyApi'
 import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
 import { StatisticsApi } from '@/services/sms/StatisticsApi'
+import { AutocompleteApi } from '@/services/sms/AutocompleteApi'
 
 import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
 import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
@@ -148,6 +149,7 @@ export class Api {
   private readonly _globalProvenanceApi: GlobalProvenanceApi
   private readonly _aggregationTypeApi: AggregationTypeApi
   private readonly _actionCategoryApi: ActionCategoryApi
+  private readonly _autocompleteApi: AutocompleteApi
 
   private readonly _elevationDatumApi: ElevationDatumApi
   private readonly _epsgCodeApi: EpsgCodeApi
@@ -382,6 +384,11 @@ export class Api {
       '/pids'
     )
 
+    this._autocompleteApi = new AutocompleteApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/controller/'
+    )
+
     // and here we can set settings for all the cv api calls
     const cvConfig: AxiosRequestConfig = {
       headers: {
@@ -597,6 +604,10 @@ export class Api {
 
   get softwareTypes (): SoftwareTypeApi {
     return this._softwareTypeApi
+  }
+
+  get autocomplete (): AutocompleteApi {
+    return this._autocompleteApi
   }
 
   get cvContactRoles (): CvContactRoleApi {

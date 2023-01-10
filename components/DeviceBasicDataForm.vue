@@ -89,7 +89,7 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.shortName"
           :readonly="readonly"
           :disabled="readonly"
@@ -97,15 +97,17 @@ permissions and limitations under the Licence.
           required
           class="required"
           :rules="[rules.required]"
+          endpoint="device-short-names"
           @input="update('shortName', $event)"
         />
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.longName"
           :readonly="readonly"
           :disabled="readonly"
           label="Long name"
+          endpoint="device-long-names"
           @input="update('longName', $event)"
         />
       </v-col>
@@ -146,7 +148,7 @@ permissions and limitations under the Licence.
             </v-btn>
           </template>
           <template #item="data">
-            <template v-if="typeof data.item !== 'object'">
+            <template v-if="(typeof data.item) !== 'object'">
               <v-list-item-content>{{ data.item }}</v-list-item-content>
             </template>
             <template v-else>
@@ -335,6 +337,7 @@ import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
 import DeviceTypeDialog from '@/components/devices/DeviceTypeDialog.vue'
 import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
 import StatusDialog from '@/components/shared/StatusDialog.vue'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
@@ -355,7 +358,8 @@ type StatusSelectValue = Status | string | undefined;
     ManufacturerDialog,
     PermissionGroupSelect,
     StatusDialog,
-    VisibilitySwitch
+    VisibilitySwitch,
+    AutocompleteTextInput
   }
 })
 export default class DeviceBasicDataForm extends mixins(Rules) {

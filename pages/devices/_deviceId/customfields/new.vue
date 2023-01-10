@@ -43,6 +43,8 @@ permissions and limitations under the Licence.
           ref="customFieldForm"
           v-model="customField"
           :readonly="false"
+          :key-endpoint="'device-custom-field-keys'"
+          :value-endpoint="'device-custom-field-values'"
         >
           <template #actions>
             <SaveAndCancelButtons

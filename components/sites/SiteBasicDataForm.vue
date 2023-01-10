@@ -110,76 +110,83 @@ permissions and limitations under the Licence.
     <h4>Address information</h4>
     <v-row>
       <v-col cols="8">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.address.street"
           :readonly="readonly"
           :disabled="readonly"
           label="Street"
           placeholder="Street name"
+          endpoint="site-streets"
           @input="update('address.street', $event)"
         />
       </v-col>
       <v-col cols="4">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.address.streetNumber"
           :readonly="readonly"
           :disabled="readonly"
           label="Street number"
           placeholder="Street number"
+          endpoint="site-street-numbers"
           @input="update('address.streetNumber', $event)"
         />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.address.city"
           :readonly="readonly"
           :disabled="readonly"
           label="City"
           placeholder="City"
+          endpoint="site-cities"
           @input="update('address.city', $event)"
         />
       </v-col>
       <v-col cols="2">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.address.zipCode"
           :readonly="readonly"
           :disabled="readonly"
           label="Zip code"
           placeholder="Zip code"
+          endpoint="site-zip-codes"
           @input="update('address.zipCode', $event)"
         />
       </v-col>
       <v-col cols="4">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.address.country"
           :readonly="readonly"
           :disabled="readonly"
           label="Country"
           placeholder="Country"
+          endpoint="site-countries"
           @input="update('address.country', $event)"
         />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.address.building"
           :readonly="readonly"
           :disabled="readonly"
           label="Building"
           placeholder="Building"
+          endpoint="site-buildings"
           @input="update('address.building', $event)"
         />
       </v-col>
       <v-col cols="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.address.room"
           :readonly="readonly"
           :disabled="readonly"
           label="Room"
           placeholder="Room"
+          endpoint="site-rooms"
           @input="update('address.room', $event)"
         />
       </v-col>
@@ -200,6 +207,7 @@ import { DetailedUserInfo } from '@/models/UserInfo'
 
 import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
 import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 
 import Validator from '@/utils/validator'
 import SiteMap from '@/components/sites/SiteMap.vue'
@@ -209,7 +217,8 @@ import { VocabularyState } from '@/store/vocabulary'
   components: {
     PermissionGroupSelect,
     VisibilitySwitch,
-    SiteMap
+    SiteMap,
+    AutocompleteTextInput
   },
   methods: {
     ...mapState('vocabulary', ['epsgCodes'])

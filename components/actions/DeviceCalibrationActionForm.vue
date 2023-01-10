@@ -57,11 +57,11 @@ permissions and limitations under the Licence.
       </v-row>
     </v-form>
     <v-row>
-      <!-- TODO find appropriate placeholders -->
       <v-col cols="12" md="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="actionCopy.formula"
           label="Formula"
+          endpoint="device-calibration-action-formulas"
           @input="setFormula"
         />
       </v-col>
@@ -132,6 +132,7 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 import CommonActionForm from '@/components/actions/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 
 /**
  * A class component for a form for Device calibration actions
@@ -140,7 +141,8 @@ import DateTimePicker from '@/components/DateTimePicker.vue'
 @Component({
   components: {
     CommonActionForm,
-    DateTimePicker
+    DateTimePicker,
+    AutocompleteTextInput
   }
 })
 export default class DeviceCalibationActionForm extends Vue {
