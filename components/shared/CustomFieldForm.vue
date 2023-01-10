@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
         align-self="center"
       >
         <v-text-field
+          v-if="!keyEndpoint"
           label="Key"
           :value="value.key"
           :readonly="readonly"
@@ -49,18 +50,42 @@ permissions and limitations under the Licence.
           :rules="[rules.required]"
           @input="update('key', $event)"
         />
+        <autocomplete-text-input
+          v-else
+          label="Key"
+          :value="value.key"
+          :readonly="readonly"
+          :disabled="readonly"
+          required
+          class="required"
+          :rules="[rules.required]"
+          :endpoint="keyEndpoint"
+          @input="update('key', $event)"
+        />
       </v-col>
       <v-col
         cols="12"
         md="7"
       >
         <v-textarea
+          v-if="!valueEndpoint"
           label="Value"
           auto-grow
           rows="1"
           :value="value.value"
           :readonly="readonly"
           :disabled="readonly"
+          @input="update('value', $event)"
+        />
+        <autocomplete-text-input
+          v-else
+          label="Value"
+          auto-grow
+          rows="1"
+          :value="value.value"
+          :readonly="readonly"
+          :disabled="readonly"
+          :endpoint="valueEndpoint"
           @input="update('value', $event)"
         />
       </v-col>
@@ -86,12 +111,17 @@ import { Component, Prop, mixins } from 'nuxt-property-decorator'
 import { Rules } from '@/mixins/Rules'
 
 import { CustomTextField } from '@/models/CustomTextField'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 
 /**
  * A class component for a custom field
  * @extends Vue
  */
-@Component
+@Component({
+  components: {
+    AutocompleteTextInput
+  }
+})
 // @ts-ignore
 export default class CustomFieldForm extends mixins(Rules) {
   /**
@@ -104,6 +134,28 @@ export default class CustomFieldForm extends mixins(Rules) {
   })
   // @ts-ignore
   readonly value!: CustomTextField
+
+  /**
+   * endpoint url for autocomplete API
+   * Key field
+   */
+  @Prop({
+    required: false,
+    type: String
+  })
+  // @ts-ignore
+  readonly keyEndpoint: string
+
+  /**
+   * endpoint url for autocomplete API
+   * Value field
+   */
+  @Prop({
+    required: false,
+    type: String
+  })
+  // @ts-ignore
+  readonly valueEndpoint: string
 
   /**
    * whether the component is in readonly mode or not

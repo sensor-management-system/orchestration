@@ -89,7 +89,7 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.shortName"
           :readonly="readonly"
           :disabled="readonly"
@@ -97,15 +97,17 @@ permissions and limitations under the Licence.
           required
           class="required"
           :rules="[rules.required]"
+          endpoint="platform-short-names"
           @input="update('shortName', $event)"
         />
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.longName"
           :readonly="readonly"
           :disabled="readonly"
           label="Long name"
+          endpoint="platform-long-names"
           @input="update('longName', $event)"
         />
       </v-col>
@@ -317,6 +319,7 @@ import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
 import PlatformTypeDialog from '@/components/platforms/PlatformTypeDialog.vue'
 import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
 import StatusDialog from '@/components/shared/StatusDialog.vue'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
@@ -331,7 +334,8 @@ type StatusSelectValue = Status | string | undefined
     PermissionGroupSelect,
     PlatformTypeDialog,
     StatusDialog,
-    VisibilitySwitch
+    VisibilitySwitch,
+    AutocompleteTextInput
   },
   computed: {
     ...mapGetters('permissions', ['userGroups']),

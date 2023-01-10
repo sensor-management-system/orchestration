@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -62,12 +63,13 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.label"
           :rules="[rules.labelProvided]"
           label="Label"
           :readonly="readonly"
           class="required"
+          endpoint="configuration-labels"
           @input="update('label',$event)"
         />
       </v-col>
@@ -129,13 +131,15 @@ import Validator from '@/utils/validator'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
 import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import { SearchSitesAction, SitesState } from '@/store/sites'
 
 @Component({
   components: {
     VisibilitySwitch,
     PermissionGroupSelect,
-    DateTimePicker
+    DateTimePicker,
+    AutocompleteTextInput
   },
   computed: {
     ...mapState('configurations', ['configurationStates']),

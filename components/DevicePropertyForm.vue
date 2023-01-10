@@ -36,12 +36,13 @@ permissions and limitations under the Licence.
     >
       <v-row>
         <v-col cols="12" md="3">
-          <v-text-field
+          <autocomplete-text-input
             ref="label"
             label="Label"
             :value="value.label"
             :readonly="readonly"
             :disabled="readonly"
+            endpoint="device-property-labels"
             @input="update('label', $event)"
           />
         </v-col>
@@ -479,6 +480,7 @@ import CvPropertyDialog from '@/components/devices/CvPropertyDialog.vue'
 import SamplingMediaDialog from '@/components/devices/SamplingMediaDialog.vue'
 import MeasuredQuantityUnitDialog from '@/components/devices/MeasuredQuantityUnitDialog.vue'
 import UnitDialog from '@/components/devices/UnitDialog.vue'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -512,7 +514,8 @@ type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
     CvPropertyDialog,
     MeasuredQuantityUnitDialog,
     SamplingMediaDialog,
-    UnitDialog
+    UnitDialog,
+    AutocompleteTextInput
   }
 })
 export default class DevicePropertyForm extends mixins(Rules) {
