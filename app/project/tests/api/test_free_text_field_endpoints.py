@@ -152,6 +152,56 @@ class TestDeviceShortNameEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_short_name_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_short_name_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
+
 
 class TestDeviceLongNameEndpoint(BaseTestCase):
     """Tests for the long name endpoint for devices."""
@@ -326,6 +376,66 @@ class TestDeviceLongNameEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_long_name_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1",
+            long_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            long_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_long_name_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1",
+            long_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            long_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
+
 
 class TestPlatformShortNameEndpoint(BaseTestCase):
     """Tests for the short name endpoint for platforms."""
@@ -452,6 +562,56 @@ class TestPlatformShortNameEndpoint(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_short_name_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_short_name_of_private_platform_is_included_for_owner(self):
+        """Ensure we give out private platform data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
 
 
 class TestPlatformLongNameEndpoint(BaseTestCase):
@@ -627,6 +787,66 @@ class TestPlatformLongNameEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_long_name_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="d1",
+            long_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            long_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_long_name_of_private_platform_is_included_for_owner(self):
+        """Ensure we give out private platform data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="d1",
+            long_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            long_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
+
 
 class TestDeviceManufacturerNames(BaseTestCase):
     """Tests for the endpoints for the device manufacturer names."""
@@ -721,6 +941,66 @@ class TestDeviceManufacturerNames(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_manufacturer_name_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1",
+            manufacturer_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            manufacturer_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_manufacturer_name_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1",
+            manufacturer_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            manufacturer_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
 
 
 class TestDeviceSerialNumbers(BaseTestCase):
@@ -817,6 +1097,66 @@ class TestDeviceSerialNumbers(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_serial_number_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_serial_number_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
+
 
 class TestDeviceCustomFieldKeys(BaseTestCase):
     """Tests for the endpoints for the custom field key entries."""
@@ -897,6 +1237,68 @@ class TestDeviceCustomFieldKeys(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_customfield_key_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        custom_field1 = CustomField(key="key1", value="value1", device=device1)
+        custom_field2 = CustomField(key="key1", value="value2", device=device1)
+        custom_field3 = CustomField(key="key2", value="value2", device=device2)
+
+        db.session.add_all(
+            [device1, device2, custom_field1, custom_field2, custom_field3]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["key1"])
+
+    def test_customfield_key_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        custom_field1 = CustomField(key="key1", value="value1", device=device1)
+        custom_field2 = CustomField(key="key1", value="value2", device=device1)
+        custom_field3 = CustomField(key="key2", value="value2", device=device2)
+
+        db.session.add_all(
+            [device1, device2, custom_field1, custom_field2, custom_field3]
+        )
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["key1", "key2"])
+
 
 class TestDeviceCustomFieldValues(BaseTestCase):
     """Tests for the endpoints for the custom field value entries."""
@@ -976,6 +1378,68 @@ class TestDeviceCustomFieldValues(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_customfield_value_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        custom_field1 = CustomField(key="key1", value="value1", device=device1)
+        custom_field2 = CustomField(key="key1", value="value1", device=device1)
+        custom_field3 = CustomField(key="key2", value="value2", device=device2)
+
+        db.session.add_all(
+            [device1, device2, custom_field1, custom_field2, custom_field3]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["value1"])
+
+    def test_customfield_value_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        custom_field1 = CustomField(key="key1", value="value1", device=device1)
+        custom_field2 = CustomField(key="key1", value="value1", device=device1)
+        custom_field3 = CustomField(key="key2", value="value2", device=device2)
+
+        db.session.add_all(
+            [device1, device2, custom_field1, custom_field2, custom_field3]
+        )
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["value1", "value2"])
 
 
 class TestDevicePropertyLabelEndpoint(BaseTestCase):
@@ -1064,6 +1528,81 @@ class TestDevicePropertyLabelEndpoint(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        device_property1 = DeviceProperty(
+            label="label1", device=device1, property_name="some property1"
+        )
+        device_property2 = DeviceProperty(
+            label="label2", device=device2, property_name="some property2"
+        )
+        device_property3 = DeviceProperty(
+            label="label2", device=device2, property_name="some property3"
+        )
+
+        db.session.add_all(
+            [device1, device2, device_property1, device_property2, device_property3]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        device_property1 = DeviceProperty(
+            label="label1", device=device1, property_name="some property1"
+        )
+        device_property2 = DeviceProperty(
+            label="label2", device=device2, property_name="some property2"
+        )
+        device_property3 = DeviceProperty(
+            label="label2", device=device2, property_name="some property3"
+        )
+
+        db.session.add_all(
+            [device1, device2, device_property1, device_property2, device_property3]
+        )
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
 
 
 class TestDeviceCalibrationActionFormulaEndpoint(BaseTestCase):
@@ -1171,6 +1710,122 @@ class TestDeviceCalibrationActionFormulaEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        device_calibration1 = DeviceCalibrationAction(
+            formula="f1",
+            device=device1,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration2 = DeviceCalibrationAction(
+            formula="f2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration3 = DeviceCalibrationAction(
+            formula="f2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                device_calibration1,
+                device_calibration2,
+                device_calibration3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["f1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we show data for private devices to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        device_calibration1 = DeviceCalibrationAction(
+            formula="f1",
+            device=device1,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration2 = DeviceCalibrationAction(
+            formula="f2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration3 = DeviceCalibrationAction(
+            formula="f2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                device_calibration1,
+                device_calibration2,
+                device_calibration3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["f1", "f2"])
+
 
 class TestDeviceCalibrationActionDescriptionEndpoint(BaseTestCase):
     """Tests for the free text endpoint for device calibation action descriptions."""
@@ -1276,6 +1931,122 @@ class TestDeviceCalibrationActionDescriptionEndpoint(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        device_calibration1 = DeviceCalibrationAction(
+            description="d1",
+            device=device1,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration2 = DeviceCalibrationAction(
+            description="d2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration3 = DeviceCalibrationAction(
+            description="d2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                device_calibration1,
+                device_calibration2,
+                device_calibration3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["d1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we show data for private devices to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        device_calibration1 = DeviceCalibrationAction(
+            description="d1",
+            device=device1,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration2 = DeviceCalibrationAction(
+            description="d2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+        device_calibration3 = DeviceCalibrationAction(
+            description="d2",
+            device=device2,
+            contact=contact,
+            current_calibration_date=datetime(2022, 11, 4, 12, 0, 0),
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                device_calibration1,
+                device_calibration2,
+                device_calibration3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["d1", "d2"])
 
 
 class TestConfigurationLabelEndpoint(BaseTestCase):
@@ -1475,6 +2246,132 @@ class TestGenericDeviceActionDescriptionEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = GenericDeviceAction(
+            action_type_name="device action",
+            device=device1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = GenericDeviceAction(
+            action_type_name="device action",
+            device=device1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = GenericDeviceAction(
+            action_type_name="device action",
+            device=device2,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we show data for private devices to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = GenericDeviceAction(
+            action_type_name="device action",
+            device=device1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = GenericDeviceAction(
+            action_type_name="device action",
+            device=device1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = GenericDeviceAction(
+            action_type_name="device action",
+            device=device2,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1", "desc2"])
+
 
 class TestGenericPlatformActionDescriptionEndpoint(BaseTestCase):
     """Tests for the free text endpoint for platform action descriptions."""
@@ -1583,6 +2480,132 @@ class TestGenericPlatformActionDescriptionEndpoint(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = GenericPlatformAction(
+            action_type_name="platform action",
+            platform=platform1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = GenericPlatformAction(
+            action_type_name="platform action",
+            platform=platform1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = GenericPlatformAction(
+            action_type_name="platform action",
+            platform=platform2,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1"])
+
+    def test_entry_of_private_platform_is_included_for_owner(self):
+        """Ensure we show data for private platforms to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = GenericPlatformAction(
+            action_type_name="platform action",
+            platform=platform1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = GenericPlatformAction(
+            action_type_name="platform action",
+            platform=platform1,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = GenericPlatformAction(
+            action_type_name="platform action",
+            platform=platform2,
+            contact=contact,
+            begin_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1", "desc2"])
 
 
 class TestGenericConfigurationActionDescriptionEndpoint(BaseTestCase):
@@ -1804,6 +2827,128 @@ class TestDeviceSoftwareUpdateActionDescriptionEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we show data for private devices to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1", "desc2"])
+
 
 class TestPlatformSoftwareUpdateActionDescriptionEndpoint(BaseTestCase):
     """Tests for the free text endpoint for platform software update action descriptions."""
@@ -1912,6 +3057,128 @@ class TestPlatformSoftwareUpdateActionDescriptionEndpoint(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1"])
+
+    def test_entry_of_private_platform_is_included_for_owner(self):
+        """Ensure we show data for private platforms to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action2 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc1",
+        )
+        action3 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            description="desc2",
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["desc1", "desc2"])
 
 
 class TestDeviceSoftwareUpdateActionRepositoryUrlEndpoint(BaseTestCase):
@@ -2022,6 +3289,128 @@ class TestDeviceSoftwareUpdateActionRepositoryUrlEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action2 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action3 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo2",
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["repo1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we show data for private devices to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action2 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action3 = DeviceSoftwareUpdateAction(
+            software_type_name="OS",
+            device=device2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo2",
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["repo1", "repo2"])
+
 
 class TestPlatformSoftwareUpdateActionRepositoryUrlEndpoint(BaseTestCase):
     """Tests for the free text endpoint for platform software update action repository urls."""
@@ -2131,6 +3520,128 @@ class TestPlatformSoftwareUpdateActionRepositoryUrlEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_entry_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action2 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action3 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo2",
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["repo1"])
+
+    def test_entry_of_private_platform_is_included_for_owner(self):
+        """Ensure we show data for private platforms to owners."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        action1 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action2 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform1,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo1",
+        )
+        action3 = PlatformSoftwareUpdateAction(
+            software_type_name="OS",
+            platform=platform2,
+            contact=contact,
+            update_date=datetime(2022, 11, 4, 12, 0, 0),
+            repository_url="repo2",
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                contact,
+                action1,
+                action2,
+                action3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["repo1", "repo2"])
+
 
 class TestPlatformManufacturerNames(BaseTestCase):
     """Tests for the endpoints for the platform manufacturer names."""
@@ -2226,6 +3737,66 @@ class TestPlatformManufacturerNames(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+    def test_manufacturer_name_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="d1",
+            manufacturer_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            manufacturer_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_manufacturer_name_of_private_platform_is_included_for_owner(self):
+        """Ensure we give out private platform data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="d1",
+            manufacturer_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            manufacturer_name="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
+
 
 class TestPlatformSerialNumbers(BaseTestCase):
     """Tests for the endpoints for the platform serial numbers."""
@@ -2320,6 +3891,66 @@ class TestPlatformSerialNumbers(BaseTestCase):
             self.assertIn(field, get_endpoint.keys())
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
+
+    def test_serial_number_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_serial_number_of_private_platform_is_included_for_owner(self):
+        """Ensure we give out private platform data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        platform1 = Platform(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "fancy"])
 
 
 class TestConfigurationCustomFieldKeys(BaseTestCase):
