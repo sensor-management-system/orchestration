@@ -54,8 +54,10 @@ class BaseConfig:
     )
     PID_SERVICE_USER = env("PID_SERVICE_USER", None)
     PID_SERVICE_PASSWORD = env("PID_SERVICE_PASSWORD", None)
-    PID_SUFFIX = env("PID_SUFFIX", "SMS")
-    PID_PREFIX = env("PID_PREFIX", "STAGE-TEST")
+    PID_SUFFIX = env("PID_SUFFIX", "SMS-STAGE")
+    PID_PREFIX = env("PID_PREFIX", None)
+    PID_CERT_FILE = env("PID_CERT_FILE", None)
+    PID_CERT_KEY = env("PID_CERT_KEY", None)
 
 
 class DevelopmentConfig(BaseConfig):

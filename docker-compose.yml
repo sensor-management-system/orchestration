@@ -56,6 +56,9 @@ services:
       SCHEMA_VERSION: ${SCHEMA_VERSION:-0.1}
       IDENTIFIER_TYPE: ${IDENTIFIER_TYPE:-Handler}
       PID_SUFFIX: ${PID_SUFFIX:-SMS}
+      PID_PREFIX: ${PID_PREFIX}
+      PID_CERT_FILE: ${PID_CERT_FILE}
+      PID_CERT_KEY: ${PID_CERT_KEY}
     depends_on:
       - db
     command: >
