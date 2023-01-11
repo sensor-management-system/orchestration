@@ -9,6 +9,7 @@ are not part of a controlled vocabulary.
 from abc import ABC
 
 from flask import Blueprint, g
+from sqlalchemy import or_
 
 from ..api.helpers.errors import ErrorResponse, UnauthorizedError
 from ..api.models import (
@@ -43,6 +44,17 @@ class AbstractFreeTextFieldEndpoint(ABC):
 
     The main idea is always the same: Make a distinct query for one field
     without further filters & return the list of them.
+
+    The configuration of the class is done with up to 4 fields on the
+    class itself:
+
+    field: This is the field that we want to extract.
+    join_field: The field that we use to join to another table (if needed).
+    is_private_field: The field that specifies if the entry is private or not.
+                      This can be part of the joined table.
+    created_by_id_field: The field that points to the user id that created that entry.
+                         This points to the only user that can edit a private device/platform.
+                         The field can be on the joined table.
     """
 
     def __call__(self):
@@ -61,11 +73,23 @@ class AbstractFreeTextFieldEndpoint(ABC):
         try:
             if not g.user:
                 raise UnauthorizedError("Login required.")
+            base_query = db.session.query(self.__class__.field)
+            if getattr(self.__class__, "is_private_field", None) and getattr(
+                self.__class__, "created_by_id_field", None
+            ):
+                # Maybe we must join to extract the right fields.
+                if getattr(self.__class__, "join_field", None):
+                    base_query = base_query.join(self.__class__.join_field)
+                # Either it is not private or we have the owner.
+                base_query = base_query.filter(
+                    or_(
+                        self.__class__.is_private_field.isnot(True),
+                        self.__class__.created_by_id_field == g.user.id,
+                    )
+                )
             result_list = [
                 x[0]
-                for x in db.session.query(self.__class__.field)
-                .distinct()
-                .order_by(self.__class__.field)
+                for x in base_query.distinct().order_by(self.__class__.field)
                 if x[0]
             ]
             result = {"data": result_list}
@@ -110,6 +134,9 @@ class DeviceCalibrationActionDescriptionEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device calibration action descriptions."""
 
     field = DeviceCalibrationAction.description
+    join_field = DeviceCalibrationAction.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route(
@@ -120,6 +147,9 @@ class DeviceCalibrationActionFormulaEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device calibration action formulas."""
 
     field = DeviceCalibrationAction.formula
+    join_field = DeviceCalibrationAction.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route("/controller/device-custom-field-keys", methods=["GET"])
@@ -128,6 +158,9 @@ class CustomFieldKeyEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct custom field keys."""
 
     field = CustomField.key
+    join_field = CustomField.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route("/controller/device-custom-field-values", methods=["GET"])
@@ -136,6 +169,9 @@ class CustomFieldValueEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct custom field values."""
 
     field = CustomField.value
+    join_field = CustomField.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route("/controller/device-long-names", methods=["GET"])
@@ -144,6 +180,8 @@ class DeviceLongNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device long names."""
 
     field = Device.long_name
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route("/controller/device-manufacturer-names", methods=["GET"])
@@ -152,6 +190,9 @@ class DeviceManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device manufacturer names."""
 
     field = Device.manufacturer_name
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
+
 
 @free_text_field_routes.route("/controller/device-serial-numbers", methods=["GET"])
 @class_based_view
@@ -159,6 +200,8 @@ class DeviceSerialNumberEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device serial numbers."""
 
     field = Device.serial_number
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route("/controller/device-property-labels", methods=["GET"])
@@ -167,6 +210,9 @@ class DevicePropertyLabelEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device property labels."""
 
     field = DeviceProperty.label
+    join_field = DeviceProperty.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route("/controller/device-short-names", methods=["GET"])
@@ -175,6 +221,8 @@ class DeviceShortNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device short names."""
 
     field = Device.short_name
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route(
@@ -185,6 +233,9 @@ class DeviceSoftwareUpdateActionDescriptionEndPoint(AbstractFreeTextFieldEndpoin
     """Endpoint for distinct device software update action descriptions."""
 
     field = DeviceSoftwareUpdateAction.description
+    join_field = DeviceSoftwareUpdateAction.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route(
@@ -195,6 +246,9 @@ class DeviceSoftwareUpdateActionRepositoryUrlEndPoint(AbstractFreeTextFieldEndpo
     """Endpoint for distinct device software update action repository urls."""
 
     field = DeviceSoftwareUpdateAction.repository_url
+    join_field = DeviceSoftwareUpdateAction.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route(
@@ -215,6 +269,9 @@ class GenericDeviceActionDescriptionEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device action descriptions."""
 
     field = GenericDeviceAction.description
+    join_field = GenericDeviceAction.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route(
@@ -225,6 +282,9 @@ class GenericPlatformActionDescriptionEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct platform action descriptions."""
 
     field = GenericPlatformAction.description
+    join_field = GenericPlatformAction.platform
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
 
 
 @free_text_field_routes.route("/controller/platform-long-names", methods=["GET"])
@@ -233,6 +293,8 @@ class PlatformLongNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct platform long names."""
 
     field = Platform.long_name
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
 
 
 @free_text_field_routes.route(
@@ -243,15 +305,19 @@ class PlatformManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct platform manufacturer names."""
 
     field = Platform.manufacturer_name
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
 
-@free_text_field_routes.route(
-    "/controller/platform-serial-numbers", methods=["GET"]
-)
+
+@free_text_field_routes.route("/controller/platform-serial-numbers", methods=["GET"])
 @class_based_view
 class PlatformSerialNumberEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct platform serial numbers."""
 
     field = Platform.serial_number
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
+
 
 @free_text_field_routes.route("/controller/platform-short-names", methods=["GET"])
 @class_based_view
@@ -259,6 +325,8 @@ class PlatformShortNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct platform short names."""
 
     field = Platform.short_name
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
 
 
 @free_text_field_routes.route(
@@ -269,6 +337,9 @@ class PlatformSoftwareUpdateActionDescriptionEndPoint(AbstractFreeTextFieldEndpo
     """Endpoint for distinct platform software update action descriptions."""
 
     field = PlatformSoftwareUpdateAction.description
+    join_field = PlatformSoftwareUpdateAction.platform
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
 
 
 @free_text_field_routes.route(
@@ -279,6 +350,9 @@ class PlatformSoftwareUpdateActionRepositoryUrlEndPoint(AbstractFreeTextFieldEnd
     """Endpoint for distinct platform software update action repository urls."""
 
     field = PlatformSoftwareUpdateAction.repository_url
+    join_field = PlatformSoftwareUpdateAction.platform
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
 
 
 @free_text_field_routes.route("/controller/site-buildings", methods=["GET"])
