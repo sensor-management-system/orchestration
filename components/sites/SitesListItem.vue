@@ -36,13 +36,15 @@ permissions and limitations under the Licence.
     :background-color="site.archived ? 'brown lighten-4 ' : 'white'"
   >
     <template v-if="!hideHeader" #header>
-      <visibility-chip
-        v-model="site.visibility"
-      />
-      <permission-group-chips
-        v-model="site.permissionGroups"
-        collapsible
-      />
+      <div class="d-flex flex-wrap">
+        <visibility-chip
+          v-model="site.visibility"
+        />
+        <permission-group-chips
+          v-model="site.permissionGroups"
+          collapsible
+        />
+      </div>
     </template>
     <template #dot-menu-items>
       <slot name="dot-menu-items" />

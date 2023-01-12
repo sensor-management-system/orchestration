@@ -35,16 +35,18 @@ permissions and limitations under the Licence.
     :background-color="configuration.archived ? 'brown lighten-4 ' : 'white'"
   >
     <template #header>
-      <status-chip
-        :value="configuration.status"
-      />
-      <visibility-chip
-        v-model="configuration.visibility"
-      />
-      <permission-group-chips
-        :value="[configuration.permissionGroup]"
-        collapsible
-      />
+      <div class="d-flex flex-wrap">
+        <status-chip
+          :value="configuration.status"
+        />
+        <visibility-chip
+          v-model="configuration.visibility"
+        />
+        <permission-group-chips
+          :value="[configuration.permissionGroup]"
+          collapsible
+        />
+      </div>
     </template>
     <template #dot-menu-items>
       <slot name="dot-menu-items" />

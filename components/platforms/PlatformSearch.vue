@@ -53,7 +53,6 @@ permissions and limitations under the Licence.
             />
           </v-col>
           <v-col
-            cols="5"
             align-self="center"
           >
             <v-btn
