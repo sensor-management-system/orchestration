@@ -304,7 +304,7 @@ class Pid:
             raise ServiceIsUnreachableError(repr(e))
         except requests.exceptions.HTTPError as e:
             raise ConflictError(repr(e))
-        pid = response.json()["handle"].split("/")[1]
+        pid = response.json()["handle"]
         return pid
 
 
