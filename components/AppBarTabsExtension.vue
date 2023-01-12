@@ -32,6 +32,7 @@ permissions and limitations under the Licence.
   <v-tabs
     :value="value"
     background-color="grey lighten-3"
+    show-arrows
     @change="changeTab"
   >
     <template

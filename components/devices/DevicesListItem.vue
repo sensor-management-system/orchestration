@@ -35,19 +35,21 @@ permissions and limitations under the Licence.
     :background-color="device.archived ? 'brown lighten-4 ' : 'white'"
   >
     <template v-if="!hideHeader" #header>
-      <div :class="'mr-1 text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
-        {{ getType() }}
+      <div class="d-flex flex-wrap">
+        <div :class="'mr-1 text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
+          {{ getType() }}
+        </div>
+        <status-chip
+          :value="getStatus()"
+        />
+        <visibility-chip
+          v-model="device.visibility"
+        />
+        <permission-group-chips
+          v-model="device.permissionGroups"
+          collapsible
+        />
       </div>
-      <status-chip
-        :value="getStatus()"
-      />
-      <visibility-chip
-        v-model="device.visibility"
-      />
-      <permission-group-chips
-        v-model="device.permissionGroups"
-        collapsible
-      />
     </template>
     <template #dot-menu-items>
       <slot name="dot-menu-items" />

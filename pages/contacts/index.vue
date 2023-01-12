@@ -43,7 +43,6 @@ permissions and limitations under the Licence.
         />
       </v-col>
       <v-col
-        cols="5"
         align-self="center"
       >
         <v-btn
@@ -96,18 +95,23 @@ permissions and limitations under the Licence.
         no-gutters
         class="mt-10"
       >
-        <v-subheader>
-          <template v-if="contacts.length == 1">
-            1 contact found
-          </template>
-          <template v-else>
-            {{ contacts.length }} contacts found
-          </template>
-          <v-spacer />
-        </v-subheader>
-        <v-spacer />
         <v-col
-          cols="4"
+          cols="12"
+          md="3"
+        >
+          <v-subheader>
+            <template v-if="contacts.length == 1">
+              1 contact found
+            </template>
+            <template v-else>
+              {{ contacts.length }} contacts found
+            </template>
+            <v-spacer />
+          </v-subheader>
+        </v-col>
+        <v-col
+          cols="12"
+          md="6"
         >
           <v-pagination
             v-model="page"
@@ -118,7 +122,8 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col
-          cols="4"
+          cols="12"
+          md="3"
           class="flex-grow-1 flex-shrink-0"
         >
           <v-subheader>

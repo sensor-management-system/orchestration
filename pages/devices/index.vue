@@ -51,7 +51,6 @@ permissions and limitations under the Licence.
             />
           </v-col>
           <v-col
-            cols="5"
             align-self="center"
           >
             <v-btn
@@ -195,13 +194,10 @@ permissions and limitations under the Licence.
         no-gutters
         class="mt-10"
       >
-        <div v-if="devices.length <=0 && !loading">
-          <p class="text-center">
-            There are no devices that match your search criteria.
-          </p>
-        </div>
-
-        <div v-if="devices.length>0">
+        <v-col
+          cols="12"
+          md="3"
+        >
           <v-subheader>
             <template v-if="devices.length == 1">
               1 device found
@@ -209,7 +205,6 @@ permissions and limitations under the Licence.
             <template v-else>
               {{ devices.length }} devices found
             </template>
-            <v-spacer />
 
             <template v-if="devices.length>0">
               <v-dialog v-model="processing" max-width="100">
@@ -266,11 +261,11 @@ permissions and limitations under the Licence.
               </v-menu>
             </template>
           </v-subheader>
-        </div>
+        </v-col>
 
-        <v-spacer />
         <v-col
-          cols="4"
+          cols="12"
+          md="6"
         >
           <v-pagination
             v-model="page"
@@ -281,7 +276,8 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col
-          cols="4"
+          cols="12"
+          md="3"
           class="flex-grow-1 flex-shrink-0"
         >
           <v-subheader>
@@ -293,6 +289,7 @@ permissions and limitations under the Licence.
           </v-subheader>
         </v-col>
       </v-row>
+
       <BaseList
         :list-items="devices"
       >

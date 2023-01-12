@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -51,7 +51,8 @@ permissions and limitations under the Licence.
             v-bind="attrs"
             v-on="on"
           >
-            {{ group.name }}
+            <span v-if="$vuetify.breakpoint.smAndUp">{{ group.name | shortenRight(50) }}</span>
+            <span v-else>{{ group.name | shortenRight(14) }}</span>
           </v-chip>
         </template>
         <p v-for="(groupName, index) in hiddenGroupNames" :key="index" class="mb-0">{{ groupName }}</p>
@@ -64,8 +65,11 @@ permissions and limitations under the Licence.
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { IPermissionGroup, PermissionGroup } from '@/models/PermissionGroup'
+import { shortenRight } from '@/utils/stringHelpers'
 
-@Component
+@Component({
+  filters: { shortenRight }
+})
 export default class PermissionGroupChips extends Vue {
   @Prop({
     default: () => [],

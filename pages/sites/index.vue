@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
               @keydown.enter="basicSearch"
             />
           </v-col>
-          <v-col cols="5" align-self="center">
+          <v-col align-self="center">
             <v-btn
               color="primary"
               small
@@ -89,13 +89,10 @@ permissions and limitations under the Licence.
 
     <div v-if="sites.length > 0">
       <v-row no-gutters class="mt-10">
-        <div v-if="sites.length <= 0 && !loading">
-          <p class="text-center">
-            There are no sites that match your search criteria.
-          </p>
-        </div>
-
-        <div v-if="sites.length > 0">
+        <v-col
+          cols="12"
+          md="3"
+        >
           <v-subheader>
             <template v-if="sites.length == 1">
               1 site found
@@ -117,11 +114,11 @@ permissions and limitations under the Licence.
               </v-dialog>
             </template>
           </v-subheader>
-        </div>
+        </v-col>
 
-        <v-spacer />
         <v-col
-          cols="4"
+          cols="12"
+          md="6"
         >
           <v-pagination
             v-model="page"
@@ -132,7 +129,8 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col
-          cols="4"
+          cols="12"
+          md="3"
           class="flex-grow-1 flex-shrink-0"
         >
           <v-subheader>
