@@ -250,6 +250,9 @@ class Pid:
             response = requests.get(
                 url=f"{self.pid_service_url}{self.pid_prefix}/{object_pid}",
                 cert=(self.pid_cert_file, self.pid_cert_key),
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
                 verify=False,
                 headers=header,
             )
@@ -297,6 +300,9 @@ class Pid:
                 cert=(self.pid_cert_file, self.pid_cert_key),
                 headers=header,
                 json=json_body,
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
                 verify=False
             )
             response.raise_for_status()
@@ -325,6 +331,9 @@ class Pid:
                 cert=(self.pid_cert_file, self.pid_cert_key),
                 headers=header,
                 json=json_body,
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
                 verify=False
             )
             response.raise_for_status()
@@ -347,6 +356,9 @@ class Pid:
                 url=f"{self.pid_service_url}{self.pid_prefix}/{object_pid}",
                 cert=(self.pid_cert_file, self.pid_cert_key),
                 verify=False,
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
                 headers=header,
             )
             response.raise_for_status()
