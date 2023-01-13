@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -66,6 +67,7 @@ permissions and limitations under the Licence.
         />
       </v-card-actions>
     </v-card>
+    <serial-number-warning-dialog v-model="showSerialNumberWarning" entity="platform" @confirm="saveWithoutSerialNumber" />
   </div>
 </template>
 
@@ -80,6 +82,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
+import SerialNumberWarningDialog from '@/components/shared/SerialNumberWarningDialog.vue'
 
 import { Platform } from '@/models/Platform'
 
@@ -88,7 +91,8 @@ import { Platform } from '@/models/Platform'
     SaveAndCancelButtons,
     PlatformBasicDataForm,
     ProgressIndicator,
-    NonModelOptionsForm
+    NonModelOptionsForm,
+    SerialNumberWarningDialog
   },
   middleware: ['auth'],
   methods: {
@@ -100,6 +104,8 @@ import { Platform } from '@/models/Platform'
 export default class PlatformNewPage extends Vue {
   private platform: Platform = new Platform()
   private isLoading: boolean = false
+  private showSerialNumberWarning = false
+  private wantsToSaveWithoutSerialNumber = false
   private createOptions: NonModelOptions = {
     persistentIdentifierShouldBeCreated: false
   }
@@ -114,10 +120,22 @@ export default class PlatformNewPage extends Vue {
     this.initializeAppBar()
   }
 
+  saveWithoutSerialNumber () {
+    this.wantsToSaveWithoutSerialNumber = true
+    this.save()
+  }
+
   async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
+    }
+
+    if (this.platform.serialNumber === '') {
+      if (!this.wantsToSaveWithoutSerialNumber) {
+        this.showSerialNumberWarning = true
+        return
+      }
     }
 
     try {

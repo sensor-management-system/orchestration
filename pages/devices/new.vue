@@ -65,6 +65,7 @@ permissions and limitations under the Licence.
         />
       </v-card-actions>
     </v-card>
+    <serial-number-warning-dialog v-model="showSerialNumberWarning" entity="device" @confirm="saveWithoutSerialNumber" />
   </div>
 </template>
 
@@ -79,6 +80,7 @@ import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SerialNumberWarningDialog from '@/components/shared/SerialNumberWarningDialog.vue'
 
 import { Device } from '@/models/Device'
 
@@ -87,7 +89,8 @@ import { Device } from '@/models/Device'
     SaveAndCancelButtons,
     DeviceBasicDataForm,
     ProgressIndicator,
-    NonModelOptionsForm
+    NonModelOptionsForm,
+    SerialNumberWarningDialog
   },
   middleware: ['auth'],
   methods: {
@@ -99,6 +102,8 @@ import { Device } from '@/models/Device'
 export default class DeviceNewPage extends Vue {
   private device: Device = new Device()
   private isLoading: boolean = false
+  private showSerialNumberWarning = false
+  private wantsToSaveWithoutSerialNumber = false
   private createOptions: NonModelOptions = {
     persistentIdentifierShouldBeCreated: false
   }
@@ -113,10 +118,22 @@ export default class DeviceNewPage extends Vue {
     this.initializeAppBar()
   }
 
+  saveWithoutSerialNumber () {
+    this.wantsToSaveWithoutSerialNumber = true
+    this.save()
+  }
+
   async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
+    }
+
+    if (this.device.serialNumber === '') {
+      if (!this.wantsToSaveWithoutSerialNumber) {
+        this.showSerialNumberWarning = true
+        return
+      }
     }
 
     try {

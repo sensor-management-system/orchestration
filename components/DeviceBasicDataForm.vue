@@ -271,9 +271,15 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           :disabled="readonly"
           label="Serial number"
+          :hint="serialNumberHint"
+          persistent-hint
           :placeholder="serialNumberPlaceholder"
           @input="update('serialNumber', $event)"
-        />
+        >
+          <v-icon v-if="serialNumberHint" slot="append" color="warning">
+            mdi-alert
+          </v-icon>
+        </v-text-field>
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
@@ -372,6 +378,8 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   private devicetypes!: VocabularyState['devicetypes']
   private manufacturers !: VocabularyState['manufacturers']
   private equipmentstatus !: VocabularyState['equipmentstatus']
+  private serialNumbersInUse: string[] = []
+  private initialSerialNumber = ''
 
   loadDevicetypes !: LoadDevicetypesAction
   loadManufacturers !: LoadManufacturersAction
@@ -407,6 +415,10 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   })
   readonly persistentIdentifierPlaceholder!: string | null
 
+  created () {
+    this.initialSerialNumber = this.value.serialNumber
+  }
+
   get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
     return {
       validatePermissionGroups: Validator.validatePermissionGroups(this.value.isPrivate, this.entityName)
@@ -419,7 +431,20 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     ]
   }
 
+  get isSerialNumberInUse (): boolean {
+    return this.serialNumbersInUseWithoutInitial.includes(this.value.serialNumber)
+  }
+
+  get serialNumberHint () {
+    return this.isSerialNumberInUse ? 'Another device already has an equal serial number.' : ''
+  }
+
+  get serialNumbersInUseWithoutInitial () {
+    return this.serialNumbersInUse.filter(item => item !== this.initialSerialNumber)
+  }
+
   async fetch () {
+    this.serialNumbersInUse = await this.$api.autocomplete.getSuggestions('device-serial-numbers')
     try {
       await Promise.all([
         this.loadEquipmentstatus(),

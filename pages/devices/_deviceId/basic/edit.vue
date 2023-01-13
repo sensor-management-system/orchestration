@@ -167,6 +167,7 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
+
     try {
       this.isSaving = true
       const savedDevice = await this.saveDevice(this.deviceCopy)
