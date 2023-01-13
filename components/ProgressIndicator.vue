@@ -37,6 +37,7 @@ permissions and limitations under the Licence.
       <v-progress-circular
         indeterminate
         class="center-absolute"
+        :color="color"
       />
     </v-overlay>
   </div>
@@ -62,6 +63,14 @@ export default class ProgressIndicator extends Vue {
   })
   // @ts-ignore
   readonly dark!: boolean
+
+  @Prop({
+    default: 'primary',
+    required: false,
+    type: String
+  })
+  // @ts-ignore
+  readonly color!: string
 
   get isInProgress (): boolean {
     return this.value
