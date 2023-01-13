@@ -41,6 +41,7 @@ permissions and limitations under the Licence.
       <v-btn
         color="primary"
         small
+        :disabled="isFetching"
         :to="'/devices/' + deviceId + '/measuredquantities/new'"
       >
         Add Measured Quantity
@@ -115,7 +116,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Prop } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { DeleteDeviceMeasuredQuantityAction, DevicesState, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
@@ -150,6 +151,11 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 export default class DevicePropertyShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
+
+  @Prop({
+    type: Boolean
+  })
+    isFetching!: boolean
 
   private isSaving = false
 

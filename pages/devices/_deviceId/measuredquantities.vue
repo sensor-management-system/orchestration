@@ -32,8 +32,9 @@ permissions and limitations under the Licence.
   <div>
     <ProgressIndicator
       v-model="isLoading"
+      color="primary"
     />
-    <NuxtChild />
+    <NuxtChild :is-fetching="isLoading" />
   </div>
 </template>
 
