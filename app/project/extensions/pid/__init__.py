@@ -5,6 +5,7 @@ import string
 import requests
 from flask import current_app
 from requests.auth import HTTPBasicAuth
+from uuid import uuid4
 
 from ...api.helpers.errors import ConflictError, ServiceIsUnreachableError
 
@@ -49,6 +50,25 @@ class Pid:
     def pid_prefix(self):
         """Get sms prefix."""
         return current_app.config["PID_PREFIX"]
+
+    @property
+    def pid_cert_file(self):
+        """Get pid cert file path."""
+        return current_app.config["PID_CERT_FILE"]
+
+    @property
+    def pid_cert_key(self):
+        """Get pid cert key file path."""
+        return current_app.config["PID_CERT_KEY"]
+
+    def get_request_body_admin_part(self):
+        part = {"index": 100, "type": "HS_ADMIN",
+                "data": {"format": "admin",
+                         "value": {
+                             "handle": f"0.NA/{self.pid_prefix}",
+                             "index": 200,
+                             "permissions": "011111110011"}}}
+        return part
 
     def list(self, limit=0, page=None):
         """
@@ -225,11 +245,14 @@ class Pid:
         :param object_pid: The pid
         :return: pid description.
         """
-        header = {"Content-Type": "application/json", "Accept": "application/json"}
+        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
         try:
             response = requests.get(
-                url=self.pid_service_url + object_pid,
-                auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
+                url=f"{self.pid_service_url}{self.pid_prefix}/{object_pid}",
+                cert=(self.pid_cert_file, self.pid_cert_key),
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
                 verify=False,
                 headers=header,
             )
@@ -267,23 +290,29 @@ class Pid:
         :return str: the pid of the object.
         """
 
-        header = {"Content-Type": "application/json", "Accept": "application/json"}
+        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
+        pid_uuid = str(uuid4())
+        instrument_data.append(self.get_request_body_admin_part())
+        json_body = {"values": instrument_data}
         try:
-            response = requests.post(
-                url=self.pid_service_url,
-                json=instrument_data,
-                auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
-                verify=False,
+            response = requests.put(
+                url=f"{self.pid_service_url}{self.pid_prefix}/{self.pid_suffix}-{pid_uuid}",
+                cert=(self.pid_cert_file, self.pid_cert_key),
                 headers=header,
-                params={"prefix": self.pid_suffix, "suffix": self.pid_prefix},
+                json=json_body,
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
+                verify=False
             )
             response.raise_for_status()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             raise ServiceIsUnreachableError(repr(e))
         except requests.exceptions.HTTPError as e:
             raise ConflictError(repr(e))
-        epic_pid = response.json()["epic-pid"]
-        return epic_pid
+        pid = response.json()["handle"]
+        return pid
+
 
     def update(self, source_object_pid, instrument_data):
         """
@@ -293,14 +322,19 @@ class Pid:
         :param source_object_pid: The PID.
         :return:
         """
-        header = {"Content-Type": "application/json", "Accept": "application/json"}
+        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
+        instrument_data.append(self.get_request_body_admin_part())
+        json_body = {"values": instrument_data}
         try:
             response = requests.put(
-                url=self.pid_service_url + source_object_pid,
-                json=instrument_data,
-                auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
-                verify=False,
+                url=f"{self.pid_service_url}{self.pid_prefix}/{source_object_pid}",
+                cert=(self.pid_cert_file, self.pid_cert_key),
                 headers=header,
+                json=json_body,
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
+                verify=False
             )
             response.raise_for_status()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
@@ -316,12 +350,15 @@ class Pid:
         :param object_pid: the PID.
         :return:
         """
-        header = {"Content-Type": "application/json", "Accept": "application/json"}
+        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
         try:
             response = requests.delete(
-                url=self.pid_service_url + object_pid,
-                auth=HTTPBasicAuth(self.pid_service_user, self.pid_service_password),
+                url=f"{self.pid_service_url}{self.pid_prefix}/{object_pid}",
+                cert=(self.pid_cert_file, self.pid_cert_key),
                 verify=False,
+                # Adding certificate verification is strongly advised but in this case when we try to access the handle
+                # API with verification we get a SSLCertVerificationError.
+                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
                 headers=header,
             )
             response.raise_for_status()
