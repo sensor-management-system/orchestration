@@ -386,7 +386,7 @@ export class Api {
 
     this._autocompleteApi = new AutocompleteApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/controller/'
+      '/controller'
     )
 
     // and here we can set settings for all the cv api calls
