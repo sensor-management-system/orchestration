@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020-2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -81,13 +81,13 @@ permissions and limitations under the Licence.
       <p>
         Responsible editor for the contents of this internet presence with regard to media law is<br>
         Martin Hammitzsch (Head of <a href="https://www.gfz-potsdam.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
-        Phone: +49 331 288-1717<br>
+        Phone: +49 331 6264-1717<br>
         E-Mail: <a href="mailto:martin.hammitzsch@gfz-potsdam.de">martin.hammitzsch@gfz-potsdam.de</a>
       </p>
       <p>
         Editor, conception, coordination (<a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a>)<br>
         Nils Brinckmann (<a href="https://www.gfz-potsdam.de/en/centre/escience-centre" target="_blank">eScience-Centre</a>)<br>
-        Tel.: +49 331 288-28940<br>
+        Tel.: +49 331 6264-28940<br>
         E-Mail: <a href="mailto:nils.brinckmann@gfz-potsdam.de">nils.brinckmann@gfz-potsdam.de</a>
       </p>
     </section>
