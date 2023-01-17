@@ -1157,6 +1157,136 @@ class TestDeviceSerialNumbers(BaseTestCase):
         data = resp.json["data"]
         self.assertEqual(data, ["dummy", "fancy"])
 
+    def test_ignore_by_ids(self):
+        """Ensure we can ignore the entries that come from certain ids."""
+        device1 = Device(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url + f"?ignore={device1.id}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["fancy"])
+
+    def test_prefilter_by_short_name(self):
+        """Ensure we can filter the set by a given short name."""
+        device1 = Device(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url + f"?short_name={device1.short_name}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_prefilter_by_manufacturer_name(self):
+        """Ensure we can filter the set by a manufacturer name."""
+        device1 = Device(
+            short_name="d1",
+            serial_number="dummy",
+            manufacturer_name="m1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            serial_number="fancy",
+            manufacturer_name="m2",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(
+                self.url + f"?manufacturer_name={device1.manufacturer_name}"
+            )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_prefilter_by_manufacturer_uri(self):
+        """Ensure we can filter the set by a manufacturer name."""
+        device1 = Device(
+            short_name="d1",
+            serial_number="dummy",
+            manufacturer_uri="m1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            serial_number="fancy",
+            manufacturer_uri="m2",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(
+                self.url + f"?manufacturer_uri={device1.manufacturer_uri}"
+            )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_prefilter_by_model(self):
+        """Ensure we can filter the set by a manufacturer name."""
+        device1 = Device(
+            short_name="d1",
+            serial_number="dummy",
+            model="m1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        device2 = Device(
+            short_name="d2",
+            serial_number="fancy",
+            model="m2",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([device1, device2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url + f"?model={device1.model}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
 
 class TestDeviceCustomFieldKeys(BaseTestCase):
     """Tests for the endpoints for the custom field key entries."""
@@ -3951,6 +4081,136 @@ class TestPlatformSerialNumbers(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json["data"]
         self.assertEqual(data, ["dummy", "fancy"])
+
+    def test_ignore_by_ids(self):
+        """Ensure we can ignore the entries that come from certain ids."""
+        platform1 = Platform(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url + f"?ignore={platform1.id}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["fancy"])
+
+    def test_prefilter_by_short_name(self):
+        """Ensure we can filter the set by a given short name."""
+        platform1 = Platform(
+            short_name="d1",
+            serial_number="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            serial_number="fancy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url + f"?short_name={platform1.short_name}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_prefilter_by_manufacturer_name(self):
+        """Ensure we can filter the set by a manufacturer name."""
+        platform1 = Platform(
+            short_name="d1",
+            serial_number="dummy",
+            manufacturer_name="m1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            serial_number="fancy",
+            manufacturer_name="m2",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(
+                self.url + f"?manufacturer_name={platform1.manufacturer_name}"
+            )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_prefilter_by_manufacturer_uri(self):
+        """Ensure we can filter the set by a manufacturer name."""
+        platform1 = Platform(
+            short_name="d1",
+            serial_number="dummy",
+            manufacturer_uri="m1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            serial_number="fancy",
+            manufacturer_uri="m2",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(
+                self.url + f"?manufacturer_uri={platform1.manufacturer_uri}"
+            )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
+
+    def test_prefilter_by_model(self):
+        """Ensure we can filter the set by a manufacturer name."""
+        platform1 = Platform(
+            short_name="d1",
+            serial_number="dummy",
+            model="m1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform2 = Platform(
+            short_name="d2",
+            serial_number="fancy",
+            model="m2",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        db.session.add_all([platform1, platform2])
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url + f"?model={platform1.model}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])
 
 
 class TestConfigurationCustomFieldKeys(BaseTestCase):
