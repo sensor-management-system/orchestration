@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -153,13 +153,16 @@ export default {
    * @param entityName The entity you are validating, e.g. device, platform, etc...
    * @returns String or boolean that informs the user about possible Permission Group configurations
    */
-  validatePermissionGroups (isPrivate: boolean, entityName: string): (groups: IPermissionGroup[]) => boolean | string {
+  validatePermissionGroups (isPrivate: boolean, entityName: string, canBePrivate: boolean = true): (groups: IPermissionGroup[]) => boolean | string {
     return function (groups: IPermissionGroup[]) {
       if (isPrivate && groups.length) {
         return `You are not allowed to add groups if the ${entityName} is private.`
       }
       if (!isPrivate && !groups.length) {
-        return `You must add groups if the ${entityName} is not private.`
+        if (canBePrivate) {
+          return `You must add groups if the ${entityName} is not private.`
+        }
+        return 'You must add groups.'
       }
       return true
     }
