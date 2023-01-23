@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -246,8 +246,12 @@ export default class SiteBasicDataForm extends mixins(Rules) {
   readonly readonly!: boolean
 
   get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
+    // For the moment there is no way a site could be private.
+    const isPrivate = false
+    const canBePrivate = false
+
     return {
-      validatePermissionGroups: Validator.validatePermissionGroups(false, this.entityName)
+      validatePermissionGroups: Validator.validatePermissionGroups(isPrivate, this.entityName, canBePrivate)
     }
   }
 

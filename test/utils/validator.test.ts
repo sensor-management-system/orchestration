@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021, 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,6 +33,7 @@ import { DateTime } from 'luxon'
 import Validator from '@/utils/validator'
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 import { LocationTypes } from '@/store/configurations'
+import { IPermissionGroup, PermissionGroup } from '@/models/PermissionGroup'
 
 const isValidEmailAddress = Validator.isValidEmailAddress
 const startDateMustBeAfterPreviousAction = Validator.startDateMustBeAfterPreviousAction
@@ -378,5 +379,57 @@ describe('#canNotStartAnActionAfterAnActiveAction', () => {
       }
     ]
     expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBe('Must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm'))
+  })
+})
+
+describe('#validatePermissionGroups', () => {
+  it('should return true for a non private thing with groups', () => {
+    const groups = [PermissionGroup.createFromObject({
+      id: '1',
+      name: 'Test group 1',
+      description: 'abc'
+    })]
+    const isPrivate = false
+    const checkFunction = Validator.validatePermissionGroups(isPrivate, 'device')
+    const result = checkFunction(groups)
+    expect(result).toBe(true)
+  })
+  it('should return true for a private thing without groups', () => {
+    const groups: IPermissionGroup[] = []
+    const isPrivate = true
+    const checkFunction = Validator.validatePermissionGroups(isPrivate, 'device')
+    const result = checkFunction(groups)
+    expect(result).toBe(true)
+  })
+  it('should tell me that I can\'t add groups to a private entity', () => {
+    const groups = [PermissionGroup.createFromObject({
+      id: '1',
+      name: 'Test group 1',
+      description: 'abc'
+    })]
+    const isPrivate = true
+    const checkFunction = Validator.validatePermissionGroups(isPrivate, 'device')
+    const result = checkFunction(groups)
+    expect(result).toEqual('You are not allowed to add groups if the device is private.')
+  })
+  it('should tell me that I need to add groups to a non private entity', () => {
+    const groups: IPermissionGroup[] = []
+    const isPrivate = false
+    const checkFunction = Validator.validatePermissionGroups(isPrivate, 'device')
+    const result = checkFunction(groups)
+    expect(result).toEqual('You must add groups if the device is not private.')
+  })
+  it('should tell me that I need to add groups if the entity can\'t be private (different wording)', () => {
+    /* Not all the permission group managable entites are allowed to be private.
+       For sites this is not allowed.
+       We don't want to show the message here that would claim somehow that the
+       thing must be private.
+    */
+    const groups: IPermissionGroup[] = []
+    const isPrivate = false
+    const canBePrivate = false
+    const checkFunction = Validator.validatePermissionGroups(isPrivate, 'site', canBePrivate)
+    const result = checkFunction(groups)
+    expect(result).toEqual('You must add groups.')
   })
 })
