@@ -3,13 +3,13 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020 - 2023
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
- * (UFZ, https://www.ufz.de)
+ *   (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -36,10 +36,6 @@
 
 import { DateTime } from 'luxon'
 
-import { multiLineString } from '@turf/helpers'
-import { lineToPolygon } from '@turf/turf'
-import kinks from '@turf/kinks'
-
 import { Contact } from '@/models/Contact'
 import { IAddress, ILatLng, Site } from '@/models/Site'
 import { PermissionGroup } from '@/models/PermissionGroup'
@@ -65,16 +61,6 @@ export interface ISiteMissingData {
 export interface ISiteWithMeta {
   site: Site
   missing: ISiteMissingData
-}
-
-export function hasSelfIntersection (coords: ILatLng[]): boolean {
-  const coordsList = coords.map(coord => [coord.lng, coord.lat])
-  const multiLine = multiLineString([coordsList])
-  const testPolygon = lineToPolygon(multiLine)
-  // @ts-ignore
-  const testKinks = kinks(testPolygon)
-
-  return testKinks.features.length > 0
 }
 
 export class SiteSerializer {
@@ -149,6 +135,10 @@ export class SiteSerializer {
       result.description = attributes.description || ''
       result.epsgCode = attributes.epsg_code || ''
       result.address = address
+      result.siteTypeName = attributes.site_type_name || ''
+      result.siteTypeUri = attributes.site_type_uri || ''
+      result.siteUsageName = attributes.site_usage_name || ''
+      result.siteUsageUri = attributes.site_usage_uri || ''
       result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
       if (attributes.is_internal) {
@@ -236,7 +226,11 @@ export class SiteSerializer {
         zip_code: site.address.zipCode,
         country: site.address.country,
         building: site.address.building,
-        room: site.address.room
+        room: site.address.room,
+        site_usage_name: site.siteUsageName,
+        site_usage_uri: site.siteUsageUri,
+        site_type_name: site.siteTypeName,
+        site_type_uri: site.siteTypeUri
 
         // these properties are set by the db, so we wont send anything related here:
         // archived

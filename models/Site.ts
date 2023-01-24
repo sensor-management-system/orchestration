@@ -3,12 +3,14 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -63,6 +65,13 @@ export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo 
   archived: boolean
   contacts: IContact[]
   configurationIds: string[]
+
+  siteUsageUri: string
+  siteUsageName: string
+
+  siteTypeUri: string
+  siteTypeName: string
+
   createdAt: DateTime | null
   updatedAt: DateTime | null
   createdBy: IContact | null
@@ -81,6 +90,12 @@ export class Site implements ISite, IVisible {
   private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
   private _configurationIds: string[] = []
+
+  private _siteUsageUri: string = ''
+  private _siteUsageName: string = ''
+  private _siteTypeUri: string = ''
+  private _siteTypeName: string = ''
+
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
   private _createdBy: IContact | null = null
@@ -152,6 +167,38 @@ export class Site implements ISite, IVisible {
 
   set configurationIds (configurationIds: string[]) {
     this._configurationIds = configurationIds
+  }
+
+  get siteUsageName (): string {
+    return this._siteUsageName
+  }
+
+  set siteUsageName (siteUsageName: string) {
+    this._siteUsageName = siteUsageName
+  }
+
+  get siteUsageUri (): string {
+    return this._siteUsageUri
+  }
+
+  set siteUsageUri (siteUsageUri: string) {
+    this._siteUsageUri = siteUsageUri
+  }
+
+  get siteTypeName (): string {
+    return this._siteTypeName
+  }
+
+  set siteTypeName (siteTypeName: string) {
+    this._siteTypeName = siteTypeName
+  }
+
+  get siteTypeUri (): string {
+    return this._siteTypeUri
+  }
+
+  set siteTypeUri (siteTypeUri: string) {
+    this._siteTypeUri = siteTypeUri
   }
 
   get createdAt (): DateTime | null {
@@ -244,6 +291,13 @@ export class Site implements ISite, IVisible {
     newObject.address = { ...someObject.address }
     newObject.archived = someObject.archived
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
+
+    newObject.siteUsageName = someObject.siteUsageName
+    newObject.siteUsageUri = someObject.siteUsageUri
+
+    newObject.siteTypeName = someObject.siteTypeName
+    newObject.siteTypeUri = someObject.siteTypeUri
+
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
     newObject.createdBy = someObject.createdBy ? Contact.createFromObject(someObject.createdBy) : null

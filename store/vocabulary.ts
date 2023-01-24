@@ -3,13 +3,15 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -49,6 +51,8 @@ import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { EpsgCode } from '@/models/EpsgCode'
 import { ElevationDatum } from '@/models/ElevationDatum'
 import { CvContactRole } from '@/models/CvContactRole'
+import { SiteType } from '@/models/SiteType'
+import { SiteUsage } from '@/models/SiteUsage'
 
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION, ActionTypeApiFilterType } from '@/services/cv/ActionTypeApi'
 import { GlobalProvenance } from '@/models/GlobalProvenance'
@@ -78,7 +82,9 @@ export interface VocabularyState {
   cvContactRoles: CvContactRole[],
   globalProvenances: GlobalProvenance[],
   aggregationtypes: AggregationType[],
-  actionCategories: ActionCategory[]
+  actionCategories: ActionCategory[],
+  siteUsages: SiteUsage[],
+  siteTypes: SiteType[]
 }
 
 const state = (): VocabularyState => ({
@@ -99,7 +105,9 @@ const state = (): VocabularyState => ({
   cvContactRoles: [],
   globalProvenances: [],
   aggregationtypes: [],
-  actionCategories: []
+  actionCategories: [],
+  siteUsages: [],
+  siteTypes: []
 })
 
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
@@ -206,6 +214,8 @@ export type LoadCvContactRolesAction = () => Promise<void>
 export type LoadGlobalProvenancesAction = () => Promise<void>
 export type LoadAggregationtypesAction = () => Promise<void>
 export type LoadActionCategoriesAction = () => Promise<void>
+export type LoadSiteUsagesAction = () => Promise<void>
+export type LoadSiteTypesAction = () => Promise<void>
 export type AddDeviceTypeAction = ({ devicetype }: {devicetype: DeviceType}) => Promise<DeviceType>
 export type AddPlatformTypeAction = ({ platformtype }: {platformtype: PlatformType}) => Promise<PlatformType>
 export type AddManufacturerAction = ({ manufacturer }: { manufacturer: Manufacturer}) => Promise<Manufacturer>
@@ -216,7 +226,9 @@ export type AddSamplingMediaAction = ({ samplingMedium }: { samplingMedium: Samp
 export type AddPropertyAction = ({ property }: { property: Property}) => Promise<Property>
 export type AddActiontypeAction = ({ actiontype, actionCategoryTerm }: {actiontype: ActionType, actionCategoryTerm: ActionTypeApiFilterType}) => Promise<ActionType>
 export type AddUnitAction = ({ unit }: {unit: Unit }) => Promise<Unit>
-export type AddMeasuredQuantityUnitAction = ({ measuredQuantityUnit }: {measuredQuantityUnit: MeasuredQuantityUnit }) => Promise<MeasuredQuantityUnit>
+export type AddMeasuredQuantityUnitAction = ({ measuredQuantityUnit }: { measuredQuantityUnit: MeasuredQuantityUnit }) => Promise<MeasuredQuantityUnit>
+export type AddSiteUsageAction = ({ siteUsage }: { siteUsage: SiteUsage }) => Promise<SiteUsage>
+export type AddSiteTypeAction = ({ siteType }: { siteType: SiteType }) => Promise<SiteType>
 
 const actions: ActionTree<VocabularyState, RootState> = {
   async loadManufacturers ({ commit }: { commit: Commit }): Promise<void> {
@@ -277,6 +289,12 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadActionCategories ({ commit }: { commit: Commit }): Promise<void> {
     commit('setActionCategories', await this.$api.actionCategories.findAll())
+  },
+  async loadSiteUsages ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setSiteUsages', await this.$api.siteUsages.findAll())
+  },
+  async loadSiteTypes ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setSiteTypes', await this.$api.siteTypes.findAll())
   },
   async addDevicetype ({ commit, state }: {commit: Commit, state: VocabularyState }, { devicetype }: {devicetype: DeviceType }): Promise<DeviceType> {
     const newDevicetype = await this.$api.deviceTypes.add(devicetype)
@@ -351,6 +369,18 @@ const actions: ActionTree<VocabularyState, RootState> = {
     const measuredQuantityUnits = [...state.measuredQuantityUnits, newMeasuredQuantityUnit]
     await commit('setMeasuredQuantityUnits', measuredQuantityUnits)
     return newMeasuredQuantityUnit
+  },
+  async addSiteUsage ({ commit, state }: {commit: Commit, state: VocabularyState }, { siteUsage }: { siteUsage: SiteUsage }): Promise<SiteUsage> {
+    const newSiteUsage = await this.$api.siteUsages.add(siteUsage)
+    const siteUsages = [...state.siteUsages, newSiteUsage]
+    await commit('setSiteUsages', siteUsages)
+    return newSiteUsage
+  },
+  async addSiteType ({ commit, state }: {commit: Commit, state: VocabularyState }, { siteType }: { siteType: SiteType }): Promise<SiteType> {
+    const newSiteType = await this.$api.siteTypes.add(siteType)
+    const siteTypes = [...state.siteTypes, newSiteType]
+    await commit('setSiteTypes', siteTypes)
+    return newSiteType
   }
 }
 
@@ -408,6 +438,12 @@ const mutations = {
   },
   setActionCategories (state: VocabularyState, actionCategories: ActionCategory[]) {
     state.actionCategories = actionCategories
+  },
+  setSiteUsages (state: VocabularyState, siteUsages: SiteUsage[]) {
+    state.siteUsages = siteUsages
+  },
+  setSiteTypes (state: VocabularyState, siteTypes: SiteType[]) {
+    state.siteTypes = siteTypes
   }
 }
 

@@ -2,12 +2,14 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -35,12 +37,39 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
 
-@Component
+import { LoadSiteUsagesAction, LoadSiteTypesAction } from '@/store/vocabulary'
+
+@Component({
+  methods: {
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
+  }
+})
 export default class SiteBasicPage extends Vue {
   head () {
     return {
       titleTemplate: 'Basic Data - %s'
+    }
+  }
+
+  private isLoading = false
+
+  // vuex definition for typescript check
+  loadSiteUsages!: LoadSiteUsagesAction
+  loadSiteTypes!: LoadSiteTypesAction
+
+  async fetch (): Promise<void> {
+    try {
+      this.isLoading = true
+      await Promise.all([
+        this.loadSiteUsages(),
+        this.loadSiteTypes()
+      ])
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to fetch site types or usages')
+    } finally {
+      this.isLoading = false
     }
   }
 }

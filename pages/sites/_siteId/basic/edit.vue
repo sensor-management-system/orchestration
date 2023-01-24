@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -49,6 +49,8 @@ permissions and limitations under the Licence.
     <SiteBasicDataForm
       ref="basicForm"
       v-model="siteCopy"
+      :site-usages="siteUsages"
+      :site-types="siteTypes"
     />
     <v-card-actions>
       <v-spacer />
@@ -87,7 +89,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
-import { hasSelfIntersection } from '@/serializers/jsonapi/SiteSerializer'
+import { hasSelfIntersection } from '@/utils/mapHelpers'
+import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -95,11 +98,16 @@ import { hasSelfIntersection } from '@/serializers/jsonapi/SiteSerializer'
     SiteBasicDataForm,
     ProgressIndicator,
     NavigationGuardDialog
-
   },
   middleware: ['auth'],
-  computed: mapState('sites', ['site']),
-  methods: mapActions('sites', ['saveSite', 'loadSite'])
+  computed: {
+    ...mapState('sites', ['site']),
+    ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
+  },
+  methods: {
+    ...mapActions('sites', ['saveSite', 'loadSite']),
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
+  }
 })
 export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   private siteCopy: Site | null = null
@@ -112,6 +120,10 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   site!: SitesState['site']
   saveSite!: SaveSiteAction
   loadSite!: LoadSiteAction
+  siteUsages!: VocabularyState['siteUsages']
+  loadSiteUsages!: LoadSiteUsagesAction
+  siteTypes!: VocabularyState['siteTypes']
+  loadSiteTypes!: LoadSiteTypesAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -133,6 +145,17 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
    */
   getRedirectMessage (): string {
     return 'You\'re not allowed to edit this Site.'
+  }
+
+  async fetch () {
+    try {
+      await Promise.all([
+        this.loadSiteUsages(),
+        this.loadSiteTypes()
+      ])
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load site types or usages')
+    }
   }
 
   created () {
@@ -158,6 +181,11 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
     }
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+
+    if (this.siteCopy.geometry.length !== 0 && this.siteCopy.geometry.length < 3) {
+      this.$store.commit('snackbar/setError', 'Please draw at least 3 markers.')
       return
     }
 

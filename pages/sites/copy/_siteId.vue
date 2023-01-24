@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -73,6 +73,8 @@ permissions and limitations under the Licence.
         v-if="siteToCopy"
         ref="basicForm"
         v-model="siteToCopy"
+        :site-usages="siteUsages"
+        :site-types="siteTypes"
       />
       <v-alert
         border="left"
@@ -113,13 +115,13 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
 import { LoadSiteAction, CopySiteAction, SitesState } from '@/store/sites'
-
+import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState } from '@/store/vocabulary'
 import { Site } from '@/models/Site'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { hasSelfIntersection } from '@/serializers/jsonapi/SiteSerializer'
+import { hasSelfIntersection } from '@/utils/mapHelpers'
 
 @Component({
   components: {
@@ -130,11 +132,14 @@ import { hasSelfIntersection } from '@/serializers/jsonapi/SiteSerializer'
   middleware: ['auth'],
   computed: {
     ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
-    ...mapState('sites', ['site'])
+    ...mapState('sites', ['site']),
+    ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
+
   },
   methods: {
     ...mapActions('sites', ['copySite', 'loadSite', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
   }
 })
 // @ts-ignore
@@ -154,6 +159,10 @@ export default class SiteCopyPage extends Vue {
   copySite!: CopySiteAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  siteUsages!: VocabularyState['siteUsages']
+  loadSiteUsages!: LoadSiteUsagesAction
+  siteTypes!: VocabularyState['siteTypes']
+  loadSiteTypes!: LoadSiteTypesAction
 
   async created () {
     this.initializeAppBar()
@@ -162,6 +171,15 @@ export default class SiteCopyPage extends Vue {
       await this.loadSite({
         siteId: this.siteId
       })
+
+      try {
+        await Promise.all([
+          this.loadSiteUsages(),
+          this.loadSiteTypes()
+        ])
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Failed to load site types or usages')
+      }
 
       if (!this.site || !this.canAccessEntity(this.site)) {
         this.$router.replace('/sites/')
@@ -205,6 +223,11 @@ export default class SiteCopyPage extends Vue {
 
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+
+    if (this.siteToCopy.geometry.length !== 0 && this.siteToCopy.geometry.length < 3) {
+      this.$store.commit('snackbar/setError', 'Please draw at least 3 markers.')
       return
     }
 
