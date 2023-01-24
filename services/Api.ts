@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -35,6 +35,7 @@
  */
 import { AxiosRequestConfig } from 'axios'
 
+import { SiteTypeApi } from './cv/SiteTypeApi'
 import { createAxios } from '@/utils/axiosHelper'
 
 import { PermissionGroup } from '@/models/PermissionGroup'
@@ -78,6 +79,7 @@ import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
 import { GlobalProvenanceApi } from '@/services/cv/GlobalProvenanceApi'
 import { AggregationTypeApi } from '@/services/cv/AggregationTypeApi'
 import { ActionCategoryApi } from '@/services/cv/ActionCategoryApi'
+import { SiteUsageApi } from '@/services/cv/SiteUsageApi'
 
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
@@ -150,6 +152,8 @@ export class Api {
   private readonly _aggregationTypeApi: AggregationTypeApi
   private readonly _actionCategoryApi: ActionCategoryApi
   private readonly _autocompleteApi: AutocompleteApi
+  private readonly _siteUsageApi: SiteUsageApi
+  private readonly _siteTypeApi: SiteTypeApi
 
   private readonly _elevationDatumApi: ElevationDatumApi
   private readonly _epsgCodeApi: EpsgCodeApi
@@ -456,6 +460,14 @@ export class Api {
       createAxios(cvBaseUrl, cvConfig),
       '/actioncategories/'
     )
+    this._siteUsageApi = new SiteUsageApi(
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
+      '/siteusages/'
+    )
+    this._siteTypeApi = new SiteTypeApi(
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
+      '/sitetypes/'
+    )
 
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
@@ -628,6 +640,14 @@ export class Api {
 
   get epsgCodes (): EpsgCodeApi {
     return this._epsgCodeApi
+  }
+
+  get siteUsages (): SiteUsageApi {
+    return this._siteUsageApi
+  }
+
+  get siteTypes (): SiteTypeApi {
+    return this._siteTypeApi
   }
 
   get userInfoApi (): UserInfoApi {

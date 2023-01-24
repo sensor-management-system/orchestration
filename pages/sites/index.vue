@@ -2,12 +2,14 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ
+  (UFZ, https://www.ufz.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -218,6 +220,11 @@ import {
   LoadPermissionGroupsAction,
   CanRestoreEntityGetter
 } from '@/store/permissions'
+import {
+  LoadSiteUsagesAction,
+  LoadSiteTypesAction,
+  VocabularyState
+} from '@/store/vocabulary'
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
@@ -239,12 +246,15 @@ import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
     ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
     ...mapState('appbar', ['activeTab']),
     ...mapState('sites', ['sites', 'pageNumber', 'pageSize', 'totalPages', 'site']),
-    ...mapGetters('sites', ['pageSizes'])
+    ...mapGetters('sites', ['pageSizes']),
+    ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
+
   },
   methods: {
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('sites', ['searchSitesPaginated', 'setPageNumber', 'setPageSize', 'deleteSite', 'archiveSite', 'restoreSite', 'loadSite']),
-    ...mapActions('permissions', ['loadPermissionGroups'])
+    ...mapActions('permissions', ['loadPermissionGroups']),
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
 
   }
 })
@@ -283,12 +293,20 @@ export default class SearchSitesPage extends Vue {
   canRestoreEntity!: CanRestoreEntityGetter
   site!: SitesState['site']
   sites!: SitesState['sites']
+  loadSiteUsages!: LoadSiteUsagesAction
+  siteUsages!: VocabularyState['siteUsages']
+  loadSiteTypes!: LoadSiteTypesAction
+  siteTypes!: VocabularyState['siteTypes']
 
   async created () {
     this.initializeAppBar()
     try {
       this.loading = true
-      await this.loadPermissionGroups()
+      await Promise.all([
+        this.loadPermissionGroups(),
+        this.loadSiteUsages(),
+        this.loadSiteTypes()
+      ])
       this.initSearchQueryParams()
       await this.runInitialSearch()
     } catch (e) {

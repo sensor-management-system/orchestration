@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
@@ -52,6 +52,8 @@ permissions and limitations under the Licence.
       <SiteBasicDataForm
         ref="basicForm"
         v-model="site"
+        :site-usages="siteUsages"
+        :site-types="siteTypes"
       />
       <v-card-actions>
         <v-spacer />
@@ -67,7 +69,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
@@ -75,18 +77,21 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Site } from '@/models/Site'
 import { SaveSiteAction } from '@/store/sites'
 import { SetTabsAction, SetTitleAction } from '@/store/appbar'
-import { LoadEpsgCodesAction } from '@/store/vocabulary'
+import { LoadEpsgCodesAction, LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState } from '@/store/vocabulary'
 
-import { hasSelfIntersection } from '@/serializers/jsonapi/SiteSerializer'
+import { hasSelfIntersection } from '@/utils/mapHelpers'
 
 @Component({
   components: {
     SaveAndCancelButtons, SiteBasicDataForm, ProgressIndicator
   },
   middleware: ['auth'],
+  computed: {
+    ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
+  },
   methods: {
     ...mapActions('sites', ['saveSite']),
-    ...mapActions('vocabulary', ['loadEpsgCodes']),
+    ...mapActions('vocabulary', ['loadEpsgCodes', 'loadSiteUsages', 'loadSiteTypes']),
 
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
@@ -101,19 +106,32 @@ export default class SiteNewPage extends Vue {
   saveSite!: SaveSiteAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  siteUsages!: VocabularyState['siteUsages']
+  loadSiteUsages!: LoadSiteUsagesAction
+  siteTypes!: VocabularyState['siteTypes']
+  loadSiteTypes!: LoadSiteTypesAction
 
   async created () {
     this.initializeAppBar()
     try {
-      await this.loadEpsgCodes()
+      await Promise.all([
+        this.loadEpsgCodes(),
+        this.loadSiteUsages(),
+        this.loadSiteTypes()
+      ])
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to load EPSG codes')
+      this.$store.commit('snackbar/setError', 'Failed to load site usages or types')
     }
   }
 
   async save () {
     if (!(this.$refs.basicForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
+
+    if (this.site.geometry.length !== 0 && this.site.geometry.length < 3) {
+      this.$store.commit('snackbar/setError', 'Please draw at least 3 markers.')
       return
     }
 
