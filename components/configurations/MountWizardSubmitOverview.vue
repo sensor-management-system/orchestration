@@ -94,7 +94,7 @@ permissions and limitations under the Licence.
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>
                 <td>
-                  {{ item.mountInfo.beginContact.fullName | orDefault }}
+                  {{ item.mountInfo.beginContact?.fullName | orDefault }}
                 </td>
                 <td v-if="selectedEndDate !== null && item.mountInfo.endDescription !== null" class="table-border-left">
                   {{ item.mountInfo.endDescription | shortenRight(14, '...') | orDefault }}
