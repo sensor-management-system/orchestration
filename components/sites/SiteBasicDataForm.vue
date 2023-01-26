@@ -79,7 +79,7 @@ permissions and limitations under the Licence.
             label="Usage"
             clearable
             :items="siteUsageItems"
-            item-name="name"
+            item-text="name"
             :value="valueSiteUsageItem"
             :readonly="readonly"
             :disabled="readonly"
