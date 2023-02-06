@@ -93,6 +93,7 @@ export type ArchiveSiteAction = (id: string) => Promise<void>
 export type RestoreSiteAction = (id: string) => Promise<void>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
+export type ReplaceSiteInSitesAction = (newSite: Site) => void
 
 const actions: ActionTree<SitesState, RootState> = {
   async searchSitesPaginated ({
@@ -212,6 +213,17 @@ const actions: ActionTree<SitesState, RootState> = {
   },
   setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
     commit('setPageSize', newPageSize)
+  },
+  replaceSiteInSites ({ commit, state }: {commit: Commit, state: SitesState}, newSite: Site) {
+    const result = []
+    for (const oldSite of state.sites) {
+      if (oldSite.id !== newSite.id) {
+        result.push(oldSite)
+      } else {
+        result.push(newSite)
+      }
+    }
+    commit('setSites', result)
   }
 
 }

@@ -204,7 +204,18 @@ import BaseList from '@/components/shared/BaseList.vue'
 import SitesListItem from '@/components/sites/SitesListItem.vue'
 import SiteDeleteDialog from '@/components/sites/SiteDeleteDialog.vue'
 import SiteArchiveDialog from '@/components/sites/SiteArchiveDialog.vue'
-import { SitesState, SearchSitesPaginatedAction, PageSizesGetter, SetPageNumberAction, SetPageSizeAction, LoadSiteAction, ArchiveSiteAction, DeleteSiteAction, RestoreSiteAction } from '@/store/sites'
+import {
+  SitesState,
+  SearchSitesPaginatedAction,
+  PageSizesGetter,
+  SetPageNumberAction,
+  SetPageSizeAction,
+  LoadSiteAction,
+  ArchiveSiteAction,
+  DeleteSiteAction,
+  RestoreSiteAction,
+  ReplaceSiteInSitesAction
+} from '@/store/sites'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
@@ -252,7 +263,16 @@ import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
   },
   methods: {
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
-    ...mapActions('sites', ['searchSitesPaginated', 'setPageNumber', 'setPageSize', 'deleteSite', 'archiveSite', 'restoreSite', 'loadSite']),
+    ...mapActions('sites', [
+      'searchSitesPaginated',
+      'setPageNumber',
+      'setPageSize',
+      'deleteSite',
+      'archiveSite',
+      'restoreSite',
+      'loadSite',
+      'replaceSiteInSites'
+    ]),
     ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
 
@@ -297,6 +317,7 @@ export default class SearchSitesPage extends Vue {
   siteUsages!: VocabularyState['siteUsages']
   loadSiteTypes!: LoadSiteTypesAction
   siteTypes!: VocabularyState['siteTypes']
+  replaceSiteInSites !: ReplaceSiteInSitesAction
 
   async created () {
     this.initializeAppBar()
@@ -438,6 +459,7 @@ export default class SearchSitesPage extends Vue {
       await this.loadSite({
         siteId: this.siteToArchive.id
       })
+      await this.replaceSiteInSites(this.site!)
       this.$store.commit('snackbar/setSuccess', 'Site archived')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Site could not be archived')
@@ -455,6 +477,7 @@ export default class SearchSitesPage extends Vue {
         await this.loadSite({
           siteId: site.id
         })
+        await this.replaceSiteInSites(this.site!)
         this.$store.commit('snackbar/setSuccess', 'Site restored')
       } catch (error) {
         this.$store.commit('snackbar/setError', 'Site could not be restored')
