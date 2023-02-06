@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2022
+Copyright (C) 2020, 2022, 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -341,6 +342,11 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
         this.$store.commit('snackbar/setSuccess', 'Save successful')
       }
       this.selectedNode = null
+      // We need to update the selected date, so that we don't show the unmounted eleement anymore in
+      // the tree. The easiest way is to just add one millisecond to the selected date.
+      // This way, the unmounted device is no longer visible in the tree, and we can easily unmount
+      // multiple devices or platforms before leaving the unmount mode.
+      this.setSelectedDate(this.selectedDate.plus({ milliseconds: 1 }))
       await this.loadTree()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to unmount node')

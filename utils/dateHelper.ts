@@ -3,10 +3,11 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020, 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -80,6 +81,10 @@ export const dateToDateTimeString = (aDate: DateTime | null): string => {
     return ''
   }
   return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm:ss')
+}
+
+export const currentAsDateTimeObject = (): DateTime => {
+  return DateTime.now().setZone('UTC')
 }
 
 export const currentAsUtcDateSecondsAsZeros = (): DateTime => {
