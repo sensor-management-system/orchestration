@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -260,17 +260,17 @@ export default class PlatformCopyPage extends Vue {
     }
     try {
       this.isSaving = true
-      const savedPLatformId = await this.copyPlatform({
+      const savedPlatformId = await this.copyPlatform({
         platform: this.platformToCopy,
         copyContacts: this.copyContacts,
         copyAttachments: this.copyAttachments,
         originalPlatformId: this.platformId
       })
       if (this.copyOptions.persistentIdentifierShouldBeCreated) {
-        this.platformToCopy.persistentIdentifier = await this.createPid(savedPLatformId)
+        this.platformToCopy.persistentIdentifier = await this.createPid(savedPlatformId)
       }
       this.$store.commit('snackbar/setSuccess', 'Platform copied')
-      this.$router.push('/platforms/' + savedPLatformId)
+      this.$router.push('/platforms/' + savedPlatformId)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Copy failed')
     } finally {
