@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -208,6 +208,7 @@ export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType |
 export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
 export type CreatePidAction = (id: string | null) => Promise<string>
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
+export type ClearDeviceAvailabilitiesAction = () => void
 
 const actions: ActionTree<DevicesState, RootState> = {
   async searchDevicesPaginated ({
@@ -565,6 +566,9 @@ const actions: ActionTree<DevicesState, RootState> = {
       }
     }
     commit('setDevices', result)
+  },
+  clearDeviceAvailabilities ({ commit }: { commit: Commit }) {
+    commit('setDeviceAvailabilities', [])
   }
 }
 

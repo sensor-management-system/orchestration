@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -212,6 +213,8 @@ import { DateTime } from 'luxon'
 
 import { LoadConfigurationAction, AddPlatformMountActionAction, AddDeviceMountActionAction, LoadMountingConfigurationForDateAction } from '@/store/configurations'
 import { ContactsState } from '@/store/contacts'
+import { ClearDeviceAvailabilitiesAction } from '@/store/devices'
+import { ClearPlatformAvailabilitiesAction } from '@/store/platforms'
 
 import { MountAction } from '@/models/MountAction'
 import { Configuration } from '@/models/Configuration'
@@ -251,8 +254,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ...mapState('contacts', ['contacts'])
   },
   methods: {
-    ...mapActions('devices', ['searchDevices']),
-    ...mapActions('platforms', ['searchPlatforms']),
+    ...mapActions('devices', ['searchDevices', 'clearDeviceAvailabilities']),
+    ...mapActions('platforms', ['searchPlatforms', 'clearPlatformAvailabilities']),
     ...mapActions('configurations', ['addDeviceMountAction', 'addPlatformMountAction', 'loadConfiguration', 'loadMountingConfigurationForDate'])
   }
 })
@@ -289,6 +292,8 @@ export default class MountWizard extends Vue {
   addPlatformMountAction!: AddPlatformMountActionAction
   loadMountingConfigurationForDate!: LoadMountingConfigurationForDateAction
   configurationMountingActionsForDate!: ConfigurationsTree
+  clearDeviceAvailabilities!: ClearDeviceAvailabilitiesAction
+  clearPlatformAvailabilities!: ClearPlatformAvailabilitiesAction
 
   async created () {
     this.syncedHasSaved = false
@@ -366,6 +371,10 @@ export default class MountWizard extends Vue {
         this.$store.commit('snackbar/setError', `Mounting of platform ${platformMount.entity.shortName} failed`)
       }
     })
+
+    this.clearDeviceAvailabilities()
+    this.clearPlatformAvailabilities()
+
     this.syncedHasSaved = true
     await this.loadConfiguration(this.configurationId)
     await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
