@@ -74,6 +74,89 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
       </v-tab-item>
+      <v-tab-item :eager="true">
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="searchText"
+              label="Search term"
+              placeholder="Name of site"
+              hint="Please enter at least 3 characters"
+              @keydown.enter="extendedSearch"
+            />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <SiteUsageSelect v-model="selectedSearchSiteUsages" label="Select a site usage" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <SiteTypeSelect v-model="selectedSearchSiteTypes" label="Select a site type" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
+            <permission-group-search-select v-model="selectedSearchPermissionGroups" label="Select a permission group" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col v-if="$auth.loggedIn" cols="12" md="3">
+            <v-checkbox v-model="onlyOwnSites" label="Only own sites" />
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-checkbox v-model="includeArchivedSites" label="Include archived sites" />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col
+            cols="5"
+            align-self="center"
+          >
+            <v-btn
+              color="primary"
+              small
+              @click="extendedSearch"
+            >
+              Search
+            </v-btn>
+            <v-btn
+              text
+              small
+              @click="clearExtendedSearch"
+            >
+              Clear
+            </v-btn>
+          </v-col>
+          <v-col
+            align-self="center"
+            class="text-right"
+          >
+            <v-btn
+              v-if="$auth.loggedIn"
+              color="accent"
+              small
+              nuxt
+              to="/sites/new"
+            >
+              New Site
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-tab-item>
     </v-tabs-items>
 
     <v-progress-circular
@@ -211,6 +294,9 @@ import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
+import SiteUsageSelect from '@/components/SiteUsageSelect.vue'
+import SiteTypeSelect from '@/components/SiteTypeSelect.vue'
+import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 
 import {
   PermissionsState,
@@ -228,6 +314,8 @@ import {
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
+import { SiteUsage } from '@/models/SiteUsage'
+import { SiteType } from '@/models/SiteType'
 
 @Component({
   components: {
@@ -240,7 +328,10 @@ import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
     DotMenuActionRestore,
     PageSizeSelect,
     SiteArchiveDialog,
-    SiteDeleteDialog
+    SiteDeleteDialog,
+    SiteUsageSelect,
+    SiteTypeSelect,
+    PermissionGroupSearchSelect
   },
   computed: {
     ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
@@ -261,6 +352,8 @@ import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
 export default class SearchSitesPage extends Vue {
   private loading = false
   private processing = false
+  private selectedSearchSiteUsages: SiteUsage[] = []
+  private selectedSearchSiteTypes: SiteType[] = []
   private selectedSearchPermissionGroups: PermissionGroup[] = []
   private onlyOwnSites: boolean = false
   private includeArchivedSites: boolean = false
@@ -316,15 +409,6 @@ export default class SearchSitesPage extends Vue {
     }
   }
 
-  get searchParams () {
-    return {
-      searchText: this.searchText,
-      permissionGroups: [],
-      onlyOwnSites: false,
-      includeArchivedSites: false
-    }
-  }
-
   get page () {
     return this.pageNumber
   }
@@ -357,7 +441,27 @@ export default class SearchSitesPage extends Vue {
     return Array.from(resultSet).sort((a, b) => a - b)
   }
 
+  get searchParams () {
+    return {
+      searchText: this.searchText,
+      permissionGroups: this.selectedSearchPermissionGroups,
+      siteUsages: this.selectedSearchSiteUsages,
+      siteTypes: this.selectedSearchSiteTypes,
+      onlyOwnSites: this.onlyOwnSites && this.$auth.loggedIn,
+      includeArchivedSites: this.includeArchivedSites
+    }
+  }
+
+  isExtendedSearch (): boolean {
+    return this.onlyOwnSites === true ||
+      !!this.selectedSearchSiteUsages.length ||
+      !!this.selectedSearchSiteTypes.length ||
+      !!this.selectedSearchPermissionGroups.length ||
+      this.includeArchivedSites === true
+  }
+
   async runInitialSearch (): Promise<void> {
+    this.setActiveTab(this.isExtendedSearch() ? 1 : 0)
     this.page = this.getPageFromUrl()
     this.size = this.getSizeFromUrl()
 
@@ -374,6 +478,22 @@ export default class SearchSitesPage extends Vue {
 
   clearBasicSearch () {
     this.searchText = null
+    this.initUrlQueryParams()
+  }
+
+  extendedSearch () {
+    this.page = 1// Important to set page to one otherwise it's possible that you don't anything
+    this.runSearch()
+  }
+
+  clearExtendedSearch () {
+    this.clearBasicSearch()
+
+    this.selectedSearchSiteUsages = []
+    this.selectedSearchSiteTypes = []
+    this.selectedSearchPermissionGroups = []
+    this.onlyOwnSites = false
+    this.includeArchivedSites = false
     this.initUrlQueryParams()
   }
 
@@ -466,7 +586,9 @@ export default class SearchSitesPage extends Vue {
 
   initSearchQueryParams (): void {
     const searchParamsObject = (new SiteSearchParamsSerializer({
-      permissionGroups: this.permissionGroups
+      permissionGroups: this.permissionGroups,
+      siteUsages: this.siteUsages,
+      siteTypes: this.siteTypes
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
@@ -482,6 +604,12 @@ export default class SearchSitesPage extends Vue {
 
     if (searchParamsObject.permissionGroups) {
       this.selectedSearchPermissionGroups = searchParamsObject.permissionGroups
+    }
+    if (searchParamsObject.siteUsages) {
+      this.selectedSearchSiteUsages = searchParamsObject.siteUsages
+    }
+    if (searchParamsObject.siteTypes) {
+      this.selectedSearchSiteTypes = searchParamsObject.siteTypes
     }
   }
 
@@ -538,7 +666,8 @@ export default class SearchSitesPage extends Vue {
 
   initializeAppBar () {
     this.setTabs([
-      'Search'
+      'Search',
+      'Extended Search'
     ])
     this.setTitle('Sites')
   }

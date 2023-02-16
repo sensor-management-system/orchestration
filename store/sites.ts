@@ -111,6 +111,8 @@ const actions: ActionTree<SitesState, RootState> = {
       .setSearchText(searchParams.searchText)
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
+      .setSearchedSiteUsages(searchParams.siteUsages)
+      .setSearchedSiteTypes(searchParams.siteTypes)
       .setSearchIncludeArchivedSites(searchParams.includeArchivedSites)
       .searchPaginated(
         state.pageNumber,

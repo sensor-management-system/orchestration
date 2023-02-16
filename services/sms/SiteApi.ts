@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -44,6 +44,8 @@ import {
 import { ContactRole } from '@/models/ContactRole'
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 import { SiteConfigurationsApi } from '@/services/sms/SiteConfigurationsApi'
+import { SiteUsage } from '@/models/SiteUsage'
+import { SiteType } from '@/models/SiteType'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -76,6 +78,8 @@ export class SiteApi {
   private _siteConfigurationsApi: SiteConfigurationsApi
 
   private _searchedPermissionGroups: PermissionGroup[] = []
+  private _searchedSiteUsages: SiteUsage[] = []
+  private _searchedSiteTypes: SiteType[] = []
   private _searchedUserMail: string | null = null
   private _searchedCreatorId: string | null = null
   private _searchedIncludeArchivedSites: boolean = false
@@ -107,6 +111,24 @@ export class SiteApi {
 
   setSearchedPermissionGroups (value: PermissionGroup[]) {
     this._searchedPermissionGroups = value
+    return this
+  }
+
+  get searchedSiteUsages (): SiteUsage[] {
+    return this._searchedSiteUsages
+  }
+
+  setSearchedSiteUsages (value: SiteUsage[]) {
+    this._searchedSiteUsages = value
+    return this
+  }
+
+  get searchedSiteTypes (): SiteType[] {
+    return this._searchedSiteTypes
+  }
+
+  setSearchedSiteTypes (value: SiteType[]) {
+    this._searchedSiteTypes = value
     return this
   }
 
@@ -223,6 +245,8 @@ export class SiteApi {
   prepareSearch () {
     this.resetFilterSetting()
     this.preparePermissionGroups()
+    this.prepareSiteUsages()
+    this.prepareSiteTypes()
     this.prepareMail()
     this.prepareCreator()
   }
@@ -261,6 +285,44 @@ export class SiteApi {
             val: permissionGroup.id
           }
         })
+      })
+    }
+  }
+
+  prepareSiteUsages () {
+    if (this.searchedSiteUsages.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'site_usage_name',
+            op: 'in_',
+            val: this.searchedSiteUsages.map((s: SiteUsage) => s.name)
+          },
+          {
+            name: 'site_usage_uri',
+            op: 'in_',
+            val: this.searchedSiteUsages.map((s: SiteUsage) => s.uri)
+          }
+        ]
+      })
+    }
+  }
+
+  prepareSiteTypes () {
+    if (this.searchedSiteTypes.length > 0) {
+      this.filterSettings.push({
+        or: [
+          {
+            name: 'site_type_name',
+            op: 'in_',
+            val: this.searchedSiteTypes.map((s: SiteType) => s.name)
+          },
+          {
+            name: 'site_type_uri',
+            op: 'in_',
+            val: this.searchedSiteTypes.map((s: SiteType) => s.uri)
+          }
+        ]
       })
     }
   }
