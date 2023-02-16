@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,7 +32,7 @@ permissions and limitations under the Licence.
   <EntitySelect
     v-model="wrappedValue"
     :readonly="readonly"
-    :fetch-function="findAllManufacturers"
+    :fetch-function="findAllSiteUsages"
     :label="label"
     color="brown"
   />
@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 /**
- * @file provides a component to select manufacturers
+ * @file provides a component to select site usages
  * @author <marc.hanisch@gfz-potsdam.de>
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
@@ -48,12 +48,12 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import EntitySelect from '@/components/EntitySelect.vue'
 
-import { Manufacturer } from '@/models/Manufacturer'
+import { SiteUsage } from '@/models/SiteUsage'
 
-type ManufacturersLoaderFunction = () => Promise<Manufacturer[]>
+type SiteUsagesLoaderFunction = () => Promise<SiteUsage[]>
 
 /**
- * A class component to select manufacturers
+ * A class component to select site usages
  * @extends Vue
  */
 @Component({
@@ -62,17 +62,17 @@ type ManufacturersLoaderFunction = () => Promise<Manufacturer[]>
   }
 })
 // @ts-ignore
-export default class ManufacturerSelect extends Vue {
+export default class SiteUsageSelect extends Vue {
   /**
-   * a list of Manufacturer
+   * a list of site usages
    */
   @Prop({
-    default: () => [] as Manufacturer[],
+    default: () => [] as SiteUsage[],
     required: true,
     type: Array
   })
   // @ts-ignore
-  readonly value!: Manufacturer[]
+  readonly value!: SiteUsage[]
 
   /**
    * whether the component is in readonly mode or not
@@ -95,34 +95,34 @@ export default class ManufacturerSelect extends Vue {
   readonly label!: String
 
   /**
-   * fetches a list of Manufacturer
+   * fetches a list of site usages
    *
-   * @return {ManufacturersLoaderFunction} a list of Manufacturer
+   * @return {SiteUsageLoaderFunction} a list of site usages
    */
-  get findAllManufacturers (): ManufacturersLoaderFunction {
-    return () => { return this.$api.manufacturer.findAll() }
+  get findAllSiteUsages (): SiteUsagesLoaderFunction {
+    return () => { return this.$api.siteUsages.findAll() }
   }
 
   /**
-   * returns the list of manufacturers
+   * returns the list of site usages
    *
-   * @return {Manufacturer[]} a list of manufacturers
+   * @return {SiteUsage[]} a list of site usages
    */
   get wrappedValue () {
     return this.value
   }
 
   /**
-   * triggers an input event when the list of manufacturers has changed
+   * triggers an input event when the list of site usages has changed
    *
-   * @param {Manufacturer[]} newValue - a list of manufacturers
-   * @fires ManufacturerSelect#input
+   * @param {SiteUsage[]} newValue - a list of site usages
+   * @fires SiteUsageSelect#input
    */
   set wrappedValue (newValue) {
     /**
      * fires an input event
-     * @event ManufacturerSelect#input
-     * @type {Manufacturer[]}
+     * @event SiteUsageSelect#input
+     * @type {SiteUsage[]}
      */
     this.$emit('input', newValue)
   }

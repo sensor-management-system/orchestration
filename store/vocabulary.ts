@@ -113,6 +113,8 @@ const state = (): VocabularyState => ({
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
 export type GetPlatformTypeByUriGetter = (uri: string) => PlatformType | undefined
 export type GetDeviceTypeByUriGetter = (uri: string) => DeviceType | undefined
+export type GetSiteUsageByUriGetter = (uri: string) => SiteUsage | undefined
+export type getSiteTypeByUriGetter = (uri: string) => SiteType | undefined
 export type GetEquipmentstatusByUriGetter = (uri: string) => Status | undefined
 export type GetManufacturerByUriGetter = (uri: string) => Manufacturer | undefined
 export type PlatformActionTypeItemsGetter = ActionTypeItem[]
@@ -139,6 +141,12 @@ const getters: GetterTree<VocabularyState, RootState> = {
     return state.manufacturers.find((manufacturer: Manufacturer) => {
       return manufacturer.uri === uri
     })
+  },
+  getSiteUsageByUri: (state: VocabularyState) => (uri: string): SiteUsage | undefined => {
+    return state.siteUsages.find(s => s.uri === uri)
+  },
+  getSiteTypeByUri: (state: VocabularyState) => (uri: string): SiteType | undefined => {
+    return state.siteTypes.find(s => s.uri === uri)
   },
   platformActionTypeItems: (state: VocabularyState) => {
     return [

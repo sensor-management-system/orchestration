@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -37,6 +37,9 @@ permissions and limitations under the Licence.
   >
     <template v-if="!hideHeader" #header>
       <div class="d-flex flex-wrap">
+        <div :class="'mr-1 text-caption' + (getType() === NO_TYPE ? ' text--disabled' : '')">
+          {{ getType() }}
+        </div>
         <visibility-chip
           v-model="site.visibility"
         />
@@ -227,7 +230,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { Site } from '@/models/Site'
 
@@ -235,6 +238,9 @@ import StatusChip from '@/components/shared/StatusChip.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import { SiteUsage } from '@/models/SiteUsage'
+import { getSiteTypeByUriGetter, GetSiteUsageByUriGetter } from '@/store/vocabulary'
+import { SiteType } from '@/models/SiteType'
 
 @Component({
   components: {
@@ -242,7 +248,11 @@ import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
     VisibilityChip,
     PermissionGroupChips,
     BaseExpandableListItem
-  }
+  },
+  computed: mapGetters('vocabulary', [
+    'getSiteUsageByUri',
+    'getSiteTypeByUri'
+  ])
 })
 export default class SitesListItem extends Vue {
   @Prop({
@@ -256,6 +266,42 @@ export default class SitesListItem extends Vue {
     default: false
   })
   private hideHeader!: boolean
+
+  public readonly NO_TYPE: string = 'Unknown type'
+
+  getSiteUsageByUri!: GetSiteUsageByUriGetter
+  getSiteTypeByUri!: getSiteTypeByUriGetter
+
+  getType (): string {
+    // This here is a bit more complex, compared to the devive type case.
+    // The reason is that it is splitted to two parts: The site usage
+    // and then the site type.
+    const parts = []
+    if (this.site.siteUsageName) {
+      parts.push(this.site.siteUsageName)
+    } else if (this.getSiteUsageByUri(this.site.siteUsageUri)) {
+      const siteUsage: SiteUsage | undefined = this.getSiteUsageByUri(this.site.siteUsageUri)
+      const name = siteUsage?.name
+      if (name) {
+        parts.push(name)
+      }
+    }
+
+    if (this.site.siteTypeName) {
+      parts.push(this.site.siteTypeName)
+    } else if (this.getSiteTypeByUri(this.site.siteTypeUri)) {
+      const siteType: SiteType | undefined = this.getSiteTypeByUri(this.site.siteTypeUri)
+      const name = siteType?.name
+      if (name) {
+        parts.push(name)
+      }
+    }
+
+    if (parts.length > 0) {
+      return parts.join(': ')
+    }
+    return this.NO_TYPE
+  }
 
   // vuex definition for typescript check
 
