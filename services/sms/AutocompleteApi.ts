@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -32,6 +32,14 @@
  */
 import { AxiosInstance } from 'axios'
 
+interface SerialNumberOptions {
+  ignore: string | null
+  model: string | null
+  manufacturerName: string | null
+}
+
+type DeviceOrPlatform = 'device' | 'platform'
+
 export class AutocompleteApi {
   private axiosApi: AxiosInstance
   readonly basePath: string
@@ -49,5 +57,33 @@ export class AutocompleteApi {
     } else {
       return []
     }
+  }
+
+  private async getSerialNumbers (entity: DeviceOrPlatform, serialNumberOptions: SerialNumberOptions | null): Promise<string[]> {
+    const url = this.basePath + '/' + entity + '-serial-numbers'
+    const params: any = {}
+    if (serialNumberOptions?.ignore) {
+      params.ignore = serialNumberOptions.ignore
+    }
+    if (serialNumberOptions?.manufacturerName) {
+      params.manufacturer_name = serialNumberOptions.manufacturerName
+    }
+    if (serialNumberOptions?.model) {
+      params.model = serialNumberOptions.model
+    }
+    const rawServerResponse = await this.axiosApi.get(url, { params })
+    if (rawServerResponse.data) {
+      return rawServerResponse.data.data
+    } else {
+      return []
+    }
+  }
+
+  getDeviceSerialNumbers (serialNumberOptions: SerialNumberOptions | null = null): Promise<string[]> {
+    return this.getSerialNumbers('device', serialNumberOptions)
+  }
+
+  getPlatformSerialNumbers (serialNumberOptions: SerialNumberOptions | null = null): Promise<string[]> {
+    return this.getSerialNumbers('platform', serialNumberOptions)
   }
 }

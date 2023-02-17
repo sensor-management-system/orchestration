@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -416,21 +416,32 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
   }
 
   get isSerialNumberInUse (): boolean {
-    return this.serialNumbersInUseWithoutInitial.includes(this.value.serialNumber)
+    return this.serialNumbersInUse.includes(this.value.serialNumber)
   }
 
   get serialNumberHint () {
     return this.isSerialNumberInUse ? 'Another platform already has an equal serial number.' : ''
   }
 
-  get serialNumbersInUseWithoutInitial () {
-    return this.serialNumbersInUse.filter(item => item !== this.initialSerialNumber)
+  async loadSerialNumbers (platform: Platform | null = null) {
+    if (!platform) {
+      platform = this.value
+    }
+    const platformId = platform?.id
+    const params: any = {
+      manufacturerName: platform?.manufacturerName,
+      model: platform?.model
+    }
+    if (platformId) {
+      params.ignore = platformId
+    }
+    this.serialNumbersInUse = await this.$api.autocomplete.getPlatformSerialNumbers(params)
   }
 
   async fetch () {
-    this.serialNumbersInUse = await this.$api.autocomplete.getSuggestions('platform-serial-numbers')
     try {
       await Promise.all([
+        this.loadSerialNumbers(),
         this.loadEquipmentstatus(),
         this.loadManufacturers(),
         this.loadPlatformtypes()
@@ -450,6 +461,14 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
 
   update (key: string, value: any) {
     const newObj = Platform.createFromObject(this.value)
+    // We use a check for already inserted serial numbers.
+    // For that we can filter by manufacturer & model, as we expect
+    // to have collisions between different manufacturers & series.
+    // We store those fields in the serialNumbersInUse variable.
+    //
+    // In case we change the manufacturer or the model, we also want
+    // to update this list with that we check for those collisions.
+    let updateSerialNumberCheck = false
 
     switch (key) {
       case 'shortName':
@@ -479,9 +498,11 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
             newObj.manufacturerUri = ''
           }
         }
+        updateSerialNumberCheck = true
         break
       case 'model':
         newObj.model = value
+        updateSerialNumberCheck = true
         break
       case 'description':
         newObj.description = value
@@ -515,6 +536,9 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
         throw new TypeError('key ' + key + ' is not valid')
     }
     this.$emit('input', newObj)
+    if (updateSerialNumberCheck) {
+      this.loadSerialNumbers(newObj)
+    }
   }
 
   /**
