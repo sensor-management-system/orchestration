@@ -176,15 +176,20 @@ export default {
     // needed to include own fonts
     defaultAssets: false
   },
+  babel: {
+    presets (_env, [_preset, _options]) {
+      return [
+        ['@nuxt/babel-preset-app', {
+          loose: true,
+          decoratorsBeforeExport: true
+        }]
+      ]
+    }
+  },
   /*
   ** Build configuration
   */
   build: {
-    babel: {
-      // due to a bug with nuxtjs and babel we have to explictly set 'loose' to true
-      // see https://github.com/nuxt/nuxt.js/issues/9224#issuecomment-893289291
-      plugins: [['@babel/plugin-proposal-private-property-in-object', { loose: true }]]
-    }
   },
   router: {
     base: process.env.BASE_URL || '/',

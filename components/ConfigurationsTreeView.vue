@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -83,13 +83,18 @@ import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 import { dateToString } from '@/utils/dateHelper'
+import { shortenMiddle } from '@/utils/stringHelpers'
 
 /**
  * A class component to display platforms and devices in a tree
  * @extends Vue
  */
 @Component({
-  computed: {
+  filters: {
+    // Normally, this filter is already registered via the filters.ts plugin.
+    // However, in order to run the tests without further warning, we add
+    // it here explicitly.
+    shortenMiddle
   }
 })
 export default class ConfigurationsTreeView extends Vue {

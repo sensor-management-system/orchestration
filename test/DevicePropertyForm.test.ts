@@ -60,6 +60,7 @@ describe('DevicePropertyForm', () => {
     const vuetify = new Vuetify()
 
     const vocabulary = {
+      namespaced: true,
       state: {
         // The dialogs to submit new entries use the vocabulary state.
         globalProvenances: []
