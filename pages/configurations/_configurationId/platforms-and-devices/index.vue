@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -277,16 +278,21 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
       return
     }
     const action = this.selectedNode.unpack()
-    if ('isDeviceMountAction' in action && action.isDeviceMountAction()) {
-      await this.deleteDeviceMountAction(action.id)
-    }
-    if ('isPlatformMountAction' in action && action.isPlatformMountAction()) {
-      await this.deletePlatformMountAction(action.id)
+    try {
+      if ('isDeviceMountAction' in action && action.isDeviceMountAction()) {
+        await this.deleteDeviceMountAction(action.id)
+      }
+      if ('isPlatformMountAction' in action && action.isPlatformMountAction()) {
+        await this.deletePlatformMountAction(action.id)
+      }
+      this.$store.commit('snackbar/setSuccess', 'Mount Action deleted.')
+    } catch (err) {
+      this.$store.commit('snackbar/setError', 'Mount Action could not be deleted.')
     }
     this.selectedNode = null
     this.isDeleteDialogShown = false
-    await this.$router.replace({
-      params: {}
+    this.$router.replace({
+      query: {}
     })
     this.$fetch()
   }
