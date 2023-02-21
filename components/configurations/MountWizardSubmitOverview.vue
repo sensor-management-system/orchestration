@@ -39,9 +39,11 @@ permissions and limitations under the Licence.
           <tbody>
             <tr><td>Date range</td><td>{{ dateRangeString }}</td></tr>
             <tr>
-              <td>Selected parent platform</td><td v-if="selectedNode && selectedNode.isPlatform()">
+              <td>Selected parent platform</td>
+              <td v-if="selectedNode && selectedNode.isPlatform()">
                 {{ selectedNode.unpack().platform.shortName }}
-              </td><td v-if="selectedNode && selectedNode.isConfiguration()">
+              </td>
+              <td v-if="selectedNode && selectedNode.isConfiguration()">
                 {{ selectedNode.unpack().label }} (Configuration root)
               </td>
             </tr>
@@ -94,7 +96,7 @@ permissions and limitations under the Licence.
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>
                 <td>
-                  {{ item.mountInfo.beginContact?.fullName | orDefault }}
+                  {{ fullNameOfBeginContact(item.mountInfo) | orDefault }}
                 </td>
                 <td v-if="selectedEndDate !== null && item.mountInfo.endDescription !== null" class="table-border-left">
                   {{ item.mountInfo.endDescription | shortenRight(14, '...') | orDefault }}
@@ -117,7 +119,7 @@ permissions and limitations under the Licence.
                 <td>
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>
-                <td>{{ item.mountInfo.beginContact.fullName }}</td>
+                <td>{{ fullNameOfBeginContact(item.mountInfo) | orDefault }}</td>
                 <td v-if="selectedEndDate !== null && item.mountInfo.endDescription !== null" class="table-border-left">
                   {{ item.mountInfo.endDescription | shortenRight(14, '...') | orDefault }}
                 </td>
@@ -169,6 +171,10 @@ export default class MountWizardSubmitOverview extends Vue {
     const start = `From ${dateToDateTimeStringHHMM(this.selectedDate)}`
     const end = (this.selectedEndDate === null) ? ' with open end' : ` until ${dateToDateTimeStringHHMM(this.selectedEndDate)}`
     return start + end
+  }
+
+  fullNameOfBeginContact (mountInfo: MountAction): string | undefined {
+    return mountInfo.beginContact?.fullName
   }
 }
 </script>
