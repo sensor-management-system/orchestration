@@ -61,15 +61,14 @@ permissions and limitations under the Licence.
             @submit.prevent
           >
             <mount-action-details-form
-              v-if="value"
               ref="detailsForm"
+              v-model="mountActionInformationDTO"
               :value="value"
               :contacts="contacts"
               :begin-date-rules="beginDateRules"
               :end-date-rules="endDateRules"
               :unmount-required="getUnmountRequired()"
               with-unmount
-              @add="update"
             />
           </v-form>
         </v-card-text>
@@ -84,10 +83,9 @@ import { mapState, mapActions } from 'vuex'
 
 import { DevicesState, LoadDeviceAvailabilitiesAction } from '@/store/devices'
 import { PlatformsState, LoadPlatformAvailabilitiesAction } from '@/store/platforms'
-import { ConfigurationsState, LoadConfigurationDynamicLocationActionsAction } from '@/store/configurations'
+import { ConfigurationsState, LoadConfigurationDynamicLocationActionsAction, MountActionInformationDTO } from '@/store/configurations'
 
 import { Contact } from '@/models/Contact'
-import { MountAction } from '@/models/MountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
@@ -166,6 +164,24 @@ export default class MountActionEditForm extends Vue {
     }
   }
 
+  get mountActionInformationDTO () {
+    return {
+      beginDate: this.value.beginDate,
+      endDate: this.value.endDate,
+      offsetX: this.value.offsetX,
+      offsetY: this.value.offsetY,
+      offsetZ: this.value.offsetZ,
+      beginContact: this.value.beginContact,
+      endContact: this.value.endContact,
+      beginDescription: this.value.beginDescription,
+      endDescription: this.value.endDescription
+    }
+  }
+
+  set mountActionInformationDTO (newValue: MountActionInformationDTO) {
+    this.update(newValue)
+  }
+
   get mountActionName (): string {
     if ('isDeviceMountAction' in this.value && this.value.isDeviceMountAction()) {
       return this.value.device.shortName
@@ -193,8 +209,12 @@ export default class MountActionEditForm extends Vue {
     ]
   }
 
-  async update (mountAction: MountAction) {
+  async update (mountActionInformationDTO: MountActionInformationDTO) {
     if (!this.selectedNode) {
+      return
+    }
+
+    if (!mountActionInformationDTO.beginDate || !mountActionInformationDTO.beginContact) {
       return
     }
 
@@ -203,34 +223,34 @@ export default class MountActionEditForm extends Vue {
 
     if ('isDeviceMountAction' in this.value && this.value.isDeviceMountAction()) {
       newMountAction = new DeviceMountAction(
-        mountAction.id,
+        this.value.id,
         this.value.device,
         this.value.parentPlatform,
-        mountAction.beginDate,
-        mountAction.endDate,
-        mountAction.offsetX,
-        mountAction.offsetY,
-        mountAction.offsetZ,
-        mountAction.beginContact,
-        mountAction.endContact,
-        mountAction.beginDescription,
-        mountAction.endDescription
+        mountActionInformationDTO.beginDate,
+        mountActionInformationDTO.endDate,
+        mountActionInformationDTO.offsetX,
+        mountActionInformationDTO.offsetY,
+        mountActionInformationDTO.offsetZ,
+        Contact.createFromObject(mountActionInformationDTO.beginContact),
+        mountActionInformationDTO.endContact ? Contact.createFromObject(mountActionInformationDTO.endContact) : null,
+        mountActionInformationDTO.beginDescription,
+        mountActionInformationDTO.endDescription
       )
       newNode = new DeviceNode(newMountAction)
     } else {
       newMountAction = new PlatformMountAction(
-        mountAction.id,
+        this.value.id,
         this.value.platform,
         this.value.parentPlatform,
-        mountAction.beginDate,
-        mountAction.endDate,
-        mountAction.offsetX,
-        mountAction.offsetY,
-        mountAction.offsetZ,
-        mountAction.beginContact,
-        mountAction.endContact,
-        mountAction.beginDescription,
-        mountAction.endDescription
+        mountActionInformationDTO.beginDate,
+        mountActionInformationDTO.endDate,
+        mountActionInformationDTO.offsetX,
+        mountActionInformationDTO.offsetY,
+        mountActionInformationDTO.offsetZ,
+        Contact.createFromObject(mountActionInformationDTO.beginContact),
+        mountActionInformationDTO.endContact ? Contact.createFromObject(mountActionInformationDTO.endContact) : null,
+        mountActionInformationDTO.beginDescription,
+        mountActionInformationDTO.endDescription
       )
       newNode = new PlatformNode(newMountAction)
     }
@@ -239,7 +259,7 @@ export default class MountActionEditForm extends Vue {
     const newTree: ConfigurationsTree = ConfigurationsTree.fromArray(this.tree.toArray())
     newTree.replace(this.selectedNode, newNode)
 
-    // only if the dates have changed we will validate the tree
+    // only if the dates have changed we will validate the treeS
     const datesChanged = this.value.beginDate !== newMountAction.beginDate || this.value.endDate !== newMountAction.endDate
     if (datesChanged) {
       await this.validateTree(newTree, newNode)

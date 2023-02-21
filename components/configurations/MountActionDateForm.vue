@@ -42,26 +42,26 @@ permissions and limitations under the Licence.
     <v-row justify="start" class="mb-6">
       <v-col cols="6" md="6">
         <DateTimePicker
-          :value="valueCopy.beginDate"
+          v-model="valueCopy.beginDate"
           placeholder="e.g. 2000-01-31 12:00"
           label="Select begin date"
           hint="Start date"
           required
           class="required"
           :rules="[rules.required, additionalRules.validateMountingDates, ...beginDateRules]"
-          @input="dateChanged('beginDate', $event)"
+          @input="dateChanged"
         />
       </v-col>
       <v-col cols="6">
         <DateTimePicker
-          :value="valueCopy.endDate"
+          v-model="valueCopy.endDate"
           placeholder="Open End"
           label="Select end date"
           :hint="!endRequired ? 'Optional. Leave blank for open end' : ''"
           :required="endRequired"
           :rules="[additionalRules.validateMountingDates, ...endDateRules]"
           :class="{'required' : endRequired}"
-          @input="dateChanged('endDate', $event)"
+          @input="dateChanged"
         />
       </v-col>
     </v-row>
@@ -73,9 +73,8 @@ import { Component, mixins, Prop, Watch } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 
-import { IMountAction, MountAction } from '@/models/MountAction'
+import { MountActionDateDTO } from '@/store/configurations'
 
-import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import Validator from '@/utils/validator'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
@@ -85,15 +84,14 @@ import { Rules } from '@/mixins/Rules'
 @Component({
   components: {
     DateTimePicker
-  },
-  filters: { dateToDateTimeStringHHMM }
+  }
 })
 export default class MountActionDateForm extends mixins(Rules) {
   @Prop({
     required: true,
     type: Object
   })
-  readonly value!: MountAction
+  readonly value!: MountActionDateDTO
 
   @Prop({
     default: () => [],
@@ -116,7 +114,7 @@ export default class MountActionDateForm extends mixins(Rules) {
   })
   readonly endRequired!: boolean
 
-  private valueCopy: IMountAction | null = null
+  private valueCopy: MountActionDateDTO | null = null
   private formIsValid: boolean = true
 
   get additionalRules (): Object {
@@ -146,29 +144,17 @@ export default class MountActionDateForm extends mixins(Rules) {
     }
   }
 
-  dateChanged (target: keyof Pick<MountAction, 'beginDate' | 'endDate'>, value: null | DateTime) {
-    if (this.valueCopy) {
-      switch (target) {
-        case 'beginDate':
-          if (value) {
-            this.valueCopy.beginDate = value
-          }
-          break
-        case 'endDate':
-          this.valueCopy.endDate = value
-          break
-      }
-      this.$emit('input', this.valueCopy)
-    }
+  dateChanged () {
+    this.$emit('input', this.valueCopy)
   }
 
   @Watch('value', {
     immediate: true,
     deep: true
   })
-  onValueChange (value: IMountAction) {
+  onValueChange (value: MountActionDateDTO) {
     if (value) {
-      this.valueCopy = MountAction.createFromObject(value)
+      this.valueCopy = value
     }
   }
 }
