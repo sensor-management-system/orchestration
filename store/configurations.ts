@@ -73,6 +73,7 @@ import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { IActionType } from '@/models/ActionType'
+import { IContact } from '@/models/Contact'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -101,7 +102,7 @@ const PAGE_SIZES = [
 ]
 
 export interface ConfigurationsState {
-  selectedDate: DateTime
+  selectedDate: DateTime | null
   configurations: Configuration[]
   configuration: Configuration | null
   configurationContactRoles: ContactRole[]
@@ -358,7 +359,7 @@ export type EarliestEndDateOfRelatedDeviceOfDynamicActionGetter = (action: Dynam
 
 type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 
-export type SetSelectedDateAction = (params: DateTime) => void
+export type SetSelectedDateAction = (params: DateTime | null) => void
 export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
 export type AddDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type AddPlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>
@@ -381,7 +382,7 @@ export type LoadConfigurationContactRolesAction = IdParamReturnsVoidPromiseActio
 export type LoadConfigurationGenericAction = IdParamReturnsVoidPromiseAction
 export type LoadDeviceMountActionsAction = IdParamReturnsVoidPromiseAction
 export type LoadMountingActionsAction = IdParamReturnsVoidPromiseAction
-export type LoadMountingConfigurationForDateAction = (params: { id: string, timepoint: DateTime }) => Promise<void>
+export type LoadMountingConfigurationForDateAction = (params: { id: string, timepoint: DateTime | null }) => Promise<void>
 export type LoadPlatformMountActionsAction = IdParamReturnsVoidPromiseAction
 export type LoadConfigurationDynamicLocationActionsAction = IdParamReturnsVoidPromiseAction
 export type LoadConfigurationStaticLocationActionsAction = IdParamReturnsVoidPromiseAction
@@ -432,11 +433,26 @@ export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActio
 
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
 
+export type MountActionDateDTO = {
+  beginDate: DateTime | null,
+  endDate: DateTime | null
+}
+
+export type MountActionInformationDTO = {
+  beginDate: DateTime | null
+  endDate: DateTime | null
+  offsetX: number
+  offsetY: number
+  offsetZ: number
+  beginContact: IContact | null
+  endContact: IContact | null
+  beginDescription: string
+  endDescription: string | null
+}
+
 const actions: ActionTree<ConfigurationsState, RootState> = {
-  setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime) {
-    if (selectedDate) {
-      commit('setSelectedDate', selectedDate)
-    }
+  setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime | null) {
+    commit('setSelectedDate', selectedDate)
   },
   async searchConfigurationsPaginated ({
     commit,
@@ -551,6 +567,8 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     id: string;
     timepoint: DateTime;
   }): Promise<void> {
+    if (!timepoint) { return }
+
     await dispatch('contacts/loadAllContacts', null, { root: true })
     const contacts = this.getters['contacts/searchContacts']
     const mountingActionsByDate = await this.$api.configurations.findRelatedMountingActionsByDate(id, timepoint, contacts)
@@ -764,7 +782,7 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
 }
 
 const mutations = {
-  setSelectedDate (state: ConfigurationsState, selectedDate: DateTime) {
+  setSelectedDate (state: ConfigurationsState, selectedDate: DateTime | null) {
     state.selectedDate = selectedDate
   },
   setConfigurations (state: ConfigurationsState, configurations: Configuration[]) {

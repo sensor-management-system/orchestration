@@ -35,7 +35,7 @@ permissions and limitations under the Licence.
 <template>
   <span>
     <v-form
-      v-if="valueCopy"
+      v-if="value"
       ref="mountForm"
       @submit.prevent
     >
@@ -43,11 +43,11 @@ permissions and limitations under the Licence.
         <mount-action-date-form
           v-if="withDates"
           ref="dateForm"
-          :value="valueCopy"
+          v-model="mountActionDateDTO"
           :begin-date-rules="beginDateRules"
           :end-date-rules="endDateRules"
           :end-required="unmountRequired"
-          @input="updateDates"
+          @input="update"
         />
         <v-row class="pb-0">
           <v-col
@@ -55,7 +55,7 @@ permissions and limitations under the Licence.
             md="3"
           >
             <v-text-field
-              v-model.number="valueCopy.offsetX"
+              v-model.number="mountActionInformationDTO.offsetX"
               data-role="textfield-offset-x"
               label="Offset (x)"
               type="number"
@@ -73,7 +73,7 @@ permissions and limitations under the Licence.
             md="3"
           >
             <v-text-field
-              v-model.number="valueCopy.offsetY"
+              v-model.number="mountActionInformationDTO.offsetY"
               data-role="textfield-offset-y"
               label="Offset (y)"
               type="number"
@@ -91,7 +91,7 @@ permissions and limitations under the Licence.
             md="3"
           >
             <v-text-field
-              v-model.number="valueCopy.offsetZ"
+              v-model.number="mountActionInformationDTO.offsetZ"
               data-role="textfield-offset-z"
               label="Offset (z)"
               type="number"
@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
           <v-col>
             <span>
               <v-autocomplete
-                v-model="valueCopy.beginContact"
+                v-model="mountActionInformationDTO.beginContact"
                 data-role="select-begin-contact"
                 :items="contacts"
                 label="Begin contact"
@@ -129,7 +129,7 @@ permissions and limitations under the Licence.
           <v-col v-if="withUnmount">
             <span>
               <v-autocomplete
-                v-model="valueCopy.endContact"
+                v-model="mountActionInformationDTO.endContact"
                 data-role="select-end-contact"
                 :items="contacts"
                 label="End contact"
@@ -146,7 +146,7 @@ permissions and limitations under the Licence.
         <v-row>
           <v-col>
             <v-textarea
-              v-model="valueCopy.beginDescription"
+              v-model="mountActionInformationDTO.beginDescription"
               data-role="textarea-begin-description"
               label="Begin description"
               rows="3"
@@ -156,7 +156,7 @@ permissions and limitations under the Licence.
           </v-col>
           <v-col v-if="withUnmount">
             <v-textarea
-              v-model="valueCopy.endDescription"
+              v-model="mountActionInformationDTO.endDescription"
               data-role="textarea-end-description"
               label="End description"
               rows="3"
@@ -171,16 +171,16 @@ permissions and limitations under the Licence.
 </template>
 <script lang="ts">
 
-import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 
 import { Rules } from '@/mixins/Rules'
 
-import { IMountAction, MountAction } from '@/models/MountAction'
 import { Contact } from '@/models/Contact'
 
 import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
+import { MountActionDateDTO, MountActionInformationDTO } from '@/store/configurations'
 
 @Component({
   components: {
@@ -192,7 +192,7 @@ export default class MountActionDetailsForm extends mixins(Rules) {
     required: true,
     type: Object
   })
-  readonly value!: IMountAction
+  readonly value!: MountActionInformationDTO
 
   @Prop({
     default: () => false,
@@ -238,7 +238,21 @@ export default class MountActionDetailsForm extends mixins(Rules) {
   })
   readonly endDateRules!: ((value: DateTime | null) => string | boolean)[]
 
-  private valueCopy: IMountAction | null = null
+  get mountActionDateDTO (): MountActionDateDTO {
+    return {
+      beginDate: this.mountActionInformationDTO.beginDate,
+      endDate: this.mountActionInformationDTO.endDate
+    }
+  }
+
+  set mountActionDateDTO (value: MountActionDateDTO) {
+    this.mountActionInformationDTO.beginDate = value.beginDate
+    this.mountActionInformationDTO.endDate = value.endDate
+  }
+
+  get mountActionInformationDTO (): MountActionInformationDTO {
+    return this.value
+  }
 
   validateForm (): boolean {
     let isValid: boolean = false
@@ -268,23 +282,8 @@ export default class MountActionDetailsForm extends mixins(Rules) {
     return []
   }
 
-  updateDates (mountAction: MountAction) {
-    this.$emit('add', mountAction)
-  }
-
   update () {
-    this.$emit('add', this.valueCopy)
-  }
-
-  @Watch('value', {
-    immediate: true,
-    deep: true
-  })
-  onValueChange (value: IMountAction) {
-    if (value) {
-      this.valueCopy = MountAction.createFromObject(value)
-      this.$nextTick(() => this.validateForm())
-    }
+    this.$emit('input', this.mountActionInformationDTO)
   }
 }
 </script>

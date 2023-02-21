@@ -118,12 +118,12 @@ describe('MountActionDetailsForm', () => {
     const newValue = 1
     const component = await wrapper.findComponent('[data-role="textfield-offset-x"]')
     await component.setValue(newValue)
-    expect(wrapper.emitted('add')).toBeTruthy()
-    expect(wrapper.emitted('add').length).toBe(1)
-    const addPayload = wrapper.emitted('add')[0]
-    expect(addPayload.length).toEqual(1)
-    const addPayloadContent = addPayload[0]
-    expect(addPayloadContent.offsetX).toBeCloseTo(newValue)
+    expect(wrapper.emitted('input')).toBeTruthy()
+    expect(wrapper.emitted('input').length).toBe(1)
+    const inputPayload = wrapper.emitted('input')[0]
+    expect(inputPayload.length).toEqual(1)
+    const inputPayloadContent = inputPayload[0]
+    expect(inputPayloadContent.offsetX).toBeCloseTo(newValue)
   })
 
   it('should trigger an event when the value of offset-y changes', async () => {
@@ -131,12 +131,12 @@ describe('MountActionDetailsForm', () => {
     const newValue = 2
     const component = await wrapper.findComponent('[data-role="textfield-offset-y"]')
     await component.setValue(newValue)
-    expect(wrapper.emitted('add')).toBeTruthy()
-    expect(wrapper.emitted('add').length).toBe(1)
-    const addPayload = wrapper.emitted('add')[0]
-    expect(addPayload.length).toEqual(1)
-    const addPayloadContent = addPayload[0]
-    expect(addPayloadContent.offsetY).toBeCloseTo(newValue)
+    expect(wrapper.emitted('input')).toBeTruthy()
+    expect(wrapper.emitted('input').length).toBe(1)
+    const inputPayload = wrapper.emitted('input')[0]
+    expect(inputPayload.length).toEqual(1)
+    const inputPayloadContent = inputPayload[0]
+    expect(inputPayloadContent.offsetY).toBeCloseTo(newValue)
   })
 
   it('should trigger an event when the value of offset-z changes', async () => {
@@ -144,12 +144,12 @@ describe('MountActionDetailsForm', () => {
     const newValue = 3
     const component = await wrapper.findComponent('[data-role="textfield-offset-z"]')
     await component.setValue(newValue)
-    expect(wrapper.emitted('add')).toBeTruthy()
-    expect(wrapper.emitted('add').length).toBe(1)
-    const addPayload = wrapper.emitted('add')[0]
-    expect(addPayload.length).toEqual(1)
-    const addPayloadContent = addPayload[0]
-    expect(addPayloadContent.offsetZ).toBeCloseTo(newValue)
+    expect(wrapper.emitted('input')).toBeTruthy()
+    expect(wrapper.emitted('input').length).toBe(1)
+    const inputPayload = wrapper.emitted('input')[0]
+    expect(inputPayload.length).toEqual(1)
+    const inputPayloadContent = inputPayload[0]
+    expect(inputPayloadContent.offsetZ).toBeCloseTo(newValue)
   })
 
   // I don't know how to test the autocomplete field. nothing works...

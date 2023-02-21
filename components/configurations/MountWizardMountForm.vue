@@ -32,45 +32,34 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-card v-for="(device, i) in selectedDevices" :key="`device-${i}`" class="mb-6">
-      <v-card-title>Mounting info for {{ device.shortName }}</v-card-title>
+    <v-card v-for="(entityMountInformation, i) in value" :key="`${prefix}-${i}`" class="mb-6">
+      <v-card-title>Mounting info for {{ entityMountInformation.entity.shortName }}</v-card-title>
       <v-card-subtitle>{{ dateRangeString }}</v-card-subtitle>
       <mount-action-details-form
-        :value="mountAction"
+        ref="mountActionDetailsForm"
+        v-model="entityMountInformation.mountInfo"
         :readonly="false"
         :contacts="contacts"
         :with-unmount="selectedEndDate !== null"
         :with-dates="false"
-        @add="setDeviceToMount(device, $event)"
-      />
-    </v-card>
-    <v-card v-for="(platform, i) in selectedPlatforms" :key="`platform-${i}`" class="mb-6">
-      <v-card-title>Mounting info for {{ platform.shortName }}</v-card-title>
-      <v-card-subtitle>{{ dateRangeString }}</v-card-subtitle>
-      <mount-action-details-form
-        :readonly="false"
-        :value="mountAction"
-        :contacts="contacts"
-        :with-unmount="selectedEndDate !== null"
-        :with-dates="false"
-        @add="setPlatformToMount(platform, $event)"
+        @input="update"
       />
     </v-card>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, PropSync, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Prop } from 'nuxt-property-decorator'
 import { mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
 import { ContactsState } from '@/store/contacts'
+import { MountActionInformationDTO } from '@/store/configurations'
 
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
-import { MountAction } from '@/models/MountAction'
 
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 
@@ -86,29 +75,17 @@ import MountActionDetailsForm from '@/components/configurations/MountActionDetai
   }
 })
 export default class MountWizardMountForm extends Vue {
-  @PropSync('selectedDevices', {
-    required: false,
+  @Prop({
+    required: true,
     type: Array
   })
-    syncedSelectedDevices!: Device[]
+  readonly value!: { entity: Device | Platform, mountInfo: MountActionInformationDTO }[]
 
-  @PropSync('selectedPlatforms', {
-    required: false,
-    type: Array
+  @Prop({
+    required: true,
+    type: String
   })
-    syncedSelectedPlatforms!: Platform[]
-
-  @PropSync('devicesToMount', {
-    required: false,
-    type: Array
-  })
-    syncedDevicesToMount!: { entity: Device, mountInfo: MountAction }[]
-
-  @PropSync('platformsToMount', {
-    required: false,
-    type: Array
-  })
-    syncedPlatformsToMount!: { entity: Platform, mountInfo: MountAction }[]
+  readonly prefix!: String
 
   @InjectReactive() selectedDate!: DateTime
   @InjectReactive() selectedEndDate!: DateTime | null
@@ -138,54 +115,18 @@ export default class MountWizardMountForm extends Vue {
     return start + end
   }
 
-  get mountAction (): MountAction {
-    return MountAction.createFromObject({
-      id: '',
-      parentPlatform: null,
-      beginContact: this.currentUserAsContact || new Contact(),
-      beginDate: this.selectedDate,
-      endContact: this.selectedEndDate ? this.currentUserAsContact : null,
-      endDate: this.selectedEndDate || null,
-      beginDescription: '',
-      endDescription: '',
-      offsetX: 0,
-      offsetY: 0,
-      offsetZ: 0
-    })
-  }
-
-  setPlatformToMount (platform: Platform, mountInfo: MountAction) {
-    mountInfo.beginDate = this.selectedDate
-    mountInfo.endDate = this.selectedEndDate
-    const platformToMount = {
-      entity: platform,
-      mountInfo
-    }
-
-    const mountIndex = this.syncedPlatformsToMount.findIndex(platformMount => platformMount.entity.id === platform.id)
-
-    if (mountIndex < 0) {
-      this.syncedPlatformsToMount.push(platformToMount)
+  validateForm (): boolean {
+    if (this.$refs.mountActionDetailsForm) {
+      return Object.values(this.$refs.mountActionDetailsForm).every(
+        form => (form as Vue & { validateForm: () => boolean }).validateForm()
+      )
     } else {
-      this.syncedPlatformsToMount[mountIndex].mountInfo = mountInfo
+      return true
     }
   }
 
-  setDeviceToMount (device: Device, mountInfo: MountAction) {
-    mountInfo.beginDate = this.selectedDate
-    mountInfo.endDate = this.selectedEndDate
-    const deviceToMount = {
-      entity: device,
-      mountInfo
-    }
-
-    const mountIndex = this.syncedDevicesToMount.findIndex(deviceMount => deviceMount.entity.id === device.id)
-
-    if (mountIndex < 0) {
-      this.syncedDevicesToMount.push(deviceToMount)
-    } else {
-      this.syncedDevicesToMount[mountIndex].mountInfo = mountInfo
-    }
+  update () {
+    this.$emit('input', this.value)
   }
 }
 </script>

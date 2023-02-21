@@ -55,17 +55,17 @@ permissions and limitations under the Licence.
 
       <v-stepper-content step="1">
         <v-container>
-          <mount-wizard-date-select
-            :selected-date.sync="selectedDate"
-            :selected-end-date.sync="selectedEndDate"
-            :selected-node-begin-date="selectedNodeBeginDate"
-            :selected-node-end-date="selectedNodeEndDate"
+          <mount-action-date-form
+            ref="mountActionDateForm"
+            v-model="mountActionDateDTO"
             :begin-date-rules="beginDateRules"
             :end-date-rules="endDateRules"
+            :end-required="selectedNodeEndDate !== null"
           />
           <v-row class="mb-6">
             <v-btn
               color="primary"
+              :disabled="!selectedDate"
               @click="step++"
             >
               Continue
@@ -113,7 +113,8 @@ permissions and limitations under the Licence.
       </v-stepper-content>
 
       <v-stepper-step
-        :editable="selectedEntities.length > 0"
+        :editable="selectedDate && selectedEntities.length > 0"
+        :rules="[()=>!!selectedDate]"
         :complete="selectedEntities.length > 0"
         step="3"
       >
@@ -148,7 +149,7 @@ permissions and limitations under the Licence.
 
       <v-stepper-step
         :editable="selectedDevices.length > 0 || selectedPlatforms.length > 0"
-        :rules="[()=>!!selectedDate]"
+        :rules="[()=>validateAllForms()]"
         :complete="platformsToMount.length > 0 || devicesToMount.length > 0"
         step="4"
       >
@@ -158,14 +159,21 @@ permissions and limitations under the Licence.
       <v-stepper-content step="4">
         <v-container>
           <mount-wizard-mount-form
-            :selected-devices.sync="selectedDevices"
-            :selected-platforms.sync="selectedPlatforms"
-            :devices-to-mount.sync="devicesToMount"
-            :platforms-to-mount.sync="platformsToMount"
+            ref="mountActionMountDevicesForm"
+            v-model="devicesToMount"
+            prefix="devices-mount-info"
+            @input="validateAllForms"
+          />
+          <mount-wizard-mount-form
+            ref="mountActionMountPlatformsForm"
+            v-model="platformsToMount"
+            prefix="platforms-mount-info"
+            @input="validateAllForms"
           />
           <v-row class="mb-6">
             <v-btn
               color="primary"
+              :disabled="!validateAllForms()"
               @click="step++"
             >
               Continue
@@ -175,8 +183,8 @@ permissions and limitations under the Licence.
       </v-stepper-content>
 
       <v-stepper-step
-        :editable="!!selectedDate && (devicesToMount.length > 0 || platformsToMount.length > 0)"
-        :rules="[()=>!!selectedDate && (devicesToMount.length > 0 || platformsToMount.length > 0)]"
+        :editable="validateAllForms() && (devicesToMount.length > 0 || platformsToMount.length > 0)"
+        :rules="[() => validateAllForms() && (devicesToMount.length > 0 || platformsToMount.length > 0)]"
         step="5"
       >
         Submit
@@ -211,7 +219,14 @@ import { mapActions, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
-import { LoadConfigurationAction, AddPlatformMountActionAction, AddDeviceMountActionAction, LoadMountingConfigurationForDateAction } from '@/store/configurations'
+import {
+  LoadConfigurationAction,
+  AddPlatformMountActionAction,
+  AddDeviceMountActionAction,
+  LoadMountingConfigurationForDateAction,
+  MountActionInformationDTO,
+  MountActionDateDTO
+} from '@/store/configurations'
 import { ContactsState } from '@/store/contacts'
 import { ClearDeviceAvailabilitiesAction } from '@/store/devices'
 import { ClearPlatformAvailabilitiesAction } from '@/store/platforms'
@@ -233,16 +248,18 @@ import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 import Validator from '@/utils/validator'
 import { MountActionValidator, MountActionValidationResultOp } from '@/utils/MountActionValidator'
 
-import MountWizardDateSelect from '@/components/configurations/MountWizardDateSelect.vue'
+import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
 import MountWizardNodeSelect from '@/components/configurations/MountWizardNodeSelect.vue'
 import MountWizardEntitySelect from '@/components/configurations/MountWizardEntitySelect.vue'
 import MountWizardMountForm from '@/components/configurations/MountWizardMountForm.vue'
 import MountWizardSubmitOverview from '@/components/configurations/MountWizardSubmitOverview.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
 
 @Component({
   components: {
-    MountWizardDateSelect,
+    MountActionDetailsForm,
+    MountActionDateForm,
     MountWizardNodeSelect,
     MountWizardEntitySelect,
     MountWizardMountForm,
@@ -272,13 +289,13 @@ export default class MountWizard extends Vue {
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
   @ProvideReactive() private selectedNode: ConfigurationsTreeNode | null = null
-  @ProvideReactive() private selectedDate: DateTime = DateTime.utc()
+  @ProvideReactive() private selectedDate: DateTime | null = DateTime.utc()
   @ProvideReactive() private selectedEndDate: DateTime | null = null
 
-  private platformsToMount: { entity: Platform, mountInfo: MountAction }[] = []
+  private platformsToMount: { entity: Platform, mountInfo: MountActionInformationDTO }[] = []
   private selectedPlatforms: Platform[] = []
 
-  private devicesToMount: { entity: Device, mountInfo: MountAction }[] = []
+  private devicesToMount: { entity: Device, mountInfo: MountActionInformationDTO }[] = []
   private selectedDevices: Device[] = []
 
   private beginDateErrorMessage: string = ''
@@ -310,6 +327,18 @@ export default class MountWizard extends Vue {
     this.tree.getAllDeviceNodesAsList().forEach((i) => {
       i.disabled = true
     })
+  }
+
+  get mountActionDateDTO (): MountActionDateDTO {
+    return {
+      beginDate: this.selectedDate,
+      endDate: this.selectedEndDate
+    }
+  }
+
+  set mountActionDateDTO (value: MountActionDateDTO) {
+    this.selectedDate = value.beginDate
+    this.selectedEndDate = value.endDate
   }
 
   get configurationId (): string {
@@ -356,6 +385,11 @@ export default class MountWizard extends Vue {
   }
 
   async mount () {
+    if (!this.validateAllForms()) {
+      this.$store.commit('snackbar/setError', 'Please correct your inputs')
+      return
+    }
+
     this.devicesToMount.forEach((deviceMount) => {
       try {
         this.mountDevice(deviceMount!.entity, deviceMount!.mountInfo)
@@ -381,7 +415,7 @@ export default class MountWizard extends Vue {
     this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices')
   }
 
-  async mountDevice (device: Device, mountInfo: MountAction) {
+  async mountDevice (device: Device, mountInfo: MountActionInformationDTO) {
     try {
       if (this.selectedNode && !this.selectedNode.canHaveChildren()) {
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
@@ -399,13 +433,13 @@ export default class MountWizard extends Vue {
         id: '',
         device,
         parentPlatform,
-        beginDate: mountInfo.beginDate,
+        beginDate: mountInfo.beginDate!,
         endDate: mountInfo.endDate,
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
         offsetZ: mountInfo.offsetZ,
-        beginContact: mountInfo.beginContact,
-        endContact: mountInfo.endContact,
+        beginContact: Contact.createFromObject(mountInfo.beginContact!),
+        endContact: mountInfo.endContact ? Contact.createFromObject(mountInfo.endContact) : null,
         beginDescription: mountInfo.beginDescription,
         endDescription: mountInfo.endDescription
       })
@@ -422,7 +456,7 @@ export default class MountWizard extends Vue {
     }
   }
 
-  async mountPlatform (platform: Platform, mountInfo: MountAction) {
+  async mountPlatform (platform: Platform, mountInfo: MountActionInformationDTO) {
     try {
       if (this.selectedNode && !this.selectedNode.canHaveChildren()) {
         this.$store.commit('snackbar/setError', 'Selected node-type cannot have children')
@@ -441,13 +475,13 @@ export default class MountWizard extends Vue {
         id: '',
         platform,
         parentPlatform,
-        beginDate: mountInfo.beginDate,
+        beginDate: mountInfo.beginDate!,
         endDate: mountInfo.endDate,
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
         offsetZ: mountInfo.offsetZ,
-        beginContact: mountInfo.beginContact,
-        endContact: mountInfo.endContact,
+        beginContact: Contact.createFromObject(mountInfo.beginContact!),
+        endContact: mountInfo.endContact ? Contact.createFromObject(mountInfo.endContact) : null,
         beginDescription: mountInfo.beginDescription,
         endDescription: mountInfo.endDescription
       })
@@ -475,6 +509,12 @@ export default class MountWizard extends Vue {
     }
   }
 
+  validateAllForms (): boolean {
+    return Object.values(this.$refs).every(
+      ref => (ref as Vue & { validateForm: () => boolean }).validateForm()
+    )
+  }
+
   validateMountingDates (): string | boolean {
     return Validator.validateMountingDates(this.selectedDate, this.selectedEndDate)
   }
@@ -484,6 +524,8 @@ export default class MountWizard extends Vue {
     const mountEndDate = this.selectedEndDate
     const parentBeginDate = this.selectedNodeBeginDate || this.configuration.startDate
     const parentEndDate = this.selectedNodeEndDate || this.configuration.endDate
+
+    if (!mountBeginDate) { return false }
 
     if (parentBeginDate) {
       const error = MountActionValidator.actionConflictsWith(
@@ -539,27 +581,21 @@ export default class MountWizard extends Vue {
   }
 
   confirmSelection () {
-    let parentPlatform: Platform | null
-    if (this.selectedNode && this.selectedNode.canHaveChildren() && !this.selectedNode.isConfiguration()) {
-      parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
-    }
-    type creatorFunc = <T>(entity: T) => { entity: T, mountInfo: MountAction }
+    type creatorFunc = <T>(entity: T) => { entity: T, mountInfo: MountActionInformationDTO }
     const createNew: creatorFunc = (entity) => {
       return {
         entity,
-        mountInfo: new MountAction(
-          '',
-          parentPlatform,
-          this.selectedDate,
-          this.selectedEndDate,
-          0,
-          0,
-          0,
-          this.currentUserAsContact || new Contact(),
-          this.selectedEndDate ? this.currentUserAsContact || new Contact() : null,
-          '',
-          this.selectedEndDate ? '' : null
-        )
+        mountInfo: {
+          beginContact: this.currentUserAsContact || new Contact(),
+          beginDate: this.selectedDate,
+          endContact: this.selectedEndDate ? this.currentUserAsContact : null,
+          endDate: this.selectedEndDate || null,
+          beginDescription: '',
+          endDescription: '',
+          offsetX: 0,
+          offsetY: 0,
+          offsetZ: 0
+        }
       }
     }
     this.devicesToMount = this.selectedDevices.map(i => createNew<Device>(i))

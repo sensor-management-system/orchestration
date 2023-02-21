@@ -76,7 +76,10 @@ export default {
     }
   },
 
-  validateMountingTimeRange (startDate: DateTime, endDate: DateTime | null, parentStartDate: DateTime, parentEndDate: DateTime | null): boolean | string {
+  validateMountingTimeRange (startDate: DateTime | null, endDate: DateTime | null, parentStartDate: DateTime, parentEndDate: DateTime | null): boolean | string {
+    if (startDate === null) {
+      return 'Start date is required'
+    }
     if (!(startDate >= parentStartDate)) {
       return `Start date must not be before start date of the parent platform (${dateToString(parentStartDate)})`
     }
@@ -94,7 +97,10 @@ export default {
     return true
   },
 
-  validateMountingDates (startDate: DateTime, endDate: DateTime | null): boolean | string {
+  validateMountingDates (startDate: DateTime | null, endDate: DateTime | null): boolean | string {
+    if (startDate === null) {
+      return 'Start date is required'
+    }
     if (endDate === null) {
       return true
     }
