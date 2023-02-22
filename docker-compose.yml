@@ -233,7 +233,7 @@ services:
       retries: 3
 
   createbuckets:
-    image: minio/mc:latest
+    image: minio/mc:RELEASE.2023-02-16T19-20-11Z
     container_name: sms_mc
     depends_on:
       - minio
@@ -246,7 +246,7 @@ services:
       until curl -f http://minio:9000/minio/health/live; do sleep 5; done;
       /usr/bin/mc  alias set minio http://minio:9000 ${MINIO_ACCESS_KEY:-admin} ${MINIO_SECRET_KEY:-minio123} --api S3v4;
       /usr/bin/mc mb --quiet minio/${MINIO_BUCKET_NAME:-sms-attachments};
-      /usr/bin/mc policy set download minio/${MINIO_BUCKET_NAME:-sms-attachments};
+      /usr/bin/mc anonymous set download minio/${MINIO_BUCKET_NAME:-sms-attachments};
       exit 0;
       "
 
