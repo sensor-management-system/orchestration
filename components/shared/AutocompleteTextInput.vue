@@ -7,6 +7,7 @@
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -37,6 +38,7 @@
     :items="suggestionsWithHeader"
     :loading="loading"
     v-on="$listeners"
+    @update:search-input="updateValue"
     @focus="loadSuggestions(endpoint)"
   >
     <!-- pass through scoped slots -->
@@ -86,6 +88,10 @@ export default class AutocompleteTextInput extends Vue {
     } finally {
       this.loading = false
     }
+  }
+
+  updateValue (value: string) {
+    this.$emit('input', value)
   }
 }
 </script>
