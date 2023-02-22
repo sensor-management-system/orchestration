@@ -1,4 +1,4 @@
-FROM minio/mc:latest
+FROM minio/mc:RELEASE.2023-02-16T19-20-11Z
 
 RUN \
     microdnf update --nodocs && \
