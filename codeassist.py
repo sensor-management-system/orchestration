@@ -125,5 +125,30 @@ def ordering():
             print(f"{level} {child.value} {problematic}")
 
 
+@main.group()
+def download():
+    """Download data."""
+
+
+@download.group()
+def schemas():
+    """Download schemas."""
+
+
+@schemas.command()
+def sensorml():
+    """Download the sensorml schema & store it in a pickle file."""
+    import pickle
+
+    import xmlschema
+
+    schema = xmlschema.XMLSchema(
+        "https://schemas.opengis.net/sensorML/2.0/sensorML.xsd"
+    )
+    output_filename = "app/project/tests/api/helpers/sensorml_schema_validator.pickle"
+    with open(output_filename, "wb") as outfile:
+        pickle.dump(schema, outfile)
+
+
 if __name__ == "__main__":
     main()

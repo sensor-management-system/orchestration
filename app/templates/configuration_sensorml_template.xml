@@ -4,20 +4,28 @@
             {% set obj = element.entity %}
             {% set contact_roles = obj.platform_contact_roles %}
             {% set gmlId = 'platform_' ~ obj.id %}
-                <sml:component xlink:href="{{frontend_url}}/platforms/{{obj.id}}" name='{{obj.short_name.replace(" ", "_")}}' xlink:title="Link To Platform {{obj.id}}">
+                <sml:component xlink:href="{{url_for('sensorml.platform_to_sensor_ml', platform_id=obj.id, _external=True)}}" name='{{obj.short_name.replace(" ", "_")}}' xlink:title="Link To Platform {{obj.id}}">
+                {% include 'physical_system_sensorml_start_template.xml' %}
                     <!-- Component Device / Platform  -->
-                    {% include 'platform_sensorml_template.xml' %}
-                    {% for child in element.children %}
-                    {% set obj = child %}
-                        {{build_tree(child)}}
-                    {% endfor %}
+                    {% include 'platform_sensorml_inner_template.xml' %}
+                    <sml:components>
+                      {% if element.children %}
+                      <sml:ComponentList>
+                        {% for child in element.children %}
+                        {% set obj = child %}
+                            {{build_tree(child)}}
+                        {% endfor %}
+                      </sml:ComponentList>
+                    {% endif %}
+                    </sml:components>
+                  </sml:PhysicalSystem>
                 </sml:component>
         {% endwith %}
     {% else %}
             {% set obj = element.entity %}
             {% set contact_roles = obj.device_contact_roles %}
             {% set gmlId = 'device_' ~ obj.id %}
-            <sml:component xlink:href="{{frontend_url}}/devices/{{obj.id}}" name='{{obj.short_name.replace(" ", "_")}}' xlink:title="Link To Device {{obj.id}}">
+            <sml:component xlink:href="{{url_for('sensorml.device_to_sensor_ml', device_id=obj.id, _external=True)}}" name='{{obj.short_name.replace(" ", "_")}}' xlink:title="Link To Device {{obj.id}}">
                      {% include 'device_sensorml_template.xml' %}
             </sml:component>
     {% endif %}
@@ -29,7 +37,7 @@
             <sml:classification>
                 <sml:ClassifierList>
                     <sml:classifier>
-                        <sml:Term definition="#">
+                        <sml:Term definition="{{event_name}}">
                             <sml:label>{{event_name}}</sml:label>
                             <sml:value>{{event_name}}</sml:value>
                         </sml:Term>
@@ -37,17 +45,17 @@
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
-                <gml:TimePeriod gml:id="TimePeriodFor{{event_name}}_{{event.id}}_of_{{event.get_parent().id}}">
-                    <gml:description>{{event.description}}</gml:description>
+                <gml:TimePeriod gml:id="TimePeriodFor{{event_name}}_{{event.id}}_of_configuration_{{event.get_parent().id}}">
+                    <gml:description>{{event.description or event.begin_description or ''}}</gml:description>
                     <gml:begin>
                         <gml:TimeInstant>
-                            <gml:timePosition>{{event.begin_date}}</gml:timePosition>
+                            <gml:timePosition>{{event.begin_date.isoformat()}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:begin>
                     <gml:end>
                       {% if event.end_date %}
                         <gml:TimeInstant>
-                            <gml:timePosition>{{event.end_date}}</gml:timePosition>
+                            <gml:timePosition>{{event.end_date.isoformat()}}</gml:timePosition>
                         </gml:TimeInstant>
                       {% endif %}
                     </gml:end>
@@ -58,7 +66,7 @@
 {%- endmacro %}
 
 
-<sml:PhysicalSystem gml:id='{{gmlId}}'
+<sml:PhysicalSystem gml:id="{{gmlId}}"
                     xmlns:sml="http://www.opengis.net/sensorml/2.0"
                     xmlns:swe="http://www.opengis.net/swe/2.0"
                     xmlns:gml="http://www.opengis.net/gml/3.2"
@@ -76,12 +84,48 @@
     <!--            Constraints                  -->
     <!-- ======================================= -->
     <sml:validTime>
-        <gml:TimePeriod gml:id="ConfigurationValidTime">
-            <gml:beginPosition>{{obj.start_date}}</gml:beginPosition>
-            <gml:endPosition>{{obj.end_date}}</gml:endPosition>
+        <gml:TimePeriod gml:id="ValidTime_{{gmlId}}">
+          <gml:begin>
+            <gml:TimeInstant>
+              <gml:timePosition>{{obj.start_date.isoformat()}}</gml:timePosition>
+            </gml:TimeInstant>
+          </gml:begin>
+          <gml:end>
+            {% if obj.end_date %}
+            <gml:TimeInstant>
+              <gml:timePosition>{{obj.end_date.isoformat()}}</gml:timePosition>
+            </gml:TimeInstant>
+            {% endif %}
+          </gml:end>
         </gml:TimePeriod>
     </sml:validTime>
     {% endif %}
+
+    {% block documentation %}
+    {% if obj.configuration_attachments %}
+    <!-- ========================================================================= -->
+    <!--                 Documentation                                             -->
+    <!-- ========================================================================= -->
+    <sml:documentation>
+        <sml:DocumentList>
+            {% if obj.configuration_attachments %}
+            {% for attachment in obj.configuration_attachments %}
+            <sml:document xlink:arcrole="Attachment">
+                <gmd:CI_OnlineResource id="Attachment_{{attachment.id}}_of_PhysicalSystem_{{gmlId}}">
+                    <gmd:linkage>
+                        <gmd:URL>{{attachment.url}}</gmd:URL>
+                    </gmd:linkage>
+                    <gmd:name>
+                        <gco:CharacterString>{{attachment.label}}</gco:CharacterString>
+                    </gmd:name>
+                </gmd:CI_OnlineResource>
+            </sml:document>
+            {% endfor %}
+            {% endif %}
+        </sml:DocumentList>
+    </sml:documentation>
+    {% endif %}
+    {% endblock %}
 
     {% include 'contact_sensorml_template.xml' %}
 
@@ -89,6 +133,7 @@
     <!--                 History                                                   -->
     <!-- ========================================================================= -->
 <sml:history>
+    {% if obj.device_mount_actions or obj.platform_mount_actions or obj.generic_configuration_actions or obj.configuration_static_location_begin_actions or obj.configuration_dynamic_location_begin_actions %}
     <sml:EventList>
 
     {% block mount_actions %}
@@ -123,19 +168,64 @@
         {% endfor %}
      {% endblock %}
 
+    {% block generic_actions %}
+    {% for action in obj.generic_configuration_actions %}
+    <!-- ========================================================================= -->
+    <!--           Generic actions: {{action.action_type_name}} id:{{action.id}}   -->
+    <!-- ========================================================================= -->
+
+    <sml:event>
+        <sml:Event>
+            <sml:classification>
+                <sml:ClassifierList>
+                    <sml:classifier>
+                      <sml:Term
+                          definition="{{action.action_type_uri or 'Action'}}"
+                      >
+                            <sml:label>{{action.action_type_name}}</sml:label>
+                            <sml:value>{{action.action_type_name}}</sml:value>
+                        </sml:Term>
+                    </sml:classifier>
+                </sml:ClassifierList>
+            </sml:classification>
+            <sml:time>
+                <gml:TimePeriod
+                        gml:id="TimePeriodFor{{action.action_type_name.replace(' ', '')}}_{{action.id}}_of_{{gmlId}}">
+                    <gml:description>{{action.description or ""}}</gml:description>
+                    <gml:begin>
+                        <gml:TimeInstant>
+                            <gml:timePosition>{{action.begin_date.isoformat()}}</gml:timePosition>
+                        </gml:TimeInstant>
+                    </gml:begin>
+                    <gml:end>
+                        {% if action.end_date %}
+                        <gml:TimeInstant>
+                            <gml:timePosition>{{action.end_date.isoformat()}}</gml:timePosition>
+                        </gml:TimeInstant>
+                        {% endif %}
+                    </gml:end>
+                </gml:TimePeriod>
+            </sml:time>
+        </sml:Event>
+    </sml:event>
+    {% endfor %}
+    {% endblock %}
 
 </sml:EventList>
+{% endif %}
 </sml:history>
     <!-- ======================================== -->
     <!--        Components                        -->
     <!-- ======================================== -->
     <sml:components>
+        {% if tree %}
         <sml:ComponentList>
             {% for element in tree %}
             <!-- Component 1 -->
                 {{build_tree(element)}}
             {% endfor %}
         </sml:ComponentList>
+        {% endif %}
     </sml:components>
 
 </sml:PhysicalSystem>
