@@ -1,6 +1,7 @@
 <!-- ========================================================================= -->
 <!--                 Contacts                                                  -->
 <!-- ========================================================================= -->
+{% if contact_roles %}
 <sml:contacts>
     <sml:ContactList>
         {% for contact_role in contact_roles %}
@@ -18,6 +19,15 @@
                         </gmd:electronicMailAddress>
                       </gmd:CI_Address>
                     </gmd:address>
+                    {% if contact_role.contact.website %}
+                    <gmd:onlineResource>
+                      <gmd:CI_OnlineResource>
+                        <gmd:linkage>
+                          <gmd:URL>{{ contact_role.contact.website }}</gmd:URL>
+                        </gmd:linkage>
+                      </gmd:CI_OnlineResource>
+                    </gmd:onlineResource>
+                    {% endif %}
                   </gmd:CI_Contact>
                 </gmd:contactInfo>
                 <gmd:role>
@@ -28,3 +38,4 @@
         {% endfor %}
     </sml:ContactList>
 </sml:contacts>
+{% endif %}

@@ -1,0 +1,182 @@
+{% extends "base_sensorml_template.xml" %}
+{% block opening %}{% endblock %}
+
+        {% block description %}{{super()}}{% endblock %}
+
+        {% block identifiers %}{{super()}}{% endblock %}
+
+        {% block classifiers %}
+        {% if obj.platform_type_name %}
+        <!-- ========================================================================= -->
+        <!-- ========================================================================= -->
+        <sml:classification>
+            <sml:ClassifierList>
+                <sml:classifier>
+                    <sml:Term definition="http://sensorml.com/ont/swe/property/PlatformType">
+                        <sml:label>platform type</sml:label>
+                        <sml:value>{{obj.platform_type_name}}</sml:value>
+                    </sml:Term>
+                </sml:classifier>
+            </sml:ClassifierList>
+        </sml:classification>
+        {% endif %}
+        {% endblock %}
+
+        {% block documentation %}
+        {% if obj.platform_attachments or obj.website %}
+        <!-- ========================================================================= -->
+        <!--                 Documentation                                             -->
+        <!-- ========================================================================= -->
+        <sml:documentation>
+            <sml:DocumentList>
+                {% if obj.platform_attachments %}
+                {% for attachment in obj.platform_attachments %}
+                <sml:document xlink:arcrole="Attachment">
+                    <gmd:CI_OnlineResource id="Attachment_{{attachment.id}}_of_PhysicalSystem_{{gmlId}}">
+                        <gmd:linkage>
+                            <gmd:URL>{{attachment.url}}</gmd:URL>
+                        </gmd:linkage>
+                        <gmd:name>
+                            <gco:CharacterString>{{attachment.label}}</gco:CharacterString>
+                        </gmd:name>
+                    </gmd:CI_OnlineResource>
+                </sml:document>
+                {% endfor %}
+                {% endif %}
+                {% if obj.website %}
+                <sml:document xlink:arcrole="Website">
+                    <gmd:CI_OnlineResource>
+                        <gmd:linkage>
+                            <gmd:URL>{{obj.website}}</gmd:URL>
+                        </gmd:linkage>
+                    </gmd:CI_OnlineResource>
+                </sml:document>
+                {% endif %}
+            </sml:DocumentList>
+        </sml:documentation>
+        {% endif %}
+        {% endblock %}
+
+        {% block history %}
+{% if obj.platform_mount_actions or obj.generic_platform_actions or obj.platform_software_update_actions %}        
+        <!-- ========================================================================= -->
+        <!--                 History                                                  -->
+        <!-- ========================================================================= -->
+<sml:history>
+    <sml:EventList>
+        {% block mount_actions %}
+        {% for action in obj.platform_mount_actions %}
+        <!-- ========================================================================= -->
+        <!--                 Mount action   id:{{action.id}}                                           -->
+        <!-- ========================================================================= -->
+        <sml:event>
+            <sml:Event>
+                <sml:classification>
+                    <sml:ClassifierList>
+                        <sml:classifier>
+                            <sml:Term definition="Mount">
+                                {% if action.configuration.label %}
+                                <sml:label>Mounted to {{action.configuration.label}}</sml:label>
+                                {% else %}
+                                <sml:label>Mounted to configuration {{action.configuration.id}}</sml:label>
+                                {% endif %}
+                                <sml:value>Mount</sml:value>
+                            </sml:Term>
+                        </sml:classifier>
+                    </sml:ClassifierList>
+                </sml:classification>
+                <sml:time>
+                    <gml:TimePeriod gml:id="TimePeriodForPlatformMountAction_{{action.id}}_of_{{gmlId}}">
+                        <gml:description>{{action.begin_description or ""}}</gml:description>
+                        <gml:begin>
+                            <gml:TimeInstant>
+                                <gml:timePosition>{{action.begin_date.isoformat()}}</gml:timePosition>
+                            </gml:TimeInstant>
+                        </gml:begin>
+                        <gml:end>
+                          {% if action.end_date %}
+                          <gml:TimeInstant>
+                              <gml:timePosition>{{action.end_date.isoformat()}}</gml:timePosition>
+                          </gml:TimeInstant>
+                          {% endif %}
+                        </gml:end>
+                    </gml:TimePeriod>
+                </sml:time>
+            </sml:Event>
+        </sml:event>
+        {% endfor %}
+        {% endblock %}
+
+        {% block generic_actions %}
+        {% for action in obj.generic_platform_actions %}
+        <!-- ========================================================================= -->
+        <!--                 Generic actions:{{action.action_type_name}} id:{{action.id}} -->
+        <!-- ========================================================================= -->
+        <sml:event>
+            <sml:Event>
+                <sml:classification>
+                    <sml:ClassifierList>
+                        <sml:classifier>
+                            <sml:Term definition="{{action.action_type_uri or 'Action'}}">
+                                <sml:label>{{action.action_type_name}}</sml:label>
+                                <sml:value>{{action.action_type_name}}</sml:value>
+                            </sml:Term>
+                        </sml:classifier>
+                    </sml:ClassifierList>
+                </sml:classification>
+                <sml:time>
+                    <gml:TimePeriod
+                            gml:id="TimePeriodFor{{action.action_type_name.replace(' ', '')}}_{{action.id}}_of_{{gmlId}}">
+                        <gml:description>{{action.description or ""}}</gml:description>
+                        <gml:begin>
+                            <gml:TimeInstant>
+                                <gml:timePosition>{{action.begin_date.isoformat()}}</gml:timePosition>
+                            </gml:TimeInstant>
+                        </gml:begin>
+                        <gml:end>
+                            {% if action.end_date %}
+                            <gml:TimeInstant>
+                                <gml:timePosition>{{action.end_date.isoformat()}}</gml:timePosition>
+                            </gml:TimeInstant>
+                            {% endif %}
+                        </gml:end>
+                    </gml:TimePeriod>
+                </sml:time>
+            </sml:Event>
+        </sml:event>
+        {% endfor %}
+        {% endblock %}
+        {% block software_update_actions %}
+        {% for action in obj.platform_software_update_actions %}
+        <!-- ========================================================================= -->
+        <!--                 Software Update actions    id:{{action.id}}             -->
+        <!-- ========================================================================= -->
+        <sml:event>
+            <sml:Event>
+                <sml:classification>
+                    <sml:ClassifierList>
+                        <sml:classifier>
+                            <sml:Term definition="{{action.software_type_uri or 'SoftwareUpdate'}}">
+                                <sml:label>{{action.software_type_name}}</sml:label>
+                                <sml:value>{{action.software_type_name}}</sml:value>
+                            </sml:Term>
+                        </sml:classifier>
+                    </sml:ClassifierList>
+                </sml:classification>
+                <sml:time>
+                    <gml:TimeInstant
+                            gml:id="TimeInstantFor{{action.software_type_name.replace(' ', '')}}Update_{{action.id}}_of_{{gmlId}}">
+                      <gml:timePosition>{{action.update_date.isoformat()}}</gml:timePosition>
+                    </gml:TimeInstant>
+                </sml:time>
+            </sml:Event>
+        </sml:event>
+        {% endfor %}
+        {% endblock %}
+        {{super()}}
+    </sml:EventList>
+</sml:history>
+{% endif %}
+        {% endblock %}
+
+{% block finish %}{% endblock %}
