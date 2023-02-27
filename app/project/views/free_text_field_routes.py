@@ -8,7 +8,7 @@ are not part of a controlled vocabulary.
 
 from abc import ABC
 
-from flask import Blueprint, g
+from flask import Blueprint, g, request
 from sqlalchemy import or_
 
 from ..api.helpers.errors import ErrorResponse, UnauthorizedError
@@ -74,6 +74,22 @@ class AbstractFreeTextFieldEndpoint(ABC):
             if not g.user:
                 raise UnauthorizedError("Login required.")
             base_query = db.session.query(self.__class__.field)
+
+            if getattr(self.__class__, "ignore_field", None):
+                ignore_str = request.values.get("ignore", "")
+                if ignore_str:
+                    ignore_values = request.values.get("ignore", "").split(",")
+                    base_query = base_query.filter(
+                        self.__class__.ignore_field.not_in(ignore_values)
+                    )
+
+            if getattr(self.__class__, "filter_fields", None):
+                filter_fields = self.__class__.filter_fields
+                for query_param, field in filter_fields.items():
+                    if request.values.get(query_param):
+                        param_value = request.values[query_param]
+                        base_query = base_query.filter(field == param_value)
+
             if getattr(self.__class__, "is_private_field", None) and getattr(
                 self.__class__, "created_by_id_field", None
             ):
@@ -202,6 +218,14 @@ class DeviceSerialNumberEndpoint(AbstractFreeTextFieldEndpoint):
     field = Device.serial_number
     is_private_field = Device.is_private
     created_by_id_field = Device.created_by_id
+    ignore_field = Device.id
+
+    filter_fields = {
+        "short_name": Device.short_name,
+        "manufacturer_name": Device.manufacturer_name,
+        "manufacturer_uri": Device.manufacturer_uri,
+        "model": Device.model,
+    }
 
 
 @free_text_field_routes.route("/controller/device-property-labels", methods=["GET"])
@@ -317,6 +341,14 @@ class PlatformSerialNumberEndpoint(AbstractFreeTextFieldEndpoint):
     field = Platform.serial_number
     is_private_field = Platform.is_private
     created_by_id_field = Platform.created_by_id
+    ignore_field = Platform.id
+
+    filter_fields = {
+        "short_name": Platform.short_name,
+        "manufacturer_name": Platform.manufacturer_name,
+        "manufacturer_uri": Platform.manufacturer_uri,
+        "model": Platform.model,
+    }
 
 
 @free_text_field_routes.route("/controller/platform-short-names", methods=["GET"])

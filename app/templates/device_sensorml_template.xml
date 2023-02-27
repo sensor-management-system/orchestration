@@ -3,6 +3,58 @@
         {% block description %}{{super()}}{% endblock %}
 
         {% block identifiers %}{{super()}}{% endblock %}
+
+        {% block classifiers %}
+        {% if obj.device_type_name %}
+        <!-- ========================================================================= -->
+        <!-- ========================================================================= -->
+        <sml:classification>
+            <sml:ClassifierList>
+                <sml:classifier>
+                    <sml:Term definition="http://sensorml.com/ont/swe/property/SensorType">
+                        <sml:label>sensor type</sml:label>
+                        <sml:value>{{obj.device_type_name}}</sml:value>
+                    </sml:Term>
+                </sml:classifier>
+            </sml:ClassifierList>
+        </sml:classification>
+        {% endif %}
+        {% endblock %}
+
+        {% block documentation %}
+        {% if obj.device_attachments or obj.website %}
+        <!-- ========================================================================= -->
+        <!--                 Documentation                                             -->
+        <!-- ========================================================================= -->
+        <sml:documentation>
+            <sml:DocumentList>
+                {% if obj.device_attachments %}
+                {% for attachment in obj.device_attachments %}
+                <sml:document xlink:arcrole="Attachment">
+                    <gmd:CI_OnlineResource id="Attachment_{{attachment.id}}_of_PhysicalSystem_{{gmlId}}">
+                        <gmd:linkage>
+                            <gmd:URL>{{attachment.url}}</gmd:URL>
+                        </gmd:linkage>
+                        <gmd:name>
+                            <gco:CharacterString>{{attachment.label}}</gco:CharacterString>
+                        </gmd:name>
+                    </gmd:CI_OnlineResource>
+                </sml:document>
+                {% endfor %}
+                {% endif %}
+                {% if obj.website %}
+                <sml:document xlink:arcrole="Website">
+                    <gmd:CI_OnlineResource>
+                        <gmd:linkage>
+                            <gmd:URL>{{obj.website}}</gmd:URL>
+                        </gmd:linkage>
+                    </gmd:CI_OnlineResource>
+                </sml:document>
+                {% endif %}
+            </sml:DocumentList>
+        </sml:documentation>
+        {% endif %}
+        {% endblock %}
         
         {% block outputs %}
         {% if obj.device_properties  %}
@@ -12,15 +64,19 @@
 <sml:outputs>
     <sml:OutputList>
         {% for property in obj.device_properties %}
-        <sml:output name='{{property.sampling_media_name}}'>
-            <swe:DataRecord>
-                <swe:field name="{{property.property_name}}">
-                    <swe:Quantity definition="{{property.property_uri}}">
-                        <swe:label>{{property.label}}</swe:label>
-                        <swe:uom code="{{property.unit_name}}"/>
-                    </swe:Quantity>
-                </swe:field>
-            </swe:DataRecord>
+        <sml:output name='{{property.property_name | replace(" ", "_")}}'>
+          {% if property.property_uri %}
+          <swe:Quantity definition="{{property.property_uri or ''}}">
+          {% else %}
+          <swe:Quantity>
+          {% endif %}
+              <swe:label>{{property.label or ""}}</swe:label>
+              {% if property.unit_name %}
+              <swe:uom code="{{property.unit_name}}"/>
+              {% else %}
+              <swe:uom />
+              {% endif %}
+          </swe:Quantity>
         </sml:output>
         {% endfor %}
     </sml:OutputList>
@@ -33,6 +89,7 @@
         <!-- ========================================================================= -->
         <!--                 History                                                   -->
         <!-- ========================================================================= -->
+{% if obj.device_mount_actions or obj.device_calibration_actions or obj.generic_device_actions or obj.device_software_update_actions %}        
 <sml:history>
     <sml:EventList>
 
@@ -47,24 +104,28 @@
                 <sml:ClassifierList>
                     <sml:classifier>
                         <sml:Term definition="Mount">
-                            <sml:label>Mounted on {{action.configuration.label}}</sml:label>
-                            <sml:value>MountAction</sml:value>
+                            {% if action.configuration.label %}
+                            <sml:label>Mounted to {{action.configuration.label}}</sml:label>
+                            {% else %}
+                            <sml:label>Mounted to configuration {{action.configuration.id}}</sml:label>
+                            {% endif %}
+                            <sml:value>Mount</sml:value>
                         </sml:Term>
                     </sml:classifier>
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
-                <gml:TimePeriod gml:id="TimePeriodForMountAction_{{action.id}}_of_{{gmlId}}">
-                    <gml:description>{{action.description}}</gml:description>
+                <gml:TimePeriod gml:id="TimePeriodForDeviceMountAction_{{action.id}}_of_{{gmlId}}">
+                    <gml:description>{{action.begin_description or ""}}</gml:description>
                     <gml:begin>
                         <gml:TimeInstant>
-                            <gml:timePosition>{{action.begin_date}}</gml:timePosition>
+                            <gml:timePosition>{{action.begin_date.isoformat()}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:begin>
                     <gml:end>
                         {% if action.end_date %}
                         <gml:TimeInstant>
-                            <gml:timePosition>{{action.end_date}}</gml:timePosition>
+                            <gml:timePosition>{{action.end_date.isoformat()}}</gml:timePosition>
                         </gml:TimeInstant>
                         {% endif %}
                     </gml:end>
@@ -87,31 +148,19 @@
             <sml:classification>
                 <sml:ClassifierList>
                     <sml:classifier>
-                        <sml:Term>
+                        <sml:Term definition="Calibration">
                             <sml:label>Calibration</sml:label>
-                            <sml:value>{{action.value}}</sml:value>
-                            <sml:formula>{{action.formula}}</sml:formula>
+                            <sml:value>{{action.value or ""}}</sml:value>
                         </sml:Term>
                     </sml:classifier>
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
-                <gml:TimePeriod gml:id="TimePeriodForCalibration_{{action.id}}_of_{{gmlId}}">
-                    <gml:description>{{action.description}}</gml:description>
-                    <gml:current>
-                        <gml:TimeInstant>
-                            <gml:timePosition>{{action.current_calibration_date}}</gml:timePosition>
-                        </gml:TimeInstant>
-                    </gml:current>
-                    {% if action.next_calibration_date %}
-                    <gml:next>
-                        <gml:TimeInstant>
-                            <gml:timePosition>{{action.next_calibration_date}}</gml:timePosition>
-                        </gml:TimeInstant>
-                    </gml:next>
-                    {% endif %}
-                </gml:TimePeriod>
+                <gml:TimeInstant gml:id="TimeInstantForCalibration_{{action.id}}_of_{{gmlId}}">
+                  <gml:timePosition>{{action.current_calibration_date.isoformat()}}</gml:timePosition>
+                </gml:TimeInstant>
             </sml:time>
+            {# TODO Find a valid way to put the formula & description in; + think about next calibration date #}
         </sml:Event>
     </sml:event>
     {% endfor %}
@@ -128,7 +177,9 @@
             <sml:classification>
                 <sml:ClassifierList>
                     <sml:classifier>
-                        <sml:Term definition="{{action.action_type_uri}}">
+                      <sml:Term
+                          definition="{{action.action_type_uri or 'Action'}}"
+                      >
                             <sml:label>{{action.action_type_name}}</sml:label>
                             <sml:value>{{action.action_type_name}}</sml:value>
                         </sml:Term>
@@ -138,20 +189,19 @@
             <sml:time>
                 <gml:TimePeriod
                         gml:id="TimePeriodFor{{action.action_type_name.replace(' ', '')}}_{{action.id}}_of_{{gmlId}}">
-                    <gml:description>{{action.description}}</gml:description>
+                    <gml:description>{{action.description or ""}}</gml:description>
                     <gml:begin>
                         <gml:TimeInstant>
-                            <gml:timePosition>{{action.begin_date}}</gml:timePosition>
+                            <gml:timePosition>{{action.begin_date.isoformat()}}</gml:timePosition>
                         </gml:TimeInstant>
                     </gml:begin>
                     <gml:end>
                         {% if action.end_date %}
                         <gml:TimeInstant>
-                            <gml:timePosition>{{action.end_date}}</gml:timePosition>
+                            <gml:timePosition>{{action.end_date.isoformat()}}</gml:timePosition>
                         </gml:TimeInstant>
                         {% endif %}
                     </gml:end>
-
                 </gml:TimePeriod>
             </sml:time>
         </sml:Event>
@@ -170,7 +220,7 @@
             <sml:classification>
                 <sml:ClassifierList>
                     <sml:classifier>
-                        <sml:Term definition="{{action.software_type_uri}}">
+                        <sml:Term definition="{{action.software_type_uri or 'SoftwareUpdate'}}">
                             <sml:label>{{action.software_type_name}}</sml:label>
                             <sml:value>{{action.software_type_name}}</sml:value>
                         </sml:Term>
@@ -178,15 +228,11 @@
                 </sml:ClassifierList>
             </sml:classification>
             <sml:time>
-                <gml:TimePeriod
-                        gml:id="TimePeriodFor{{action.software_type_name.replace(' ', '')}}_{{action.id}}_of_{{gmlId}}">
-                    <gml:description>{{action.description}}</gml:description>
-                    <gml:begin>
-                        <gml:TimeInstant>
-                            <gml:timePosition>{{action.update_date}}</gml:timePosition>
-                        </gml:TimeInstant>
-                    </gml:begin>
-                </gml:TimePeriod>
+                <gml:TimeInstant
+                  gml:id="TimeInstantFor{{action.software_type_name.replace(' ', '')}}Update_{{action.id}}_of_{{gmlId}}"
+                >
+                  <gml:timePosition>{{action.update_date.isoformat()}}</gml:timePosition>
+                </gml:TimeInstant>
             </sml:time>
         </sml:Event>
     </sml:event>
@@ -197,5 +243,5 @@
 
 </sml:EventList>
 </sml:history>
-
+{% endif %}
 {% endblock %}

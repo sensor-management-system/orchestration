@@ -1,12 +1,6 @@
-<sml:PhysicalSystem gml:id='{{gmlId}}'
-                    xmlns:sml="http://www.opengis.net/sensorml/2.0"
-                    xmlns:swe="http://www.opengis.net/swe/2.0"
-                    xmlns:gml="http://www.opengis.net/gml/3.2"
-                    xmlns:gmd="http://www.isotc211.org/2005/gmd"
-                    xmlns:gco="http://www.isotc211.org/2005/gco"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    xsi:schemaLocation="http://www.opengis.net/sensorml/2.0 https://schemas.opengis.net/sensorML/2.0/sensorML.xsd">
+{% block opening %}
+{% include 'physical_system_sensorml_start_template.xml' %}
+{% endblock %}
     {% block description %}
     {% if obj.description %}
     <!-- ========================================================================= -->
@@ -21,6 +15,14 @@
     <!-- ========================================================================= -->
     <sml:identification>
         <sml:IdentifierList>
+            {% if obj.persistent_identifier %}
+            <sml:identifier>
+                <sml:Term definition="http://sensorml.com/ont/swe/property/Identifier">
+                    <sml:label>handle</sml:label>
+                    <sml:value>{{obj.persistent_identifier}}</sml:value>
+                </sml:Term>
+            </sml:identifier>
+            {% endif %}
             {% if obj.long_name %}
             <sml:identifier>
                 <sml:Term definition="http://sensorml.com/ont/swe/property/LongName">
@@ -35,7 +37,7 @@
                     <sml:value>{{obj.short_name}}</sml:value>
                 </sml:Term>
             </sml:identifier>
-            {% if obj.long_name %}
+            {% if obj.model %}
             <sml:identifier>
                 <sml:Term definition="http://sensorml.com/ont/swe/property/ModelNumber">
                     <sml:label>Model Number</sml:label>
@@ -59,7 +61,7 @@
                 </sml:Term>
             </sml:identifier>
             {% endif %}
-            {% if obj.manufacturer %}
+            {% if obj.manufacturer_name %}
             <sml:identifier>
                 <sml:Term definition="http://sensorml.com/ont/swe/property/Manufacturer">
                     <sml:label>Manufacturer</sml:label>
@@ -76,6 +78,7 @@
     <!-- ========================================================================= -->
     <!--                  Classifiers                                              -->
     <!-- ========================================================================= -->
+    {# TODO Check if we still need this block here, as the types are specific for our classes #}
     <sml:classification>
         <sml:ClassifierList>
             <sml:classifier>
@@ -95,14 +98,15 @@
     {% endif %}
     {% endblock %}
     {% block documentation %}
-    {% if obj.obj_attachments or obj.website %}
+    {# TODO Adopt it, so that we can extract attachments of devices, platforms & configurations #}
+    {% if obj.device_attachments or obj.website %}
     <!-- ========================================================================= -->
     <!--                 Documentation                                             -->
     <!-- ========================================================================= -->
     <sml:documentation>
         <sml:DocumentList>
-            {% if obj.obj_attachments %}
-            {% for attachment in obj.obj_attachments %}
+            {% if obj.device_attachments %}
+            {% for attachment in obj.device_attachments %}
             <sml:document xlink:arcrole="Attachment">
                 <gmd:CI_OnlineResource id="Attachment_{{attachment.id}}_of_PhysicalSystem_{{gmlId}}">
                     <gmd:linkage>
@@ -134,7 +138,8 @@
     {% endblock %}
 
     {% include 'contact_sensorml_template.xml' %}
-
     {% block outputs %}{% endblock %}
     {% block history %}{% endblock %}
+{% block finish %}
 </sml:PhysicalSystem>
+{% endblock %}

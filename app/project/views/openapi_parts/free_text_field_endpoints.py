@@ -34,6 +34,180 @@ def template(endpoint, description, operation_id):
 
 
 paths = {
+    "/controller/platform-serial-numbers": {
+        "get": {
+            "tags": [
+                "Controller",
+            ],
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "ignore",
+                    "schema": {
+                        "type": "string",
+                    },
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to ignore certain platform ids (given",
+                            " as comma seperated numbers) when extracting ",
+                            "the set of serial numbers.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "short_name",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given short name.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "manufacturer_name",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer name.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "manufacturer_uri",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer uri.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "model",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given model.",
+                        ]
+                    ),
+                },
+            ],
+            "responses": {
+                "200": {
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "401": {"$ref": "#/components/errors/authentification_required"},
+            },
+            "description": "Get the list of distinct serial numbers of all platforms.",
+            "operationId": "controller_platform_serial_numbers",
+        }
+    },
+    "/controller/device-serial-numbers": {
+        "get": {
+            "tags": [
+                "Controller",
+            ],
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "ignore",
+                    "schema": {
+                        "type": "string",
+                    },
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to ignore certain device ids (given",
+                            " as comma seperated numbers) when extracting ",
+                            "the set of serial numbers.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "short_name",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given short name.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "manufacturer_name",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer name.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "manufacturer_uri",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer uri.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "model",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given model.",
+                        ]
+                    ),
+                },
+            ],
+            "responses": {
+                "200": {
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "401": {"$ref": "#/components/errors/authentification_required"},
+            },
+            "description": "Get the list of distinct serial numbers of all devices.",
+            "operationId": "controller_device_serial_numbers",
+        }
+    },
     **template(
         endpoint="/controller/device-short-names",
         description="Get the list of distinct short names of all devices.",
@@ -50,11 +224,6 @@ paths = {
         operation_id="controller_platform_short_names",
     ),
     **template(
-        endpoint="/controller/platform-serial-numbers",
-        description="Get the list of distinct serial numbers of all devices.",
-        operation_id="controller_platform_serial_numbers",
-    ),
-    **template(
         endpoint="/controller/platform-long-names",
         description="Get the list of distinct long names of all platforms.",
         operation_id="controller_platform_long_names",
@@ -63,11 +232,6 @@ paths = {
         endpoint="/controller/device-manufacturer-names",
         description="Get the list of distinct manufacturer names of all devices.",
         operation_id="controller_device_manufacturer_names",
-    ),
-    **template(
-        endpoint="/controller/device-serial-numbers",
-        description="Get the list of distinct serial numbers of all devices.",
-        operation_id="controller_device_serial_numbers",
     ),
     **template(
         endpoint="/controller/platform-manufacturer-names",
