@@ -37,6 +37,7 @@
     v-bind="$attrs"
     :items="suggestionsWithHeader"
     :loading="loading"
+    validate-on-blur
     v-on="$listeners"
     @update:search-input="updateValue"
     @focus="loadSuggestions(endpoint)"

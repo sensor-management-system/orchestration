@@ -47,6 +47,7 @@ permissions and limitations under the Licence.
       persistent-hint
       :rules="[...rules]"
       :class="{ required: required }"
+      validate-on-blur
     >
       <template #selection="data">
         <v-chip
