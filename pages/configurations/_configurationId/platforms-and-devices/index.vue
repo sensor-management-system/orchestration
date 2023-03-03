@@ -124,7 +124,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, Watch, InjectReactive, ProvideReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
@@ -146,6 +146,8 @@ import { ConfigurationNode } from '@/viewmodels/ConfigurationNode'
 import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 
 import { MountActionValidator } from '@/utils/MountActionValidator'
+import { IOffsets } from '@/utils/configurationInterfaces'
+import { sumOffsets } from '@/utils/configurationsTreeHelper'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
@@ -191,6 +193,9 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
 
   private isLoading: boolean = false
   private isDeleteDialogShown: boolean = false
+
+  @ProvideReactive()
+    calculatedOffsets: IOffsets | null = null
 
   // vuex definition for typescript check
   private configuration!: ConfigurationsState['configuration']
@@ -334,6 +339,19 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
     } finally {
       this.isLoading = false
     }
+  }
+
+  @Watch('selectedNode')
+  onSelectedNodeChanged (value: ConfigurationsTreeNode | null) {
+    if (value === null) {
+      this.calculatedOffsets = null
+      return
+    }
+    if (value.isConfiguration()) {
+      return
+    }
+    const parents = this.tree.getParents(value)
+    this.calculatedOffsets = sumOffsets([...parents, value])
   }
 }
 </script>

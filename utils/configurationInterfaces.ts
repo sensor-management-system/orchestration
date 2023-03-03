@@ -3,14 +3,13 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
- * - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
- * - Tim Eder (UFZ, tim.eder@ufz.de)
- * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences
- *   (GFZ, https://www.gfz-potsdam.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for
+ *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
  *   (UFZ, https://www.ufz.de)
  *
@@ -558,4 +557,27 @@ export class GenericTimelineAction implements IGenericTimelineAction {
   get type (): string {
     return 'generic_configuration_action'
   }
+}
+
+export type MountActionDateDTO = {
+  beginDate: DateTime | null,
+  endDate: DateTime | null
+}
+
+export type MountActionInformationDTO = {
+  beginDate: DateTime | null
+  endDate: DateTime | null
+  offsetX: number
+  offsetY: number
+  offsetZ: number
+  beginContact: IContact | null
+  endContact: IContact | null
+  beginDescription: string
+  endDescription: string | null
+}
+
+export interface IOffsets {
+  offsetX: number
+  offsetY: number
+  offsetZ: number
 }

@@ -73,7 +73,7 @@ import { Component, mixins, Prop, Watch } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 
-import { MountActionDateDTO } from '@/store/configurations'
+import { MountActionDateDTO } from '@/utils/configurationInterfaces'
 
 import Validator from '@/utils/validator'
 

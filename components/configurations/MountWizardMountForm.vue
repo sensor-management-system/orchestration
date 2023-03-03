@@ -42,6 +42,7 @@ permissions and limitations under the Licence.
         :contacts="contacts"
         :with-unmount="selectedEndDate !== null"
         :with-dates="false"
+        :parent-offsets="parentOffsets"
         @input="update"
       />
     </v-card>
@@ -55,13 +56,13 @@ import { mapState } from 'vuex'
 import { DateTime } from 'luxon'
 
 import { ContactsState } from '@/store/contacts'
-import { MountActionInformationDTO } from '@/store/configurations'
 
 import { Contact } from '@/models/Contact'
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
 
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
+import { IOffsets, MountActionInformationDTO } from '@/utils/configurationInterfaces'
 
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
 
@@ -86,6 +87,13 @@ export default class MountWizardMountForm extends Vue {
     type: String
   })
   readonly prefix!: String
+
+  @Prop({
+    default: (): IOffsets => ({ offsetX: 0, offsetY: 0, offsetZ: 0 }),
+    required: false,
+    type: Object
+  })
+  readonly parentOffsets!: IOffsets
 
   @InjectReactive() selectedDate!: DateTime
   @InjectReactive() selectedEndDate!: DateTime | null

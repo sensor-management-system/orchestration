@@ -162,12 +162,14 @@ permissions and limitations under the Licence.
             ref="mountActionMountDevicesForm"
             v-model="devicesToMount"
             prefix="devices-mount-info"
+            :parent-offsets="parentOffsets"
             @input="validateAllForms"
           />
           <mount-wizard-mount-form
             ref="mountActionMountPlatformsForm"
             v-model="platformsToMount"
             prefix="platforms-mount-info"
+            :parent-offsets="parentOffsets"
             @input="validateAllForms"
           />
           <v-row class="mb-6">
@@ -195,6 +197,7 @@ permissions and limitations under the Licence.
           <mount-wizard-submit-overview
             :devices-to-mount.sync="devicesToMount"
             :platforms-to-mount.sync="platformsToMount"
+            :parent-offsets="parentOffsets"
           />
           <v-row>
             <v-col>
@@ -223,9 +226,7 @@ import {
   LoadConfigurationAction,
   AddPlatformMountActionAction,
   AddDeviceMountActionAction,
-  LoadMountingConfigurationForDateAction,
-  MountActionInformationDTO,
-  MountActionDateDTO
+  LoadMountingConfigurationForDateAction
 } from '@/store/configurations'
 import { ContactsState } from '@/store/contacts'
 import { ClearDeviceAvailabilitiesAction } from '@/store/devices'
@@ -247,6 +248,8 @@ import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 
 import Validator from '@/utils/validator'
 import { MountActionValidator, MountActionValidationResultOp } from '@/utils/MountActionValidator'
+import { MountActionInformationDTO, MountActionDateDTO, IOffsets } from '@/utils/configurationInterfaces'
+import { sumOffsets } from '@/utils/configurationsTreeHelper'
 
 import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
 import MountWizardNodeSelect from '@/components/configurations/MountWizardNodeSelect.vue'
@@ -300,6 +303,8 @@ export default class MountWizard extends Vue {
 
   private beginDateErrorMessage: string = ''
   private endDateErrorMessage: string = ''
+
+  private parentOffsets: IOffsets = { offsetX: 0, offsetY: 0, offsetZ: 0 }
 
   // vuex definition for typescript check
   contacts!: ContactsState['contacts']
@@ -658,6 +663,21 @@ export default class MountWizard extends Vue {
   })
   onSelectedDateChange (_date: DateTime) {
     this.createTree()
+  }
+
+  @Watch('selectedNode', {
+    immediate: true
+  })
+  onSelectedNodeChange (value: ConfigurationsTreeNode | null) {
+    if (value === null) {
+      this.parentOffsets = { offsetX: 0, offsetY: 0, offsetZ: 0 }
+      return
+    }
+    if (value.isConfiguration()) {
+      return
+    }
+    const parents = this.tree.getParents(value)
+    this.parentOffsets = sumOffsets([...parents, value])
   }
 }
 </script>

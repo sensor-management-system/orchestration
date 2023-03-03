@@ -3,11 +3,15 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -30,36 +34,25 @@
  * permissions and limitations under the Licence.
  */
 
-/**
- * @file provides a mixin component for standard form validation rules
- * @author <marc.hanisch@gfz-potsdam.de>
- */
-
-import { Vue, Component } from 'nuxt-property-decorator'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
+import { IOffsets } from '@/utils/configurationInterfaces'
 
 /**
- * A mixin component for standard form validation rules
- * @extends Vue
+ * sums the offsets of all nodes in an array
+ *
+ * @param {ConfigurationsTreeNode[]} nodes - the nodes to calculate the offsets from
+ * @returns {IOffsets} an object containing all summed offsets
  */
-@Component
-export class Rules extends Vue {
-  /**
-   * various rules for validating form inputs
-   *
-   * @property {function} required - triggers when value is empty
-   * @property {function} validUrl - triggers when value does not start with http(s):// or ftp://
-   */
-  private rules: Object = {
-    required: (v: any) => {
-      switch (typeof v) {
-        case 'string':
-          return v.trim() !== '' || 'Required'
-        case 'number':
-          return true
-      }
-      return !!v || 'Required'
-    },
-    validUrl: (v: string) => v.match(/^https*:\/\//) !== null || v.match(/^ftp*:\/\//) !== null || 'URL not valid',
-    numeric: (v: any) => !isNaN(parseInt(v)) || 'Number expected'
+export function sumOffsets (nodes: ConfigurationsTreeNode[]): IOffsets {
+  const result = {
+    offsetX: 0,
+    offsetY: 0,
+    offsetZ: 0
   }
+  nodes.forEach((node) => {
+    result.offsetX += node.unpack().offsetX
+    result.offsetY += node.unpack().offsetY
+    result.offsetZ += node.unpack().offsetZ
+  })
+  return result
 }
