@@ -67,6 +67,24 @@ permissions and limitations under the Licence.
                   Offsets (X | Y | Z)
                 </th>
                 <th class="text-left">
+                  Absolute offsets (X | Y | Z)
+                  <v-tooltip
+                    right
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        class="pl-2"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle
+                      </v-icon>
+                    </template>
+                    The offsets of the nodes are included.
+                  </v-tooltip>
+                </th>
+                <th class="text-left">
                   Description
                 </th>
                 <th class="text-left">
@@ -82,7 +100,7 @@ permissions and limitations under the Licence.
             </thead>
             <tbody>
               <tr v-if="platformsToMount.length !== 0 && devicesToMount.length > 0">
-                <td colspan="6" class="font-weight-bold">
+                <td colspan="7" class="font-weight-bold">
                   Devices
                 </td>
               </tr>
@@ -91,7 +109,8 @@ permissions and limitations under the Licence.
                 :key="'device-'+index"
               >
                 <td>{{ item.entity.shortName }}</td>
-                <td>{{ `(${item.mountInfo.offsetX} | ${item.mountInfo.offsetY} | ${item.mountInfo.offsetZ})` }}</td>
+                <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
+                <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
                 <td>
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>
@@ -106,7 +125,7 @@ permissions and limitations under the Licence.
                 </td>
               </tr>
               <tr v-if="devicesToMount.length !== 0 && platformsToMount.length > 0">
-                <td colspan="6" class="font-weight-bold">
+                <td colspan="7" class="font-weight-bold">
                   Platforms
                 </td>
               </tr>
@@ -115,7 +134,8 @@ permissions and limitations under the Licence.
                 :key="'platform-'+index"
               >
                 <td>{{ item.entity.shortName }}</td>
-                <td>{{ `(${item.mountInfo.offsetX} | ${item.mountInfo.offsetY} | ${item.mountInfo.offsetZ})` }}</td>
+                <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
+                <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
                 <td>
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>
@@ -136,7 +156,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, PropSync, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, Prop, PropSync, InjectReactive } from 'nuxt-property-decorator'
 
 import { DateTime } from 'luxon'
 
@@ -146,6 +166,7 @@ import { Platform } from '@/models/Platform'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
+import { IOffsets } from '@/utils/configurationInterfaces'
 
 @Component({
   filters: { dateToDateTimeStringHHMM }
@@ -163,6 +184,13 @@ export default class MountWizardSubmitOverview extends Vue {
   })
     syncedPlatformsToMount!: { entity: Platform, mountInfo: MountAction }[]
 
+  @Prop({
+    default: (): IOffsets => ({ offsetX: 0, offsetY: 0, offsetZ: 0 }),
+    required: false,
+    type: Object
+  })
+  readonly parentOffsets!: IOffsets
+
   @InjectReactive() selectedDate!: DateTime
   @InjectReactive() selectedEndDate!: DateTime | null
   @InjectReactive() selectedNode!: ConfigurationsTreeNode | null
@@ -175,6 +203,14 @@ export default class MountWizardSubmitOverview extends Vue {
 
   fullNameOfBeginContact (mountInfo: MountAction): string | undefined {
     return mountInfo.beginContact?.fullName
+  }
+
+  getAbsoluteOffsets (mountInfo: MountAction): IOffsets {
+    return {
+      offsetX: this.parentOffsets.offsetX + mountInfo.offsetX,
+      offsetY: this.parentOffsets.offsetY + mountInfo.offsetY,
+      offsetZ: this.parentOffsets.offsetZ + mountInfo.offsetZ
+    }
   }
 }
 </script>

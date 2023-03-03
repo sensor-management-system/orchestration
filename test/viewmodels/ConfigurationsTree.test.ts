@@ -646,4 +646,80 @@ describe('ConfigurationsTree', () => {
       expect(deviceNodes).toEqual([deviceNode])
     })
   })
+  describe('#getParents', () => {
+    it('should return all parent nodes of a node', () => {
+      const platform1 = new Platform()
+      const platform2 = new Platform()
+      const platform3 = new Platform()
+      const device = new Device()
+
+      const platformNode1 = new PlatformNode(PlatformMountAction.createFromObject({
+        id: '',
+        platform: platform1,
+        parentPlatform: null,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Platform mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
+      }))
+      const platformNode2 = new PlatformNode(PlatformMountAction.createFromObject({
+        id: '',
+        platform: platform2,
+        parentPlatform: platform1,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Platform mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
+      }))
+      const platformNode3 = new PlatformNode(PlatformMountAction.createFromObject({
+        id: '',
+        platform: platform3,
+        parentPlatform: platform2,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Platform mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
+      }))
+      const deviceNode = new DeviceNode(DeviceMountAction.createFromObject({
+        id: '',
+        device,
+        parentPlatform: platform3,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        beginContact: contact,
+        beginDate: date,
+        beginDescription: 'Device mount',
+        endDate: null,
+        endContact: null,
+        endDescription: null
+      }))
+
+      platformNode1.getTree().push(platformNode2)
+      platformNode2.getTree().push(platformNode3)
+      platformNode3.getTree().push(deviceNode)
+      const tree = ConfigurationsTree.fromArray([platformNode1])
+
+      expect(tree.getParents(deviceNode)).toHaveLength(3)
+      expect(tree.getParents(deviceNode)).toContain(platformNode1)
+      expect(tree.getParents(deviceNode)).toContain(platformNode2)
+      expect(tree.getParents(deviceNode)).toContain(platformNode3)
+      expect(tree.getParents(platformNode1)).toHaveLength(0)
+    })
+  })
 })

@@ -435,4 +435,20 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
     }
     return getParentRecursive(node, null, this)
   }
+
+  /**
+   * returns all parents of a node in the tree
+   *
+   * @param {ConfigurationsTreeNode} node - the node to get the parents of
+   * @return {ConfigurationsTreeNode} the all parents of the node, empty array if the node has not parent
+   */
+  getParents (node: ConfigurationsTreeNode): ConfigurationsTreeNode[] {
+    const parents: ConfigurationsTreeNode[] = []
+    let parent = this.getParent(node)
+    while (parent !== null) {
+      parents.push(parent)
+      parent = this.getParent(parent)
+    }
+    return parents
+  }
 }

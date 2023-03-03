@@ -51,8 +51,9 @@ permissions and limitations under the Licence.
         />
         <v-row class="pb-0">
           <v-col
-            cols="12"
-            md="3"
+            md="12"
+            lg="4"
+            xl="3"
           >
             <v-text-field
               v-model.number="mountActionInformationDTO.offsetX"
@@ -62,15 +63,16 @@ permissions and limitations under the Licence.
               step="any"
               :disabled="readonly"
               required
-              :rules="[rules.numericRequired]"
-              class="m-annotated"
+              :rules="[rules.numeric, rules.required]"
+              class="required m-annotated"
               @wheel.prevent
               @input="update"
             />
           </v-col>
           <v-col
-            cols="12"
-            md="3"
+            md="12"
+            lg="4"
+            xl="3"
           >
             <v-text-field
               v-model.number="mountActionInformationDTO.offsetY"
@@ -80,15 +82,16 @@ permissions and limitations under the Licence.
               step="any"
               :disabled="readonly"
               required
-              :rules="[rules.numericRequired]"
-              class="m-annotated"
+              :rules="[rules.numeric, rules.required]"
+              class="required m-annotated"
               @wheel.prevent
               @input="update"
             />
           </v-col>
           <v-col
-            cols="12"
-            md="3"
+            md="12"
+            lg="4"
+            xl="3"
           >
             <v-text-field
               v-model.number="mountActionInformationDTO.offsetZ"
@@ -98,16 +101,93 @@ permissions and limitations under the Licence.
               step="any"
               :disabled="readonly"
               required
-              :rules="[rules.numericRequired]"
-              class="m-annotated"
+              :rules="[rules.numeric, rules.required]"
+              class="required m-annotated"
               @wheel.prevent
               @input="update"
             />
           </v-col>
         </v-row>
-        <v-row class="mt-0 pt-0">
-          <v-col>
-            <span class="text-caption">Offsets are relative to parent platform/root</span>
+        <v-row no-gutters>
+          <v-col class="text-caption text--secondary">Offsets are relative to parent platform/root</v-col>
+        </v-row>
+        <v-row>
+          <v-col md="12" lg="4" xl="3">
+            <v-row
+              no-gutters
+            >
+              <v-col
+                cols="12"
+                md="6"
+                lg="12"
+                class="text-caption text--secondary"
+              >
+                Absolute offset (x):
+                <v-tooltip
+                  bottom
+                >
+                  <template #activator="{ on, attrs }">
+                    <v-icon
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      mdi-help-circle
+                    </v-icon>
+                  </template>
+                  The offsets of the node are included.
+                </v-tooltip>
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+                lg="12"
+              >
+                {{ absoluteOffsets.offsetX }} m
+              </v-col>
+            </v-row>
+          </v-col>
+          <v-col md="12" lg="4" xl="3">
+            <v-row
+              no-gutters
+            >
+              <v-col
+                cols="12"
+                md="6"
+                lg="12"
+                class="text-caption text--secondary"
+              >
+                Absolute offset (y):
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+                lg="12"
+              >
+                {{ absoluteOffsets.offsetY }} m
+              </v-col>
+            </v-row>
+          </v-col>
+          <v-col md="12" lg="4" xl="3">
+            <v-row
+              no-gutters
+            >
+              <v-col
+                cols="12"
+                md="6"
+                lg="12"
+                class="text-caption text--secondary"
+              >
+                Absolute offset (z):
+              </v-col>
+              <v-col
+                cols="12"
+                md="6"
+                lg="12"
+              >
+                {{ absoluteOffsets.offsetZ }} m
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
         <v-row>
@@ -180,7 +260,7 @@ import { Rules } from '@/mixins/Rules'
 import { Contact } from '@/models/Contact'
 
 import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
-import { MountActionDateDTO, MountActionInformationDTO } from '@/store/configurations'
+import { MountActionDateDTO, MountActionInformationDTO, IOffsets } from '@/utils/configurationInterfaces'
 
 @Component({
   components: {
@@ -238,6 +318,13 @@ export default class MountActionDetailsForm extends mixins(Rules) {
   })
   readonly endDateRules!: ((value: DateTime | null) => string | boolean)[]
 
+  @Prop({
+    default: (): IOffsets => ({ offsetX: 0, offsetY: 0, offsetZ: 0 }),
+    required: false,
+    type: Object
+  })
+  readonly parentOffsets!: IOffsets
+
   get mountActionDateDTO (): MountActionDateDTO {
     return {
       beginDate: this.mountActionInformationDTO.beginDate,
@@ -284,6 +371,14 @@ export default class MountActionDetailsForm extends mixins(Rules) {
 
   update () {
     this.$emit('input', this.mountActionInformationDTO)
+  }
+
+  get absoluteOffsets (): IOffsets {
+    return {
+      offsetX: this.parentOffsets.offsetX + this.value.offsetX,
+      offsetY: this.parentOffsets.offsetY + this.value.offsetY,
+      offsetZ: this.parentOffsets.offsetZ + this.value.offsetZ
+    }
   }
 }
 </script>

@@ -73,7 +73,6 @@ import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
 import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
 import { IActionType } from '@/models/ActionType'
-import { IContact } from '@/models/Contact'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -432,23 +431,6 @@ export type UpdateConfigurationCustomFieldAction = (params: { configurationId: s
 export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActionType | null) => void
 
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
-
-export type MountActionDateDTO = {
-  beginDate: DateTime | null,
-  endDate: DateTime | null
-}
-
-export type MountActionInformationDTO = {
-  beginDate: DateTime | null
-  endDate: DateTime | null
-  offsetX: number
-  offsetY: number
-  offsetZ: number
-  beginContact: IContact | null
-  endContact: IContact | null
-  beginDescription: string
-  endDescription: string | null
-}
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
   setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime | null) {

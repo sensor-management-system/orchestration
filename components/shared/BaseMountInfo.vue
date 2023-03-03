@@ -65,7 +65,35 @@ permissions and limitations under the Licence.
         Offsets:
       </v-col>
       <v-col cols="8">
-        {{ `X = ${mountAction.offsetX} m | Y = ${mountAction.offsetY} m | Z = ${mountAction.offsetZ} m` }}
+        {{ getOffsets(mountAction) }}
+      </v-col>
+    </v-row>
+    <v-row
+      v-if="calculatedOffsets"
+      dense
+    >
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Absolute offsets:
+        <v-tooltip
+          bottom
+        >
+          <template #activator="{ on, attrs }">
+            <v-icon
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle
+            </v-icon>
+          </template>
+          The offsets of the selected node are included.
+        </v-tooltip>
+      </v-col>
+      <v-col cols="8">
+        {{ getOffsets(calculatedOffsets) }}
       </v-col>
     </v-row>
     <v-row
@@ -161,18 +189,17 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, Vue, Prop, InjectReactive } from 'nuxt-property-decorator'
 import { RawLocation } from 'vue-router'
 
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 
+import { IOffsets } from '@/utils/configurationInterfaces'
 import { ISOToDateTimeString } from '@/utils/dateHelper'
 import { removeTrailingSlash } from '@/utils/urlHelpers'
 
 @Component({
-  components: {
-  },
   filters: {
     ISOToDateTimeString
   }
@@ -212,10 +239,17 @@ export default class BaseMountInfo extends Vue {
   })
   private warning!: string
 
+  @InjectReactive()
+  readonly calculatedOffsets!: IOffsets | null
+
   get editLink (): RawLocation {
     return {
       path: removeTrailingSlash(this.$route.path) + '/' + ('device' in this.mountAction ? 'device-mount-actions' : 'platform-mount-actions') + '/' + this.mountAction.id + '/edit'
     }
+  }
+
+  getOffsets (valueWithOffsets: IOffsets): string {
+    return `X = ${valueWithOffsets.offsetX} m | Y = ${valueWithOffsets.offsetY} m | Z = ${valueWithOffsets.offsetZ} m`
   }
 }
 </script>

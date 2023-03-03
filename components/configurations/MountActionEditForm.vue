@@ -83,7 +83,7 @@ import { mapState, mapActions } from 'vuex'
 
 import { DevicesState, LoadDeviceAvailabilitiesAction } from '@/store/devices'
 import { PlatformsState, LoadPlatformAvailabilitiesAction } from '@/store/platforms'
-import { ConfigurationsState, LoadConfigurationDynamicLocationActionsAction, MountActionInformationDTO } from '@/store/configurations'
+import { ConfigurationsState, LoadConfigurationDynamicLocationActionsAction } from '@/store/configurations'
 
 import { Contact } from '@/models/Contact'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
@@ -96,6 +96,7 @@ import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 
 import { MountActionValidator, MountActionValidationResultOp } from '@/utils/MountActionValidator'
+import { MountActionInformationDTO } from '@/utils/configurationInterfaces'
 
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
