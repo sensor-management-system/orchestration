@@ -1,3 +1,0 @@
-{% include 'physical_system_sensorml_start_template.xml' %}
-{% include 'platform_sensorml_inner_template.xml' %}
-</sml:PhysicalSystem>
