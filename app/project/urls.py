@@ -146,6 +146,7 @@ api.route(
 )
 api.route(UserDetail, "user_detail", "/users/<int:id>")
 # User modifications
+api.route(AcceptTermsOfUse, "accept_terms_of_use", "/accept-terms-of-use")
 api.route(RevokeApikey, "revoke_apikey", "/revoke-apikey")
 
 # Configuration
