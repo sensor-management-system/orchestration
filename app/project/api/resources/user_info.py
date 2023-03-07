@@ -49,6 +49,7 @@ class UserInfo(ResourceList):
                     "is_superuser": g.user.is_superuser,
                     "apikey": g.user.apikey,
                     "subject": g.user.subject,
+                    "terms_of_use_agreement_date": g.user.terms_of_use_agreement_date,
                 },
                 "relationships": {
                     "contact": {

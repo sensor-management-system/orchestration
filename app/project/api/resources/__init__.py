@@ -126,5 +126,5 @@ from .site_role_resources import (  # noqa: F401
 )
 from .usage_statistics import UsageStatistics  # noqa: F401
 from .user_info import UserInfo  # noqa: F401
-from .user_modification import RevokeApikey  # noqa: F401
+from .user_modification import AcceptTermsOfUse, RevokeApikey  # noqa: F401
 from .user_resources import UserDetail, UserList  # noqa: F401

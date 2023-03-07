@@ -1,5 +1,8 @@
 """Resources to modify the current user."""
 
+import datetime
+
+import pytz
 from flask import g
 
 from ...frj_csv_export.resource import ResourceList
@@ -31,3 +34,35 @@ class RevokeApikey(ResourceList):
             }
         }
         return response
+
+
+class AcceptTermsOfUse(ResourceList):
+    """Resource to allow the user to agree to the terms of use - and set the field in the database."""
+
+    def get(self):
+        """Get is not allowed."""
+        raise MethodNotAllowed("Endpoint can only be used with POST method.")
+
+    def post(self):
+        """Take the user of the request and set the terms of use agreement date & return it."""
+        if not g.user:
+            raise UnauthorizedError("Login required")
+        now = self.get_current_time()
+        g.user.terms_of_use_agreement_date = now
+        db.session.add(g.user)
+        db.session.commit()
+
+        response = {
+            "data": {
+                "type": "user",
+                "id": str(g.user.id),
+                "attributes": {
+                    "terms_of_use_agreement_date": g.user.terms_of_use_agreement_date
+                },
+            }
+        }
+        return response
+
+    def get_current_time(self):
+        """Get the current datetime (helper method for easier mocking)."""
+        return datetime.datetime.now(tz=pytz.utc)
