@@ -19,6 +19,7 @@ class User(db.Model):
     active = db.Column(db.Boolean, default=True)
     is_superuser = db.Column(db.Boolean, default=False)
     apikey = db.Column(db.String(256), unique=True)
+    terms_of_use_agreement_date = db.Column(db.DateTime(timezone=True), nullable=True)
 
     @staticmethod
     def generate_new_apikey():

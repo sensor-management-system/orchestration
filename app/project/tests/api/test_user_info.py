@@ -1,7 +1,9 @@
 """Test classes & functions for the userinfo endpoint."""
+import datetime
 import json
 from unittest.mock import patch
 
+import pytz
 from flask import current_app
 
 from project import base_url
@@ -153,3 +155,54 @@ class TestUserinfo(BaseTestCase):
                     )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["subject"], "dummy")
+
+    def test_get_includes_terms_of_use_agreement_date(self):
+        """Ensure that we give out the agreement date in the payload."""
+        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
+        user = User(
+            subject="dummy",
+            contact=contact,
+            terms_of_use_agreement_date=datetime.datetime(
+                2023, 2, 28, 12, 0, 0, tzinfo=pytz.utc
+            ),
+        )
+        db.session.add_all([contact, user])
+        db.session.commit()
+        with self.run_requests_as(user):
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups_for_a_user:
+                test_get_all_permission_groups_for_a_user.return_value = (
+                    IDL_USER_ACCOUNT
+                )
+                with self.client:
+                    response = self.client.get(
+                        self.url,
+                    )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json["data"]["attributes"]["terms_of_use_agreement_date"],
+            "2023-02-28T12:00:00+00:00",
+        )
+
+    def test_get_includes_terms_of_use_agreement_date_not_set(self):
+        """Ensure that we give out the null agreement date (not set yet)."""
+        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
+        user = User(subject="dummy", contact=contact, terms_of_use_agreement_date=None)
+        db.session.add_all([contact, user])
+        db.session.commit()
+        with self.run_requests_as(user):
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups_for_a_user:
+                test_get_all_permission_groups_for_a_user.return_value = (
+                    IDL_USER_ACCOUNT
+                )
+                with self.client:
+                    response = self.client.get(
+                        self.url,
+                    )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json["data"]["attributes"]["terms_of_use_agreement_date"], None
+        )
