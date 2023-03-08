@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022
+ * Copyright (C) 2022-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,6 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { UserInfo } from '@/models/UserInfo'
 import { UserInfoSerializer } from '@/serializers/jsonapi/UserInfoSerializer'
 
@@ -41,7 +42,8 @@ describe('UserInfoSerializer', () => {
             active: true,
             is_superuser: false,
             member: ['123', '456'],
-            admin: ['789']
+            admin: ['789'],
+            terms_of_use_agreement_date: null
           },
           id: '1',
           links: {
@@ -66,7 +68,51 @@ describe('UserInfoSerializer', () => {
         isSuperUser: false,
         member: ['123', '456'],
         admin: ['789'],
-        contactId: '1234'
+        contactId: '1234',
+        termsOfUseAgreementDate: null
+      })
+
+      const serializer = new UserInfoSerializer()
+
+      const userinfo = serializer.convertJsonApiDataToModel(jsonApiObject.data)
+
+      expect(userinfo).toEqual(expectedResult)
+    })
+    it('should should also parse a date for agreement', () => {
+      const jsonApiObject: any = {
+        data: {
+          attributes: {
+            active: true,
+            is_superuser: false,
+            member: ['123', '456'],
+            admin: ['789'],
+            terms_of_use_agreement_date: '2023-02-28T16:15:14+00:00'
+          },
+          id: '1',
+          links: {
+            self: 'http://rz-vm64.gfz-potsdam.de:5001/api/units/1/'
+          },
+          relationships: {
+            contact: {
+              data: {
+                type: 'contact',
+                id: 1234
+              }
+            }
+          },
+          type: 'user'
+        },
+        included: []
+      }
+
+      const expectedResult = UserInfo.createFromObject({
+        id: '1',
+        active: true,
+        isSuperUser: false,
+        member: ['123', '456'],
+        admin: ['789'],
+        contactId: '1234',
+        termsOfUseAgreementDate: DateTime.utc(2023, 2, 28, 16, 15, 14)
       })
 
       const serializer = new UserInfoSerializer()

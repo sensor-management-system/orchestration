@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022
+ * Copyright (C) 2022 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,6 +29,8 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+import { DateTime } from 'luxon'
 import { PermissionGroup } from '@/models/PermissionGroup'
 
 export type PermissionGroupId = string
@@ -41,6 +43,7 @@ export interface IUserInfo {
   member: PermissionGroupId[]
   admin: PermissionGroupId[]
   apikey: string | null
+  termsOfUseAgreementDate: DateTime | null
   isMemberOf(group: PermissionGroup): boolean
   isAdminOf(group: PermissionGroup): boolean
 }
@@ -55,6 +58,7 @@ export class UserInfo implements IUserInfo {
   private _member: PermissionGroupId[] = []
   private _admin: PermissionGroupId[] = []
   private _apikey: string | null = null
+  private _termsOfUseAgreementDate: DateTime | null = null
 
   get id (): string | null {
     return this._id
@@ -120,6 +124,14 @@ export class UserInfo implements IUserInfo {
     this._apikey = newApikey
   }
 
+  get termsOfUseAgreementDate (): DateTime | null {
+    return this._termsOfUseAgreementDate
+  }
+
+  set termsOfUseAgreementDate (newDate: DateTime | null) {
+    this._termsOfUseAgreementDate = newDate
+  }
+
   /**
    * creates an instance from another object
    *
@@ -149,6 +161,9 @@ export class UserInfo implements IUserInfo {
     }
     if (someObject.apikey) {
       userinfo.apikey = someObject.apikey
+    }
+    if (someObject.termsOfUseAgreementDate === null || someObject.termsOfUseAgreementDate) {
+      userinfo.termsOfUseAgreementDate = someObject.termsOfUseAgreementDate
     }
     return userinfo
   }

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022
+ * Copyright (C) 2022 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,6 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { UserInfo } from '@/models/UserInfo'
 
 import {
@@ -60,6 +61,10 @@ export class UserInfoSerializer {
         newEntry.admin = attributes.admin.map(e => e.toString())
       }
       newEntry.apikey = attributes.apikey || null
+      newEntry.termsOfUseAgreementDate = null
+      if (attributes.terms_of_use_agreement_date) {
+        newEntry.termsOfUseAgreementDate = DateTime.fromISO(attributes.terms_of_use_agreement_date, { zone: 'UTC' })
+      }
     }
     const relationships = jsonApiData.relationships
 

@@ -34,6 +34,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-app>
+    <terms-of-use-acceptance-dialog
+      :value="(!infoPage) && needToAcceptTermsOfUse"
+      @logout="logout"
+    />
     <v-navigation-drawer
       v-model="drawer"
       :mini-variant="miniVariant"
@@ -347,19 +351,21 @@ permissions and limitations under the Licence.
 <script>
 
 import CookieLaw from 'vue-cookie-law'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
 import LogoFooter from '@/components/LogoFooter'
 
 import { saveCurrentRoute } from '@/utils/loginHelpers'
+import TermsOfUseAcceptanceDialog from '@/components/TermsOfUseAcceptanceDialog.vue'
 
 export default {
   components: {
     AppBarTabsExtension,
     AppBarEditModeContent,
     CookieLaw,
-    LogoFooter
+    LogoFooter,
+    TermsOfUseAcceptanceDialog
   },
   data () {
     return {
@@ -379,6 +385,7 @@ export default {
   },
   computed: {
     ...mapState('defaultlayout', ['fullWidth']),
+    ...mapGetters('permissions', ['needToAcceptTermsOfUse']),
     browserTitle () {
       if (this.title === this.appBarTitle) {
         return this.title
@@ -493,6 +500,9 @@ export default {
     },
     isLandingPage () {
       return this.$route.path === '/'
+    },
+    infoPage () {
+      return this.$route.path.startsWith('/info/')
     }
   },
   created () {

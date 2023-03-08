@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -33,6 +33,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { Commit, GetterTree, ActionTree } from 'vuex'
 
 import { RootState } from '@/store'
@@ -288,12 +289,32 @@ const getters: GetterTree<PermissionsState, RootState> = {
       return state.userInfo.isSuperUser
     }
     return false
+  },
+  termsOfUseAgreementDate: (state: PermissionsState): DateTime | null => {
+    if (state.userInfo) {
+      return state.userInfo.termsOfUseAgreementDate
+    }
+    return null
+  },
+  needToAcceptTermsOfUse: (state: PermissionsState): boolean => {
+    // Can be set for every new release.
+    // const latestUpdateToTermsOfUse = DateTime.fromISO('2023-03-05T00:00:00')
+    if (state.userInfo) {
+      if (state.userInfo.termsOfUseAgreementDate === null) {
+        return true
+      }
+      // if (state.userInfo.termsOfUseAgreementDate < latestUpdateToTermsOfUse) {
+      //   return true
+      // }
+    }
+    return false
   }
 }
 
 export type LoadUserInfoAction = () => void
 export type ClearUserInfoAction = () => void
 export type LoadPermissionGroupsAction = () => Promise<void>
+export type AcceptTermsOfUseAction = () => Promise<void>
 
 const actions: ActionTree<PermissionsState, RootState> = {
   async loadUserInfo ({ commit }: { commit: Commit }) {
@@ -306,6 +327,11 @@ const actions: ActionTree<PermissionsState, RootState> = {
   async loadPermissionGroups ({ commit }: { commit: Commit }): Promise<void> {
     const permissionGroups = await this.$api.permissionGroupApi.findAll()
     commit('setPermissionGroups', permissionGroups)
+  },
+  async acceptTermsOfUse ({ commit }: { commit: Commit }): Promise<void> {
+    await this.$api.userModificationApi.acceptTermsOfUse()
+    const userInfo = await this.$api.userInfoApi.get()
+    commit('setUserInfo', userInfo)
   }
 }
 
