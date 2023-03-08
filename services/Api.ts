@@ -97,6 +97,7 @@ import { LocationActionTimepointControllerApi } from '@/services/sms/LocationAct
 
 import { SiteApi } from '@/services/sms/SiteApi'
 import { SiteConfigurationsApi } from '@/services/sms/SiteConfigurationsApi'
+import { UserModificationApi } from '@/services/sms/UserModificationApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -160,6 +161,7 @@ export class Api {
 
   private readonly _userInfoApi: UserInfoApi
   private readonly _permissionGroupApi: PermissionGroupApi
+  private readonly _userModificationApi: UserModificationApi
 
   constructor (
     getIdToken: () => string | null,
@@ -476,6 +478,7 @@ export class Api {
       '/user-info'
     )
     this._permissionGroupApi = new PermissionGroupApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/permission-groups')
+    this._userModificationApi = new UserModificationApi(createAxios(smsBaseUrl, smsConfig, getIdToken))
   }
 
   get devices (): DeviceApi {
@@ -660,5 +663,9 @@ export class Api {
 
   get statisticsApi (): StatisticsApi {
     return this._statisticsApi
+  }
+
+  get userModificationApi (): UserModificationApi {
+    return this._userModificationApi
   }
 }

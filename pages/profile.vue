@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -133,6 +133,14 @@ permissions and limitations under the Licence.
             </v-row>
             <v-row no-gutters>
               <v-col class="text-subtitle-2" :cols="firstCol">
+                Terms of Use accepted
+              </v-col>
+              <v-col align-self="end" :cols="secondCol">
+                {{ termsOfUseAgreementDate | toUtcDateTimeString }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col class="text-subtitle-2" :cols="firstCol">
                 Membered permission groups
               </v-col>
               <v-col align-self="end" :cols="secondCol">
@@ -198,7 +206,7 @@ import { PermissionGroup } from '@/models/PermissionGroup'
     }
   },
   middleware: ['auth'],
-  computed: mapGetters('permissions', ['memberedPermissionGroups', 'administradedPermissionGroups', 'apikey', 'isSuperUser'])
+  computed: mapGetters('permissions', ['memberedPermissionGroups', 'administradedPermissionGroups', 'apikey', 'isSuperUser', 'termsOfUseAgreementDate'])
 })
 export default class ProfilePage extends Vue {
   private isOpenIdConnectSectionVisible: boolean = false
