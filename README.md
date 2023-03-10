@@ -87,6 +87,37 @@ After having installed the dependencies, then just run the following commands to
 
 [How to user filters](docs/filtering.md)
 
+## FAQ
+
+### What is the connection between the user subject and the username from the IDL?
+
+We use the users subject entry as a user readable unque identifier for our
+users. It looks like
+
+```
+username@institute.org
+```
+
+In past it was identical to the `sub` entry in the userinfo response of
+the IDP instances (both at UFZ and GFZ).
+
+With the switch to the Helmholtz AAI, this changed.
+We introducted the `OIDC_USERNAME_CLAIM` environment variable
+(default to `sub`) to make it configurable from which attribute of the user
+response we want to fill our subject entry in the user table.
+
+The Helmholtz AAI fills `sub` with cryptic uuid, which is unique, but not
+user friendly readable. However it gives the `eduperson_principal_name`
+which is exactly what we used for subject in the past.
+
+In any case the interaction with the IDL will use the subject from our
+users table to search for usernames within the IDL.
+So both should be identical.
+
+In case you want to use the `gfz-idl` implementation, as well as the
+Helmholtz AAI, make sure that you set the `OIDC_USERNAME_CLAIM` variable
+to `eduperson_principal_name`.
+
 ## CLI commands for admins
 
 <details>
