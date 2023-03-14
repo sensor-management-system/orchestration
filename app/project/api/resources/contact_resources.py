@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from ...frj_csv_export.resource import ResourceList
 from ..auth.permission_utils import is_superuser
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
-from ..helpers.errors import ForbiddenError
+from ..helpers.errors import ConflictError, ForbiddenError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
@@ -75,6 +75,16 @@ class ContactList(ResourceList):
     def before_create_object(self, data, *args, **kwargs):
         """Run hooks for data we want to add before creating the contact."""
         add_created_by_id(data)
+        orcid = data.get("orcid")
+        if orcid:
+            has_orcid = db.session.query(Contact).filter(Contact.orcid == orcid).first()
+            if has_orcid:
+                raise ConflictError("Orcid already used.")
+        email = data.get("email")
+        if email:
+            has_email = db.session.query(Contact).filter(Contact.email == email).first()
+            if has_email:
+                raise ConflictError("E-Mail already used.")
 
     schema = ContactSchema
     decorators = (token_required,)
@@ -107,6 +117,28 @@ class ContactDetail(ResourceDetail):
             if not (is_self or is_creator):
                 raise ForbiddenError("User is not allowed to edit this contact")
         add_updated_by_id(data)
+
+        # And lets add some checks for the orcid & email
+        orcid = data.get("orcid")
+        if orcid:
+            has_orcid = (
+                db.session.query(Contact)
+                .filter(Contact.id != data["id"])
+                .filter(Contact.orcid == orcid)
+                .first()
+            )
+            if has_orcid:
+                raise ConflictError("Orcid already used.")
+        email = data.get("email")
+        if email:
+            has_email = (
+                db.session.query(Contact)
+                .filter(Contact.id != data["id"])
+                .filter(Contact.email == email)
+                .first()
+            )
+            if has_email:
+                raise ConflictError("Email already used.")
 
     def before_delete(self, args, kwargs):
         """Check if the user is allowed to delete the contact."""

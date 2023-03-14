@@ -23,6 +23,8 @@ class ContactSchema(Schema):
     given_name = fields.Str(required=True)
     family_name = fields.Str(required=True)
     website = fields.Str(allow_none=True)
+    organization = fields.Str(allow_none=True)
+    orcid = fields.Str(allow_none=True)
     email = fields.Email(required=True)
     active = fields.Boolean(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
@@ -65,5 +67,7 @@ class ContactSchema(Schema):
                 "given_name": obj.given_name,
                 "family_name": obj.family_name,
                 "website": obj.website,
+                "organization": obj.organization,
+                "orcid": obj.orcid,
                 "email": obj.email,
             }

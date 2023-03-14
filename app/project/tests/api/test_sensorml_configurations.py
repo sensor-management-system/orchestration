@@ -212,6 +212,7 @@ class TestSensorMLConfiguration(BaseTestCase):
             family_name="Fam",
             email="given@family",
             website="https://given.fam/index.html",
+            organization="Dummy organization",
         )
         contact2 = Contact(given_name="Homer J", family_name="S", email="homer.j@fix")
         contact_role1 = ConfigurationContactRole(
@@ -252,6 +253,13 @@ class TestSensorMLConfiguration(BaseTestCase):
             .find("{http://www.isotc211.org/2005/gco}CharacterString")
             .text,
             f"{contact1.given_name} {contact1.family_name}",
+        )
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}organisationName")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            "Dummy organization",
         )
         self.assertEqual(
             first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
