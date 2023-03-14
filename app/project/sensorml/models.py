@@ -302,6 +302,19 @@ class GmdIndividualName:
 
 
 @dataclass
+class GmdOrganisationName:
+    """Represent a gmd:organisationName."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("organisationName")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
 class GmdElectronicalMailAddress:
     """Represent a gmd:electronicMailAddress."""
 
@@ -450,12 +463,15 @@ class GmdCiResponsibleParty:
 
     gmd_contact_info: GmdContactInfo
     gmd_individual_name: GmdIndividualName
+    gmd_organisation_name: Optional[GmdOrganisationName] = None
     gmd_role: Optional[GmdRole] = None
 
     def to_xml(self):
         """Transform to xml element."""
         element = gmd.tag("CI_ResponsibleParty")
         element.append(self.gmd_individual_name.to_xml())
+        if self.gmd_organisation_name:
+            element.append(self.gmd_organisation_name.to_xml())
         element.append(self.gmd_contact_info.to_xml())
         if self.gmd_role:
             element.append(self.gmd_role.to_xml())

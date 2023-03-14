@@ -1,9 +1,8 @@
 """Model for contacts & reference tables."""
 
+from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
+from ..models.mixin import AuditMixin, IndirectSearchableMixin, SearchableMixin
 from .base_model import db
-from ..models.mixin import SearchableMixin, IndirectSearchableMixin, AuditMixin
-
-from ..es_utils import settings_with_ngrams, ElasticSearchIndexTypes
 
 platform_contacts = db.Table(
     "platform_contacts",
@@ -40,6 +39,8 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
     website = db.Column(db.String(1024), nullable=True)
     email = db.Column(db.String(256), nullable=False, unique=True)
     active = db.Column(db.Boolean, default=True)
+    organization = db.Column(db.String(1024), nullable=True)
+    orcid = db.Column(db.String(32), nullable=True, unique=True)
     devices = db.relationship(
         "Device",
         secondary=device_contacts,
@@ -67,6 +68,8 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "family_name": self.family_name,
             "website": self.website,
             "email": self.email,
+            "organization": self.organization,
+            "orcid": self.orcid,
             "created_by_id": self.created_by_id,
         }
 
@@ -86,10 +89,12 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
             "family_name": type_keyword_and_full_searchable,
             # Not necessary to allow exact search for the personal website.
             "website": type_text_full_searchable,
+            "organization": type_keyword_and_full_searchable,
             "email": type_keyword_and_full_searchable,
+            "orcid": type_keyword_and_full_searchable,
             "created_by_id": {
                 "type": "integer",
-            }
+            },
         }
 
     @classmethod

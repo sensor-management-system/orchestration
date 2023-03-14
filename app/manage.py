@@ -166,6 +166,8 @@ def reactivate_a_user(subject_user, given_name, family_name, email):
     contact.family_name = family_name
     contact.email = email
     contact.website = None
+    contact.orcid = None
+    contact.organization = ""
 
     user.active = True
 

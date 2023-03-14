@@ -17,6 +17,7 @@ from .models import (
     GmdLinkage,
     GmdName,
     GmdOnlineResource,
+    GmdOrganisationName,
     GmdRole,
     GmdUrl,
     GmlBegin,
@@ -99,6 +100,13 @@ class ContactRoleConverter:
                     text=f"{contact_role.contact.given_name} {contact_role.contact.family_name}"
                 )
             )
+            gmd_organisation_name = None
+            if contact_role.contact.organization:
+                gmd_organisation_name = GmdOrganisationName(
+                    gco_character_string=GcoCharacterString(
+                        text=contact_role.contact.organization
+                    )
+                )
             gmd_address = GmdAddress(
                 gmd_ci_address=GmdCiAddress(
                     gmd_electronical_mail_address=GmdElectronicalMailAddress(
@@ -136,6 +144,7 @@ class ContactRoleConverter:
                 xlink_arcrole=xlink_arcrole,
                 gmd_ci_responsible_party=GmdCiResponsibleParty(
                     gmd_individual_name=gmd_individual_name,
+                    gmd_organisation_name=gmd_organisation_name,
                     gmd_contact_info=gmd_contact_info,
                     gmd_role=gmd_role,
                 ),

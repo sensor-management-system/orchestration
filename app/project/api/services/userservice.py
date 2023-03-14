@@ -95,3 +95,5 @@ def remove_contact_data(src_contact, src_user):
     src_contact.family_name = message
     src_contact.email = message
     src_contact.website = message
+    src_contact.orcid = None
+    src_contact.organization = message
