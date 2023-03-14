@@ -15,6 +15,7 @@ from ..api.helpers.errors import ErrorResponse, UnauthorizedError
 from ..api.models import (
     Configuration,
     ConfigurationCustomField,
+    Contact,
     CustomField,
     Device,
     DeviceCalibrationAction,
@@ -449,3 +450,11 @@ class SiteZipCodeEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct site zip codes."""
 
     field = Site.zip_code
+
+
+@free_text_field_routes.route("/controller/contact-organizations", methods=["GET"])
+@class_based_view
+class ContactOrganizationEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact organizations."""
+
+    field = Contact.organization

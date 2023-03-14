@@ -362,4 +362,9 @@ paths = {
         description="Get the list of distinct configuration custom field values of all devices.",
         operation_id="controller_configuration_custom_field_values",
     ),
+    **template(
+        endpoint="/controller/contact-organizations",
+        description="Get the list of distinct organization field values of all contacts.",
+        operation_id="controller_contact_organizations",
+    ),
 }
