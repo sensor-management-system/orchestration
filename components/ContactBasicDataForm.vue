@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -129,6 +129,56 @@ permissions and limitations under the Licence.
         </v-text-field>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <v-text-field
+          v-if="readonly"
+          :value="value.orcid"
+          label="ORCID"
+          placeholder="0000-1111-2222-3333"
+          readonly
+          disabled
+        >
+          <template #append>
+            <a v-if="value.orcid.length > 0" :href="'https://orcid.org/' + value.orcid" target="_blank">
+              <v-icon
+                small
+              >
+                mdi-open-in-new
+              </v-icon>
+            </a>
+          </template>
+        </v-text-field>
+        <v-text-field
+          v-else
+          :value="value.orcid"
+          label="ORCID"
+          placeholder="0000-1111-2222-3333"
+          :rules="[additionalRules.isValidOrcid]"
+          @input="update('orcid', $event)"
+        >
+          <template #append>
+            <a v-if="value.orcid.length > 0" :href="'https://orcid.org/' + value.orcid" target="_blank">
+              <v-icon
+                small
+              >
+                mdi-open-in-new
+              </v-icon>
+            </a>
+          </template>
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <autocomplete-text-input
+          :value="value.organization"
+          label="Organization"
+          endpoint="contact-organizations"
+          @input="update('organization', $event)"
+        />
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 <script lang="ts">
@@ -139,8 +189,15 @@ import { Rules } from '@/mixins/Rules'
 import { Contact } from '@/models/Contact'
 
 import Validator from '@/utils/validator'
+import { isValidOrcid } from '@/utils/orcidHelpers'
 
-@Component
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+
+@Component({
+  components: {
+    AutocompleteTextInput
+  }
+})
 export default class ContactBasicDataForm extends mixins(Rules) {
   @Prop({
     required: true,
@@ -155,7 +212,19 @@ export default class ContactBasicDataForm extends mixins(Rules) {
   readonly readonly!: boolean
 
   private additionalRules = {
-    isValidEmailAddress: Validator.isValidEmailAddress
+    isValidEmailAddress: Validator.isValidEmailAddress,
+    isValidOrcid: (x: string | null) => {
+      if (!x) {
+        // The field is empty. It can be that there is no orcid, so we are fine.
+        return true
+      }
+      // Now we can check all the nesty details of an orcid.
+      // We use the function from the orcidHelpers file (which came from the Li2 development).
+      if (!isValidOrcid(x)) {
+        return 'The ORCID is not valid'
+      }
+      return true
+    }
   }
 
   update (key: string, value: string) {
@@ -172,6 +241,12 @@ export default class ContactBasicDataForm extends mixins(Rules) {
         break
       case 'website':
         newObj.website = value
+        break
+      case 'organization':
+        newObj.organization = value
+        break
+      case 'orcid':
+        newObj.orcid = value
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')

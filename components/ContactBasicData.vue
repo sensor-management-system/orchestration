@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -68,6 +68,25 @@ permissions and limitations under the Licence.
             mdi-open-in-new
           </v-icon>
         </a>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <label>ORCID</label>
+        {{ value.orcid | orDefault }}
+        <a v-if="value.orcid.length > 0" :href="'https://orcid.org/' + value.orcid" target="_blank">
+          <v-icon
+            small
+          >
+            mdi-open-in-new
+          </v-icon>
+        </a>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <label>Organization</label>
+        {{ value.organization | orDefault }}
       </v-col>
     </v-row>
   </div>

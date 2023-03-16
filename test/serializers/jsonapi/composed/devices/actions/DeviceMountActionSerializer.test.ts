@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021-2022
+ * Copyright (C) 2021-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -128,6 +128,8 @@ describe('DeviceMountActionSerializer', () => {
               given_name: 'Max',
               email: 'test@test.test',
               website: null,
+              organization: null,
+              orcid: null,
               family_name: 'Mustermann'
             }
           },
@@ -138,6 +140,8 @@ describe('DeviceMountActionSerializer', () => {
               given_name: 'Mux',
               email: 'foo@bar.test',
               website: null,
+              organization: 'abc',
+              orcid: '0000-0000-0000-0001',
               family_name: 'Mastermann'
             }
           },
@@ -196,6 +200,8 @@ describe('DeviceMountActionSerializer', () => {
         familyName: 'Mustermann',
         website: '',
         email: 'test@test.test',
+        organization: '',
+        orcid: '',
         createdAt: null,
         updatedAt: null,
         createdByUserId: null
@@ -206,6 +212,8 @@ describe('DeviceMountActionSerializer', () => {
         familyName: 'Mastermann',
         website: '',
         email: 'foo@bar.test',
+        organization: 'abc',
+        orcid: '0000-0000-0000-0001',
         createdAt: null,
         updatedAt: null,
         createdByUserId: null

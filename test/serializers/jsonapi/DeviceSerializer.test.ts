@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -149,6 +149,8 @@ const createTestDevice = () => {
       familyName: 'Mustermann',
       email: 'max@mustermann.de',
       website: '',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -159,6 +161,8 @@ const createTestDevice = () => {
       familyName: 'Mastermunn',
       email: 'mux@mastermunn.de',
       website: '',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -825,6 +829,8 @@ describe('DeviceSerializer', () => {
           email: 'test@test.test',
           website: '',
           familyName: 'Mustermann',
+          organization: '',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -1253,6 +1259,8 @@ describe('deviceWithMetaToDeviceByThrowingErrorOnMissing', () => {
       givenName: 'Max',
       website: '',
       email: 'max@mustermann.de',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -1317,6 +1325,8 @@ describe('deviceWithMetaToDeviceByAddingDummyObjects', () => {
       givenName: 'Max',
       website: '',
       email: 'max@mustermann.de',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -1363,6 +1373,8 @@ describe('deviceWithMetaToDeviceByAddingDummyObjects', () => {
       givenName: 'Max',
       website: '',
       email: 'max@mustermann.de',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -81,7 +81,9 @@ export class ContactSerializer {
       newEntry.givenName = attributes.given_name || ''
       newEntry.familyName = attributes.family_name || ''
       newEntry.website = attributes.website || ''
+      newEntry.organization = attributes.organization || ''
       newEntry.email = attributes.email
+      newEntry.orcid = attributes.orcid || ''
       newEntry.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       newEntry.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
     }
@@ -123,7 +125,12 @@ export class ContactSerializer {
         given_name: contact.givenName,
         family_name: contact.familyName,
         email: contact.email,
-        website: contact.website
+        website: contact.website,
+        organization: contact.organization,
+        // We don't want it to be empty string, as this would make
+        // the unique constraint problematic.
+        // Using null is save here.
+        orcid: contact.orcid ? contact.orcid : null
       }
     }
     if (contact.id) {

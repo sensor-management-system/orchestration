@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -36,6 +36,44 @@ import { ContactSerializer } from '@/serializers/jsonapi/ContactSerializer'
 import { IJsonApiEntityWithoutDetailsDataDictList } from '@/serializers/jsonapi/JsonApiTypes'
 
 describe('ContactSerializer', () => {
+  describe('#convertModelToJsonApiData', () => {
+    it('should set the orcid to null of not present', () => {
+      const contact = Contact.createFromObject({
+        id: '',
+        givenName: 'Humer',
+        familyName: 'Symben',
+        email: 'humer@symbsen.org',
+        organization: 'Spynkfylt Nuclear',
+        orcid: '',
+        website: '',
+        createdAt: DateTime.utc(2022, 12, 24, 12, 0, 0),
+        updatedAt: DateTime.utc(2022, 12, 25, 5, 0, 0),
+        createdByUserId: '123'
+      })
+      const serializer = new ContactSerializer()
+      const payload = serializer.convertModelToJsonApiData(contact)
+
+      expect(payload.attributes?.orcid).toBeNull()
+    })
+    it('should use the orcid if present', () => {
+      const contact = Contact.createFromObject({
+        id: '',
+        givenName: 'Humer',
+        familyName: 'Symben',
+        email: 'humer@symbsen.org',
+        organization: 'Spynkfylt Nuclear',
+        orcid: 'abc',
+        website: '',
+        createdAt: DateTime.utc(2022, 12, 24, 12, 0, 0),
+        updatedAt: DateTime.utc(2022, 12, 25, 5, 0, 0),
+        createdByUserId: '123'
+      })
+      const serializer = new ContactSerializer()
+      const payload = serializer.convertModelToJsonApiData(contact)
+
+      expect(payload.attributes?.orcid).toEqual('abc')
+    })
+  })
   describe('#convertJsonApiObjectListToModelList', () => {
     it('should convert a json api object with multiple entries to a contact model list', () => {
       const jsonApiObjectList: any = {
@@ -75,7 +113,9 @@ describe('ContactSerializer', () => {
             given_name: 'Max',
             email: 'test@test.test',
             website: null,
-            family_name: 'Mustermann'
+            family_name: 'Mustermann',
+            organization: null,
+            orcid: null
           },
           id: '1',
           links: {
@@ -99,6 +139,8 @@ describe('ContactSerializer', () => {
       expectedContact.familyName = 'Mustermann'
       expectedContact.website = ''
       expectedContact.email = 'test@test.test'
+      expectedContact.organization = ''
+      expectedContact.orcid = ''
 
       const serializer = new ContactSerializer()
       const contacts = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
@@ -154,6 +196,8 @@ describe('ContactSerializer', () => {
             email: 'test@test.test',
             website: null,
             family_name: 'Mustermann',
+            organization: 'Muster',
+            orcid: '0000-0000-0000-0001',
             created_at: '2020-08-29T13:49:48.015620+00:00',
             updated_at: '2021-08-29T13:49:48.015620+00:00'
           },
@@ -176,6 +220,8 @@ describe('ContactSerializer', () => {
       expectedContact.familyName = 'Mustermann'
       expectedContact.website = ''
       expectedContact.email = 'test@test.test'
+      expectedContact.organization = 'Muster'
+      expectedContact.orcid = '0000-0000-0000-0001'
       expectedContact.createdAt = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedContact.updatedAt = DateTime.utc(2021, 8, 29, 13, 49, 48, 15)
       expectedContact.createdByUserId = '123'
@@ -227,6 +273,8 @@ describe('ContactSerializer', () => {
           given_name: 'Max',
           email: 'test@test.test',
           website: null,
+          organization: null,
+          orcid: null,
           family_name: 'Mustermann'
         },
         id: '1',
@@ -241,6 +289,8 @@ describe('ContactSerializer', () => {
       expectedContact.familyName = 'Mustermann'
       expectedContact.website = ''
       expectedContact.email = 'test@test.test'
+      expectedContact.organization = ''
+      expectedContact.orcid = ''
 
       const serializer = new ContactSerializer()
       const contact = serializer.convertJsonApiDataToModel(jsonApiData)
@@ -257,6 +307,8 @@ describe('ContactSerializer', () => {
           familyName: 'Mustermann',
           email: 'max@mustermann.de',
           website: '',
+          organization: '',
+          orcid: '',
           createdAt: null,
           updatedAt: null,
           createdByUserId: null
@@ -267,6 +319,8 @@ describe('ContactSerializer', () => {
           familyName: 'Mastermunn',
           email: 'mux@mastermunn.de',
           website: '',
+          organization: 'Muster',
+          orcid: '0000-0000-0000-0001',
           createdAt: null,
           updatedAt: null,
           createdByUserId: null
@@ -323,7 +377,9 @@ describe('ContactSerializer', () => {
           given_name: 'AA',
           family_name: 'BB',
           email: 'AA@BB',
-          website: ''
+          website: '',
+          organization: 'CC',
+          orcid: '0000-0000-0000-0001'
         }
       }, {
         type: 'contact',
@@ -332,7 +388,9 @@ describe('ContactSerializer', () => {
           given_name: 'AA',
           family_name: 'BB',
           email: 'AA@BB',
-          website: ''
+          website: '',
+          organization: '',
+          orcid: null
         }
       }]
 
@@ -342,6 +400,8 @@ describe('ContactSerializer', () => {
         familyName: 'BB',
         email: 'AA@BB',
         website: '',
+        organization: 'CC',
+        orcid: '0000-0000-0000-0001',
         createdAt: null,
         updatedAt: null,
         createdByUserId: null
