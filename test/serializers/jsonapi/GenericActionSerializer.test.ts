@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -721,6 +721,8 @@ describe('GenericActionSerializer', () => {
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
           website: '',
+          organization: '',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -748,6 +750,8 @@ describe('GenericActionSerializer', () => {
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
           website: '',
+          organization: '',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -808,6 +812,8 @@ describe('GenericActionSerializer', () => {
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
           website: '',
+          organization: '',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -864,6 +870,8 @@ describe('GenericActionSerializer', () => {
           familyName: 'Hanisch',
           email: 'marc.hanisch@gfz-potsdam.de',
           website: '',
+          organization: '',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null

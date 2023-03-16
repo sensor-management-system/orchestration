@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -158,6 +158,59 @@ permissions and limitations under the Licence.
               mdi-open-in-new
             </v-icon>
           </a>
+        </v-col>
+      </v-row>
+      <v-row no-gutters>
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          ORCID:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ contact.orcid | orDefault }}
+          <a v-if="contact.orcid.length > 0" :href="'https://orcid.org/' + contact.orcid" target="_blank">
+            <v-icon
+              small
+            >
+              mdi-open-in-new
+            </v-icon>
+          </a>
+        </v-col>
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Organization:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          {{ contact.organization | orDefault }}
         </v-col>
       </v-row>
     </template>

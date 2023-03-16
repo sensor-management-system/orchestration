@@ -83,6 +83,8 @@ const createTestPlatform = () => {
       familyName: 'Mustermann',
       email: 'max@mustermann.de',
       website: '',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -93,6 +95,8 @@ const createTestPlatform = () => {
       familyName: 'Mastermunn',
       email: 'mux@mastermunn.de',
       website: '',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -328,7 +332,9 @@ describe('PlatformSerializer', () => {
         givenName: 'Max',
         email: 'test@test.test',
         website: '',
+        organization: '',
         familyName: 'Mustermann',
+        orcid: '',
         createdByUserId: null,
         createdAt: null,
         updatedAt: null
@@ -546,7 +552,9 @@ describe('PlatformSerializer', () => {
         givenName: 'Max',
         email: 'test@test.test',
         website: '',
+        organization: '',
         familyName: 'Mustermann',
+        orcid: '',
         createdByUserId: null,
         createdAt: null,
         updatedAt: null
@@ -730,7 +738,9 @@ describe('PlatformSerializer', () => {
         givenName: 'Max',
         email: 'test@test.test',
         website: '',
+        organization: '',
         familyName: 'Mustermann',
+        orcid: '',
         createdByUserId: null,
         createdAt: null,
         updatedAt: null
@@ -942,7 +952,9 @@ describe('platformWithMetaToPlatformByThrowingErrorOnMissing', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
+      organization: '',
       email: 'max@mustermann.de',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -1006,7 +1018,9 @@ describe('platformWithMetaToPlatformByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
+      organization: '',
       email: 'max@mustermann.de',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -1052,7 +1066,9 @@ describe('platformWithMetaToPlatformByAddingDummyObjects', () => {
       familyName: 'Mustermann',
       givenName: 'Max',
       website: '',
+      organization: '',
       email: 'max@mustermann.de',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null

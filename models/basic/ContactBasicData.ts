@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -38,6 +38,8 @@ export interface IContactBasicData {
   givenName: string
   familyName: string
   website: string
+  organization: string
+  orcid: string
   createdAt: DateTime | null
   updatedAt: DateTime | null
   createdByUserId: string | null
@@ -49,6 +51,8 @@ export class ContactBasicData implements IContactBasicData {
   private _givenName: string = ''
   private _familyName: string = ''
   private _website: string = ''
+  private _organization: string = ''
+  private _orcid: string = ''
 
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -92,6 +96,22 @@ export class ContactBasicData implements IContactBasicData {
 
   set website (newWebsite: string) {
     this._website = newWebsite
+  }
+
+  get organization (): string {
+    return this._organization
+  }
+
+  set organization (newOrganization: string) {
+    this._organization = newOrganization
+  }
+
+  get orcid (): string {
+    return this._orcid
+  }
+
+  set orcid (newOrcid: string) {
+    this._orcid = newOrcid
   }
 
   get createdAt (): DateTime | null {
@@ -156,6 +176,8 @@ export class ContactBasicData implements IContactBasicData {
     newObject.givenName = someObject.givenName
     newObject.familyName = someObject.familyName
     newObject.website = someObject.website
+    newObject.organization = someObject.organization
+    newObject.orcid = someObject.orcid
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt
     newObject.createdByUserId = someObject.createdByUserId

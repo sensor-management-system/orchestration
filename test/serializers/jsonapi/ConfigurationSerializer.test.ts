@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -394,7 +394,9 @@ describe('ConfigurationSerializer', () => {
           givenName: 'Max',
           familyName: 'Mustermann',
           website: '',
+          organization: '',
           email: 'test@test.test',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -404,6 +406,8 @@ describe('ConfigurationSerializer', () => {
           givenName: 'Mux',
           familyName: 'Mastermann',
           website: '',
+          organization: '',
+          orcid: '',
           email: 'test@tost.test',
           createdByUserId: null,
           createdAt: null,
@@ -467,6 +471,8 @@ describe('ConfigurationSerializer', () => {
           familyName: 'Mustermann',
           website: '',
           email: 'test@test.test',
+          orcid: '',
+          organization: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -476,7 +482,9 @@ describe('ConfigurationSerializer', () => {
           givenName: 'Mux',
           familyName: 'Mastermann',
           website: '',
+          organization: '',
           email: 'test@fost.test',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -559,6 +567,8 @@ describe('ConfigurationSerializer', () => {
           familyName: 'Mustermann',
           website: '',
           email: 'test@test.test',
+          organization: '',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -569,6 +579,8 @@ describe('ConfigurationSerializer', () => {
           familyName: 'Mastermann',
           website: '',
           email: 'test@fost.test',
+          organization: '',
+          orcid: '',
           createdByUserId: null,
           createdAt: null,
           updatedAt: null
@@ -657,6 +669,8 @@ describe('configurationWithMetaToConfigurationByThrowingErrorOnMissing', () => {
       givenName: 'Max',
       website: '',
       email: 'max@mustermann.de',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -720,6 +734,8 @@ describe('configurationWithMetaToConfigurationByAddingDummyObjects', () => {
       givenName: 'Max',
       website: '',
       email: 'max@mustermann.de',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
@@ -747,6 +763,8 @@ describe('configurationWithMetaToConfigurationByAddingDummyObjects', () => {
       givenName: 'Max',
       website: '',
       email: 'max@mustermann.de',
+      organization: '',
+      orcid: '',
       createdByUserId: null,
       createdAt: null,
       updatedAt: null
