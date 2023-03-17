@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from ...api import minio
 from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_attachment import DeviceAttachment
@@ -54,6 +55,10 @@ class DeviceAttachmentList(ResourceList):
                 query_ = query_.filter(DeviceAttachment.device_id == device_id)
         return query_
 
+    def before_create_object(self, data, *args, **kwargs):
+        """Set some fields before we save the new entry."""
+        add_created_by_id(data)
+
     def after_post(self, result):
         """
         Add update description to related device.
@@ -96,7 +101,7 @@ class DeviceAttachmentList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceAttachment,
-        "methods": {"query": query},
+        "methods": {"before_create_object": before_create_object, "query": query},
     }
 
 
@@ -122,6 +127,7 @@ class DeviceAttachmentDetail(ResourceDetail):
         if attachment and attachment.is_upload:
             if data["url"] and data["url"] != attachment.url:
                 raise ConflictError("It is not allowed to change the url of uploads")
+        add_updated_by_id(data)
 
     def after_patch(self, result):
         """
