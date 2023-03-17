@@ -77,10 +77,29 @@ permissions and limitations under the Licence.
           prepend-icon="mdi-paperclip"
           no-data-text="There are no attachments for this device"
           :items="attachments"
-          :item-text="(x) => x.label"
+          :item-text="attachmentText"
           :item-value="(x) => x"
           :disabled="!attachments.length"
-        />
+        >
+          <template #item="{ item, attrs, on }">
+            <v-list-item v-slot="{ active }" v-bind="attrs" v-on="on">
+              <v-list-item-action>
+                <v-checkbox :ripple="false" :input-value="active" />
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-subtitle
+                  v-if="item.isUpload && item.createdAt"
+                  class="text--secondary text-caption"
+                >
+                  uploaded at {{ item.createdAt | dateToDateTimeStringHHMM }}
+                </v-list-item-subtitle>
+                <v-list-item-title>
+                  {{ item.label }}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+        </v-select>
       </v-col>
     </v-row>
   </div>
@@ -96,13 +115,17 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { IActionCommonDetails, ActionCommonDetails } from '@/models/ActionCommonDetails'
+import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 
 /**
  * A class component for a set of common form fields for actions
  * @extends Vue
  */
-@Component
-// @ts-ignore
+@Component({
+  filters: {
+    dateToDateTimeStringHHMM
+  }
+})
 export default class CommonActionForm extends Vue {
   private contacts: Contact[] = []
   private readonly labelForSelectMeButton = 'Add current user'
@@ -240,6 +263,13 @@ export default class CommonActionForm extends Vue {
    */
   isValid (): boolean {
     return (this.$refs.contactForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  attachmentText (attachment: Attachment): string {
+    if (attachment.isUpload && attachment.createdAt) {
+      return attachment.label + ', uploaded at ' + dateToDateTimeStringHHMM(attachment.createdAt)
+    }
+    return attachment.label
   }
 }
 </script>

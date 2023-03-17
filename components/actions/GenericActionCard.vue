@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -83,17 +83,7 @@ permissions and limitations under the Licence.
           <label>Description</label>
           {{ value.description }}
         </v-card-text>
-        <v-card-text
-          v-if="value.attachments.length > 0"
-          class="grey lighten-5 text--primary pt-2"
-        >
-          <label>Attachments</label>
-          <div v-for="(attachment, index) in value.attachments" :key="index">
-            <v-icon small class="text-decoration-none">
-              mdi-open-in-new
-            </v-icon> <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
-          </div>
-        </v-card-text>
+        <attachments-block :value="value.attachments" :is-public="isPublic" @open-attachment="openAttachment" />
       </div>
     </v-expand-transition>
   </v-card>
@@ -110,6 +100,8 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
 
 import DotMenu from '@/components/DotMenu.vue'
+import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
+import { Attachment } from '@/models/Attachment'
 
 /**
  * A class component for Generic Device Action card
@@ -117,6 +109,7 @@ import DotMenu from '@/components/DotMenu.vue'
  */
 @Component({
   components: {
+    AttachmentsBlock,
     DotMenu
   }
 })
@@ -135,12 +128,22 @@ export default class GenericActionCard extends Vue {
   // @ts-ignore
   readonly value!: GenericAction
 
+  @Prop({
+    type: Boolean,
+    default: false
+  })
+  readonly isPublic!: Boolean
+
   get actionDate (): string {
     let actionDate = dateToDateTimeString(this.value.beginDate)
     if (this.value.endDate) {
       actionDate += ' - ' + dateToDateTimeString(this.value.endDate)
     }
     return actionDate
+  }
+
+  openAttachment (attachment: Attachment) {
+    this.$emit('open-attachment', attachment)
   }
 }
 </script>

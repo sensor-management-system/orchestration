@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -56,6 +56,8 @@ permissions and limitations under the Licence.
       <template #generic-action="{action}">
         <GenericActionCard
           :value="action"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #actions>
             <v-btn
@@ -81,6 +83,8 @@ permissions and limitations under the Licence.
         <SoftwareUpdateActionCard
           :value="action"
           target="Platform"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #actions>
             <v-btn
@@ -128,13 +132,15 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
   ActionsGetter,
   LoadAllPlatformActionsAction,
   DeletePlatformSoftwareUpdateActionAction,
-  DeletePlatformGenericActionAction
+  DeletePlatformGenericActionAction,
+  DownloadAttachmentAction,
+  PlatformsState
 } from '@/store/platforms'
 
 import { GenericAction } from '@/models/GenericAction'
@@ -149,6 +155,8 @@ import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionC
 import PlatformMountActionCard from '@/components/actions/PlatformMountActionCard.vue'
 import PlatformUnmountActionCard from '@/components/actions/PlatformUnmountActionCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { Attachment } from '@/models/Attachment'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
@@ -162,8 +170,16 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     HintCard,
     PlatformActionTimeline
   },
-  computed: mapGetters('platforms', ['actions']),
-  methods: mapActions('platforms', ['loadAllPlatformActions', 'deletePlatformSoftwareUpdateAction', 'deletePlatformGenericAction'])
+  computed: {
+    ...mapGetters('platforms', ['actions']),
+    ...mapState('platforms', ['platform'])
+  },
+  methods: mapActions('platforms', [
+    'loadAllPlatformActions',
+    'deletePlatformSoftwareUpdateAction',
+    'deletePlatformGenericAction',
+    'downloadAttachment'
+  ])
 })
 export default class PlatformActionsShowPage extends Vue {
   @InjectReactive()
@@ -176,9 +192,11 @@ export default class PlatformActionsShowPage extends Vue {
 
   // vuex definition for typescript check
   actions!: ActionsGetter
+  platform!: PlatformsState['platform']
   loadAllPlatformActions!: LoadAllPlatformActionsAction
   deletePlatformGenericAction!: DeletePlatformGenericActionAction
   deletePlatformSoftwareUpdateAction!: DeletePlatformSoftwareUpdateActionAction
+  downloadAttachment!: DownloadAttachmentAction
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -261,6 +279,20 @@ export default class PlatformActionsShowPage extends Vue {
       this.isSaving = false
       this.closeDialog()
     }
+  }
+
+  async openAttachment (attachment: Attachment) {
+    try {
+      const blob = await this.downloadAttachment(attachment.url)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
+    }
+  }
+
+  get isPublic (): boolean {
+    return (this.platform?.visibility === Visibility.Public) || false
   }
 }
 </script>

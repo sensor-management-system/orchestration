@@ -87,13 +87,15 @@ const createTestDevice = () => {
       id: '2',
       label: 'GFZ',
       url: 'http://www.gfz-potsdam.de',
-      isUpload: false
+      isUpload: false,
+      createdAt: null
     }),
     Attachment.createFromObject({
       id: '1',
       label: 'UFZ',
       url: 'http://www.ufz.de',
-      isUpload: false
+      isUpload: false,
+      createdAt: null
     })
   ]
 
@@ -799,7 +801,8 @@ describe('DeviceSerializer', () => {
         label: 'test label',
         url: 'http://test.test',
         id: '1',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })]
       expectedDevice.statusUri = ''
       expectedDevice.website = ''

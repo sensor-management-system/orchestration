@@ -1085,19 +1085,22 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '51',
           label: 'Foo.de',
           url: 'https://foo.de',
-          isUpload: false
+          isUpload: false,
+          createdAt: null
         })
         const attachment2 = Attachment.createFromObject({
           id: '52',
           label: 'Bar.baz',
           url: 'https://bar.baz',
-          isUpload: false
+          isUpload: false,
+          createdAt: null
         })
         const attachment3 = Attachment.createFromObject({
           id: '53',
           label: 'GFZ',
           url: 'https://www.gfz-potsdam.de',
-          isUpload: false
+          isUpload: false,
+          createdAt: null
         })
 
         const expectedAction1 = new SoftwareUpdateAction()

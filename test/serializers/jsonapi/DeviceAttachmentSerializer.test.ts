@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021-2022
+ * Copyright (C) 2021-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,6 +30,7 @@
  * permissions and limitations under the Licence.
  */
 
+import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 
@@ -43,7 +44,8 @@ describe('DeviceAttachmetnSerializer', () => {
           attributes: {
             url: 'https://www.gfz-potsdam.de',
             label: 'GFZ Homepage',
-            is_upload: false
+            is_upload: false,
+            created_at: null
           },
           relationships: {}
         }, {
@@ -52,7 +54,8 @@ describe('DeviceAttachmetnSerializer', () => {
           attributes: {
             url: 'https://www.ufz.de',
             label: 'UFZ Homepage',
-            is_upload: true
+            is_upload: true,
+            created_at: '2023-08-16T12:00:00+00:00'
           },
           relationships: {}
         }],
@@ -66,10 +69,13 @@ describe('DeviceAttachmetnSerializer', () => {
       expect(models[0].url).toEqual('https://www.gfz-potsdam.de')
       expect(models[0].label).toEqual('GFZ Homepage')
       expect(models[0].isUpload).not.toBeTruthy()
+      expect(models[0].createdAt).toBeNull()
+
       expect(models[1].id).toEqual('456')
       expect(models[1].url).toEqual('https://www.ufz.de')
       expect(models[1].label).toEqual('UFZ Homepage')
       expect(models[1].isUpload).toBeTruthy()
+      expect(models[1].createdAt).toEqual(DateTime.utc(2023, 8, 16, 12, 0, 0))
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -122,7 +128,8 @@ describe('DeviceAttachmetnSerializer', () => {
         id: '123',
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
       const serializer = new DeviceAttachmentSerializer()
       const deviceId = '456'
@@ -152,7 +159,8 @@ describe('DeviceAttachmetnSerializer', () => {
         id: null,
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
-        isUpload: true
+        isUpload: true,
+        createdAt: null
       })
       const serializer = new DeviceAttachmentSerializer()
       const deviceId = '456'

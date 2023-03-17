@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -111,17 +111,7 @@ permissions and limitations under the Licence.
             {{ value.description | orDefault }}
           </div>
         </v-card-text>
-        <v-card-text
-          v-if="value.attachments.length > 0"
-          class="grey lighten-5 text--primary pt-2"
-        >
-          <label>Attachments</label>
-          <div v-for="(attachment, index) in value.attachments" :key="index">
-            <v-icon small class="text-decoration-none">
-              mdi-open-in-new
-            </v-icon> <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
-          </div>
-        </v-card-text>
+        <attachments-block :value="value.attachments" :is-public="isPublic" @open-attachment="openAttachment" />
       </div>
     </v-expand-transition>
   </v-card>
@@ -138,12 +128,15 @@ import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 
 import DotMenu from '@/components/DotMenu.vue'
+import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
+import { Attachment } from '@/models/Attachment'
 
 @Component({
   filters: {
     toUtcDate: dateToDateTimeString
   },
   components: {
+    AttachmentsBlock,
     DotMenu
   }
 })
@@ -156,5 +149,15 @@ export default class DeviceCalibrationActionCard extends Vue {
     type: Object
   })
   readonly value!: DeviceCalibrationAction
+
+  @Prop({
+    type: Boolean,
+    default: false
+  })
+  readonly isPublic!: Boolean
+
+  openAttachment (attachment: Attachment) {
+    this.$emit('open-attachment', attachment)
+  }
 }
 </script>

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -66,13 +66,15 @@ const createTestPlatform = () => {
       id: '2',
       label: 'GFZ',
       url: 'http://www.gfz-potsdam.de',
-      isUpload: false
+      isUpload: false,
+      createdAt: null
     }),
     Attachment.createFromObject({
       id: null,
       label: 'UFZ',
       url: 'http://www.ufz.de',
-      isUpload: false
+      isUpload: false,
+      createdAt: null
     })
   ]
 
@@ -311,7 +313,8 @@ describe('PlatformSerializer', () => {
         id: '12',
         label: 'test label',
         url: 'http://test.test',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })]
       expectedPlatform1.platformTypeUri = 'type/Station'
       expectedPlatform1.statusUri = 'status/inuse'
@@ -531,7 +534,8 @@ describe('PlatformSerializer', () => {
         id: '12',
         label: 'GFZ',
         url: 'http://www.gfz-potsdam.de',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })]
       expectedPlatform.platformTypeUri = 'type/Station'
       expectedPlatform.statusUri = 'status/inuse'
@@ -716,7 +720,8 @@ describe('PlatformSerializer', () => {
         id: '12',
         label: 'GFZ',
         url: 'http://www.gfz-potsdam.de',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })]
 
       expectedPlatform.platformTypeUri = 'type/Station'
@@ -885,7 +890,8 @@ describe('PlatformSerializer', () => {
         id: '1',
         label: 'GFZ',
         url: 'https://www.gfz-potsdam.de',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
 
       platform.attachments = [attachment]
@@ -909,7 +915,8 @@ describe('PlatformSerializer', () => {
         id: '1',
         label: 'GFZ',
         url: 'https://www.gfz-potsdam.de',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
 
       platform.attachments = [attachment]

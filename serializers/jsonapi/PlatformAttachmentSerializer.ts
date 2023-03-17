@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2023
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -33,6 +33,7 @@
  * permissions and limitations under the Licence.
  */
 
+import { DateTime } from 'luxon'
 import { Attachment, IAttachment } from '@/models/Attachment'
 import {
   IJsonApiEntityEnvelope,
@@ -65,6 +66,7 @@ export class PlatformAttachmentSerializer implements IAttachmentSerializer {
       newEntry.url = attributes.url || ''
       newEntry.label = attributes.label || ''
       newEntry.isUpload = attributes.is_upload || false
+      newEntry.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
     }
 
     return newEntry
@@ -142,6 +144,7 @@ export class PlatformAttachmentSerializer implements IAttachmentSerializer {
         url: attachment.url,
         label: attachment.label
         // is_upload is readonly field
+        // Also the field for the created_at entry is set automatically
       },
       relationships: {
         platform: {

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -61,6 +61,8 @@ permissions and limitations under the Licence.
           >
             <ConfigurationsTimelineActionCard
               :action="action"
+              :is-public="isPublic"
+              @open-attachment="openAttachment"
             />
           </v-timeline-item>
         </v-timeline>
@@ -71,16 +73,22 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions, mapState } from 'vuex'
 
-import { TimelineActionsGetter } from '@/store/configurations'
+import { ConfigurationsState, TimelineActionsGetter, DownloadAttachmentAction } from '@/store/configurations'
 
 import HintCard from '@/components/HintCard.vue'
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
+import { Attachment } from '@/models/Attachment'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: { ConfigurationsTimelineActionCard, HintCard },
-  computed: mapGetters('configurations', ['timelineActions'])
+  computed: {
+    ...mapGetters('configurations', ['timelineActions']),
+    ...mapState('configurations', ['configuration'])
+  },
+  methods: mapActions('configurations', ['downloadAttachment'])
 })
 export default class ConfigurationShowActionPage extends Vue {
   timelineActions!: TimelineActionsGetter
@@ -88,8 +96,25 @@ export default class ConfigurationShowActionPage extends Vue {
     @InjectReactive()
       editable!: boolean
 
+    configuration!: ConfigurationsState['configuration']
+    downloadAttachment!: DownloadAttachmentAction
+
     get configurationId (): string {
       return this.$route.params.configurationId
+    }
+
+    async openAttachment (attachment: Attachment) {
+      try {
+        const blob = await this.downloadAttachment(attachment.url)
+        const url = window.URL.createObjectURL(blob)
+        window.open(url)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
+      }
+    }
+
+    get isPublic (): boolean {
+      return (this.configuration?.visibility === Visibility.Public) || false
     }
 }
 </script>

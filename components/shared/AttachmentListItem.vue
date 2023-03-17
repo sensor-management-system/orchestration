@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -43,7 +43,9 @@ permissions and limitations under the Licence.
       >
         <div class="d-flex align-center">
           <span class="text-caption">
-            {{ attachment.url | shortenMiddle }}
+            {{ attachment.url | shortenMiddle }}<span v-if="attachment.createdAt && attachment.isUpload">,
+              uploaded at {{ attachment.createdAt | toUtcDateTimeString }}
+            </span>
           </span>
           <v-spacer />
           <DotMenu>
