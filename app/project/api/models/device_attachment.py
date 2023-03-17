@@ -2,10 +2,10 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .base_model import db
-from .mixin import IndirectSearchableMixin
+from .mixin import AuditMixin, IndirectSearchableMixin
 
 
-class DeviceAttachment(db.Model, IndirectSearchableMixin):
+class DeviceAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     """Device attachment class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

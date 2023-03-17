@@ -1,15 +1,15 @@
 """Tests for the device attachment endpoints."""
 
 import json
+import time
 from unittest.mock import patch
 
 from flask import url_for
 
 from project import base_url
 from project.api import minio
+from project.api.models import Contact, Device, DeviceAttachment, User
 from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.models.device_attachment import DeviceAttachment
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
@@ -469,7 +469,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
             device=device,
             label="File upload",
             url="http://localhost/.../file",
-            internal_url="http://minio/.../file"
+            internal_url="http://minio/.../file",
         )
         db.session.add_all([device, attachment])
         db.session.commit()
@@ -485,18 +485,12 @@ class TestDeviceAttachmentServices(BaseTestCase):
                     "url": "https://www.ufz.de",
                 },
                 "relationships": {
-                    "device": {
-                        "data": {"type": "device", "id": str(device.id)}
-                    }
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
                 },
             }
         }
         with self.client:
-            url_patch = (
-                base_url
-                + "/device-attachments/"
-                + str(attachment.id)
-            )
+            url_patch = base_url + "/device-attachments/" + str(attachment.id)
             response = self.client.patch(
                 url_patch,
                 data=json.dumps(payload),
@@ -505,3 +499,87 @@ class TestDeviceAttachmentServices(BaseTestCase):
             )
 
         self.assertEqual(response.status_code, 409)
+
+    def test_created_and_updated_fields(self):
+        """Ensure we set & update the created & updated metainformation."""
+        contact1 = Contact(
+            given_name="first", family_name="contact", email="first@contact.org"
+        )
+        contact2 = Contact(
+            given_name="second", family_name="contact", email="second@contact.org"
+        )
+        user1 = User(contact=contact1, subject=contact1.email, is_superuser=True)
+        user2 = User(contact=contact2, subject=contact2.email, is_superuser=True)
+        device1 = Device(short_name="dummy device", is_public=True)
+
+        db.session.add_all([contact1, contact2, user1, user2, device1])
+        db.session.commit()
+
+        with self.run_requests_as(user1):
+            response1 = self.client.post(
+                self.url,
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "device_attachment",
+                            "attributes": {
+                                "url": "https://gfz-potsdam.de",
+                                "label": "GFZ",
+                            },
+                            "relationships": {
+                                "device": {"data": {"type": "device", "id": device1.id}}
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response1.status_code, 201)
+        attachment_id = response1.json["data"]["id"]
+
+        one_second = 1
+        time.sleep(one_second)
+
+        with self.run_requests_as(user2):
+            response2 = self.client.patch(
+                f"{self.url}/{attachment_id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "device_attachment",
+                            "id": attachment_id,
+                            "attributes": {
+                                "label": "GFZ Landing page",
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response2.status_code, 200)
+
+        self.assertEqual(
+            response1.json["data"]["attributes"]["created_at"],
+            response2.json["data"]["attributes"]["created_at"],
+        )
+
+        self.assertEqual(
+            response1.json["data"]["relationships"]["created_by"]["data"]["id"],
+            response2.json["data"]["relationships"]["created_by"]["data"]["id"],
+        )
+        self.assertEqual(
+            response1.json["data"]["relationships"]["created_by"]["data"]["id"],
+            str(user1.id),
+        )
+
+        self.assertEqual(
+            response2.json["data"]["relationships"]["updated_by"]["data"]["id"],
+            str(user2.id),
+        )
+
+        self.assertTrue(
+            # Due to the iso format it is enought to compare them as stirngs
+            # here, as 2023-03-14T12:00:00 is < then 2023-03-14T12:00:01.
+            response1.json["data"]["attributes"]["updated_at"]
+            < response2.json["data"]["attributes"]["updated_at"]
+        )
