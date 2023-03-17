@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -57,7 +57,8 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: 'https://foo.pdf',
         label: 'Manual',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'foo.pdf'
@@ -68,7 +69,8 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: '',
         label: 'Manual',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'unknown filename'
@@ -79,7 +81,8 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: 'https://server/very/fancy/images/abc.jpeg',
         label: 'Manual',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'abc.jpeg'
@@ -90,7 +93,8 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: 'https://server/very/fancy/images/abc.jpeg/',
         label: 'Manual',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
       const filename = wrapper.vm.filename(attachment)
       const expectedFilename = 'abc.jpeg'

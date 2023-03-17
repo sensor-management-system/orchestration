@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -56,6 +56,8 @@ permissions and limitations under the Licence.
       <template #generic-action="{action}">
         <GenericActionCard
           :value="action"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #actions>
             <v-btn
@@ -80,6 +82,8 @@ permissions and limitations under the Licence.
         <SoftwareUpdateActionCard
           :value="action"
           target="Device"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #actions>
             <v-btn
@@ -103,6 +107,8 @@ permissions and limitations under the Licence.
       <template #calibration-action="{action}">
         <DeviceCalibrationActionCard
           :value="action"
+          :is-public="isPublic"
+          @open-attachment="openAttachment"
         >
           <template #actions>
             <v-btn
@@ -148,14 +154,16 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
   ActionsGetter,
   DeleteDeviceSoftwareUpdateAction,
   DeleteDeviceGenericAction,
   DeleteDeviceCalibrationAction,
-  LoadAllDeviceActionsAction
+  LoadAllDeviceActionsAction,
+  DevicesState,
+  DownloadAttachmentAction
 } from '@/store/devices'
 
 import { GenericAction } from '@/models/GenericAction'
@@ -172,6 +180,8 @@ import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationA
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
+import { Visibility } from '@/models/Visibility'
+import { Attachment } from '@/models/Attachment'
 
 @Component({
   components: {
@@ -186,8 +196,17 @@ import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionC
     DeviceActionTimeline,
     HintCard
   },
-  computed: mapGetters('devices', ['actions']),
-  methods: mapActions('devices', ['deleteDeviceSoftwareUpdateAction', 'deleteDeviceGenericAction', 'deleteDeviceCalibrationAction', 'loadAllDeviceActions'])
+  computed: {
+    ...mapGetters('devices', ['actions']),
+    ...mapState('devices', ['device'])
+  },
+  methods: mapActions('devices', [
+    'deleteDeviceSoftwareUpdateAction',
+    'deleteDeviceGenericAction',
+    'deleteDeviceCalibrationAction',
+    'loadAllDeviceActions',
+    'downloadAttachment'
+  ])
 })
 export default class DeviceActionsShowPage extends Vue {
   @InjectReactive()
@@ -201,10 +220,12 @@ export default class DeviceActionsShowPage extends Vue {
 
   // vuex definition for typescript check
   actions!: ActionsGetter
+  device!: DevicesState['device']
   deleteDeviceGenericAction!: DeleteDeviceGenericAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
   deleteDeviceSoftwareUpdateAction!: DeleteDeviceSoftwareUpdateAction
   deleteDeviceCalibrationAction!: DeleteDeviceCalibrationAction
+  downloadAttachment!: DownloadAttachmentAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -323,6 +344,20 @@ export default class DeviceActionsShowPage extends Vue {
       this.isSaving = false
       this.closeDialog()
     }
+  }
+
+  async openAttachment (attachment: Attachment) {
+    try {
+      const blob = await this.downloadAttachment(attachment.url)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url)
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
+    }
+  }
+
+  get isPublic (): boolean {
+    return (this.device?.visibility === Visibility.Public) || false
   }
 }
 </script>

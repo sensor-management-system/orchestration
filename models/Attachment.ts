@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,11 +29,15 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+
+import { DateTime } from 'luxon'
+
 export interface IAttachment {
   id: string | null
   url: string
   label: string
   isUpload: boolean
+  createdAt: DateTime | null
 }
 
 export class Attachment implements IAttachment {
@@ -52,6 +56,7 @@ export class Attachment implements IAttachment {
   private _url: string = ''
   private _label: string = ''
   private _isUpload: boolean = false
+  private _createdAt: DateTime | null = null
 
   // @TODO: add an _uploadedAt field
   static createEmpty (): Attachment {
@@ -71,6 +76,7 @@ export class Attachment implements IAttachment {
     attachment.url = someObject.url || ''
     attachment.label = someObject.label || ''
     attachment.isUpload = someObject.isUpload
+    attachment.createdAt = someObject.createdAt
     return attachment
   }
 
@@ -104,5 +110,13 @@ export class Attachment implements IAttachment {
 
   set isUpload (isUpload: boolean) {
     this._isUpload = isUpload
+  }
+
+  get createdAt (): DateTime | null {
+    return this._createdAt
+  }
+
+  set createdAt (newDate: DateTime | null) {
+    this._createdAt = newDate
   }
 }

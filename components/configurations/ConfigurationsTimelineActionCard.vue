@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -191,9 +191,18 @@ permissions and limitations under the Licence.
             <v-col>
               <label>Attachments</label>
               <div v-for="(attachment, index) in action.genericAction.attachments" :key="index">
-                <v-icon small class="text-decoration-none">
-                  mdi-open-in-new
-                </v-icon> <a :href="attachment.url" target="_blank">{{ attachment.label }}</a>
+                <span class="text-caption">
+                  <template v-if="isPublic || !attachment.isUpload">
+                    <a :href="attachment.url" target="_blank">
+                      {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
+                    </a>
+                  </template>
+                  <template v-else>
+                    <span>
+                      {{ attachment.label }}&nbsp;<v-icon small @click="openAttachment(attachment)">mdi-link-lock</v-icon>
+                    </span>
+                  </template>
+                </span>
               </div>
             </v-col>
           </v-row>
@@ -228,6 +237,7 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import { ITimelineAction } from '@/utils/configurationInterfaces'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
+import { Attachment } from '@/models/Attachment'
 
 @Component({
   filters: {
@@ -250,6 +260,12 @@ export default class ConfigurationsTimelineActionCard extends Vue {
     type: Object
   })
   readonly action!: ITimelineAction
+
+  @Prop({
+    default: () => false,
+    type: Boolean
+  })
+  readonly isPublic!: boolean
 
   private isSaving: boolean = false
   private showDeleteDialog: boolean = false
@@ -296,6 +312,10 @@ export default class ConfigurationsTimelineActionCard extends Vue {
       this.isSaving = false
       this.closeDialog()
     }
+  }
+
+  openAttachment (attachment: Attachment) {
+    this.$emit('open-attachment', attachment)
   }
 }
 </script>

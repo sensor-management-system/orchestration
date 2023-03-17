@@ -319,13 +319,15 @@ describe('DeviceCalibrationActionSerializer', () => {
         id: '11',
         label: 'UFZ',
         url: 'https://www.ufz.de',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
       const attachment2 = Attachment.createFromObject({
         id: '22',
         label: 'GFZ',
         url: 'https://www.gfz-potsdam.de',
-        isUpload: false
+        isUpload: false,
+        createdAt: null
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'

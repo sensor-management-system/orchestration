@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -29,6 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 
 describe('Attachment Models', () => {
@@ -37,12 +38,14 @@ describe('Attachment Models', () => {
       id: '1',
       url: 'https://foo/test.png',
       label: 'Testpicture',
-      isUpload: true
+      isUpload: true,
+      createdAt: DateTime.utc(2023, 2, 28, 12, 0, 0)
     })
     expect(typeof attachment).toBe('object')
     expect(attachment).toHaveProperty('id', '1')
     expect(attachment).toHaveProperty('url', 'https://foo/test.png')
     expect(attachment).toHaveProperty('label', 'Testpicture')
     expect(attachment).toHaveProperty('isUpload', true)
+    expect(attachment).toHaveProperty('createdAt', DateTime.utc(2023, 2, 28, 12, 0, 0))
   })
 })
