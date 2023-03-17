@@ -3,10 +3,10 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .base_model import db
-from .mixin import IndirectSearchableMixin
+from .mixin import AuditMixin, IndirectSearchableMixin
 
 
-class ConfigurationAttachment(db.Model, IndirectSearchableMixin):
+class ConfigurationAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     """Configuration attachment class."""
 
     id = db.Column(db.Integer, primary_key=True)

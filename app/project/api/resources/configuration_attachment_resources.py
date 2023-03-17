@@ -15,6 +15,7 @@ from ..auth.permission_utils import (
     get_query_with_permissions_for_configuration_related_objects,
 )
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
 from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
@@ -57,6 +58,10 @@ class ConfigurationAttachmentList(ResourceList):
         """Check that we are allowed to add a attachment."""
         check_post_permission_for_configuration_related_objects()
 
+    def before_create_object(self, data, *args, **kwargs):
+        """Set some fields before we save the new entry."""
+        add_created_by_id(data)
+
     def after_post(self, result):
         """
         Add update description to related configuraiton.
@@ -97,6 +102,7 @@ class ConfigurationAttachmentList(ResourceList):
         "session": db.session,
         "model": ConfigurationAttachment,
         "methods": {
+            "before_create_object": before_create_object,
             "query": query,
         },
     }
@@ -125,6 +131,7 @@ class ConfigurationAttachmentDetail(ResourceDetail):
         if attachment and attachment.is_upload:
             if data["url"] and data["url"] != attachment.url:
                 raise ConflictError("It is not allowed to change the url of uploads")
+        add_updated_by_id(data)
 
     def after_patch(self, result):
         """
