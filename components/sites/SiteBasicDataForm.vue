@@ -76,7 +76,7 @@ permissions and limitations under the Licence.
 
       <v-row>
         <v-col cols="12" md="6">
-          <v-combobox
+          <combobox
             label="Usage"
             clearable
             :items="siteUsageItems"
@@ -137,10 +137,10 @@ permissions and limitations under the Licence.
                 </v-list-item-content>
               </template>
             </template>
-          </v-combobox>
+          </combobox>
         </v-col>
         <v-col cols="12" md="6">
-          <v-combobox
+          <combobox
             label="Type"
             clearable
             :items="siteTypeItems"
@@ -201,7 +201,7 @@ permissions and limitations under the Licence.
                 </v-list-item-content>
               </template>
             </template>
-          </v-combobox>
+          </combobox>
         </v-col>
       </v-row>
 
@@ -357,6 +357,7 @@ import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import SiteUsageDialog from '@/components/sites/SiteUsageDialog.vue'
 import SiteTypeDialog from '@/components/sites/SiteTypeDialog.vue'
+import Combobox from '@/components/shared/Combobox.vue'
 
 import Validator from '@/utils/validator'
 import SiteMap from '@/components/sites/SiteMap.vue'
@@ -379,7 +380,8 @@ type SiteTypeComboboxValue = SiteType | string | undefined
     SiteMap,
     AutocompleteTextInput,
     SiteUsageDialog,
-    SiteTypeDialog
+    SiteTypeDialog,
+    Combobox
   },
   methods: {
     ...mapState('vocabulary', ['epsgCodes'])
