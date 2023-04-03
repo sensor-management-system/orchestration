@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <v-combobox
+        <combobox
           :items="equipmentstatus"
           item-text="name"
           :value="valueStatusItem"
@@ -175,10 +175,10 @@ permissions and limitations under the Licence.
               </v-list-item-content>
             </template>
           </template>
-        </v-combobox>
+        </combobox>
       </v-col>
       <v-col cols="12" md="3">
-        <v-combobox
+        <combobox
           :value="platformTypeName"
           :items="platformTypeNames"
           :readonly="readonly"
@@ -193,10 +193,10 @@ permissions and limitations under the Licence.
               </v-icon>
             </v-btn>
           </template>
-        </v-combobox>
+        </combobox>
       </v-col>
       <v-col cols="12" md="3">
-        <v-combobox
+        <combobox
           :value="platformManufacturerName"
           :items="manufacturerNames"
           :readonly="readonly"
@@ -211,7 +211,7 @@ permissions and limitations under the Licence.
               </v-icon>
             </v-btn>
           </template>
-        </v-combobox>
+        </combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
@@ -326,6 +326,7 @@ import PlatformTypeDialog from '@/components/platforms/PlatformTypeDialog.vue'
 import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
 import StatusDialog from '@/components/shared/StatusDialog.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import Combobox from '@/components/shared/Combobox.vue'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
@@ -341,7 +342,8 @@ type StatusSelectValue = Status | string | undefined
     PlatformTypeDialog,
     StatusDialog,
     VisibilitySwitch,
-    AutocompleteTextInput
+    AutocompleteTextInput,
+    Combobox
   },
   computed: {
     ...mapGetters('permissions', ['userGroups']),
@@ -489,7 +491,7 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
         }
         break
       case 'manufacturerName':
-        newObj.manufacturerName = value
+        newObj.manufacturerName = value || ''
         {
           const manufacturerIndex = this.manufacturers.findIndex(m => m.name === value)
           if (manufacturerIndex > -1) {

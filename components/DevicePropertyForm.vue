@@ -49,7 +49,7 @@ permissions and limitations under the Licence.
       </v-row>
       <v-row>
         <v-col cols="12" md="3">
-          <v-combobox
+          <combobox
             label="Compartment"
             clearable
             :items="compartmentItems"
@@ -110,10 +110,10 @@ permissions and limitations under the Licence.
                 </v-list-item-content>
               </template>
             </template>
-          </v-combobox>
+          </combobox>
         </v-col>
         <v-col cols="12" md="3">
-          <v-combobox
+          <combobox
             label="Sampling media"
             clearable
             :items="samplingMediaItems"
@@ -174,10 +174,10 @@ permissions and limitations under the Licence.
                 </v-list-item-content>
               </template>
             </template>
-          </v-combobox>
+          </combobox>
         </v-col>
         <v-col cols="12" md="3">
-          <v-combobox
+          <combobox
             label="Measured Quantity"
             class="required"
             :rules="[rules.required]"
@@ -241,12 +241,12 @@ permissions and limitations under the Licence.
                 </v-list-item-content>
               </template>
             </template>
-          </v-combobox>
+          </combobox>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="12" md="3">
-          <v-combobox
+          <combobox
             label="Unit"
             clearable
             :items="measuredQuantityUnitItems"
@@ -308,7 +308,7 @@ permissions and limitations under the Licence.
                 </v-list-item-content>
               </template>
             </template>
-          </v-combobox>
+          </combobox>
         </v-col>
         <v-col cols="12" md="3">
           <v-text-field
@@ -375,8 +375,9 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col cols="12" md="3">
-          <v-combobox
+          <combobox
             label="Unit of Resolution"
+            clearable
             :items="unitItems"
             item-text="name"
             :value="valueResolutionUnitItem"
@@ -435,7 +436,7 @@ permissions and limitations under the Licence.
                 </v-list-item-content>
               </template>
             </template>
-          </v-combobox>
+          </combobox>
         </v-col>
       </v-row>
     </v-form>
@@ -481,6 +482,7 @@ import SamplingMediaDialog from '@/components/devices/SamplingMediaDialog.vue'
 import MeasuredQuantityUnitDialog from '@/components/devices/MeasuredQuantityUnitDialog.vue'
 import UnitDialog from '@/components/devices/UnitDialog.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import Combobox from '@/components/shared/Combobox.vue'
 
 import { Compartment } from '@/models/Compartment'
 import { Property } from '@/models/Property'
@@ -494,11 +496,8 @@ import { parseFloatOrNull } from '@/utils/numericsHelper'
 
 import { Rules } from '@/mixins/Rules'
 
-interface INameAndUri {
-  name: string
-  uri: string
-}
-
+type CvDictTypes = Compartment | Unit | Property | SamplingMedia | MeasuredQuantityUnit
+type CvDictKeys = 'compartments' | 'units' | 'properties' | 'samplingMedias' | 'measuredQuantityUnits'
 type CompartmentComboboxValue = Compartment | string | undefined
 type SamplingMediaComboboxValue = SamplingMedia | string | undefined
 type PropertyComboboxValue = Property | string | undefined
@@ -515,7 +514,8 @@ type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
     MeasuredQuantityUnitDialog,
     SamplingMediaDialog,
     UnitDialog,
-    AutocompleteTextInput
+    AutocompleteTextInput,
+    Combobox
   }
 })
 export default class DevicePropertyForm extends mixins(Rules) {
@@ -613,46 +613,33 @@ export default class DevicePropertyForm extends mixins(Rules) {
   /**
    * returns the URI of an value
    *
-   * @param {string} name - the name of the dictionary to look in
-   * @param {string} value - the value to look the URI for
-   * @returns {string} the URI or an empty string
+   * @param {CvDictKeys} key - the name of the dictionary to look in
+   * @param {string|null} value - the value to look for
+   * @returns {string} the URI of the found object or an empty string
    */
-  private getUriByValue (name: string, value: string): string {
-    let valueToSet = ''
+  private getUriByValue (key: CvDictKeys, value: string | null): string {
+    return this.getCvObjectByValue(key, value)?.uri || ''
+  }
 
-    const elementsByName: { [name: string]: { elements: INameAndUri[] } } = {
-      compartmentName: {
-        elements: this.compartments
-      },
-      unitName: {
-        elements: this.units
-      },
-      measuredQuantityUnitName: {
-        elements: this.measuredQuantityUnits
-      },
-      samplingMediaName: {
-        elements: this.samplingMedias
-      },
-      propertyName: {
-        elements: this.properties
-      }
+  /**
+   * returns the object of an value
+   *
+   * @param {CvDictKeys} key - the name of the dictionary to look in
+   * @param {string | null} value - the value to look for
+   * @returns {CvDictTypes | null} the found object or null
+   */
+  private getCvObjectByValue (key: CvDictKeys, value: string | null): CvDictTypes | null {
+    if (!(key in this)) {
+      return null
     }
-    if (!elementsByName[name]) {
-      return valueToSet
-    }
-    // the comoboboxes may set the value to null,
-    // but we don't want to work further with nulls
-    //
-    // all of the comboboxes see the empty string as the
-    // "no value" choice
     if (value === null) {
       value = ''
     }
-    const index = elementsByName[name].elements.findIndex(x => x.name === value)
-    if (index > -1) {
-      valueToSet = elementsByName[name].elements[index].uri
+    const index = this[key].findIndex((x: CvDictTypes) => x.name === value)
+    if (index === -1) {
+      return null
     }
-    return valueToSet
+    return this[key][index]
   }
 
   /**
@@ -667,7 +654,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
     if (value) {
       if (typeof value === 'string') {
         newObj.compartmentName = value
-        newObj.compartmentUri = this.getUriByValue('compartmentName', value)
+        newObj.compartmentUri = this.getUriByValue('compartments', value)
       } else {
         newObj.compartmentName = value.name
         newObj.compartmentUri = value.uri
@@ -704,7 +691,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
     if (value) {
       if (typeof value === 'string') {
         newObj.samplingMediaName = value
-        newObj.samplingMediaUri = this.getUriByValue('samplingMediaName', value)
+        newObj.samplingMediaUri = this.getUriByValue('samplingMedias', value)
       } else {
         newObj.samplingMediaName = value.name
         newObj.samplingMediaUri = value.uri
@@ -753,7 +740,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
     if (value) {
       if (typeof value === 'string') {
         newObj.propertyName = value
-        newObj.propertyUri = this.getUriByValue('propertyName', value)
+        newObj.propertyUri = this.getUriByValue('properties', value)
       } else {
         newObj.propertyName = value.name
         newObj.propertyUri = value.uri
@@ -801,7 +788,9 @@ export default class DevicePropertyForm extends mixins(Rules) {
    * updates the unit
    *
    * Note: although we display a list of measuredQuantityUnits, the actual URI
-   * to be saved is the URI of the original unit
+   * to be saved is the URI of the original unit. The measuredQuantityUnit is
+   * just a helper which is used to defined eg. the defaults for limitMin and
+   * limitMax.
    *
    * @param {UnitComboboxValue} value - an object as provided by the combobox
    * @fires DevicePropertyForm#input
@@ -811,23 +800,26 @@ export default class DevicePropertyForm extends mixins(Rules) {
 
     if (value) {
       if (typeof value === 'string') {
-        newObj.unitName = value
-        newObj.unitUri = this.getUriByValue('unitName', value)
-      } else {
-        newObj.unitName = value.name
-        newObj.unitUri = this.getUriByValue('unitName', value.name)
-        // if the unit has numerical default values, apply them to measuringRange min and max
-        if (value.defaultLimitMin !== null) {
-          newObj.measuringRange.min = parseFloatOrNull(value.defaultLimitMin)
+        const name = value
+        // search the corresponding object
+        const measuredQuantityUnit = this.getCvObjectByValue('measuredQuantityUnits', name)
+        if (measuredQuantityUnit) {
+          // it there is one, use it as the value
+          value = measuredQuantityUnit as MeasuredQuantityUnit
         } else {
-          newObj.measuringRange.min = null
-        }
-        if (value.defaultLimitMax !== null) {
-          newObj.measuringRange.max = parseFloatOrNull(value.defaultLimitMax)
-        } else {
-          newObj.measuringRange.max = null
+          // if there is none, create a new object with just the name
+          value = new MeasuredQuantityUnit()
+          value.name = name
         }
       }
+
+      // assign unit name and unit uri to the measured quantity
+      newObj.unitName = value.name
+      // always use the uri of the original unit!
+      newObj.unitUri = this.getUriByValue('units', value.name)
+      // if the unit has default values for the measuring range, apply them
+      newObj.measuringRange.min = parseFloatOrNull(value.defaultLimitMin)
+      newObj.measuringRange.max = parseFloatOrNull(value.defaultLimitMax)
     } else {
       newObj.unitName = ''
       newObj.unitUri = ''
@@ -854,7 +846,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
     if (value) {
       if (typeof value === 'string') {
         newObj.resolutionUnitName = value
-        newObj.resolutionUnitUri = this.getUriByValue('unitName', value)
+        newObj.resolutionUnitUri = this.getUriByValue('units', value)
       } else {
         newObj.resolutionUnitName = value.name
         newObj.resolutionUnitUri = value.uri

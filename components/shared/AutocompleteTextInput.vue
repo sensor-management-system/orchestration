@@ -10,6 +10,8 @@
  * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ
+ *   (UFZ, https://www.ufz.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -33,13 +35,12 @@
  */
 
 <template>
-  <v-combobox
+  <combobox
     v-bind="$attrs"
     :items="suggestionsWithHeader"
     :loading="loading"
     validate-on-blur
     v-on="$listeners"
-    @update:search-input="updateValue"
     @focus="loadSuggestions(endpoint)"
   >
     <!-- pass through scoped slots -->
@@ -51,13 +52,19 @@
     <template v-for="(_, name) in $slots" #[name]>
       <slot :name="name" />
     </template>
-  </v-combobox>
+  </combobox>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
-@Component({})
+import Combobox from '@/components/shared/Combobox.vue'
+
+@Component({
+  components: {
+    Combobox
+  }
+})
 export default class AutocompleteTextInput extends Vue {
   @Prop({
     required: true,
@@ -89,10 +96,6 @@ export default class AutocompleteTextInput extends Vue {
     } finally {
       this.loading = false
     }
-  }
-
-  updateValue (value: string) {
-    this.$emit('input', value)
   }
 }
 </script>

@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <v-combobox
+        <combobox
           :items="equipmentstatus"
           item-text="name"
           :value="valueStatusItem"
@@ -175,10 +175,10 @@ permissions and limitations under the Licence.
               </v-list-item-content>
             </template>
           </template>
-        </v-combobox>
+        </combobox>
       </v-col>
       <v-col cols="12" md="3">
-        <v-combobox
+        <combobox
           :value="deviceTypeName"
           :items="deviceTypeNames"
           :readonly="readonly"
@@ -193,10 +193,10 @@ permissions and limitations under the Licence.
               </v-icon>
             </v-btn>
           </template>
-        </v-combobox>
+        </combobox>
       </v-col>
       <v-col cols="12" md="3">
-        <v-combobox
+        <combobox
           :value="deviceManufacturerName"
           :items="manufacturerNames"
           :readonly="readonly"
@@ -211,7 +211,7 @@ permissions and limitations under the Licence.
               </v-icon>
             </v-btn>
           </template>
-        </v-combobox>
+        </combobox>
       </v-col>
       <v-col cols="12" md="3">
         <v-text-field
@@ -344,6 +344,7 @@ import DeviceTypeDialog from '@/components/devices/DeviceTypeDialog.vue'
 import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
 import StatusDialog from '@/components/shared/StatusDialog.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import Combobox from '@/components/shared/Combobox.vue'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
@@ -365,7 +366,8 @@ type StatusSelectValue = Status | string | undefined;
     PermissionGroupSelect,
     StatusDialog,
     VisibilitySwitch,
-    AutocompleteTextInput
+    AutocompleteTextInput,
+    Combobox
   }
 })
 export default class DeviceBasicDataForm extends mixins(Rules) {
@@ -475,7 +477,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     this.update('manufacturerName', manufacturer.name)
   }
 
-  update (key: string, value: string|PermissionGroup[]) {
+  update (key: string, value: any) {
     const newObj = Device.createFromObject(this.value)
     // We use a check for already inserted serial numbers.
     // For that we can filter by manufacturer & model, as we expect
@@ -505,7 +507,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         }
         break
       case 'manufacturerName':
-        newObj.manufacturerName = value as string
+        newObj.manufacturerName = value || ''
         {
           const manufacturerIndex = this.manufacturers.findIndex(m => m.name === value)
           if (manufacturerIndex > -1) {
