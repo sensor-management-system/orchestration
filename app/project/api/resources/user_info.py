@@ -27,7 +27,7 @@ class UserInfo(ResourceList):
         :return: Dict with user infos from database + IDL-groups.
         """
         if not g.user:
-            raise UnauthorizedError("Login required")
+            raise UnauthorizedError("Authentication required")
         idl_groups = idl.get_all_permission_groups_for_a_user(g.user.subject)
 
         if not g.user.apikey:

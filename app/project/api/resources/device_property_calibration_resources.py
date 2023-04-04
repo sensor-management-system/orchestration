@@ -1,9 +1,10 @@
 """Resource classes for device property calibrations."""
 
-from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
+from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.calibration_actions import (
     DeviceCalibrationAction,
@@ -11,10 +12,11 @@ from ..models.calibration_actions import (
 )
 from ..models.device import Device
 from ..models.device_property import DeviceProperty
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..resources.base_resource import check_if_object_not_found
 from ..schemas.calibration_actions_schema import DevicePropertyCalibrationSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class DevicePropertyCalibrationList(ResourceList):
@@ -26,7 +28,7 @@ class DevicePropertyCalibrationList(ResourceList):
 
         Also handle optional pre-filters (for specific devices, for example).
         """
-        query_ = self.session.query(DevicePropertyCalibration)
+        query_ = filter_visible(self.session.query(self.model))
         device_id = view_kwargs.get("device_id")
         device_calibration_action_id = view_kwargs.get("device_calibration_action_id")
         device_property_id = view_kwargs.get("device_property_id")
@@ -38,7 +40,9 @@ class DevicePropertyCalibrationList(ResourceList):
                 ).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "DeviceCalibrationAction: {} not found".format(
                         device_calibration_action_id
                     ),
@@ -55,7 +59,9 @@ class DevicePropertyCalibrationList(ResourceList):
                 ).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",},
+                    {
+                        "parameter": "id",
+                    },
                     "DeviceProperty: {} not found".format(device_property_id),
                 )
             else:
@@ -67,12 +73,15 @@ class DevicePropertyCalibrationList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
                 )
             else:
-                query_ = query_.join(DeviceCalibrationAction).filter(
-                    DeviceCalibrationAction.device_id == device_id
-                )
+                # Due to the visible filter we already join with the
+                # DevicePropertyCalibration
+                query_ = query_.filter(DeviceCalibrationAction.device_id == device_id)
 
         return query_
 
@@ -81,15 +90,18 @@ class DevicePropertyCalibrationList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,
-        "methods": {"query": query,},
+        "methods": {
+            "query": query,
+        },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DevicePropertyCalibrationDetail(ResourceDetail):
     """Detail resource for the device property calibrations (get, delete, patch)."""
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if DevicePropertyCalibration not found"""
+        """Return 404 Responses if DevicePropertyCalibration not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DevicePropertyCalibrationSchema
@@ -98,14 +110,4 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
         "session": db.session,
         "model": DevicePropertyCalibration,
     }
-
-
-class DevicePropertyCalibrationRelationship(ResourceRelationship):
-    """Relationship resource for the device property calibrations."""
-
-    schema = DevicePropertyCalibrationSchema
-    decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": DevicePropertyCalibration,
-    }
+    permission_classes = [DelegateToCanFunctions]

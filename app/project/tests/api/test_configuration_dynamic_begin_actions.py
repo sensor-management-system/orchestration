@@ -272,7 +272,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         db.session.commit()
 
         _ = super().try_add_object_with_status_code(
-            url=self.url, data_object=data, expected_status_code=409
+            url=self.url, data_object=data, expected_status_code=403
         )
 
     def test_add_for_archived_device(self):
@@ -672,8 +672,9 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         _ = super().try_update_object_with_status_code(
             url=f"{self.url}/{dynamic_location_begin_action.id}",
             data_object=new_data,
-            expected_status_code=409,
+            expected_status_code=403,
         )
+
 
     def test_update_archived_device(self):
         """Ensure that we can't change for archived devices."""
@@ -878,7 +879,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_archived_device(self):
         """Ensure we can't delete for an archived device."""

@@ -8,7 +8,7 @@ from healthcheck import HealthCheck
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .api import minio
-from .api.auth.permission_manager import permission_manager
+from .api.permissions.permission_manager import permission_manager
 from .api.helpers.health_checks import (
     health_check_db,
     health_check_elastic_search,

@@ -383,7 +383,8 @@ class TestSiteContacts(BaseTestCase):
         db.session.commit()
 
         resp = self.client.get(f"{self.url}/{contact_role.id}")
-        self.assertEqual(resp.status_code, 401)
+        # Both 401 or 403 are fine.
+        self.assertIn(resp.status_code, [401, 403])
 
     def test_get_one_public_anonymous(self):
         """Ensure that we allow to get contact roles for public sites without login."""
@@ -602,7 +603,7 @@ class TestSiteContacts(BaseTestCase):
                 json=payload,
                 headers={"Content-Type": "application/vnd.api+json"},
             )
-        self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.status_code, 403)
 
     def test_after_patch_updated_site_update_description(self):
         """Ensure we update the update description after patching the contact role."""

@@ -1,11 +1,15 @@
 """Tests for the device calibration api."""
 
+import datetime
 import json
 from unittest.mock import patch
 
+import pytz
+
 from project import base_url
-from project.api.models import Contact, Device, DeviceCalibrationAction
+from project.api.models import Contact, Device, DeviceCalibrationAction, User
 from project.api.models.base_model import db
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_action_model import (
@@ -133,7 +137,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_update_device_calibration_action(self):
         """Update DeviceCalibration."""
@@ -220,7 +224,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
                     headers=create_token(),
                 )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_device_calibration_action(self):
         """Delete DeviceCalibrationAction should succeed as a admin."""
@@ -281,7 +285,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
-            self.assertEqual(response.status_code, 409)
+            self.assertEqual(response.status_code, 403)
 
     def test_delete_device_calibration_action_as_member(self):
         """Delete DeviceCalibrationAction."""
@@ -310,3 +314,72 @@ class TestDeviceCalibrationAction(BaseTestCase):
                     headers=access_headers,
                 )
             self.assertEqual(response.status_code, 200)
+
+    def test_patch_to_non_editable_device(self):
+        """Ensure we can't update to a device we can't edit."""
+        device1 = Device(
+            short_name="device1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        device2 = Device(
+            short_name="device2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        action = DeviceCalibrationAction(
+            device=device1,
+            contact=contact,
+            current_calibration_date=datetime.datetime(
+                2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc
+            ),
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([device1, device2, contact, user, action])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_calibration_action",
+                "id": action.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another device for
+                    # which we have no edit permissions.
+                    "device": {
+                        "data": {
+                            "type": "device",
+                            "id": device2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*device1.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{action.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

@@ -73,7 +73,7 @@ class AbstractFreeTextFieldEndpoint(ABC):
         """
         try:
             if not g.user:
-                raise UnauthorizedError("Login required.")
+                raise UnauthorizedError("Authentication required.")
             base_query = db.session.query(self.__class__.field)
 
             if getattr(self.__class__, "ignore_field", None):

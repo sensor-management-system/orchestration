@@ -454,3 +454,15 @@ api.route(UsageStatistics, "usage_statistics", "/usage-statistics")
 # PIDs
 api.route(PidList, "pid_list", "/pids")
 api.route(PidDetail, "pid_detail", "/pids/<pid>")
+# Datastream links
+api.route(
+    DatastreamLinkList,
+    "datastream_link_list",
+    "/datastream-links",
+    "/configurations/<int:configuration_id>/datastream-links",
+)
+api.route(
+    DatastreamLinkDetail,
+    "datastream_link_detail",
+    "/datastream-links/<int:id>"
+)

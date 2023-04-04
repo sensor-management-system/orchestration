@@ -1,3 +1,4 @@
+"""Tests for the generic action attachment models."""
 from project.api.models import (
     ConfigurationAttachment,
     GenericConfigurationActionAttachment,
@@ -17,7 +18,8 @@ from project.tests.models.test_generic_actions_models import (
 )
 
 
-def add_generic_configuration_action_attachment_model():
+def add_generic_configuration_action_model():
+    """Create a generic configuration action model with attachments."""
     configuration_action_model = generate_configuration_action_model()
     attachment1 = ConfigurationAttachment(
         label="configuration attachment1",
@@ -40,7 +42,8 @@ def add_generic_configuration_action_attachment_model():
     return configuration_action_model
 
 
-def add_generic_device_action_attachment_model():
+def add_generic_device_action_model():
+    """Create a generic device action model with attachments."""
     device_action_model = generate_device_action_model()
     attachment1 = DeviceAttachment(
         label="device attachment1",
@@ -61,7 +64,8 @@ def add_generic_device_action_attachment_model():
     return device_action_model
 
 
-def add_generic_platform_action_attachment_model():
+def add_generic_platform_action_model():
+    """Create a generic platform action model with attachments."""
     platform_action_model = generate_platform_action_model()
     attachment1 = PlatformAttachment(
         label="platform attachment1",
@@ -83,18 +87,14 @@ def add_generic_platform_action_attachment_model():
 
 
 class TestGenericActionModel(BaseTestCase):
-    """
-    Test Generic Action Model
-    """
+    """Tess for the generic action attachment models."""
 
     def test_add_generic_platform_action_attachment_model(self):
-        """""Ensure Add generic platform action attachment model """
-        generic_platform_action_attachment_model = (
-            add_generic_platform_action_attachment_model()
-        )
+        """Ensure Add generic platform action attachment model."""
+        generic_platform_action_model = add_generic_platform_action_model()
         generic_platform_action_attachment = (
             db.session.query(GenericPlatformActionAttachment)
-            .filter_by(action_id=generic_platform_action_attachment_model.id)
+            .filter_by(action_id=generic_platform_action_model.id)
             .one()
         )
         self.assertEqual(
@@ -103,13 +103,11 @@ class TestGenericActionModel(BaseTestCase):
         )
 
     def test_add_generic_device_action_attachment_model(self):
-        """""Ensure Add generic device action attachment model """
-        generic_device_action_attachment_model = (
-            add_generic_device_action_attachment_model()
-        )
+        """Ensure Add generic device action attachment model."""
+        generic_device_action_model = add_generic_device_action_model()
         generic_device_action_attachment = (
             db.session.query(GenericDeviceActionAttachment)
-            .filter_by(action_id=generic_device_action_attachment_model.id)
+            .filter_by(action_id=generic_device_action_model.id)
             .one()
         )
         self.assertEqual(
@@ -118,13 +116,11 @@ class TestGenericActionModel(BaseTestCase):
         )
 
     def test_add_generic_configuration_action_attachment_model(self):
-        """""Ensure Add generic configuration action attachment model """
-        generic_device_action_attachment_model = (
-            add_generic_configuration_action_attachment_model()
-        )
+        """Ensure Add generic configuration action attachment model."""
+        generic_device_action_model = add_generic_configuration_action_model()
         generic_device_action_attachment = (
             db.session.query(GenericConfigurationActionAttachment)
-            .filter_by(action_id=generic_device_action_attachment_model.id)
+            .filter_by(action_id=generic_device_action_model.id)
             .one()
         )
         self.assertEqual(

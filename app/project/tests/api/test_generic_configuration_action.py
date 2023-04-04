@@ -14,7 +14,7 @@ from project.tests.base import (
 )
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_generic_action_attachment_model import (
-    add_generic_configuration_action_attachment_model,
+    add_generic_configuration_action_model,
 )
 from project.tests.models.test_generic_actions_models import (
     generate_configuration_action_model,
@@ -226,7 +226,7 @@ class TestGenericConfigurationAction(BaseTestCase):
 
     def test_delete_generic_configuration_action_with_attachment_link(self):
         """Delete GenericConfigurationAction with an attachment link."""
-        configuration_action = add_generic_configuration_action_attachment_model()
+        configuration_action = add_generic_configuration_action_model()
         _ = super().delete_object(
             url=f"{self.url}/{configuration_action.id}",
         )

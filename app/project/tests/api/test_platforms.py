@@ -14,7 +14,7 @@ from project.tests.base import (
     test_file_path,
 )
 from project.tests.models.test_generic_action_attachment_model import (
-    add_generic_platform_action_attachment_model,
+    add_generic_platform_action_model,
 )
 from project.tests.models.test_software_update_actions_model import (
     add_platform_software_update_action_model,
@@ -187,8 +187,8 @@ class TestPlatformServices(BaseTestCase):
 
     def test_delete_platform_with_a_generic_action(self):
         """Ensure a platform with generic action can be deleted."""
-        platform_software_update_action = add_generic_platform_action_attachment_model()
-        platform_id = platform_software_update_action.platform_id
+        generic_action = add_generic_platform_action_model()
+        platform_id = generic_action.platform_id
         with self.run_requests_as(self.super_user):
             _ = super().try_delete_object_with_status_code(
                 url=f"{self.platform_url}/{platform_id}", expected_status_code=200

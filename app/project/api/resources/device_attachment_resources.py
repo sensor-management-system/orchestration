@@ -7,12 +7,13 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...api import minio
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_attachment import DeviceAttachment
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.device_attachment_schema import DeviceAttachmentSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -38,7 +39,7 @@ class DeviceAttachmentList(ResourceList):
         Handle also additional logic to query the device
         attachments for a specific device.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -103,9 +104,7 @@ class DeviceAttachmentList(ResourceList):
         "model": DeviceAttachment,
         "methods": {"before_create_object": before_create_object, "query": query},
     }
-
-
-"""Module for the device attachment detail resource."""
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DeviceAttachmentDetail(ResourceDetail):
@@ -186,3 +185,4 @@ class DeviceAttachmentDetail(ResourceDetail):
         "session": db.session,
         "model": DeviceAttachment,
     }
+    permission_classes = [DelegateToCanFunctions]

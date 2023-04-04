@@ -21,7 +21,7 @@ class RevokeApikey(ResourceList):
     def post(self):
         """Take the user of the request set a new apikey & return it."""
         if not g.user:
-            raise UnauthorizedError("Login required")
+            raise UnauthorizedError("Authentication required")
         g.user.apikey = User.generate_new_apikey()
         db.session.add(g.user)
         db.session.commit()
@@ -37,7 +37,7 @@ class RevokeApikey(ResourceList):
 
 
 class AcceptTermsOfUse(ResourceList):
-    """Resource to allow the user to agree to the terms of use - and set the field in the database."""
+    """Resource to allow the user to agree to terms of use + set the field in db."""
 
     def get(self):
         """Get is not allowed."""
@@ -46,7 +46,7 @@ class AcceptTermsOfUse(ResourceList):
     def post(self):
         """Take the user of the request and set the terms of use agreement date & return it."""
         if not g.user:
-            raise UnauthorizedError("Login required")
+            raise UnauthorizedError("Authentication required")
         now = self.get_current_time()
         g.user.terms_of_use_agreement_date = now
         db.session.add(g.user)

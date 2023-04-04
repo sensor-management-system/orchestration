@@ -6,10 +6,15 @@ from xml.etree import ElementTree as ET
 from flask import Blueprint, current_app, g, make_response, url_for
 from flask_rest_jsonapi.exceptions import JsonApiException
 
-from ..api.auth.permission_utils import check_for_permission
-from ..api.helpers.errors import ErrorResponse, NotFoundError, UnauthorizedError
+from ..api.helpers.errors import (
+    ErrorResponse,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
+)
 from ..api.models import Configuration, Device, Platform
 from ..api.models.base_model import db
+from ..api.permissions.rules import can_see
 from ..config import env
 from ..sensorml.converters import (
     ConfigurationConverter,
@@ -32,24 +37,26 @@ def device_to_sensor_ml(device_id):
     :return: xml file
     """
     try:
-        check_for_permission(model_class=Device, kwargs={"id": device_id})
         device = db.session.query(Device).filter_by(id=device_id).first()
         if device is None:
             raise NotFoundError({"pointer": ""}, "Object Not Found")
-        else:
-            cv_url = current_app.config["CV_URL"]
-            physical_system = DeviceConverter(device, cv_url).sml_physical_system()
-            xml_object = physical_system.to_xml()
-            ET.register_namespace("gml", gml.namespace)
-            ET.register_namespace("gco", gco.namespace)
-            ET.register_namespace("gmd", gmd.namespace)
-            ET.register_namespace("sml", sml.namespace)
-            ET.register_namespace("swe", swe.namespace)
-            ET.register_namespace("xlink", xlink.namespace)
-            text = ET.tostring(xml_object)
-            response = make_response(text)
-            response.headers["Content-Type"] = "application/xml"
-            return response
+        if not can_see(device):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Device not accessable")
+        cv_url = current_app.config["CV_URL"]
+        physical_system = DeviceConverter(device, cv_url).sml_physical_system()
+        xml_object = physical_system.to_xml()
+        ET.register_namespace("gml", gml.namespace)
+        ET.register_namespace("gco", gco.namespace)
+        ET.register_namespace("gmd", gmd.namespace)
+        ET.register_namespace("sml", sml.namespace)
+        ET.register_namespace("swe", swe.namespace)
+        ET.register_namespace("xlink", xlink.namespace)
+        text = ET.tostring(xml_object)
+        response = make_response(text)
+        response.headers["Content-Type"] = "application/xml"
+        return response
     except ErrorResponse as e:
         return e.respond()
     except JsonApiException as e:
@@ -65,24 +72,26 @@ def platform_to_sensor_ml(platform_id):
     :return: xml file
     """
     try:
-        check_for_permission(model_class=Platform, kwargs={"id": platform_id})
         platform = db.session.query(Platform).filter_by(id=platform_id).first()
         if platform is None:
             raise NotFoundError({"pointer": ""}, "Object Not Found")
-        else:
-            cv_url = current_app.config["CV_URL"]
-            physical_system = PlatformConverter(platform, cv_url).sml_physical_system()
-            xml_object = physical_system.to_xml()
-            ET.register_namespace("gml", gml.namespace)
-            ET.register_namespace("gco", gco.namespace)
-            ET.register_namespace("gmd", gmd.namespace)
-            ET.register_namespace("sml", sml.namespace)
-            ET.register_namespace("swe", swe.namespace)
-            ET.register_namespace("xlink", xlink.namespace)
-            text = ET.tostring(xml_object)
-            response = make_response(text)
-            response.headers["Content-Type"] = "application/xml"
-            return response
+        if not can_see(platform):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Platform not accessable")
+        cv_url = current_app.config["CV_URL"]
+        physical_system = PlatformConverter(platform, cv_url).sml_physical_system()
+        xml_object = physical_system.to_xml()
+        ET.register_namespace("gml", gml.namespace)
+        ET.register_namespace("gco", gco.namespace)
+        ET.register_namespace("gmd", gmd.namespace)
+        ET.register_namespace("sml", sml.namespace)
+        ET.register_namespace("swe", swe.namespace)
+        ET.register_namespace("xlink", xlink.namespace)
+        text = ET.tostring(xml_object)
+        response = make_response(text)
+        response.headers["Content-Type"] = "application/xml"
+        return response
     except ErrorResponse as e:
         return e.respond()
     except JsonApiException as e:
@@ -105,56 +114,57 @@ def configuration_to_sensor_ml(configuration_id):
         )
         if configuration is None:
             raise NotFoundError({"pointer": ""}, "Object Not Found")
-        else:
-            if configuration.is_internal and not g.user:
+        if not can_see(configuration):
+            if not g.user:
                 raise UnauthorizedError("Authentication required.")
-            cv_url = current_app.config["CV_URL"]
+            raise ForbiddenError("Configuration not accessable")
+        cv_url = current_app.config["CV_URL"]
 
-            def url_lookup(element):
+        def url_lookup(element):
 
-                if isinstance(element, Platform):
-                    return url_for(
-                        "sensorml.platform_to_sensor_ml",
-                        platform_id=element.id,
-                        _external=True,
-                    )
+            if isinstance(element, Platform):
                 return url_for(
-                    "sensorml.device_to_sensor_ml", device_id=element.id, _external=True
+                    "sensorml.platform_to_sensor_ml",
+                    platform_id=element.id,
+                    _external=True,
                 )
+            return url_for(
+                "sensorml.device_to_sensor_ml", device_id=element.id, _external=True
+            )
 
-            physical_system = ConfigurationConverter(
-                configuration,
-                cv_url,
-                url_lookup,
-            ).sml_physical_system()
-            xml_object = physical_system.to_xml()
-            ET.register_namespace("gml", gml.namespace)
-            ET.register_namespace("gco", gco.namespace)
-            ET.register_namespace("gmd", gmd.namespace)
-            ET.register_namespace("sml", sml.namespace)
-            ET.register_namespace("swe", swe.namespace)
-            ET.register_namespace("xlink", xlink.namespace)
-            text = ET.tostring(xml_object)
+        physical_system = ConfigurationConverter(
+            configuration,
+            cv_url,
+            url_lookup,
+        ).sml_physical_system()
+        xml_object = physical_system.to_xml()
+        ET.register_namespace("gml", gml.namespace)
+        ET.register_namespace("gco", gco.namespace)
+        ET.register_namespace("gmd", gmd.namespace)
+        ET.register_namespace("sml", sml.namespace)
+        ET.register_namespace("swe", swe.namespace)
+        ET.register_namespace("xlink", xlink.namespace)
+        text = ET.tostring(xml_object)
 
-            # We need to make sure that our gml:ids are unique in the
-            # overall document.
-            # The strategy here to give different names - with `_dup_{n}`
-            # suffix.
-            dup_count = {}
+        # We need to make sure that our gml:ids are unique in the
+        # overall document.
+        # The strategy here to give different names - with `_dup_{n}`
+        # suffix.
+        dup_count = {}
 
-            def gml_id_replacement(match):
-                original_gml_id = match.group(1)
-                if original_gml_id not in dup_count.keys():
-                    dup_count[original_gml_id] = 0
-                    return match.group()
-                dup_count[original_gml_id] += 1
-                result = f'gml:id="{original_gml_id}_dup_{dup_count[original_gml_id]}"'
-                return result
+        def gml_id_replacement(match):
+            original_gml_id = match.group(1)
+            if original_gml_id not in dup_count.keys():
+                dup_count[original_gml_id] = 0
+                return match.group()
+            dup_count[original_gml_id] += 1
+            result = f'gml:id="{original_gml_id}_dup_{dup_count[original_gml_id]}"'
+            return result
 
-            text = re.sub(r'gml:id="([^"]+)"', gml_id_replacement, text.decode())
-            response = make_response(text)
-            response.headers["Content-Type"] = "application/xml"
-            return response
+        text = re.sub(r'gml:id="([^"]+)"', gml_id_replacement, text.decode())
+        response = make_response(text)
+        response.headers["Content-Type"] = "application/xml"
+        return response
     except ErrorResponse as e:
         return e.respond()
     except JsonApiException as e:

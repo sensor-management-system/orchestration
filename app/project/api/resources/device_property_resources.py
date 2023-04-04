@@ -3,11 +3,12 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
+from ..helpers.resource_checks import DevicePropertyValidator
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_property import DeviceProperty
-from ..helpers.resource_checks import DevicePropertyValidator
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.device_property_schema import DevicePropertySchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -32,7 +33,7 @@ class DevicePropertyList(ResourceList):
         Also handle cases to search for all the device
         properties of a specific device.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -69,21 +70,21 @@ class DevicePropertyList(ResourceList):
         "model": DeviceProperty,
         "methods": {"query": query},
     }
-
-
-"""Module for the device property detail resource."""
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DevicePropertyDetail(ResourceDetail):
+    """
+    Detail resource class for device properties.
+
+    Provides get, patch and delete methods to retrieve details
+    of an object, update an object and delete a device property.
+    """
 
     validator = DevicePropertyValidator()
-    """
-    provides get, patch and delete methods to retrieve details
-    of an object, update an object and delete a Device
-    """
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if DeviceProperty not found"""
+        """Return 404 Responses if DeviceProperty not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     def after_patch(self, result):
@@ -99,6 +100,7 @@ class DevicePropertyDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Run some validations before deleting the device mount."""
         self.validator.validate_property_dynamic_location_action_deletion(kwargs["id"])
         device_property = (
             db.session.query(DeviceProperty).filter_by(id=kwargs["id"]).one_or_none()
@@ -115,3 +117,4 @@ class DevicePropertyDetail(ResourceDetail):
         "session": db.session,
         "model": DeviceProperty,
     }
+    permission_classes = [DelegateToCanFunctions]

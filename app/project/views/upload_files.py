@@ -1,22 +1,31 @@
-from flask import request, Blueprint, current_app
+"""Routes for uploading files."""
+from flask import Blueprint, current_app, g, request
 
-from ..api.flask_minio import MinioNotAvailableException
-from ..api.helpers.errors import UnsupportedMediaTypeError, BadRequestError, ServiceIsUnreachableError
-from ..api.token_checker import token_required
 from ..api import minio
+from ..api.flask_minio import MinioNotAvailableException
+from ..api.helpers.errors import (
+    BadRequestError,
+    ServiceIsUnreachableError,
+    UnauthorizedError,
+    UnsupportedMediaTypeError,
+)
 from ..config import env
 
-upload_routes = Blueprint('upload', __name__,
-                          url_prefix=env("URL_PREFIX", env("URL_PREFIX", "/rdm/svm-api/v1")))
+upload_routes = Blueprint(
+    "upload",
+    __name__,
+    url_prefix=env("URL_PREFIX", env("URL_PREFIX", "/rdm/svm-api/v1")),
+)
 
 
-@upload_routes.route('/upload', methods=['POST'])
-@token_required
+@upload_routes.route("/upload", methods=["POST"])
 def upload():
-    """Upload route"""
+    """Upload files."""
+    if not g.user:
+        raise UnauthorizedError("Authentication required")
     content_types = current_app.config["ALLOWED_MIME_TYPES"]
-    if 'file' in request.files:
-        file = request.files['file']
+    if "file" in request.files:
+        file = request.files["file"]
         content_type = file.content_type
         if file and content_type in content_types:
             try:

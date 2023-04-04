@@ -69,7 +69,7 @@ class TestControllerConfigurationMountingActionTimepoints(BaseTestCase):
     def test_get_interal_withoput_user(self):
         """Ensure anonymous can't access an internal configuration."""
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_get_empty(self):
         """Ensure we get an empty list if there is no mount."""

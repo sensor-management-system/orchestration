@@ -92,7 +92,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         db.session.commit()
 
         _ = super().try_add_object_with_status_code(
-            url=self.url, data_object=data, expected_status_code=409
+            url=self.url, data_object=data, expected_status_code=403
         )
 
     def prepare_request_data(self, description):
@@ -224,7 +224,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         _ = super().try_update_object_with_status_code(
             url=f"{self.url}/{static_location_begin_action.id}",
             data_object=new_data,
-            expected_status_code=409,
+            expected_status_code=403,
         )
 
     def test_update_configuration_static_begin_location_action_set_end_contact_to_none(
@@ -354,7 +354,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_filtered_by_configuration(self):
         """Ensure that filter by a specific configuration works well."""

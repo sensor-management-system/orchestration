@@ -1,16 +1,16 @@
 """Resource classes for platform software update actions."""
 
-from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
+from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
-from ..helpers.errors import MethodNotAllowed
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.software_update_actions import PlatformSoftwareUpdateAction
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..resources.base_resource import (
     check_if_object_not_found,
     query_platform_and_set_update_description_text,
@@ -33,7 +33,7 @@ class PlatformSoftwareUpdateActionList(ResourceList):
 
         Also handle optional pre-filters (for specific platforms, for example).
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         platform_id = view_kwargs.get("platform_id")
         if platform_id is not None:
             try:
@@ -74,13 +74,14 @@ class PlatformSoftwareUpdateActionList(ResourceList):
             "query": query,
         },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class PlatformSoftwareUpdateActionDetail(ResourceDetail):
     """Detail relationship for platform software update actions (get, delete, patch)."""
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if PlatformSoftwareUpdateAction not found"""
+        """Return 404 Responses if PlatformSoftwareUpdateAction not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     def before_patch(self, args, kwargs, data):
@@ -100,6 +101,7 @@ class PlatformSoftwareUpdateActionDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Update the platforms update description."""
         action = (
             db.session.query(PlatformSoftwareUpdateAction)
             .filter_by(id=kwargs["id"])
@@ -117,14 +119,4 @@ class PlatformSoftwareUpdateActionDetail(ResourceDetail):
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,
     }
-
-
-class PlatformSoftwareUpdateActionRelationship(ResourceRelationship):
-    """Relationship resource for platform software update actions."""
-
-    schema = PlatformSoftwareUpdateActionSchema
-    decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": PlatformSoftwareUpdateAction,
-    }
+    permission_classes = [DelegateToCanFunctions]

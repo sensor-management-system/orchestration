@@ -1,20 +1,11 @@
 """Routes to download uploaded files."""
 import requests
-from flask import Blueprint, current_app, redirect
+from flask import Blueprint, current_app, g, redirect
 
-from ..api.auth.permission_utils import (
-    check_for_permission,
-    check_permissions_for_configuration_related_objects,
-)
-from ..api.helpers.errors import ErrorResponse
-from ..api.models import (
-    ConfigurationAttachment,
-    Device,
-    DeviceAttachment,
-    Platform,
-    PlatformAttachment,
-)
+from ..api.helpers.errors import ErrorResponse, ForbiddenError, UnauthorizedError
+from ..api.models import ConfigurationAttachment, DeviceAttachment, PlatformAttachment
 from ..api.models.base_model import db
+from ..api.permissions.rules import can_see
 from ..config import env
 
 download_routes = Blueprint(
@@ -50,7 +41,10 @@ def get_device_attachment_content(id, filename):
         return {"details": "Object not found"}, 404
 
     try:
-        check_for_permission(Device, {"id": device_attachment.device_id})
+        if not can_see(device_attachment):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Attachment not accessable")
     except ErrorResponse as e:
         return e.respond()
 
@@ -75,7 +69,10 @@ def get_platform_attachment_content(id, filename):
         return {"details": "Object not found"}, 404
 
     try:
-        check_for_permission(Platform, {"id": platform_attachment.platform_id})
+        if not can_see(platform_attachment):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Attachment not accessable")
     except ErrorResponse as e:
         return e.respond()
 
@@ -100,7 +97,10 @@ def get_configuration_attachment_content(id, filename):
         return {"details": "Object not found"}, 404
 
     try:
-        check_permissions_for_configuration_related_objects(ConfigurationAttachment, id)
+        if not can_see(configuration_attachment):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Attachment not accessable")
     except ErrorResponse as e:
         return e.respond()
 

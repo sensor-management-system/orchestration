@@ -3,10 +3,11 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models.base_model import db
 from ..models.customfield import CustomField
 from ..models.device import Device
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.customfield_schema import CustomFieldSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -33,7 +34,7 @@ class CustomFieldList(ResourceList):
         /devices/<device_id>/customfields
         we want to filter according to them.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -70,9 +71,7 @@ class CustomFieldList(ResourceList):
         "model": CustomField,
         "methods": {"query": query},
     }
-
-
-"""Module for the custom field detail resource."""
+    permission_classes = [DelegateToCanFunctions]
 
 
 class CustomFieldDetail(ResourceDetail):
@@ -84,7 +83,7 @@ class CustomFieldDetail(ResourceDetail):
     """
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if CustomField not found"""
+        """Return 404 Responses if CustomField not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     def after_patch(self, result):
@@ -100,6 +99,7 @@ class CustomFieldDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Update the devices update description."""
         custom_field = (
             db.session.query(CustomField).filter_by(id=kwargs["id"]).one_or_none()
         )
@@ -115,3 +115,4 @@ class CustomFieldDetail(ResourceDetail):
         "session": db.session,
         "model": CustomField,
     }
+    permission_classes = [DelegateToCanFunctions]

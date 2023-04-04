@@ -3,6 +3,8 @@ import datetime
 import json
 from unittest.mock import patch
 
+import pytz
+
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -13,6 +15,7 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
@@ -370,7 +373,7 @@ class TestMountDevicePermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
-            self.assertEqual(response.status_code, 409)
+            self.assertEqual(response.status_code, 403)
 
     def test_post_action_for_archived_configuration(self):
         """Ensure we can't mount on an archived configuration."""
@@ -408,7 +411,7 @@ class TestMountDevicePermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
-            self.assertEqual(response.status_code, 409)
+            self.assertEqual(response.status_code, 403)
 
     def test_post_action_for_archived_parent_platform(self):
         """Ensure we can't mount on an archived parent platform."""
@@ -536,7 +539,7 @@ class TestMountDevicePermissions(BaseTestCase):
                 delete_response_user_is_a_member = self.client.delete(
                     url, headers=access_headers
                 )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+                self.assertEqual(delete_response_user_is_a_member.status_code, 403)
 
     def test_delete_for_archived_configuration(self):
         """Ensure we can't delete the device mount for an archived configuration."""
@@ -583,7 +586,7 @@ class TestMountDevicePermissions(BaseTestCase):
                 delete_response_user_is_a_member = self.client.delete(
                     url, headers=access_headers
                 )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+                self.assertEqual(delete_response_user_is_a_member.status_code, 403)
 
     def test_delete_for_archived_parent_platform(self):
         """Ensure we can't delete the device mount for an archived parent platform."""
@@ -1084,7 +1087,7 @@ class TestMountDevicePermissions(BaseTestCase):
                     headers=access_headers,
                     content_type="application/vnd.api+json",
                 )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+                self.assertEqual(patch_response_user_is_a_member.status_code, 403)
 
     def test_patch_for_archived_configuration(self):
         """Ensure we can't patch the device mount for an archived configuration."""
@@ -1141,7 +1144,7 @@ class TestMountDevicePermissions(BaseTestCase):
                     headers=access_headers,
                     content_type="application/vnd.api+json",
                 )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+                self.assertEqual(patch_response_user_is_a_member.status_code, 403)
 
     def test_patch_for_archived_parent_platform(self):
         """Ensure we can't patch the device mount for an archived parent platform."""
@@ -1199,3 +1202,152 @@ class TestMountDevicePermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                 )
                 self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+
+    def test_patch_to_non_editable_configuration(self):
+        """Ensure we can't update to a configuration we can't edit."""
+        configuration1 = Configuration(
+            label="config1",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="1",
+        )
+        configuration2 = Configuration(
+            label="config2",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="2",
+        )
+        device = Device(
+            short_name="dummy device",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        mount = DeviceMountAction(
+            configuration=configuration1,
+            device=device,
+            begin_date=datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_contact=contact,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all(
+            [configuration1, configuration2, device, contact, user, mount]
+        )
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_mount_action",
+                "id": mount.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another configuration for
+                    # which we have no edit permissions.
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": configuration2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration1.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{mount.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
+
+    def test_patch_to_non_editable_device(self):
+        """Ensure we can't update to a device we can't edit."""
+        configuration = Configuration(
+            label="config1",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="1",
+        )
+        device1 = Device(
+            short_name="dummy device1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        device2 = Device(
+            short_name="dummy device2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        mount = DeviceMountAction(
+            configuration=configuration,
+            device=device1,
+            begin_date=datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_contact=contact,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([configuration, device1, device2, contact, user, mount])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_mount_action",
+                "id": mount.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another device for
+                    # which we have no edit permissions.
+                    "device": {
+                        "data": {
+                            "type": "device",
+                            "id": device2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{mount.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
