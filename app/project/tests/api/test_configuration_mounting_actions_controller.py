@@ -45,10 +45,10 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_get_internal_without_user(self):
-        """Ensure we get 401 if user isn't authenticated when accessing an internal config."""
+        """Ensure we get 40x if user isn't authenticated when accessing an internal config."""
         url = f"{base_url}/controller/configurations/{self.configuration.id}/mounting-actions"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_get_without_timepoint(self):
         """Ensure we get 400 if we miss the timepoint parameter."""
@@ -237,7 +237,8 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
         url = f"{base_url}/controller/configurations/{self.configuration.id}/mounting-actions"
         with self.run_requests_as(self.u):
             response = self.client.get(
-                url, query_string={"timepoint": datetime.datetime(2022, 5, 18, 12, 0, 0)}
+                url,
+                query_string={"timepoint": datetime.datetime(2022, 5, 18, 12, 0, 0)},
             )
         self.assertEqual(response.status_code, 200)
         expected = [

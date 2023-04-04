@@ -1,9 +1,11 @@
+"""Test cases for the api usage for generic platform action attachments."""
+
 from project import base_url
 from project.api.models import PlatformAttachment
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake
 from project.tests.models.test_generic_action_attachment_model import (
-    add_generic_platform_action_attachment_model,
+    add_generic_platform_action_model,
 )
 from project.tests.models.test_generic_actions_models import (
     generate_platform_action_model,
@@ -24,21 +26,41 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_generic_platform_action_attachment_collection(self):
-        """Test retrieve a collection of GenericPlatformActionAttachment objects"""
-        _ = add_generic_platform_action_attachment_model()
+        """Test retrieve a collection of GenericPlatformActionAttachment objects."""
+        generic_platform_action = add_generic_platform_action_model()
+        self.assertTrue(generic_platform_action.platform.is_public)
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+        # should be only one
+        self.assertEqual(response.json["meta"]["count"], 1)
+        self.assertEqual(
+            response.json["data"][0]["id"],
+            str(generic_platform_action.generic_platform_action_attachments[0].id),
+        )
+
+    def test_get_generic_platform_action_attachment_collection_internal(self):
+        """Ensure we don't expose details if the platform is internal without user login."""
+        generic_platform_action = add_generic_platform_action_model()
+        platform = generic_platform_action.platform
+        platform.is_internal = True
+        platform.is_public = False
+        db.session.add(platform)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["meta"]["count"], 0)
 
     def test_post_generic_platform_action_attachment(self):
-        """Create GenericPlatformActionAttachment"""
+        """Create GenericPlatformActionAttachment."""
         platform_action = generate_platform_action_model()
         attachment = PlatformAttachment(
             label="test platform attachment",
             url=fake.image_url(),
             platform_id=platform_action.platform_id,
         )
-
         db.session.add(attachment)
         db.session.commit()
         data = {
@@ -65,18 +87,18 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
         )
 
     def test_update_generic_platform_action_attachment(self):
-        """Update GenericPlatformActionAttachment"""
-        generic_platform_action_attachment = (
-            add_generic_platform_action_attachment_model()
-        )
-        generic_platform_action_attachment_changed = PlatformAttachment(
+        """Update GenericPlatformActionAttachment."""
+        generic_platform_action = add_generic_platform_action_model()
+        attachment_new = PlatformAttachment(
             label="new platform attachment",
             url=fake.image_url(),
-            platform_id=generic_platform_action_attachment.platform_id,
+            platform_id=generic_platform_action.platform_id,
         )
-
-        db.session.add(generic_platform_action_attachment_changed)
+        db.session.add(attachment_new)
         db.session.commit()
+        generic_platform_action_attachment = (
+            generic_platform_action.generic_platform_action_attachments[0]
+        )
         data = {
             "data": {
                 "type": self.object_type,
@@ -84,10 +106,7 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
                 "attributes": {},
                 "relationships": {
                     "attachment": {
-                        "data": {
-                            "type": "platform_attachment",
-                            "id": generic_platform_action_attachment_changed.id,
-                        }
+                        "data": {"type": "platform_attachment", "id": attachment_new.id}
                     },
                 },
             }
@@ -99,14 +118,14 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
         )
 
     def test_delete_generic_platform_action_attachment(self):
-        """Delete GenericPlatformActionAttachment """
+        """Delete GenericPlatformActionAttachment."""
+        generic_platform_action = add_generic_platform_action_model()
         generic_platform_action_attachment = (
-            add_generic_platform_action_attachment_model()
+            generic_platform_action.generic_platform_action_attachments[0]
         )
-        url = f"{self.url}/{generic_platform_action_attachment.id}"
-        _ = super().delete_object(url)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 404)
+        _ = super().delete_object(
+            url=f"{self.url}/{generic_platform_action_attachment.id}",
+        )
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

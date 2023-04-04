@@ -4,8 +4,9 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration, ConfigurationCustomField
+from project.api.models import Configuration, ConfigurationCustomField, Contact, User
 from project.api.models.base_model import db
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
@@ -210,7 +211,7 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
                     headers=create_token(),
                 )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_to_a_configuration_with_an_other_permission_group(self):
         """Post to a configuration with a different permission group from the user."""
@@ -352,7 +353,7 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
                     headers=create_token(),
                 )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_for_a_configuration_with_a_permission_group(self):
         """Delete customfield for configuration with same group as user (admin)."""
@@ -431,7 +432,7 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_for_a_configuration_with_a_permission_group_as_a_member(self):
         """Delete customfield for configuration with same group as user (member)."""
@@ -473,3 +474,70 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_patch_to_non_editable_configuration(self):
+        """Ensure we can't update to a configuration we can't edit."""
+        configuration1 = Configuration(
+            label="config1",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="1",
+        )
+        configuration2 = Configuration(
+            label="config2",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="2",
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        custom_field = ConfigurationCustomField(
+            key="k",
+            value="v",
+            configuration=configuration1,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all(
+            [configuration1, configuration2, contact, user, custom_field]
+        )
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration_customfield",
+                "id": custom_field.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another configuration for
+                    # which we have no edit permissions.
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": configuration2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration1.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{custom_field.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

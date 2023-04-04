@@ -4,9 +4,18 @@ import datetime
 import json
 from unittest.mock import patch
 
+import pytz
+
 from project import base_url
-from project.api.models import Configuration, Contact, PlatformMountAction, User
+from project.api.models import (
+    Configuration,
+    Contact,
+    Platform,
+    PlatformMountAction,
+    User,
+)
 from project.api.models.base_model import db
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
@@ -323,7 +332,7 @@ class TestMountPlatformPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
-            self.assertEqual(response.status_code, 409)
+            self.assertEqual(response.status_code, 403)
 
     def test_post_action_for_archived_parent_platform(self):
         """Ensure we can't create mount actions for archived parent platforms."""
@@ -411,7 +420,7 @@ class TestMountPlatformPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=access_headers,
                 )
-            self.assertEqual(response.status_code, 409)
+            self.assertEqual(response.status_code, 403)
 
     def test_delete_action_as_a_group_member(self):
         """Ensure mounted platform groups can be deleted."""
@@ -502,7 +511,7 @@ class TestMountPlatformPermissions(BaseTestCase):
                 delete_response_user_is_a_member = self.client.delete(
                     url, headers=access_headers
                 )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+                self.assertEqual(delete_response_user_is_a_member.status_code, 403)
 
     def test_delete_action_for_archived_parent_platform(self):
         """Ensure we can't delete mount actions for archived parent platforms."""
@@ -598,7 +607,7 @@ class TestMountPlatformPermissions(BaseTestCase):
                 delete_response_user_is_a_member = self.client.delete(
                     url, headers=access_headers
                 )
-                self.assertEqual(delete_response_user_is_a_member.status_code, 409)
+                self.assertEqual(delete_response_user_is_a_member.status_code, 403)
 
     def test_patch_action_for_archived_platform(self):
         """Ensure we can't patch mount actions for archived platforms."""
@@ -658,7 +667,7 @@ class TestMountPlatformPermissions(BaseTestCase):
                     headers=access_headers,
                     content_type="application/vnd.api+json",
                 )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+                self.assertEqual(patch_response_user_is_a_member.status_code, 403)
 
     def test_patch_action_for_archived_parent_platform(self):
         """Ensure we can't patch mount actions for archived parent platforms."""
@@ -778,7 +787,7 @@ class TestMountPlatformPermissions(BaseTestCase):
                     headers=access_headers,
                     content_type="application/vnd.api+json",
                 )
-                self.assertEqual(patch_response_user_is_a_member.status_code, 409)
+                self.assertEqual(patch_response_user_is_a_member.status_code, 403)
 
     def test_mount_a_platform_in_two_configuration_at_same_time(self):
         """
@@ -1105,6 +1114,155 @@ class TestMountPlatformPermissions(BaseTestCase):
                 headers=access_headers,
             )
             self.assertEqual(response_5.status_code, 409)
+
+    def test_patch_to_non_editable_configuration(self):
+        """Ensure we can't update to a configuration we can't edit."""
+        configuration1 = Configuration(
+            label="config1",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="1",
+        )
+        configuration2 = Configuration(
+            label="config2",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="2",
+        )
+        platform = Platform(
+            short_name="dummy platform",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        mount = PlatformMountAction(
+            configuration=configuration1,
+            platform=platform,
+            begin_date=datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_contact=contact,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all(
+            [configuration1, configuration2, platform, contact, user, mount]
+        )
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform_mount_action",
+                "id": mount.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another configuration for
+                    # which we have no edit permissions.
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": configuration2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration1.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{mount.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
+
+    def test_patch_to_non_editable_platform(self):
+        """Ensure we can't update to a platform we can't edit."""
+        configuration = Configuration(
+            label="config1",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="1",
+        )
+        platform1 = Platform(
+            short_name="dummy platform1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        platform2 = Platform(
+            short_name="dummy platform2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        mount = PlatformMountAction(
+            configuration=configuration,
+            platform=platform1,
+            begin_date=datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_contact=contact,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([configuration, platform1, platform2, contact, user, mount])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform_mount_action",
+                "id": mount.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another platform for
+                    # which we have no edit permissions.
+                    "platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": platform2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{mount.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
 
 
 def mount_payload_data(

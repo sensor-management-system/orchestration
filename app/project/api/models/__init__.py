@@ -26,6 +26,7 @@ from .contact_role import (  # noqa: F401
 )
 from .configuration_customfield import ConfigurationCustomField # noqa: F401
 from .customfield import CustomField  # noqa: F401
+from .datastream_link import DatastreamLink  # noqa: F401
 from .device import Device  # noqa: F401
 from .device_attachment import DeviceAttachment  # noqa: F401
 from .device_property import DeviceProperty  # noqa: F401

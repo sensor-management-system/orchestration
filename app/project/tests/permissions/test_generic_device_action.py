@@ -3,8 +3,11 @@ import json
 from datetime import datetime
 from unittest.mock import patch
 
+import pytz
+
 from project import base_url, db
-from project.api.models import Device, GenericDeviceAction
+from project.api.models import Contact, Device, GenericDeviceAction, User
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_actions_models import (
@@ -124,7 +127,7 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_generic_device_action_data_user_not_in_the_permission_group(self):
         """Post to device,with permission Group different from the user group."""
@@ -202,7 +205,7 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_generic_device_action_data_user_is_not_part_from_permission_group(
         self,
@@ -271,7 +274,7 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_generic_device_action_data_as_member(self):
         """Delete generic_device_action_data as member."""
@@ -290,3 +293,72 @@ class TestGenericDeviceActionPermissions(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_patch_to_non_editable_device(self):
+        """Ensure we can't update to a device we can't edit."""
+        device1 = Device(
+            short_name="device1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        device2 = Device(
+            short_name="device2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        action = GenericDeviceAction(
+            device=device1,
+            contact=contact,
+            begin_date=datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            action_type_name="Something",
+            action_type_uri="something",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([device1, device2, contact, user, action])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "generic_device_action",
+                "id": action.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another device for
+                    # which we have no edit permissions.
+                    "device": {
+                        "data": {
+                            "type": "device",
+                            "id": device2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*device1.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{action.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

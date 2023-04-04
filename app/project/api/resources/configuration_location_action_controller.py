@@ -1,15 +1,14 @@
 """Custom controller classes to work with location actions for configurations."""
 
-from flask import g
-
 from ...frj_csv_export.resource import ResourceList
-from ..helpers.errors import NotFoundError, UnauthorizedError
+from ..helpers.errors import ForbiddenError, NotFoundError
 from ..models import (
     Configuration,
     ConfigurationDynamicLocationBeginAction,
     ConfigurationStaticLocationBeginAction,
 )
 from ..models.base_model import db
+from ..permissions.rules import can_see
 
 
 class ControllerConfigurationLocationActionTimepoints(ResourceList):
@@ -25,9 +24,8 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
         )
         if not configuration:
             raise NotFoundError("No configuration with the given id.")
-        if configuration.is_internal:
-            if not g.user:
-                raise UnauthorizedError("Authentication required.")
+        if not can_see(configuration):
+            raise ForbiddenError("Authentication required.")
 
         static_locations = db.session.query(
             ConfigurationStaticLocationBeginAction

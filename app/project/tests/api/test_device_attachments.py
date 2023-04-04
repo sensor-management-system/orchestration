@@ -156,9 +156,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
-        # 404 as we don't find the device the moment we want to update
-        # its update description
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 422)
         count_device_attachments_after = db.session.query(DeviceAttachment).count()
         self.assertEqual(
             count_device_attachments_before, count_device_attachments_after
@@ -394,7 +392,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=create_token(),
             )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 422)
 
     def test_post_minio_url(self):
         """

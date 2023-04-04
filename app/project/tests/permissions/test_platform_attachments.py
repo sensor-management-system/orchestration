@@ -4,8 +4,9 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Platform, PlatformAttachment
+from project.api.models import Contact, Platform, PlatformAttachment, User
 from project.api.models.base_model import db
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions import create_a_test_platform
@@ -176,7 +177,7 @@ class TesPlatformAttachment(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_to_a_platform_with_an_other_permission_group(self):
         """Post to a platform with a different permission Group from the user."""
@@ -290,7 +291,7 @@ class TesPlatformAttachment(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_for_a_platform_with_a_permission_group(self):
         """Delete attached to platform with same group as group admin."""
@@ -353,7 +354,7 @@ class TesPlatformAttachment(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_to_a_platform_with_a_permission_group_as_a_member(self):
         """Delete attachment of platform with same group as user (member)."""
@@ -393,3 +394,70 @@ class TesPlatformAttachment(BaseTestCase):
         # description for the platform
         reloaded_platform = db.session.query(Platform).filter_by(id=platform.id).first()
         self.assertEqual(reloaded_platform.update_description, "delete;attachment")
+
+    def test_patch_to_non_editable_platform(self):
+        """Ensure we can't update to a platform we can't edit."""
+        platform1 = Platform(
+            short_name="platform1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        platform2 = Platform(
+            short_name="platform2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        attachment = PlatformAttachment(
+            label="k",
+            url="v",
+            platform=platform1,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([platform1, platform2, contact, user, attachment])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform_attachment",
+                "id": attachment.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another platform for
+                    # which we have no edit permissions.
+                    "platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": platform2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*platform1.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{attachment.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

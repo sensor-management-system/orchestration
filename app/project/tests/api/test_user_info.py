@@ -1,6 +1,7 @@
 """Test classes & functions for the userinfo endpoint."""
 import datetime
 import json
+from unittest import skipIf
 from unittest.mock import patch
 
 import pytz
@@ -24,17 +25,18 @@ class TestUserinfo(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 401)
 
+    @skipIf(
+        not current_app.config["IDL_URL"],
+        "will not work without idl url configuration.",
+    )
     def test_get_with_jwt_user_not_assigned_to_any_permission_group(self):
         """Ensure response with an empty list if user not assigned to any permission group."""
         access_headers = create_token()
-        if current_app.config["IDL_URL"] is not None:
-            response = self.client.get(self.url, headers=access_headers)
-            self.assertEqual(response.status_code, 200)
-            data = response.json["data"]
-            self.assertEqual(data["attributes"]["admin"], [])
-            self.assertEqual(data["attributes"]["member"], [])
-        else:
-            pass
+        response = self.client.get(self.url, headers=access_headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        self.assertEqual(data["attributes"]["admin"], [])
+        self.assertEqual(data["attributes"]["member"], [])
 
     def test_get_with_jwt_user_is_assigned_to_permission_groups(self):
         """Ensure response with an empty list if user not assigned to any permission group."""

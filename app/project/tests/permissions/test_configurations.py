@@ -3,8 +3,9 @@ import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Configuration, User
+from project.api.models import Configuration, Contact, User
 from project.api.models.base_model import db
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.permissions import create_a_test_contact, create_superuser_token
@@ -16,6 +17,22 @@ class TestConfigurationPermissions(BaseTestCase):
 
     configuration_url = base_url + "/configurations"
     object_type = "configuration"
+
+    def setUp(self):
+        """Set stuff up for the tests."""
+        super().setUp()
+        normal_contact = Contact(
+            given_name="normal", family_name="user", email="normal.user@localhost"
+        )
+        self.normal_user = User(subject=normal_contact.email, contact=normal_contact)
+        contact = Contact(
+            given_name="super", family_name="user", email="super.user@localhost"
+        )
+        self.super_user = User(
+            subject=contact.email, contact=contact, is_superuser=True
+        )
+        db.session.add_all([contact, normal_contact, self.normal_user, self.super_user])
+        db.session.commit()
 
     def test_add_public_configuration(self):
         """Ensure a new configuration can be public."""
@@ -60,18 +77,23 @@ class TestConfigurationPermissions(BaseTestCase):
                     "label": fake.pystr(),
                     "is_public": False,
                     "is_internal": True,
-                    "cfg_permission_group": "1",
+                    "cfg_permission_group": IDL_USER_ACCOUNT.membered_permission_groups[
+                        0
+                    ],
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.configuration_url,
-                data=json.dumps(configuration_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
+        with self.run_requests_as(self.normal_user):
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                with self.client:
+                    response = self.client.post(
+                        self.configuration_url,
+                        data=json.dumps(configuration_data),
+                        content_type="application/vnd.api+json",
+                    )
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data["data"]["attributes"]["is_internal"], True)
@@ -163,18 +185,17 @@ class TestConfigurationPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.configuration_url,
-                data=json.dumps(configuration_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
+        with self.run_requests_as(self.super_user):
+            with self.client:
+                response = self.client.post(
+                    self.configuration_url,
+                    data=json.dumps(configuration_data),
+                    content_type="application/vnd.api+json",
+                )
         self.assertEqual(response.status_code, 409)
 
-    def test_add_groups_ids(self):
-        """Ensure that a configuration with groups ids can be created."""
+    def test_add_group_ids(self):
+        """Ensure that a configuration with group ids can be created."""
         config_data = {
             "data": {
                 "type": "configuration",
@@ -182,24 +203,33 @@ class TestConfigurationPermissions(BaseTestCase):
                     "label": fake.pystr(),
                     "is_public": False,
                     "is_internal": True,
-                    "cfg_permission_group": "12",
+                    "cfg_permission_group": IDL_USER_ACCOUNT.membered_permission_groups[
+                        0
+                    ],
                 },
             }
         }
         access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.configuration_url,
-                data=json.dumps(config_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    self.configuration_url,
+                    data=json.dumps(config_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
 
         data = json.loads(response.data.decode())
 
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(data["data"]["attributes"]["cfg_permission_group"], "12")
+        self.assertEqual(
+            data["data"]["attributes"]["cfg_permission_group"],
+            IDL_USER_ACCOUNT.membered_permission_groups[0],
+        )
 
     def test_patch_configuration_as_a_member_in_a_permission_group(self):
         """Ensure a member in a group (admin/member) can change the configuration."""
@@ -209,15 +239,14 @@ class TestConfigurationPermissions(BaseTestCase):
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_member_in_2
         )
-        access_headers = create_token()
         for configuration_data in configs:
-            with self.client:
-                response = self.client.post(
-                    self.configuration_url,
-                    data=json.dumps(configuration_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+            with self.run_requests_as(self.super_user):
+                with self.client:
+                    response = self.client.post(
+                        self.configuration_url,
+                        data=json.dumps(configuration_data),
+                        content_type="application/vnd.api+json",
+                    )
 
             data = json.loads(response.data.decode())
 
@@ -239,9 +268,10 @@ class TestConfigurationPermissions(BaseTestCase):
                     }
                 }
                 url = f"{self.configuration_url}/{data['data']['id']}"
-                res = super().update_object(
-                    url, configuration_data_changed, self.object_type
-                )
+                with self.run_requests_as(self.normal_user):
+                    res = super().update_object(
+                        url, configuration_data_changed, self.object_type
+                    )
                 self.assertEqual(
                     res["data"]["attributes"]["label"],
                     configuration_data_changed["data"]["attributes"]["label"],
@@ -255,15 +285,14 @@ class TestConfigurationPermissions(BaseTestCase):
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_member_in_2
         )
-        access_headers = create_token()
         for configuration_data in configs:
             with self.client:
-                response = self.client.post(
-                    self.configuration_url,
-                    data=json.dumps(configuration_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+                with self.run_requests_as(self.super_user):
+                    response = self.client.post(
+                        self.configuration_url,
+                        data=json.dumps(configuration_data),
+                        content_type="application/vnd.api+json",
+                    )
 
             data = json.loads(response.data.decode())
 
@@ -292,7 +321,7 @@ class TestConfigurationPermissions(BaseTestCase):
                 }
                 url = f"{self.configuration_url}/{data['data']['id']}"
                 _ = super().try_update_object_with_status_code(
-                    url, configuration_data_changed, expected_status_code=409
+                    url, configuration_data_changed, expected_status_code=403
                 )
 
     def test_patch_configuration_user_not_in_any_permission_group(self):
@@ -301,15 +330,15 @@ class TestConfigurationPermissions(BaseTestCase):
         configs = preparation_of_public_and_internal_configuration_data(
             group_id_test_user_is_not_included
         )
-        access_headers = create_token()
         for configuration_data in configs:
-            with self.client:
-                response = self.client.post(
-                    self.configuration_url,
-                    data=json.dumps(configuration_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+            with self.run_requests_as(self.super_user):
+                # We run it as super user so that we can create the configuration.
+                with self.client:
+                    response = self.client.post(
+                        self.configuration_url,
+                        data=json.dumps(configuration_data),
+                        content_type="application/vnd.api+json",
+                    )
 
             data = json.loads(response.data.decode())
 
@@ -331,15 +360,14 @@ class TestConfigurationPermissions(BaseTestCase):
                     }
                 }
                 url = f"{self.configuration_url}/{data['data']['id']}"
-                access_headers = create_token()
-                with self.client:
-                    response = self.client.patch(
-                        url,
-                        data=json.dumps(configuration_data_changed_forbidden),
-                        content_type="application/vnd.api+json",
-                        headers=access_headers,
-                    )
-                self.assertEqual(response.status, "403 FORBIDDEN")
+                with self.run_requests_as(self.normal_user):
+                    with self.client:
+                        response = self.client.patch(
+                            url,
+                            data=json.dumps(configuration_data_changed_forbidden),
+                            content_type="application/vnd.api+json",
+                        )
+        self.assertEqual(response.status, "403 FORBIDDEN")
 
     def test_patch_configuration_no_permission_group_set(self):
         """Ensure a user can change a configuration if cfg_permission_group is not unset."""
@@ -390,13 +418,13 @@ class TestConfigurationPermissions(BaseTestCase):
         )
         access_headers = create_token()
         for configuration_data in configs:
-            with self.client:
-                response = self.client.post(
-                    self.configuration_url,
-                    data=json.dumps(configuration_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+            with self.run_requests_as(self.super_user):
+                with self.client:
+                    response = self.client.post(
+                        self.configuration_url,
+                        data=json.dumps(configuration_data),
+                        content_type="application/vnd.api+json",
+                    )
 
             data = json.loads(response.data.decode())
 
@@ -425,12 +453,12 @@ class TestConfigurationPermissions(BaseTestCase):
         access_headers = create_token()
         for configuration_data in configs:
             with self.client:
-                response = self.client.post(
-                    self.configuration_url,
-                    data=json.dumps(configuration_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+                with self.run_requests_as(self.super_user):
+                    response = self.client.post(
+                        self.configuration_url,
+                        data=json.dumps(configuration_data),
+                        content_type="application/vnd.api+json",
+                    )
 
             data = json.loads(response.data.decode())
 
@@ -458,12 +486,12 @@ class TestConfigurationPermissions(BaseTestCase):
         access_headers = create_superuser_token()
         for configuration_data in configs:
             with self.client:
-                response = self.client.post(
-                    self.configuration_url,
-                    data=json.dumps(configuration_data),
-                    content_type="application/vnd.api+json",
-                    headers=access_headers,
-                )
+                with self.run_requests_as(self.super_user):
+                    response = self.client.post(
+                        self.configuration_url,
+                        data=json.dumps(configuration_data),
+                        content_type="application/vnd.api+json",
+                    )
 
             data = json.loads(response.data.decode())
 
@@ -481,6 +509,51 @@ class TestConfigurationPermissions(BaseTestCase):
                 url = f"{self.configuration_url}/{data['data']['id']}"
                 delete_response = self.client.delete(url, headers=access_headers)
                 self.assertEqual(delete_response.status_code, 200)
+
+    def test_patch_to_different_permission_group(self):
+        """Ensure we can't update to a permission group we aren't members."""
+        configuration = Configuration(
+            label="Dummy config",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="1",
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([configuration, contact, user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "id": configuration.id,
+                "attributes": {"cfg_permission_group": "2"},
+                "relationships": {},
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.configuration_url}/{configuration.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
 
 
 def preparation_of_public_and_internal_configuration_data(group_id=None):
