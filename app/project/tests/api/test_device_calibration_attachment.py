@@ -1,3 +1,5 @@
+"""Tests for the api for device calibration attachments."""
+
 from project import base_url, db
 from project.api.models import (
     Contact,
@@ -25,8 +27,15 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_device_calibration_action_attachment_collection(self):
-        """Test retrieve a collection of DeviceCalibrationAttachment objects"""
+        """Test retrieve a collection of DeviceCalibrationAttachment objects."""
         device_calibration_attachment = add_device_calibration_attachment()
+        device = device_calibration_attachment.action.device
+        device.is_public = True
+        device.is_internal = False
+
+        db.session.add(device)
+        db.session.commit()
+
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -36,11 +45,31 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             response.json["data"][0]["id"], str(device_calibration_attachment.id)
         )
 
+    def test_get_device_calibration_action_attachment_collection_internal(self):
+        """Ensure we don't show entries of internal devices without user."""
+        device_calibration_attachment = add_device_calibration_attachment()
+        device = device_calibration_attachment.action.device
+        self.assertTrue(device.is_internal)
+
+        db.session.add(device)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        # Should be empty as we don't give a user => internal device is not
+        # visible anymore.
+        self.assertEqual(response.json["meta"]["count"], 0)
+
     def test_post_generic_device_action_attachment(self):
-        """Create DeviceCalibrationAttachment"""
+        """Create DeviceCalibrationAttachment."""
         userinfo = generate_userinfo_data()
         device = Device(
-            short_name="Device 1", manufacturer_name=fake.company(),is_public=False, is_private=False, is_internal=True,
+            short_name="Device 1",
+            manufacturer_name=fake.company(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
 
         contact = Contact(
@@ -86,7 +115,7 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         )
 
     def test_update_generic_device_action_attachment(self):
-        """Update DeviceCalibrationAttachment"""
+        """Update DeviceCalibrationAttachment."""
         device_calibration_attachment = add_device_calibration_attachment()
         device = Device(
             short_name="Device new",
@@ -121,9 +150,11 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
         )
 
     def test_delete_generic_device_action_attachment(self):
-        """Delete DeviceCalibrationAttachment"""
+        """Delete DeviceCalibrationAttachment."""
         dca = add_device_calibration_attachment()
-        _ = super().delete_object(url=f"{self.url}/{dca.id}",)
+        _ = super().delete_object(
+            url=f"{self.url}/{dca.id}",
+        )
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

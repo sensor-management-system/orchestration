@@ -52,7 +52,7 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
     def test_get_internal_without_user(self):
         """Ensure anonymous can't access an internal configuration."""
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_get_one_location_action_static(self):
         """Ensure we get an entry for an existing location action."""

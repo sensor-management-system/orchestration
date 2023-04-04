@@ -1,10 +1,9 @@
 """Resource classes for device mount actions."""
 
-from flask_rest_jsonapi import ResourceDetail, ResourceList, ResourceRelationship
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.mounting_checks import DeviceMountActionValidator
 from ..helpers.resource_mixin import add_updated_by_id, decode_json_request_data
 from ..models.base_model import db
@@ -12,6 +11,8 @@ from ..models.configuration import Configuration
 from ..models.device import Device
 from ..models.mount_actions import DeviceMountAction
 from ..models.platform import Platform
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..resources.base_resource import (
     check_if_object_not_found,
     query_configuration_and_set_update_description_text,
@@ -27,6 +28,7 @@ class DeviceMountActionList(ResourceList):
     validator = DeviceMountActionValidator()
 
     def before_post(self, args, kwargs, data=None):
+        """Run some validators before adding the entry."""
         data_with_relationships = decode_json_request_data()
         self.validator.validate_create(data_with_relationships)
 
@@ -36,7 +38,7 @@ class DeviceMountActionList(ResourceList):
 
         Also handle optional pre-filters (for specific configurations, for example).
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
         device_id = view_kwargs.get("device_id")
         parent_platform_id = view_kwargs.get("parent_platform_id")
@@ -58,7 +60,8 @@ class DeviceMountActionList(ResourceList):
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id"}, "Device: {} not found".format(device_id),
+                    {"parameter": "id"},
+                    "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(DeviceMountAction.device_id == device_id)
@@ -97,6 +100,7 @@ class DeviceMountActionList(ResourceList):
         "model": DeviceMountAction,
         "methods": {"query": query},
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DeviceMountActionDetail(ResourceDetail):
@@ -105,7 +109,7 @@ class DeviceMountActionDetail(ResourceDetail):
     validator = DeviceMountActionValidator()
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if DeviceMountAction not found"""
+        """Return 404 Responses if DeviceMountAction not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     def before_patch(self, args, kwargs, data=None):
@@ -115,13 +119,6 @@ class DeviceMountActionDetail(ResourceDetail):
         data_with_relationships = decode_json_request_data()
         self.validator.validate_update(data_with_relationships, kwargs["id"])
         add_updated_by_id(data)
-
-    schema = DeviceMountActionSchema
-    decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": DeviceMountAction,
-    }
 
     def after_patch(self, result):
         """
@@ -147,13 +144,10 @@ class DeviceMountActionDetail(ResourceDetail):
         msg = "delete;device mount action"
         set_update_description_text_and_update_by_user(configuration, msg)
 
-
-class DeviceMountActionRelationship(ResourceRelationship):
-    """Relationship resource for device mount actions."""
-
     schema = DeviceMountActionSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
     }
+    permission_classes = [DelegateToCanFunctions]

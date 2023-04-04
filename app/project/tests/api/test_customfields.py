@@ -151,8 +151,7 @@ class TestCustomFieldServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
-        self.assertEqual(response.status_code, 404)
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 422)
         count_customfields_after = db.session.query(CustomField).count()
         self.assertEqual(count_customfields_before, count_customfields_after)
 

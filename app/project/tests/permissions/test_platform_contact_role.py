@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, Platform, PlatformContactRole, User
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
-from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
-from project.tests.base import fake
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 
 
@@ -291,7 +291,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
             .one()
         )
         response = self.client.get(self.url + f"/{role.id}")
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_getone_interal_platform_contact_role_logged_in(self):
         """Ensure that a contact role for an internal platform is listed for logged in users."""
@@ -322,7 +322,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
         db.session.commit()
 
         response = self.client.get(self.url + f"/{platform_contact_role.id}")
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_getone_private_platform_contact_role_owner(self):
         """Ensure that the owner of a private platform can access the contact role."""
@@ -455,7 +455,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
             response = self.client.delete(
                 self.url + f"/{platform_contact_role.id}", headers=access_headers
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_public_platform_contact_role_admin_in_group(self):
         """Ensure that contact role for public platform can be deleted by admin of group."""
@@ -805,7 +805,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_public_platform_contact_role_admin_in_group(self):
         """Ensure that contact role for public platform can be patched by admin of group."""
@@ -1363,7 +1363,7 @@ class TestPlatformContactRolePermissions(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_public_platform_contact_role_admin_in_group(self):
         """Ensure that contact role for public platform can be posted by admin of group."""
@@ -1944,3 +1944,71 @@ class TestPlatformContactRolePermissions(BaseTestCase):
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
+
+    def test_patch_to_non_editable_platform(self):
+        """Ensure we can't update to a platform we can't edit."""
+        platform1 = Platform(
+            short_name="platform1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        platform2 = Platform(
+            short_name="platform2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        role = PlatformContactRole(
+            contact=contact,
+            platform=platform1,
+            role_name="Owner",
+            role_uri="something",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([platform1, platform2, contact, user, role])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform_contact_role",
+                "id": role.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another platform for
+                    # which we have no edit permissions.
+                    "platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": platform2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*platform1.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{role.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

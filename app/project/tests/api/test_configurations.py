@@ -72,95 +72,63 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_add_configuration(self):
         """Ensure POST a new configuration can be added to the database."""
-        # we want to run the very same test with multiple dates
-        calibration_dates = {
-            "20201111": {
-                "json_api_value": "2020-11-11T00:00:00+00:00",
-                "sql_alchemy_value": datetime.datetime(
-                    year=2020,
-                    month=11,
-                    day=11,
-                    hour=0,
-                    minute=0,
-                    second=0,
-                    tzinfo=pytz.UTC,
-                ),
-            },
-            "20200229": {
-                "json_api_value": "2020-02-29T00:00:00+00:00",
-                "sql_alchemy_value": datetime.datetime(
-                    year=2020,
-                    month=2,
-                    day=29,
-                    hour=0,
-                    minute=0,
-                    second=0,
-                    tzinfo=pytz.UTC,
-                ),
-            },
-            "2020-08-29T13:49:48.015620+00:00": {
-                "json_api_value": "2020-08-29T13:49:48.015620+00:00",
-                # first this should be wrong
-                "sql_alchemy_value": datetime.datetime(
-                    year=2020,
-                    month=8,
-                    day=29,
-                    hour=13,
-                    minute=49,
-                    second=48,
-                    microsecond=15620,
-                    tzinfo=pytz.UTC,
-                ),
-            },
-        }
-        for (
-            # Note: As those values are never used, it should be checked
-            # if the test still does something useful.
-            _input_calibration_date,
-            _expected_output_calibration_date,
-        ) in calibration_dates.items():
-            # set up for each single run
-            self.setUp()
+        devices_json = extract_data_from_json_file(
+            self.device_json_data_url, "devices"
+        )
 
-            devices_json = extract_data_from_json_file(
-                self.device_json_data_url, "devices"
+        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
+        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+            idl_mock.return_value = UserAccount(
+                id="1234",
+                username="User 1234",
+                membered_permission_groups=["12"],
+                administrated_permission_groups=["12"],
             )
-
-            device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
             super().add_object(
                 url=self.device_url, data_object=device_data, object_type="device"
             )
 
-            platforms_json = extract_data_from_json_file(
-                self.platform_json_data_url, "platforms"
+        platforms_json = extract_data_from_json_file(
+            self.platform_json_data_url, "platforms"
+        )
+
+        platform_data = {
+            "data": {"type": "platform", "attributes": platforms_json[0]}
+        }
+
+        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+            idl_mock.return_value = UserAccount(
+                id="1234",
+                username="User 1234",
+                membered_permission_groups=["12"],
+                administrated_permission_groups=["12"],
             )
-
-            platform_data = {
-                "data": {"type": "platform", "attributes": platforms_json[0]}
-            }
-
             super().add_object(
                 url=self.platform_url, data_object=platform_data, object_type="platform"
             )
 
-            config_json = extract_data_from_json_file(
-                self.json_data_url, "configuration"
-            )
+        config_json = extract_data_from_json_file(
+            self.json_data_url, "configuration"
+        )
 
-            config_data = {
-                "data": {"type": "configuration", "attributes": config_json[0]}
-            }
+        config_data = {
+            "data": {"type": "configuration", "attributes": config_json[0]}
+        }
+        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+            idl_mock.return_value = UserAccount(
+                id="1234",
+                username="User 1234",
+                membered_permission_groups=["12"],
+                administrated_permission_groups=["12"],
+            )
             result_payload = super().add_object(
                 url=self.configurations_url,
                 data_object=config_data,
                 object_type=self.object_type,
             )
-            # Make sure that we have some fields that we want to have.
-            self.assertTrue("created_at" in result_payload["data"]["attributes"].keys())
-            self.assertTrue("updated_at" in result_payload["data"]["attributes"].keys())
-
-            # clean up after each run
-            self.tearDown()
+        # Make sure that we have some fields that we want to have.
+        self.assertTrue("created_at" in result_payload["data"]["attributes"].keys())
+        self.assertTrue("updated_at" in result_payload["data"]["attributes"].keys())
 
     def test_support_include_devices_and_platforms_on_rest_call(self):
         """
@@ -633,11 +601,18 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
-        result = super().add_object(
-            url=self.configurations_url,
-            data_object=config_data,
-            object_type=self.object_type,
-        )
+        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+            idl_mock.return_value = UserAccount(
+                id="1234",
+                username="User 1234",
+                membered_permission_groups=["12"],
+                administrated_permission_groups=["12"],
+            )
+            result = super().add_object(
+                url=self.configurations_url,
+                data_object=config_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
         cfg = db.session.query(Configuration).filter_by(id=result_id).first()
 
@@ -649,11 +624,18 @@ class TestConfigurationsService(BaseTestCase):
         config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
         config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
-        result = super().add_object(
-            url=self.configurations_url,
-            data_object=config_data,
-            object_type=self.object_type,
-        )
+        with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+            idl_mock.return_value = UserAccount(
+                id="1234",
+                username="User 1234",
+                membered_permission_groups=["12"],
+                administrated_permission_groups=["12"],
+            )
+            result = super().add_object(
+                url=self.configurations_url,
+                data_object=config_data,
+                object_type=self.object_type,
+            )
         result_id = result["data"]["id"]
 
         contact = create_a_test_contact()
@@ -663,21 +645,28 @@ class TestConfigurationsService(BaseTestCase):
         db.session.commit()
 
         with self.run_requests_as(user):
-            with self.client:
-                resp = self.client.patch(
-                    self.configurations_url + "/" + result_id,
-                    json={
-                        "data": {
-                            "id": result_id,
-                            "type": "configuration",
-                            "attributes": {
-                                "label": "updated label",
-                            },
-                        }
-                    },
-                    headers={"Content-Type": "application/vnd.api+json"},
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
+                idl_mock.return_value = UserAccount(
+                    id="1234",
+                    username="User 1234",
+                    membered_permission_groups=["12"],
+                    administrated_permission_groups=["12"],
                 )
-                self.assertEqual(resp.status_code, 200)
+                with self.client:
+                    resp = self.client.patch(
+                        self.configurations_url + "/" + result_id,
+                        json={
+                            "data": {
+                                "id": result_id,
+                                "type": "configuration",
+                                "attributes": {
+                                    "label": "updated label",
+                                },
+                            }
+                        },
+                        headers={"Content-Type": "application/vnd.api+json"},
+                    )
+        self.assertEqual(resp.status_code, 200)
 
         config = db.session.query(Configuration).filter_by(id=result_id).first()
 

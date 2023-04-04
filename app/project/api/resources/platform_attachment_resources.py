@@ -7,12 +7,13 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...api import minio
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.platform_attachment import PlatformAttachment
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.platform_attachment_schema import PlatformAttachmentSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -38,7 +39,7 @@ class PlatformAttachmentList(ResourceList):
         Handle also cases to get all the platform attachments
         for a specific platform.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         platform_id = view_kwargs.get("platform_id")
 
         if platform_id is not None:
@@ -95,9 +96,7 @@ class PlatformAttachmentList(ResourceList):
         "model": PlatformAttachment,
         "methods": {"before_create_object": before_create_object, "query": query},
     }
-
-
-"""Module for the platform attachment detail resource."""
+    permission_classes = [DelegateToCanFunctions]
 
 
 class PlatformAttachmentDetail(ResourceDetail):
@@ -180,3 +179,4 @@ class PlatformAttachmentDetail(ResourceDetail):
         "session": db.session,
         "model": PlatformAttachment,
     }
+    permission_classes = [DelegateToCanFunctions]

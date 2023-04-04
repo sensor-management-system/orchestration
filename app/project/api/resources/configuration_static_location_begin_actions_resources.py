@@ -1,17 +1,10 @@
 """Resource classes for Configuration static location begin actions."""
 
-from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
+from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import (
-    check_deletion_permission_for_configuration_related_objects,
-    check_patch_permission_for_configuration_related_objects,
-    check_permissions_for_configuration_related_objects,
-    check_post_permission_for_configuration_related_objects,
-    get_query_with_permissions_for_configuration_related_objects,
-)
 from ..helpers.location_checks import StaticLocationActionValidator
 from ..helpers.resource_mixin import (
     add_created_by_id,
@@ -20,6 +13,8 @@ from ..helpers.resource_mixin import (
 )
 from ..models import Configuration, ConfigurationStaticLocationBeginAction
 from ..models.base_model import db
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.configuration_static_location_actions_schema import (
     ConfigurationStaticLocationBeginActionSchema,
 )
@@ -46,9 +41,7 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
 
         Also handle optional pre-filters (for specific configuration, for example).
         """
-        query_ = get_query_with_permissions_for_configuration_related_objects(
-            self.model
-        )
+        query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -67,10 +60,6 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
                     == configuration_id
                 )
         return query_
-
-    def before_post(self, args, kwargs, data=None):
-        """Run some checks before we create the object."""
-        check_post_permission_for_configuration_related_objects()
 
     def after_post(self, result):
         """
@@ -95,6 +84,7 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
             "before_create_object": before_create_object,
         },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
@@ -111,15 +101,9 @@ class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
         - Check that the user is allowed to see the object (401 or 405 otherwise)
         """
         check_if_object_not_found(self._data_layer.model, kwargs)
-        check_permissions_for_configuration_related_objects(
-            self._data_layer.model, kwargs["id"]
-        )
 
     def before_patch(self, args, kwargs, data=None):
         """Run some checks before we update an object."""
-        check_patch_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
         data_with_relationships = decode_json_request_data()
         self.validator.validate_update(data_with_relationships, kwargs["id"])
         add_updated_by_id(data)
@@ -138,9 +122,6 @@ class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
 
     def before_delete(self, args, kwargs):
         """Run some checks before we delete."""
-        check_deletion_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
         location_action = (
             db.session.query(ConfigurationStaticLocationBeginAction)
             .filter_by(id=kwargs["id"])
@@ -158,14 +139,4 @@ class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
         "session": db.session,
         "model": ConfigurationStaticLocationBeginAction,
     }
-
-
-class ConfigurationStaticLocationBeginActionRelationship(ResourceRelationship):
-    """Relationship resource for Configuration static location begin actions."""
-
-    schema = ConfigurationStaticLocationBeginActionSchema
-    decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": ConfigurationStaticLocationBeginAction,
-    }
+    permission_classes = [DelegateToCanFunctions]

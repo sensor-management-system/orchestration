@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Configuration, ConfigurationContactRole, Contact, User
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, generate_userinfo_data
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
@@ -159,7 +160,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             .one()
         )
         response = self.client.get(self.url + f"/{role.id}")
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_getone_interal_configuration_contact_role_logged_in(self):
         """Ensure that contact role for an internal configuration is listed for logged in users."""
@@ -221,7 +222,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             response = self.client.delete(
                 self.url + f"/{configuration_contact_role.id}", headers=access_headers
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_public_configuration_contact_role_admin_in_group(self):
         """Ensure that contact role for public configuration can be deleted by admin of group."""
@@ -470,7 +471,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_public_configuration_contact_role_admin_in_group(self):
         """Ensure that contact role for public configuration can be patched by admin of group."""
@@ -884,7 +885,7 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_public_configuration_contact_role_admin_in_group(self):
         """Ensure that contact role for public configuration can be posted by admin of group."""
@@ -1288,3 +1289,70 @@ class TestConfigurationContactRolePermissions(BaseTestCase):
             )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json["data"]["attributes"]["role_name"], "dummy name")
+
+    def test_patch_to_non_editable_configuration(self):
+        """Ensure we can't update to a configuration we can't edit."""
+        configuration1 = Configuration(
+            label="config1",
+            is_public=False,
+            is_internal=True,
+        )
+        configuration2 = Configuration(
+            label="config2",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="2",
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        contact_role = ConfigurationContactRole(
+            contact=contact,
+            role_name="Owner",
+            role_uri="something",
+            configuration=configuration1,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all(
+            [configuration1, configuration2, contact, user, contact_role]
+        )
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration_contact_role",
+                "id": contact_role.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to anohter configuration for
+                    # which we have no edit permissions.
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": configuration2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration1.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{contact_role.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

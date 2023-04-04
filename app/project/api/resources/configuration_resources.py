@@ -5,29 +5,23 @@ import os
 from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
-from sqlalchemy import or_
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import (
-    cfg_permission_group_defined,
-    check_deletion_permission,
-    is_superuser,
-    is_user_in_a_group,
-)
 from ..datalayers.esalchemy import (
     AndFilter,
     EsSqlalchemyDataLayer,
-    OrFilter,
     TermEqualsExactStringFilter,
 )
 from ..helpers.db import save_to_db
-from ..helpers.errors import ConflictError, ForbiddenError, UnauthorizedError
+from ..helpers.errors import ConflictError, ForbiddenError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact_role import ConfigurationContactRole
 from ..models.site import Site
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.configuration_schema import ConfigurationSchema
 from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
@@ -47,17 +41,7 @@ class ConfigurationList(ResourceList):
         :param view_kwargs:
         :return: queryset or es filter
         """
-        query = db.session.query(self.model)
-        if g.user is None:
-            query = query.filter_by(is_public=True)
-        else:
-            if not g.user.is_superuser:
-                query = query.filter(
-                    or_(
-                        self.model.is_public,
-                        self.model.is_internal,
-                    )
-                )
+        query = filter_visible(self.session.query(self.model))
         site_id = view_kwargs.get("site_id")
         if site_id is not None:
             try:
@@ -83,20 +67,7 @@ class ConfigurationList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
-        and_filters = []
-        permission_filter = None
-        if g.user is None:
-            permission_filter = TermEqualsExactStringFilter("is_public", True)
-        elif g.user.is_superuser:
-            permission_filter = OrFilter(
-                [
-                    TermEqualsExactStringFilter("is_public", True),
-                    TermEqualsExactStringFilter("is_internal", True),
-                ]
-            )
-
-        if permission_filter:
-            and_filters.append(permission_filter)
+        and_filters = [filter_visible_es(self.model)]
 
         site_id = view_kwargs.get("site_id")
         if site_id is not None:
@@ -108,12 +79,7 @@ class ConfigurationList(ResourceList):
         if hide_archived:
             and_filters.append(TermEqualsExactStringFilter("archived", False))
 
-        if len(and_filters) == 0:
-            return None
-        if len(and_filters) == 1:
-            return and_filters[0]
-
-        return AndFilter(and_filters)
+        return AndFilter.combine_optionals(and_filters)
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -173,6 +139,7 @@ class ConfigurationList(ResourceList):
             "es_query": es_query,
         },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class ConfigurationDetail(ResourceDetail):
@@ -186,29 +153,9 @@ class ConfigurationDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Prevent not registered users form viewing internal configs."""
         check_if_object_not_found(self._data_layer.model, kwargs)
-        config = db.session.query(Configuration).filter_by(id=kwargs["id"]).first()
-        if config:
-            if config.is_internal:
-                if not g.user:
-                    raise UnauthorizedError("Authentication required.")
 
     def before_patch(self, args, kwargs, data):
         """Check if a user has the permission to change this configuration."""
-        configuration = (
-            db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
-        )
-        if configuration and configuration.archived:
-            raise ConflictError("It is not allowed to edit archived configurations.")
-        if not is_superuser():
-            configuration = (
-                db.session.query(Configuration).filter_by(id=data["id"]).one_or_none()
-            )
-            group_id = configuration.cfg_permission_group
-            if cfg_permission_group_defined(group_id):
-                if not is_user_in_a_group([group_id]):
-                    raise ForbiddenError(
-                        "User is not part of any group to edit this object."
-                    )
         add_updated_by_id(data)
 
     def after_patch(self, result):
@@ -220,10 +167,6 @@ class ConfigurationDetail(ResourceDetail):
 
         save_to_db(configuration)
         return result
-
-    def before_delete(self, args, kwargs):
-        """Check for permission."""
-        check_deletion_permission(kwargs, Configuration)
 
     def delete(self, *args, **kwargs):
         """
@@ -260,3 +203,4 @@ class ConfigurationDetail(ResourceDetail):
         "session": db.session,
         "model": Configuration,
     }
+    permission_classes = [DelegateToCanFunctions]

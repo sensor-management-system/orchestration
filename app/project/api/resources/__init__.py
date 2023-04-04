@@ -33,6 +33,10 @@ from .configuration_customfield_resources import (  # noqa: F401
 )
 from .contact_resources import ContactDetail, ContactList  # noqa: F401
 from .customfield_resources import CustomFieldDetail, CustomFieldList  # noqa: F401
+from .datastream_link_resources import (  # noqa: F401
+    DatastreamLinkDetail,
+    DatastreamLinkList,
+)
 from .device_attachment_resources import (  # noqa: F401
     DeviceAttachmentDetail,
     DeviceAttachmentList,

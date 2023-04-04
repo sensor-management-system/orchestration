@@ -11,8 +11,8 @@ from flask import Blueprint, g
 from ..api.helpers.errors import ForbiddenError, UnauthorizedError
 from ..api.models import Site
 from ..api.models.base_model import db
+from ..api.permissions.rules import can_archive, can_restore, can_see
 from ..config import env
-from ..restframework.rules import archive_site_permissions, restore_site_permissions
 from ..restframework.shortcuts import get_object_or_404
 from ..restframework.views.classbased import BaseView, class_based_view
 
@@ -28,7 +28,6 @@ additional_site_routes = Blueprint(
 class ArchiveSiteView(BaseView):
     """View to archive sites with a post request."""
 
-    permissions = archive_site_permissions
     model = Site
 
     def __init__(self, id):
@@ -46,10 +45,10 @@ class ArchiveSiteView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         site = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(site):
+        if not can_see(site) or not can_archive(site):
             raise ForbiddenError("User is not allowed to archive")
         self.archive(site)
         return "", 204
@@ -60,7 +59,6 @@ class ArchiveSiteView(BaseView):
 class RestoreSiteView(BaseView):
     """View to restore archived sites."""
 
-    permissions = restore_site_permissions
     model = Site
 
     def __init__(self, id):
@@ -78,10 +76,10 @@ class RestoreSiteView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         site = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(site):
+        if not can_see(site) or not can_restore(site):
             raise ForbiddenError("User is not allowed to restore")
         self.restore(site)
         return "", 204

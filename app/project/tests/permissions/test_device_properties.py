@@ -5,9 +5,9 @@ from unittest import skip
 from unittest.mock import patch
 
 from project import base_url
+from project.api.models import Contact, Device, DeviceProperty, User
 from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.models.device_property import DeviceProperty
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 from project.tests.permissions.test_customfields import create_a_test_device
@@ -181,7 +181,7 @@ class TestDevicePropertyServices(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_device_property_api(self):
         """Ensure that we can update a device property."""
@@ -270,7 +270,7 @@ class TestDevicePropertyServices(BaseTestCase):
                     headers=create_token(),
                 )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     @skip("Checks for permissions currently only test for ")
     def test_patch_device_property_for_archived_target_device(self):
@@ -376,4 +376,71 @@ class TestDevicePropertyServices(BaseTestCase):
                     headers=create_token(),
                 )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
+
+    def test_patch_to_non_editable_device(self):
+        """Ensure we can't update to a device we can't edit."""
+        device1 = Device(
+            short_name="device1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        device2 = Device(
+            short_name="device2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        dv_property = DeviceProperty(
+            device=device1,
+            property_name="Temp",
+            property_uri="something",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([device1, device2, contact, user, dv_property])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "id": dv_property.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another device for
+                    # which we have no edit permissions.
+                    "device": {
+                        "data": {
+                            "type": "device",
+                            "id": device2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*device1.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{dv_property.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

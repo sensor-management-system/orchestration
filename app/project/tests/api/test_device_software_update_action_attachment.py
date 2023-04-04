@@ -1,3 +1,5 @@
+"""Test for the api usage for device software update action attachments."""
+
 from project import base_url, db
 from project.api.models import (
     Contact,
@@ -25,10 +27,16 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_device_software_update_action_attachment_collection(self):
-        """Test retrieve a collection of DeviceSoftwareUpdateActionAttachment objects"""
+        """Test retrieve a collection of DeviceSoftwareUpdateActionAttachment objects."""
         device_software_update_action_attachment = (
             add_device_software_update_action_attachment()
         )
+        device = device_software_update_action_attachment.action.device
+        device.is_public = True
+        device.is_internal = False
+        db.session.add(device)
+        db.session.commit()
+
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -39,8 +47,22 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
             str(device_software_update_action_attachment.id),
         )
 
+    def test_get_device_software_update_action_attachment_collection_internal(self):
+        """Ensure we don't give out attachments for internal devices without login."""
+        device_software_update_action_attachment = (
+            add_device_software_update_action_attachment()
+        )
+        device = device_software_update_action_attachment.action.device
+        self.assertTrue(device.is_internal)
+
+        with self.client:
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        # should be empty
+        self.assertEqual(response.json["meta"]["count"], 0)
+
     def test_post_device_software_update_action_attachment(self):
-        """TEST Create DeviceSoftwareUpdateActionAttachment"""
+        """Create DeviceSoftwareUpdateActionAttachment."""
         userinfo = generate_userinfo_data()
         device = Device(
             short_name="Device 277",
@@ -96,7 +118,7 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
         )
 
     def test_update_device_software_update_action_attachment(self):
-        """TEST Update DeviceSoftwareUpdateActionAttachment"""
+        """Update DeviceSoftwareUpdateActionAttachment."""
         device_software_update_action_attachment = (
             add_device_software_update_action_attachment()
         )
@@ -133,7 +155,7 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
         )
 
     def test_delete_device_software_update_action_attachment(self):
-        """TEST Delete DeviceSoftwareUpdateActionAttachment"""
+        """Delete DeviceSoftwareUpdateActionAttachment."""
         device_software_update_action_attachment = (
             add_device_software_update_action_attachment()
         )

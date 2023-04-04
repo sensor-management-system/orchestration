@@ -36,6 +36,12 @@ class TestDeviceMountAction(BaseTestCase):
     def test_get_device_mount_action_collection(self):
         """Test retrieve a collection of DeviceMountAction objects."""
         mount_device_action = add_mount_device_action_model()
+        configuration = mount_device_action.configuration
+        configuration.is_public = True
+        configuration.is_internal = False
+        db.session.add(configuration)
+        db.session.commit()
+
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
@@ -125,15 +131,20 @@ class TestDeviceMountAction(BaseTestCase):
             }
         }
         response = super().add_object(
-            url=f"{self.url}?include=device,begin_contact,end_contact,parent_platform,configuration",
+            url=f"{self.url}?include="
+            + "device,begin_contact,end_contact,parent_platform,configuration",
             data_object=data,
             object_type=self.object_type,
         )
         result_id = response["data"]["id"]
-        result_device_mount_action = db.session.query(DeviceMountAction).filter_by(id=result_id).first()
+        result_device_mount_action = (
+            db.session.query(DeviceMountAction).filter_by(id=result_id).first()
+        )
 
         msg = "create;device mount action"
-        self.assertEqual(msg, result_device_mount_action.configuration.update_description)
+        self.assertEqual(
+            msg, result_device_mount_action.configuration.update_description
+        )
 
     def test_update_device_mount_action(self):
         """Update DeviceMountAction."""
@@ -155,10 +166,14 @@ class TestDeviceMountAction(BaseTestCase):
             object_type=self.object_type,
         )
         result_id = response["data"]["id"]
-        result_device_mount_action = db.session.query(DeviceMountAction).filter_by(id=result_id).first()
+        result_device_mount_action = (
+            db.session.query(DeviceMountAction).filter_by(id=result_id).first()
+        )
 
         msg = "update;device mount action"
-        self.assertEqual(msg, result_device_mount_action.configuration.update_description)
+        self.assertEqual(
+            msg, result_device_mount_action.configuration.update_description
+        )
 
     def test_delete_device_mount_action(self):
         """Delete DeviceMountAction should fail without permission."""
@@ -176,7 +191,11 @@ class TestDeviceMountAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 200)
 
-        related_configuration = db.session.query(Configuration).filter_by(id=related_configuration_id).first()
+        related_configuration = (
+            db.session.query(Configuration)
+            .filter_by(id=related_configuration_id)
+            .first()
+        )
         msg = "delete;device mount action"
         self.assertEqual(msg, related_configuration.update_description)
 
@@ -413,7 +432,8 @@ class TestDeviceMountAction(BaseTestCase):
             short_name="platform1",
             manufacturer_name=fake.company(),
             is_public=True,
-            is_private=False, is_internal=False,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform1)
 
@@ -421,7 +441,8 @@ class TestDeviceMountAction(BaseTestCase):
             short_name="platform2",
             manufacturer_name=fake.company(),
             is_public=True,
-            is_private=False, is_internal=False,
+            is_private=False,
+            is_internal=False,
         )
         db.session.add(platform2)
 
@@ -501,7 +522,8 @@ class TestDeviceMountAction(BaseTestCase):
                 base_url + f"/platforms/{platform2.id + 9999}/device-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing, content_type="application/vnd.api+json",
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -520,7 +542,9 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {"begin_description": "updated",},
+                "attributes": {
+                    "begin_description": "updated",
+                },
                 "relationships": {
                     "device": {
                         "data": {
@@ -540,7 +564,15 @@ class TestDeviceMountAction(BaseTestCase):
                 headers=access_headers,
             )
 
-        self.assertEqual(response.status_code, 404)
+        # It looks a little bit strange to have the 403 here.
+        # This is due to the permission management checks that
+        # we run before putting the device mount action to the new
+        # device: The user must not only be able to edit
+        # the device to that the mount action belong before
+        # doing the request, but also for the one that we want
+        # to use as the target.
+        # As this doesn't exist, we don't allow the change.
+        self.assertEqual(response.status_code, 403)
 
     def test_update_device_mount_action_change_configuration_id(self):
         """Make sure configuration id can not be changed if new config doesn't exist."""
@@ -552,7 +584,9 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_device_action.id,
-                "attributes": {"begin_description": "updated",},
+                "attributes": {
+                    "begin_description": "updated",
+                },
                 "relationships": {
                     "configuration": {
                         "data": {
@@ -571,7 +605,15 @@ class TestDeviceMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 404)
+        # It looks a little bit strange to have the 403 here.
+        # This is due to the permission management checks that
+        # we run before putting the device mount action to the new
+        # configuration: The user must not only be able to edit
+        # the configuration to that the mount action belong before
+        # doing the request, but also for the one that we want
+        # to use as the target.
+        # As this doesn't exist, we don't allow the change.
+        self.assertEqual(response.status_code, 403)
 
     def test_update_device_mount_action_change_parent_platform_id(self):
         """Make sure parent platform id can not be changed without platform mount."""
@@ -662,7 +704,12 @@ class TestDeviceMountAction(BaseTestCase):
                 "id": device_mount_action.id,
                 "attributes": {"begin_description": "updated"},
                 "relationships": {
-                    "parent_platform": {"data": {"type": "platform", "id": p_p.id,}},
+                    "parent_platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": p_p.id,
+                        }
+                    },
                 },
             }
         }
@@ -864,7 +911,9 @@ class TestDeviceMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_mount_action_1.id,
-                "attributes": {"end_date": "2023-11-08T07:25:00.782000",},
+                "attributes": {
+                    "end_date": "2023-11-08T07:25:00.782000",
+                },
             }
         }
         access_headers = create_token()
