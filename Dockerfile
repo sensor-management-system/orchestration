@@ -1,3 +1,13 @@
+# SPDX-FileCopyrightText: 2020 - 2022
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Norman Ziegner <norman.ziegner@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 FROM python:3.11-slim-buster as base
 
 ARG BUILD_DATE

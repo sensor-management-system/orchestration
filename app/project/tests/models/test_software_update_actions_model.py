@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from project.api.models import (
     Contact,
     Device,
@@ -9,7 +17,12 @@ from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
 
-def add_device_software_update_action_model(public=True, private=False, internal=False, group_ids=[],):
+def add_device_software_update_action_model(
+    public=True,
+    private=False,
+    internal=False,
+    group_ids=[],
+):
     userinfo = generate_userinfo_data()
     d = Device(
         short_name="Device 1",
@@ -41,7 +54,7 @@ def add_device_software_update_action_model(public=True, private=False, internal
 
 
 def add_platform_software_update_action_model(
-        public=True, private=False, internal=False, group_ids=[]
+    public=True, private=False, internal=False, group_ids=[]
 ):
     userinfo = generate_userinfo_data()
     p = Platform(
@@ -50,7 +63,7 @@ def add_platform_software_update_action_model(
         is_public=public,
         is_private=private,
         is_internal=internal,
-        group_ids=group_ids
+        group_ids=group_ids,
     )
     c = Contact(
         given_name=userinfo["given_name"],

@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Merge Configuration begin and end Location Action
 
 Revision ID: 2c77c77a37cb
@@ -201,7 +209,6 @@ def upgrade():
     op.drop_table("configuration_static_location_end_action")
     op.drop_table("configuration_dynamic_location_end_action")
 
-
     # ### end Alembic commands ###
 
 
@@ -332,16 +339,24 @@ def downgrade():
         None, "configuration_dynamic_location_begin_action", type_="foreignkey"
     )
     op.alter_column(
-        "configuration_static_location_end_action", "begin_contact_id", new_column_name="contact_id"
+        "configuration_static_location_end_action",
+        "begin_contact_id",
+        new_column_name="contact_id",
     )
     op.alter_column(
-        "configuration_dynamic_location_end_action", "begin_contact_id", new_column_name="contact_id"
+        "configuration_dynamic_location_end_action",
+        "begin_contact_id",
+        new_column_name="contact_id",
     )
     op.alter_column(
-        "configuration_static_location_end_action", "begin_description", new_column_name="description"
+        "configuration_static_location_end_action",
+        "begin_description",
+        new_column_name="description",
     )
     op.alter_column(
-        "configuration_dynamic_location_end_action", "begin_description", new_column_name="description"
+        "configuration_dynamic_location_end_action",
+        "begin_description",
+        new_column_name="description",
     )
     op.create_foreign_key(
         "configuration_static_location_begin_action_contact_id_fkey",

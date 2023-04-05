@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """empty message
 
 Revision ID: 910f941f151b
@@ -11,8 +17,8 @@ from sqlalchemy.sql import text
 
 
 # revision identifiers, used by Alembic.
-revision = '910f941f151b'
-down_revision = 'd5148bc31abd'
+revision = "910f941f151b"
+down_revision = "d5148bc31abd"
 branch_labels = None
 depends_on = None
 

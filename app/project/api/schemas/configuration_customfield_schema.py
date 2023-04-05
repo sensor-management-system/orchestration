@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema

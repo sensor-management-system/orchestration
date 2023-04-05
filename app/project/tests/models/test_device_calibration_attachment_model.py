@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from project.api.models import (
     Contact,
     Device,
@@ -12,7 +20,11 @@ from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 def add_device_calibration_attachment():
     userinfo = generate_userinfo_data()
     device = Device(
-        short_name="Device 1", manufacturer_name=fake.company(), is_public=False, is_private=False, is_internal=True,
+        short_name="Device 1",
+        manufacturer_name=fake.company(),
+        is_public=False,
+        is_private=False,
+        is_internal=True,
     )
     contact = Contact(
         given_name=userinfo["given_name"],

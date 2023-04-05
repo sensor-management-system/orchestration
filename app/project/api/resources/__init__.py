@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """JSON API resource classes of our app."""
 
 from .configuration_attachment_resources import (  # noqa: F401
@@ -40,7 +49,7 @@ from .datastream_link_resources import (  # noqa: F401
 from .device_attachment_resources import (  # noqa: F401
     DeviceAttachmentDetail,
     DeviceAttachmentList,
-) # noqa: F401
+)  # noqa: F401
 from .device_calibration_action_attachment_resources import (  # noqa: F401
     DeviceCalibrationAttachmentDetail,
     DeviceCalibrationAttachmentList,

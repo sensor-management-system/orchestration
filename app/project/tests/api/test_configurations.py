@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the configuration api of our app."""
 import datetime
 import os
@@ -72,9 +81,7 @@ class TestConfigurationsService(BaseTestCase):
 
     def test_add_configuration(self):
         """Ensure POST a new configuration can be added to the database."""
-        devices_json = extract_data_from_json_file(
-            self.device_json_data_url, "devices"
-        )
+        devices_json = extract_data_from_json_file(self.device_json_data_url, "devices")
 
         device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
         with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
@@ -92,9 +99,7 @@ class TestConfigurationsService(BaseTestCase):
             self.platform_json_data_url, "platforms"
         )
 
-        platform_data = {
-            "data": {"type": "platform", "attributes": platforms_json[0]}
-        }
+        platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
 
         with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
             idl_mock.return_value = UserAccount(
@@ -107,13 +112,9 @@ class TestConfigurationsService(BaseTestCase):
                 url=self.platform_url, data_object=platform_data, object_type="platform"
             )
 
-        config_json = extract_data_from_json_file(
-            self.json_data_url, "configuration"
-        )
+        config_json = extract_data_from_json_file(self.json_data_url, "configuration")
 
-        config_data = {
-            "data": {"type": "configuration", "attributes": config_json[0]}
-        }
+        config_data = {"data": {"type": "configuration", "attributes": config_json[0]}}
         with patch.object(idl, "get_all_permission_groups_for_a_user") as idl_mock:
             idl_mock.return_value = UserAccount(
                 id="1234",
