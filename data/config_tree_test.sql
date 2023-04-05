@@ -1,3 +1,9 @@
+-- SPDX-FileCopyrightText: 2020
+-- - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+-- - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+--
+-- SPDX-License-Identifier: HEESIL-1.0
+
 
 INSERT INTO public.device (description, short_name, long_name, serial_number, manufacturer_uri, manufacturer_name,
                            dual_use, model, inventory_number, persistent_identifier, website, device_type_uri,

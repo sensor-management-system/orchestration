@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Classes to test the endpoints to reflect free text fields."""
 
 from datetime import datetime
@@ -5100,6 +5109,7 @@ class TestSiteRoomEndpoint(BaseTestCase):
             self.assertTrue(get_endpoint[field] is not None)
             self.assertTrue(get_endpoint[field] != "")
 
+
 class TestContactOrganizationEndpoint(BaseTestCase):
     """Tests for the free text field endpoint for contacts organization."""
 
@@ -5109,7 +5119,9 @@ class TestContactOrganizationEndpoint(BaseTestCase):
         """Set up some data for the tests."""
         super().setUp()
         self.normal_contact = Contact(
-            given_name="normal", family_name="contact", email="normal.contact@localhost",
+            given_name="normal",
+            family_name="contact",
+            email="normal.contact@localhost",
         )
         self.normal_user = User(
             subject=self.normal_contact.email, contact=self.normal_contact
@@ -5136,10 +5148,16 @@ class TestContactOrganizationEndpoint(BaseTestCase):
         """Ensure we get a list of contacts."""
         self.normal_contact.organization = "Normal organization"
         contact2 = Contact(
-            given_name="second", family_name="contact", email="second@contacts", organization="Normal organization"
+            given_name="second",
+            family_name="contact",
+            email="second@contacts",
+            organization="Normal organization",
         )
         contact3 = Contact(
-            given_name="third", family_name="contact", email="third@contacts", organization="Fancy organization"
+            given_name="third",
+            family_name="contact",
+            email="third@contacts",
+            organization="Fancy organization",
         )
 
         db.session.add_all([self.normal_contact, contact2, contact3])

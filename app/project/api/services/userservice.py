@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from ..models import Device, Platform, Configuration
 from ..models.contact import device_contacts, platform_contacts, configuration_contacts
 from ... import db
@@ -55,15 +63,28 @@ def search_database_tables_and_add_substituted_user(dest_contact, src_user):
     :return:
     """
 
-    device_contact_table = db.session.query(device_contacts).filter_by(contact_id=src_user.contact_id).all()
-    add_substituted_user(device_contact_table, Device, 'device_id', dest_contact)
+    device_contact_table = (
+        db.session.query(device_contacts)
+        .filter_by(contact_id=src_user.contact_id)
+        .all()
+    )
+    add_substituted_user(device_contact_table, Device, "device_id", dest_contact)
 
-    platform_contact_table = db.session.query(platform_contacts).filter_by(contact_id=src_user.contact_id).all()
-    add_substituted_user(platform_contact_table, Platform, 'platform_id', dest_contact)
+    platform_contact_table = (
+        db.session.query(platform_contacts)
+        .filter_by(contact_id=src_user.contact_id)
+        .all()
+    )
+    add_substituted_user(platform_contact_table, Platform, "platform_id", dest_contact)
 
-    configuration_contact_table = db.session.query(configuration_contacts).filter_by(
-        contact_id=src_user.contact_id).all()
-    add_substituted_user(configuration_contact_table, Configuration, 'configuration_id', dest_contact)
+    configuration_contact_table = (
+        db.session.query(configuration_contacts)
+        .filter_by(contact_id=src_user.contact_id)
+        .all()
+    )
+    add_substituted_user(
+        configuration_contact_table, Configuration, "configuration_id", dest_contact
+    )
 
 
 def search_and_replace_referencing_foreign_keys(src_contact, dest_contact, src_user):

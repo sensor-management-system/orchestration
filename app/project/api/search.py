@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2020 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """
 Functions to work with the full text search.
 
@@ -27,7 +35,7 @@ def query_index(index, query, page, per_page):
     """Query the index with custom filters & pagination settings."""
     if not current_app.elasticsearch:
         return [], 0
-    body={
+    body = {
         "query": query,
         # the from value is the beginning & starts counting with 0
         "from": (page - 1) * per_page,
@@ -35,7 +43,7 @@ def query_index(index, query, page, per_page):
     }
     search = current_app.elasticsearch.search(
         index=index,
-            **body,
+        **body,
     )
     ids = [int(hit["_id"]) for hit in search["hits"]["hits"]]
     return ids, search["hits"]["total"]["value"]

@@ -1,3 +1,10 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Florian Gransee <florian.gransee@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Extension for the PID."""
 import json
 import string
@@ -62,12 +69,18 @@ class Pid:
         return current_app.config["PID_CERT_KEY"]
 
     def get_request_body_admin_part(self):
-        part = {"index": 100, "type": "HS_ADMIN",
-                "data": {"format": "admin",
-                         "value": {
-                             "handle": f"0.NA/{self.pid_prefix}",
-                             "index": 200,
-                             "permissions": "011111110011"}}}
+        part = {
+            "index": 100,
+            "type": "HS_ADMIN",
+            "data": {
+                "format": "admin",
+                "value": {
+                    "handle": f"0.NA/{self.pid_prefix}",
+                    "index": 200,
+                    "permissions": "011111110011",
+                },
+            },
+        }
         return part
 
     def list(self, limit=0, page=None):
@@ -245,7 +258,10 @@ class Pid:
         :param object_pid: The pid
         :return: pid description.
         """
-        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": 'Handle clientCert="true"',
+        }
         try:
             response = requests.get(
                 url=f"{self.pid_service_url}{self.pid_prefix}/{object_pid}",
@@ -290,7 +306,10 @@ class Pid:
         :return str: the pid of the object.
         """
 
-        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": 'Handle clientCert="true"',
+        }
         pid_uuid = str(uuid4())
         instrument_data.append(self.get_request_body_admin_part())
         json_body = {"values": instrument_data}
@@ -303,7 +322,7 @@ class Pid:
                 # Adding certificate verification is strongly advised but in this case when we try to access the handle
                 # API with verification we get a SSLCertVerificationError.
                 # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
-                verify=False
+                verify=False,
             )
             response.raise_for_status()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
@@ -313,7 +332,6 @@ class Pid:
         pid = response.json()["handle"]
         return pid
 
-
     def update(self, source_object_pid, instrument_data):
         """
         Update an existing PID.
@@ -322,7 +340,10 @@ class Pid:
         :param source_object_pid: The PID.
         :return:
         """
-        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": 'Handle clientCert="true"',
+        }
         instrument_data.append(self.get_request_body_admin_part())
         json_body = {"values": instrument_data}
         try:
@@ -334,7 +355,7 @@ class Pid:
                 # Adding certificate verification is strongly advised but in this case when we try to access the handle
                 # API with verification we get a SSLCertVerificationError.
                 # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
-                verify=False
+                verify=False,
             )
             response.raise_for_status()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
@@ -350,7 +371,10 @@ class Pid:
         :param object_pid: the PID.
         :return:
         """
-        header = {'Content-Type': 'application/json', 'Authorization': 'Handle clientCert="true"'}
+        header = {
+            "Content-Type": "application/json",
+            "Authorization": 'Handle clientCert="true"',
+        }
         try:
             response = requests.delete(
                 url=f"{self.pid_service_url}{self.pid_prefix}/{object_pid}",

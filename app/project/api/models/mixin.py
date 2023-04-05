@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2020 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Several mixin classes for our models."""
 
 import collections
@@ -19,15 +27,19 @@ from ..search import (
 )
 from .base_model import db
 
+
 def utc_now():
     now = datetime.utcnow()
     return pytz.utc.localize(now)
+
 
 class AuditMixin:
     """Audit mixin to save information about creation & updates."""
 
     created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
-    updated_at = db.Column(db.DateTime(timezone=True), default=utc_now, onupdate=utc_now)
+    updated_at = db.Column(
+        db.DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 
     @declared_attr
     def created_by_id(self):

@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Luca Johannes Nendel <luca-johannes.nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for various resource tests."""
 import dateutil.parser
 

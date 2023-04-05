@@ -1,3 +1,15 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Luca Johannes Nendel <luca-johannes.nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from project.api.resources import *
 
 from .api.resources.permission_group_resources import PermissionGroups
@@ -461,8 +473,4 @@ api.route(
     "/datastream-links",
     "/configurations/<int:configuration_id>/datastream-links",
 )
-api.route(
-    DatastreamLinkDetail,
-    "datastream_link_detail",
-    "/datastream-links/<int:id>"
-)
+api.route(DatastreamLinkDetail, "datastream_link_detail", "/datastream-links/<int:id>")

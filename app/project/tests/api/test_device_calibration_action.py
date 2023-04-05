@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the device calibration api."""
 
 import json
@@ -46,7 +54,11 @@ class TestDeviceCalibrationAction(BaseTestCase):
         """Create DeviceCalibrationAction."""
         userinfo = generate_userinfo_data()
         device = Device(
-            short_name="Device 12",manufacturer_name=fake.company(), is_public=False, is_private=False, is_internal=True,
+            short_name="Device 12",
+            manufacturer_name=fake.company(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
         )
 
         contact = Contact(
@@ -79,7 +91,9 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
 
         result_id = response["data"]["id"]
-        result_action = db.session.query(DeviceCalibrationAction).filter_by(id=result_id).first()
+        result_action = (
+            db.session.query(DeviceCalibrationAction).filter_by(id=result_id).first()
+        )
 
         msg = "create;calibration action"
         self.assertEqual(msg, result_action.device.update_description)
@@ -91,7 +105,9 @@ class TestDeviceCalibrationAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": device_calibration_action.id,
-                "attributes": {"description": "updated",},
+                "attributes": {
+                    "description": "updated",
+                },
             }
         }
         response = super().update_object(
@@ -100,7 +116,9 @@ class TestDeviceCalibrationAction(BaseTestCase):
             object_type=self.object_type,
         )
         result_id = response["data"]["id"]
-        result_action = db.session.query(DeviceCalibrationAction).filter_by(id=result_id).first()
+        result_action = (
+            db.session.query(DeviceCalibrationAction).filter_by(id=result_id).first()
+        )
 
         msg = "update;calibration action"
         self.assertEqual(msg, result_action.device.update_description)
@@ -122,6 +140,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
         msg = "delete;calibration action"
         self.assertEqual(msg, device.update_description)
+
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
         device1 = Device(
