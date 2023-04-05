@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """
 File to collect all the models.
 
@@ -24,7 +33,7 @@ from .contact_role import (  # noqa: F401
     PlatformContactRole,
     SiteContactRole,
 )
-from .configuration_customfield import ConfigurationCustomField # noqa: F401
+from .configuration_customfield import ConfigurationCustomField  # noqa: F401
 from .customfield import CustomField  # noqa: F401
 from .datastream_link import DatastreamLink  # noqa: F401
 from .device import Device  # noqa: F401

@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from project.api.models import (
     ConfigurationDynamicLocationBeginAction,
     Contact,
@@ -44,15 +52,17 @@ def add_dynamic_location_begin_action_model(
         family_name=userinfo["family_name"],
         email=userinfo["email"],
     )
-    configuration_dynamic_location_begin_action = ConfigurationDynamicLocationBeginAction(
-        begin_date="2021-08-21T10:00:50.542Z",
-        end_date="2033-08-30T10:00:50.542Z",
-        begin_description="test configuration_dynamic_location_begin_action",
-        end_description="end",
-        x_property=x_property,
-        configuration=config,
-        begin_contact=contact,
-        end_contact=contact,
+    configuration_dynamic_location_begin_action = (
+        ConfigurationDynamicLocationBeginAction(
+            begin_date="2021-08-21T10:00:50.542Z",
+            end_date="2033-08-30T10:00:50.542Z",
+            begin_description="test configuration_dynamic_location_begin_action",
+            end_description="end",
+            x_property=x_property,
+            configuration=config,
+            begin_contact=contact,
+            end_contact=contact,
+        )
     )
     db.session.add_all(
         [

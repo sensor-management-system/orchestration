@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Add contact roles
 
 Revision ID: 7b504fcc359b
@@ -31,8 +37,14 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("contact_id", sa.Integer(), nullable=True),
         sa.Column("device_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["contact_id"], ["contact.id"],),
-        sa.ForeignKeyConstraint(["device_id"], ["device.id"],),
+        sa.ForeignKeyConstraint(
+            ["contact_id"],
+            ["contact.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["device_id"],
+            ["device.id"],
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -42,8 +54,14 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("contact_id", sa.Integer(), nullable=True),
         sa.Column("platform_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["contact_id"], ["contact.id"],),
-        sa.ForeignKeyConstraint(["platform_id"], ["platform.id"],),
+        sa.ForeignKeyConstraint(
+            ["contact_id"],
+            ["contact.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["platform_id"],
+            ["platform.id"],
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -53,8 +71,14 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("contact_id", sa.Integer(), nullable=True),
         sa.Column("configuration_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["configuration_id"], ["configuration.id"],),
-        sa.ForeignKeyConstraint(["contact_id"], ["contact.id"],),
+        sa.ForeignKeyConstraint(
+            ["configuration_id"],
+            ["configuration.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["contact_id"],
+            ["contact.id"],
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     # Fill contact_role tables with default role.

@@ -1,3 +1,15 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Dirk Ecker <d.ecker@fz-juelich.de>
+# - Florian Gransee <florian.gransee@ufz.de>
+# - Forschungszentrum Jülich GmbH (FZJ, https://fz-juelich.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from environs import Env
 
 env = Env()
@@ -43,9 +55,7 @@ class BaseConfig:
     OIDC_TOKEN_CACHING_SECONDS = env.int("OIDC_TOKEN_CACHING_SECONDS", 600)
     PKCE_SCOPES = env("PKCE_SCOPES", "openid profile email auth_context")
     PKCE_CLIENT_ID = env("PKCE_CLIENT_ID", "rdmsms-pkce-flow")
-    SMS_BACKEND_URL = env(
-        "SMS_BACKEND_URL", "https://localhost.localdomain"
-    )
+    SMS_BACKEND_URL = env("SMS_BACKEND_URL", "https://localhost.localdomain")
     SMS_FRONTEND_URL = env("SMS_FRONTEND_URL", "https://localhost.localdomain")
     CV_URL = env("CV_URL", "https://localhost.localdomain/backend/api/v1")
     # PID service
@@ -88,11 +98,7 @@ class TestingConfig(BaseConfig):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     INSTITUTE = None
     PID_SERVICE_URL = None
-    SQLALCHEMY_ENGINE_OPTIONS = {
-         "connect_args": {
-            "options": "-c timezone=utc"
-        }
-    }
+    SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"options": "-c timezone=utc"}}
 
 
 class ProductionConfig(BaseConfig):

@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Some methods to use in various resource classes."""
 
 import datetime
@@ -103,6 +111,7 @@ def check_if_object_not_found(model_class, kwargs):
         raise ObjectNotFound({"pointer": ""}, "Object Not Found")
     else:
         return object_to_be_checked
+
 
 def set_update_description_text_and_update_by_user(obj_, msg):
     """Set the update description & user and save it to the db."""

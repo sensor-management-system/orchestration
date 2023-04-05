@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the configuration custom field endpoints."""
 
 import json
@@ -5,10 +11,8 @@ import json
 from project import base_url
 from project.api.models.base_model import db
 from project.api.models.configuration import Configuration
-from project.api.models.configuration_customfield import \
-    ConfigurationCustomField
-from project.tests.base import (BaseTestCase, create_token, fake,
-                                query_result_to_list)
+from project.api.models.configuration_customfield import ConfigurationCustomField
+from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
 class TestConfigurationCustomFieldServices(BaseTestCase):

@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """empty message
 
 Revision ID: 0740d341ea8e
@@ -135,7 +143,9 @@ def upgrade():
         key = (row["configuration_id"], row["device_id"])
         mount_actions = device_mount_data_lookup.get(key)
         if mount_actions:
-            mount_actions = [a for a in mount_actions if a["begin_date"] <= row["end_date"]]
+            mount_actions = [
+                a for a in mount_actions if a["begin_date"] <= row["end_date"]
+            ]
             mount_actions.sort(key=lambda x: x["begin_date"])
             mount_action = mount_actions[-1]
             update_query = text(

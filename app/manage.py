@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 import sys
 import unittest
 
@@ -52,7 +61,10 @@ def cov(test_names):
         branch=True,
         include="project/*",
         # skip the tests itself for the coverage
-        omit=["project/tests/*", "project/config.py",],
+        omit=[
+            "project/tests/*",
+            "project/config.py",
+        ],
     )
     coverage_.erase()
     coverage_.start()
@@ -72,7 +84,11 @@ def cov(test_names):
         coverage_.save()
         click.secho("Coverage Summary:", fg="green")
         # coverage_.html_report(directory="coveragereport", skip_empty=True)
-        coverage_.report(show_missing=True, skip_empty=True, skip_covered=True, )
+        coverage_.report(
+            show_missing=True,
+            skip_empty=True,
+            skip_covered=True,
+        )
         return sys.exit(0)
     return sys.exit(1)
 
@@ -175,7 +191,7 @@ def reactivate_a_user(subject_user, given_name, family_name, email):
 
 
 @users.command("upgrade-to-superuser")
-@click.argument('user_subject')
+@click.argument("user_subject")
 def make_super_user(user_subject):
     """
     Upgrade a user to superuser a superuser.
@@ -188,13 +204,16 @@ def make_super_user(user_subject):
     user.is_superuser = True
     db.session.commit()
     click.secho(f"{user.contact.given_name} is now upgraded to super user!", fg="green")
-    click.secho("As super-user you will be able to modify or delete any entity \n"
-                "in SMS without the need to belong to a group or a project.\n"
-                "Please use it wisely", fg="yellow")
+    click.secho(
+        "As super-user you will be able to modify or delete any entity \n"
+        "in SMS without the need to belong to a group or a project.\n"
+        "Please use it wisely",
+        fg="yellow",
+    )
 
 
 @users.command("downgrade-to-user")
-@click.argument('user_subject')
+@click.argument("user_subject")
 def downgrade_to_user(user_subject):
     """
     Downgrade a superuser to a normal user.
@@ -206,7 +225,9 @@ def downgrade_to_user(user_subject):
     user = db.session.query(User).filter_by(subject=user_subject).first()
     user.is_superuser = False
     db.session.commit()
-    click.secho(f"{user.contact.given_name} is now a downgraded to a normal user!", fg="green")
+    click.secho(
+        f"{user.contact.given_name} is now a downgraded to a normal user!", fg="green"
+    )
 
 
 if __name__ == "__main__":

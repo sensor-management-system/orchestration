@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2021 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 import os
 import sys
 from contextlib import contextmanager
@@ -12,7 +18,7 @@ from project.tests.base import fake
 
 # import manage packages onto the path
 
-sys.path.append(os.path.abspath(os.path.join('..', 'manage')))
+sys.path.append(os.path.abspath(os.path.join("..", "manage")))
 
 
 # Avoid DetachedInstanceError in Flask-SQLAlchemy
@@ -28,7 +34,6 @@ def no_expire():
 
 
 class TestCliCommands(BaseTestCase):
-
     def test_deactivate_a_user_with_no_substituted_user(self):
         """Ensure that a user can be deactivated and all it
         data are changed to deactivation message."""
@@ -44,8 +49,9 @@ class TestCliCommands(BaseTestCase):
             db.session.commit()
 
             runner = CliRunner()
-            result = runner.invoke(deactivate_a_user, ["testuser1@ufz.test"],
-                                   env={"FLASK_APP": "manage"})
+            result = runner.invoke(
+                deactivate_a_user, ["testuser1@ufz.test"], env={"FLASK_APP": "manage"}
+            )
             assert not result.exception
             assert result.exit_code == 0
             assert user.active is False
@@ -67,20 +73,25 @@ class TestCliCommands(BaseTestCase):
             )
             user1 = User(subject="testuser1@ufz.test", contact=contact1)
             user2 = User(subject="testuser2@ufz.test", contact=contact2)
-            device = Device(short_name="device_short_name test", created_by_id=user1.id,
-                            manufacturer_name=fake.company(),
-                            is_public=False,
-                            is_private=False,
-                            is_internal=True,
-                            )
+            device = Device(
+                short_name="device_short_name test",
+                created_by_id=user1.id,
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
 
             db.session.add_all([contact1, contact2, user1, user2, device])
             device.contacts.append(contact1)
             db.session.commit()
 
             runner = CliRunner()
-            result = runner.invoke(deactivate_a_user, ["testuser1@ufz.test", "--dest-user-subject=testuser2@ufz.test"],
-                                   env={"FLASK_APP": "manage"})
+            result = runner.invoke(
+                deactivate_a_user,
+                ["testuser1@ufz.test", "--dest-user-subject=testuser2@ufz.test"],
+                env={"FLASK_APP": "manage"},
+            )
 
             assert not result.exception
             assert result.exit_code == 0
@@ -95,7 +106,7 @@ class TestCliCommands(BaseTestCase):
                 given_name="User is deactivated",
                 family_name="User is deactivated",
                 email="User is deactivated",
-                active=False
+                active=False,
             )
             user = User(subject="testuser@ufz.test", contact=contact, active=False)
             db.session.expire_on_commit = False
@@ -104,8 +115,12 @@ class TestCliCommands(BaseTestCase):
 
             runner = CliRunner()
 
-            reactivate = runner.invoke(reactivate_a_user, ["testuser@ufz.test"], env={"FLASK_APP": "manage"},
-                                       input="Test\nUser\ntest.user@ufz.test\n")
+            reactivate = runner.invoke(
+                reactivate_a_user,
+                ["testuser@ufz.test"],
+                env={"FLASK_APP": "manage"},
+                input="Test\nUser\ntest.user@ufz.test\n",
+            )
             assert user.active is True
             assert contact.active is True
             assert contact.email == "test.user@ufz.test"

@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022
+# - Luca Johannes Nendel <luca-johannes.nendel@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Some validator classes for several resources."""
 
 from sqlalchemy import or_
@@ -47,4 +53,3 @@ class DevicePropertyValidator:
         return (
             "There is still a dynamic location action that uses this measured variable."
         )
-
