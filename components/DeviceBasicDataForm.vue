@@ -496,7 +496,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         newObj.longName = value as string
         break
       case 'deviceTypeName':
-        newObj.deviceTypeName = value as string
+        newObj.deviceTypeName = value || ''
         {
           const deviceTypeIndex = this.devicetypes.findIndex(t => t.name === value)
           if (deviceTypeIndex > -1) {
