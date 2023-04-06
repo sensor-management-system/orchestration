@@ -55,11 +55,55 @@ permissions and limitations under the Licence.
       >
         <v-col>
           <label>Key:</label>
-          {{ value.key | shortenRight(40) }}
+          <span
+            v-if="keyLengthExceedsDefault && !isKeyExpanded"
+          >
+            {{ shortenedKey }}
+          </span>
+          <span
+            v-else
+          >
+            {{ value.key }}
+          </span>
+          <v-btn
+            v-if="keyLengthExceedsDefault"
+            icon
+            small
+            :title="isKeyExpanded ? 'show less' : 'show more'"
+            @click.stop.prevent="isKeyExpanded = !isKeyExpanded"
+          >
+            <v-icon
+              small
+            >
+              {{ isKeyExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+            </v-icon>
+          </v-btn>
         </v-col>
         <v-col>
           <label>Value:</label>
-          {{ value.value | shortenRight }}
+          <span
+            v-if="valueLengthExceedsDefault && !isValueExpanded"
+          >
+            {{ shortenedValue }}
+          </span>
+          <span
+            v-else
+          >
+            {{ value.value }}
+          </span>
+          <v-btn
+            v-if="valueLengthExceedsDefault"
+            icon
+            small
+            :title="isValueExpanded ? 'show less' : 'show more'"
+            @click.stop.prevent="isValueExpanded = !isValueExpanded"
+          >
+            <v-icon
+              small
+            >
+              {{ isValueExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+            </v-icon>
+          </v-btn>
         </v-col>
       </v-row>
     </template>
@@ -71,6 +115,8 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { RawLocation } from 'vue-router'
 
 import { CustomTextField } from '@/models/CustomTextField'
+
+import { shortenRight } from '@/utils/stringHelpers'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 
@@ -99,5 +145,27 @@ export default class CustomFieldListItem extends Vue {
     type: Boolean
   })
   private editable!: boolean
+
+  private isKeyExpanded: boolean = false
+  private isValueExpanded: boolean = false
+
+  private shortenKeyLengthAt: number = 60
+  private shortenValueLengthAt: number = 60
+
+  get keyLengthExceedsDefault (): boolean {
+    return this.value.key.length > this.shortenKeyLengthAt
+  }
+
+  get valueLengthExceedsDefault (): boolean {
+    return this.value.value.length > this.shortenValueLengthAt
+  }
+
+  get shortenedKey (): string {
+    return shortenRight(this.value.key, this.shortenKeyLengthAt)
+  }
+
+  get shortenedValue (): string {
+    return shortenRight(this.value.value, this.shortenValueLengthAt)
+  }
 }
 </script>
