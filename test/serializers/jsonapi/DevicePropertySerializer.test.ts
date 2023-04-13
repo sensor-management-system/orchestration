@@ -35,150 +35,6 @@ import { MeasuringRange } from '@/models/MeasuringRange'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 
 describe('DevicePropertySerializer', () => {
-  describe('#convertNestedJsonApiToModelList', () => {
-    it('should convert a list of entries', () => {
-      const jsonApiElements = [{
-        compartment_name: 'Climate',
-        unit_uri: '',
-        sampling_media_name: 'Other',
-        compartment_uri: 'variabletype/Climate',
-        property_name: 'Water vapor concentration',
-        accuracy: null,
-        measuring_range_min: null,
-        measuring_range_max: null,
-        label: 'water vapor',
-        property_uri: 'variablename/Water%20vapor%20concentration',
-        id: '39',
-        unit_name: '',
-        failure_value: null,
-        sampling_media_uri: 'medium/Other',
-        resolution: 0.001,
-        resolution_unit_uri: 'http://foo/unit/1',
-        resolution_unit_name: 'mm'
-      }, {
-        compartment_name: 'a',
-        unit_uri: 'b',
-        sampling_media_name: 'c',
-        compartment_uri: 'd',
-        property_name: 'e',
-        accuracy: 1,
-        measuring_range_min: 2,
-        measuring_range_max: 3,
-        label: 'f',
-        property_uri: 'g',
-        id: '40',
-        unit_name: 'j',
-        failure_value: 4,
-        sampling_media_uri: 'k',
-        resolution: 0.001,
-        resolution_unit_uri: 'http://foo/unit/1',
-        resolution_unit_name: 'mm'
-      }]
-
-      const expectedProperty1 = DeviceProperty.createFromObject({
-        compartmentName: 'Climate',
-        unitUri: '',
-        samplingMediaName: 'Other',
-        compartmentUri: 'variabletype/Climate',
-        propertyName: 'Water vapor concentration',
-        accuracy: null,
-        measuringRange: MeasuringRange.createFromObject({
-          min: null,
-          max: null
-        }),
-        label: 'water vapor',
-        propertyUri: 'variablename/Water%20vapor%20concentration',
-        id: '39',
-        unitName: '',
-        failureValue: null,
-        samplingMediaUri: 'medium/Other',
-        resolution: 0.001,
-        resolutionUnitUri: 'http://foo/unit/1',
-        resolutionUnitName: 'mm'
-      })
-
-      const expectedProperty2 = DeviceProperty.createFromObject({
-        compartmentName: 'a',
-        unitUri: 'b',
-        samplingMediaName: 'c',
-        compartmentUri: 'd',
-        propertyName: 'e',
-        accuracy: 1,
-        measuringRange: MeasuringRange.createFromObject({
-          min: 2,
-          max: 3
-        }),
-        label: 'f',
-        propertyUri: 'g',
-        id: '40',
-        unitName: 'j',
-        failureValue: 4,
-        samplingMediaUri: 'k',
-        resolution: 0.001,
-        resolutionUnitUri: 'http://foo/unit/1',
-        resolutionUnitName: 'mm'
-      })
-
-      const serializer = new DevicePropertySerializer()
-
-      const properties = serializer.convertNestedJsonApiToModelList(jsonApiElements)
-
-      expect(Array.isArray(properties)).toBeTruthy()
-      expect(properties.length).toEqual(2)
-      expect(properties[0]).toEqual(expectedProperty1)
-      expect(properties[1]).toEqual(expectedProperty2)
-    })
-  })
-  describe('#convertJsonApiElementToModel', () => {
-    it('should convert a element', () => {
-      const jsonApiElement = {
-        compartment_name: 'Climate',
-        unit_uri: '',
-        sampling_media_name: 'Other',
-        compartment_uri: 'variabletype/Climate',
-        property_name: 'Water vapor concentration',
-        accuracy: null,
-        measuring_range_min: null,
-        measuring_range_max: null,
-        label: 'water vapor',
-        property_uri: 'variablename/Water%20vapor%20concentration',
-        id: '39',
-        unit_name: '',
-        failure_value: null,
-        sampling_media_uri: 'medium/Other',
-        resolution: 0.001,
-        resolution_unit_uri: 'http://foo/unit/1',
-        resolution_unit_name: 'mm'
-      }
-
-      const expectedProperty = DeviceProperty.createFromObject({
-        compartmentName: 'Climate',
-        unitUri: '',
-        samplingMediaName: 'Other',
-        compartmentUri: 'variabletype/Climate',
-        propertyName: 'Water vapor concentration',
-        accuracy: null,
-        measuringRange: MeasuringRange.createFromObject({
-          min: null,
-          max: null
-        }),
-        label: 'water vapor',
-        propertyUri: 'variablename/Water%20vapor%20concentration',
-        id: '39',
-        unitName: '',
-        failureValue: null,
-        samplingMediaUri: 'medium/Other',
-        resolution: 0.001,
-        resolutionUnitUri: 'http://foo/unit/1',
-        resolutionUnitName: 'mm'
-      })
-      const serializer = new DevicePropertySerializer()
-
-      const property = serializer.convertJsonApiElementToModel(jsonApiElement)
-
-      expect(property).toEqual(expectedProperty)
-    })
-  })
   describe('#convertModelListToNestedJsonApiArray', () => {
     it('should convert a list of device properties to a list of json objects', () => {
       const properties = [
@@ -441,6 +297,78 @@ describe('DevicePropertySerializer', () => {
       expect(model.resolution).toEqual(null)
       expect(model.resolutionUnitUri).toEqual('')
       expect(model.resolutionUnitName).toEqual('')
+    })
+    it('should handle non-numeric values as null', () => {
+      const data = {
+        data: {
+          id: '123',
+          type: 'device_property',
+          attributes: {
+            compartment_name: 'Climate',
+            unit_uri: 'abc',
+            sampling_media_name: 'Other',
+            compartment_uri: 'variabletype/Climate',
+            property_name: 'Water vapor concentration',
+            accuracy: null,
+            measuring_range_min: null,
+            measuring_range_max: null,
+            label: 'water vapor',
+            property_uri: 'variablename/Water%20vapor%20concentration',
+            unit_name: '%',
+            failure_value: null,
+            sampling_media_uri: 'medium/Other',
+            resolution: null,
+            resolution_unit_uri: 'http://foo/unit/1',
+            resolution_unit_name: 'mm'
+          },
+          relationships: {}
+        },
+        included: []
+      }
+      const serializer = new DevicePropertySerializer()
+      const model = serializer.convertJsonApiObjectToModel(data)
+
+      expect(model.accuracy).toBeNull()
+      expect(model.measuringRange.min).toBeNull()
+      expect(model.measuringRange.max).toBeNull()
+      expect(model.failureValue).toBeNull()
+      expect(model.resolution).toBeNull()
+    })
+    it('should handle numeric 0 as 0', () => {
+      const data = {
+        data: {
+          id: '123',
+          type: 'device_property',
+          attributes: {
+            compartment_name: 'Climate',
+            unit_uri: 'abc',
+            sampling_media_name: 'Other',
+            compartment_uri: 'variabletype/Climate',
+            property_name: 'Water vapor concentration',
+            accuracy: 0,
+            measuring_range_min: 0,
+            measuring_range_max: 0,
+            label: 'water vapor',
+            property_uri: 'variablename/Water%20vapor%20concentration',
+            unit_name: '%',
+            failure_value: 0,
+            sampling_media_uri: 'medium/Other',
+            resolution: 0,
+            resolution_unit_uri: 'http://foo/unit/1',
+            resolution_unit_name: 'mm'
+          },
+          relationships: {}
+        },
+        included: []
+      }
+      const serializer = new DevicePropertySerializer()
+      const model = serializer.convertJsonApiObjectToModel(data)
+
+      expect(model.accuracy).toBe(0)
+      expect(model.measuringRange.min).toBe(0)
+      expect(model.measuringRange.max).toBe(0)
+      expect(model.failureValue).toBe(0)
+      expect(model.resolution).toBe(0)
     })
   })
   describe('#convertModelToJsonApiData', () => {

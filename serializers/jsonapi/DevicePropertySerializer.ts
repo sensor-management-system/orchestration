@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2023
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -56,35 +56,6 @@ export interface IDevicePropertiesAndMissing {
 }
 
 export class DevicePropertySerializer {
-  convertJsonApiElementToModel (property: IJsonApiAttributes): DeviceProperty {
-    const result = new DeviceProperty()
-    result.id = property.id.toString()
-    result.measuringRange = new MeasuringRange(
-      property.measuring_range_min,
-      property.measuring_range_max
-    )
-    result.failureValue = property.failure_value
-    result.accuracy = property.accuracy
-    result.resolution = property.resolution
-    result.label = property.label || ''
-    result.unitUri = property.unit_uri || ''
-    result.unitName = property.unit_name || ''
-    result.compartmentUri = property.compartment_uri || ''
-    result.compartmentName = property.compartment_name || ''
-    result.propertyUri = property.property_uri || ''
-    result.propertyName = property.property_name || ''
-    result.samplingMediaUri = property.sampling_media_uri || ''
-    result.samplingMediaName = property.sampling_media_name || ''
-    result.resolutionUnitUri = property.resolution_unit_uri || ''
-    result.resolutionUnitName = property.resolution_unit_name || ''
-
-    return result
-  }
-
-  convertNestedJsonApiToModelList (properties: IJsonApiAttributes[]): DeviceProperty[] {
-    return properties.map(this.convertJsonApiElementToModel)
-  }
-
   convertModelListToNestedJsonApiArray (properties: DeviceProperty[]): IJsonApiAttributes[] {
     const result = []
 
@@ -143,12 +114,12 @@ export class DevicePropertySerializer {
 
     if (jsonApiData.attributes) {
       newEntry.measuringRange = new MeasuringRange(
-        jsonApiData.attributes.measuring_range_min || null,
-        jsonApiData.attributes.measuring_range_max || null
+        !isNaN(jsonApiData.attributes.measuring_range_min) ? jsonApiData.attributes.measuring_range_min : null,
+        !isNaN(jsonApiData.attributes.measuring_range_max) ? jsonApiData.attributes.measuring_range_max : null
       )
-      newEntry.failureValue = jsonApiData.attributes.failure_value || null
-      newEntry.accuracy = jsonApiData.attributes.accuracy || null
-      newEntry.resolution = jsonApiData.attributes.resolution || null
+      newEntry.failureValue = !isNaN(jsonApiData.attributes.failure_value) ? jsonApiData.attributes.failure_value : null
+      newEntry.accuracy = !isNaN(jsonApiData.attributes.accuracy) ? jsonApiData.attributes.accuracy : null
+      newEntry.resolution = !isNaN(jsonApiData.attributes.resolution) ? jsonApiData.attributes.resolution : null
       newEntry.label = jsonApiData.attributes.label || ''
       newEntry.unitUri = jsonApiData.attributes.unit_uri || ''
       newEntry.unitName = jsonApiData.attributes.unit_name || ''

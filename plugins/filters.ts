@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -39,12 +39,18 @@ import { shortenRight, shortenLeft, shortenMiddle } from '@/utils/stringHelpers'
 /**
  * returns a default string when value is empty
  *
- * @param {string} value - the string
+ * @param {any} value - a value
  * @param {string} [defaultValue] - a default string, defaults to '-'
  * @returns {string} the string or the default, if the string is empty
  */
-Vue.filter('orDefault', (value: string, defaultValue: string = '—'): string => {
-  return value || defaultValue
+Vue.filter('orDefault', (value: string | number | null | undefined, defaultValue: string = '—'): string => {
+  if (typeof value === 'string') {
+    return value || defaultValue
+  }
+  if (typeof value === 'number') {
+    return !isNaN(value) ? String(value) : defaultValue
+  }
+  return defaultValue
 })
 
 Vue.filter('toUtcDateTimeString', (value: DateTime, defaultValue: string = ''): string => {
