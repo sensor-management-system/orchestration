@@ -1,33 +1,28 @@
 # SPDX-FileCopyrightText: 2022 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Florian Gransee <florian.gransee@ufz.de>
 # - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-"""PID resources.."""
+"""PID resources."""
 from flask import g, request
 from flask_rest_jsonapi import ResourceDetail
-from sqlalchemy import and_
 
-from .base_resource import add_pid
-from ..helpers.errors import (
-    BadRequestError,
-    UnauthorizedError,
-)
-from ..models import (
-    Device,
-    Platform,
-    DeviceContactRole,
-    PlatformContactRole,
-)
 from ... import db
 from ...extensions.instances import pid
 from ...frj_csv_export.resource import ResourceList
+from ..helpers.errors import BadRequestError, UnauthorizedError
+from ..models import Configuration, Device, Platform
+from .base_resource import add_pid
 
 
 class PidList(ResourceList):
+    """List resource for pid handling."""
+
     def get(self, *args, **kwargs):
         """List Pids, or search PIDS for a term in url.
 
@@ -170,10 +165,19 @@ class PidList(ResourceList):
                 instrument = (
                     db.session.query(Device).filter_by(id=request_data["id"]).first()
                 )
-            else:
+            elif request_data["type"] == "platform":
                 instrument = (
                     db.session.query(Platform).filter_by(id=request_data["id"]).first()
                 )
+            elif request_data["type"] == "configuration":
+                instrument = (
+                    db.session.query(Configuration)
+                    .filter_by(id=request_data["id"])
+                    .first()
+                )
+            else:
+                raise BadRequestError("Entity not supported for PIDs")
+
         elif "instrument_instance" in request.get_json():
             instrument_instance = request.get_json()["instrument_instance"]
             instrument_data, instrument = make_instrument_data_from_instance(
@@ -189,8 +193,10 @@ class PidList(ResourceList):
 
 
 class PidDetail(ResourceDetail):
+    """Detail resource for PID handling."""
+
     def get(self, *args, **kwargs):
-        """GEt PID information."""
+        """Get PID information."""
         if not g.user:
             raise UnauthorizedError("Authentication required.")
         if "pid" not in kwargs.keys():
@@ -221,7 +227,8 @@ class PidDetail(ResourceDetail):
 
 def make_instrument_data_from_instance(instrument_instance: dict) -> (list, object):
     """
-    prepare the data toi be sent to the pid handler.
+    Prepare the data toi be sent to the pid handler.
+
     The data is a list of dict, which has two attributes:
          - type: required: The data type defines the syntax and semantics of the data in its data field.
          - parsed_data: required: The syntax and semantics of parsed data are identified by the field.
@@ -252,6 +259,12 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> (list, obje
         #     .filter_by(platform_id=instrument_instance["id"], role_name="Owner")
         #     .first()
         # )
+    elif instrument_instance["type"] == "configuration":
+        instrument = (
+            db.session.query(Configuration)
+            .filter_by(id=instrument_instance["id"])
+            .first()
+        )
     else:
         raise BadRequestError("Type Not Implemented.")
     try:
@@ -278,7 +291,8 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> (list, obje
 
 def make_instrument_data_from_request(instrument_data: dict) -> list:
     """
-    prepare the data to be sent to the pid handler.
+    Prepare the data to be sent to the pid handler.
+
     The data is a list of dict, which has two attributes:
          - type: required: The data type defines the syntax and semantics of the data in its data field.
          - parsed_data: required: The syntax and semantics of parsed data are identified by the field.

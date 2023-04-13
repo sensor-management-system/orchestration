@@ -54,6 +54,7 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
                     "timepoint": static_location.begin_date,
                     "id": str(static_location.id),
                     "type": "configuration_static_location_begin",
+                    "label": static_location.label,
                 }
             )
             if static_location.end_date:
@@ -62,6 +63,7 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
                         "timepoint": static_location.end_date,
                         "id": str(static_location.id),
                         "type": "configuration_static_location_end",
+                        "label": static_location.label,
                     }
                 )
 
@@ -71,6 +73,7 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
                     "timepoint": dynamic_location.begin_date,
                     "id": str(dynamic_location.id),
                     "type": "configuration_dynamic_location_begin",
+                    "label": dynamic_location.label,
                 }
             )
             if dynamic_location.end_date:
@@ -79,6 +82,7 @@ class ControllerConfigurationLocationActionTimepoints(ResourceList):
                         "timepoint": dynamic_location.end_date,
                         "id": str(dynamic_location.id),
                         "type": "configuration_dynamic_location_end",
+                        "label": dynamic_location.label,
                     }
                 )
         dates_with_labels.sort(key=lambda x: x["timepoint"])

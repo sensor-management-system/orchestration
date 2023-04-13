@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -12,10 +12,10 @@
 
 from ..models.device import Device
 from .base_model import db
-from .mixin import IndirectSearchableMixin
+from .mixin import AuditMixin, IndirectSearchableMixin
 
 
-class DeviceProperty(db.Model, IndirectSearchableMixin):
+class DeviceProperty(db.Model, IndirectSearchableMixin, AuditMixin):
     """DeviceProperty class."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

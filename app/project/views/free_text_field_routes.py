@@ -132,6 +132,14 @@ class ConfigurationLabelEndPoint(AbstractFreeTextFieldEndpoint):
     field = Configuration.label
 
 
+@free_text_field_routes.route("/controller/configuration-projects", methods=["GET"])
+@class_based_view
+class ConfigurationProjectEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct configuration projects."""
+
+    field = Configuration.project
+
+
 @free_text_field_routes.route(
     "/controller/configuration-custom-field-keys", methods=["GET"]
 )
