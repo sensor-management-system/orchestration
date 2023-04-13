@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Norman Ziegner <norman.ziegner@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 # Create self-signed certificates for testing.
 # Requires https://pypi.org/project/zeroc-icecertutils/
 # Optional arg: CommonName for certificate

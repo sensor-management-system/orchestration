@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 FROM minio/mc:RELEASE.2023-02-16T19-20-11Z
 
 RUN \

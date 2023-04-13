@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022
+# - Hannes Bohring <hannes.bohring@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 # 
