@@ -177,7 +177,10 @@ class ConfigurationConverter:
         physical_system = SmlPhysicalSystem(
             gml_id=self.gml_id(),
             gml_name=self.gml_name(),
+            gml_description=self.gml_description(),
             sml_valid_time=self.sml_valid_time(),
+            sml_identification=self.sml_identification(),
+            sml_classification=self.sml_classification(),
             sml_documentation=self.sml_documentation(),
             sml_contacts=self.sml_contacts(),
             sml_history=self.sml_history(),
@@ -192,6 +195,12 @@ class ConfigurationConverter:
     def gml_name(self) -> GmlName:
         """Return the gml:name."""
         return GmlName(text=self.configuration.label)
+
+    def gml_description(self) -> Optional[GmlDescription]:
+        """Return the gml:description."""
+        if not self.configuration.description:
+            return None
+        return GmlDescription(text=self.configuration.description)
 
     def sml_valid_time(self) -> Optional[SmlValidTime]:
         """Return the sml:validTime."""
@@ -211,6 +220,37 @@ class ConfigurationConverter:
             gml_id=f"ValidTime_{self.gml_id()}", gml_begin=gml_begin, gml_end=gml_end
         )
         return SmlValidTime(gml_time_period=gml_time_period)
+
+    def sml_identification(self) -> Optional[SmlIdentification]:
+        """Return the sml:identification."""
+        sml_identifier_list = []
+
+        if self.configuration.persistent_identifier:
+            sml_term = SmlTerm(
+                definition="http://sensorml.com/ont/swe/property/Identifier",
+                sml_label=SmlLabel(text="handle"),
+                sml_value=SmlValue(text=self.configuration.persistent_identifier),
+            )
+            sml_identifier = SmlIdentifier(sml_term=sml_term)
+            sml_identifier_list.append(sml_identifier)
+        if not sml_identifier_list:
+            return None
+        return SmlIdentification(sml_identifier_list=sml_identifier_list)
+
+    def sml_classification(self) -> Optional[SmlClassification]:
+        """Return the sml classification."""
+        sml_classifier_list = []
+        if self.configuration.project:
+            sml_term = SmlTerm(
+                definition="http://xmlns.com/foaf/0.1/#term_Project",
+                sml_label=SmlLabel(text="Project"),
+                sml_value=SmlValue(text=self.configuration.project),
+            )
+            sml_classifier = SmlClassifier(sml_term=sml_term)
+            sml_classifier_list.append(sml_classifier)
+        if not sml_classifier_list:
+            return None
+        return SmlClassification(sml_classifier_list=sml_classifier_list)
 
     def sml_contacts(self) -> Optional[SmlContacts]:
         """Return the sml:contacts."""
@@ -309,7 +349,9 @@ class ConfigurationConverter:
                     SmlClassifier(
                         sml_term=SmlTerm(
                             sml_label=SmlLabel(text="StaticLocationAction"),
-                            sml_value=SmlValue(text="StaticLocationAction"),
+                            sml_value=SmlValue(
+                                text=event.label or "StaticLocationAction"
+                            ),
                             definition="StaticLocationAction",
                         )
                     )
@@ -344,7 +386,9 @@ class ConfigurationConverter:
                     SmlClassifier(
                         sml_term=SmlTerm(
                             sml_label=SmlLabel(text="DynamicLocationAction"),
-                            sml_value=SmlValue(text="DynamicLocationAction"),
+                            sml_value=SmlValue(
+                                text=event.label or "DynamicLocationAction"
+                            ),
                             definition="DynamicLocationAction",
                         )
                     )

@@ -563,6 +563,42 @@ class TestConfigurationPermissions(BaseTestCase):
                     )
         self.assertEqual(response.status_code, 403)
 
+    def test_delete_config_with_pid_as_superuser(self):
+        """Make sure that even a superuser can't delete a configuration with pid."""
+        configuration_data = {
+            "data": {
+                "type": "configuration",
+                "attributes": {
+                    "label": fake.pystr(),
+                    "is_public": True,
+                    "is_internal": False,
+                    "cfg_permission_group": "40",
+                    "persistent_identifier": "pid0-0000-0001-1234",
+                },
+            }
+        }
+        access_headers = create_superuser_token()
+        with self.client:
+            response = self.client.post(
+                self.configuration_url,
+                data=json.dumps(configuration_data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+
+        data = json.loads(response.data.decode())
+
+        self.assertEqual(response.status_code, 201)
+
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            url = f"{self.configuration_url}/{data['data']['id']}"
+            delete_response = self.client.delete(url, headers=access_headers)
+            # Due to the pid, we can't delete it anymore
+            self.assertEqual(delete_response.status_code, 403)
+
 
 def preparation_of_public_and_internal_configuration_data(group_id=None):
     """

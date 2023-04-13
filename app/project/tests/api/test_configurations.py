@@ -8,11 +8,8 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Tests for the configuration api of our app."""
-import datetime
 import os
 from unittest.mock import patch
-
-import pytz
 
 from project import base_url
 from project.api.models import Contact, PlatformMountAction, User
@@ -1063,3 +1060,45 @@ class TestConfigurationsService(BaseTestCase):
         with self.run_requests_as(self.super_user):
             resp = self.client.delete(f"{self.configurations_url}/{configuration.id}")
         self.assertEqual(resp.status_code, 200)
+
+    def test_get_description_and_project(self):
+        """Ensure the fields for description and project are included in get response."""
+        configuration = Configuration(
+            label="configuration",
+            description="Some description",
+            project="Helmholtz DataHub",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+        )
+        db.session.add(configuration)
+        db.session.commit()
+
+        response = self.client.get(f"{self.configurations_url}/{configuration.id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json["data"]["attributes"]["description"],
+            configuration.description,
+        )
+        self.assertEqual(
+            response.json["data"]["attributes"]["project"], configuration.project
+        )
+
+    def test_get_persistent_identifier(self):
+        """Ensure that the field for persistent identrifier is included in get response."""
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+            persistent_identifier="pid0-0000-0001-1234",
+        )
+        db.session.add(configuration)
+        db.session.commit()
+
+        response = self.client.get(f"{self.configurations_url}/{configuration.id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json["data"]["attributes"]["persistent_identifier"],
+            configuration.persistent_identifier,
+        )

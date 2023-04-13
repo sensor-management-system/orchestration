@@ -13,6 +13,7 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ..helpers.resource_checks import DevicePropertyValidator
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_property import DeviceProperty
@@ -59,6 +60,10 @@ class DevicePropertyList(ResourceList):
                 query_ = query_.filter(DeviceProperty.device_id == device_id)
         return query_
 
+    def before_create_object(self, data, *args, **kwargs):
+        """Set some fields before we save the new entry."""
+        add_created_by_id(data)
+
     def after_post(self, result):
         """
         Add update description to related device.
@@ -77,7 +82,7 @@ class DevicePropertyList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceProperty,
-        "methods": {"query": query},
+        "methods": {"query": query, "before_create_object": before_create_object},
     }
     permission_classes = [DelegateToCanFunctions]
 
@@ -95,6 +100,10 @@ class DevicePropertyDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if DeviceProperty not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def before_patch(self, args, kwargs, data):
+        """Add update info to the object."""
+        add_updated_by_id(data)
 
     def after_patch(self, result):
         """

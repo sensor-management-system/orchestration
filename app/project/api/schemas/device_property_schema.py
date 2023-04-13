@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -7,6 +7,8 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""Schema class for the device properties."""
+
 from marshmallow import Schema as MarshmallowSchema
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
@@ -14,6 +16,8 @@ from marshmallow_jsonapi.flask import Relationship, Schema
 
 class InnerDevicePropertySchema(MarshmallowSchema):
     """
+    Schema for device properties meant to be included in another schema.
+
     This is the very same class as DevicePropertySchema,
     but it uses just a normal marshmallow schema in order
     to support its usage as a nested element within the
@@ -21,6 +25,8 @@ class InnerDevicePropertySchema(MarshmallowSchema):
     """
 
     class Meta:
+        """Meta class of the InnerDevicePropertySchema."""
+
         type_ = "property"
 
     id = fields.Integer(as_string=True)
@@ -67,13 +73,15 @@ class InnerDevicePropertySchema(MarshmallowSchema):
 class DevicePropertySchema(Schema):
     """
     This class create a schema for a property.
+
     Every attribute in the schema going to expose through the api.
     It uses library called marshmallow-jsonapi that fit
     the JSONAPI 1.0 specification and provides Flask integration.
-
     """
 
     class Meta:
+        """Meta class for the DevicePropertySchema."""
+
         type_ = "device_property"
         self_view = "api.device_property_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -95,6 +103,8 @@ class DevicePropertySchema(Schema):
     resolution = fields.Float(allow_none=True)
     resolution_unit_uri = fields.String(allow_none=True)
     resolution_unit_name = fields.String(allow_none=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
 
     device = Relationship(
         related_view="api.device_detail",
@@ -103,4 +113,22 @@ class DevicePropertySchema(Schema):
         type_="device",
         schema="DeviceSchema",
         id_field="id",
+    )
+
+    created_by = Relationship(
+        attribute="created_by",
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<created_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
+        type_="user",
+        dump_only=True,
+    )
+    updated_by = Relationship(
+        related_view="api.user_detail",
+        related_view_kwargs={"id": "<updated_by_id>"},
+        include_resource_linkage=True,
+        schema="UserSchema",
+        type_="user",
+        dump_only=True,
     )

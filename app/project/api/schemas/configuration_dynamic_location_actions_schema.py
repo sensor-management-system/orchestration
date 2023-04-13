@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -6,18 +6,24 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+
+"""Schema class for the dynamic location actions."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class ConfigurationDynamicLocationBeginActionSchema(Schema):
     """
-    This class create a schema for a configuration_dynamic_location_begin_action.
+    This class creates a schema for a dynamic location action.
+
     It uses the  marshmallow-jsonapi library that fit
     the JSONAPI 1.0 specification and provides Flask integration.
     """
 
     class Meta:
+        """Meta classf for the ConfigurationDynamicLocationBeginActionSchema."""
+
         type_ = "configuration_dynamic_location_action"
         self_view = "api.configuration_dynamic_location_begin_action_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -27,6 +33,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
     end_date = fields.DateTime(allow_none=True)
     begin_description = fields.Str(allow_none=True)
     end_description = fields.Str(allow_none=True)
+    label = fields.Str(allow_none=True)
     epsg_code = fields.Str(allow_none=True)
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)

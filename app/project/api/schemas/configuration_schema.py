@@ -14,7 +14,6 @@ from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 from ..schemas.contact_schema import ContactSchema
-from ..schemas.device_property_schema import InnerDevicePropertySchema
 
 
 class ConfigurationSchema(Schema):
@@ -31,6 +30,8 @@ class ConfigurationSchema(Schema):
     start_date = fields.DateTime(allow_none=True)
     end_date = fields.DateTime(allow_none=True)
     label = fields.String(allow_none=True)
+    project = fields.String(allow_none=True)
+    description = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
     cfg_permission_group = fields.String(required=True)
     created_at = fields.DateTime(dump_only=True)
@@ -41,6 +42,7 @@ class ConfigurationSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     update_description = fields.Str(dump_only=True)
+    persistent_identifier = fields.Str(allow_none=True)
     contacts = Relationship(
         attribute="contacts",
         related_view="api.contact_list",
@@ -140,15 +142,18 @@ class ConfigurationSchema(Schema):
 
     @staticmethod
     def nested_dict_serializer(configuration):
-        """serialize the object to a nested dict."""
+        """Serialize the object to a nested dict."""
         return ConfigurationToNestedDictSerializer().to_nested_dict(configuration)
 
 
 class ConfigurationToNestedDictSerializer:
+    """Some other serializer, so that we include it somewhere."""
+
     @staticmethod
     def to_nested_dict(configuration):
         """
         Convert the configuration-object to a nested dict.
+
         :param configuration:
         :return:
         """
@@ -165,7 +170,11 @@ class ConfigurationToNestedDictSerializer:
 
 
 class ConfigurationSchemaForOnlyId(Schema):
+    """Schema that just returns the id of the configuration."""
+
     class Meta:
+        """Meta class for ConfigurationSchemaForOnlyId."""
+
         type_ = "configuration"
         self_view = "api.configuration_detail"
         self_view_kwargs = {"id": "<id>"}

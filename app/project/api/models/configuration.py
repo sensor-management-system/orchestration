@@ -30,11 +30,14 @@ class Configuration(
     start_date = db.Column(db.DateTime(timezone=True), nullable=True)
     end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     label = db.Column(db.String(256), nullable=True)
+    project = db.Column(db.String(256), nullable=True)
+    description = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(256), nullable=True, default="draft")
     cfg_permission_group = db.Column(db.String, nullable=True)
     is_internal = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=False)
     update_description = db.Column(db.String(256), nullable=True)
+    persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     configuration_attachments = db.relationship(
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
@@ -68,6 +71,8 @@ class Configuration(
 
         return {
             "label": self.label,
+            "description": self.description,
+            "project": self.project,
             "status": self.status,
             "cfg_permission_group": self.cfg_permission_group,
             "configuration_contact_roles": [
@@ -103,6 +108,7 @@ class Configuration(
             "start_date": self.start_date,
             "end_date": self.end_date,
             "site_id": self.site_id,
+            "persistent_identifier": self.persistent_identifier,
         }
 
     @staticmethod
@@ -144,6 +150,8 @@ class Configuration(
                         "type": "integer",
                     },
                     "label": type_keyword_and_full_searchable,
+                    "project": type_keyword_and_full_searchable,
+                    "description": type_text_full_searchable,
                     "status": type_keyword_and_full_searchable,
                     "cfg_permission_group": type_keyword,
                     "start_date": {"type": "date"},
@@ -187,13 +195,17 @@ class Configuration(
                     "configuration_static_location_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": type_text_full_searchable,
+                            "begin_description": type_text_full_searchable,
+                            "end_description": type_text_full_searchable,
+                            "label": type_keyword_and_full_searchable,
                         },
                     },
                     "configuration_dynamic_location_actions": {
                         "type": "nested",
                         "properties": {
-                            "description": type_text_full_searchable,
+                            "begin_description": type_text_full_searchable,
+                            "end_description": type_text_full_searchable,
+                            "label": type_keyword_and_full_searchable,
                         },
                     },
                     "platform_mount_actions": {
@@ -231,6 +243,7 @@ class Configuration(
                     "site_id": {
                         "type": "integer",
                     },
+                    "persistent_identifier": type_keyword_and_full_searchable,
                 }
             },
             "settings": settings_with_ngrams(
