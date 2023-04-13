@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: 2021
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+
 # This is a script to make backups of the minio server from within the gitlab CI.
 # We need to mount the target folder under /backups
 # And we need to provide the user and group id of the user that should be able
