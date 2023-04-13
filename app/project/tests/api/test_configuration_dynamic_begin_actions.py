@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Luca Johannes Nendel <luca-johannes.nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 import json
 
 import dateutil.parser
@@ -272,7 +281,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         db.session.commit()
 
         _ = super().try_add_object_with_status_code(
-            url=self.url, data_object=data, expected_status_code=409
+            url=self.url, data_object=data, expected_status_code=403
         )
 
     def test_add_for_archived_device(self):
@@ -672,7 +681,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         _ = super().try_update_object_with_status_code(
             url=f"{self.url}/{dynamic_location_begin_action.id}",
             data_object=new_data,
-            expected_status_code=409,
+            expected_status_code=403,
         )
 
     def test_update_archived_device(self):
@@ -878,7 +887,7 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_archived_device(self):
         """Ensure we can't delete for an archived device."""

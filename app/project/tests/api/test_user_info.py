@@ -1,7 +1,18 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Test classes & functions for the userinfo endpoint."""
+import datetime
 import json
+from unittest import skipIf
 from unittest.mock import patch
 
+import pytz
 from flask import current_app
 
 from project import base_url
@@ -22,17 +33,18 @@ class TestUserinfo(BaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 401)
 
+    @skipIf(
+        not current_app.config["IDL_URL"],
+        "will not work without idl url configuration.",
+    )
     def test_get_with_jwt_user_not_assigned_to_any_permission_group(self):
         """Ensure response with an empty list if user not assigned to any permission group."""
         access_headers = create_token()
-        if current_app.config["IDL_URL"] is not None:
-            response = self.client.get(self.url, headers=access_headers)
-            self.assertEqual(response.status_code, 200)
-            data = response.json["data"]
-            self.assertEqual(data["attributes"]["admin"], [])
-            self.assertEqual(data["attributes"]["member"], [])
-        else:
-            pass
+        response = self.client.get(self.url, headers=access_headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json["data"]
+        self.assertEqual(data["attributes"]["admin"], [])
+        self.assertEqual(data["attributes"]["member"], [])
 
     def test_get_with_jwt_user_is_assigned_to_permission_groups(self):
         """Ensure response with an empty list if user not assigned to any permission group."""
@@ -153,3 +165,54 @@ class TestUserinfo(BaseTestCase):
                     )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["subject"], "dummy")
+
+    def test_get_includes_terms_of_use_agreement_date(self):
+        """Ensure that we give out the agreement date in the payload."""
+        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
+        user = User(
+            subject="dummy",
+            contact=contact,
+            terms_of_use_agreement_date=datetime.datetime(
+                2023, 2, 28, 12, 0, 0, tzinfo=pytz.utc
+            ),
+        )
+        db.session.add_all([contact, user])
+        db.session.commit()
+        with self.run_requests_as(user):
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups_for_a_user:
+                test_get_all_permission_groups_for_a_user.return_value = (
+                    IDL_USER_ACCOUNT
+                )
+                with self.client:
+                    response = self.client.get(
+                        self.url,
+                    )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json["data"]["attributes"]["terms_of_use_agreement_date"],
+            "2023-02-28T12:00:00+00:00",
+        )
+
+    def test_get_includes_terms_of_use_agreement_date_not_set(self):
+        """Ensure that we give out the null agreement date (not set yet)."""
+        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
+        user = User(subject="dummy", contact=contact, terms_of_use_agreement_date=None)
+        db.session.add_all([contact, user])
+        db.session.commit()
+        with self.run_requests_as(user):
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups_for_a_user:
+                test_get_all_permission_groups_for_a_user.return_value = (
+                    IDL_USER_ACCOUNT
+                )
+                with self.client:
+                    response = self.client.get(
+                        self.url,
+                    )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json["data"]["attributes"]["terms_of_use_agreement_date"], None
+        )

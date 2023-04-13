@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Florian Gransee <florian.gransee@ufz.de>
+# - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """PID resources.."""
 from flask import g, request
 from flask_rest_jsonapi import ResourceDetail
@@ -248,10 +256,15 @@ def make_instrument_data_from_instance(instrument_instance: dict) -> (list, obje
         raise BadRequestError("Type Not Implemented.")
     try:
         instrument_data = [
-            {"index": 1, "type": "URL", "data": {
-                "format": "string",
-                "value": instrument_instance["source_uri"]
-            }}]
+            {
+                "index": 1,
+                "type": "URL",
+                "data": {
+                    "format": "string",
+                    "value": instrument_instance["source_uri"],
+                },
+            }
+        ]
         #     {"index": 2, "type": "LandingPage", "data": {
         #         "format": "string",
         #         "value": instrument_instance["source_uri"]
@@ -275,10 +288,15 @@ def make_instrument_data_from_request(instrument_data: dict) -> list:
     """
     try:
         instrument_data = [
-            {"index": 1, "type:": "URL", "data": {
-                "format": "string",
-                "value": instrument_data["source_object_url"]
-            }}]
+            {
+                "index": 1,
+                "type:": "URL",
+                "data": {
+                    "format": "string",
+                    "value": instrument_data["source_object_url"],
+                },
+            }
+        ]
         #     {"index": 2, "type": "LandingPage", "data": {
         #         "format": "string",
         #         "value": instrument_data["source_object_url"]

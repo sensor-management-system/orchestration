@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """
 Endpoints to query for text fields only.
 
@@ -15,6 +24,7 @@ from ..api.helpers.errors import ErrorResponse, UnauthorizedError
 from ..api.models import (
     Configuration,
     ConfigurationCustomField,
+    Contact,
     CustomField,
     Device,
     DeviceCalibrationAction,
@@ -72,7 +82,7 @@ class AbstractFreeTextFieldEndpoint(ABC):
         """
         try:
             if not g.user:
-                raise UnauthorizedError("Login required.")
+                raise UnauthorizedError("Authentication required.")
             base_query = db.session.query(self.__class__.field)
 
             if getattr(self.__class__, "ignore_field", None):
@@ -449,3 +459,11 @@ class SiteZipCodeEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct site zip codes."""
 
     field = Site.zip_code
+
+
+@free_text_field_routes.route("/controller/contact-organizations", methods=["GET"])
+@class_based_view
+class ContactOrganizationEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct contact organizations."""
+
+    field = Contact.organization

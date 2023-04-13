@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Resource classes for the device contact roles."""
 
 from flask_rest_jsonapi import ResourceDetail
@@ -5,10 +13,11 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models import Device
 from ..models.base_model import db
 from ..models.contact_role import DeviceContactRole
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.role import DeviceRoleSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -33,7 +42,7 @@ class DeviceRoleList(ResourceList):
         Handle also additional logic to query the device
         attachments for a specific device.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -66,6 +75,7 @@ class DeviceRoleList(ResourceList):
         "model": DeviceContactRole,
         "methods": {"query": query},
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DeviceRoleDetail(ResourceDetail):
@@ -93,6 +103,7 @@ class DeviceRoleDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Update the device update description."""
         contact_role = (
             db.session.query(DeviceContactRole).filter_by(id=kwargs["id"]).one_or_none()
         )
@@ -108,3 +119,4 @@ class DeviceRoleDetail(ResourceDetail):
         "session": db.session,
         "model": DeviceContactRole,
     }
+    permission_classes = [DelegateToCanFunctions]

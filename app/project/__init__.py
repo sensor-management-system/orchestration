@@ -1,3 +1,14 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Dirk Ecker <d.ecker@fz-juelich.de>
+# - Forschungszentrum Jülich GmbH (FZJ, https://fz-juelich.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Application for the sensor management system."""
 
 from elasticsearch import Elasticsearch
@@ -8,7 +19,7 @@ from healthcheck import HealthCheck
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .api import minio
-from .api.auth.permission_manager import permission_manager
+from .api.permissions.permission_manager import permission_manager
 from .api.helpers.health_checks import (
     health_check_db,
     health_check_elastic_search,

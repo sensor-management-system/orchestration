@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the location actions controller."""
 
 import datetime
@@ -52,7 +60,7 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
     def test_get_internal_without_user(self):
         """Ensure anonymous can't access an internal configuration."""
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_get_one_location_action_static(self):
         """Ensure we get an entry for an existing location action."""

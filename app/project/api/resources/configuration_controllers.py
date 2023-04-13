@@ -1,18 +1,26 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Controller resources for the configuration mounting actions."""
 
 import dateutil.parser
-from flask import g, request
+from flask import request
 from sqlalchemy import and_, or_
 
 from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import (
     BadRequestError,
+    ForbiddenError,
     MethodNotAllowed,
     NotFoundError,
-    UnauthorizedError,
 )
 from ..models import Configuration, DeviceMountAction, PlatformMountAction
 from ..models.base_model import db
+from ..permissions.rules import can_see
 from ..schemas.device_schema import DeviceSchema
 from ..schemas.mount_actions_schema import (
     DeviceMountActionSchema,
@@ -34,9 +42,8 @@ class ControllerConfigurationMountingActionTimepoints(ResourceList):
         )
         if not configuration:
             raise NotFoundError("No configuration with the given id.")
-        if configuration.is_internal:
-            if not g.user:
-                raise UnauthorizedError("Authentication required.")
+        if not can_see(configuration):
+            raise ForbiddenError("Authentication required.")
 
         device_schema = DeviceSchema()
         platform_schema = PlatformSchema()
@@ -124,9 +131,8 @@ class ControllerConfigurationMountingActions(ResourceList):
         )
         if not configuration:
             raise NotFoundError("No configuration with the given id.")
-        if configuration.is_internal:
-            if not g.user:
-                raise UnauthorizedError("Authentication required.")
+        if not can_see(configuration):
+            raise ForbiddenError("Authentication required.")
 
         if "timepoint" not in request.args.keys():
             raise BadRequestError("timepoint parameter required")

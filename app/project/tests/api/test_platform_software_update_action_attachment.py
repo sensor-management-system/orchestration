@@ -1,3 +1,13 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+"""Tests for the api usage for platform software update action attachments."""
+
 from project import base_url
 from project.api.models import (
     Contact,
@@ -26,10 +36,16 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_platform_software_update_action_attachment_collection(self):
-        """Test retrieve attachment collection of PlatformSoftwareUpdateActionAttachment objects"""
+        """Test retrieve attachment collection of PlatformSoftwareUpdateActionAttachments."""
         platform_software_update_action_attachment = (
             add_platform_software_update_action_attachment_model()
         )
+        platform = platform_software_update_action_attachment.action.platform
+        platform.is_public = True
+        platform.is_internal = False
+        db.session.add(platform)
+        db.session.commit()
+
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -40,8 +56,22 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
             str(platform_software_update_action_attachment.id),
         )
 
+    def test_get_platform_software_update_action_attachment_collection_internal(self):
+        """Ensure we don't show infos for internal platforms without login."""
+        platform_software_update_action_attachment = (
+            add_platform_software_update_action_attachment_model()
+        )
+        platform = platform_software_update_action_attachment.action.platform
+        self.assertTrue(platform.is_internal)
+
+        with self.client:
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        # should be only one
+        self.assertEqual(response.json["meta"]["count"], 0)
+
     def test_post_platform_software_update_action_attachment(self):
-        """Create PlatformSoftwareUpdateActionAttachment"""
+        """Create PlatformSoftwareUpdateActionAttachment."""
         userinfo = generate_userinfo_data()
         platform = Platform(
             short_name="Platform 144",
@@ -99,7 +129,7 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         )
 
     def test_update_platform_software_update_action_attachment(self):
-        """Update PlatformSoftwareUpdateActionAttachment"""
+        """Update PlatformSoftwareUpdateActionAttachment."""
         platform_software_update_action_attachment = (
             add_platform_software_update_action_attachment_model()
         )
@@ -136,7 +166,7 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         )
 
     def test_delete_platform_software_update_action_attachment(self):
-        """Delete PlatformSoftwareUpdateActionAttachment """
+        """Delete PlatformSoftwareUpdateActionAttachment."""
         platform_software_update_action_attachment = (
             add_platform_software_update_action_attachment_model()
         )

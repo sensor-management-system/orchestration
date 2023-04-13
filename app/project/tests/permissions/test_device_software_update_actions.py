@@ -1,10 +1,22 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the device software update action api."""
 
+import datetime
 import json
 from unittest.mock import patch
 
+import pytz
+
 from project import base_url, db
-from project.api.models import DeviceSoftwareUpdateAction
+from project.api.models import Contact, Device, DeviceSoftwareUpdateAction, User
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_software_update_actions_model import (
@@ -123,7 +135,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                     headers=create_token(),
                 )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_action__user_not_in_the_permission_group(self):
         """Post to device,with permission Group different from the user group."""
@@ -206,7 +218,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_action__user_is_not_part_from_permission_group(self):
         """Post to device,with permission Group."""
@@ -274,7 +286,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_software_update_action_as_member(self):
         """Delete DeviceSoftwareUpdateAction as member."""
@@ -293,3 +305,72 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_patch_to_non_editable_device(self):
+        """Ensure we can't update to a device we can't edit."""
+        device1 = Device(
+            short_name="device1",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["1"],
+        )
+        device2 = Device(
+            short_name="device2",
+            is_public=False,
+            is_internal=True,
+            is_private=False,
+            group_ids=["2"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        action = DeviceSoftwareUpdateAction(
+            device=device1,
+            contact=contact,
+            update_date=datetime.datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            software_type_name="OS",
+            software_type_uri="something",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([device1, device2, contact, user, action])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_software_update_action",
+                "id": action.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another device for
+                    # which we have no edit permissions.
+                    "device": {
+                        "data": {
+                            "type": "device",
+                            "id": device2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*device1.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{action.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """External openapi spec file for device attachments."""
 
 paths = {
@@ -183,7 +189,11 @@ components = {
                         "id": {"type": "string"},
                     },
                     "example": {
-                        "attributes": {"label": "", "url": "", "is_upload": False},
+                        "attributes": {
+                            "label": "",
+                            "url": "",
+                            "is_upload": False,
+                        },
                         "relationships": {
                             "device": {"data": {"type": "device", "id": "0"}}
                         },
@@ -212,21 +222,90 @@ components = {
                                             "is_upload": {
                                                 "type": "boolean",
                                             },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                            },
                                         },
                                     },
                                     "type": {"type": "string"},
                                     "id": {"type": "string"},
+                                    "relationships": {
+                                        "type": "object",
+                                        "properties": {
+                                            "device": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                            },
+                                                            "id": {"type": "string"},
+                                                        },
+                                                    }
+                                                },
+                                            },
+                                            "created_by": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                            },
+                                                            "id": {"type": "string"},
+                                                        },
+                                                    }
+                                                },
+                                            },
+                                            "updated_by": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                            },
+                                                            "id": {"type": "string"},
+                                                        },
+                                                    }
+                                                },
+                                            },
+                                        },
+                                    },
                                 },
                                 "example": {
                                     "attributes": {
                                         "label": "",
                                         "url": "",
                                         "is_upload": False,
+                                        "created_at": "2023-03-14T12:00:00+00:00",
+                                        "updated_at": "2023-03-14T13:00:00+00:00",
                                     },
                                     "relationships": {
                                         "device": {
                                             "data": {"type": "device", "id": "0"}
-                                        }
+                                        },
+                                        "created_by": {
+                                            "data": {
+                                                "type": "user",
+                                                "id": "123",
+                                            }
+                                        },
+                                        "updated_by": {
+                                            "data": {
+                                                "type": "user",
+                                                "id": "124",
+                                            }
+                                        },
                                     },
                                     "type": "device_attachment",
                                     "id": "0",

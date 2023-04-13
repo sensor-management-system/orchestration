@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """
 Extra routes to have some verbs for platforms.
 
@@ -11,11 +17,12 @@ from flask import Blueprint, g
 from ..api.helpers.errors import ForbiddenError, UnauthorizedError
 from ..api.models import Platform
 from ..api.models.base_model import db
+from ..api.permissions.rules import can_archive, can_restore, can_see
 from ..config import env
-from ..restframework.rules import (
-    archive_platform_permissions,
-    archive_platform_preconditions,
-    restore_platform_permissions,
+from ..restframework.preconditions.platforms import (
+    AllMountsOfPlatformAreFinishedInThePast,
+    AllUsagesAsParentPlatformInDeviceMountsFinishedInThePast,
+    AllUsagesAsParentPlatformInPlatformMountsFinishedInThePast,
 )
 from ..restframework.shortcuts import get_object_or_404
 from ..restframework.views.classbased import BaseView, class_based_view
@@ -32,9 +39,12 @@ additional_platforms_routes = Blueprint(
 class ArchivePlatformView(BaseView):
     """View to archive platforms with a post request."""
 
-    permissions = archive_platform_permissions
     model = Platform
-    preconditions = archive_platform_preconditions
+    preconditions = (
+        AllMountsOfPlatformAreFinishedInThePast()
+        & AllUsagesAsParentPlatformInDeviceMountsFinishedInThePast()
+        & AllUsagesAsParentPlatformInPlatformMountsFinishedInThePast()
+    )
 
     def __init__(self, id):
         """Init the environment for the single request."""
@@ -51,10 +61,10 @@ class ArchivePlatformView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         platform = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(platform):
+        if not can_see(platform) or not can_archive(platform):
             raise ForbiddenError("User is not allowed to archive")
         conflict = self.preconditions.violated_by_object(platform)
         if conflict:
@@ -68,7 +78,6 @@ class ArchivePlatformView(BaseView):
 class RestorePlatformView(BaseView):
     """View to restore archived platforms."""
 
-    permissions = restore_platform_permissions
     model = Platform
 
     def __init__(self, id):
@@ -86,10 +95,10 @@ class RestorePlatformView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         platform = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(platform):
+        if not can_see(platform) or not can_restore(platform):
             raise ForbiddenError("User is not allowed to restore")
         self.restore(platform)
         return "", 204

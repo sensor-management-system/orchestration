@@ -1,10 +1,19 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the devices."""
 import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Device, User
+from project.api.models import Contact, Device, User
 from project.api.models.base_model import db
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.permissions import (
@@ -219,31 +228,35 @@ class TestDevicePermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
+        access_headers = create_superuser_token()
         with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-            self.assertEqual(response.status_code, 409)
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups:
+                test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+                response = self.client.post(
+                    self.device_url,
+                    data=json.dumps(device_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response.status_code, 409)
 
-            response_1 = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data_1),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-            self.assertEqual(response_1.status_code, 409)
+                response_1 = self.client.post(
+                    self.device_url,
+                    data=json.dumps(device_data_1),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response_1.status_code, 409)
 
-            response_2 = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data_2),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-            self.assertEqual(response_2.status_code, 409)
+                response_2 = self.client.post(
+                    self.device_url,
+                    data=json.dumps(device_data_2),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                self.assertEqual(response_2.status_code, 409)
 
     def test_add_groups_ids(self):
         """Ensure a device with groups ids can be created."""
@@ -342,7 +355,7 @@ class TestDevicePermissions(BaseTestCase):
 
         url = f"{self.device_url}/{private_sensor.id}"
         response = self.client.get(url)
-        self.assertEqual(response.status, "401 UNAUTHORIZED")
+        self.assertIn(response.status_code, [401, 403])
 
     def test_patch_device_as_a_member_in_a_permission_group(self):
         """Ensure a member in a group (admin/member) can change the device."""
@@ -441,7 +454,7 @@ class TestDevicePermissions(BaseTestCase):
                 }
                 url = f"{self.device_url}/{data['data']['id']}"
                 _ = super().try_update_object_with_status_code(
-                    url, device_data_changed, expected_status_code=409
+                    url, device_data_changed, expected_status_code=403
                 )
 
     def test_patch_device_user_not_in_any_permission_group(self):
@@ -491,14 +504,18 @@ class TestDevicePermissions(BaseTestCase):
             }
         }
         access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    self.device_url,
+                    data=json.dumps(device_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+        self.assertEqual(response.status_code, 403)
 
     def test_add_public_device_without_group(self):
         """Ensure a public device can't be added without a group."""
@@ -515,14 +532,18 @@ class TestDevicePermissions(BaseTestCase):
             }
         }
         access_headers = create_token()
-        with self.client:
-            response = self.client.post(
-                self.device_url,
-                data=json.dumps(device_data),
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertEqual(response.status_code, 409)
+        with patch.object(
+            idl, "get_all_permission_groups_for_a_user"
+        ) as test_get_all_permission_groups:
+            test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
+            with self.client:
+                response = self.client.post(
+                    self.device_url,
+                    data=json.dumps(device_data),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+        self.assertEqual(response.status_code, 403)
 
     def test_add_private_device_without_group(self):
         """Ensure a new private device can be added without a group."""
@@ -726,7 +747,141 @@ class TestDevicePermissions(BaseTestCase):
             url = f"{self.device_url}/{data['data']['id']}"
             delete_response = self.client.delete(url, headers=access_headers)
             # Due to the pid, we can't delete it anymore
-            self.assertEqual(delete_response.status_code, 409)
+            self.assertEqual(delete_response.status_code, 403)
+
+    def test_patch_to_different_permission_group(self):
+        """Ensure we can't update to a permission group we aren't members."""
+        device = Device(
+            short_name="test device", is_public=False, is_internal=True, group_ids=["1"]
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([device, contact, user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device",
+                "id": device.id,
+                "attributes": {
+                    "group_ids": ["2"],
+                },
+                "relationships": {},
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*device.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.device_url}/{device.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
+
+    def test_patch_to_remove_permission_group_non_admin(self):
+        """Ensure we can't remove a permission group we aren't admins."""
+        device = Device(
+            short_name="test device", is_public=False, is_internal=True, group_ids=["1"]
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([device, contact, user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device",
+                "id": device.id,
+                "attributes": {
+                    "group_ids": ["2"],
+                },
+                "relationships": {},
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*device.group_ids, "2"],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.device_url}/{device.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
+
+    def test_patch_from_internal_to_private(self):
+        """Ensure we can't set back to private once the device was visible."""
+        device = Device(
+            short_name="test device", is_public=False, is_internal=True, group_ids=["1"]
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([device, contact, user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device",
+                "id": device.id,
+                "attributes": {
+                    "group_ids": [],
+                    "is_private": True,
+                    "is_internal": False,
+                },
+                "relationships": {},
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*device.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.device_url}/{device.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
 
 
 def preparation_of_public_and_internal_device_data(group_ids):

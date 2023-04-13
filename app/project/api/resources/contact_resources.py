@@ -1,20 +1,28 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Resource classes for contacts."""
 
-from flask import g
 from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import is_superuser
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
-from ..helpers.errors import ForbiddenError
+from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.contact import Contact
 from ..models.device import Device
 from ..models.platform import Platform
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.contact_schema import ContactSchema
 from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
@@ -30,7 +38,7 @@ class ContactList(ResourceList):
 
     def query(self, view_kwargs):
         """Return the base query to search for contacts."""
-        query_ = self.session.query(Contact)
+        query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
         platform_id = view_kwargs.get("platform_id")
         device_id = view_kwargs.get("device_id")
@@ -75,6 +83,16 @@ class ContactList(ResourceList):
     def before_create_object(self, data, *args, **kwargs):
         """Run hooks for data we want to add before creating the contact."""
         add_created_by_id(data)
+        orcid = data.get("orcid")
+        if orcid:
+            has_orcid = db.session.query(Contact).filter(Contact.orcid == orcid).first()
+            if has_orcid:
+                raise ConflictError("Orcid already used.")
+        email = data.get("email")
+        if email:
+            has_email = db.session.query(Contact).filter(Contact.email == email).first()
+            if has_email:
+                raise ConflictError("E-Mail already used.")
 
     schema = ContactSchema
     decorators = (token_required,)
@@ -84,6 +102,7 @@ class ContactList(ResourceList):
         "class": EsSqlalchemyDataLayer,
         "methods": {"query": query, "before_create_object": before_create_object},
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class ContactDetail(ResourceDetail):
@@ -100,26 +119,29 @@ class ContactDetail(ResourceDetail):
 
     def before_patch(self, args, kwargs, data):
         """Check if the user has the permission to change this contact."""
-        contact = db.session.query(Contact).filter_by(id=data["id"]).one_or_none()
-        if contact and not is_superuser():
-            is_self = contact.id == g.user.contact.id
-            is_creator = contact.created_by_id == g.user.id
-            if not (is_self or is_creator):
-                raise ForbiddenError("User is not allowed to edit this contact")
         add_updated_by_id(data)
 
-    def before_delete(self, args, kwargs):
-        """Check if the user is allowed to delete the contact."""
-        contact = db.session.query(Contact).filter_by(id=kwargs["id"]).one_or_none()
-        if contact and not is_superuser():
-            # It doesn't make sense to delete the own contact as
-            # it is still needed for the user entry in the db.
-            # So we only check if the user created that contact.
-            if not contact.created_by_id == g.user.id:
-                raise ForbiddenError("User is not allowed to delete this contact")
-        # in any case the foreign key settings will not allow to delete
-        # contacts that are used in actions or still have a user for it.
-        pass
+        # And lets add some checks for the orcid & email
+        orcid = data.get("orcid")
+        if orcid:
+            has_orcid = (
+                db.session.query(Contact)
+                .filter(Contact.id != data["id"])
+                .filter(Contact.orcid == orcid)
+                .first()
+            )
+            if has_orcid:
+                raise ConflictError("Orcid already used.")
+        email = data.get("email")
+        if email:
+            has_email = (
+                db.session.query(Contact)
+                .filter(Contact.id != data["id"])
+                .filter(Contact.email == email)
+                .first()
+            )
+            if has_email:
+                raise ConflictError("Email already used.")
 
     schema = ContactSchema
     decorators = (token_required,)
@@ -127,3 +149,4 @@ class ContactDetail(ResourceDetail):
         "session": db.session,
         "model": Contact,
     }
+    permission_classes = [DelegateToCanFunctions]

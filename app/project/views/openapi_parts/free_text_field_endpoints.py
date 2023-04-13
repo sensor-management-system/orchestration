@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Openapi docs helper file for the free text endpoints."""
 
 
@@ -361,5 +370,10 @@ paths = {
         endpoint="/controller/configuration-custom-field-values",
         description="Get the list of distinct configuration custom field values of all devices.",
         operation_id="controller_configuration_custom_field_values",
+    ),
+    **template(
+        endpoint="/controller/contact-organizations",
+        description="Get the list of distinct organization field values of all contacts.",
+        operation_id="controller_contact_organizations",
     ),
 }

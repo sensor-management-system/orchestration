@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the api for contacts."""
 
 import json
@@ -102,6 +110,7 @@ class TestContactServices(BaseTestCase):
                 "id": contact.id,
                 "attributes": {
                     "given_name": "updated",
+                    "organization": "Helmholtz",
                 },
             }
         }
@@ -114,6 +123,9 @@ class TestContactServices(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["given_name"], "updated")
+        self.assertEqual(
+            response.json["data"]["attributes"]["organization"], "Helmholtz"
+        )
 
     def test_update_contact_as_superuser(self):
         """
@@ -305,3 +317,144 @@ class TestContactServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_post_duplicated_orcids(self):
+        """Make sure we can't add a orcid for a second time."""
+        userinfo = generate_userinfo_data()
+        contact_data1 = {
+            "given_name": fake.first_name(),
+            "family_name": fake.last_name(),
+            "email": fake.unique.email(),
+            "orcid": "0000-0000-0000-0001",
+        }
+        contact_data2 = {
+            "given_name": fake.first_name(),
+            "family_name": fake.last_name(),
+            "email": fake.unique.email(),
+            "orcid": "0000-0000-0000-0001",
+        }
+
+        data = {"data": {"type": "contact", "attributes": contact_data1}}
+        access_headers = create_token(userinfo)
+        with self.client:
+            response = self.client.post(
+                self.url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 201)
+        # And for the second one
+        data = {"data": {"type": "contact", "attributes": contact_data2}}
+        access_headers = create_token(userinfo)
+        with self.client:
+            response = self.client.post(
+                self.url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
+
+    def test_post_duplicated_email(self):
+        """Make sure we can't add an email for a second time."""
+        userinfo = generate_userinfo_data()
+        contact_data1 = {
+            "given_name": fake.first_name(),
+            "family_name": fake.last_name(),
+            "email": "fake@unique.email",
+        }
+        contact_data2 = {
+            "given_name": fake.first_name(),
+            "family_name": fake.last_name(),
+            "email": "fake@unique.email",
+        }
+
+        data = {"data": {"type": "contact", "attributes": contact_data1}}
+        access_headers = create_token(userinfo)
+        with self.client:
+            response = self.client.post(
+                self.url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 201)
+        # And for the second one
+        data = {"data": {"type": "contact", "attributes": contact_data2}}
+        access_headers = create_token(userinfo)
+        with self.client:
+            response = self.client.post(
+                self.url,
+                data=json.dumps(data),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
+
+    def test_patch_to_duplicated_orcids(self):
+        """Make sure we can't insert an orcid for a second time by patch."""
+        contact1 = Contact(
+            given_name=fake.first_name(),
+            family_name=fake.last_name(),
+            email=fake.unique.email(),
+            orcid="0000-0000-0000-0001",
+        )
+        contact2 = Contact(
+            given_name=fake.first_name(),
+            family_name=fake.last_name(),
+            email=fake.unique.email(),
+        )
+        super_user = User(contact=contact1, is_superuser=True, subject=contact1.email)
+        db.session.add_all([contact1, contact2, super_user])
+        db.session.commit()
+        contact_data = {
+            "orcid": "0000-0000-0000-0001",
+        }
+
+        # We try to update the orcid of the second contact.
+        # But when it is equal to an existing one, we should see the error.
+        data = {
+            "data": {"type": "contact", "id": contact2.id, "attributes": contact_data}
+        }
+        with self.client:
+            with self.run_requests_as(super_user):
+                response = self.client.patch(
+                    f"{self.url}/{contact2.id}",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                )
+        self.assertEqual(response.status_code, 409)
+
+    def test_patch_to_duplicated_emails(self):
+        """Make sure we can't insert an email for a second time by patch."""
+        contact1 = Contact(
+            given_name=fake.first_name(),
+            family_name=fake.last_name(),
+            email=fake.unique.email(),
+        )
+        contact2 = Contact(
+            given_name=fake.first_name(),
+            family_name=fake.last_name(),
+            email=fake.unique.email(),
+        )
+        super_user = User(contact=contact1, is_superuser=True, subject=contact1.email)
+        db.session.add_all([contact1, contact2, super_user])
+        db.session.commit()
+        contact_data = {
+            "email": contact1.email,
+        }
+
+        # We try to update the mail of the second contact.
+        # But when it is equal to an existing one, we should see the error.
+        data = {
+            "data": {"type": "contact", "id": contact2.id, "attributes": contact_data}
+        }
+        with self.client:
+            with self.run_requests_as(super_user):
+                response = self.client.patch(
+                    f"{self.url}/{contact2.id}",
+                    data=json.dumps(data),
+                    content_type="application/vnd.api+json",
+                )
+        self.assertEqual(response.status_code, 409)

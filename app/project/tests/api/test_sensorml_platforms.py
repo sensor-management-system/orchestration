@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests to extract sensorML for platforms."""
 
 import datetime
@@ -187,6 +193,7 @@ class TestSensorMLPlatform(BaseTestCase):
             family_name="Fam",
             email="given@family",
             website="https://given.fam/index.html",
+            organization="Dummy organization",
         )
         contact2 = Contact(given_name="Homer J", family_name="S", email="homer.j@fix")
         contact_role1 = PlatformContactRole(
@@ -224,6 +231,13 @@ class TestSensorMLPlatform(BaseTestCase):
             .find("{http://www.isotc211.org/2005/gco}CharacterString")
             .text,
             f"{contact1.given_name} {contact1.family_name}",
+        )
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}organisationName")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            "Dummy organization",
         )
         self.assertEqual(
             first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")

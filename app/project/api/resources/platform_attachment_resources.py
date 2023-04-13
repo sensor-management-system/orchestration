@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Module for the platform attachment list resource."""
 import pathlib
 
@@ -7,11 +15,13 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...api import minio
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.platform import Platform
 from ..models.platform_attachment import PlatformAttachment
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.platform_attachment_schema import PlatformAttachmentSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -37,7 +47,7 @@ class PlatformAttachmentList(ResourceList):
         Handle also cases to get all the platform attachments
         for a specific platform.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         platform_id = view_kwargs.get("platform_id")
 
         if platform_id is not None:
@@ -83,16 +93,18 @@ class PlatformAttachmentList(ResourceList):
 
         return result
 
+    def before_create_object(self, data, *args, **kwargs):
+        """Set some fields before we save the new entry."""
+        add_created_by_id(data)
+
     schema = PlatformAttachmentSchema
     decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformAttachment,
-        "methods": {"query": query},
+        "methods": {"before_create_object": before_create_object, "query": query},
     }
-
-
-"""Module for the platform attachment detail resource."""
+    permission_classes = [DelegateToCanFunctions]
 
 
 class PlatformAttachmentDetail(ResourceDetail):
@@ -114,6 +126,7 @@ class PlatformAttachmentDetail(ResourceDetail):
         if attachment and attachment.is_upload:
             if data["url"] and data["url"] != attachment.url:
                 raise ConflictError("It is not allowed to change the url of uploads")
+        add_updated_by_id(data)
 
     def after_patch(self, result):
         """
@@ -174,3 +187,4 @@ class PlatformAttachmentDetail(ResourceDetail):
         "session": db.session,
         "model": PlatformAttachment,
     }
+    permission_classes = [DelegateToCanFunctions]

@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the device property calibration api."""
 from project import base_url
 from project.api.models import (
@@ -30,6 +38,12 @@ class TestDevicePropertyCalibration(BaseTestCase):
     def test_get_device_property_calibration_collection(self):
         """Test retrieve a collection of DevicePropertyCalibration objects."""
         device_property_calibration_model = add_device_property_calibration_model()
+        device = device_property_calibration_model.calibration_action.device
+        device.is_public = True
+        device.is_internal = False
+        db.session.add(device)
+        db.session.commit()
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         # should be only one
@@ -43,9 +57,9 @@ class TestDevicePropertyCalibration(BaseTestCase):
         device = Device(
             short_name="Device 200",
             manufacturer_name=fake.company(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         device_property = DeviceProperty(
             device=device,
@@ -111,9 +125,9 @@ class TestDevicePropertyCalibration(BaseTestCase):
         device = Device(
             short_name="Device 300",
             manufacturer_name=fake.company(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
 
         contact = Contact(
@@ -158,37 +172,55 @@ class TestDevicePropertyCalibration(BaseTestCase):
     def test_delete_device_property_calibration(self):
         """Delete DevicePropertyCalibration."""
         device_property_calibration = add_device_property_calibration_model()
-        _ = super().delete_object(url=f"{self.url}/{device_property_calibration.id}",)
+        _ = super().delete_object(
+            url=f"{self.url}/{device_property_calibration.id}",
+        )
 
     def _create_some_device_property_calibrations(self):
         """Create some devices, properties, & device property calibrations."""
         device1 = Device(
             short_name="sample device",
             manufacturer_name=fake.company(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         db.session.add(device1)
         device2 = Device(
             short_name="sample device II",
             manufacturer_name=fake.company(),
-            is_public=False,
+            is_public=True,
             is_private=False,
-            is_internal=True,
+            is_internal=False,
         )
         db.session.add(device2)
 
-        device_property1 = DeviceProperty(device=device1, label="prop1",property_name= "device_property1", )
+        device_property1 = DeviceProperty(
+            device=device1,
+            label="prop1",
+            property_name="device_property1",
+        )
         db.session.add(device_property1)
 
-        device_property2 = DeviceProperty(device=device1, label="prop2",property_name= "device_property2", )
+        device_property2 = DeviceProperty(
+            device=device1,
+            label="prop2",
+            property_name="device_property2",
+        )
         db.session.add(device_property2)
 
-        device_property3 = DeviceProperty(device=device2, label="prop3",property_name= "device_property3", )
+        device_property3 = DeviceProperty(
+            device=device2,
+            label="prop3",
+            property_name="device_property3",
+        )
         db.session.add(device_property3)
 
-        device_property4 = DeviceProperty(device=device2, label="prop4",property_name= "device_property4", )
+        device_property4 = DeviceProperty(
+            device=device2,
+            label="prop4",
+            property_name="device_property4",
+        )
         db.session.add(device_property4)
 
         contact1 = Contact(
@@ -215,21 +247,25 @@ class TestDevicePropertyCalibration(BaseTestCase):
         db.session.add(action2)
 
         device_property_calibration1 = DevicePropertyCalibration(
-            device_property=device_property1, calibration_action=action1,
+            device_property=device_property1,
+            calibration_action=action1,
         )
         db.session.add(device_property1)
 
         device_property_calibration2 = DevicePropertyCalibration(
-            device_property=device_property2, calibration_action=action1,
+            device_property=device_property2,
+            calibration_action=action1,
         )
         db.session.add(device_property2)
 
         device_property_calibration3 = DevicePropertyCalibration(
-            device_property=device_property3, calibration_action=action2,
+            device_property=device_property3,
+            calibration_action=action2,
         )
         db.session.add(device_property3)
         device_property_calibration4 = DevicePropertyCalibration(
-            device_property=device_property4, calibration_action=action2,
+            device_property=device_property4,
+            calibration_action=action2,
         )
         db.session.add(device_property2)
 

@@ -1,18 +1,20 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Module for the configuration customfield resources."""
 from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import (
-    check_deletion_permission_for_configuration_related_objects,
-    check_patch_permission_for_configuration_related_objects,
-    check_permissions_for_configuration_related_objects,
-    check_post_permission_for_configuration_related_objects,
-    get_query_with_permissions_for_configuration_related_objects,
-)
 from ..models.base_model import db
 from ..models.configuration import Configuration
 from ..models.configuration_customfield import ConfigurationCustomField
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.configuration_customfield_schema import ConfigurationCustomFieldSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -39,9 +41,7 @@ class ConfigurationCustomFieldList(ResourceList):
         /configurations/<configuration_id>/configuration-customfields
         we want to filter according to them.
         """
-        query_ = get_query_with_permissions_for_configuration_related_objects(
-            self.model
-        )
+        query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -59,10 +59,6 @@ class ConfigurationCustomFieldList(ResourceList):
                     ConfigurationCustomField.configuration_id == configuration_id
                 )
         return query_
-
-    def before_post(self, args, kwargs, data=None):
-        """Run checks before posting."""
-        check_post_permission_for_configuration_related_objects()
 
     def after_post(self, result):
         """
@@ -84,6 +80,7 @@ class ConfigurationCustomFieldList(ResourceList):
         "model": ConfigurationCustomField,
         "methods": {"query": query},
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class ConfigurationCustomFieldDetail(ResourceDetail):
@@ -97,15 +94,6 @@ class ConfigurationCustomFieldDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if ConfigurationCustomField can't be found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
-        check_permissions_for_configuration_related_objects(
-            self._data_layer.model, kwargs["id"]
-        )
-
-    def before_patch(self, args, kwargs, data=None):
-        """Run checks before patching."""
-        check_patch_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
 
     def after_patch(self, result):
         """
@@ -121,9 +109,6 @@ class ConfigurationCustomFieldDetail(ResourceDetail):
 
     def before_delete(self, args, kwargs):
         """Run checks before deleting."""
-        check_deletion_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
         custom_field = (
             db.session.query(ConfigurationCustomField)
             .filter_by(id=kwargs["id"])
@@ -141,3 +126,4 @@ class ConfigurationCustomFieldDetail(ResourceDetail):
         "session": db.session,
         "model": ConfigurationCustomField,
     }
+    permission_classes = [DelegateToCanFunctions]

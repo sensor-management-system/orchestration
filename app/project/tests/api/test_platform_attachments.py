@@ -1,15 +1,23 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the platform attachment endpoints."""
 
 import json
+import time
 from unittest.mock import patch
 
 from flask import url_for
 
 from project import base_url
 from project.api import minio
+from project.api.models import Contact, Platform, PlatformAttachment, User
 from project.api.models.base_model import db
-from project.api.models.platform import Platform
-from project.api.models.platform_attachment import PlatformAttachment
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
@@ -158,7 +166,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the platform)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 422)
         count_platform_attachments_after = db.session.query(PlatformAttachment).count()
         self.assertEqual(
             count_platform_attachments_before, count_platform_attachments_after
@@ -398,7 +406,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=create_token(),
             )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 422)
 
     def test_post_minio_url(self):
         """
@@ -477,7 +485,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
             platform=platform,
             label="File upload",
             url="http://localhost/.../file",
-            internal_url="http://minio/.../file"
+            internal_url="http://minio/.../file",
         )
         db.session.add_all([platform, attachment])
         db.session.commit()
@@ -493,18 +501,12 @@ class TestPlatformAttachmentServices(BaseTestCase):
                     "url": "https://www.ufz.de",
                 },
                 "relationships": {
-                    "platform": {
-                        "data": {"type": "platform", "id": str(platform.id)}
-                    }
+                    "platform": {"data": {"type": "platform", "id": str(platform.id)}}
                 },
             }
         }
         with self.client:
-            url_patch = (
-                base_url
-                + "/platform-attachments/"
-                + str(attachment.id)
-            )
+            url_patch = base_url + "/platform-attachments/" + str(attachment.id)
             response = self.client.patch(
                 url_patch,
                 data=json.dumps(payload),
@@ -513,3 +515,89 @@ class TestPlatformAttachmentServices(BaseTestCase):
             )
 
         self.assertEqual(response.status_code, 409)
+
+    def test_created_and_updated_fields(self):
+        """Ensure we set & update the created & updated metainformation."""
+        contact1 = Contact(
+            given_name="first", family_name="contact", email="first@contact.org"
+        )
+        contact2 = Contact(
+            given_name="second", family_name="contact", email="second@contact.org"
+        )
+        user1 = User(contact=contact1, subject=contact1.email, is_superuser=True)
+        user2 = User(contact=contact2, subject=contact2.email, is_superuser=True)
+        platform1 = Platform(short_name="dummy platform", is_public=True)
+
+        db.session.add_all([contact1, contact2, user1, user2, platform1])
+        db.session.commit()
+
+        with self.run_requests_as(user1):
+            response1 = self.client.post(
+                self.url,
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "platform_attachment",
+                            "attributes": {
+                                "url": "https://gfz-potsdam.de",
+                                "label": "GFZ",
+                            },
+                            "relationships": {
+                                "platform": {
+                                    "data": {"type": "platform", "id": platform1.id}
+                                }
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response1.status_code, 201)
+        attachment_id = response1.json["data"]["id"]
+
+        one_second = 1
+        time.sleep(one_second)
+
+        with self.run_requests_as(user2):
+            response2 = self.client.patch(
+                f"{self.url}/{attachment_id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "platform_attachment",
+                            "id": attachment_id,
+                            "attributes": {
+                                "label": "GFZ Landing page",
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response2.status_code, 200)
+
+        self.assertEqual(
+            response1.json["data"]["attributes"]["created_at"],
+            response2.json["data"]["attributes"]["created_at"],
+        )
+
+        self.assertEqual(
+            response1.json["data"]["relationships"]["created_by"]["data"]["id"],
+            response2.json["data"]["relationships"]["created_by"]["data"]["id"],
+        )
+        self.assertEqual(
+            response1.json["data"]["relationships"]["created_by"]["data"]["id"],
+            str(user1.id),
+        )
+
+        self.assertEqual(
+            response2.json["data"]["relationships"]["updated_by"]["data"]["id"],
+            str(user2.id),
+        )
+
+        self.assertTrue(
+            # Due to the iso format it is enought to compare them as stirngs
+            # here, as 2023-03-14T12:00:00 is < then 2023-03-14T12:00:01.
+            response1.json["data"]["attributes"]["updated_at"]
+            < response2.json["data"]["attributes"]["updated_at"]
+        )

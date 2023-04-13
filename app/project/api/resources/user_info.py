@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Resource classes for the user info endpoint."""
 
 from flask import g
@@ -27,7 +35,7 @@ class UserInfo(ResourceList):
         :return: Dict with user infos from database + IDL-groups.
         """
         if not g.user:
-            raise UnauthorizedError("Login required")
+            raise UnauthorizedError("Authentication required")
         idl_groups = idl.get_all_permission_groups_for_a_user(g.user.subject)
 
         if not g.user.apikey:
@@ -49,6 +57,7 @@ class UserInfo(ResourceList):
                     "is_superuser": g.user.is_superuser,
                     "apikey": g.user.apikey,
                     "subject": g.user.subject,
+                    "terms_of_use_agreement_date": g.user.terms_of_use_agreement_date,
                 },
                 "relationships": {
                     "contact": {

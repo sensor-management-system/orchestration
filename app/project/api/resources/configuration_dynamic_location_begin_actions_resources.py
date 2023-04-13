@@ -1,17 +1,18 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Resource classes for Configuration dynamic location begin actions."""
 
-from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
+from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import (
-    check_deletion_permission_for_configuration_related_objects,
-    check_patch_permission_for_configuration_related_objects,
-    check_permissions_for_configuration_related_objects,
-    check_post_permission_for_configuration_related_objects,
-    get_query_with_permissions_for_configuration_related_objects,
-)
 from ..helpers.errors import ConflictError
 from ..helpers.location_checks import DynamicLocationActionValidator
 from ..helpers.resource_mixin import (
@@ -25,6 +26,8 @@ from ..models import (
     DeviceProperty,
 )
 from ..models.base_model import db
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.configuration_dynamic_location_actions_schema import (
     ConfigurationDynamicLocationBeginActionSchema,
 )
@@ -51,9 +54,7 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
 
         Also handle optional pre-filters (for specific configuration, for example).
         """
-        query_ = get_query_with_permissions_for_configuration_related_objects(
-            self.model
-        )
+        query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
         x_property_id = view_kwargs.get("x_property_id")
         y_property_id = view_kwargs.get("y_property_id")
@@ -121,10 +122,6 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
                 )
         return query_
 
-    def before_post(self, args, kwargs, data=None):
-        """Run some checks before posting."""
-        check_post_permission_for_configuration_related_objects()
-
     def after_post(self, result):
         """
         Add update description to related platform.
@@ -148,6 +145,7 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
             "before_create_object": before_create_object,
         },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
@@ -158,15 +156,9 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if ConfigurationDynamicLocationBeginAction ccan't be found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
-        check_permissions_for_configuration_related_objects(
-            self._data_layer.model, kwargs["id"]
-        )
 
     def before_patch(self, args, kwargs, data=None):
         """Run some checks before patching."""
-        check_patch_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
         data_with_relationships = decode_json_request_data()
         self.validator.validate_update(data_with_relationships, kwargs["id"])
         add_updated_by_id(data)
@@ -185,9 +177,6 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
 
     def before_delete(self, args, kwargs):
         """Run some checks before deleting."""
-        check_deletion_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
         location_action = (
             db.session.query(ConfigurationDynamicLocationBeginAction)
             .filter_by(id=kwargs["id"])
@@ -211,14 +200,4 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
         "session": db.session,
         "model": ConfigurationDynamicLocationBeginAction,
     }
-
-
-class ConfigurationDynamicLocationBeginActionRelationship(ResourceRelationship):
-    """Relationship resource for Configuration dynamic location begin actions."""
-
-    schema = ConfigurationDynamicLocationBeginActionSchema
-    decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": ConfigurationDynamicLocationBeginAction,
-    }
+    permission_classes = [DelegateToCanFunctions]

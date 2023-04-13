@@ -1,37 +1,41 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Dirk Ecker <d.ecker@fz-juelich.de>
+# - Forschungszentrum Jülich GmbH (FZJ, https://fz-juelich.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Routes for sensorML."""
 
-# import requests
 import re
-from flask import Blueprint, current_app, g, make_response, render_template
+from xml.etree import ElementTree as ET
+
+from flask import Blueprint, current_app, g, make_response, url_for
 from flask_rest_jsonapi.exceptions import JsonApiException
 
-# from ..api.helpers.db import save_to_db
-from sqlalchemy import and_
-
-from ..api.auth.permission_utils import check_for_permission
-from ..api.helpers.errors import ErrorResponse, NotFoundError, UnauthorizedError
-from ..api.models import (
-    Configuration,
-    Device,
-    DeviceMountAction,
-    Platform,
-    PlatformMountAction,
+from ..api.helpers.errors import (
+    ErrorResponse,
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
 )
+from ..api.models import Configuration, Device, Platform
 from ..api.models.base_model import db
+from ..api.permissions.rules import can_see
 from ..config import env
-
-# from ..extensions.sensor_ml.sml import PhysicalSystem
+from ..sensorml.converters import (
+    ConfigurationConverter,
+    DeviceConverter,
+    PlatformConverter,
+)
+from ..sensorml.models import gco, gmd, gml, sml, swe, xlink
 
 sensor_ml_routes = Blueprint(
     "sensorml", __name__, url_prefix=env("URL_PREFIX", "/rdm/svm-api/v1")
 )
-
-
-def is_non_empty_device_property(dp):
-    """Return true if the device property has enough information to be included in SensorML."""
-    if dp.property_name or dp.property_uri or dp.label or dp.unit_name:
-        return True
-    return False
 
 
 @sensor_ml_routes.route("/devices/<int:device_id>/sensorml", methods=["GET"])
@@ -43,25 +47,26 @@ def device_to_sensor_ml(device_id):
     :return: xml file
     """
     try:
-        check_for_permission(model_class=Device, kwargs={"id": device_id})
         device = db.session.query(Device).filter_by(id=device_id).first()
         if device is None:
             raise NotFoundError({"pointer": ""}, "Object Not Found")
-        else:
-            gmlId = f"device_{device.id}"
-            device.device_properties = list(
-                filter(is_non_empty_device_property, device.device_properties)
-            )
-            template = render_template(
-                "device_sensorml_template.xml",
-                gmlId=gmlId,
-                obj=device,
-                contact_roles=device.device_contact_roles,
-                cv_url=current_app.config["CV_URL"],
-            )
-            response = make_response(template)
-            response.headers["Content-Type"] = "application/xml"
-            return response
+        if not can_see(device):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Device not accessable")
+        cv_url = current_app.config["CV_URL"]
+        physical_system = DeviceConverter(device, cv_url).sml_physical_system()
+        xml_object = physical_system.to_xml()
+        ET.register_namespace("gml", gml.namespace)
+        ET.register_namespace("gco", gco.namespace)
+        ET.register_namespace("gmd", gmd.namespace)
+        ET.register_namespace("sml", sml.namespace)
+        ET.register_namespace("swe", swe.namespace)
+        ET.register_namespace("xlink", xlink.namespace)
+        text = ET.tostring(xml_object)
+        response = make_response(text)
+        response.headers["Content-Type"] = "application/xml"
+        return response
     except ErrorResponse as e:
         return e.respond()
     except JsonApiException as e:
@@ -77,22 +82,26 @@ def platform_to_sensor_ml(platform_id):
     :return: xml file
     """
     try:
-        check_for_permission(model_class=Platform, kwargs={"id": platform_id})
         platform = db.session.query(Platform).filter_by(id=platform_id).first()
         if platform is None:
             raise NotFoundError({"pointer": ""}, "Object Not Found")
-        else:
-            gmlId = f"platform_{platform.id}"
-            template = render_template(
-                "platform_sensorml_template.xml",
-                gmlId=gmlId,
-                obj=platform,
-                contact_roles=platform.platform_contact_roles,
-                cv_url=current_app.config["CV_URL"],
-            )
-            response = make_response(template)
-            response.headers["Content-Type"] = "application/xml"
-            return response
+        if not can_see(platform):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Platform not accessable")
+        cv_url = current_app.config["CV_URL"]
+        physical_system = PlatformConverter(platform, cv_url).sml_physical_system()
+        xml_object = physical_system.to_xml()
+        ET.register_namespace("gml", gml.namespace)
+        ET.register_namespace("gco", gco.namespace)
+        ET.register_namespace("gmd", gmd.namespace)
+        ET.register_namespace("sml", sml.namespace)
+        ET.register_namespace("swe", swe.namespace)
+        ET.register_namespace("xlink", xlink.namespace)
+        text = ET.tostring(xml_object)
+        response = make_response(text)
+        response.headers["Content-Type"] = "application/xml"
+        return response
     except ErrorResponse as e:
         return e.respond()
     except JsonApiException as e:
@@ -115,92 +124,57 @@ def configuration_to_sensor_ml(configuration_id):
         )
         if configuration is None:
             raise NotFoundError({"pointer": ""}, "Object Not Found")
-        else:
-            if configuration.is_internal and not g.user:
+        if not can_see(configuration):
+            if not g.user:
                 raise UnauthorizedError("Authentication required.")
-            active_device_mounts = db.session.query(DeviceMountAction).filter(
-                and_(DeviceMountAction.configuration_id == configuration_id)
-            )
-            active_platform_mounts = db.session.query(PlatformMountAction).filter(
-                and_(PlatformMountAction.configuration_id == configuration_id)
-            )
+            raise ForbiddenError("Configuration not accessable")
+        cv_url = current_app.config["CV_URL"]
 
-            children = {}
-            top_level_mounts = []
+        def url_lookup(element):
 
-            for active_platform_mount in active_platform_mounts:
-                children.setdefault(active_platform_mount.platform_id, [])
-
-                element_payload = {
-                    "action_type": "platform_mount",
-                    "entity": active_platform_mount.platform,
-                    "children": children[active_platform_mount.platform_id],
-                }
-                if active_platform_mount.parent_platform_id:
-                    children.setdefault(active_platform_mount.parent_platform_id, [])
-                    if (
-                        element_payload
-                        not in children[active_platform_mount.parent_platform_id]
-                    ):
-                        children[active_platform_mount.parent_platform_id].append(
-                            element_payload
-                        )
-                else:
-                    if element_payload not in top_level_mounts:
-                        top_level_mounts.append(element_payload)
-
-            for active_device_mount in active_device_mounts:
-                active_device_mount.device.device_properties = list(
-                    filter(
-                        is_non_empty_device_property,
-                        active_device_mount.device.device_properties,
-                    )
+            if isinstance(element, Platform):
+                return url_for(
+                    "sensorml.platform_to_sensor_ml",
+                    platform_id=element.id,
+                    _external=True,
                 )
-                element_payload = {
-                    "action_type": "device_mount",
-                    "entity": active_device_mount.device,
-                    "children": [],
-                }
-                if active_device_mount.parent_platform_id:
-                    children.setdefault(active_device_mount.parent_platform_id, [])
-                    if (
-                        element_payload
-                        not in children[active_device_mount.parent_platform_id]
-                    ):
-                        children[active_device_mount.parent_platform_id].append(
-                            element_payload
-                        )
-                else:
-                    if element_payload not in top_level_mounts:
-                        top_level_mounts.append(element_payload)
-
-            gmlId = f"configuration_{configuration.id}"
-            template = render_template(
-                "configuration_sensorml_template.xml",
-                gmlId=gmlId,
-                obj=configuration,
-                contact_roles=configuration.configuration_contact_roles,
-                tree=top_level_mounts,
-                frontend_url=current_app.config["SMS_FRONTEND_URL"],
-                cv_url=current_app.config["CV_URL"],
+            return url_for(
+                "sensorml.device_to_sensor_ml", device_id=element.id, _external=True
             )
-            # We need to make sure that our gml:ids are unique in the
-            # overall document.
-            # The strategy here to give different names - with `_dup_{n}`
-            # suffix.
-            dup_count = {}
-            def gml_id_replacement(match):
-                original_gml_id = match.group(1)
-                if original_gml_id not in dup_count.keys():
-                    dup_count[original_gml_id] = 0
-                    return match.group()
-                dup_count[original_gml_id] += 1
-                result = f'gml:id="{original_gml_id}_dup_{dup_count[original_gml_id]}"'
-                return result
-            template = re.sub(r'gml:id="([^"]+)"', gml_id_replacement, template)
-            response = make_response(template)
-            response.headers["Content-Type"] = "application/xml"
-            return response
+
+        physical_system = ConfigurationConverter(
+            configuration,
+            cv_url,
+            url_lookup,
+        ).sml_physical_system()
+        xml_object = physical_system.to_xml()
+        ET.register_namespace("gml", gml.namespace)
+        ET.register_namespace("gco", gco.namespace)
+        ET.register_namespace("gmd", gmd.namespace)
+        ET.register_namespace("sml", sml.namespace)
+        ET.register_namespace("swe", swe.namespace)
+        ET.register_namespace("xlink", xlink.namespace)
+        text = ET.tostring(xml_object)
+
+        # We need to make sure that our gml:ids are unique in the
+        # overall document.
+        # The strategy here to give different names - with `_dup_{n}`
+        # suffix.
+        dup_count = {}
+
+        def gml_id_replacement(match):
+            original_gml_id = match.group(1)
+            if original_gml_id not in dup_count.keys():
+                dup_count[original_gml_id] = 0
+                return match.group()
+            dup_count[original_gml_id] += 1
+            result = f'gml:id="{original_gml_id}_dup_{dup_count[original_gml_id]}"'
+            return result
+
+        text = re.sub(r'gml:id="([^"]+)"', gml_id_replacement, text.decode())
+        response = make_response(text)
+        response.headers["Content-Type"] = "application/xml"
+        return response
     except ErrorResponse as e:
         return e.respond()
     except JsonApiException as e:

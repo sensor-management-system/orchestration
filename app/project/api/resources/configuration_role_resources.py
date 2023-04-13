@@ -1,27 +1,30 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Resources for configuration contact roles."""
 
 from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
-from .base_resource import (
-    check_if_object_not_found,
-    set_update_description_text_and_update_by_user,
-    query_configuration_and_set_update_description_text,
-)
-from ..auth.permission_utils import (
-    check_deletion_permission_for_configuration_related_objects,
-    check_patch_permission_for_configuration_related_objects,
-    check_permissions_for_configuration_related_objects,
-    check_post_permission_for_configuration_related_objects,
-    get_query_with_permissions_for_configuration_related_objects,
-)
+from ...frj_csv_export.resource import ResourceList
 from ..models import Configuration
 from ..models.base_model import db
 from ..models.contact_role import ConfigurationContactRole
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.role import ConfigurationRoleSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import (
+    check_if_object_not_found,
+    query_configuration_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
+)
 
 
 class ConfigurationRoleList(ResourceList):
@@ -34,9 +37,7 @@ class ConfigurationRoleList(ResourceList):
 
     def query(self, view_kwargs):
         """Query the entries from the database."""
-        query_ = get_query_with_permissions_for_configuration_related_objects(
-            self.model
-        )
+        query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -51,10 +52,6 @@ class ConfigurationRoleList(ResourceList):
                 ConfigurationContactRole.configuration_id == configuration_id
             )
         return query_
-
-    def before_post(self, args, kwargs, data=None):
-        """Run some checks to ensure we are allows to post."""
-        check_post_permission_for_configuration_related_objects()
 
     def after_post(self, result):
         """
@@ -76,6 +73,7 @@ class ConfigurationRoleList(ResourceList):
         "model": ConfigurationContactRole,
         "methods": {"query": query},
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class ConfigurationRoleDetail(ResourceDetail):
@@ -93,15 +91,6 @@ class ConfigurationRoleDetail(ResourceDetail):
         Also check if we are allowed to see the entry.
         """
         check_if_object_not_found(self._data_layer.model, kwargs)
-        check_permissions_for_configuration_related_objects(
-            self._data_layer.model, kwargs["id"]
-        )
-
-    def before_patch(self, args, kwargs, data=None):
-        """Check that we are allowed to patch."""
-        check_patch_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
 
     def after_patch(self, result):
         """
@@ -117,9 +106,6 @@ class ConfigurationRoleDetail(ResourceDetail):
 
     def before_delete(self, args, kwargs):
         """Check that we are allowed to delete."""
-        check_deletion_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
         contact_role = (
             db.session.query(ConfigurationContactRole)
             .filter_by(id=kwargs["id"])
@@ -137,3 +123,4 @@ class ConfigurationRoleDetail(ResourceDetail):
         "session": db.session,
         "model": ConfigurationContactRole,
     }
+    permission_classes = [DelegateToCanFunctions]

@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Platform contact role resources."""
 
 from flask_rest_jsonapi import ResourceDetail
@@ -5,10 +13,11 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..models import Platform
 from ..models.base_model import db
 from ..models.contact_role import PlatformContactRole
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.role import PlatformRoleSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -33,7 +42,7 @@ class PlatformRoleList(ResourceList):
         Handle also cases to get all the platform attachments
         for a specific platform.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         platform_id = view_kwargs.get("platform_id")
 
         if platform_id is not None:
@@ -66,6 +75,7 @@ class PlatformRoleList(ResourceList):
         "model": PlatformContactRole,
         "methods": {"query": query},
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class PlatformRoleDetail(ResourceDetail):
@@ -93,6 +103,7 @@ class PlatformRoleDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Update the platforms update description."""
         contact_role = (
             db.session.query(PlatformContactRole)
             .filter_by(id=kwargs["id"])
@@ -110,3 +121,4 @@ class PlatformRoleDetail(ResourceDetail):
         "session": db.session,
         "model": PlatformContactRole,
     }
+    permission_classes = [DelegateToCanFunctions]

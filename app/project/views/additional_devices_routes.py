@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """
 Extra routes to have some verbs for devices.
 
@@ -11,12 +17,9 @@ from flask import Blueprint, g
 from ..api.helpers.errors import ForbiddenError, UnauthorizedError
 from ..api.models import Device
 from ..api.models.base_model import db
+from ..api.permissions.rules import can_archive, can_restore, can_see
 from ..config import env
-from ..restframework.rules import (
-    archive_device_permissions,
-    archive_device_preconditions,
-    restore_device_permissions,
-)
+from ..restframework.preconditions.devices import AllMountsOfDeviceAreFinishedInThePast
 from ..restframework.shortcuts import get_object_or_404
 from ..restframework.views.classbased import BaseView, class_based_view
 
@@ -32,9 +35,8 @@ additional_devices_routes = Blueprint(
 class ArchiveDeviceView(BaseView):
     """View to archive devices with a post request."""
 
-    permissions = archive_device_permissions
     model = Device
-    preconditions = archive_device_preconditions
+    preconditions = AllMountsOfDeviceAreFinishedInThePast()
 
     def __init__(self, id):
         """Init the environment for the single request."""
@@ -51,10 +53,10 @@ class ArchiveDeviceView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         device = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(device):
+        if not can_see(device) or not can_archive(device):
             raise ForbiddenError("User is not allowed to archive")
         conflict = self.preconditions.violated_by_object(device)
         if conflict:
@@ -68,7 +70,6 @@ class ArchiveDeviceView(BaseView):
 class RestoreDeviceView(BaseView):
     """View to restore archived devices."""
 
-    permissions = restore_device_permissions
     model = Device
 
     def __init__(self, id):
@@ -86,10 +87,10 @@ class RestoreDeviceView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         device = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(device):
+        if not can_see(device) or not can_restore(device):
             raise ForbiddenError("User is not allowed to restore")
         self.restore(device)
         return "", 204

@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the api & permissions for the sites."""
 
 from unittest.mock import patch
@@ -116,7 +122,7 @@ class TestSiteApi(BaseTestCase):
         """Ensure that internal is the visibility if nothing else is given."""
         payload = {"data": {"type": "site", "attributes": {"label": "some new site"}}}
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -139,7 +145,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -180,7 +186,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -190,7 +196,7 @@ class TestSiteApi(BaseTestCase):
         data_entry = resp.json["data"]
         self.assertEqual(
             data_entry["relationships"]["created_by"]["data"]["id"],
-            str(self.normal_user.id),
+            str(self.super_user.id),
         )
 
     def test_after_post_has_one_contact(self):
@@ -204,7 +210,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -218,7 +224,7 @@ class TestSiteApi(BaseTestCase):
             db.session.query(SiteContactRole).filter_by(site_id=new_id).all()
         )
         self.assertEqual(len(contact_roles), 1)
-        self.assertEqual(contact_roles[0].contact, self.normal_contact)
+        self.assertEqual(contact_roles[0].contact, self.super_contact)
         self.assertEqual(contact_roles[0].role_name, "Owner")
 
     def test_after_post_updated_at_and_by(self):
@@ -232,7 +238,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -243,7 +249,7 @@ class TestSiteApi(BaseTestCase):
         new_id = data_entry["id"]
         new_site = db.session.query(Site).filter_by(id=new_id).first()
 
-        self.assertEqual(new_site.updated_by, self.normal_user)
+        self.assertEqual(new_site.updated_by, self.super_user)
         self.assertTrue(new_site.updated_at >= new_site.created_at)
 
     def test_after_post_update_description(self):
@@ -257,7 +263,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -278,7 +284,7 @@ class TestSiteApi(BaseTestCase):
     def test_get_one_internal_anonymous(self):
         """Ensure we can't get an internal site without login."""
         resp = self.client.get(f"{self.sites_url}/{self.internal_site.id}")
-        self.assertEqual(resp.status_code, 401)
+        self.assertIn(resp.status_code, [401, 403])
 
     def test_get_one_internal_user(self):
         """Ensure we can get an internal site with login."""
@@ -360,7 +366,7 @@ class TestSiteApi(BaseTestCase):
                 json=payload,
                 headers={"Content-Type": "application/vnd.api+json"},
             )
-        self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.status_code, 403)
 
     def test_patch_super_user(self):
         """Ensure we allow super users to patch sites."""
@@ -567,7 +573,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -594,7 +600,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,
@@ -622,7 +628,7 @@ class TestSiteApi(BaseTestCase):
             }
         }
 
-        with self.run_requests_as(self.normal_user):
+        with self.run_requests_as(self.super_user):
             resp = self.client.post(
                 self.sites_url,
                 json=payload,

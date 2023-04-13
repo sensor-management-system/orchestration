@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the site contact roles."""
 
 from unittest.mock import patch
@@ -383,7 +389,8 @@ class TestSiteContacts(BaseTestCase):
         db.session.commit()
 
         resp = self.client.get(f"{self.url}/{contact_role.id}")
-        self.assertEqual(resp.status_code, 401)
+        # Both 401 or 403 are fine.
+        self.assertIn(resp.status_code, [401, 403])
 
     def test_get_one_public_anonymous(self):
         """Ensure that we allow to get contact roles for public sites without login."""
@@ -602,7 +609,7 @@ class TestSiteContacts(BaseTestCase):
                 json=payload,
                 headers={"Content-Type": "application/vnd.api+json"},
             )
-        self.assertEqual(resp.status_code, 409)
+        self.assertEqual(resp.status_code, 403)
 
     def test_after_patch_updated_site_update_description(self):
         """Ensure we update the update description after patching the contact role."""

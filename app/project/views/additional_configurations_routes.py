@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """
 Extra routes to have some verbs for configurations.
 
@@ -11,11 +17,13 @@ from flask import Blueprint, g
 from ..api.helpers.errors import ForbiddenError, UnauthorizedError
 from ..api.models import Configuration
 from ..api.models.base_model import db
+from ..api.permissions.rules import can_archive, can_restore, can_see
 from ..config import env
-from ..restframework.rules import (
-    archive_configuration_permissions,
-    archive_configuration_preconditions,
-    restore_configuration_permissions,
+from ..restframework.preconditions.configurations import (
+    AllDeviceMountsForConfigurationAreFinishedInThePast,
+    AllDynamicLocationsForConfigurationAreFinishedInThePast,
+    AllPlatformMountsForConfigurationAreFinishedInThePast,
+    AllStaticLocationsForConfigurationAreFinishedInThePast,
 )
 from ..restframework.shortcuts import get_object_or_404
 from ..restframework.views.classbased import BaseView, class_based_view
@@ -34,9 +42,13 @@ additional_configuration_routes = Blueprint(
 class ArchiveConfigurationView(BaseView):
     """View to archive configurations with a post request."""
 
-    permissions = archive_configuration_permissions
     model = Configuration
-    preconditions = archive_configuration_preconditions
+    preconditions = (
+        AllDeviceMountsForConfigurationAreFinishedInThePast()
+        & AllPlatformMountsForConfigurationAreFinishedInThePast()
+        & AllStaticLocationsForConfigurationAreFinishedInThePast()
+        & AllDynamicLocationsForConfigurationAreFinishedInThePast()
+    )
 
     def __init__(self, id):
         """Init the environment for the single request."""
@@ -53,10 +65,10 @@ class ArchiveConfigurationView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         configuration = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(configuration):
+        if not can_see(configuration) or not can_archive(configuration):
             raise ForbiddenError("User is not allowed to archive")
         conflict = self.preconditions.violated_by_object(configuration)
         if conflict:
@@ -72,11 +84,10 @@ class ArchiveConfigurationView(BaseView):
 class RestoreConfigurationView(BaseView):
     """View to restore archived configurations."""
 
-    permissions = restore_configuration_permissions
     model = Configuration
 
     def __init__(self, id):
-        """Init the envirnoment for the single request."""
+        """Init the environment for the single request."""
         self.id = id
 
     def restore(self, configuration):
@@ -90,10 +101,10 @@ class RestoreConfigurationView(BaseView):
 
     def post(self):
         """Run the post request."""
-        if not self.permissions.has_permission():
-            raise UnauthorizedError("Login required")
+        if not g.user:
+            raise UnauthorizedError("Authentication required")
         configuration = get_object_or_404(self.model, self.id)
-        if not self.permissions.has_object_permission(configuration):
+        if not can_see(configuration) or not can_restore(configuration):
             raise ForbiddenError("User is not allowed to restore")
         self.restore(configuration)
         return "", 204

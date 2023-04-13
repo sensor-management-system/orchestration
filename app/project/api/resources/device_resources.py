@@ -1,37 +1,40 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Device list resource."""
 
 import os
 
-from flask import g, current_app, request
+from flask import current_app, g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
+from ...extensions.instances import pid
 from ...frj_csv_export.resource import ResourceList
-from .base_resource import (
-    check_if_object_not_found,
-    delete_attachments_in_minio_by_url,
+from ..datalayers.esalchemy import (
+    AndFilter,
+    EsSqlalchemyDataLayer,
+    TermEqualsExactStringFilter,
 )
-from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
-from ..helpers.resource_mixin import add_updated_by_id
+from ..helpers.resource_mixin import (
+    add_updated_by_id,
+    set_default_permission_view_to_internal_if_not_exists_or_all_false,
+)
 from ..models.base_model import db
 from ..models.contact_role import DeviceContactRole
 from ..models.device import Device
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
-from .base_resource import (
-    check_if_object_not_found,
-    delete_attachments_in_minio_by_url,
-    add_pid,
-)
-
-from ...api.auth.permission_utils import (
-    get_es_query_with_permissions,
-    get_query_with_permissions,
-    set_default_permission_view_to_internal_if_not_exists_or_all_false,
-)
-from ...extensions.instances import pid
-from ...frj_csv_export.resource import ResourceList
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class DeviceList(ResourceList):
@@ -51,7 +54,10 @@ class DeviceList(ResourceList):
         false_values = ["false"]
         # hide archived must be disabled explicitly
         hide_archived = request.args.get("hide_archived") not in false_values
-        return get_query_with_permissions(self.model, hide_archived=hide_archived)
+        query_ = filter_visible(self.session.query(self.model))
+        if hide_archived:
+            query_ = query_.filter_by(archived=False)
+        return query_
 
     def es_query(self, view_kwargs):
         """
@@ -60,10 +66,14 @@ class DeviceList(ResourceList):
         Should return the same set as query, but using
         the elasticsearch fields.
         """
+        and_filters = [filter_visible_es(self.model)]
+
         false_values = ["false"]
         # hide archived must be disabled explicitly
         hide_archived = request.args.get("hide_archived") not in false_values
-        return get_es_query_with_permissions(hide_archived=hide_archived)
+        if hide_archived:
+            and_filters.append(TermEqualsExactStringFilter("archived", False))
+        return AndFilter.combine_optionals(and_filters)
 
     def before_create_object(self, data, *args, **kwargs):
         """
@@ -106,7 +116,7 @@ class DeviceList(ResourceList):
 
         save_to_db(device)
 
-        #if current_app.config["INSTITUTE"] == "ufz":
+        # if current_app.config["INSTITUTE"] == "ufz":
         #    sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
         #    source_object_url = f"{sms_frontend_url}/devices/{str(device.id)}"
         #    add_pid(device, source_object_url)
@@ -125,6 +135,7 @@ class DeviceList(ResourceList):
             "es_query": es_query,
         },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DeviceDetail(ResourceDetail):
@@ -134,6 +145,10 @@ class DeviceDetail(ResourceDetail):
     Provides get, patch and delete methods to retrieve details
     of an object, update an object and delete a Device.
     """
+
+    def before_get(self, args, kwargs):
+        """Run some tests before the get method."""
+        check_if_object_not_found(self._data_layer.model, kwargs)
 
     def delete(self, *args, **kwargs):
         """
@@ -158,8 +173,6 @@ class DeviceDetail(ResourceDetail):
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
-
-
 
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
@@ -191,3 +204,4 @@ class DeviceDetail(ResourceDetail):
         "session": db.session,
         "model": Device,
     }
+    permission_classes = [DelegateToCanFunctions]

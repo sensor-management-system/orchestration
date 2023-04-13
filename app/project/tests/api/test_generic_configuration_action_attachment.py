@@ -1,11 +1,20 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+"""Test cases for the api usage for generic configuration action attachments."""
+
 import json
 
 from project import base_url, db
 from project.api.models import ConfigurationAttachment
-from project.tests.base import BaseTestCase, fake
-from project.tests.base import create_token
+from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_action_attachment_model import (
-    add_generic_configuration_action_attachment_model,
+    add_generic_configuration_action_model,
 )
 from project.tests.models.test_generic_actions_models import (
     generate_configuration_action_model,
@@ -26,10 +35,14 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
         self.assertEqual(response.json["data"], [])
 
     def test_get_generic_configuration_action_attachment_collection(self):
-        """Test retrieve a collection of GenericConfigurationActionAttachment objects"""
-        generic_configuration_action_attachment = (
-            add_generic_configuration_action_attachment_model()
-        )
+        """Test retrieve a collection of GenericConfigurationActionAttachment objects."""
+        generic_configuration_action = add_generic_configuration_action_model()
+        configuration = generic_configuration_action.configuration
+        configuration.is_public = True
+        configuration.is_internal = True
+        db.session.add(configuration)
+        db.session.commit()
+
         with self.client:
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -37,11 +50,26 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
         self.assertEqual(response.json["meta"]["count"], 1)
         self.assertEqual(
             response.json["data"][0]["id"],
-            str(generic_configuration_action_attachment.id),
+            str(
+                generic_configuration_action.generic_configuration_action_attachments[
+                    0
+                ].id
+            ),
         )
 
+    def test_get_generic_configuration_action_attachment_collection_internal(self):
+        """Ensure we don't give infos out for internal configurations without having a user."""
+        generic_configuration_action = add_generic_configuration_action_model()
+        configuration = generic_configuration_action.configuration
+        self.assertTrue(configuration.is_internal)
+
+        with self.client:
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["meta"]["count"], 0)
+
     def test_post_generic_configuration_action_attachment(self):
-        """Create GenericConfigurationActionAttachment"""
+        """Create GenericConfigurationActionAttachment."""
         generic_configuration_action = generate_configuration_action_model()
         a1 = ConfigurationAttachment(
             label="configuration attachment1",
@@ -74,21 +102,22 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
         )
 
     def test_update_generic_configuration_action_attachment(self):
-        """Update GenericConfigurationActionAttachment"""
-        generic_configuration_action_attachment = (
-            add_generic_configuration_action_attachment_model()
-        )
+        """Update GenericConfigurationActionAttachment."""
+        generic_configuration_action = add_generic_configuration_action_model()
         attachment = ConfigurationAttachment(
             label="configuration attachment1",
             url=fake.image_url(),
-            configuration_id=generic_configuration_action_attachment.configuration_id,
+            configuration_id=generic_configuration_action.configuration_id,
         )
         db.session.add(attachment)
         db.session.commit()
+        action_attachment = (
+            generic_configuration_action.generic_configuration_action_attachments[0]
+        )
         data = {
             "data": {
                 "type": self.object_type,
-                "id": generic_configuration_action_attachment.id,
+                "id": action_attachment.id,
                 "attributes": {},
                 "relationships": {
                     "attachment": {
@@ -101,24 +130,23 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
             }
         }
         _ = super().update_object(
-            url=f"{self.url}/{generic_configuration_action_attachment.id}?include=attachment",
+            url=f"{self.url}/{action_attachment.id}?include=attachment",
             data_object=data,
             object_type=self.object_type,
         )
 
     def test_delete_generic_configuration_action_attachment(self):
-        """Delete GenericConfigurationActionAttachment """
-        generic_configuration_action_attachment = (
-            add_generic_configuration_action_attachment_model()
+        """Delete GenericConfigurationActionAttachment."""
+        generic_configuration_action = add_generic_configuration_action_model()
+        action_attachment = (
+            generic_configuration_action.generic_configuration_action_attachments[0]
         )
         _ = super().delete_object(
-            url=f"{self.url}/{generic_configuration_action_attachment.id}",
+            url=f"{self.url}/{action_attachment.id}",
         )
 
     def test_post_generic_configuration_action_attachment_false_type(self):
-        """Check errors.
-        This should give a Validation error with code 422.
-        """
+        """Test the post with an invalid attachment type."""
         configuration_action = generate_configuration_action_model()
         a1 = ConfigurationAttachment(
             label="configuration attachment1",

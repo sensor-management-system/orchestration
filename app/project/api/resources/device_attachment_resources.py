@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Module for the device attachment list resource."""
 import pathlib
 
@@ -7,11 +15,13 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...api import minio
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.device_attachment import DeviceAttachment
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.device_attachment_schema import DeviceAttachmentSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -37,7 +47,7 @@ class DeviceAttachmentList(ResourceList):
         Handle also additional logic to query the device
         attachments for a specific device.
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         device_id = view_kwargs.get("device_id")
 
         if device_id is not None:
@@ -53,6 +63,10 @@ class DeviceAttachmentList(ResourceList):
             else:
                 query_ = query_.filter(DeviceAttachment.device_id == device_id)
         return query_
+
+    def before_create_object(self, data, *args, **kwargs):
+        """Set some fields before we save the new entry."""
+        add_created_by_id(data)
 
     def after_post(self, result):
         """
@@ -96,11 +110,9 @@ class DeviceAttachmentList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceAttachment,
-        "methods": {"query": query},
+        "methods": {"before_create_object": before_create_object, "query": query},
     }
-
-
-"""Module for the device attachment detail resource."""
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DeviceAttachmentDetail(ResourceDetail):
@@ -122,6 +134,7 @@ class DeviceAttachmentDetail(ResourceDetail):
         if attachment and attachment.is_upload:
             if data["url"] and data["url"] != attachment.url:
                 raise ConflictError("It is not allowed to change the url of uploads")
+        add_updated_by_id(data)
 
     def after_patch(self, result):
         """
@@ -180,3 +193,4 @@ class DeviceAttachmentDetail(ResourceDetail):
         "session": db.session,
         "model": DeviceAttachment,
     }
+    permission_classes = [DelegateToCanFunctions]

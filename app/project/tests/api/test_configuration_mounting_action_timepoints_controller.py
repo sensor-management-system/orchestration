@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the mounting action timepoints controller for configuratins."""
 
 import datetime
@@ -69,7 +75,7 @@ class TestControllerConfigurationMountingActionTimepoints(BaseTestCase):
     def test_get_interal_withoput_user(self):
         """Ensure anonymous can't access an internal configuration."""
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 401)
+        self.assertIn(response.status_code, [401, 403])
 
     def test_get_empty(self):
         """Ensure we get an empty list if there is no mount."""

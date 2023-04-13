@@ -1,21 +1,31 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Resource classes for device software update actions."""
 
-from flask_rest_jsonapi import ResourceDetail, ResourceRelationship
+from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..auth.permission_utils import get_query_with_permissions_for_related_objects
+from ...frj_csv_export.resource import ResourceList
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.device import Device
 from ..models.software_update_actions import DeviceSoftwareUpdateAction
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..resources.base_resource import (
     check_if_object_not_found,
-    query_device_and_set_update_description_text, set_update_description_text_and_update_by_user,
+    query_device_and_set_update_description_text,
+    set_update_description_text_and_update_by_user,
 )
 from ..schemas.software_update_action_schema import DeviceSoftwareUpdateActionSchema
 from ..token_checker import token_required
-from ...frj_csv_export.resource import ResourceList
 
 
 class DeviceSoftwareUpdateActionList(ResourceList):
@@ -31,14 +41,17 @@ class DeviceSoftwareUpdateActionList(ResourceList):
 
         Also handle optional pre-filters (for specific devices, for example).
         """
-        query_ = get_query_with_permissions_for_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         device_id = view_kwargs.get("device_id")
         if device_id is not None:
             try:
                 self.session.query(Device).filter_by(id=device_id).one()
             except NoResultFound:
                 raise ObjectNotFound(
-                    {"parameter": "id",}, "Device: {} not found".format(device_id),
+                    {
+                        "parameter": "id",
+                    },
+                    "Device: {} not found".format(device_id),
                 )
             else:
                 query_ = query_.filter(
@@ -64,15 +77,19 @@ class DeviceSoftwareUpdateActionList(ResourceList):
     data_layer = {
         "session": db.session,
         "model": DeviceSoftwareUpdateAction,
-        "methods": {"before_create_object": before_create_object, "query": query,},
+        "methods": {
+            "before_create_object": before_create_object,
+            "query": query,
+        },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class DeviceSoftwareUpdateActionDetail(ResourceDetail):
     """Detail resource for device software update actions (get, delete, patch)."""
 
     def before_get(self, args, kwargs):
-        """Return 404 Responses if DeviceSoftwareUpdateAction not found"""
+        """Return 404 Responses if DeviceSoftwareUpdateAction not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     def before_patch(self, args, kwargs, data):
@@ -92,8 +109,11 @@ class DeviceSoftwareUpdateActionDetail(ResourceDetail):
         return result
 
     def before_delete(self, args, kwargs):
+        """Update the update description of the device."""
         action = (
-            db.session.query(DeviceSoftwareUpdateAction).filter_by(id=kwargs["id"]).one_or_none()
+            db.session.query(DeviceSoftwareUpdateAction)
+            .filter_by(id=kwargs["id"])
+            .one_or_none()
         )
         if action is None:
             raise ObjectNotFound("Object not found!")
@@ -107,14 +127,4 @@ class DeviceSoftwareUpdateActionDetail(ResourceDetail):
         "session": db.session,
         "model": DeviceSoftwareUpdateAction,
     }
-
-
-class DeviceSoftwareUpdateActionRelationship(ResourceRelationship):
-    """Relationship resource for device software update actions."""
-
-    schema = DeviceSoftwareUpdateActionSchema
-    decorators = (token_required,)
-    data_layer = {
-        "session": db.session,
-        "model": DeviceSoftwareUpdateAction,
-    }
+    permission_classes = [DelegateToCanFunctions]

@@ -1,3 +1,11 @@
+<!--
+SPDX-FileCopyrightText: 2020
+- Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+
+SPDX-License-Identifier: HEESIL-1.0
+-->
+
 | Name                | Version    | License                    | Author                        | URL                                                     | Description                                                                                                                                                                        |
 |---------------------|------------|----------------------------|-------------------------------|---------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Flask               | 1.1.2      | BSD-3-Clause               | Armin Ronacher                | https://palletsprojects.com/p/flask/                    | A simple framework for building complex web applications.                                                                                                                          |

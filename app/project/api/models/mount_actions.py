@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2022
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 from .base_model import db
 from ..models.mixin import AuditMixin, IndirectSearchableMixin
 
@@ -16,7 +24,11 @@ class PlatformMountAction(db.Model, AuditMixin):
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
-    platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False,)
+    platform_id = db.Column(
+        db.Integer,
+        db.ForeignKey("platform.id"),
+        nullable=False,
+    )
     platform = db.relationship(
         "Platform",
         uselist=False,
@@ -34,7 +46,9 @@ class PlatformMountAction(db.Model, AuditMixin):
     )
     begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
-    begin_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    begin_contact_id = db.Column(
+        db.Integer, db.ForeignKey("contact.id"), nullable=False
+    )
     begin_contact = db.relationship(
         "Contact",
         uselist=False,
@@ -86,7 +100,11 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "device_mount_actions", cascade="save-update, merge, delete, delete-orphan"
         ),
     )
-    device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False,)
+    device_id = db.Column(
+        db.Integer,
+        db.ForeignKey("device.id"),
+        nullable=False,
+    )
     device = db.relationship(
         "Device",
         uselist=False,
@@ -94,7 +112,9 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         backref=db.backref("device_mount_actions"),
     )
     parent_platform_id = db.Column(
-        db.Integer, db.ForeignKey("platform.id"), nullable=True,
+        db.Integer,
+        db.ForeignKey("platform.id"),
+        nullable=True,
     )
     parent_platform = db.relationship(
         "Platform",
@@ -107,7 +127,9 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     )
     begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
-    begin_contact_id = db.Column(db.Integer, db.ForeignKey("contact.id"), nullable=False)
+    begin_contact_id = db.Column(
+        db.Integer, db.ForeignKey("contact.id"), nullable=False
+    )
     begin_contact = db.relationship(
         "Contact",
         uselist=False,
@@ -127,6 +149,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         foreign_keys=[end_contact_id],
         backref=db.backref("device_unmount_actions"),
     )
+
     def get_parent_search_entities(self):
         """Return the configuration as parent for the search."""
         # We only want to include the mount for the search in the

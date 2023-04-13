@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Resources for site contact roles."""
 
 from flask_rest_jsonapi import ResourceDetail
@@ -5,16 +11,11 @@ from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
 from ...frj_csv_export.resource import ResourceList
-from ..auth.permission_utils import (
-    check_deletion_permission_for_site_related_objects,
-    check_patch_permission_for_site_related_objects,
-    check_permissions_for_site_related_objects,
-    check_post_permission_for_site_related_objects,
-    get_query_with_permissions_for_site_related_objects,
-)
 from ..models import Site
 from ..models.base_model import db
 from ..models.contact_role import SiteContactRole
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.role import SiteRoleSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -34,7 +35,7 @@ class SiteRoleList(ResourceList):
 
     def query(self, view_kwargs):
         """Query the entries from the database."""
-        query_ = get_query_with_permissions_for_site_related_objects(self.model)
+        query_ = filter_visible(self.session.query(self.model))
         site_id = view_kwargs.get("site_id")
 
         if site_id is not None:
@@ -47,10 +48,6 @@ class SiteRoleList(ResourceList):
                 )
             query_ = query_.filter(SiteContactRole.site_id == site_id)
         return query_
-
-    def before_post(self, args, kwargs, data=None):
-        """Run some checks before posting the data to the db."""
-        check_post_permission_for_site_related_objects()
 
     def after_post(self, result):
         """Run some hooks after the post."""
@@ -67,6 +64,7 @@ class SiteRoleList(ResourceList):
         "model": SiteContactRole,
         "methods": {"query": query},
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class SiteRoleDetail(ResourceDetail):
@@ -84,11 +82,6 @@ class SiteRoleDetail(ResourceDetail):
         Also check if we are allowed to see the entry.
         """
         check_if_object_not_found(self._data_layer.model, kwargs)
-        check_permissions_for_site_related_objects(self._data_layer.model, kwargs["id"])
-
-    def before_patch(self, args, kwargs, data=None):
-        """Check permissions for patching."""
-        check_patch_permission_for_site_related_objects(kwargs, self._data_layer.model)
 
     def after_patch(self, result):
         """Rune some hooks after the patch of the contact role."""
@@ -99,9 +92,6 @@ class SiteRoleDetail(ResourceDetail):
 
     def before_delete(self, args, kwargs):
         """Check permissions to delete."""
-        check_deletion_permission_for_site_related_objects(
-            kwargs, self._data_layer.model
-        )
         contact_role = (
             db.session.query(SiteContactRole).filter_by(id=kwargs["id"]).one_or_none()
         )
@@ -117,3 +107,4 @@ class SiteRoleDetail(ResourceDetail):
         "session": db.session,
         "model": SiteContactRole,
     }
+    permission_classes = [DelegateToCanFunctions]

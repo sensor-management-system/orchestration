@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the platform mount action api."""
 
 import datetime
@@ -140,9 +148,7 @@ class TestPlatformMountAction(BaseTestCase):
         )
         db.session.add(configuration1)
         configuration2 = Configuration(
-            label="sample configuration II",
-            is_public=True,
-            is_internal=False
+            label="sample configuration II", is_public=True, is_internal=False
         )
         db.session.add(configuration2)
 
@@ -156,7 +162,7 @@ class TestPlatformMountAction(BaseTestCase):
             manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
-            is_internal=False
+            is_internal=False,
         )
         db.session.add(platform1)
 
@@ -165,7 +171,7 @@ class TestPlatformMountAction(BaseTestCase):
             manufacturer_name=fake.company(),
             is_public=True,
             is_private=False,
-            is_internal=False
+            is_internal=False,
         )
         db.session.add(platform2)
 
@@ -226,7 +232,8 @@ class TestPlatformMountAction(BaseTestCase):
                 base_url + f"/platforms/{platform2.id + 9999}/platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing, content_type="application/vnd.api+json",
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -349,7 +356,8 @@ class TestPlatformMountAction(BaseTestCase):
                 + f"/platforms/{platform2.id + 9999}/parent-platform-mount-actions"
             )
             response = self.client.get(
-                url_get_for_non_existing, content_type="application/vnd.api+json",
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
 
@@ -363,6 +371,12 @@ class TestPlatformMountAction(BaseTestCase):
     def test_get_platform_mount_action_collection(self):
         """Test retrieve a collection of PlatformMountAction objects."""
         mount_platform_action = add_mount_platform_action_model()
+        configuration = mount_platform_action.configuration
+        configuration.is_public = True
+        configuration.is_internal = False
+        db.session.add(configuration)
+        db.session.commit()
+
         with self.client:
             response = self.client.get(self.url)
         data = json.loads(response.data.decode())
@@ -371,6 +385,17 @@ class TestPlatformMountAction(BaseTestCase):
             mount_platform_action.begin_description,
             data["data"][0]["attributes"]["begin_description"],
         )
+
+    def test_get_platform_mount_action_collection_internal(self):
+        """Ensure we don't offer data for internal configuration."""
+        mount_platform_action = add_mount_platform_action_model()
+        configuration = mount_platform_action.configuration
+        self.assertTrue(configuration.is_internal)
+        with self.client:
+            response = self.client.get(self.url)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(0, len(data["data"]))
 
     def test_post_platfrom_mount_action(self):
         """Create PlatformMountAction."""
@@ -447,7 +472,8 @@ class TestPlatformMountAction(BaseTestCase):
             }
         }
         response = super().add_object(
-            url=f"{self.url}?include=platform,begin_contact,end_contact,parent_platform,configuration",
+            url=f"{self.url}?include="
+            + "platform,begin_contact,end_contact,parent_platform,configuration",
             data_object=data,
             object_type=self.object_type,
         )
@@ -472,7 +498,9 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {"begin_description": "updated",},
+                "attributes": {
+                    "begin_description": "updated",
+                },
             }
         }
         response = super().update_object(
@@ -503,7 +531,9 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {"begin_description": "updated",},
+                "attributes": {
+                    "begin_description": "updated",
+                },
                 "relationships": {
                     "end_contact": {
                         "data": None,
@@ -562,7 +592,9 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {"begin_description": "updated",},
+                "attributes": {
+                    "begin_description": "updated",
+                },
                 "relationships": {
                     "platform": {
                         "data": {
@@ -581,7 +613,10 @@ class TestPlatformMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 404)
+        # Due to the permission management checks we try to check
+        # the settings for the new platform.
+        # As we can't find it, we doesn't allow the change.
+        self.assertEqual(response.status_code, 403)
 
     def test_update_platform_mount_action_change_configuration_id(self):
         """Make sure configuration id can not be changed if the config doesn't exist."""
@@ -594,7 +629,9 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": mount_platform_action.id,
-                "attributes": {"begin_description": "updated",},
+                "attributes": {
+                    "begin_description": "updated",
+                },
                 "relationships": {
                     "configuration": {
                         "data": {
@@ -614,10 +651,13 @@ class TestPlatformMountAction(BaseTestCase):
                 headers=access_headers,
             )
         # New configuration id is not associated with an entry.
-        self.assertEqual(response.status_code, 404)
+        # However, we check it with the permission management.
+        # As the configuration doesn't exist, we don't allow the
+        # change.
+        self.assertEqual(response.status_code, 403)
 
     def test_update_platform_mount_action_change_parent_platform_id(self):
-        """Make sure parent platform id can not be changed if the parent platform is not mounted before."""
+        """Make sure parent platform can't be changed if parent platform isn't mounted before."""
         mount_platform_action = add_mount_platform_action_model()
         mount_platform_action_updated = {
             "data": {
@@ -703,7 +743,12 @@ class TestPlatformMountAction(BaseTestCase):
                 "id": platform_mount_action.id,
                 "attributes": {"begin_description": "updated"},
                 "relationships": {
-                    "parent_platform": {"data": {"type": "platform", "id": p_p.id,}},
+                    "parent_platform": {
+                        "data": {
+                            "type": "platform",
+                            "id": p_p.id,
+                        }
+                    },
                 },
             }
         }
@@ -869,7 +914,9 @@ class TestPlatformMountAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "id": platform_mount_action_1.id,
-                "attributes": {"end_date": "2023-11-08T07:25:00.782000",},
+                "attributes": {
+                    "end_date": "2023-11-08T07:25:00.782000",
+                },
             }
         }
         access_headers = create_token()

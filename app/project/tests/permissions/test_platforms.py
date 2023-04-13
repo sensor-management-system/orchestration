@@ -1,9 +1,17 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the Platform-Permissions."""
 import json
 from unittest.mock import patch
 
 from project import base_url
-from project.api.models import Platform, User
+from project.api.models import Contact, Platform, User
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
@@ -240,7 +248,7 @@ class TestPlatformPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
+        access_headers = create_superuser_token()
         with self.client:
             response = self.client.post(
                 self.platform_url,
@@ -262,7 +270,6 @@ class TestPlatformPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.platform_url,
@@ -284,7 +291,6 @@ class TestPlatformPermissions(BaseTestCase):
                 },
             }
         }
-        access_headers = create_token()
         with self.client:
             response = self.client.post(
                 self.platform_url,
@@ -392,7 +398,7 @@ class TestPlatformPermissions(BaseTestCase):
 
         url = f"{self.platform_url}/{private_platform.id}"
         response = self.client.get(url)
-        self.assertEqual(response.status, "401 UNAUTHORIZED")
+        self.assertIn(response.status_code, [401, 403])
 
     def test_patch_platform_as_a_member_in_a_permission_group(self):
         """Make sure that a member in a group (admin/member) can patch a platform."""
@@ -482,7 +488,7 @@ class TestPlatformPermissions(BaseTestCase):
                 }
                 url = f"{self.platform_url}/{data['data']['id']}"
                 _ = super().try_update_object_with_status_code(
-                    url, platform_data_changed, expected_status_code=409
+                    url, platform_data_changed, expected_status_code=403
                 )
 
     def test_patch_platform_user_not_in_any_permission_group(self):
@@ -696,7 +702,7 @@ class TestPlatformPermissions(BaseTestCase):
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
                 url = f"{self.platform_url}/{data['data']['id']}"
                 delete_response = self.client.delete(url, headers=access_headers)
-                self.assertEqual(delete_response.status_code, 409)
+                self.assertEqual(delete_response.status_code, 403)
 
     def test_add_internal_platform_without_group(self):
         """Ensure a new internal platfrom can't be added without a group."""
@@ -720,7 +726,7 @@ class TestPlatformPermissions(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_add_public_platform_without_group(self):
         """Ensure a new public platform can't be added without a group."""
@@ -744,7 +750,7 @@ class TestPlatformPermissions(BaseTestCase):
                 content_type="application/vnd.api+json",
                 headers=access_headers,
             )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_add_private_platform_without_group(self):
         """Ensure a new private platform can be added without a group."""
@@ -769,6 +775,149 @@ class TestPlatformPermissions(BaseTestCase):
                 headers=access_headers,
             )
         self.assertEqual(response.status_code, 201)
+
+    def test_patch_to_different_permission_group(self):
+        """Ensure we can't update to a permission group we aren't members."""
+        platform = Platform(
+            short_name="test platform",
+            is_public=False,
+            is_internal=True,
+            group_ids=["1"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([platform, contact, user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform",
+                "id": platform.id,
+                "attributes": {
+                    "group_ids": ["2"],
+                },
+                "relationships": {},
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*platform.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.platform_url}/{platform.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
+
+    def test_patch_to_remove_permission_group_non_admin(self):
+        """Ensure we can't remove a permission group we aren't admins."""
+        platform = Platform(
+            short_name="test platform",
+            is_public=False,
+            is_internal=True,
+            group_ids=["1"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([platform, contact, user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform",
+                "id": platform.id,
+                "attributes": {
+                    "group_ids": ["2"],
+                },
+                "relationships": {},
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*platform.group_ids, "2"],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.platform_url}/{platform.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
+
+    def test_patch_from_internal_to_private(self):
+        """Ensure we can't set back to private once the platform was visible."""
+        platform = Platform(
+            short_name="test platform",
+            is_public=False,
+            is_internal=True,
+            group_ids=["1"],
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([platform, contact, user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform",
+                "id": platform.id,
+                "attributes": {
+                    "group_ids": [],
+                    "is_private": True,
+                    "is_internal": False,
+                },
+                "relationships": {},
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[*platform.group_ids],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.platform_url}/{platform.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)
 
 
 def preparation_of_public_and_internal_platform_data(group_ids):

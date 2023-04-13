@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Classes to help searching in the elasticsearch."""
 
 from dataclasses import dataclass
@@ -75,12 +83,16 @@ class NestedElementFilterWrapper:
             return False
         return True
 
+
 @dataclass
 class TermHasAnyExactFilter:
+    """Filter to check for several values of that one must match."""
+
     term: str
     value: str
 
     def to_query(self):
+        """Return the elasticquery to match any of the values."""
         # ES doesn't differ that much for arrays or scalar values.
         # For the first try, we try to do it like the normal term filter.
         # as in the es it doesn't make that much differnce if term
@@ -161,6 +173,14 @@ class AndFilter:
         if len(self.sub_filters) == 1:
             return self.sub_filters[0]
         return self
+
+    @classmethod
+    def combine_optionals(cls, filters):
+        """Help to deal with None filters but AND like semantic if they are set."""
+        not_none_filters = [f for f in filters if f is not None]
+        if not_none_filters:
+            return AndFilter(not_none_filters).simplify()
+        return None
 
 
 class FilterParser:

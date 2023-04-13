@@ -1,10 +1,19 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the generic configuration actions api."""
 import json
 from datetime import datetime
 from unittest.mock import patch
 
+import pytz
+
 from project import base_url, db
-from project.api.models import Configuration, GenericConfigurationAction
+from project.api.models import Configuration, Contact, GenericConfigurationAction, User
+from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_actions_models import (
@@ -128,7 +137,7 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_generic_configuration_action_data_user_not_in_the_permission_group(
         self,
@@ -210,7 +219,7 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_patch_generic_configuration_action_data_user_is_not_part_from_permission_group(
         self,
@@ -281,7 +290,7 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
                     content_type="application/vnd.api+json",
                     headers=create_token(),
                 )
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_generic_configuration_action_data_as_member(self):
         """Delete generic_configuration_action_data as member."""
@@ -300,3 +309,69 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
                     headers=create_token(),
                 )
         self.assertEqual(response.status_code, 200)
+
+    def test_patch_to_non_editable_configuration(self):
+        """Ensure we can't update to a configuration we can't edit."""
+        configuration1 = Configuration(
+            label="config1",
+            is_public=False,
+            is_internal=True,
+        )
+        configuration2 = Configuration(
+            label="config2",
+            is_public=False,
+            is_internal=True,
+            cfg_permission_group="2",
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        action = GenericConfigurationAction(
+            configuration=configuration1,
+            action_type_name="fancy action",
+            action_type_uri="something",
+            begin_date=datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            contact=contact,
+        )
+        user = User(
+            subject=contact.email,
+            contact=contact,
+        )
+        db.session.add_all([configuration1, configuration2, contact, user, action])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "generic_configuration_action",
+                "id": action.id,
+                "attributes": {},
+                "relationships": {
+                    # We try to switch here to another configuration for
+                    # which we have no edit permissions.
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": configuration2.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
+                mock.return_value = UserAccount(
+                    id="123",
+                    username=user.subject,
+                    administrated_permission_groups=[],
+                    membered_permission_groups=[configuration1.cfg_permission_group],
+                )
+                with self.client:
+                    response = self.client.patch(
+                        f"{self.url}/{action.id}",
+                        data=json.dumps(payload),
+                        content_type="application/vnd.api+json",
+                    )
+        self.assertEqual(response.status_code, 403)

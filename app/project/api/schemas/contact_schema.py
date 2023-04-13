@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Contact schema."""
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
@@ -23,6 +32,8 @@ class ContactSchema(Schema):
     given_name = fields.Str(required=True)
     family_name = fields.Str(required=True)
     website = fields.Str(allow_none=True)
+    organization = fields.Str(allow_none=True)
+    orcid = fields.Str(allow_none=True)
     email = fields.Email(required=True)
     active = fields.Boolean(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
@@ -65,5 +76,7 @@ class ContactSchema(Schema):
                 "given_name": obj.given_name,
                 "family_name": obj.family_name,
                 "website": obj.website,
+                "organization": obj.organization,
+                "orcid": obj.orcid,
                 "email": obj.email,
             }

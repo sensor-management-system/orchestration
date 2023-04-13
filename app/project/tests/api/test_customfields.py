@@ -1,3 +1,11 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Tests for the custom field endpoints."""
 
 import json
@@ -151,8 +159,7 @@ class TestCustomFieldServices(BaseTestCase):
                 headers=create_token(),
             )
         # it will not work, as we miss an important part (the device)
-        self.assertEqual(response.status_code, 404)
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 422)
         count_customfields_after = db.session.query(CustomField).count()
         self.assertEqual(count_customfields_before, count_customfields_after)
 

@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 """Module for the configuration attachments list resource."""
 import pathlib
 
@@ -7,16 +13,12 @@ from flask_rest_jsonapi.exceptions import JsonApiException, ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...api import minio
-from ..auth.permission_utils import (
-    check_deletion_permission_for_configuration_related_objects,
-    check_patch_permission_for_configuration_related_objects,
-    check_permissions_for_configuration_related_objects,
-    check_post_permission_for_configuration_related_objects,
-    get_query_with_permissions_for_configuration_related_objects,
-)
 from ..helpers.errors import ConflictError
+from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import Configuration, ConfigurationAttachment
 from ..models.base_model import db
+from ..permissions.common import DelegateToCanFunctions
+from ..permissions.rules import filter_visible
 from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
 from ..token_checker import token_required
 from .base_resource import (
@@ -32,9 +34,7 @@ class ConfigurationAttachmentList(ResourceList):
 
     def query(self, view_kwargs):
         """Query the entries from the database."""
-        query_ = get_query_with_permissions_for_configuration_related_objects(
-            self.model
-        )
+        query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
 
         if configuration_id is not None:
@@ -53,9 +53,9 @@ class ConfigurationAttachmentList(ResourceList):
                 )
         return query_
 
-    def before_post(self, args, kwargs, data=None):
-        """Check that we are allowed to add a attachment."""
-        check_post_permission_for_configuration_related_objects()
+    def before_create_object(self, data, *args, **kwargs):
+        """Set some fields before we save the new entry."""
+        add_created_by_id(data)
 
     def after_post(self, result):
         """
@@ -97,9 +97,11 @@ class ConfigurationAttachmentList(ResourceList):
         "session": db.session,
         "model": ConfigurationAttachment,
         "methods": {
+            "before_create_object": before_create_object,
             "query": query,
         },
     }
+    permission_classes = [DelegateToCanFunctions]
 
 
 class ConfigurationAttachmentDetail(ResourceDetail):
@@ -108,23 +110,16 @@ class ConfigurationAttachmentDetail(ResourceDetail):
     def before_get(self, args, kwargs):
         """Return 404 Responses if ConfigurationAttachment not found."""
         check_if_object_not_found(self._data_layer.model, kwargs)
-        check_permissions_for_configuration_related_objects(
-            self._data_layer.model, kwargs["id"]
-        )
 
     def before_patch(self, args, kwargs, data=None):
-        """Check that we are allowed to edit the attachment."""
-        check_patch_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
-        # And then also check that we don't change fields that we are not
-        # supposted to change.
+        """Add handling for uploads from our file storage."""
         attachment = (
             db.session.query(self._data_layer.model).filter_by(id=kwargs["id"]).first()
         )
         if attachment and attachment.is_upload:
             if data["url"] and data["url"] != attachment.url:
                 raise ConflictError("It is not allowed to change the url of uploads")
+        add_updated_by_id(data)
 
     def after_patch(self, result):
         """
@@ -140,9 +135,6 @@ class ConfigurationAttachmentDetail(ResourceDetail):
 
     def before_delete(self, args, kwargs):
         """Update the configurations update description."""
-        check_deletion_permission_for_configuration_related_objects(
-            kwargs, self._data_layer.model
-        )
         configuration_attachment = (
             db.session.query(ConfigurationAttachment)
             .filter_by(id=kwargs["id"])
@@ -188,3 +180,4 @@ class ConfigurationAttachmentDetail(ResourceDetail):
         "session": db.session,
         "model": ConfigurationAttachment,
     }
+    permission_classes = [DelegateToCanFunctions]

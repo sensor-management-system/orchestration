@@ -1,3 +1,13 @@
+# SPDX-FileCopyrightText: 2022 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+"""Some helper functions to be used in various resource classes."""
+
 import json
 from json import JSONDecodeError
 
@@ -8,7 +18,8 @@ from ..helpers.errors import BadRequestError
 
 def add_created_by_id(data):
     """
-    Use jwt to add user id to dataset.
+    Use user object to add user id to dataset.
+
     :param data:
     :param args:
     :param kwargs:
@@ -24,7 +35,8 @@ def add_created_by_id(data):
 
 def add_updated_by_id(data):
     """
-    Use jwt to add user id to dataset after updating the data.
+    Use user object to add user id to dataset after updating the data.
+
     :param data:
     :param args:
     :param kwargs:
@@ -35,8 +47,30 @@ def add_updated_by_id(data):
 
 
 def decode_json_request_data():
+    """Try to decode the json data."""
     try:
         data = json.loads(request.data.decode())["data"]
     except JSONDecodeError as e:
         raise BadRequestError(repr(e))
     return data
+
+
+def set_default_permission_view_to_internal_if_not_exists_or_all_false(data):
+    """
+    Check if the request doesn't include permission data or all are False.
+
+    Checks are for is_public, is_internal or is_private.
+    If none of them are true, we set internal as default.
+    and if not the set it to internal by default.
+
+    :param data: json date sent wit the request.
+    """
+    if not any(
+        [data.get("is_private"), data.get("is_public"), data.get("is_internal")]
+    ):
+        data["is_internal"] = True
+        data["is_public"] = False
+        data["is_private"] = False
+
+    # Add created by id to data
+    add_created_by_id(data)
