@@ -278,6 +278,11 @@ paths = {
         operation_id="controller_configuration_labels",
     ),
     **template(
+        endpoint="/controller/configuration-projects",
+        description="Get the list of distinct projects of all configurations.",
+        operation_id="controller_configuration_projects",
+    ),
+    **template(
         endpoint="/controller/generic-device-action-descriptions",
         description="Get the list of distinct descriptions of all generic device actions.",
         operation_id="controller_generic_device_action_descriptions",

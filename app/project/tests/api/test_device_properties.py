@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -9,11 +9,11 @@
 """Tests for the device property endpoints."""
 
 import json
+import time
 
 from project import base_url
+from project.api.models import Contact, Device, DeviceProperty, User
 from project.api.models.base_model import db
-from project.api.models.device import Device
-from project.api.models.device_property import DeviceProperty
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
@@ -407,3 +407,87 @@ class TestDevicePropertyServices(BaseTestCase):
                 headers=create_token(),
             )
         self.assertNotEqual(response.status_code, 201)
+
+    def test_created_and_updated_fields(self):
+        """Ensure we set & update the created & updated metainformation."""
+        contact1 = Contact(
+            given_name="first", family_name="contact", email="first@contact.org"
+        )
+        contact2 = Contact(
+            given_name="second", family_name="contact", email="second@contact.org"
+        )
+        user1 = User(contact=contact1, subject=contact1.email, is_superuser=True)
+        user2 = User(contact=contact2, subject=contact2.email, is_superuser=True)
+        device1 = Device(short_name="dummy device", is_public=True)
+
+        db.session.add_all([contact1, contact2, user1, user2, device1])
+        db.session.commit()
+
+        with self.run_requests_as(user1):
+            response1 = self.client.post(
+                self.url,
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "device_property",
+                            "attributes": {
+                                "property_name": "Air temperature",
+                                "label": "Temp",
+                            },
+                            "relationships": {
+                                "device": {"data": {"type": "device", "id": device1.id}}
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response1.status_code, 201)
+        property_id = response1.json["data"]["id"]
+
+        one_second = 1
+        time.sleep(one_second)
+
+        with self.run_requests_as(user2):
+            response2 = self.client.patch(
+                f"{self.url}/{property_id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "device_property",
+                            "id": property_id,
+                            "attributes": {
+                                "label": "Temperature",
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response2.status_code, 200)
+
+        self.assertEqual(
+            response1.json["data"]["attributes"]["created_at"],
+            response2.json["data"]["attributes"]["created_at"],
+        )
+
+        self.assertEqual(
+            response1.json["data"]["relationships"]["created_by"]["data"]["id"],
+            response2.json["data"]["relationships"]["created_by"]["data"]["id"],
+        )
+        self.assertEqual(
+            response1.json["data"]["relationships"]["created_by"]["data"]["id"],
+            str(user1.id),
+        )
+
+        self.assertEqual(
+            response2.json["data"]["relationships"]["updated_by"]["data"]["id"],
+            str(user2.id),
+        )
+
+        self.assertTrue(
+            # Due to the iso format it is enought to compare them as stirngs
+            # here, as 2023-03-14T12:00:00 is < then 2023-03-14T12:00:01.
+            response1.json["data"]["attributes"]["updated_at"]
+            < response2.json["data"]["attributes"]["updated_at"]
+        )

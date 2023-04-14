@@ -269,6 +269,8 @@ def can_delete(entity):
     """Return if the entity can be deleted."""
     if entity.archived:
         return False
+    if entity.persistent_identifier:
+        return False
     # Only super users can delete.
     return g.user and g.user.is_superuser
 

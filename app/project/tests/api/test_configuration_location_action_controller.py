@@ -68,6 +68,7 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
             ConfigurationStaticLocationBeginAction(
                 begin_date=datetime.datetime(2021, 10, 31, 10, 0, 0, tzinfo=pytz.UTC),
                 begin_description="test configuration_static_location_begin_action",
+                label="somewhere",
                 x=20.0,
                 y=20.0,
                 z=20.0,
@@ -89,6 +90,7 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
                 "timepoint": "2021-10-31T10:00:00+00:00",
                 "id": str(configuration_static_location_begin_action.id),
                 "type": "configuration_static_location_begin",
+                "label": "somewhere",
             }
         ]
 
@@ -100,6 +102,7 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
             ConfigurationDynamicLocationBeginAction(
                 begin_date=datetime.datetime(2021, 10, 31, 10, 0, 0, tzinfo=pytz.UTC),
                 begin_description="test configuration_location_begin_action",
+                label="flexible",
                 configuration=self.configuration,
                 begin_contact=self.u.contact,
             )
@@ -115,6 +118,7 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
                 "timepoint": "2021-10-31T10:00:00+00:00",
                 "id": str(configuration_dynamic_location_begin_action.id),
                 "type": "configuration_dynamic_location_begin",
+                "label": "flexible",
             }
         ]
 
@@ -173,16 +177,19 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
                 "timepoint": "2011-11-25T10:00:00+00:00",
                 "id": str(configuration_static_location_begin_action1.id),
                 "type": "configuration_static_location_begin",
+                "label": None,
             },
             {
                 "timepoint": "2021-10-31T10:00:00+00:00",
                 "id": str(configuration_static_location_begin_action.id),
                 "type": "configuration_static_location_begin",
+                "label": None,
             },
             {
                 "timepoint": "2024-01-13T22:56:57+00:00",
                 "type": "configuration_dynamic_location_begin",
                 "id": str(configuration_dynamic_location_action.id),
+                "label": None,
             },
         ]
         self.assertEqual(response.json, expected)
@@ -249,31 +256,37 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
                 "timepoint": "2011-11-25T10:00:00+00:00",
                 "id": str(configuration_static_location_begin_action1.id),
                 "type": "configuration_static_location_begin",
+                "label": None,
             },
             {
                 "timepoint": "2011-11-26T12:00:00+00:00",
                 "type": "configuration_static_location_end",
                 "id": str(configuration_static_location_begin_action1.id),
+                "label": None,
             },
             {
                 "timepoint": "2021-10-31T10:00:00+00:00",
                 "type": "configuration_static_location_begin",
                 "id": str(configuration_static_location_begin_action.id),
+                "label": None,
             },
             {
                 "timepoint": "2021-11-01T12:00:00+00:00",
                 "type": "configuration_static_location_end",
                 "id": str(configuration_static_location_begin_action.id),
+                "label": None,
             },
             {
                 "timepoint": "2024-01-13T22:56:57+00:00",
                 "id": str(configuration_dynamic_location_action.id),
                 "type": "configuration_dynamic_location_begin",
+                "label": None,
             },
             {
                 "timepoint": "2025-12-25T01:01:02+00:00",
                 "id": str(configuration_dynamic_location_action.id),
                 "type": "configuration_dynamic_location_end",
+                "label": None,
             },
         ]
         self.assertEqual(response.json, expected)

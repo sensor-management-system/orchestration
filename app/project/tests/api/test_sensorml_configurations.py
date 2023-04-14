@@ -59,7 +59,7 @@ class TestSensorMLConfiguration(BaseTestCase):
         db.session.commit()
 
     def test_get_non_existing(self):
-        """Ensure we get an 404 if the device doesn't exist."""
+        """Ensure we get an 404 if the configuration doesn't exist."""
         with self.client:
             resp = self.client.get(f"{self.url}/9999999999/sensorml")
         self.assertEqual(resp.status_code, 404)
@@ -205,6 +205,110 @@ class TestSensorMLConfiguration(BaseTestCase):
                 .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
             ),
             0,
+        )
+
+    def test_get_public_configuration_with_description(self):
+        """Check that we give out the description."""
+        self.configuration.description = "Some long description"
+        db.session.add(self.configuration)
+        db.session.commit()
+
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_description = root.find("{http://www.opengis.net/gml/3.2}description")
+        self.assertEqual(sml_description.text, self.configuration.description)
+
+    def test_get_public_configuration_with_pid(self):
+        """Check that we give out the pid."""
+        self.configuration.persistent_identifier = "12345/test.abc.1234-4567"
+
+        db.session.add(self.configuration)
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_identification = root.find(
+            "{http://www.opengis.net/sensorml/2.0}identification"
+        )
+        sml_identifier_list = sml_identification.find(
+            "{http://www.opengis.net/sensorml/2.0}IdentifierList"
+        )
+        sml_identifiers = sml_identifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}identifier"
+        )
+        self.assertEqual(len(sml_identifiers), 1)
+        sml_identifier_pid = sml_identifiers[0]
+
+        self.assertEqual(
+            sml_identifier_pid.find(
+                "{http://www.opengis.net/sensorml/2.0}Term"
+            ).attrib.get("definition"),
+            "http://sensorml.com/ont/swe/property/Identifier",
+        )
+        self.assertEqual(
+            sml_identifier_pid.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "handle",
+        )
+        self.assertEqual(
+            sml_identifier_pid.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            self.configuration.persistent_identifier,
+        )
+
+    def test_get_public_configuration_with_project(self):
+        """Check that we give out the configurations project."""
+        self.configuration.project = "Moses"
+
+        db.session.add(self.configuration)
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_classification = root.find(
+            "{http://www.opengis.net/sensorml/2.0}classification"
+        )
+        sml_classifier_list = sml_classification.find(
+            "{http://www.opengis.net/sensorml/2.0}ClassifierList"
+        )
+        sml_classifiers = sml_classifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}classifier"
+        )
+        self.assertEqual(len(sml_classifiers), 1)
+        sml_classifier_device_type = sml_classifiers[0]
+
+        self.assertEqual(
+            sml_classifier_device_type.find(
+                "{http://www.opengis.net/sensorml/2.0}Term"
+            ).attrib.get("definition"),
+            "http://xmlns.com/foaf/0.1/#term_Project",
+        )
+        self.assertEqual(
+            sml_classifier_device_type.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "Project",
+        )
+        self.assertEqual(
+            sml_classifier_device_type.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            self.configuration.project,
         )
 
     def test_get_public_configuration_contacts(self):
@@ -730,6 +834,53 @@ class TestSensorMLConfiguration(BaseTestCase):
             static_location_action.begin_description,
         )
 
+    def test_get_public_configuration_with_static_location_with_label(self):
+        """Check that we give out the static location with a label."""
+        contact = Contact(given_name="Given", family_name="Fam", email="given@family")
+        static_location_action = ConfigurationStaticLocationBeginAction(
+            configuration=self.configuration,
+            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            begin_contact=contact,
+            begin_description="Some desc",
+            label="Somewhere",
+            x=1,
+            y=2,
+            z=1.5,
+        )
+
+        db.session.add_all([contact, static_location_action])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+
+        sml_history = root.find("{http://www.opengis.net/sensorml/2.0}history")
+        sml_event_list = sml_history.find(
+            "{http://www.opengis.net/sensorml/2.0}EventList"
+        )
+        sml_events = sml_event_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}event"
+        )
+        self.assertEqual(len(sml_events), 1)
+
+        sml_location_event = sml_events[0]
+
+        self.assertEqual(
+            sml_location_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            static_location_action.label,
+        )
+
     def test_get_public_configuration_with_static_location_without_end(self):
         """Check that we give out the static location without end date."""
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")
@@ -912,6 +1063,50 @@ class TestSensorMLConfiguration(BaseTestCase):
             .find("{http://www.opengis.net/gml/3.2}description")
             .text,
             dynamic_location_action.begin_description,
+        )
+
+    def test_get_public_configuration_with_dynamic_location_with_label(self):
+        """Check that we give out the dynamic location with a label."""
+        contact = Contact(given_name="Given", family_name="Fam", email="given@family")
+        dynamic_location_action = ConfigurationDynamicLocationBeginAction(
+            configuration=self.configuration,
+            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            begin_contact=contact,
+            begin_description="Some desc",
+            label="Somewhere",
+        )
+
+        db.session.add_all([contact, dynamic_location_action])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+
+        sml_history = root.find("{http://www.opengis.net/sensorml/2.0}history")
+        sml_event_list = sml_history.find(
+            "{http://www.opengis.net/sensorml/2.0}EventList"
+        )
+        sml_events = sml_event_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}event"
+        )
+        self.assertEqual(len(sml_events), 1)
+
+        sml_location_event = sml_events[0]
+
+        self.assertEqual(
+            sml_location_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            dynamic_location_action.label,
         )
 
     def test_get_public_configuration_with_dynamic_location_without_end(self):

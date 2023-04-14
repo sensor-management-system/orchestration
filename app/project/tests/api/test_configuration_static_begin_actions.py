@@ -406,3 +406,17 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    def test_get_with_label(self):
+        """Ensure that we return the label in the response."""
+        static_location_begin_action = add_static_location_begin_action_model()
+        static_location_begin_action.label = "fancy location"
+        configuration = static_location_begin_action.configuration
+        configuration.is_public = True
+        configuration.is_internal = False
+        db.session.add_all([static_location_begin_action, configuration])
+        db.session.commit()
+
+        response = self.client.get(f"{self.url}/{static_location_begin_action.id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["data"]["attributes"]["label"], "fancy location")

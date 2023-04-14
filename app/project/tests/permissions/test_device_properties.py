@@ -9,7 +9,6 @@
 """Tests for the device property endpoints."""
 
 import json
-from unittest import skip
 from unittest.mock import patch
 
 from project import base_url
@@ -280,7 +279,6 @@ class TestDevicePropertyServices(BaseTestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    @skip("Checks for permissions currently only test for ")
     def test_patch_device_property_for_archived_target_device(self):
         """Ensure we can't update a device property for an archived target device."""
         device1 = create_a_test_device(IDL_USER_ACCOUNT.membered_permission_groups)
@@ -321,7 +319,7 @@ class TestDevicePropertyServices(BaseTestCase):
                     headers=create_token(),
                 )
 
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 403)
 
     def test_delete_device_property_api(self):
         """Ensure that we can delete a device property."""

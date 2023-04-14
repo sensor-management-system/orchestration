@@ -775,10 +775,10 @@ class SmlPhysicalSystem:
         element = sml.tag("PhysicalSystem")
         if self.gml_id:
             element.attrib[gml.attrib("id")] = self.gml_id
-        if self.gml_name:
-            element.append(self.gml_name.to_xml())
         if self.gml_description:
             element.append(self.gml_description.to_xml())
+        if self.gml_name:
+            element.append(self.gml_name.to_xml())
         if self.sml_valid_time:
             element.append(self.sml_valid_time.to_xml())
         if self.sml_identification:

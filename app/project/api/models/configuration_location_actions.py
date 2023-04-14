@@ -6,6 +6,8 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""Location actions for configurations."""
+
 from .base_model import db
 from .mixin import AuditMixin, IndirectSearchableMixin
 
@@ -13,6 +15,13 @@ from .mixin import AuditMixin, IndirectSearchableMixin
 class ConfigurationStaticLocationBeginAction(
     db.Model, AuditMixin, IndirectSearchableMixin
 ):
+    """
+    Static location for a configuration.
+
+    Think on something like a weather station that is on a fixed
+    location for allmost all of its existence.
+    """
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -26,6 +35,7 @@ class ConfigurationStaticLocationBeginAction(
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
+    label = db.Column(db.String(256), nullable=True)
     begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
     begin_contact_id = db.Column(
@@ -62,6 +72,7 @@ class ConfigurationStaticLocationBeginAction(
         return {
             "begin_description": self.begin_description,
             "end_description": self.end_description,
+            "label": self.label,
         }
 
     def get_parent(self):
@@ -72,6 +83,13 @@ class ConfigurationStaticLocationBeginAction(
 class ConfigurationDynamicLocationBeginAction(
     db.Model, AuditMixin, IndirectSearchableMixin
 ):
+    """
+    Dynamic location for a configuration.
+
+    Think on something like a rover, where an gps device is
+    used to keep track of the position.
+    """
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -85,6 +103,7 @@ class ConfigurationDynamicLocationBeginAction(
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )
+    label = db.Column(db.String(256), nullable=True)
     begin_date = db.Column(db.DateTime(timezone=True), nullable=False)
     begin_description = db.Column(db.Text, nullable=True)
     begin_contact_id = db.Column(
@@ -142,6 +161,7 @@ class ConfigurationDynamicLocationBeginAction(
             # We don't include the epsg code or the elevation_datum yet
             "begin_description": self.begin_description,
             "end_description": self.end_description,
+            "label": self.label,
         }
 
     def get_parent_search_entities(self):

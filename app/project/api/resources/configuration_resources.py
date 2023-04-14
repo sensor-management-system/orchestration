@@ -10,11 +10,12 @@
 
 import os
 
-from flask import g, request
+from flask import current_app, g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...extensions.instances import pid
 from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     AndFilter,
@@ -186,6 +187,11 @@ class ConfigurationDetail(ResourceDetail):
         :return:
         """
         configuration = check_if_object_not_found(Configuration, kwargs)
+        if current_app.config["INSTITUTE"] == "ufz":
+            pid_to_delete = configuration.persistent_identifier
+            if pid_to_delete and pid.get(pid_to_delete).status_code == 200:
+                pid.delete(pid_to_delete)
+
         urls = [
             a.internal_url
             for a in configuration.configuration_attachments

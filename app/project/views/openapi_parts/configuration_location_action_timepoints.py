@@ -33,22 +33,26 @@ components = {
                                     },
                                     "type": {"type": "string"},
                                     "id": {"type": "string"},
+                                    "label": {"type": "string"},
                                 },
                                 "example": [
                                     {
                                         "timepoint": "2022-07-14T10:51:04",
                                         "type": "static_location_begin_action",
                                         "id": "123",
+                                        "label": "Somewhere",
                                     },
                                     {
                                         "timepoint": "2022-07-14T11:49:50",
                                         "type": "static_location_end_action",
                                         "id": "123",
+                                        "label": "Somewhere",
                                     },
                                     {
                                         "timepoint": "2022-07-14T11:49:50",
                                         "type": "dynamic_location_begin_action",
                                         "id": "234",
+                                        "label": "flexible",
                                     },
                                 ],
                             }
