@@ -8,3 +8,4 @@
 /docker/env.dev
 /docker/backend.dev
 /docker/cv.dev
+/sql/preset-development-and-test-data.sql
