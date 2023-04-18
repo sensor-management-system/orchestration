@@ -122,6 +122,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - ./backend/app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+      - ./sql:/mnt/sql
     networks:
       - sms
     command: -p 5433

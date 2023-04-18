@@ -138,6 +138,15 @@ For the minio the restore is different:
 - There is currently no strategy to restore the metadata - we save them to keep track of the user uploads (if the user wasn't allowed
   to upload a file, we can check who was responsible for that)
 
+## Test data for faster development
+- You can use your own test data to be inserted directly into the database during your development process
+- Do the following steps:
+  - __Make sure that you `db` service is up and running__ 
+  - `chmod +x preset-database.sh`
+  - `cp ./sql/preset-development-and-test-data.sql.example ./sql/preset-development-and-test-data.sql`
+  - Update the `./sql/preset-development-and-test-data.sql` file to your needs
+    - __HINT__: If you use hard coded IDs make sure to update the corresponding sequences or you'll encounter problems 
+  - run `./preset-database.sh`
 ## How to add new environment variables to the project
 You have to look for many places. Keep in mind, that you always have look in the specific repository (e.g. `frontend` or `backend`) __and__ the orchestration repository 
 
