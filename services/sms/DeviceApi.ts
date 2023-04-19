@@ -540,7 +540,9 @@ export class DeviceApi {
   findRelatedDeviceProperties (deviceId: string): Promise<DeviceProperty[]> {
     const url = this.basePath + '/' + deviceId + '/device-properties'
     const params = {
-      'page[size]': 10000
+      'page[size]': 10000,
+      // The one that was created first, should be first. All others behind.
+      sort: 'created_at'
     }
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DevicePropertySerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
