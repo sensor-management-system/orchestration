@@ -290,13 +290,13 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col cols="4">
-          <autocomplete-text-input
+          <combobox
             :value="value.address.country"
+            :items="countryNames"
             :readonly="readonly"
             :disabled="readonly"
             label="Country"
             placeholder="Country"
-            endpoint="site-countries"
             @input="update('address.country', $event)"
           />
         </v-col>
@@ -422,6 +422,13 @@ export default class SiteBasicDataForm extends mixins(Rules) {
     type: Array
   })
   readonly siteTypes!: SiteType[]
+
+  @Prop({
+    default: () => [] as string[],
+    required: true,
+    type: Array
+  })
+  readonly countryNames!: string[]
 
   get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
     // For the moment there is no way a site could be private.

@@ -54,6 +54,7 @@ permissions and limitations under the Licence.
         v-model="site"
         :site-usages="siteUsages"
         :site-types="siteTypes"
+        :country-names="countryNames"
       />
       <v-card-actions>
         <v-spacer />
@@ -69,7 +70,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
@@ -77,7 +78,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Site } from '@/models/Site'
 import { SaveSiteAction } from '@/store/sites'
 import { SetTabsAction, SetTitleAction } from '@/store/appbar'
-import { LoadEpsgCodesAction, LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState } from '@/store/vocabulary'
+import { LoadEpsgCodesAction, LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 
 import { hasSelfIntersection } from '@/utils/mapHelpers'
 
@@ -87,11 +88,12 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
   },
   middleware: ['auth'],
   computed: {
+    ...mapGetters('vocabulary', ['countryNames']),
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
   },
   methods: {
     ...mapActions('sites', ['saveSite']),
-    ...mapActions('vocabulary', ['loadEpsgCodes', 'loadSiteUsages', 'loadSiteTypes']),
+    ...mapActions('vocabulary', ['loadEpsgCodes', 'loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
 
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
@@ -110,6 +112,8 @@ export default class SiteNewPage extends Vue {
   loadSiteUsages!: LoadSiteUsagesAction
   siteTypes!: VocabularyState['siteTypes']
   loadSiteTypes!: LoadSiteTypesAction
+  loadCountries!: LoadCountriesAction
+  countryNames!: CountryNamesGetter
 
   async created () {
     this.initializeAppBar()
@@ -117,7 +121,8 @@ export default class SiteNewPage extends Vue {
       await Promise.all([
         this.loadEpsgCodes(),
         this.loadSiteUsages(),
-        this.loadSiteTypes()
+        this.loadSiteTypes(),
+        this.loadCountries()
       ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load site usages or types')
