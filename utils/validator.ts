@@ -40,10 +40,14 @@ import { LocationType } from '@/models/Location'
 import { Configuration } from '@/models/Configuration'
 import { IPermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
-import { dateTimesEqual, dateToDateTimeStringHHMM, dateToString } from '@/utils/dateHelper'
+import { dateTimesEqual, dateToDateTimeStringHHMM, dateToString, sortCriteriaAscending } from '@/utils/dateHelper'
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 import { LocationTypes } from '@/store/configurations'
 import { getActiveActionOrNull, getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
+
+function sortedTimepoints (timepoints: ILocationTimepoint[]): ILocationTimepoint[] {
+  return [...timepoints].sort((a, b) => sortCriteriaAscending(a.timepoint, b.timepoint))
+}
 
 export default {
   validateInputForStartDate (configuration: Configuration): (v: string) => (boolean | string) {
@@ -233,14 +237,19 @@ export default {
       return true
     }
 
-    const filteredArray = locationTimepoints.filter((item: ILocationTimepoint) => {
+    // In order to make the test easier, we want to make sure we have a sorted array of locationTimepoints.
+    // In general those values should be sorted by the backend site, but in order to be robust
+    // (also regarding to future changes), we should make sure that it sorted.
+    const sortedlocationTimepoints = sortedTimepoints(locationTimepoints)
+
+    const filteredArray = sortedlocationTimepoints.filter((item: ILocationTimepoint) => {
       return item.timepoint <= dateToValidate!
     })
-    // wenn de letzte eintrag eine start action ist, dann ist es invalide
+    // If the last action is a start action, then it is invalid.
     if (filteredArray.length > 0) {
       const lastEntry = filteredArray[filteredArray.length - 1] as ILocationTimepoint
 
-      const correspondingEndAction = getEndLocationTimepointForBeginning(lastEntry, locationTimepoints)
+      const correspondingEndAction = getEndLocationTimepointForBeginning(lastEntry, sortedlocationTimepoints)
 
       if (correspondingEndAction) {
         return 'Must be before ' + dateToDateTimeStringHHMM(lastEntry.timepoint) + ' or after ' + dateToDateTimeStringHHMM(correspondingEndAction.timepoint)
@@ -273,7 +282,9 @@ export default {
       return true
     }
 
-    const filteredArray = locationTimepoints.filter((item: ILocationTimepoint) => {
+    const sortedlocationTimepoints = sortedTimepoints(locationTimepoints)
+
+    const filteredArray = sortedlocationTimepoints.filter((item: ILocationTimepoint) => {
       return item.timepoint > startDate
     })
 
@@ -300,7 +311,9 @@ export default {
       return true
     }
 
-    const filteredArray = locationTimepoints.filter((item: ILocationTimepoint) => {
+    const sortedlocationTimepoints = sortedTimepoints(locationTimepoints)
+
+    const filteredArray = sortedlocationTimepoints.filter((item: ILocationTimepoint) => {
       return item.timepoint < endDate
     })
 
