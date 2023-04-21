@@ -53,6 +53,7 @@ import { ElevationDatum } from '@/models/ElevationDatum'
 import { CvContactRole } from '@/models/CvContactRole'
 import { SiteType } from '@/models/SiteType'
 import { SiteUsage } from '@/models/SiteUsage'
+import { Country } from '@/models/Country'
 
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION, ActionTypeApiFilterType } from '@/services/cv/ActionTypeApi'
 import { GlobalProvenance } from '@/models/GlobalProvenance'
@@ -84,7 +85,8 @@ export interface VocabularyState {
   aggregationtypes: AggregationType[],
   actionCategories: ActionCategory[],
   siteUsages: SiteUsage[],
-  siteTypes: SiteType[]
+  siteTypes: SiteType[],
+  countries: Country[],
 }
 
 const state = (): VocabularyState => ({
@@ -107,7 +109,8 @@ const state = (): VocabularyState => ({
   aggregationtypes: [],
   actionCategories: [],
   siteUsages: [],
-  siteTypes: []
+  siteTypes: [],
+  countries: []
 })
 
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
@@ -120,6 +123,7 @@ export type GetManufacturerByUriGetter = (uri: string) => Manufacturer | undefin
 export type PlatformActionTypeItemsGetter = ActionTypeItem[]
 export type DeviceActionTypeItemsGetter = ActionTypeItem[]
 export type ConfigurationActionTypeItemsGetter = ActionTypeItem[]
+export type CountryNamesGetter = string[]
 
 const getters: GetterTree<VocabularyState, RootState> = {
   getPlatformTypeByUri: (state: VocabularyState) => (uri: string): PlatformType | undefined => {
@@ -201,6 +205,14 @@ const getters: GetterTree<VocabularyState, RootState> = {
         }
       })
     ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+  },
+  countryNames: (state: VocabularyState) => {
+    // We want to have germany as the first entry, so that this is the
+    // first one in the select list (as we expect it to be the most common choice).
+    const germany = state.countries.filter(c => c.name === 'Germany')
+    const countriesThatAreNotGermany = state.countries.filter(c => c.name !== 'Germany')
+    const countries = [...germany, ...countriesThatAreNotGermany]
+    return countries.map(c => c.name)
   }
 }
 
@@ -224,6 +236,7 @@ export type LoadAggregationtypesAction = () => Promise<void>
 export type LoadActionCategoriesAction = () => Promise<void>
 export type LoadSiteUsagesAction = () => Promise<void>
 export type LoadSiteTypesAction = () => Promise<void>
+export type LoadCountriesAction = () => Promise<void>
 export type AddDeviceTypeAction = ({ devicetype }: {devicetype: DeviceType}) => Promise<DeviceType>
 export type AddPlatformTypeAction = ({ platformtype }: {platformtype: PlatformType}) => Promise<PlatformType>
 export type AddManufacturerAction = ({ manufacturer }: { manufacturer: Manufacturer}) => Promise<Manufacturer>
@@ -303,6 +316,9 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadSiteTypes ({ commit }: { commit: Commit }): Promise<void> {
     commit('setSiteTypes', await this.$api.siteTypes.findAll())
+  },
+  async loadCountries ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setCountries', await this.$api.countries.findAll())
   },
   async addDevicetype ({ commit, state }: {commit: Commit, state: VocabularyState }, { devicetype }: {devicetype: DeviceType }): Promise<DeviceType> {
     const newDevicetype = await this.$api.deviceTypes.add(devicetype)
@@ -452,6 +468,9 @@ const mutations = {
   },
   setSiteTypes (state: VocabularyState, siteTypes: SiteType[]) {
     state.siteTypes = siteTypes
+  },
+  setCountries (state: VocabularyState, countries: Country[]) {
+    state.countries = countries
   }
 }
 

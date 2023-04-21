@@ -51,6 +51,7 @@ permissions and limitations under the Licence.
       v-model="siteCopy"
       :site-usages="siteUsages"
       :site-types="siteTypes"
+      :country-names="countryNames"
     />
     <v-card-actions>
       <v-spacer />
@@ -76,7 +77,7 @@ import { Component, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
@@ -90,7 +91,7 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
 import { hasSelfIntersection } from '@/utils/mapHelpers'
-import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState } from '@/store/vocabulary'
+import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -101,12 +102,13 @@ import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState } from '@/st
   },
   middleware: ['auth'],
   computed: {
+    ...mapGetters('vocabulary', ['countryNames']),
     ...mapState('sites', ['site']),
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
   },
   methods: {
     ...mapActions('sites', ['saveSite', 'loadSite']),
-    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries'])
   }
 })
 export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
@@ -124,6 +126,8 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   loadSiteUsages!: LoadSiteUsagesAction
   siteTypes!: VocabularyState['siteTypes']
   loadSiteTypes!: LoadSiteTypesAction
+  countryNames!: CountryNamesGetter
+  loadCountries!: LoadCountriesAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -151,7 +155,8 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
     try {
       await Promise.all([
         this.loadSiteUsages(),
-        this.loadSiteTypes()
+        this.loadSiteTypes(),
+        this.loadCountries()
       ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load site types or usages')

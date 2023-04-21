@@ -80,6 +80,7 @@ import { GlobalProvenanceApi } from '@/services/cv/GlobalProvenanceApi'
 import { AggregationTypeApi } from '@/services/cv/AggregationTypeApi'
 import { ActionCategoryApi } from '@/services/cv/ActionCategoryApi'
 import { SiteUsageApi } from '@/services/cv/SiteUsageApi'
+import { CountryApi } from '@/services/cv/CountryApi'
 
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
@@ -155,6 +156,7 @@ export class Api {
   private readonly _autocompleteApi: AutocompleteApi
   private readonly _siteUsageApi: SiteUsageApi
   private readonly _siteTypeApi: SiteTypeApi
+  private readonly _countryApi: CountryApi
 
   private readonly _elevationDatumApi: ElevationDatumApi
   private readonly _epsgCodeApi: EpsgCodeApi
@@ -470,6 +472,10 @@ export class Api {
       createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/sitetypes/'
     )
+    this._countryApi = new CountryApi(
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
+      '/countries/'
+    )
 
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
@@ -651,6 +657,10 @@ export class Api {
 
   get siteTypes (): SiteTypeApi {
     return this._siteTypeApi
+  }
+
+  get countries (): CountryApi {
+    return this._countryApi
   }
 
   get userInfoApi (): UserInfoApi {

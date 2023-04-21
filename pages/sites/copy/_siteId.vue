@@ -75,6 +75,7 @@ permissions and limitations under the Licence.
         v-model="siteToCopy"
         :site-usages="siteUsages"
         :site-types="siteTypes"
+        :country-names="countryNames"
       />
       <v-alert
         border="left"
@@ -115,7 +116,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
 import { LoadSiteAction, CopySiteAction, SitesState } from '@/store/sites'
-import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState } from '@/store/vocabulary'
+import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 import { Site } from '@/models/Site'
 
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
@@ -132,6 +133,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
   middleware: ['auth'],
   computed: {
     ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
+    ...mapGetters('vocabulary', ['countryNames']),
     ...mapState('sites', ['site']),
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
 
@@ -139,7 +141,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
   methods: {
     ...mapActions('sites', ['copySite', 'loadSite', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs']),
-    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries'])
   }
 })
 // @ts-ignore
@@ -163,6 +165,8 @@ export default class SiteCopyPage extends Vue {
   loadSiteUsages!: LoadSiteUsagesAction
   siteTypes!: VocabularyState['siteTypes']
   loadSiteTypes!: LoadSiteTypesAction
+  countryNames!: CountryNamesGetter
+  loadCountries!: LoadCountriesAction
 
   async created () {
     this.initializeAppBar()
@@ -175,7 +179,8 @@ export default class SiteCopyPage extends Vue {
       try {
         await Promise.all([
           this.loadSiteUsages(),
-          this.loadSiteTypes()
+          this.loadSiteTypes(),
+          this.loadCountries()
         ])
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to load site types or usages')
