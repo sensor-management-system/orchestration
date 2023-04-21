@@ -45,20 +45,25 @@ const canNotStartAnActionAfterAnActiveAction = Validator.canNotStartAnActionAfte
 describe('#isValidEmailAddress()', () => {
   it('should return true with an valid email address', () => {
     const email = 'john.doe@gfz-potsdam.de'
-    expect(isValidEmailAddress(email)).toBeTruthy()
+    // Do not test with .toBeTruthy, as it passes when we get a non empty string back.
+    // Those non empty strings represent error messages, so we don't want to see them
+    // as passing.
+    // So we better make a test with equality check here.
+    // Note: This also effects most of the validation tests here.
+    expect(isValidEmailAddress(email)).toEqual(true)
   })
   it('should return true with some more interesting email addresses', () => {
     // bob@⚔️.gg
     const email1 = 'xn--bob@-y13b.gg'
-    expect(isValidEmailAddress(email1)).toBeTruthy()
+    expect(isValidEmailAddress(email1)).toEqual(true)
 
     // max@müller.de
     const email2 = 'xn--max@mller-u9a.de'
-    expect(isValidEmailAddress(email2)).toBeTruthy()
+    expect(isValidEmailAddress(email2)).toEqual(true)
   })
   it('should return true with an valid email address with subdomains', () => {
     const email = 'john.doe@mail.gfz-potsdam.de'
-    expect(isValidEmailAddress(email)).toBeTruthy()
+    expect(isValidEmailAddress(email)).toEqual(true)
   })
   it('should return false with invalid TLD', () => {
     const email1 = 'john.doe@gfz-potsdam'
@@ -88,7 +93,7 @@ describe('#startDateMustBeAfterPreviousAction', () => {
     const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
     const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
     const locationTimepoints: ILocationTimepoint[] = []
-    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toEqual(true)
   })
   it('should return true if the new location dates are before the existing ones', () => {
     const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
@@ -110,7 +115,10 @@ describe('#startDateMustBeAfterPreviousAction', () => {
         text: 'not important for test'
       }
     ]
-    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toEqual(true)
+    // And it should also work if we have the reversed order.
+    locationTimepoints.reverse()
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toEqual(true)
   })
   it('should return true if the new location dates are after the existing ones', () => {
     const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
@@ -132,7 +140,10 @@ describe('#startDateMustBeAfterPreviousAction', () => {
         text: 'not important for test'
       }
     ]
-    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toEqual(true)
+    // And, again, also in reversed order
+    locationTimepoints.reverse()
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toEqual(true)
   })
 
   it('should throw a validation error if the startdate is before the previous action', () => {
@@ -155,6 +166,9 @@ describe('#startDateMustBeAfterPreviousAction', () => {
     ]
     const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
     const endDate = DateTime.fromISO('1990-09-20', { zone: 'UTC' })
+    expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBe('Start date must be after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm'))
+    // And same if reversed order.
+    locationTimepoints.reverse()
     expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBe('Start date must be after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm'))
   })
 })
@@ -185,7 +199,9 @@ describe('#endDateMustBeBeforeNextAction', () => {
         text: 'not important for test'
       }
     ]
-    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toEqual(true)
+    locationTimepoints.reverse()
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toEqual(true)
   })
   it('should return true if the new location dates are after the existing ones', () => {
     const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
@@ -207,7 +223,9 @@ describe('#endDateMustBeBeforeNextAction', () => {
         text: 'not important for test'
       }
     ]
-    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBeTruthy()
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toEqual(true)
+    locationTimepoints.reverse()
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toEqual(true)
   })
 
   it('should throw a validation error if the enddate is after the next action', () => {
@@ -231,6 +249,8 @@ describe('#endDateMustBeBeforeNextAction', () => {
         text: 'not important for test'
       }
     ]
+    expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBe('End date must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' (next action)')
+    locationTimepoints.reverse()
     expect(endDateMustBeBeforeNextAction(checkDate, endDate, locationTimepoints)).toBe('End date must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' (next action)')
   })
 })
@@ -264,13 +284,33 @@ describe('#canNotIntersectWithExistingInterval', () => {
     const startDate = null
     const locationTimepoints: ILocationTimepoint[] = []
 
-    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBeTruthy()
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toEqual(true)
   })
   it('should return true if no locations exists', () => {
     const startDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
     const locationTimepoints: ILocationTimepoint[] = []
 
-    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBeTruthy()
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toEqual(true)
+  })
+  it('should return true if the start date is after the last end date', () => {
+    const startDate = DateTime.utc(2023, 4, 19, 9, 0, 0)
+    const locationTimepoints = [
+      {
+        type: LocationTypes.staticStart,
+        timepoint: DateTime.utc(2023, 4, 19, 7, 0, 0),
+        id: '1',
+        text: 'The location start'
+      },
+      {
+        type: LocationTypes.staticEnd,
+        timepoint: DateTime.utc(2023, 4, 19, 8, 0, 0),
+        id: '1',
+        text: 'The location end'
+      }
+    ]
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toEqual(true)
+    locationTimepoints.reverse()
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toEqual(true)
   })
   it('should return a validation error when the startDate is intersecting with an existing location action', () => {
     const startDate = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
@@ -293,6 +333,8 @@ describe('#canNotIntersectWithExistingInterval', () => {
     ]
 
     const expectedValidationMessage = 'Must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' or after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)
+    locationTimepoints.reverse()
     expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)
   })
 
@@ -318,6 +360,8 @@ describe('#canNotIntersectWithExistingInterval', () => {
 
     const expectedValidationMessage = 'Must be after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
     expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)
+    locationTimepoints.reverse()
+    expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)
   })
 })
 
@@ -334,13 +378,13 @@ describe('#canNotStartAnActionAfterAnActiveAction', () => {
         text: 'not important for test'
       }
     ]
-    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBeTruthy()
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toEqual(true)
   })
 
   it('should return true if no location actions exist', () => {
     const dateToCheck = DateTime.fromISO('1990-09-21', { zone: 'UTC' })
     const locationTimepoints: ILocationTimepoint[] = []
-    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBeTruthy()
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toEqual(true)
   })
 
   it('should return true if no active action exist', () => {
@@ -363,7 +407,9 @@ describe('#canNotStartAnActionAfterAnActiveAction', () => {
         text: 'not important for test'
       }
     ]
-    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toBeTruthy()
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toEqual(true)
+    locationTimepoints.reverse()
+    expect(canNotStartAnActionAfterAnActiveAction(dateToCheck, locationTimepoints)).toEqual(true)
   })
   it('should return validation error if the date is after an active action', () => {
     const dateToCheck = DateTime.fromISO('1990-09-23', { zone: 'UTC' })
