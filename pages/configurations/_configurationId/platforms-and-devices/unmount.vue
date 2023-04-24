@@ -87,6 +87,7 @@ permissions and limitations under the Licence.
               v-model="selectedNode"
               disable-per-node
               :tree="tree"
+              show-detailed-name
               @input="onNodeSelect"
             />
           </v-card-text>

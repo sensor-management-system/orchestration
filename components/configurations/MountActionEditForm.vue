@@ -46,6 +46,7 @@ permissions and limitations under the Licence.
             :value="selectedNode"
             :tree="tree"
             disable-per-node
+            show-detailed-name
             :activatable="false"
             @input="$emit('select', $event)"
           />

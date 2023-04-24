@@ -90,6 +90,7 @@ permissions and limitations under the Licence.
               ref="treeView"
               v-model="selectedNode"
               :tree="tree"
+              show-detailed-name
             />
           </v-card-text>
         </v-card>

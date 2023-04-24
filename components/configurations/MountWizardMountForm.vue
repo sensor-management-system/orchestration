@@ -33,8 +33,16 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-card v-for="(entityMountInformation, i) in value" :key="`${prefix}-${i}`" class="mb-6">
-      <v-card-title>Mounting info for {{ entityMountInformation.entity.shortName }}</v-card-title>
-      <v-card-subtitle>{{ dateRangeString }}</v-card-subtitle>
+      <v-card-text>
+        <div>Mounting info</div>
+        <div class="text-h6 text--primary">
+          <extended-item-name
+            :value="entityMountInformation.entity"
+            :shorten="false"
+          />
+        </div>
+        <div>{{ dateRangeString }}</div>
+      </v-card-text>
       <mount-action-details-form
         ref="mountActionDetailsForm"
         v-model="entityMountInformation.mountInfo"
@@ -65,10 +73,12 @@ import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { IOffsets, MountActionInformationDTO } from '@/utils/configurationInterfaces'
 
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
+import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
 
 @Component({
   components: {
-    MountActionDetailsForm
+    MountActionDetailsForm,
+    ExtendedItemName
   },
   filters: { dateToDateTimeStringHHMM },
   computed: {
