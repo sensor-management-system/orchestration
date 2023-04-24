@@ -47,10 +47,18 @@ permissions and limitations under the Licence.
     >
       <template #label="{item}">
         <div v-if="item.isDevice()">
-          Device - {{ item.unpack().device.shortName | shortenMiddle }}
+          Device -&nbsp;
+          <extended-item-name
+            :value="item.unpack().device"
+            :extended="showDetailedNames || (showDetailedName && item === value)"
+          />
         </div>
         <div v-if="item.isPlatform()">
-          Platform - {{ item.unpack().platform.shortName | shortenMiddle }}
+          Platform -&nbsp;
+          <extended-item-name
+            :value="item.unpack().platform"
+            :extended="showDetailedNames || (showDetailedName && item === value)"
+          />
         </div>
         <div v-if="item.isConfiguration()">
           Configuration - {{ getConfigurationLabel(item.unpack().configuration) }}
@@ -83,18 +91,16 @@ import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 import { dateToString } from '@/utils/dateHelper'
-import { shortenMiddle } from '@/utils/stringHelpers'
+
+import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
 
 /**
  * A class component to display platforms and devices in a tree
  * @extends Vue
  */
 @Component({
-  filters: {
-    // Normally, this filter is already registered via the filters.ts plugin.
-    // However, in order to run the tests without further warning, we add
-    // it here explicitly.
-    shortenMiddle
+  components: {
+    ExtendedItemName
   }
 })
 export default class ConfigurationsTreeView extends Vue {
@@ -136,6 +142,26 @@ export default class ConfigurationsTreeView extends Vue {
     type: Boolean
   })
   readonly disablePerNode!: boolean
+
+  /**
+   * show detailed name for the selected node
+   */
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  readonly showDetailedName!: boolean
+
+  /**
+   * show detailed names for all nodes
+   */
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  readonly showDetailedNames!: boolean
 
   created (): void {
     this.initializeOpenNodes()

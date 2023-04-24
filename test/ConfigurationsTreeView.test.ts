@@ -50,6 +50,8 @@ import { PlatformNode } from '@/viewmodels/PlatformNode'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 
+import { shortenMiddle } from '@/utils/stringHelpers'
+
 Vue.use(Vuetify)
 
 const contact = new Contact()
@@ -58,6 +60,8 @@ const date = DateTime.utc(2020, 2, 3, 0, 0, 0, 0)
 describe('ConfigurationsTreeView', () => {
   const createWrapper = (tree: ConfigurationsTree, value: ConfigurationsTreeNode | null = null) => {
     const localVue = createLocalVue()
+    // register the used filter explicitly
+    localVue.filter('shortenMiddle', shortenMiddle)
     const vuetify = new Vuetify()
 
     return mount(ConfigurationsTreeView, {

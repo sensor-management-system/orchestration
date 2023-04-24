@@ -65,6 +65,7 @@ permissions and limitations under the Licence.
         <configurations-tree-view
           ref="treeViewStepper"
           v-model="syncedSelectedNode"
+          show-detailed-names
           :tree="tree"
           @input="checkEndDateOfDatePicker"
         />

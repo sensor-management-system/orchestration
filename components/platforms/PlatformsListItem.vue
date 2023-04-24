@@ -74,40 +74,9 @@ permissions and limitations under the Licence.
         </template>
         <span>Archived</span>
       </v-tooltip>
-      <span>  {{ platform.shortName }}</span>
-      <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
-        <template #activator="{ on, attrs }">
-          <span
-            v-if="platform.manufacturerName !== ''"
-            v-bind="attrs"
-            class="text--disabled"
-            v-on="on"
-          >- {{ platform.manufacturerName }}</span>
-        </template>
-        <span>Manufacturer</span>
-      </v-tooltip>
-      <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
-        <template #activator="{ on, attrs }">
-          <span
-            v-if="platform.model !== ''"
-            v-bind="attrs"
-            class="text--disabled"
-            v-on="on"
-          >- {{ platform.model }}</span>
-        </template>
-        <span>Model number</span>
-      </v-tooltip>
-      <v-tooltip bottom>
-        <template #activator="{ on, attrs }">
-          <span
-            v-if="platform.serialNumber !== ''"
-            v-bind="attrs"
-            class="text--disabled"
-            v-on="on"
-          >- {{ platform.serialNumber }}</span>
-        </template>
-        <span>Serial number</span>
-      </v-tooltip>
+      <extended-item-name
+        :value="platform"
+      />
     </template>
     <template #expandable>
       <v-row
@@ -250,13 +219,15 @@ import StatusChip from '@/components/shared/StatusChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
 
 @Component({
   components: {
     StatusChip,
     PermissionGroupChips,
     VisibilityChip,
-    BaseExpandableListItem
+    BaseExpandableListItem,
+    ExtendedItemName
   },
   computed: mapGetters('vocabulary', ['getPlatformTypeByUri', 'getEquipmentstatusByUri'])
 })

@@ -48,7 +48,9 @@ permissions and limitations under the Licence.
             <template #default="{ active }">
               <v-list-item-content>
                 <v-list-item-title>
-                  {{ item.shortName }} ({{ item.serialNumber ? item.serialNumber : 'no serial number' }})
+                  <extended-item-name
+                    :value="item"
+                  />
                 </v-list-item-title>
               </v-list-item-content>
 
@@ -90,7 +92,13 @@ import { Device } from '@/models/Device'
 import { dateToString } from '@/utils/dateHelper'
 import { Configuration } from '@/models/Configuration'
 
-@Component
+import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
+
+@Component({
+  components: {
+    ExtendedItemName
+  }
+})
 export default class BaseMountList extends Vue {
   @Prop({
     required: true,

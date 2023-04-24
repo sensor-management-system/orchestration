@@ -74,40 +74,9 @@ permissions and limitations under the Licence.
         </template>
         <span>Archived</span>
       </v-tooltip>
-      <span>{{ device.shortName }}</span>
-      <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
-        <template #activator="{ on, attrs }">
-          <span
-            v-if="device.manufacturerName !== ''"
-            v-bind="attrs"
-            class="text--disabled"
-            v-on="on"
-          >- {{ device.manufacturerName }}</span>
-        </template>
-        <span>Manufacturer</span>
-      </v-tooltip>
-      <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
-        <template #activator="{ on, attrs }">
-          <span
-            v-if="device.model !== ''"
-            v-bind="attrs"
-            class="text--disabled"
-            v-on="on"
-          >- {{ device.model }}</span>
-        </template>
-        <span>Model number</span>
-      </v-tooltip>
-      <v-tooltip bottom>
-        <template #activator="{ on, attrs }">
-          <span
-            v-if="device.serialNumber !== ''"
-            v-bind="attrs"
-            class="text--disabled"
-            v-on="on"
-          >- {{ device.serialNumber }}</span>
-        </template>
-        <span>Serial number</span>
-      </v-tooltip>
+      <extended-item-name
+        :value="device"
+      />
     </template>
     <template #expandable>
       <v-row
@@ -248,13 +217,15 @@ import StatusChip from '@/components/shared/StatusChip.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
 
 @Component({
   components: {
     StatusChip,
     VisibilityChip,
     PermissionGroupChips,
-    BaseExpandableListItem
+    BaseExpandableListItem,
+    ExtendedItemName
   },
   computed: mapGetters('vocabulary', ['getDeviceTypeByUri', 'getEquipmentstatusByUri'])
 })

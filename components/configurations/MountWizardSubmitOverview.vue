@@ -41,7 +41,9 @@ permissions and limitations under the Licence.
             <tr>
               <td>Selected parent platform</td>
               <td v-if="selectedNode && selectedNode.isPlatform()">
-                {{ selectedNode.unpack().platform.shortName }}
+                <extended-item-name
+                  :value="selectedNode.unpack().platform"
+                />
               </td>
               <td v-if="selectedNode && selectedNode.isConfiguration()">
                 {{ selectedNode.unpack().label }} (Configuration root)
@@ -108,7 +110,11 @@ permissions and limitations under the Licence.
                 v-for="(item, index) in devicesToMount"
                 :key="'device-'+index"
               >
-                <td>{{ item.entity.shortName }}</td>
+                <td>
+                  <extended-item-name
+                    :value="item.entity"
+                  />
+                </td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
                 <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
                 <td>
@@ -133,7 +139,11 @@ permissions and limitations under the Licence.
                 v-for="(item, index) in platformsToMount"
                 :key="'platform-'+index"
               >
-                <td>{{ item.entity.shortName }}</td>
+                <td>
+                  <extended-item-name
+                    :value="item.entity"
+                  />
+                </td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
                 <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
                 <td>
@@ -168,8 +178,13 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { IOffsets } from '@/utils/configurationInterfaces'
 
+import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
+
 @Component({
-  filters: { dateToDateTimeStringHHMM }
+  filters: { dateToDateTimeStringHHMM },
+  components: {
+    ExtendedItemName
+  }
 })
 export default class MountWizardSubmitOverview extends Vue {
   @PropSync('devicesToMount', {
