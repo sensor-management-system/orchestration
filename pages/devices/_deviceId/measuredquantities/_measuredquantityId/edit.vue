@@ -71,10 +71,11 @@ permissions and limitations under the Licence.
     <v-subheader>Existing measured quantities</v-subheader>
     <BaseList
       v-if="deviceMeasuredQuantity !== null"
-      :list-items="quantitiesExceptCurrent"
+      :list-items="deviceMeasuredQuantities"
     >
       <template #list-item="{item,index}">
         <DevicesMeasuredQuantitiesListItem
+          v-if="item.id !== deviceMeasuredQuantity.id"
           :measured-quantity="item"
           :index="index"
           :device-id="deviceId"
@@ -120,7 +121,8 @@ import BaseList from '@/components/shared/BaseList.vue'
     ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
     ...mapState('devices', ['deviceMeasuredQuantity', 'deviceMeasuredQuantities'])
   },
-  methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity'])
+  methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity']),
+  scrollToTop: true
 })
 export default class DevicePropertyEditPage extends mixins(CheckEditAccess) {
   private isSaving = false
@@ -186,12 +188,6 @@ export default class DevicePropertyEditPage extends mixins(CheckEditAccess) {
 
   get isInProgress (): boolean {
     return this.isLoading || this.isSaving
-  }
-
-  get quantitiesExceptCurrent () {
-    return this.deviceMeasuredQuantities.filter((measuredQuantity) => {
-      return measuredQuantity.id !== this.deviceMeasuredQuantity!.id
-    })
   }
 
   async save () {
