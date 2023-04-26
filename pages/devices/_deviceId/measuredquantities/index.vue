@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
             #actions
           >
             <v-btn
-              :to="'/devices/'+deviceId+'/measuredquantities/'+item.id+'/edit'"
+              :to="'/devices/' + deviceId + '/measuredquantities/' + item.id + '/edit'"
               color="primary"
               text
               small
@@ -82,6 +82,10 @@ permissions and limitations under the Licence.
             v-if="editable"
             #dot-menu-items
           >
+            <DotMenuActionCopy
+              :readonly="!editable"
+              :path="'/devices/' + deviceId + '/measuredquantities/' + item.id + '/copy'"
+            />
             <DotMenuActionDelete
               :readonly="!$auth.loggedIn"
               @click="initDeleteDialog(item)"
@@ -130,10 +134,12 @@ import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 
 @Component({
   components: {
     DotMenuActionDelete,
+    DotMenuActionCopy,
     ProgressIndicator,
     BaseList,
     HintCard,
@@ -146,7 +152,8 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
   },
   methods: {
     ...mapActions('devices', ['deleteDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities'])
-  }
+  },
+  scrollToTop: true
 })
 export default class DevicePropertyShowPage extends Vue {
   @InjectReactive()

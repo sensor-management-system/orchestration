@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,8 +31,8 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <ProgressIndicator
-      v-model="isSaving"
-      dark
+      v-model="isInProgress"
+      :dark="isSaving"
     />
     <v-card
       flat
@@ -40,14 +40,15 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
-          save-btn-text="Add"
+          v-if="editable"
+          save-btn-text="Copy"
           :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
         />
       </v-card-actions>
       <v-card-text>
         <DevicePropertyForm
-          ref="propertyForm"
+          ref="propertyEditForm"
           v-model="valueCopy"
           :readonly="false"
           :compartments="compartments"
@@ -60,7 +61,8 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
-          save-btn-text="Add"
+          v-if="editable"
+          save-btn-text="Copy"
           :to="'/devices/' + deviceId + '/measuredquantities'"
           @save="save"
         />
@@ -68,6 +70,7 @@ permissions and limitations under the Licence.
     </v-card>
     <v-subheader>Existing measured quantities</v-subheader>
     <BaseList
+      v-if="deviceMeasuredQuantity !== null"
       :list-items="deviceMeasuredQuantities"
     >
       <template #list-item="{item,index}">
@@ -87,44 +90,43 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { AddDeviceMeasuredQuantityAction, DevicesState, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
 import {
-  LoadCompartmentsAction,
-  LoadSamplingMediaAction,
-  LoadPropertiesAction,
-  LoadUnitsAction,
-  LoadMeasuredQuantityUnitsAction,
-  VocabularyState
-} from '@/store/vocabulary'
+  DevicesState,
+  LoadDeviceMeasuredQuantityAction,
+  LoadDeviceMeasuredQuantitiesAction,
+  AddDeviceMeasuredQuantityAction
+} from '@/store/devices'
+
+import { VocabularyState } from '@/store/vocabulary'
 
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import BaseList from '@/components/shared/BaseList.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import BaseList from '@/components/shared/BaseList.vue'
 
 @Component({
+  components: { BaseList, DotMenuActionDelete, DevicesMeasuredQuantitiesListItem, SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
   middleware: ['auth'],
-  components: { DevicesMeasuredQuantitiesListItem, BaseList, ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
   computed: {
     ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
-    ...mapState('devices', ['deviceMeasuredQuantities'])
+    ...mapState('devices', ['deviceMeasuredQuantity', 'deviceMeasuredQuantities'])
   },
-  methods: {
-    ...mapActions('devices', ['addDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities']),
-    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits'])
-  },
+  methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'addDeviceMeasuredQuantity']),
   scrollToTop: true
 })
-export default class DevicePropertyAddPage extends mixins(CheckEditAccess) {
+export default class DevicePropertyCopyPage extends mixins(CheckEditAccess) {
   private isSaving = false
+  private isLoading = false
+
   private valueCopy: DeviceProperty = new DeviceProperty()
 
   // vuex definition for typescript check
@@ -132,13 +134,10 @@ export default class DevicePropertyAddPage extends mixins(CheckEditAccess) {
   samplingMedia!: VocabularyState['samplingMedia']
   properties!: VocabularyState['properties']
   units!: VocabularyState['units']
-  measuredQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  deviceMeasuredQuantity!: DevicesState['deviceMeasuredQuantity']
   deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
-  loadCompartments!: LoadCompartmentsAction
-  loadSamplingMedia!: LoadSamplingMediaAction
-  loadProperties!: LoadPropertiesAction
-  loadUnits!: LoadUnitsAction
-  loadMeasuredQuantityUnits!: LoadMeasuredQuantityUnitsAction
+  loadDeviceMeasuredQuantity!: LoadDeviceMeasuredQuantityAction
   addDeviceMeasuredQuantity!: AddDeviceMeasuredQuantityAction
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
 
@@ -164,16 +163,37 @@ export default class DevicePropertyAddPage extends mixins(CheckEditAccess) {
     return 'You\'re not allowed to edit this device.'
   }
 
+  async created () {
+    try {
+      this.isLoading = true
+      await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
+      if (this.deviceMeasuredQuantity) {
+        this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
+        // as we want to save a new instance of the measured quantity, we set
+        // the id to null
+        this.valueCopy.id = null
+        this.valueCopy.label = 'Copy of ' + this.valueCopy.label
+      }
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load measured quantity')
+    } finally {
+      this.isLoading = false
+    }
+  }
+
   get deviceId (): string {
     return this.$route.params.deviceId
   }
 
-  async save (): Promise<void> {
-    if (!(this.$refs.propertyForm as Vue & { validateForm: () => boolean }).validateForm()) {
-      this.$store.commit('snackbar/setError', 'Please correct your input')
-      return
-    }
+  get measuredquantityId (): string {
+    return this.$route.params.measuredquantityId
+  }
 
+  get isInProgress (): boolean {
+    return this.isLoading || this.isSaving
+  }
+
+  async save () {
     try {
       this.isSaving = true
       await this.addDeviceMeasuredQuantity({
@@ -181,7 +201,7 @@ export default class DevicePropertyAddPage extends mixins(CheckEditAccess) {
         deviceMeasuredQuantity: this.valueCopy
       })
       this.loadDeviceMeasuredQuantities(this.deviceId)
-      this.$store.commit('snackbar/setSuccess', 'New measured quantity added')
+      this.$store.commit('snackbar/setSuccess', 'Measured quantity copied')
       this.$router.push('/devices/' + this.deviceId + '/measuredquantities')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
@@ -191,7 +211,3 @@ export default class DevicePropertyAddPage extends mixins(CheckEditAccess) {
   }
 }
 </script>
-
-<style scoped>
-
-</style>
