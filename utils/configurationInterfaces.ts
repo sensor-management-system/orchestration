@@ -80,7 +80,7 @@ export interface IDynamicLocationInfo {
   elevationDatumName: string
 }
 
-export interface IMountTimelineAction {
+export interface IMountTimelineAction <T> {
   key: string
   color: string
   icon: string
@@ -90,6 +90,7 @@ export interface IMountTimelineAction {
   mountInfo: IMountInfo | null
   description: string
   isUnmountAction: boolean
+  mountAction: T
 }
 
 export interface IStaticLocationTimelineAction {
@@ -126,17 +127,17 @@ export interface IGenericTimelineAction {
   type: string
 }
 
-export type ITimelineAction = IMountTimelineAction | IStaticLocationTimelineAction | IDynamicLocationTimelineAction | IGenericTimelineAction
+export type ITimelineAction = IMountTimelineAction<PlatformMountAction> | IMountTimelineAction<DeviceMountAction>| IStaticLocationTimelineAction | IDynamicLocationTimelineAction | IGenericTimelineAction
 
-export class PlatformMountTimelineAction implements IMountTimelineAction {
-  private mountAction: PlatformMountAction
+export class PlatformMountTimelineAction implements IMountTimelineAction<PlatformMountAction> {
+  private _mountAction: PlatformMountAction
 
   constructor (mountAction: PlatformMountAction) {
-    this.mountAction = mountAction
+    this._mountAction = mountAction
   }
 
   get key (): string {
-    return 'Platform-mount-action-' + this.mountAction.id
+    return 'Platform-mount-action-' + this._mountAction.id
   }
 
   get color (): string {
@@ -148,44 +149,48 @@ export class PlatformMountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime {
-    return this.mountAction.beginDate
+    return this._mountAction.beginDate
   }
 
   get title (): string {
-    return this.mountAction.platform.shortName + ' mounted'
+    return this._mountAction.platform.shortName + ' mounted'
   }
 
   get contact (): IContact {
-    return this.mountAction.beginContact
+    return this._mountAction.beginContact
   }
 
   get mountInfo (): IMountInfo {
     return {
-      parentPlatform: this.mountAction.parentPlatform,
-      offsetX: this.mountAction.offsetX,
-      offsetY: this.mountAction.offsetY,
-      offsetZ: this.mountAction.offsetZ
+      parentPlatform: this._mountAction.parentPlatform,
+      offsetX: this._mountAction.offsetX,
+      offsetY: this._mountAction.offsetY,
+      offsetZ: this._mountAction.offsetZ
     }
   }
 
   get description (): string {
-    return this.mountAction.beginDescription
+    return this._mountAction.beginDescription
   }
 
   get isUnmountAction (): boolean {
     return false
   }
+
+  get mountAction (): PlatformMountAction {
+    return this._mountAction
+  }
 }
 
-export class DeviceMountTimelineAction implements IMountTimelineAction {
-  private mountAction: DeviceMountAction
+export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMountAction> {
+  private _mountAction: DeviceMountAction
 
   constructor (mountAction: DeviceMountAction) {
-    this.mountAction = mountAction
+    this._mountAction = mountAction
   }
 
   get key (): string {
-    return 'Device-mount-action-' + this.mountAction.id
+    return 'Device-mount-action-' + this._mountAction.id
   }
 
   get color (): string {
@@ -197,44 +202,48 @@ export class DeviceMountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime {
-    return this.mountAction.beginDate
+    return this._mountAction.beginDate
   }
 
   get title (): string {
-    return this.mountAction.device.shortName + ' mounted'
+    return this._mountAction.device.shortName + ' mounted'
   }
 
   get contact (): IContact {
-    return this.mountAction.beginContact
+    return this._mountAction.beginContact
   }
 
   get mountInfo (): IMountInfo {
     return {
-      parentPlatform: this.mountAction.parentPlatform,
-      offsetX: this.mountAction.offsetX,
-      offsetY: this.mountAction.offsetY,
-      offsetZ: this.mountAction.offsetZ
+      parentPlatform: this._mountAction.parentPlatform,
+      offsetX: this._mountAction.offsetX,
+      offsetY: this._mountAction.offsetY,
+      offsetZ: this._mountAction.offsetZ
     }
   }
 
   get description (): string {
-    return this.mountAction.beginDescription
+    return this._mountAction.beginDescription
   }
 
   get isUnmountAction (): boolean {
     return false
   }
+
+  get mountAction (): DeviceMountAction {
+    return this._mountAction
+  }
 }
 
-export class PlatformUnmountTimelineAction implements IMountTimelineAction {
-  private mountAction: PlatformMountAction
+export class PlatformUnmountTimelineAction implements IMountTimelineAction<PlatformMountAction> {
+  private _mountAction: PlatformMountAction
 
   constructor (mountAction: PlatformMountAction) {
-    this.mountAction = mountAction
+    this._mountAction = mountAction
   }
 
   get key (): string {
-    return 'Platform-unmount-action-' + this.mountAction.id
+    return 'Platform-unmount-action-' + this._mountAction.id
   }
 
   get color (): string {
@@ -246,15 +255,15 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime | null {
-    return this.mountAction.endDate
+    return this._mountAction.endDate
   }
 
   get title (): string {
-    return this.mountAction.platform.shortName + ' unmounted'
+    return this._mountAction.platform.shortName + ' unmounted'
   }
 
   get contact (): IContact | null {
-    return this.mountAction.endContact
+    return this._mountAction.endContact
   }
 
   get mountInfo (): null {
@@ -262,23 +271,27 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.mountAction.endDescription || ''
+    return this._mountAction.endDescription || ''
   }
 
   get isUnmountAction (): boolean {
     return true
   }
+
+  get mountAction (): PlatformMountAction {
+    return this._mountAction
+  }
 }
 
-export class DeviceUnmountTimelineAction implements IMountTimelineAction {
-  private mountAction: DeviceMountAction
+export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceMountAction> {
+  private _mountAction: DeviceMountAction
 
   constructor (mountAction: DeviceMountAction) {
-    this.mountAction = mountAction
+    this._mountAction = mountAction
   }
 
   get key (): string {
-    return 'Device-unmount-action-' + this.mountAction.id
+    return 'Device-unmount-action-' + this._mountAction.id
   }
 
   get color (): string {
@@ -290,15 +303,15 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get date (): DateTime | null {
-    return this.mountAction.endDate
+    return this._mountAction.endDate
   }
 
   get title (): string {
-    return this.mountAction.device.shortName + ' unmounted'
+    return this._mountAction.device.shortName + ' unmounted'
   }
 
   get contact (): IContact | null {
-    return this.mountAction.endContact
+    return this._mountAction.endContact
   }
 
   get mountInfo (): null {
@@ -306,11 +319,15 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction {
   }
 
   get description (): string {
-    return this.mountAction.endDescription || ''
+    return this._mountAction.endDescription || ''
   }
 
   get isUnmountAction (): boolean {
     return true
+  }
+
+  get mountAction (): DeviceMountAction {
+    return this._mountAction
   }
 }
 

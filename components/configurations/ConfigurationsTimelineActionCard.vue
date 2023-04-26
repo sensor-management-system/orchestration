@@ -62,15 +62,33 @@ permissions and limitations under the Licence.
           @click="initDeleteDialogGenericAction(action.genericAction)"
         />
       </template>
-      <template v-if="action.genericAction" #actions>
+      <template #actions>
         <v-btn
-          v-if="editable"
+          v-if="action.genericAction && editable"
           :to="'/configurations/' + configurationId + '/actions/generic-configuration-actions/' + action.genericAction.id + '/edit'"
           color="primary"
           text
           @click.stop.prevent
         >
           Edit
+        </v-btn>
+        <v-btn
+          v-if="action.mountAction && action.mountAction.platform"
+          :to="'/platforms/' + action.mountAction.platform.id"
+          color="primary"
+          text
+          @click.stop.prevent
+        >
+          View
+        </v-btn>
+        <v-btn
+          v-if="action.mountAction && action.mountAction.device"
+          :to="'/devices/' + action.mountAction.device.id"
+          color="primary"
+          text
+          @click.stop.prevent
+        >
+          View
         </v-btn>
       </template>
       <template #expandable>
