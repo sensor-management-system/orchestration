@@ -60,6 +60,14 @@ permissions and limitations under the Licence.
         >
           <slot name="actions" />
           <v-btn
+            :to="'/configurations/' + value.configuration.id"
+            color="primary"
+            text
+            @click.stop.prevent
+          >
+            View
+          </v-btn>
+          <v-btn
             icon
             @click.stop.prevent="show = !show"
           >
