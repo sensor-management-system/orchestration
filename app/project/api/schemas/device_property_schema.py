@@ -105,6 +105,8 @@ class DevicePropertySchema(Schema):
     resolution_unit_name = fields.String(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    aggregation_type_uri = fields.String(allow_none=True)
+    aggregation_type_name = fields.String(allow_none=True)
 
     device = Relationship(
         related_view="api.device_detail",

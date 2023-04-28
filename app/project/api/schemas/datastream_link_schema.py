@@ -36,6 +36,9 @@ class DatastreamLinkSchema(Schema):
     datastream_name = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    license_uri = fields.Str(allow_none=True)
+    license_name = fields.Str(allow_none=True)
+    aggregation_period = fields.Float(allow_none=True)
 
     created_by = Relationship(
         related_view="api.user_detail",

@@ -35,6 +35,8 @@ class DeviceProperty(db.Model, IndirectSearchableMixin, AuditMixin):
     resolution = db.Column(db.Float(), nullable=True)
     resolution_unit_uri = db.Column(db.String(256), nullable=True)
     resolution_unit_name = db.Column(db.String(256), nullable=True)
+    aggregation_type_uri = db.Column(db.String(256), nullable=True)
+    aggregation_type_name = db.Column(db.String(256), nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(Device, uselist=False, foreign_keys=[device_id])
 
@@ -53,6 +55,8 @@ class DeviceProperty(db.Model, IndirectSearchableMixin, AuditMixin):
             "sample_medium_uri": self.sampling_media_uri,
             "resolution_unit_name": self.resolution_unit_name,
             "resolution_unit_uri": self.resolution_unit_uri,
+            "aggregation_type_name": self.aggregation_type_name,
+            "aggregation_type_uri": self.aggregation_type_uri,
         }
 
     def get_parent_search_entities(self):

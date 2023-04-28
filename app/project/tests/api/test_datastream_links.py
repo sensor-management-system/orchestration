@@ -113,6 +113,9 @@ class TestDatastreamLinks(BaseTestCase):
                     "datasource_name": "DB1",
                     "begin_date": str(begin_date),
                     "end_date": str(end_date),
+                    "license_uri": "http://cv/api/licenses/123",
+                    "license_name": "HEESIL",
+                    "aggregation_period": 0.2,
                 },
             }
         }
@@ -147,6 +150,9 @@ class TestDatastreamLinks(BaseTestCase):
         self.assertEqual(datastream_link.device_property_id, device_property.id)
         self.assertEqual(datastream_link.device_mount_action_id, device_mount.id)
         self.assertEqual(datastream_link.tsm_endpoint, "foo")
+        self.assertEqual(datastream_link.license_uri, "http://cv/api/licenses/123")
+        self.assertEqual(datastream_link.license_name, "HEESIL")
+        self.assertEqual(datastream_link.aggregation_period, 0.2)
         self.assertEqual(datastream_link.created_by, user)
         self.assertEqual(datastream_link.created_at.year, datetime.datetime.now().year)
         # And we also want to make sure that we fill the update description of the configuration

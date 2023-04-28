@@ -222,6 +222,8 @@ class Device(
                     "sample_medium_uri": type_keyword,
                     "resolution_unit_name": type_keyword_and_full_searchable,
                     "resolution_unit_uri": type_keyword,
+                    "aggregation_type_name": type_keyword_and_full_searchable,
+                    "aggregation_type_uri": type_keyword,
                 },
             },
             "generic_actions": {
