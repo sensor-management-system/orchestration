@@ -460,7 +460,9 @@ describe('DeviceCalibrationActionSerializer', () => {
         },
         resolution: 0.5,
         resolutionUnitName: 'RU1',
-        resolutionUnitUri: 'RU/1'
+        resolutionUnitUri: 'RU/1',
+        aggregationTypeUri: 'http://foo/aggregationtypes/1',
+        aggregationTypeName: 'Average'
       })
       const measuredQuantity2 = DeviceProperty.createFromObject({
         id: '222',
@@ -481,7 +483,9 @@ describe('DeviceCalibrationActionSerializer', () => {
         },
         resolution: 0.05,
         resolutionUnitName: 'RU2',
-        resolutionUnitUri: 'RU/2'
+        resolutionUnitUri: 'RU/2',
+        aggregationTypeUri: '',
+        aggregationTypeName: ''
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -564,7 +568,9 @@ describe('DeviceCalibrationActionSerializer', () => {
           measuring_range_max: 1,
           resolution: 0.5,
           resolution_unit_name: 'RU1',
-          resolution_unit_uri: 'RU/1'
+          resolution_unit_uri: 'RU/1',
+          aggregation_type_uri: 'http://foo/aggregationtypes/1',
+          aggregation_type_name: 'Average'
         },
         relationships: {
           device: {

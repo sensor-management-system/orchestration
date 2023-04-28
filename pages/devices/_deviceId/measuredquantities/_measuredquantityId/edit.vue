@@ -56,6 +56,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         />
       </v-card-text>
       <v-card-actions>
@@ -84,6 +85,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         />
       </template>
     </BaseList>
@@ -118,7 +120,7 @@ import BaseList from '@/components/shared/BaseList.vue'
   components: { BaseList, DotMenuActionDelete, DevicesMeasuredQuantitiesListItem, SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
   middleware: ['auth'],
   computed: {
-    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits', 'aggregationtypes']),
     ...mapState('devices', ['deviceMeasuredQuantity', 'deviceMeasuredQuantities'])
   },
   methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'updateDeviceMeasuredQuantity']),
@@ -135,6 +137,7 @@ export default class DevicePropertyEditPage extends mixins(CheckEditAccess) {
   samplingMedia!: VocabularyState['samplingMedia']
   properties!: VocabularyState['properties']
   units!: VocabularyState['units']
+  aggregationtypes!: VocabularyState['aggregationtypes']
   measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
   deviceMeasuredQuantity!: DevicesState['deviceMeasuredQuantity']
   deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']

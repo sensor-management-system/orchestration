@@ -48,7 +48,8 @@ import {
   LoadSamplingMediaAction,
   LoadPropertiesAction,
   LoadUnitsAction,
-  LoadMeasuredQuantityUnitsAction
+  LoadMeasuredQuantityUnitsAction,
+  LoadAggregationtypesAction
 } from '@/store/vocabulary'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -57,7 +58,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   components: { ProgressIndicator },
   methods: {
     ...mapActions('devices', ['loadDeviceMeasuredQuantities']),
-    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits'])
+    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits', 'loadAggregationtypes'])
   }
 })
 export default class DevicePropertiesPage extends Vue {
@@ -70,6 +71,7 @@ export default class DevicePropertiesPage extends Vue {
   loadProperties!: LoadPropertiesAction
   loadUnits!: LoadUnitsAction
   loadMeasuredQuantityUnits!: LoadMeasuredQuantityUnitsAction
+  loadAggregationtypes!: LoadAggregationtypesAction
 
   async fetch (): Promise<void> {
     try {
@@ -80,7 +82,8 @@ export default class DevicePropertiesPage extends Vue {
         this.loadSamplingMedia(),
         this.loadProperties(),
         this.loadUnits(),
-        this.loadMeasuredQuantityUnits()
+        this.loadMeasuredQuantityUnits(),
+        this.loadAggregationtypes()
       ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')

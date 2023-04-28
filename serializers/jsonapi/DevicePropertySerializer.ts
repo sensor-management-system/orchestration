@@ -80,6 +80,8 @@ export class DevicePropertySerializer {
       propertyToSave.compartment_name = property.compartmentName
       propertyToSave.property_uri = property.propertyUri
       propertyToSave.property_name = property.propertyName
+      propertyToSave.aggregation_type_uri = property.aggregationTypeUri
+      propertyToSave.aggregation_type_name = property.aggregationTypeName
       propertyToSave.sampling_media_uri = property.samplingMediaUri
       propertyToSave.sampling_media_name = property.samplingMediaName
       propertyToSave.resolution_unit_uri = property.resolutionUnitUri
@@ -127,6 +129,8 @@ export class DevicePropertySerializer {
       newEntry.compartmentName = jsonApiData.attributes.compartment_name || ''
       newEntry.propertyUri = jsonApiData.attributes.property_uri || ''
       newEntry.propertyName = jsonApiData.attributes.property_name || ''
+      newEntry.aggregationTypeUri = jsonApiData.attributes.aggregation_type_uri || ''
+      newEntry.aggregationTypeName = jsonApiData.attributes.aggregation_type_name || ''
       newEntry.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
       newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
       newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
@@ -209,6 +213,8 @@ export class DevicePropertySerializer {
         compartment_name: deviceProperty.compartmentName,
         property_uri: deviceProperty.propertyUri,
         property_name: deviceProperty.propertyName,
+        aggregation_type_uri: deviceProperty.aggregationTypeUri,
+        aggregation_type_name: deviceProperty.aggregationTypeName,
         sampling_media_uri: deviceProperty.samplingMediaUri,
         sampling_media_name: deviceProperty.samplingMediaName,
         resolution_unit_uri: deviceProperty.resolutionUnitUri,

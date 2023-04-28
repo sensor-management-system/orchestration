@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -53,7 +53,9 @@ describe('DeviceProperty Models', () => {
       failureValue: 0.01,
       resolution: 0.001,
       resolutionUnitUri: 'http://foo/unit/1',
-      resolutionUnitName: 'mm'
+      resolutionUnitName: 'mm',
+      aggregationTypeUri: 'http://foo/aggregationtypes/1',
+      aggregationTypeName: 'Average'
     })
     expect(typeof prop).toBe('object')
     expect(prop).toHaveProperty('id', null)
@@ -71,6 +73,8 @@ describe('DeviceProperty Models', () => {
     expect(prop).toHaveProperty('resolution', 0.001)
     expect(prop).toHaveProperty('resolutionUnitUri', 'http://foo/unit/1')
     expect(prop).toHaveProperty('resolutionUnitName', 'mm')
+    expect(prop).toHaveProperty('aggregationTypeUri', 'http://foo/aggregationtypes/1')
+    expect(prop).toHaveProperty('aggregationTypeName', 'Average')
     expect(prop.measuringRange instanceof MeasuringRange).toBe(true)
   })
 })

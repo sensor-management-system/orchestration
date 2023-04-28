@@ -457,7 +457,7 @@ export class Api {
       '/globalprovenances/'
     )
     this._aggregationTypeApi = new AggregationTypeApi(
-      createAxios(cvBaseUrl, cvConfig),
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/aggregationtypes/'
     )
     this._actionCategoryApi = new ActionCategoryApi(

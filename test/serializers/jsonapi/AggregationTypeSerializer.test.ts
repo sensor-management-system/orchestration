@@ -122,4 +122,45 @@ describe('AggregationTypeSerializer', () => {
       expect(aggregationTypes[1]).toEqual(expectedAggregationType2)
     })
   })
+  describe('#convertModelToJsonApiData', () => {
+    it('should transform the model to json payload', () => {
+      const cvAggregation = AggregationType.createFromObject({
+        id: '2',
+        name: 'Average',
+        uri: 'http://rz-vm64.gfz-potsdam.de:5001/api/aggregationtypes/2/',
+        definition: 'mean',
+        category: 'cat',
+        note: 'note',
+        provenance: 'statistics handbook',
+        provenanceUri: 'uri',
+        globalProvenanceId: '1'
+      })
+
+      const expectedResult = {
+        attributes: {
+          category: 'cat',
+          definition: 'mean',
+          note: 'note',
+          provenance: 'statistics handbook',
+          provenance_uri: 'uri',
+          term: 'Average'
+        },
+        id: '2',
+        relationships: {
+          global_provenance: {
+            data: {
+              id: '1',
+              type: 'GlobalProvenance'
+            }
+          }
+        },
+        type: 'AggregationType'
+      }
+
+      const serializer = new AggregationTypeSerializer()
+      const result = serializer.convertModelToJsonApiData(cvAggregation)
+
+      expect(result).toEqual(expectedResult)
+    })
+  })
 })

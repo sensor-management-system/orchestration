@@ -63,6 +63,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         >
           <template
             v-if="editable"
@@ -147,7 +148,7 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
     DevicesMeasuredQuantitiesListItem
   },
   computed: {
-    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits', 'aggregationtypes']),
     ...mapState('devices', ['deviceMeasuredQuantities'])
   },
   methods: {
@@ -175,6 +176,7 @@ export default class DevicePropertyShowPage extends Vue {
   properties!: VocabularyState['properties']
   units!: VocabularyState['units']
   measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  aggregtiontypes!: VocabularyState['aggregationtypes']
   deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
   deleteDeviceMeasuredQuantity!: DeleteDeviceMeasuredQuantityAction

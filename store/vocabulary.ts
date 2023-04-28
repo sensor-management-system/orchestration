@@ -250,6 +250,7 @@ export type AddUnitAction = ({ unit }: {unit: Unit }) => Promise<Unit>
 export type AddMeasuredQuantityUnitAction = ({ measuredQuantityUnit }: { measuredQuantityUnit: MeasuredQuantityUnit }) => Promise<MeasuredQuantityUnit>
 export type AddSiteUsageAction = ({ siteUsage }: { siteUsage: SiteUsage }) => Promise<SiteUsage>
 export type AddSiteTypeAction = ({ siteType }: { siteType: SiteType }) => Promise<SiteType>
+export type AddAggregationTypeAction = ({ aggregationType }: { aggregationType: AggregationType}) => Promise<AggregationType>
 
 const actions: ActionTree<VocabularyState, RootState> = {
   async loadManufacturers ({ commit }: { commit: Commit }): Promise<void> {
@@ -405,6 +406,12 @@ const actions: ActionTree<VocabularyState, RootState> = {
     const siteTypes = [...state.siteTypes, newSiteType]
     await commit('setSiteTypes', siteTypes)
     return newSiteType
+  },
+  async addAggregationType ({ commit, state }: {commit: Commit, state: VocabularyState }, { aggregationType }: { aggregationType: AggregationType}): Promise<AggregationType> {
+    const newAggregationType = await this.$api.aggregationTypes.add(aggregationType)
+    const aggregationTypes = [...state.aggregationtypes, newAggregationType]
+    await commit('setAggregationtypes', aggregationTypes)
+    return newAggregationType
   }
 }
 

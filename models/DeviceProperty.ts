@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -42,6 +42,8 @@ export interface IDeviceProperty {
   samplingMediaName: string
   propertyUri: string
   propertyName: string
+  aggregationTypeUri: string
+  aggregationTypeName: string
   measuringRange: IMeasuringRange
   accuracy: number | null
   failureValue: number | null
@@ -61,6 +63,8 @@ export class DeviceProperty implements IDeviceProperty {
   private _samplingMediaName: string = ''
   private _propertyUri: string = ''
   private _propertyName: string = ''
+  private _aggregationTypeUri: string = ''
+  private _aggregationTypeName: string = ''
   private _measuringRange: MeasuringRange = new MeasuringRange()
   private _accuracy: number | null = null
   private _failureValue: number | null = null
@@ -88,6 +92,8 @@ export class DeviceProperty implements IDeviceProperty {
     newObject.samplingMediaName = someObject.samplingMediaName
     newObject.propertyUri = someObject.propertyUri
     newObject.propertyName = someObject.propertyName
+    newObject.aggregationTypeUri = someObject.aggregationTypeUri
+    newObject.aggregationTypeName = someObject.aggregationTypeName
     newObject.measuringRange = MeasuringRange.createFromObject(someObject.measuringRange)
     newObject.accuracy = someObject.accuracy
     newObject.failureValue = someObject.failureValue
@@ -176,6 +182,22 @@ export class DeviceProperty implements IDeviceProperty {
 
   set propertyName (propertyName: string) {
     this._propertyName = propertyName
+  }
+
+  get aggregationTypeUri (): string {
+    return this._aggregationTypeUri
+  }
+
+  set aggregationTypeUri (newAggregationTypeUri: string) {
+    this._aggregationTypeUri = newAggregationTypeUri
+  }
+
+  get aggregationTypeName (): string {
+    return this._aggregationTypeName
+  }
+
+  set aggregationTypeName (newAggregationTypeName: string) {
+    this._aggregationTypeName = newAggregationTypeName
   }
 
   get measuringRange (): MeasuringRange {
