@@ -57,6 +57,8 @@ class TestDevicePropertyServices(BaseTestCase):
                     "property_name": "device_property1",
                     "compartment_name": "climate",
                     "sampling_media_name": "air",
+                    "aggregation_type_name": "Average",
+                    "aggregation_type_uri": "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device.id)}}
@@ -89,6 +91,11 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(device_property.label, "device property1")
         self.assertEqual(device_property.compartment_name, "climate")
         self.assertEqual(device_property.sampling_media_name, "air")
+        self.assertEqual(device_property.aggregation_type_name, "Average")
+        self.assertEqual(
+            device_property.aggregation_type_uri,
+            "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
+        )
         self.assertEqual(device_property.device_id, device.id)
         self.assertEqual(
             str(device_property.device_id), response.get_json()["data"]["id"]

@@ -247,6 +247,13 @@ components = {
                                                 "format": "uri",
                                             },
                                             "resolution_unit_name": {"type": "string"},
+                                            "aggregation_type_uri": {
+                                                "type": "string",
+                                                "format": "uri",
+                                            },
+                                            "aggregation_type_name": {
+                                                "type": "string"
+                                            },
                                         },
                                     },
                                     "type": {"type": "string"},
@@ -269,6 +276,8 @@ components = {
                                         "resolution": 0,
                                         "resolution_unit_uri": "",
                                         "resolution_unit_name": "",
+                                        "aggregation_type_uri": "",
+                                        "aggregation_type_name": "",
                                     },
                                     "type": "device_property",
                                     "relationships": {
@@ -344,6 +353,13 @@ components = {
                                                 "format": "uri",
                                             },
                                             "resolution_unit_name": {"type": "string"},
+                                            "aggregation_type_uri": {
+                                                "type": "string",
+                                                "format": "uri",
+                                            },
+                                            "aggregation_type_name": {
+                                                "type": "string"
+                                            },
                                             "created_at": {
                                                 "type": "string",
                                                 "format": "date-time",
@@ -429,6 +445,8 @@ components = {
                                         "resolution": 0,
                                         "resolution_unit_uri": "",
                                         "resolution_unit_name": "",
+                                        "aggregation_type_uri": "",
+                                        "aggregation_type_name": "",
                                         "created_at": "2023-01-01T00:00:00+00:00",
                                         "updated_at": "2023-01-01T00:00:00+00:00",
                                     },
@@ -505,6 +523,13 @@ components = {
                                     "format": "uri",
                                 },
                                 "resolution_unit_name": {"type": "string"},
+                                "aggregation_type_uri": {
+                                    "type": "string",
+                                    "format": "uri",
+                                },
+                                "aggregation_type_name": {
+                                    "type": "string"
+                                },
                             },
                         },
                         "type": {"type": "string"},
@@ -528,6 +553,8 @@ components = {
                             "resolution": 0,
                             "resolution_unit_uri": "",
                             "resolution_unit_name": "",
+                            "aggregation_type_uri": "",
+                            "aggregation_type_name": "",
                         },
                         "type": "device_property",
                         "id": "0",

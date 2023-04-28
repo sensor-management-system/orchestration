@@ -63,3 +63,9 @@ class DatastreamLink(db.Model, AuditMixin):
     # mount itself (so those fields here are completely optional).
     begin_date = db.Column(db.DateTime(timezone=True), nullable=True)
     end_date = db.Column(db.DateTime(timezone=True), nullable=True)
+    # And we add some fields that may become interesting when
+    # bringing it in the direction of STA.
+    license_uri = db.Column(db.String(256), nullable=True)
+    license_name = db.Column(db.String(256), nullable=True)
+    # Aggregation period in seconds.
+    aggregation_period = db.Column(db.Float(), nullable=True)

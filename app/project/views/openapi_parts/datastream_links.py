@@ -102,6 +102,14 @@ components = {
                                                 "type": "string",
                                                 "format": "date-time",
                                             },
+                                            "license_uri": {
+                                                "type": "string",
+                                                "format": "uri",
+                                            },
+                                            "license_name": {
+                                                "type": "string",
+                                            },
+                                            "aggregation_period": {"type": "number"},
                                         },
                                     },
                                     "relationships": {
@@ -178,6 +186,16 @@ components = {
                                             "end_date": {
                                                 "type": "string",
                                                 "format": "date-time",
+                                            },
+                                            "license_uri": {
+                                                "type": "string",
+                                                "format": "uri",
+                                            },
+                                            "license_name": {
+                                                "type": "string",
+                                            },
+                                            "aggregation_period": {
+                                                "type": "number",
                                             },
                                         },
                                     },
@@ -259,6 +277,16 @@ components = {
                                                 "end_date": {
                                                     "type": "string",
                                                     "format": "date-time",
+                                                },
+                                                "license_uri": {
+                                                    "type": "string",
+                                                    "format": "uri",
+                                                },
+                                                "license_name": {
+                                                    "type": "string",
+                                                },
+                                                "aggregation_period": {
+                                                    "type": "number",
                                                 },
                                                 "created_at": {
                                                     "type": "string",
@@ -379,6 +407,16 @@ components = {
                                             "end_date": {
                                                 "type": "string",
                                                 "format": "date-time",
+                                            },
+                                            "license_uri": {
+                                                "type": "string",
+                                                "format": "uri",
+                                            },
+                                            "license_name": {
+                                                "type": "string",
+                                            },
+                                            "aggregation_period": {
+                                                "type": "number",
                                             },
                                             "created_at": {
                                                 "type": "string",
