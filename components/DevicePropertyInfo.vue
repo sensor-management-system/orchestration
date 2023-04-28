@@ -49,6 +49,10 @@ permissions and limitations under the Licence.
         <label>Measured Quantity</label>
         {{ measuredQuantityValue | orDefault }}
       </v-col>
+      <v-col cols="12" md="3">
+        <label>Aggregation Type</label>
+        {{ aggregationTypeValue | orDefault }}
+      </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
@@ -100,6 +104,7 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { AggregationType } from '@/models/AggregationType'
 
 /**
  * A class component that renders a form for a device property
@@ -169,6 +174,16 @@ export default class DevicePropertyInfo extends Vue {
   })
   readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
 
+  /**
+   * a list of AggregationTypes
+   */
+  @Prop({
+    default: () => [] as AggregationType[],
+    required: true,
+    type: Array
+  })
+  readonly aggregationTypes!: AggregationType[]
+
   get compartmentValue (): string {
     if (!this.value.compartmentName && !this.value.compartmentUri) {
       return ''
@@ -200,6 +215,21 @@ export default class DevicePropertyInfo extends Vue {
       return property.name
     }
     return this.value.propertyName
+  }
+
+  get aggregationTypeValue (): string {
+    // We could think about using also aggregation type id of the associated
+    // property. However, this would give the imagination that the value
+    // would be set - even if it is not so in the database.
+    // So we stick the "standard" way of searching for the name.
+    if (!this.value.aggregationTypeName && !this.value.aggregationTypeUri) {
+      return ''
+    }
+    const aggregationType = this.aggregationTypes.find(c => c.uri === this.value.aggregationTypeUri)
+    if (aggregationType) {
+      return aggregationType.name
+    }
+    return this.value.aggregationTypeName
   }
 
   get unitValue (): string {

@@ -243,6 +243,71 @@ permissions and limitations under the Licence.
             </template>
           </combobox>
         </v-col>
+        <v-col cols="12" md="3">
+          <combobox
+            label="Aggregation Type"
+            clearable
+            :items="aggregationTypeItems"
+            item-text="name"
+            :value="valueAggregationTypeItem"
+            :readonly="readonly"
+            :disabled="readonly"
+            @input="updateAggregationType"
+            @change="onMeasuredQuantityChanged"
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="itemHasDefinition(valueAggregationTypeItem)"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ valueAggregationTypeItem.definition }}</span>
+              </v-tooltip>
+              <v-btn icon @click="showNewAggregationTypeDialog = true">
+                <v-icon>
+                  mdi-tooltip-plus-outline
+                </v-icon>
+              </v-btn>
+            </template>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
+              </template>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </template>
+          </combobox>
+        </v-col>
       </v-row>
       <v-row>
         <v-col cols="12" md="3">
@@ -462,6 +527,11 @@ permissions and limitations under the Licence.
       :initial-measured-quantity-id="valuePropertyItem ? valuePropertyItem.id || null: null"
       @aftersubmit="updateUnit"
     />
+    <aggregation-type-dialog
+      v-model="showNewAggregationTypeDialog"
+      :initial-term="valueAggregationTypeItem ? valueAggregationTypeItem.name : null"
+      @aftersubmit="updateAggregationType"
+    />
     <unit-dialog
       v-model="showNewUnitDialog"
       @aftersubmit="updateResolutionUnit"
@@ -476,6 +546,7 @@ permissions and limitations under the Licence.
  */
 import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 
+import AggregationTypeDialog from '@/components/devices/AggregationTypeDialog.vue'
 import CompartmentDialog from '@/components/devices/CompartmentDialog.vue'
 import CvPropertyDialog from '@/components/devices/CvPropertyDialog.vue'
 import SamplingMediaDialog from '@/components/devices/SamplingMediaDialog.vue'
@@ -495,13 +566,15 @@ import { ICvSelectItem, hasDefinition, CvSelectItem } from '@/models/CvSelectIte
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 
 import { Rules } from '@/mixins/Rules'
+import { AggregationType } from '@/models/AggregationType'
 
-type CvDictTypes = Compartment | Unit | Property | SamplingMedia | MeasuredQuantityUnit
-type CvDictKeys = 'compartments' | 'units' | 'properties' | 'samplingMedias' | 'measuredQuantityUnits'
+type CvDictTypes = Compartment | Unit | Property | SamplingMedia | MeasuredQuantityUnit | AggregationType
+type CvDictKeys = 'compartments' | 'units' | 'properties' | 'samplingMedias' | 'measuredQuantityUnits' | 'aggregationTypes'
 type CompartmentComboboxValue = Compartment | string | undefined
 type SamplingMediaComboboxValue = SamplingMedia | string | undefined
 type PropertyComboboxValue = Property | string | undefined
 type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
+type AggregationTypeComboboxValue = AggregationType | string | undefined
 
 /**
  * A class component that renders a form for a device property
@@ -509,6 +582,7 @@ type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
  */
 @Component({
   components: {
+    AggregationTypeDialog,
     CompartmentDialog,
     CvPropertyDialog,
     MeasuredQuantityUnitDialog,
@@ -524,6 +598,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
   private showNewPropertyDialog = false
   private showNewMeasuredQuantityUnitDialog = false
   private showNewUnitDialog = false
+  private showNewAggregationTypeDialog = false
 
   /**
    * a DeviceProperty
@@ -595,6 +670,16 @@ export default class DevicePropertyForm extends mixins(Rules) {
     type: Array
   })
   readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
+
+  /**
+   * a list of AggregationTypes
+   */
+  @Prop({
+    default: () => [] as AggregationType[],
+    required: true,
+    type: Array
+  })
+  readonly aggregationTypes!: AggregationType[]
 
   onMeasuredQuantityChanged () {
     if (!this.isNewPropertyPage) {
@@ -772,9 +857,40 @@ export default class DevicePropertyForm extends mixins(Rules) {
             }
           }
         }
+        // And update the aggregation type.
+        const aggregationTypeId = this.properties[propertyIndex].aggregationTypeId
+        const possibleAggregationTypes = this.aggregationTypes.filter(a => a.id === aggregationTypeId)
+        if (possibleAggregationTypes) {
+          const firstAggregationType = possibleAggregationTypes[0]
+          newObj.aggregationTypeName = firstAggregationType.name
+          newObj.aggregationTypeUri = firstAggregationType.uri
+        }
       }
       newObj.unitName = ''
       newObj.unitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  updateAggregationType (value: AggregationTypeComboboxValue): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.aggregationTypeName = value
+        newObj.aggregationTypeUri = this.getUriByValue('aggregationTypes', value)
+      } else {
+        newObj.aggregationTypeName = value.name
+        newObj.aggregationTypeUri = value.uri
+      }
+    } else {
+      newObj.aggregationTypeName = ''
+      newObj.aggregationTypeUri = ''
     }
     /**
      * input event
@@ -1013,6 +1129,17 @@ export default class DevicePropertyForm extends mixins(Rules) {
     return properties
   }
 
+  get aggregationTypeItems (): AggregationType[] {
+    let aggregationTypes = this.aggregationTypes
+    if (this.valuePropertyItem && this.valuePropertyItem.id) {
+      const property = this.valuePropertyItem as Property
+      if (property.aggregationTypeId) {
+        aggregationTypes = aggregationTypes.filter(a => a.id === property.aggregationTypeId)
+      }
+    }
+    return aggregationTypes
+  }
+
   /**
    * returns an item to be used as the value of a combobox
    *
@@ -1034,6 +1161,22 @@ export default class DevicePropertyForm extends mixins(Rules) {
     return {
       name: this.value.propertyName,
       uri: this.value.propertyUri,
+      definition: '',
+      id: null
+    }
+  }
+
+  get valueAggregationTypeItem (): ICvSelectItem | null {
+    if (!this.value.aggregationTypeName && !this.value.aggregationTypeUri) {
+      return null
+    }
+    const aggregationType = this.aggregationTypes.find(a => a.uri === this.value.aggregationTypeUri)
+    if (aggregationType) {
+      return aggregationType
+    }
+    return {
+      name: this.value.aggregationTypeName,
+      uri: this.value.aggregationTypeUri,
       definition: '',
       id: null
     }

@@ -119,7 +119,9 @@ const createTestDevice = () => {
       failureValue: -999,
       resolution: 0.001,
       resolutionUnitUri: 'http://foo/unit/1',
-      resolutionUnitName: 'mm'
+      resolutionUnitName: 'mm',
+      aggregationTypeUri: 'http://foo/aggregationtypes/1',
+      aggregationTypeName: 'Average'
     }),
     DeviceProperty.createFromObject({
       id: '4',
@@ -140,7 +142,9 @@ const createTestDevice = () => {
       failureValue: null,
       resolution: 0.001,
       resolutionUnitUri: 'http://foo/unit/1',
-      resolutionUnitName: 'mm'
+      resolutionUnitName: 'mm',
+      aggregationTypeUri: 'http://foo/aggregationtypes/1',
+      aggregationTypeName: 'Average'
     })
   ]
 
@@ -722,7 +726,9 @@ describe('DeviceSerializer', () => {
               accuracy: 1,
               resolution_unit_name: 'mm',
               unit_uri: 'b',
-              failure_value: 4
+              failure_value: 4,
+              aggregation_type_uri: 'http://foo/aggregationtypes/1',
+              aggregation_type_name: 'Average'
             },
             id: '40',
             relationships: {
@@ -770,7 +776,10 @@ describe('DeviceSerializer', () => {
           samplingMediaUri: 'medium/Other',
           resolution: 0.001,
           resolutionUnitUri: 'http://foo/unit/1',
-          resolutionUnitName: 'mm'
+          resolutionUnitName: 'mm',
+          // Not included in the paylod
+          aggregationTypeUri: '',
+          aggregationTypeName: ''
         }),
         DeviceProperty.createFromObject({
           compartmentName: 'a',
@@ -791,7 +800,9 @@ describe('DeviceSerializer', () => {
           samplingMediaUri: 'k',
           resolution: 0.001,
           resolutionUnitUri: 'http://foo/unit/1',
-          resolutionUnitName: 'mm'
+          resolutionUnitName: 'mm',
+          aggregationTypeUri: 'http://foo/aggregationtypes/1',
+          aggregationTypeName: 'Average'
         })
       ]
       expectedDevice.deviceTypeName = ''

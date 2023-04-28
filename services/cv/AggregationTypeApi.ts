@@ -52,6 +52,25 @@ export class AggregationTypeApi extends CVApi<AggregationType> {
   findAll (): Promise<AggregationType[]> {
     return this.newSearchBuilder().build().findMatchingAsList()
   }
+
+  add (aggregationType: AggregationType): Promise<AggregationType> {
+    const data = this.serializer.convertModelToJsonApiData(aggregationType)
+
+    return this.axiosApi.post(
+      this.basePath,
+      {
+        data
+      },
+      {
+        headers: {
+          'Content-Type': 'application/vnd.api+json'
+        }
+      }
+    ).then((rawResponse) => {
+      const response = rawResponse.data
+      return this.serializer.convertJsonApiDataToModel(response.data)
+    })
+  }
 }
 
 export class AggregationTypeSearchBuilder {

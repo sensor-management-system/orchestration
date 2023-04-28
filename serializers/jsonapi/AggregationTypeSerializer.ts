@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022
+ * Copyright (C) 2022 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -72,5 +72,39 @@ export class AggregationTypeSerializer {
       uri: url,
       globalProvenanceId
     })
+  }
+
+  convertModelToJsonApiData (aggregationType: AggregationType) {
+    const attributes = {
+      term: aggregationType.name,
+      definition: aggregationType.definition,
+      provenance: aggregationType.provenance,
+      provenance_uri: aggregationType.provenanceUri,
+      category: aggregationType.category,
+      note: aggregationType.note
+    }
+
+    const relationships: any = {}
+
+    if (aggregationType.globalProvenanceId) {
+      relationships.global_provenance = {
+        data: {
+          id: aggregationType.globalProvenanceId,
+          type: 'GlobalProvenance'
+        }
+      }
+    }
+
+    const wrapper: any = {
+      type: 'AggregationType',
+      attributes,
+      relationships
+    }
+
+    if (aggregationType.id) {
+      wrapper.id = aggregationType.id
+    }
+
+    return wrapper
   }
 }

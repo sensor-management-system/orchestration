@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -63,6 +63,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         >
           <template
             v-if="editable"
@@ -141,7 +142,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
     DevicesMeasuredQuantitiesListItem
   },
   computed: {
-    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits', 'aggregationtypes']),
     ...mapState('devices', ['deviceMeasuredQuantities'])
   },
   methods: {
@@ -168,6 +169,7 @@ export default class DevicePropertyShowPage extends Vue {
   properties!: VocabularyState['properties']
   units!: VocabularyState['units']
   measureQuantityUnits!: VocabularyState['measuredQuantityUnits']
+  aggregtiontypes!: VocabularyState['aggregationtypes']
   deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
   deleteDeviceMeasuredQuantity!: DeleteDeviceMeasuredQuantityAction

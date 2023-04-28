@@ -44,6 +44,7 @@ import { SamplingMedia } from '@/models/SamplingMedia'
 import { Property } from '@/models/Property'
 import { Unit } from '@/models/Unit'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
+import { AggregationType } from '@/models/AggregationType'
 
 Vue.use(Vuetify)
 
@@ -99,7 +100,9 @@ describe('DevicePropertyForm', () => {
           failureValue: 0.01,
           resolution: 0.001,
           resolutionUnitUri: 'http://foo/unit/1',
-          resolutionUnitName: 'mm'
+          resolutionUnitName: 'mm',
+          aggregationTypeUri: 'http://foo/aggregationtypes/1',
+          aggregationTypeName: 'Average'
         }),
         compartments: [
           Compartment.createWithData('1', 'bar', 'http://foo/compartment/1', 'foo'),
@@ -120,7 +123,31 @@ describe('DevicePropertyForm', () => {
         measuredQuantityUnits: [
           MeasuredQuantityUnit.createWithData('1', 'mm', 'http://foo/measuredquantityunits/1', 'foo', '0.01', '10', '1', '1'),
           MeasuredQuantityUnit.createWithData('2', 's', 'http://foo/measuredquantityunits/2', 'bar', '0.001', '60', '2', '1')
-        ] as MeasuredQuantityUnit[]
+        ] as MeasuredQuantityUnit[],
+        aggregationTypes: [
+          AggregationType.createFromObject({
+            uri: 'https://foo/aggregationtypes/1',
+            name: 'Average',
+            id: '1',
+            provenance: '',
+            provenanceUri: '',
+            category: '',
+            definition: '',
+            globalProvenanceId: '1',
+            note: ''
+          }),
+          AggregationType.createFromObject({
+            uri: 'https://foo/aggregationtypes/2',
+            name: 'Mode',
+            id: '2',
+            provenance: '',
+            provenanceUri: '',
+            category: '',
+            definition: '',
+            globalProvenanceId: '1',
+            note: ''
+          })
+        ]
       }
     })
   })

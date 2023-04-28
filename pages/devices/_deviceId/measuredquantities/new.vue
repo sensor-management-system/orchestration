@@ -55,6 +55,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         />
       </v-card-text>
       <v-card-actions>
@@ -80,6 +81,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         />
       </template>
     </BaseList>
@@ -114,7 +116,7 @@ import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasu
   middleware: ['auth'],
   components: { DevicesMeasuredQuantitiesListItem, BaseList, ProgressIndicator, SaveAndCancelButtons, DevicePropertyForm },
   computed: {
-    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits', 'aggregationtypes']),
     ...mapState('devices', ['deviceMeasuredQuantities'])
   },
 
@@ -132,6 +134,7 @@ export default class DevicePropertyAddPage extends mixins(CheckEditAccess) {
   samplingMedia!: VocabularyState['samplingMedia']
   properties!: VocabularyState['properties']
   units!: VocabularyState['units']
+  aggregationtypes!: VocabularyState['aggregationtypes']
   measuredQuantityUnits!: VocabularyState['measuredQuantityUnits']
   deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   loadCompartments!: LoadCompartmentsAction

@@ -50,6 +50,7 @@ permissions and limitations under the Licence.
         :properties="properties"
         :units="units"
         :measured-quantity-units="measuredQuantityUnits"
+        :aggregation-types="aggregationTypes"
       />
     </template>
   </base-expandable-list-item>
@@ -68,6 +69,7 @@ import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import DotMenu from '@/components/DotMenu.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import DevicePropertyInfo from '@/components/DevicePropertyInfo.vue'
+import { AggregationType } from '@/models/AggregationType'
 
 @Component({
   components: {
@@ -132,6 +134,16 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
     type: Array
   })
   readonly measuredQuantityUnits!: MeasuredQuantityUnit[]
+
+  /**
+   * a list of AggregationTypes
+   */
+  @Prop({
+    default: () => [] as AggregationType[],
+    required: true,
+    type: Array
+  })
+  readonly aggregationTypes!: AggregationType[]
 
   @Prop({
     required: true
