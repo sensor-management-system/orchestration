@@ -38,6 +38,7 @@ from ..api.models import (
     Site,
 )
 from ..api.models.base_model import db
+from ..api.permissions.rules import filter_visible
 from ..config import env
 from ..restframework.views.classbased import class_based_view
 
@@ -134,8 +135,31 @@ class ConfigurationLabelEndPoint(AbstractFreeTextFieldEndpoint):
 
 @free_text_field_routes.route("/controller/configuration-projects", methods=["GET"])
 @class_based_view
-class ConfigurationProjectEndPoint(AbstractFreeTextFieldEndpoint):
+class ConfigurationProjectEndPoint:
     """Endpoint for distinct configuration projects."""
+
+    def __call__(self):
+        """
+        Find all the distinct the projects.
+
+        This method here is a little bit different to the others,
+        as we want to allow its usage also for unauthenticated users.
+        However, they should still only see the projects that
+        they are allowed to see (just public in this case).
+        """
+        try:
+            visible_configs = filter_visible(db.session.query(Configuration))
+            result_list = [
+                x.project
+                for x in visible_configs.distinct(Configuration.project).order_by(
+                    Configuration.project
+                )
+                if x.project
+            ]
+            result = {"data": result_list}
+            return result
+        except ErrorResponse as e:
+            return e.respond()
 
     field = Configuration.project
 

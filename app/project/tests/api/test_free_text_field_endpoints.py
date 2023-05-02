@@ -2295,17 +2295,32 @@ class TestConfigurationProjectEndpoint(BaseTestCase):
         db.session.commit()
 
     def test_get_without_user(self):
-        """Ensure that we need a user."""
+        """Ensure the projects endpoint works without a user."""
         resp = self.client.get(self.url)
-        self.assertEqual(resp.status_code, 401)
-
-    def test_get_empty(self):
-        """Ensure we can get an empty response."""
-        with self.run_requests_as(self.normal_user):
-            resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 200)
         data = resp.json["data"]
         self.assertEqual(data, [])
+
+    def test_get_no_internal_without_user(self):
+        """The projects endpoint without a user should only give out public configuration projects."""
+        config1 = Configuration(
+            project="MOSES",
+            is_public=True,
+            is_internal=False,
+        )
+        config2 = Configuration(
+            project="TERENO",
+            is_public=False,
+            is_internal=True,
+        )
+
+        db.session.add_all([config1, config2])
+        db.session.commit()
+
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["MOSES"])
 
     def test_get_for_three_configurations(self):
         """Ensure we get a list of projects."""
