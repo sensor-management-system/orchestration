@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -36,6 +36,9 @@ permissions and limitations under the Licence.
   >
     <template #header>
       <div class="d-flex flex-wrap">
+        <div v-if="configuration.project" class="mr-1 text-caption">
+          {{ configuration.project }}
+        </div>
         <status-chip
           :value="configuration.status"
         />
@@ -72,7 +75,7 @@ permissions and limitations under the Licence.
         </template>
         <span>Archived</span>
       </v-tooltip>
-      <span>{{ getTextOrDefault(configuration.label, 'Configuration') }}</span>
+      <span>{{ configuration.label | orDefault('Configuration') }}</span>
     </template>
     <template #expandable>
       <v-row
@@ -98,7 +101,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ configuration.startDate | dateToDateTimeString }}
+          {{ configuration.startDate | dateToDateTimeString | orDefault }}
           <span
             v-if="configuration.startDate"
             class="text-caption text--secondary"
@@ -126,13 +129,39 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ configuration.endDate | dateToDateTimeString }}
+          {{ configuration.endDate | dateToDateTimeString | orDefault }}
           <span
             v-if="configuration.endDate"
             class="text-caption text--secondary"
           >
             (UTC)
           </span>
+        </v-col>
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
+          Description:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="10"
+          lg="10"
+          xl="11"
+          class="nowrap-truncate"
+        >
+          {{ configuration.description | orDefault }}
         </v-col>
       </v-row>
     </template>
@@ -166,7 +195,5 @@ export default class ConfigurationsListItem extends Vue {
     type: Object
   })
   readonly configuration!: Configuration
-
-  getTextOrDefault = (text: string, defaultValue: string): string => text ?? defaultValue
 }
 </script>

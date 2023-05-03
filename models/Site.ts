@@ -281,6 +281,10 @@ export class Site implements ISite, IVisible {
     return 'site'
   }
 
+  toString (): string {
+    return this._label
+  }
+
   static createFromObject (someObject: ISite): Site {
     const newObject = new Site()
     newObject.id = someObject.id

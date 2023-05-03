@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -37,6 +37,7 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 export interface IDynamicLocationAction {
   id: string
+  label: string
   beginDate: DateTime | null
   endDate: DateTime | null
   beginDescription: string
@@ -54,6 +55,7 @@ export interface IDynamicLocationAction {
 
 export class DynamicLocationAction implements IDynamicLocationAction {
   private _id: string = ''
+  private _label: string = ''
   private _beginDate: DateTime | null = null
   private _endDate: DateTime | null = null
   private _beginDescription: string = ''
@@ -73,6 +75,14 @@ export class DynamicLocationAction implements IDynamicLocationAction {
 
   set id (newId: string) {
     this._id = newId
+  }
+
+  get label (): string {
+    return this._label
+  }
+
+  set label (newLabel: string) {
+    this._label = newLabel
   }
 
   get beginDate (): DateTime | null {
@@ -174,6 +184,7 @@ export class DynamicLocationAction implements IDynamicLocationAction {
   static createFromObject (someObject: IDynamicLocationAction): DynamicLocationAction {
     const result = new DynamicLocationAction()
     result.id = someObject.id
+    result.label = someObject.label
     result.beginDate = someObject.beginDate
     result.beginContact = someObject.beginContact
     result.beginDescription = someObject.beginDescription

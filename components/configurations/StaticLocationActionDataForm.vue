@@ -53,6 +53,13 @@ permissions and limitations under the Licence.
               @input="update('beginDate', $event)"
             />
           </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              :value="value.label"
+              label="Label"
+              @input="update('label', $event)"
+            />
+          </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" md="4">
@@ -321,6 +328,9 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
         break
       case 'beginContact':
         copy.beginContact = value as Contact | null
+        break
+      case 'label':
+        copy.label = value as string
         break
       case 'endDate':
         copy.endDate = value as DateTime | null

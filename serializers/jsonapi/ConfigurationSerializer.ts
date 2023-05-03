@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -92,8 +92,11 @@ export class ConfigurationSerializer {
     configuration.id = jsonApiData.id.toString()
     if (attributes) {
       configuration.label = attributes.label || ''
+      configuration.description = attributes.description || ''
+      configuration.project = attributes.project || ''
       configuration.status = attributes.status || ''
       configuration.archived = attributes.archived || false
+      configuration.persistentIdentifier = attributes.persistent_identifier || ''
 
       configuration.startDate = attributes.start_date ? DateTime.fromISO(attributes.start_date, { zone: 'UTC' }) : null
       configuration.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
@@ -181,12 +184,15 @@ export class ConfigurationSerializer {
     const result: IJsonApiEntityWithOptionalId = {
       attributes: {
         label: configuration.label,
+        description: configuration.description,
+        project: configuration.project,
         status: configuration.status,
         start_date: configuration.startDate != null ? configuration.startDate.setZone('UTC').toISO() : null,
         end_date: configuration.endDate != null ? configuration.endDate.setZone('UTC').toISO() : null,
         is_internal: configuration.isInternal,
         is_public: configuration.isPublic,
-        cfg_permission_group: configuration.permissionGroup?.id
+        cfg_permission_group: configuration.permissionGroup?.id,
+        persistent_identifier: configuration.persistentIdentifier === '' ? null : configuration.persistentIdentifier
       },
       relationships: {
         ...contacts,

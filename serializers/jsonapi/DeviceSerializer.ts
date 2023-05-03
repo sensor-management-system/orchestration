@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -79,7 +79,6 @@ export class DeviceSerializer {
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
   private _permissionGroups: PermissionGroup[] = []
-  private _PID_BASE_URL = process.env.pidBaseUrl
 
   set permissionGroups (groups: PermissionGroup[]) {
     this._permissionGroups = groups
@@ -132,10 +131,6 @@ export class DeviceSerializer {
       }
 
       result.archived = attributes.archived || false
-
-      if (result.persistentIdentifier && this._PID_BASE_URL) {
-        result.persistentIdentifierUrl = this._PID_BASE_URL + '/' + result.persistentIdentifier
-      }
     }
 
     const attachmentsWithMissing = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)

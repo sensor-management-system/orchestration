@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
@@ -58,7 +58,7 @@ permissions and limitations under the Licence.
         >
           <template #activator="{ on, attrs }">
             <span
-              class="clickable"
+              :class="value.persistentIdentifier ? 'clickable' : ''"
               v-bind="attrs"
               v-on="on"
               @click="copyPidToClipboard"
@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
         </v-tooltip>
         <a
           v-if="value.persistentIdentifier"
-          :href="value.persistentIdentifierUrl"
+          :href="persistentIdentifierUrl"
           target="_blank"
           class="text-decoration-none"
         >
@@ -245,9 +245,20 @@ export default class DeviceBasicData extends Vue {
    */
   copyPidToClipboard (): void {
     if (!this.value.persistentIdentifier) { return }
-    navigator.clipboard.writeText(this.value.persistentIdentifierUrl)
+    navigator.clipboard.writeText(this.persistentIdentifierUrl)
     this.pidTooltipText = 'Copied!'
     this.pidTooltipColor = 'green'
+  }
+
+  get persistentIdentifierUrl (): string {
+    if (!this.value.persistentIdentifier) {
+      return ''
+    }
+    const pidBaseUrl = process.env.pidBaseUrl
+    if (!pidBaseUrl) {
+      return ''
+    }
+    return pidBaseUrl + '/' + this.value.persistentIdentifier
   }
 
   /**

@@ -2,10 +2,13 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
+- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
+- Helmholtz Centre Potsdam - GFZ German Research Centre for
+  Geosciences (GFZ, https://www.gfz-potsdam.de)
 
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
@@ -49,6 +52,7 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
+import { Configuration } from '@/models/Configuration'
 
 export interface NonModelOptions {
     persistentIdentifierShouldBeCreated: boolean
@@ -66,7 +70,7 @@ export default class NonModelOptionsForm extends Vue {
     required: true,
     type: Object
   })
-  readonly entity!: Device | Platform
+  readonly entity!: Device | Platform | Configuration
 
   @Watch('entity.isPrivate', { immediate: true })
   // @ts-ignore
@@ -87,9 +91,17 @@ export default class NonModelOptionsForm extends Vue {
   }
 
   get hintText (): string {
-    return this.entity.isPrivate
+    return this.isPrivate
       ? 'PIDs are not available for private visibility'
       : 'Information about the entity including the full name and email of the owner is stored at PID-service outside the SMS'
+  }
+
+  get isPrivate (): boolean {
+    if (this.entity instanceof Configuration) {
+      // There is no isPrivate for configurations.
+      return false
+    }
+    return this.entity.isPrivate
   }
 
   update (key: string, value: boolean) {

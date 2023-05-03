@@ -82,15 +82,24 @@ permissions and limitations under the Licence.
           @input="update('status',$event)"
         />
       </v-col>
-      <v-col cols="12" md="3">
-        <v-autocomplete
-          :item-value="(x) => x.id"
-          :item-text="(x) => x.label"
-          :items="sites"
-          label="Site"
-          :readonly="readonly"
-          @input="update('siteId',$event)"
-        />
+      <v-col cols="12" md="6">
+        <v-text-field
+          :value="value.persistentIdentifier"
+          readonly
+          disabled
+          label="Persistent identifier (PID)"
+        >
+          <template #append>
+            <a
+              v-if="value.persistentIdentifier"
+              :href="persistentIdentifierUrl"
+              target="_blank"
+              class="text-decoration-none"
+            >
+              <v-icon small> mdi-open-in-new </v-icon>
+            </a>
+          </template>
+        </v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -112,6 +121,37 @@ permissions and limitations under the Licence.
           :rules="[rules.endDate]"
           :readonly="readonly"
           @input="update('endDate',$event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <autocomplete-text-input
+          :value="value.project"
+          label="Project"
+          :readonly="readonly"
+          endpoint="configuration-projects"
+          @input="update('project',$event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-autocomplete
+          :item-value="(x) => x.id"
+          :item-text="(x) => x.label"
+          :items="sites"
+          label="Site"
+          :readonly="readonly"
+          @input="update('siteId',$event)"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <v-textarea
+          :value="value.description"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Description"
+          rows="3"
+          @input="update('description', $event)"
         />
       </v-col>
     </v-row>
@@ -184,7 +224,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   }
 
   update (
-    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'startDate' | 'endDate' | 'siteId'>,
+    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'startDate' | 'endDate' | 'siteId' | 'description' | 'project'>,
     value: any
   ) {
     if (key in this.value) {
@@ -201,6 +241,17 @@ export default class ConfigurationsBasicDataForm extends Vue {
       labelProvided: Validator.mustBeProvided('label'),
       validatePermissionGroup: Validator.validatePermissionGroup(false)
     }
+  }
+
+  get persistentIdentifierUrl (): string {
+    if (!this.value.persistentIdentifier) {
+      return ''
+    }
+    const pidBaseUrl = process.env.pidBaseUrl
+    if (!pidBaseUrl) {
+      return ''
+    }
+    return pidBaseUrl + '/' + this.value.persistentIdentifier
   }
 
   public validateForm (): boolean {

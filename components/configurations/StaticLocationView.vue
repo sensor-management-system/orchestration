@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -64,7 +64,9 @@ permissions and limitations under the Licence.
       @cancel="closeBeginDeleteDialog"
       @delete="deleteAndCloseBeginDeleteDialog"
     >
-      Do you really want to delete the static location?
+      <div>
+        Do you really want to delete the static location<em v-if="action.label"> {{ action.label }}</em>?
+      </div>
     </DeleteDialog>
   </div>
 </template>

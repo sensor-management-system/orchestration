@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -54,6 +54,10 @@ permissions and limitations under the Licence.
         v-model="configuration"
         :readonly="false"
       />
+      <NonModelOptionsForm
+        v-model="createOptions"
+        :entity="configuration"
+      />
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
@@ -75,25 +79,37 @@ import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 
 import { Configuration } from '@/models/Configuration'
 
+import { CreatePidAction, SaveConfigurationAction } from '@/store/configurations'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
-  components: { ConfigurationsBasicDataForm, SaveAndCancelButtons, ProgressIndicator },
+  components: {
+    ConfigurationsBasicDataForm,
+    NonModelOptionsForm,
+    SaveAndCancelButtons,
+    ProgressIndicator
+  },
   middleware: ['auth'],
   methods: {
-    ...mapActions('configurations', ['saveConfiguration']),
+    ...mapActions('configurations', ['saveConfiguration', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs'])
   }
 })
 export default class ConfigurationNewPage extends Vue {
   private configuration: Configuration = new Configuration()
   private isLoading: boolean = false
+  private createOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   initConfigurationsNewAppBar!: () => void
-  saveConfiguration!: (configuration: Configuration) => Promise<Configuration>
+  saveConfiguration!: SaveConfigurationAction
+  createPid!: CreatePidAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
 
@@ -110,6 +126,9 @@ export default class ConfigurationNewPage extends Vue {
     try {
       this.isLoading = true
       const savedConfiguration = await this.saveConfiguration(this.configuration)
+      if (this.createOptions.persistentIdentifierShouldBeCreated) {
+        savedConfiguration.persistentIdentifier = await this.createPid(savedConfiguration.id)
+      }
       this.$store.commit('snackbar/setSuccess', 'Save successful')
       await this.$router.push('/configurations/' + savedConfiguration.id)
     } catch (e) {

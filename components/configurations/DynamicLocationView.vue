@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -65,7 +65,9 @@ permissions and limitations under the Licence.
       @cancel="closeDeleteDialog"
       @delete="deleteAndCloseDialog"
     >
-      Do you really want to delete the dynamic location?
+      <div>
+        Do you really want to delete the dynamic location<em v-if="action.label"> {{ action.label }}</em>?
+      </div>
     </DeleteDialog>
   </div>
 </template>

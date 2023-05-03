@@ -99,7 +99,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(site.address.zipCode) }} {{ getTextOrDefault(site.address.city) }}
+          {{ site.address.zipCode | orDefault }} {{ site.address.city | orDefault }}
         </v-col>
         <v-col
           cols="4"
@@ -121,7 +121,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(site.address.street) }} {{ getTextOrDefault(site.address.streetNumber) }}
+          {{ site.address.street | orDefault }} {{ site.address.streetNumber | orDefault }}
         </v-col>
       </v-row>
       <v-row
@@ -147,7 +147,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(site.address.building) }}
+          {{ site.address.building | orDefault }}
         </v-col>
         <v-col
           cols="4"
@@ -169,7 +169,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(site.address.room) }}
+          {{ site.address.room | orDefault }}
         </v-col>
       </v-row>
       <v-row
@@ -221,7 +221,7 @@ permissions and limitations under the Licence.
           xl="11"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(site.description) }}
+          {{ site.description | orDefault }}
         </v-col>
       </v-row>
     </template>
@@ -269,6 +269,7 @@ export default class SitesListItem extends Vue {
 
   public readonly NO_TYPE: string = 'Unknown type'
 
+  // vuex definition for typescript check
   getSiteUsageByUri!: GetSiteUsageByUriGetter
   getSiteTypeByUri!: getSiteTypeByUriGetter
 
@@ -302,10 +303,6 @@ export default class SitesListItem extends Vue {
     }
     return this.NO_TYPE
   }
-
-  // vuex definition for typescript check
-
-  getTextOrDefault = (text: string): string => text || '-'
 }
 </script>
 

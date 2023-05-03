@@ -351,7 +351,11 @@ export class StaticLocationBeginTimelineAction implements IStaticLocationTimelin
   }
 
   get title (): string {
-    return 'Static location begin'
+    let title = 'Static location begin'
+    if (this.staticLocationBeginAction.label) {
+      title = title + ' - ' + this.staticLocationBeginAction.label
+    }
+    return title
   }
 
   get description (): string|null {
@@ -397,7 +401,11 @@ export class StaticLocationEndTimelineAction implements IStaticLocationTimelineA
   }
 
   get title (): string {
-    return 'Static location end'
+    let title = 'Static location end'
+    if (this.staticLocationEndAction.label) {
+      title = title + ' - ' + this.staticLocationEndAction.label
+    }
+    return title
   }
 
   get description (): string | null {
@@ -439,7 +447,11 @@ export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimel
   }
 
   get title (): string {
-    return 'Dynamic location begin'
+    let title = 'Dynamic location begin'
+    if (this.dynamicLocationBeginAction.label) {
+      title = title + ' - ' + this.dynamicLocationBeginAction.label
+    }
+    return title
   }
 
   get description (): string |null {
@@ -516,7 +528,11 @@ export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelin
   }
 
   get title (): string {
-    return 'Dynamic location end'
+    let title = 'Dynamic location end'
+    if (this.dynamicLocationEndAction.label) {
+      title = title + ' - ' + this.dynamicLocationEndAction.label
+    }
+    return title
   }
 
   get description (): string | null {

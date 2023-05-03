@@ -66,6 +66,7 @@ import { CustomTextFieldSerializer, CustomTextFieldEntityType } from '@/serializ
 import { GenericConfigurationActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
+import { Site } from '@/models/Site'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -102,6 +103,8 @@ export class ConfigurationApi {
   private _mountingActionsControllerApi: MountingActionsControllerApi
 
   private _searchedStates: string[] = []
+  private _searchedProjects: string[] = []
+  private _searchedSites: Site[] = []
   private _searchPermissionGroups: PermissionGroup[] = []
   private _searchText: string | null = null
   private _searchedUserMail: string | null = null
@@ -170,6 +173,24 @@ export class ConfigurationApi {
 
   setSearchedStates (value: string[]) {
     this._searchedStates = value
+    return this
+  }
+
+  get searchedProjects (): string[] {
+    return this._searchedProjects
+  }
+
+  setSearchedProjects (value: string[]) {
+    this._searchedProjects = value
+    return this
+  }
+
+  get searchedSites (): Site[] {
+    return this._searchedSites
+  }
+
+  setSearchedSites (value: Site[]) {
+    this._searchedSites = value
     return this
   }
 
@@ -286,6 +307,8 @@ export class ConfigurationApi {
   prepareSearch () {
     this.resetFilterSetting()
     this.prepareStates()
+    this.prepareProjects()
+    this.prepareSites()
     this.preparePermissionGroups()
     this.prepareMail()
   }
@@ -314,6 +337,16 @@ export class ConfigurationApi {
     }
   }
 
+  prepareProjects () {
+    if (this.searchedProjects.length > 0) {
+      this.filterSettings.push({
+        name: 'project',
+        op: 'in_',
+        val: this.searchedProjects
+      })
+    }
+  }
+
   preparePermissionGroups () {
     if (this.searchedPermissionGroups.length > 0) {
       this.filterSettings.push({
@@ -324,6 +357,16 @@ export class ConfigurationApi {
             val: permissionGroup.id
           }
         })
+      })
+    }
+  }
+
+  prepareSites () {
+    if (this.searchedSites.length > 0) {
+      this.filterSettings.push({
+        name: 'site_id',
+        op: 'in_',
+        val: this.searchedSites.map(s => s.id)
       })
     }
   }

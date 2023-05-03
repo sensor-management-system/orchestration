@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -43,7 +43,6 @@ import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
 export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInfo {
   id: string | null
   persistentIdentifier: string
-  persistentIdentifierUrl: string
   shortName: string
   longName: string
 
@@ -91,7 +90,6 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
 export class Device implements IDevice, IVisible {
   private _id: string | null = null
   private _persistentIdentifier: string = ''
-  private _persistentIdentifierUrl: string = ''
   private _shortName: string = ''
   private _longName: string = ''
 
@@ -144,14 +142,6 @@ export class Device implements IDevice, IVisible {
 
   set persistentIdentifier (persistentIdentifier: string) {
     this._persistentIdentifier = persistentIdentifier
-  }
-
-  get persistentIdentifierUrl (): string {
-    return this._persistentIdentifierUrl
-  }
-
-  set persistentIdentifierUrl (persistentIdentifierUrl: string) {
-    this._persistentIdentifierUrl = persistentIdentifierUrl
   }
 
   get shortName (): string {
@@ -391,7 +381,6 @@ export class Device implements IDevice, IVisible {
 
     newObject.id = someObject.id
     newObject.persistentIdentifier = someObject.persistentIdentifier
-    newObject.persistentIdentifierUrl = someObject.persistentIdentifierUrl
     newObject.shortName = someObject.shortName
     newObject.longName = someObject.longName
 

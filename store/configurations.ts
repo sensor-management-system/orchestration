@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -106,6 +106,7 @@ export interface ConfigurationsState {
   configuration: Configuration | null
   configurationContactRoles: ContactRole[]
   configurationStates: string[]
+  projects: string[]
   configurationMountingActions: ConfigurationMountingAction[]
   configurationMountingActionsForDate: ConfigurationsTree | null
   configurationDeviceMountActions: DeviceMountAction[]
@@ -138,6 +139,7 @@ const state = (): ConfigurationsState => ({
   configuration: null,
   configurationContactRoles: [],
   configurationStates: [],
+  projects: [],
   configurationMountingActions: [],
   configurationMountingActionsForDate: null,
   configurationDeviceMountActions: [],
@@ -393,6 +395,7 @@ export type LoadConfigurationAttachmentsAction = (id: string) => Promise<void>
 export type LoadConfigurationAttachmentAction = (id: string) => Promise<void>
 export type LoadConfigurationCustomFieldsAction = (id: string) => Promise<void>
 export type LoadConfigurationCustomFieldAction = (id: string) => Promise<void>
+export type LoadProjectsAction = () => Promise<void>
 
 export type DeleteConfigurationAttachmentAction = (attachmentId: string) => Promise<void>
 export type LoadConfigurationGenericActionsAction = IdParamReturnsVoidPromiseAction
@@ -431,6 +434,8 @@ export type UpdateConfigurationCustomFieldAction = (params: { configurationId: s
 export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActionType | null) => void
 
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
+export type SaveConfigurationAction = (confiuration: Configuration) => Promise<Configuration>
+export type CreatePidAction = (id: string | null) => Promise<string>
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
   setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime | null) {
@@ -446,7 +451,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     } = await this.$api.configurations
       .setSearchText(searchParams.searchText)
       .setSearchedStates(searchParams.states)
+      .setSearchedProjects(searchParams.projects)
       .setSearchPermissionGroups(searchParams.permissionGroups)
+      .setSearchedSites(searchParams.sites)
       .setSearchIncludeArchivedConfigurations(searchParams.includeArchivedConfigurations)
       .searchPaginated(
         state.pageNumber,
@@ -505,6 +512,10 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async loadConfigurationsStates ({ commit }: { commit: Commit }) {
     const configurationStates = await this.$api.configurationStates.findAll()
     commit('setConfigurationStates', configurationStates)
+  },
+  async loadProjects ({ commit }: { commit: Commit }) {
+    const projects = await this.$api.autocomplete.getSuggestions('configuration-projects')
+    commit('setProjects', projects)
   },
   async loadStaticLocationAction ({ commit }: {commit: Commit}, id: string): Promise<void> {
     commit('setStaticLocationAction', await this.$api.configurations.staticLocationActionApi.findById(id))
@@ -586,6 +597,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   },
   saveConfiguration (_context, configuration: Configuration): Promise<Configuration> {
     return this.$api.configurations.save(configuration)
+  },
+  createPid (_, id: string | null): Promise<string> {
+    return this.$api.pids.create(id, 'configuration')
   },
   addConfigurationContactRole (_context, {
     configurationId,
@@ -784,6 +798,9 @@ const mutations = {
   },
   setConfigurationStates (state: ConfigurationsState, configurationStates: string[]) {
     state.configurationStates = configurationStates
+  },
+  setProjects (state: ConfigurationsState, projects: string[]) {
+    state.projects = projects
   },
   setPageNumber (state: ConfigurationsState, newPageNumber: number) {
     state.pageNumber = newPageNumber
