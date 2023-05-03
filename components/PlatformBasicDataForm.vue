@@ -77,7 +77,7 @@ permissions and limitations under the Licence.
           <template #append>
             <a
               v-if="value.persistentIdentifier"
-              :href="value.persistentIdentifierUrl"
+              :href="persistentIdentifierUrl"
               target="_blank"
               class="text-decoration-none"
             >
@@ -639,6 +639,17 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
 
   get platformURN () {
     return createPlatformUrn(this.value, this.platformtypes)
+  }
+
+  get persistentIdentifierUrl (): string {
+    if (!this.value.persistentIdentifier) {
+      return ''
+    }
+    const pidBaseUrl = process.env.pidBaseUrl
+    if (!pidBaseUrl) {
+      return ''
+    }
+    return pidBaseUrl + '/' + this.value.persistentIdentifier
   }
 
   public validateForm (): boolean {

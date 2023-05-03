@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -40,9 +40,12 @@ import { Visibility, IVisible } from '@/models/Visibility'
 
 export interface IConfiguration extends IMountActions, IPermissionableSingleGroup {
   id: string
+  persistentIdentifier: string
   startDate: DateTime | null
   endDate: DateTime | null
   label: string
+  description: string
+  project: string
   status: string
   archived: boolean
   contacts: IContact[]
@@ -64,9 +67,12 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
 
 export class Configuration implements IConfiguration, IVisible {
   private _id: string = ''
+  private _persistentIdentifier: string = ''
   private _startDate: DateTime | null = null
   private _endDate: DateTime | null = null
   private _label: string = ''
+  private _description: string = ''
+  private _project: string = ''
   private _status: string = ''
   private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
@@ -88,6 +94,14 @@ export class Configuration implements IConfiguration, IVisible {
 
   set id (id: string) {
     this._id = id
+  }
+
+  get persistentIdentifier (): string {
+    return this._persistentIdentifier
+  }
+
+  set persistentIdentifier (persistentIdentifier: string) {
+    this._persistentIdentifier = persistentIdentifier
   }
 
   get startDate (): DateTime | null {
@@ -112,6 +126,22 @@ export class Configuration implements IConfiguration, IVisible {
 
   set label (newLabel: string) {
     this._label = newLabel
+  }
+
+  get description (): string {
+    return this._description
+  }
+
+  set description (newDescription: string) {
+    this._description = newDescription
+  }
+
+  get project (): string {
+    return this._project
+  }
+
+  set project (newProject: string) {
+    this._project = newProject
   }
 
   get status (): string {
@@ -242,11 +272,14 @@ export class Configuration implements IConfiguration, IVisible {
     const newObject = new Configuration()
 
     newObject.id = someObject.id
+    newObject.persistentIdentifier = someObject.persistentIdentifier
     // luxon DateTime objects are immutable
     newObject.startDate = someObject.startDate
     newObject.endDate = someObject.endDate
 
     newObject.label = someObject.label
+    newObject.description = someObject.description
+    newObject.project = someObject.project
     newObject.status = someObject.status
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)

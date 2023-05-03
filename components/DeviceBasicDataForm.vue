@@ -77,7 +77,7 @@ permissions and limitations under the Licence.
           <template #append>
             <a
               v-if="value.persistentIdentifier"
-              :href="value.persistentIdentifierUrl"
+              :href="persistentIdentifierUrl"
               target="_blank"
               class="text-decoration-none"
             >
@@ -664,6 +664,17 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
 
   get deviceURN () {
     return createDeviceUrn(this.value, this.manufacturers)
+  }
+
+  get persistentIdentifierUrl (): string {
+    if (!this.value.persistentIdentifier) {
+      return ''
+    }
+    const pidBaseUrl = process.env.pidBaseUrl
+    if (!pidBaseUrl) {
+      return ''
+    }
+    return pidBaseUrl + '/' + this.value.persistentIdentifier
   }
 
   /**

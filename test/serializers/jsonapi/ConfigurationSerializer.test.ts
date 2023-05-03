@@ -56,8 +56,11 @@ describe('ConfigurationSerializer', () => {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
             label: 'Tereno NO Boeken',
+            description: 'Boeken station',
+            project: 'Tereno NO',
             status: 'draft',
-            archived: true
+            archived: true,
+            persistent_identifier: '12345/1234567890'
           },
           relationships: {
             created_by: {
@@ -73,9 +76,10 @@ describe('ConfigurationSerializer', () => {
           type: 'configuration',
           attributes: {
             // no start and no end date
-            // no field for label
+            // no field for label, none for description, nor project
             status: 'draft',
-            archived: false
+            archived: false,
+            persistent_identifier: null
           },
           relationships: {
             // no contacts, as we expect an empty case here
@@ -259,9 +263,12 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration1.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration1.label = 'Tereno NO Boeken'
+      expectedConfiguration1.description = 'Boeken station'
+      expectedConfiguration1.project = 'Tereno NO'
       expectedConfiguration1.archived = true
       expectedConfiguration1.status = 'draft'
       expectedConfiguration1.createdByUserId = '123456'
+      expectedConfiguration1.persistentIdentifier = '12345/1234567890'
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
@@ -311,6 +318,8 @@ describe('ConfigurationSerializer', () => {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
             label: 'Tereno NO Boeken',
+            description: 'Boeken station',
+            project: 'Tereno NO',
             status: 'draft'
           },
           relationships: {
@@ -327,6 +336,8 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration.label = 'Tereno NO Boeken'
+      expectedConfiguration.description = 'Boeken station'
+      expectedConfiguration.project = 'Tereno NO'
       expectedConfiguration.status = 'draft'
 
       const serializer = new ConfigurationSerializer()
@@ -344,6 +355,8 @@ describe('ConfigurationSerializer', () => {
             start_date: '2020-08-28T13:49:48.015620+00:00',
             end_date: '2020-08-29T13:49:48.015620+00:00',
             label: 'Tereno NO Boeken',
+            description: 'Boeken station',
+            project: 'Tereno NO',
             status: 'draft'
           },
           relationships: {
@@ -387,6 +400,8 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration.label = 'Tereno NO Boeken'
+      expectedConfiguration.description = 'Boeken station'
+      expectedConfiguration.project = 'Tereno NO'
       expectedConfiguration.status = 'draft'
       expectedConfiguration.contacts = [
         Contact.createFromObject({
@@ -430,6 +445,8 @@ describe('ConfigurationSerializer', () => {
           start_date: '2020-08-28T13:49:48.015620+00:00',
           end_date: '2020-08-29T13:49:48.015620+00:00',
           label: 'Tereno NO Boeken',
+          description: 'Boeken station',
+          project: 'Tereno NO',
           status: 'draft'
         },
         relationships: {
@@ -445,6 +462,8 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       expectedConfiguration.endDate = DateTime.utc(2020, 8, 29, 13, 49, 48, 15)
       expectedConfiguration.label = 'Tereno NO Boeken'
+      expectedConfiguration.description = 'Boeken station'
+      expectedConfiguration.project = 'Tereno NO'
       expectedConfiguration.status = 'draft'
 
       const included: any[] = []
@@ -462,6 +481,9 @@ describe('ConfigurationSerializer', () => {
       const configuration = new Configuration()
       expect(configuration.id).toEqual('')
       configuration.label = 'ABC'
+      configuration.description = 'some description'
+      configuration.project = 'Project'
+      configuration.persistentIdentifier = '12345/1234567890'
       configuration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       configuration.endDate = DateTime.utc(2021, 8, 28, 13, 49, 48, 15)
       configuration.contacts = [
@@ -504,10 +526,16 @@ describe('ConfigurationSerializer', () => {
 
       expect(attributes).toHaveProperty('label')
       expect(attributes.label).toEqual('ABC')
+      expect(attributes).toHaveProperty('description')
+      expect(attributes.description).toEqual('some description')
+      expect(attributes).toHaveProperty('project')
+      expect(attributes.project).toEqual('Project')
       expect(attributes).toHaveProperty('start_date')
       expect(attributes.start_date).toEqual('2020-08-28T13:49:48.015Z')
       expect(attributes).toHaveProperty('end_date')
       expect(attributes.end_date).toEqual('2021-08-28T13:49:48.015Z')
+      expect(attributes).toHaveProperty('persistent_identifier')
+      expect(attributes.persistent_identifier).toEqual('12345/1234567890')
 
       expect(jsonApiData).toHaveProperty('relationships')
       expect(typeof jsonApiData.relationships).toEqual('object')
@@ -553,6 +581,18 @@ describe('ConfigurationSerializer', () => {
 
       expect(jsonApiData).toHaveProperty('id')
       expect(jsonApiData.id).toEqual('1')
+    })
+    it('should set the persistent identifier to null of not given', () => {
+      const configuration = new Configuration()
+      configuration.id = '1'
+      const serializer = new ConfigurationSerializer()
+
+      const jsonApiData = serializer.convertModelToJsonApiData(configuration)
+
+      expect(jsonApiData).toHaveProperty('attributes')
+      const attributes = jsonApiData.attributes
+      expect(attributes).toHaveProperty('persistent_identifier')
+      expect(attributes.persistent_identifier).toBeNull()
     })
     it('should convert to json api model if not site was set', () => {
       const configuration = new Configuration()

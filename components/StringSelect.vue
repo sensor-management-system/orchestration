@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -44,6 +44,7 @@ permissions and limitations under the Licence.
       :key="element"
       class="ma-2"
       :color="color"
+      :small="small"
       text-color="white"
       :close="!readonly"
       @click:close="remove(element)"
@@ -89,6 +90,12 @@ export default class StringSelect extends Vue {
     required: true
   })
   readonly color!: string
+
+  @Prop({
+    type: Boolean,
+    default: false
+  })
+  readonly small!: boolean
 
   add (entry: string) {
     const selectedItem = this.items.find(e => e === entry)

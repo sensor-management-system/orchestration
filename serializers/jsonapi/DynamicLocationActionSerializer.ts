@@ -3,10 +3,13 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022
+ * Copyright (C) 2022 - 2023
  * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
+ * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
  *   (UFZ, https://www.ufz.de)
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for
+ *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
  * Parts of this program were developed within the context of the
  * following publicly funded projects or measures:
@@ -73,6 +76,7 @@ export class DynamicLocationActionSerializer {
     action.id = jsonApiData.id.toString()
 
     if (attributes) {
+      action.label = attributes.label || ''
       action.beginDescription = attributes.begin_description || ''
       action.endDescription = attributes.end_description || ''
       action.beginDate = DateTime.fromISO(attributes.begin_date, { zone: 'UTC' })
@@ -167,6 +171,7 @@ export class DynamicLocationActionSerializer {
     const data: any = {
       type: 'configuration_dynamic_location_action',
       attributes: {
+        label: action.label,
         begin_description: action.beginDescription,
         begin_date: action.beginDate!.setZone('UTC').toISO(),
         end_date: action.endDate !== null ? action.endDate.setZone('UTC').toISO() : null,

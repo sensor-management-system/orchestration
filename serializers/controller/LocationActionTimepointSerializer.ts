@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within the
  * Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,10 +33,11 @@ import { DateTime } from 'luxon'
 import { LocationTypes } from '@/store/configurations'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 
-export interface IControllerTimepoint{
+export interface IControllerTimepoint {
   timepoint: string,
   type: string,
-  id: string
+  id: string,
+  label: string | null
 }
 export interface ILocationTimepoint {
   timepoint: DateTime,
@@ -90,6 +91,10 @@ export class LocationActionTimepointSerializer {
       case LocationTypes.dynamicEnd:
         typeText = 'Dynamic location end'
         break
+    }
+
+    if (jsonControllerObject.label) {
+      typeText = typeText + ' - ' + jsonControllerObject.label
     }
 
     return dateToDateTimeStringHHMM(tmpTimepoint) + ' - ' + typeText

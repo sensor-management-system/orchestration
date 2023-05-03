@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,15 +32,15 @@ permissions and limitations under the Licence.
   <EntitySelect
     v-model="wrappedValue"
     :readonly="readonly"
-    :fetch-function="findAllPermissionGroups"
+    :fetch-function="findAllSites"
     :label="label"
-    color="orange"
+    color="blue"
   />
 </template>
 
 <script lang="ts">
 /**
- * @file provides a component to select permission groups
+ * @file provides a component to select sites
  * @author <marc.hanisch@gfz-potsdam.de>
  * @author <nils.brinckmann@gfz-potsdam.de>
  */
@@ -48,12 +48,12 @@ import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import EntitySelect from '@/components/EntitySelect.vue'
 
-import { PermissionGroup } from '@/models/PermissionGroup'
+import { Site } from '@/models/Site'
 
-type PermissionGroupLoaderFunction = () => Promise<PermissionGroup[]>
+type SitesLoaderFunction = () => Promise<Site[]>
 
 /**
- * A class component to select permission groups
+ * A class component to select sites
  * @extends Vue
  */
 @Component({
@@ -62,17 +62,17 @@ type PermissionGroupLoaderFunction = () => Promise<PermissionGroup[]>
   }
 })
 // @ts-ignore
-export default class PermissionGroupSearchSelect extends Vue {
+export default class SiteSearchSelect extends Vue {
   /**
-   * a list of permission groups
+   * a list of sites
    */
   @Prop({
-    default: () => [] as PermissionGroup[],
+    default: () => [] as Site[],
     required: true,
     type: Array
   })
   // @ts-ignore
-  readonly value!: PermissionGroup[]
+  readonly value!: Site[]
 
   /**
    * whether the component is in readonly mode or not
@@ -95,34 +95,34 @@ export default class PermissionGroupSearchSelect extends Vue {
   readonly label!: string
 
   /**
-   * fetches all permission groups from the API
+   * fetches all sites from the API
    *
-   * @return {PermissionGroupLoaderFunction} a function that returns a promise which returns a list of permission groups
+   * @return {SitesLoaderFunction} a function that returns a promise which returns a list of sites
    */
-  get findAllPermissionGroups (): PermissionGroupLoaderFunction {
-    return () => { return this.$api.permissionGroupApi.findAll() }
+  get findAllSites (): SitesLoaderFunction {
+    return () => { return this.$api.sites.searchAll() }
   }
 
   /**
-   * returns the list of permission groups
+   * returns the list of sites
    *
-   * @return {PermissionGroup[]} a list of permission groups
+   * @return {Site[]} a list of sites
    */
   get wrappedValue () {
     return this.value
   }
 
   /**
-   * triggers an input event when the list of permission groups has changed
+   * triggers an input event when the list of sites has changed
    *
-   * @param {PermissionGroup[]} newValue - a list of permission groups
-   * @fires PermissionGroupSearchSelect#input
+   * @param {Site[]} newValue - a list of sites
+   * @fires SiteSearchSelect#input
    */
   set wrappedValue (newValue) {
     /**
      * fires an input event
-     * @event PermissionGroupSearchSelect#input
-     * @type {PermissionGroup[]}
+     * @event SitesSearchSelect#input
+     * @type {Sites[]}
      */
     this.$emit('input', newValue)
   }

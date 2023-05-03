@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -54,6 +54,10 @@ permissions and limitations under the Licence.
         v-model="configurationCopy"
         :readonly="false"
       />
+      <NonModelOptionsForm
+        v-model="editOptions"
+        :entity="configurationCopy"
+      />
       <v-card-actions>
         <v-spacer />
         <save-and-cancel-buttons
@@ -89,13 +93,21 @@ import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButto
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
+import { CreatePidAction, LoadConfigurationAction, SaveConfigurationAction } from '@/store/configurations'
 
 @Component({
-  components: { ProgressIndicator, ConfigurationsBasicDataForm, SaveAndCancelButtons, NavigationGuardDialog },
+  components: {
+    ConfigurationsBasicDataForm,
+    NavigationGuardDialog,
+    NonModelOptionsForm,
+    ProgressIndicator,
+    SaveAndCancelButtons
+  },
   middleware: ['auth'],
   computed: mapState('configurations', ['configuration']),
   methods: {
-    ...mapActions('configurations', ['saveConfiguration', 'loadConfiguration']),
+    ...mapActions('configurations', ['saveConfiguration', 'loadConfiguration', 'createPid']),
     ...mapActions('appbar', ['setTitle'])
   }
 })
@@ -105,11 +117,15 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
+  private editOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   configuration!: IConfiguration
-  saveConfiguration!: (configuration: Configuration) => void
-  loadConfiguration!: (id: string) => void
+  saveConfiguration!: SaveConfigurationAction
+  loadConfiguration!: LoadConfigurationAction
+  createPid!: CreatePidAction
   setTitle!: SetTitleAction
 
   /**
@@ -157,6 +173,9 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
     try {
       this.isLoading = true
       await this.saveConfiguration(this.configurationCopy)
+      if (this.editOptions.persistentIdentifierShouldBeCreated) {
+        await this.createPid(this.configurationId)
+      }
       this.loadConfiguration(this.configurationId)
       this.hasSaved = true
 

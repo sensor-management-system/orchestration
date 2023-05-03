@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -49,6 +49,13 @@ permissions and limitations under the Licence.
               placeholder="e.g 2000-01-31 12:00"
               :rules="[...[rules.required],...beginDateExtraRules]"
               @input="update('beginDate', $event)"
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              :value="value.label"
+              label="Label"
+              @input="update('label', $event)"
             />
           </v-col>
         </v-row>
@@ -326,6 +333,9 @@ export default class DynamicLocationActionDataForm extends mixins(Rules) {
         break
       case 'beginDescription':
         copy.beginDescription = value as string
+        break
+      case 'label':
+        copy.label = value as string
         break
       case 'beginContact':
         copy.beginContact = value as Contact | null

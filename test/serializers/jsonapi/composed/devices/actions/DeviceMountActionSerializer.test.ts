@@ -117,6 +117,8 @@ describe('DeviceMountActionSerializer', () => {
               start_date: '2020-08-28T13:49:48.015620+00:00',
               end_date: '2020-08-29T13:49:48.015620+00:00',
               label: 'Tereno NO Boeken',
+              description: 'Boeken station',
+              project: 'Tereno NO',
               status: 'draft',
               archived: true
             }
@@ -224,6 +226,8 @@ describe('DeviceMountActionSerializer', () => {
         startDate: DateTime.utc(2020, 8, 28, 13, 49, 48, 15),
         endDate: DateTime.utc(2020, 8, 29, 13, 49, 48, 15),
         label: 'Tereno NO Boeken',
+        description: 'Boeken station',
+        project: 'Tereno NO',
         status: 'draft',
         archived: true
       })

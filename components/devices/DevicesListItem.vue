@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -133,7 +133,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(device.manufacturerName) }}
+          {{ device.manufacturerName | orDefault }}
         </v-col>
         <v-col
           cols="4"
@@ -155,7 +155,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(device.model) }}
+          {{ device.model | orDefault }}
         </v-col>
       </v-row>
       <v-row
@@ -181,7 +181,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(device.serialNumber) }}
+          {{ device.serialNumber | orDefault }}
         </v-col>
         <v-col
           cols="4"
@@ -203,7 +203,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(device.inventoryNumber) }}
+          {{ device.inventoryNumber | orDefault }}
         </v-col>
       </v-row>
       <v-row
@@ -229,7 +229,7 @@ permissions and limitations under the Licence.
           xl="11"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(device.description) }}
+          {{ device.description | orDefault }}
         </v-col>
       </v-row>
     </template>
@@ -276,8 +276,6 @@ export default class DevicesListItem extends Vue {
   // vuex definition for typescript check
   getDeviceTypeByUri!: (uri: string) => DeviceType | undefined
   getEquipmentstatusByUri!: (uri: string) => Status | undefined
-
-  getTextOrDefault = (text: string): string => text || '-'
 
   getType () {
     if (this.device.deviceTypeName) {

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -54,6 +54,35 @@ permissions and limitations under the Licence.
         <label>Status</label>
         {{ value.status | orDefault }}
       </v-col>
+      <v-col cols="12" md="6">
+        <label>Persistent identifier (PID)</label>
+        <v-tooltip
+          :disabled="!value.persistentIdentifier"
+          :color="pidTooltipColor"
+          bottom
+        >
+          <template #activator="{ on, attrs }">
+            <span
+              :class="value.persistentIdentifier ? 'clickable' : ''"
+              v-bind="attrs"
+              v-on="on"
+              @click="copyPidToClipboard"
+              @mouseenter="resetPidTooltip"
+            >{{ value.persistentIdentifier | orDefault }}</span>
+          </template>
+          <span>{{ pidTooltipText }}</span>
+        </v-tooltip>
+        <a
+          v-if="value.persistentIdentifier"
+          :href="persistentIdentifierUrl"
+          target="_blank"
+          class="text-decoration-none"
+        >
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
+      </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
@@ -62,6 +91,9 @@ permissions and limitations under the Licence.
           {{ value.startDate | dateToDateTimeString | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
+        <span v-else>
+          {{ null | orDefault }}
+        </span>
       </v-col>
       <v-col cols="12" md="3">
         <label>End date</label>
@@ -69,12 +101,28 @@ permissions and limitations under the Licence.
           {{ value.endDate | dateToDateTimeString | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
+        <span v-else>
+          {{ null | orDefault }}
+        </span>
+      </v-col>
+      <v-col cols="12" md="3">
+        <label>Project</label>
+        {{ value.project | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
         <label>Site</label>
         <span v-if="value.siteId && site">
           <nuxt-link :to="'/sites/' + value.siteId" target="_blank">{{ site.label }}</nuxt-link><v-icon small>mdi-open-in-new</v-icon>
         </span>
+        <span v-else>
+          {{ null | orDefault }}
+        </span>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <label>Description</label>
+        {{ value.description | orDefault }}
       </v-col>
     </v-row>
   </div>
@@ -106,6 +154,9 @@ import { LoadSiteAction, SitesState } from '@/store/sites'
   methods: mapActions('sites', ['loadSite'])
 })
 export default class ConfigurationsBasicDataForm extends Vue {
+  private pidTooltipColor: string = 'default'
+  private pidTooltipText: string = 'Copy PID-URL'
+
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
   @Prop({
     default: () => new Configuration(),
@@ -150,6 +201,39 @@ export default class ConfigurationsBasicDataForm extends Vue {
 
   public validateForm (): boolean {
     return (this.$refs.basicDataForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  /**
+   * copies the PID-URL to the clipboard and changes the tooltip's text and color
+   *
+   * @returns {void}
+   */
+  copyPidToClipboard (): void {
+    if (!this.value.persistentIdentifier) { return }
+    navigator.clipboard.writeText(this.persistentIdentifierUrl)
+    this.pidTooltipText = 'Copied!'
+    this.pidTooltipColor = 'green'
+  }
+
+  get persistentIdentifierUrl (): string {
+    if (!this.value.persistentIdentifier) {
+      return ''
+    }
+    const pidBaseUrl = process.env.pidBaseUrl
+    if (!pidBaseUrl) {
+      return ''
+    }
+    return pidBaseUrl + '/' + this.value.persistentIdentifier
+  }
+
+  /**
+   * resets the PID tooltip's color and text
+   *
+   * @returns {void}
+   */
+  resetPidTooltip (): void {
+    this.pidTooltipText = 'Click to copy PID-URL'
+    this.pidTooltipColor = 'default'
   }
 }
 </script>

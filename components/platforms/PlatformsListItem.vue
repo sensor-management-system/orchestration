@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -133,7 +133,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(platform.manufacturerName) }}
+          {{ platform.manufacturerName | orDefault }}
         </v-col>
         <v-col
           cols="4"
@@ -155,7 +155,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(platform.model) }}
+          {{ platform.model | orDefault }}
         </v-col>
       </v-row>
       <v-row
@@ -181,7 +181,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(platform.serialNumber) }}
+          {{ platform.serialNumber | orDefault }}
         </v-col>
         <v-col
           cols="4"
@@ -203,7 +203,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(platform.inventoryNumber) }}
+          {{ platform.inventoryNumber | orDefault }}
         </v-col>
       </v-row>
       <v-row
@@ -229,7 +229,7 @@ permissions and limitations under the Licence.
           xl="11"
           class="nowrap-truncate"
         >
-          {{ getTextOrDefault(platform.description) }}
+          {{ platform.description | orDefault }}
         </v-col>
       </v-row>
     </template>
@@ -278,8 +278,6 @@ export default class PlatformsListItem extends Vue {
   // vuex definition for typescript check
   getPlatformTypeByUri!: GetPlatformTypeByUriGetter
   getEquipmentstatusByUri!: GetEquipmentstatusByUriGetter
-
-  getTextOrDefault = (text: string): string => text || '-'
 
   getType () {
     if (this.platform.platformTypeName) {

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -32,6 +32,7 @@
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 
+import { Site } from '@/models/Site'
 import { PermissionGroup } from '@/models/PermissionGroup'
 
 export interface IConfigurationBasicSearchParams {
@@ -40,6 +41,8 @@ export interface IConfigurationBasicSearchParams {
 
 export interface IConfigurationSearchParams extends IConfigurationBasicSearchParams {
   states: string[]
+  projects: string[]
+  sites: Site[]
   permissionGroups: PermissionGroup[]
   includeArchivedConfigurations: boolean
 }
@@ -50,11 +53,19 @@ export interface IConfigurationSearchParams extends IConfigurationBasicSearchPar
  */
 export class ConfigurationSearchParamsSerializer {
   public states: string[] = []
+  public projects: string[] = []
+  public sites: Site[] = []
   public permissionGroups: PermissionGroup[] = []
 
-  constructor ({ states, permissionGroups }: {states?: string[], permissionGroups?: PermissionGroup[]} = {}) {
+  constructor ({ states, projects, sites, permissionGroups }: {states?: string[], projects?: string[], sites?: Site[], permissionGroups?: PermissionGroup[]} = {}) {
     if (states) {
       this.states = states
+    }
+    if (projects) {
+      this.projects = projects
+    }
+    if (sites) {
+      this.sites = sites
     }
     if (permissionGroups) {
       this.permissionGroups = permissionGroups
@@ -74,6 +85,12 @@ export class ConfigurationSearchParamsSerializer {
     }
     if (params.states) {
       result.states = params.states
+    }
+    if (params.projects) {
+      result.projects = params.projects
+    }
+    if (params.sites) {
+      result.sites = params.sites.map(s => s.id)
     }
     if (params.permissionGroups) {
       result.permissionGroups = params.permissionGroups.map(p => p.id)
@@ -100,6 +117,21 @@ export class ConfigurationSearchParamsSerializer {
       }
       states = params.states.filter(state => typeof state === 'string') as string[]
     }
+    let projects: string[] = []
+    if (params.projects) {
+      if (!Array.isArray(params.projects)) {
+        params.projects = [params.projects]
+      }
+      projects = params.projects.filter(project => typeof project === 'string') as string[]
+    }
+
+    let sites: Site[] = []
+    if (params.sites) {
+      if (!Array.isArray(params.sites)) {
+        params.sites = [params.sites]
+      }
+      sites = params.sites.map(siteId => this.sites.find(site => site.id === siteId)).filter(isNotUndefined) as Site[]
+    }
 
     let permissionGroups: PermissionGroup[] = []
     if (params.permissionGroups) {
@@ -112,6 +144,8 @@ export class ConfigurationSearchParamsSerializer {
     return {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
       states,
+      projects,
+      sites,
       permissionGroups,
       includeArchivedConfigurations: typeof params.includeArchivedConfigurations !== 'undefined' && params.includeArchivedConfigurations === 'true'
     }
