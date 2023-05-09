@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
             <v-text-field
               v-model="searchText"
               label="Search term"
-              placeholder="Name of site"
+              placeholder="Search sites"
               hint="Please enter at least 3 characters"
               @keydown.enter="basicSearch"
             />
@@ -82,7 +82,7 @@ permissions and limitations under the Licence.
             <v-text-field
               v-model="searchText"
               label="Search term"
-              placeholder="Name of site"
+              placeholder="Search sites"
               hint="Please enter at least 3 characters"
               @keydown.enter="extendedSearch"
             />
