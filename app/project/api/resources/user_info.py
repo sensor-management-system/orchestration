@@ -8,7 +8,7 @@
 
 """Resource classes for the user info endpoint."""
 
-from flask import g
+from flask import g, request
 
 from ...extensions.instances import idl
 from ...frj_csv_export.resource import ResourceList
@@ -36,7 +36,18 @@ class UserInfo(ResourceList):
         """
         if not g.user:
             raise UnauthorizedError("Authentication required")
-        idl_groups = idl.get_all_permission_groups_for_a_user(g.user.subject)
+
+        skip_cache_arguments = {}
+        # type is a function where we put the string value in.
+        # A little bit annoying...
+        if request.args.get(
+            "skip_cache", default=False, type=lambda x: x.lower() == "true"
+        ):
+            skip_cache_arguments["skip_cache"] = True
+
+        idl_groups = idl.get_all_permission_groups_for_a_user(
+            g.user.subject, **skip_cache_arguments
+        )
 
         if not g.user.apikey:
             g.user.apikey = User.generate_new_apikey()

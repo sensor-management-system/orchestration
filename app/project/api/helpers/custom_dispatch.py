@@ -14,10 +14,6 @@ def custom_dispatch(dispatch):
 
     default_function = None
 
-    def default(f):
-        nonlocal default_function
-        default_function = f
-
     @functools.wraps(dispatch)
     def wrapper(*args, **kwargs):
         dispatch_result = dispatch(*args, **kwargs)
@@ -25,6 +21,11 @@ def custom_dispatch(dispatch):
         if not func:
             raise NotImplementedError()
         return func(*args, **kwargs)
+
+    def default(f):
+        nonlocal default_function
+        default_function = f
+        return wrapper
 
     def register(dispatch_result):
         def register_wrapper(f):
@@ -46,7 +47,10 @@ def custom_dispatch(dispatch):
         return wrapper
 
     def find_for(dispatch_result):
-        return registry[dispatch_result]
+        func = registry.get(dispatch_result, default_function)
+        if not func:
+            raise NotImplementedError()
+        return func
 
     def delegate(dispatch_result, *args, **kwargs):
         return find_for(dispatch_result)(*args, **kwargs)
