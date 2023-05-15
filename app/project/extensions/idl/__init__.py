@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -10,9 +10,10 @@ import operator
 from typing import List, Optional
 
 import requests
-from cachetools import TTLCache, cachedmethod
+from cachetools import TTLCache
 from flask import current_app
 
+from ...api.helpers.cached_method import cached_method
 from ...api.helpers.errors import ConflictError, ServiceIsUnreachableError
 from .models import permission_group, user_account
 
@@ -54,7 +55,9 @@ class Idl:
         """Get the token to work with the external idl service."""
         return current_app.config["SMS_IDL_TOKEN"]
 
-    @cachedmethod(operator.attrgetter("cache_user_account"))
+    @cached_method(
+        operator.attrgetter("cache_user_account"), skip_argument={"skip_cache": True}
+    )
     def get_all_permission_groups_for_a_user(
         self, user_subject
     ) -> Optional[user_account.UserAccount]:
@@ -101,7 +104,10 @@ class Idl:
         json_obj = response.json()
         return json_obj
 
-    @cachedmethod(operator.attrgetter("cache_permission_groups"))
+    @cached_method(
+        operator.attrgetter("cache_permission_groups"),
+        skip_argument={"skip_cache": True},
+    )
     def get_permission_groups(self) -> List[permission_group.PermissionGroup]:
         """
         Return a list of groups fetched from the IDL service.

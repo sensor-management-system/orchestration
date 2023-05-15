@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
@@ -9,7 +9,15 @@ paths = {
     "/permission-groups": {
         "get": {
             "tags": ["Permission groups"],
-            "parameters": [],
+            "parameters": [
+                {
+                    "name": "skip_cache",
+                    "in": "query",
+                    "required": False,
+                    "default": False,
+                    "schema": {"type": "boolean"},
+                }
+            ],
             "responses": {
                 "200": {"$ref": "#/components/responses/Permissiongroup_coll"}
             },
