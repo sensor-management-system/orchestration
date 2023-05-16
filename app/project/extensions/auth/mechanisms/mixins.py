@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -7,6 +7,9 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Mixin classes that may be used for multiple authentification mechanisms."""
+
+import json
+import pathlib
 
 from ....api.models import Contact, User
 from ....api.models.base_model import db
@@ -42,10 +45,22 @@ class CreateNewUserByUserinfoMixin:
                 contact.active = True
                 db.session.add(contact)
         if not contact:
+            organization_names_file = (
+                pathlib.Path(__file__).parent.parent.parent.parent
+                / "static"
+                / "organization_names.json"
+            )
+            with organization_names_file.open() as infile:
+                organization_names = json.load(infile)
+
+            domain = attributes["email"].split("@")[-1]
+            organization = organization_names.get(domain)
+
             contact = Contact(
                 given_name=attributes["given_name"],
                 family_name=attributes["family_name"],
                 email=attributes["email"],
+                organization=organization,
                 active=True,
             )
             db.session.add(contact)
