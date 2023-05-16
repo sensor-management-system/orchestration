@@ -458,3 +458,58 @@ class TestContactServices(BaseTestCase):
                     content_type="application/vnd.api+json",
                 )
         self.assertEqual(response.status_code, 409)
+
+    def test_contact_creation_with_organization(self):
+        """Ensure that we try to set the organization for new contacts."""
+        user_data = {
+            "given_name": "Test",
+            "family_name": "User",
+            "email": "test.user@gfz-potsdam.de",
+            "sub": "tuser@gfz-potsdam.de",
+        }
+        token = create_token(user_data)
+        self.assertEqual(0, db.session.query(Contact).count())
+
+        self.client.get(
+            base_url + "/devices",
+            headers=token,
+            content_type="application/vnd.api+json",
+        )
+        self.assertEqual(1, db.session.query(Contact).count())
+
+        contact = db.session.query(Contact).first()
+
+        self.assertEqual(contact.given_name, "Test")
+        self.assertEqual(contact.family_name, "User")
+        self.assertEqual(contact.email, "test.user@gfz-potsdam.de")
+        # And we want to make sure that we can set the organization if
+        # we have it in our list.
+        self.assertEqual(
+            contact.organization,
+            "Helmholtz Centre Potsdam - German Research Centre for Geosciences GFZ",
+        )
+
+    def test_contact_creation_without_known_organization(self):
+        """Ensure that we still add the contact, even if the organzation is unknow."""
+        user_data = {
+            "given_name": "Test",
+            "family_name": "User",
+            "email": "test.user@abcdef.foo",
+            "sub": "tuser@abcdef.foo",
+        }
+        token = create_token(user_data)
+        self.assertEqual(0, db.session.query(Contact).count())
+
+        self.client.get(
+            base_url + "/devices",
+            headers=token,
+            content_type="application/vnd.api+json",
+        )
+        self.assertEqual(1, db.session.query(Contact).count())
+
+        contact = db.session.query(Contact).first()
+
+        self.assertEqual(contact.given_name, "Test")
+        self.assertEqual(contact.family_name, "User")
+        self.assertEqual(contact.email, "test.user@abcdef.foo")
+        self.assertIsNone(contact.organization)

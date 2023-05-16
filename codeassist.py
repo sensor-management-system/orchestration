@@ -19,10 +19,15 @@ the manage.py can't be accessed.
 To solve those problems is hard and that is what this module here is for.
 """
 
+import datetime
+import functools
+import json
 import pathlib
 import re
+from xml.etree import ElementTree
 
 import click
+import requests
 
 
 class Node:
@@ -157,6 +162,113 @@ def sensorml():
     output_filename = "app/project/tests/api/helpers/sensorml_schema_validator.pickle"
     with open(output_filename, "wb") as outfile:
         pickle.dump(schema, outfile)
+
+
+@download.command()
+def organization_names():
+    """Download the organzation names and store it in a json file."""
+    # We use here that all of the organizations that are connected
+    # to the helmholtz aai are either part of edugain or the dfn aai.
+    #
+    # But first we want to fetch content & we want to cache it locally.
+    def cache_local(f):
+        tmp = pathlib.Path("/tmp") / datetime.date.today().strftime("%Y%m%d")
+
+        @functools.wraps(f)
+        def wrapper(url):
+            if not tmp.exists():
+                tmp.mdir()
+
+            base_name = pathlib.Path(url).name
+            temp_file = tmp / base_name
+            if temp_file.exists():
+                return temp_file.open("rt").read()
+            result = f(url)
+            with temp_file.open("wt") as outfile:
+                outfile.write(result)
+            return result
+
+        return wrapper
+
+    @cache_local
+    def fetch(url):
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
+
+    # Now we can extract from our two files.
+    organizations = {}
+    urls = [
+        "https://www.aai.dfn.de/metadata/dfn-aai-idp-metadata.xml",
+        "https://www.aai.dfn.de/metadata/dfn-aai-edugain+idp-metadata.xml",
+    ]
+    for url in urls:
+        xml_content = fetch(url)
+        et = ElementTree.fromstring(xml_content)
+        for entity_descriptor in et.findall(
+            "{urn:oasis:names:tc:SAML:2.0:metadata}EntityDescriptor"
+        ):
+            idp_sso_descriptor = entity_descriptor.find(
+                "{urn:oasis:names:tc:SAML:2.0:metadata}IDPSSODescriptor"
+            )
+            if idp_sso_descriptor is not None:
+                extensions = idp_sso_descriptor.find(
+                    "{urn:oasis:names:tc:SAML:2.0:metadata}Extensions"
+                )
+                if extensions is not None:
+                    scope = extensions.find("{urn:mace:shibboleth:metadata:1.0}Scope")
+                    if scope is not None:
+                        if scope.attrib.get("regexp") not in [True, "true", "1"]:
+                            scope_text = scope.text
+
+                            organization = entity_descriptor.find(
+                                "{urn:oasis:names:tc:SAML:2.0:metadata}Organization"
+                            )
+                            if organization is not None:
+                                name_en = None
+                                name_de = None
+                                for display_name in organization.findall(
+                                    "{urn:oasis:names:tc:SAML:2.0:metadata}OrganizationDisplayName"
+                                ):
+                                    lang = display_name.attrib.get(
+                                        "{http://www.w3.org/XML/1998/namespace}lang"
+                                    )
+                                    if lang == "en":
+                                        name_en = display_name.text
+                                    elif lang == "de":
+                                        name_de = display_name.text
+                                name = name_en or name_de
+                                organizations[scope_text] = name
+                            # If we didn't got an display name by the organization,
+                            # then we can still extract it from the ui_info of the extensions.
+                            if not organizations.get(scope_text):
+                                ui_info = extensions.find(
+                                    "{urn:oasis:names:tc:SAML:metadata:ui}UIInfo"
+                                )
+                                display_names = ui_info.findall(
+                                    "{urn:oasis:names:tc:SAML:metadata:ui}DisplayName"
+                                )
+                                name_en = None
+                                name_de = None
+                                for display_name in display_names:
+                                    lang = display_name.attrib.get(
+                                        "{http://www.w3.org/XML/1998/namespace}lang"
+                                    )
+                                    if lang == "en":
+                                        name_en = display_name.text
+                                    elif lang == "de":
+                                        name_de = display_name.text
+                                name = name_en or name_de
+                                organizations[scope_text] = name
+
+    output_file = (
+        pathlib.Path(__file__).parent
+        / "app"
+        / "project"
+        / "static"
+        / "organization_names.json"
+    )
+    json.dump(organizations, output_file.open("wt"), indent=4, sort_keys=True)
 
 
 if __name__ == "__main__":
