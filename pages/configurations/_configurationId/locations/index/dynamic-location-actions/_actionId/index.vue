@@ -48,21 +48,39 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import * as VueRouter from 'vue-router'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import DynamicLocationView from '@/components/configurations/DynamicLocationView.vue'
 import {
   ConfigurationsState,
   LoadDeviceMountActionsForDynamicLocationAction,
-  LoadDynamicLocationActionAction
+  LoadDynamicLocationActionAction,
+  SetSelectedLocationDateAction,
+  SetSelectedTimepointItemAction
 } from '@/store/configurations'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import DynamicLocationView from '@/components/configurations/DynamicLocationView.vue'
+
 @Component({
   components: { DynamicLocationView, ProgressIndicator },
   middleware: ['auth'],
   computed: {
-    ...mapState('configurations', ['dynamicLocationAction'])
+    ...mapState('configurations',
+      [
+        'dynamicLocationAction',
+        'configurationLocationActionTimepoints',
+        'selectedTimepointItem',
+        'selectedLocationDate'
+      ]
+    )
   },
   methods: {
-    ...mapActions('configurations', ['loadDynamicLocationAction', 'loadDeviceMountActionsForDynamicLocation'])
+    ...mapActions('configurations',
+      [
+        'loadDynamicLocationAction',
+        'loadDeviceMountActionsForDynamicLocation',
+        'setSelectedTimepointItem',
+        'setSelectedLocationDate'
+      ]
+    )
   }
 })
 export default class DynamicLocationActionView extends Vue {
@@ -75,8 +93,13 @@ export default class DynamicLocationActionView extends Vue {
   dynamicLocationAction!: ConfigurationsState['dynamicLocationAction']
   loadDynamicLocationAction!: LoadDynamicLocationActionAction
   loadDeviceMountActionsForDynamicLocation!: LoadDeviceMountActionsForDynamicLocationAction
+  selectedTimepointItem!: ConfigurationsState['selectedTimepointItem']
+  selectedLocationDate!: ConfigurationsState['selectedLocationDate']
+  setSelectedTimepointItem!: SetSelectedTimepointItemAction
+  setSelectedLocationDate!: SetSelectedLocationDateAction
+  configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
 
-  async created () {
+  async fetch () {
     await this.loadLocationAction()
   }
 
@@ -91,8 +114,35 @@ export default class DynamicLocationActionView extends Vue {
   async loadLocationAction () {
     try {
       this.isLoading = true
-      await this.loadDynamicLocationAction(this.actionId)
-      await this.loadDeviceMountActionsForDynamicLocation(this.configurationId)
+
+      await Promise.all([
+        this.loadDynamicLocationAction(this.actionId),
+        this.loadDeviceMountActionsForDynamicLocation(this.configurationId)
+      ])
+
+      // set the date field and the date select to the correct values
+      if (this.dynamicLocationAction) {
+        const currentItem = this.selectedTimepointItem
+        if (!currentItem || (currentItem.id !== this.dynamicLocationAction.id || currentItem.type !== 'configuration_dynamic_location_end')) {
+          // date field
+          this.setSelectedLocationDate(this.dynamicLocationAction.beginDate)
+
+          // select the corresponding timepoint item
+          const item = this.configurationLocationActionTimepoints.find((item) => {
+            if (item.type !== 'configuration_dynamic_location_begin') {
+              return false
+            }
+            if (item.id !== this.dynamicLocationAction!.id) {
+              return false
+            }
+            return true
+          })
+          if (item) {
+            // date select
+            this.setSelectedTimepointItem(item)
+          }
+        }
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading failed')
     } finally {

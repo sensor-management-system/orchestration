@@ -48,17 +48,38 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import * as VueRouter from 'vue-router'
+
+import {
+  ConfigurationsState,
+  LoadStaticLocationActionAction,
+  SetSelectedLocationDateAction,
+  SetSelectedTimepointItemAction
+} from '@/store/configurations'
+
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import StaticLocationView from '@/components/configurations/StaticLocationView.vue'
-import { ConfigurationsState, LoadStaticLocationActionAction } from '@/store/configurations'
+
 @Component({
   components: { StaticLocationView, ProgressIndicator },
   middleware: ['auth'],
   computed: {
-    ...mapState('configurations', ['staticLocationAction'])
+    ...mapState('configurations',
+      [
+        'staticLocationAction',
+        'configurationLocationActionTimepoints',
+        'selectedTimepointItem',
+        'selectedLocationDate'
+      ]
+    )
   },
   methods: {
-    ...mapActions('configurations', ['loadStaticLocationAction'])
+    ...mapActions('configurations',
+      [
+        'loadStaticLocationAction',
+        'setSelectedTimepointItem',
+        'setSelectedLocationDate'
+      ]
+    )
   }
 })
 export default class StaticLocationActionView extends Vue {
@@ -70,8 +91,13 @@ export default class StaticLocationActionView extends Vue {
   // vuex definition for typescript check
   staticLocationAction!: ConfigurationsState['staticLocationAction']
   loadStaticLocationAction!: LoadStaticLocationActionAction
+  selectedTimepointItem!: ConfigurationsState['selectedTimepointItem']
+  selectedLocationDate!: ConfigurationsState['selectedLocationDate']
+  setSelectedTimepointItem!: SetSelectedTimepointItemAction
+  setSelectedLocationDate!: SetSelectedLocationDateAction
+  configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
 
-  async created () {
+  async fetch () {
     await this.loadLocationAction()
   }
 
@@ -87,6 +113,31 @@ export default class StaticLocationActionView extends Vue {
     try {
       this.isLoading = true
       await this.loadStaticLocationAction(this.actionId)
+
+      // set the date field and the date select to the correct values
+      if (this.staticLocationAction) {
+        const currentItem = this.selectedTimepointItem
+        // if we already have a timepoint item for the end action, don't overwrite it
+        if (!currentItem || (currentItem.id !== this.staticLocationAction.id || currentItem.type !== 'configuration_static_location_end')) {
+          // date field
+          this.setSelectedLocationDate(this.staticLocationAction.beginDate)
+
+          // select the corresponding timepoint item
+          const item = this.configurationLocationActionTimepoints.find((item) => {
+            if (item.type !== 'configuration_static_location_begin') {
+              return false
+            }
+            if (item.id !== this.staticLocationAction!.id) {
+              return false
+            }
+            return true
+          })
+          if (item) {
+            // date select
+            this.setSelectedTimepointItem(item)
+          }
+        }
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading failed')
     } finally {
