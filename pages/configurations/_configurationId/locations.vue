@@ -46,13 +46,17 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { mapActions } from 'vuex'
 
-import { LoadEpsgCodesAction, LoadElevationDataAction } from '@/store/vocabulary'
-
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import {
+  LoadEpsgCodesAction,
+  LoadElevationDataAction
+} from '@/store/vocabulary'
 import {
   LoadDeviceMountActionsForDynamicLocationAction,
   LoadLocationActionTimepointsAction
 } from '@/store/configurations'
+import { LoadAllContactsAction } from '@/store/contacts'
+
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
   components: {
@@ -71,17 +75,19 @@ export default class ConfigurationLocations extends Vue {
   loadEpsgCodes!: LoadEpsgCodesAction
   loadElevationData!: LoadElevationDataAction
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
-  loadAllContacts!: () => void
+  loadAllContacts!: LoadAllContactsAction
   loadDeviceMountActionsForDynamicLocation!: LoadDeviceMountActionsForDynamicLocationAction
 
-  async created () {
+  async fetch () {
     try {
       this.isLoading = true
-      await this.loadEpsgCodes()
-      await this.loadElevationData()
-      await this.loadAllContacts()
-      await this.loadLocationActionTimepoints(this.configurationId)
-      await this.loadDeviceMountActionsForDynamicLocation(this.configurationId)
+      await Promise.all([
+        this.loadEpsgCodes(),
+        this.loadElevationData(),
+        this.loadAllContacts(),
+        this.loadLocationActionTimepoints(this.configurationId),
+        this.loadDeviceMountActionsForDynamicLocation(this.configurationId)
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch locations')
     } finally {

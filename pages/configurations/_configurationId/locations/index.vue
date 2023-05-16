@@ -115,7 +115,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
@@ -129,11 +129,11 @@ import {
   SetSelectedTimepointItemAction
 } from '@/store/configurations'
 
+import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
+import { isTimePointForDynamicAction, isTimePointForStaticAction } from '@/utils/locationHelper'
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
-import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
-import { isTimePointForDynamicAction, isTimePointForStaticAction } from '@/utils/locationHelper'
 
 @Component({
   components: {
@@ -141,13 +141,19 @@ import { isTimePointForDynamicAction, isTimePointForStaticAction } from '@/utils
   },
   computed: {
     ...mapState('configurations',
-      ['configurationLocationActionTimepoints',
+      [
+        'configuration',
+        'configurationLocationActionTimepoints',
         'selectedTimepointItem',
-        'selectedLocationDate']),
-    ...mapGetters('configurations', [
-      'hasMountedDevicesWithProperties',
-      'hasActiveDevicesWithPropertiesForDate'
-    ])
+        'selectedLocationDate'
+      ]
+    ),
+    ...mapGetters('configurations',
+      [
+        'hasMountedDevicesWithProperties',
+        'hasActiveDevicesWithPropertiesForDate'
+      ]
+    )
   },
   methods: {
     ...mapActions('configurations', ['setSelectedTimepointItem', 'setSelectedLocationDate'])
@@ -158,22 +164,43 @@ export default class ConfigurationShowLocationPage extends Vue {
     editable!: boolean
 
   // vuex definition for typescript check
+  private configuration!: ConfigurationsState['configuration']
   private configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
   private selectedTimepointItem!: ConfigurationsState['selectedTimepointItem']
   private selectedLocationDate!: ConfigurationsState['selectedLocationDate']
   private setSelectedTimepointItem!: SetSelectedTimepointItemAction
   private setSelectedLocationDate!: SetSelectedLocationDateAction
-  private hasDeviceMountActionsForDynamicLocation!: () => boolean
   private hasMountedDevicesWithProperties!: HasMountedDevicesWithPropertiesGetter
   private hasActiveDevicesWithPropertiesForDate!: HasActiveDevicesWithPropertiesForDate
 
   created () {
-    if (this.selectedTimepoint) {
-      this.selectTimepoint()
-    } else {
-      this.selectedDate = currentAsUtcDateSecondsAsZeros()
+    this.selectDefaultAction()
+  }
+
+  selectDefaultAction (): void {
+    if (!this.hasActionParam && !this.isEditPage && !this.isNewPage) {
+      const now = currentAsUtcDateSecondsAsZeros()
+      // when the begin date of the configuration is past the current date, set the current date
+      if (!this.configuration?.startDate || this.configuration?.startDate < now) {
+        this.selectedDate = now
+      } else {
+        // otherwise set the (future) begin of the configuration as date
+        this.selectedDate = this.configuration.startDate
+      }
       this.updateTimepointItemWhenDateSelected()
     }
+  }
+
+  get hasActionParam (): boolean {
+    return 'actionId' in this.$route.params
+  }
+
+  get isEditPage (): boolean {
+    return this.$route.path.match(/edit$/) !== null
+  }
+
+  get isNewPage (): boolean {
+    return this.$route.path.match(/new$/) !== null
   }
 
   get selectedTimepoint () {
@@ -215,14 +242,14 @@ export default class ConfigurationShowLocationPage extends Vue {
     if (this.selectedTimepoint) {
       if (isTimePointForStaticAction(this.selectedTimepoint)) {
         this.$router.push(`/configurations/${this.configurationId}/locations/static-location-actions/${this.selectedTimepoint.id}`)
+        return
       }
-
       if (isTimePointForDynamicAction(this.selectedTimepoint)) {
         this.$router.push(`/configurations/${this.configurationId}/locations/dynamic-location-actions/${this.selectedTimepoint.id}`)
+        return
       }
-    } else {
-      this.$router.push(`/configurations/${this.configurationId}/locations`)
     }
+    this.$router.push(`/configurations/${this.configurationId}/locations`)
   }
 
   updateTimepointItemWhenDateSelected () {
@@ -245,6 +272,11 @@ export default class ConfigurationShowLocationPage extends Vue {
 
   isEndLocationAndTimepointIsBeforeSelectedDate (item: ILocationTimepoint) {
     return (item.type === LocationTypes.staticEnd || item.type === LocationTypes.dynamicEnd) && item.timepoint < this.selectedDate!
+  }
+
+  @Watch('$route')
+  onRouteChange () {
+    this.selectDefaultAction()
   }
 }
 </script>

@@ -51,7 +51,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 
 import { LatLng, LeafletMouseEvent, LocationEvent, Map } from 'leaflet'
 
@@ -65,10 +65,12 @@ export default class LocationMap extends Vue {
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
 
   private currentPosition: LatLng = new LatLng(52, 12)
+  private currentPositionIntializedByLocation = false
 
   created () {
     if (this.location !== null) {
       this.currentPosition = this.location
+      this.currentPositionIntializedByLocation = true
     }
   }
 
@@ -94,13 +96,36 @@ export default class LocationMap extends Vue {
 
   onReady (mapObject: Map) {
     // Only locate when no coordinates were set
-    if (!this.location) {
+    if (this.location === null) {
       mapObject.locate()
     }
   }
 
   onLocationFound (location: LocationEvent) {
-    this.currentPosition = location.latlng
+    if (this.location === null) {
+      this.currentPosition = location.latlng
+    }
+  }
+
+  @Watch('location')
+  onLocationChange (location: LatLng|null) {
+    // It can happen that the location is loaded after the creation of the component
+    // was done.
+    // In this case the location was not considered for the startup
+    // and the code for the geoapi was used with the onLocationFound event.
+    // However, if we still have a change from the value property (& the
+    // location getter) then we still want to focus on this given location.
+    //
+    // But we don't want to focus on every new change of the location, so that
+    // is why we check if the initialization was already done.
+    //
+    // However, if we use the component just to look at the location (readonly mode),
+    // then an updated location means that we should show another static location.
+    // In this case we want to update the current position by the given location.
+    if (location !== null && (!this.currentPositionIntializedByLocation || this.readonly)) {
+      this.currentPosition = location
+      this.currentPositionIntializedByLocation = true
+    }
   }
 }
 </script>
