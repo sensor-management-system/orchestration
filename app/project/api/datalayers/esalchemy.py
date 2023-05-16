@@ -8,6 +8,8 @@
 
 """Classes to help searching in the elasticsearch."""
 
+import csv
+import io
 from dataclasses import dataclass
 
 from flask import current_app, request
@@ -33,6 +35,30 @@ class MultiFieldMatchFilter:
         return result
 
 
+class MustNotFilter:
+    """Class to represent an inverted filter."""
+
+    def __init__(self, inner_filter):
+        """Init the object."""
+        self.inner_filter = inner_filter
+
+    def to_query(self):
+        """Convert the filter to a query."""
+        return {"bool": {"must_not": [self.inner_filter.to_query()]}}
+
+    def __eq__(self, other):
+        """Test equality."""
+        if not isinstance(other, MustNotFilter):
+            return False
+        if not self.inner_filter == other.inner_filter:
+            return False
+        return True
+
+    def __repr__(self):
+        """Transform to a string reprentation."""
+        return f"MustNotFilter(inner_filter={repr(self.inner_filter)})"
+
+
 class TermEqualsExactStringFilter:
     """Class to search for an exact string match in the field."""
 
@@ -54,6 +80,10 @@ class TermEqualsExactStringFilter:
         if not self.value == other.value:
             return False
         return True
+
+    def __repr__(self):
+        """Transform to a string reprentation."""
+        return f"TermEqualsExactStringFilter(term={repr(self.term)},value={repr(self.value)})"
 
 
 class NestedElementFilterWrapper:
@@ -82,6 +112,16 @@ class NestedElementFilterWrapper:
         if not self.inner_filter == other.inner_filter:
             return False
         return True
+
+    def __repr__(self):
+        """Transform to a string reprentation."""
+        return "".join(
+            [
+                "NestedElementFilterWrapper(",
+                f"path={repr(self.path)}, ",
+                f"inner_filter={repr(self.inner_filter)})",
+            ]
+        )
 
 
 @dataclass
@@ -126,6 +166,12 @@ class TermExactInListFilter:
             return False
         return True
 
+    def __repr__(self):
+        """Transform to a string reprentation."""
+        return (
+            "TermExactInListFilter(term={repr(self.term)}, values={repr(self.values)})"
+        )
+
 
 class OrFilter:
     """Class to search with multiple filters (and one must match)."""
@@ -147,6 +193,10 @@ class OrFilter:
             return False
         return True
 
+    def __repr__(self):
+        """Transform to a string reprentation."""
+        return f"OrFilter(sub_filters={repr(self.sub_filters)})"
+
 
 class AndFilter:
     """Class to search with multiple filters (all must match)."""
@@ -167,6 +217,10 @@ class AndFilter:
         if not self.sub_filters == other.sub_filters:
             return False
         return True
+
+    def __repr__(self):
+        """Transform to a string reprentation."""
+        return f"AndFilter(sub_filters={repr(self.sub_filters)})"
 
     def simplify(self):
         """Return an simplified filter if possible (otherwise return yourself)."""
@@ -304,16 +358,49 @@ class EsQueryBuilder:
             return False
         return True
 
+    @staticmethod
+    def split_query(q):
+        """Split the query in those parts that should be searched individually."""
+        values = [x.strip() for x in next(csv.reader(io.StringIO(q), delimiter=" "))]
+        return values
+
     def to_filter(self):
         """Return the filter out of the settings."""
         sub_filters = []
         if self.q:
-            sub_filters.append(
-                MultiFieldMatchFilter(
-                    query=self.q,
-                    type_="phrase",
-                )
-            )
+            and_filters = []
+            parts = self.split_query(self.q)
+            idx = 0
+            while idx < len(parts):
+                part = parts[idx]
+                if part == "AND":
+                    # Ignore that one. To use and semantics is our default.
+                    idx += 1
+                elif part == "OR":
+                    # We want to support alternatives.
+                    if idx + 1 < len(parts) and and_filters:
+                        or1 = and_filters[-1]
+                        or2 = MultiFieldMatchFilter(
+                            query=parts[idx + 1], type_="phrase"
+                        )
+                        and_filters[-1] = OrFilter(sub_filters=[or1, or2])
+                        idx += 2
+                    else:
+                        # Nothing to combine => Skip.
+                        idx += 1
+                else:
+                    if part.startswith("-"):
+                        and_filters.append(
+                            MustNotFilter(
+                                MultiFieldMatchFilter(query=part[1:], type_="phrase")
+                            )
+                        )
+                    else:
+                        and_filters.append(
+                            MultiFieldMatchFilter(query=part, type_="phrase")
+                        )
+                    idx += 1
+            sub_filters.append(AndFilter(and_filters).simplify())
         if self.filters:
             sub_filters.append(FilterParser.parse(filter_list=self.filters))
         return AndFilter(sub_filters).simplify()
