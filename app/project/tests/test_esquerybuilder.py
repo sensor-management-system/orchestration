@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2021
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -15,6 +15,7 @@ from project.api.datalayers.esalchemy import (
     EsQueryBuilder,
     FilterParser,
     MultiFieldMatchFilter,
+    MustNotFilter,
     NestedElementFilterWrapper,
     OrFilter,
     TermEqualsExactStringFilter,
@@ -45,7 +46,72 @@ class TestEsQueryBuilder(unittest.TestCase):
         If we give it a simple query string, we want it to be active.
         And we want to have an MultiFieldMatchFilter.
         """
-        for q in ["search1", "search2", "something different"]:
+        expected_filters = {
+            # Some very simple cases
+            "search1": MultiFieldMatchFilter(query="search1", type_="phrase"),
+            "search2": MultiFieldMatchFilter(query="search2", type_="phrase"),
+            # A multi word query => search for each of the terms.
+            "something different": AndFilter(
+                sub_filters=[
+                    MultiFieldMatchFilter(query="something", type_="phrase"),
+                    MultiFieldMatchFilter(query="different", type_="phrase"),
+                ]
+            ),
+            # Use quoting to search for both terms in one field.
+            'something "very different"': AndFilter(
+                sub_filters=[
+                    MultiFieldMatchFilter(query="something", type_="phrase"),
+                    MultiFieldMatchFilter(query="very different", type_="phrase"),
+                ]
+            ),
+            # Allow to use alternatives.
+            "term1 OR term2": OrFilter(
+                sub_filters=[
+                    MultiFieldMatchFilter(query="term1", type_="phrase"),
+                    MultiFieldMatchFilter(query="term2", type_="phrase"),
+                ]
+            ),
+            # Support the AND as well
+            "term1 AND term2": AndFilter(
+                sub_filters=[
+                    MultiFieldMatchFilter(query="term1", type_="phrase"),
+                    MultiFieldMatchFilter(query="term2", type_="phrase"),
+                ]
+            ),
+            # And we want to be able to negate things
+            "-term3": MustNotFilter(
+                inner_filter=MultiFieldMatchFilter(query="term3", type_="phrase"),
+            ),
+            # And to make sure we don't run into errors when query strings
+            # are a bit strange.
+            # We ignore ANDs anyway (as it is our default combination of
+            # search terms), so this is simple.
+            "term1 AND": MultiFieldMatchFilter(query="term1", type_="phrase"),
+            # If we don't have an or filter term, then we just use the
+            # query as we has it so far.
+            "term1 OR": MultiFieldMatchFilter(query="term1", type_="phrase"),
+            # If we have OR as first term then we are just skip it, as
+            # we have nothing to combine it with.
+            "OR term1": MultiFieldMatchFilter(query="term1", type_="phrase"),
+            # And we support multiple level of or filters.
+            "term1 OR term2 OR term3": OrFilter(
+                sub_filters=[
+                    OrFilter(
+                        sub_filters=[
+                            MultiFieldMatchFilter(query="term1", type_="phrase"),
+                            MultiFieldMatchFilter(query="term2", type_="phrase"),
+                        ],
+                    ),
+                    MultiFieldMatchFilter(query="term3", type_="phrase"),
+                ]
+            ),
+            # We ingore some stranger quoting. Better to search for those,
+            # then to thrown an error.
+            "\"super strange 'quoting": MultiFieldMatchFilter(
+                query="super strange 'quoting", type_="phrase"
+            ),
+        }
+        for q, expected_filter in expected_filters.items():
             builder = EsQueryBuilder()
             builder.q = q
 
@@ -53,8 +119,6 @@ class TestEsQueryBuilder(unittest.TestCase):
             self.assertTrue(is_set)
 
             used_filter = builder.to_filter()
-            expected_filter = MultiFieldMatchFilter(query=q, type_="phrase")
-
             self.assertEqual(used_filter, expected_filter)
 
     def test_fill_query_string_from_request_args(self):
