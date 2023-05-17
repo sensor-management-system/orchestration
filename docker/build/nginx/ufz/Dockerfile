@@ -32,11 +32,12 @@
 # implied. See the Licence for the specific language governing 
 # permissions and limitations under the Licence.
 
-FROM nginx:1.23-alpine
+FROM nginx:1.24-alpine
 
-COPY ./docker/build/nginx/ufz/staging/default.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/build/nginx/ufz/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/build/nginx/ufz/default.conf /etc/nginx/conf.d/default.conf
 
-COPY ./docker/build/nginx/ufz/staging/entrypoint.sh /custom-entrypoint.sh
+COPY ./docker/build/nginx/ufz/entrypoint.sh /custom-entrypoint.sh
 
 COPY ./app/project/static /usr/share/nginx/html/static
 
