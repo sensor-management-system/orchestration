@@ -145,7 +145,7 @@ permissions and limitations under the Licence.
       v-model="showDeleteDialog"
       title="Delete Action"
       @cancel="closeDialog"
-      @submit-deletion="deleteAndCloseDialog"
+      @delete="deleteAndCloseDialog"
     >
       Do you really want to delete the action?
     </DeleteDialog>
