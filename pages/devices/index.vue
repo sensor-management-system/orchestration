@@ -199,13 +199,7 @@ permissions and limitations under the Licence.
           md="3"
         >
           <v-subheader>
-            <template v-if="devices.length == 1">
-              1 device found
-            </template>
-            <template v-else>
-              {{ devices.length }} devices found
-            </template>
-
+            <FoundEntries v-model="totalCount" entity-name="device" />
             <template v-if="devices.length>0">
               <v-dialog v-model="processing" max-width="100">
                 <v-card>
@@ -415,9 +409,11 @@ import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 import { Visibility } from '@/models/Visibility'
+import FoundEntries from '@/components/shared/FoundEntries.vue'
 
 @Component({
   components: {
+    FoundEntries,
     DevicesListItem,
     BaseList,
     DotMenuActionDelete,
@@ -437,7 +433,7 @@ import { Visibility } from '@/models/Visibility'
     ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
     ...mapState('appbar', ['activeTab']),
     ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
-    ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages', 'device']),
+    ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'device']),
     ...mapGetters('devices', ['pageSizes'])
   },
   methods: {
@@ -471,6 +467,7 @@ export default class SearchDevicesPage extends Vue {
   totalPages!: DevicesState['totalPages']
   pageNumber!: DevicesState['pageNumber']
   pageSizes!: PageSizesGetter
+  totalCount!: DevicesState['totalCount']
   permissionGroups!: PermissionsState['permissionGroups']
   loadEquipmentstatus!: LoadEquipmentstatusAction
   loadDevicetypes!: LoadDevicetypesAction

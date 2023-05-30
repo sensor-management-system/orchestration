@@ -179,12 +179,7 @@ permissions and limitations under the Licence.
           md="3"
         >
           <v-subheader>
-            <template v-if="sites.length == 1">
-              1 site found
-            </template>
-            <template v-else>
-              {{ sites.length }} sites found
-            </template>
+            <FoundEntries v-model="totalCount" entity-name="site" />
             <v-spacer />
 
             <template v-if="sites.length > 0">
@@ -327,9 +322,11 @@ import { QueryParams } from '@/modelUtils/QueryParams'
 import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
 import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
+import FoundEntries from '@/components/shared/FoundEntries.vue'
 
 @Component({
   components: {
+    FoundEntries,
     BaseList,
     SitesListItem,
     DotMenuActionDelete,
@@ -347,7 +344,7 @@ import { SiteType } from '@/models/SiteType'
   computed: {
     ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
     ...mapState('appbar', ['activeTab']),
-    ...mapState('sites', ['sites', 'pageNumber', 'pageSize', 'totalPages', 'site']),
+    ...mapState('sites', ['sites', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'site']),
     ...mapGetters('sites', ['pageSizes']),
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
 
@@ -389,6 +386,7 @@ export default class SearchSitesPage extends Vue {
   searchSitesPaginated!: SearchSitesPaginatedAction
   pageSize!: SitesState['pageSize']
   totalPages!: SitesState['totalPages']
+  totalCount!: SitesState['totalCount']
   pageNumber!: SitesState['pageNumber']
   pageSizes!: PageSizesGetter
   permissionGroups!: PermissionsState['permissionGroups']

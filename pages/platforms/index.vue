@@ -72,13 +72,7 @@ permissions and limitations under the Licence.
           md="3"
         >
           <v-subheader>
-            <template v-if="platforms.length == 1">
-              1 platform found
-            </template>
-            <template v-else>
-              {{ platforms.length }} platforms found
-            </template>
-
+            <FoundEntries v-model="totalCount" entity-name="platform" />
             <template v-if="platforms.length>0">
               <v-dialog v-model="processing" max-width="100">
                 <v-card>
@@ -269,9 +263,11 @@ import { Visibility } from '@/models/Visibility'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
+import FoundEntries from '@/components/shared/FoundEntries.vue'
 
 @Component({
   components: {
+    FoundEntries,
     PlatformSearch,
     PlatformsBasicSearchField,
     PlatformsBasicSearch,
@@ -290,7 +286,7 @@ import PlatformSearch from '@/components/platforms/PlatformSearch.vue'
     DotMenuActionRestore
   },
   computed: {
-    ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages', 'platform']),
+    ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'platform']),
     ...mapGetters('platforms', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'canArchiveEntity', 'canRestoreEntity'])
   },
@@ -313,6 +309,7 @@ export default class SearchPlatformsPage extends Vue {
   pageNumber!: PlatformsState['pageNumber']
   pageSize!: PlatformsState['pageSize']
   totalPages!: PlatformsState['totalPages']
+  totalCount!: PlatformsState['totalCount']
   setPageNumber!: SetPageNumberAction
   setPageSize!: SetPageSizeAction
   pageSizes!: PageSizesGetter

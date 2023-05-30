@@ -129,6 +129,7 @@ export interface ConfigurationsState {
   configurationCustomFields: CustomTextField[],
   configurationCustomField: CustomTextField | null
   totalPages: number
+  totalCount: number
   pageNumber: number
   pageSize: number
 }
@@ -162,6 +163,7 @@ const state = (): ConfigurationsState => ({
   configurationCustomFields: [],
   configurationCustomField: null,
   totalPages: 1,
+  totalCount: 0,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0]
 })
@@ -466,6 +468,7 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
+    commit('setTotalCount', totalCount)
   },
   async loadConfiguration ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const configuration = await this.$api.configurations.findById(id, {
@@ -810,6 +813,9 @@ const mutations = {
   },
   setTotalPages (state: ConfigurationsState, count: number) {
     state.totalPages = count
+  },
+  setTotalCount (state: ConfigurationsState, count: number) {
+    state.totalCount = count
   },
   setConfigurationMountingActions (state: ConfigurationsState, configurationMountingActions: []) {
     state.configurationMountingActions = configurationMountingActions

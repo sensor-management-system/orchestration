@@ -204,12 +204,7 @@ permissions and limitations under the Licence.
           md="3"
         >
           <v-subheader>
-            <template v-if="configurations.length == 1">
-              1 configuration found
-            </template>
-            <template v-else>
-              {{ configurations.length }} configurations found
-            </template>
+            <FoundEntries v-model="totalCount" entity-name="configuration" />
             <v-spacer />
           </v-subheader>
         </v-col>
@@ -324,8 +319,10 @@ import { Visibility } from '@/models/Visibility'
 import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { Site } from '@/models/Site'
+import FoundEntries from '@/components/shared/FoundEntries.vue'
 @Component({
   components: {
+    FoundEntries,
     StringSelect,
     DotMenuActionDelete,
     DotMenuActionSensorML,
@@ -340,7 +337,7 @@ import { Site } from '@/models/Site'
     ConfigurationArchiveDialog
   },
   computed: {
-    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'configurationStates', 'configuration', 'projects']),
+    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'configurationStates', 'configuration', 'projects']),
     ...mapState('appbar', ['activeTab']),
     ...mapGetters('configurations', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups', 'canArchiveEntity', 'canRestoreEntity']),
@@ -382,6 +379,7 @@ export default class SearchConfigurationsPage extends Vue {
   pageSize!: number
   setPageSize!: (newPageSize: number) => void
   pageSizes!: number[]
+  totalCount!: ConfigurationsState['totalCount']
   searchConfigurationsPaginated!: (searchParams: IConfigurationSearchParams) => void
   configurations!: Configuration[]
   deleteConfiguration!: (id: string) => void

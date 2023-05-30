@@ -95,6 +95,7 @@ export interface PlatformsState {
   pageNumber: number,
   pageSize: number,
   totalPages: number,
+  totalCount: number,
   platformAvailabilities: Availability[]
 }
 
@@ -118,6 +119,7 @@ const state = (): PlatformsState => ({
   includeArchivedPlatforms: false,
   searchText: null,
   totalPages: 1,
+  totalCount: 0,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0],
   platformAvailabilities: []
@@ -242,6 +244,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
+    commit('setTotalCount', totalCount)
   },
   async searchPlatforms ({
     commit
@@ -496,6 +499,9 @@ const mutations = {
   },
   setTotalPages (state: PlatformsState, count: number) {
     state.totalPages = count
+  },
+  setTotalCount (state: PlatformsState, count: number) {
+    state.totalCount = count
   },
   setPlatformContactRoles (state: PlatformsState, platformContactRoles: ContactRole[]) {
     state.platformContactRoles = platformContactRoles
