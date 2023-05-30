@@ -317,15 +317,16 @@ export type LoadPermissionGroupsAction = () => Promise<void>
 export type AcceptTermsOfUseAction = () => Promise<void>
 
 const actions: ActionTree<PermissionsState, RootState> = {
-  async loadUserInfo ({ commit }: { commit: Commit }) {
-    const userInfo = await this.$api.userInfoApi.get()
+  async loadUserInfo ({ commit }: { commit: Commit }, params?: { skipBackendCache?: boolean }) {
+    const userInfo = await this.$api.userInfoApi.get(params?.skipBackendCache || false)
     commit('setUserInfo', userInfo)
   },
   clearUserInfo ({ commit }: { commit: Commit }) {
     commit('setUserInfo', null)
   },
-  async loadPermissionGroups ({ commit }: { commit: Commit }): Promise<void> {
-    const permissionGroups = await this.$api.permissionGroupApi.findAll()
+  async loadPermissionGroups ({ commit }: { commit: Commit }, params?: { skipBackendCache?: boolean}): Promise<void> {
+    const useFrontendCache = false
+    const permissionGroups = await this.$api.permissionGroupApi.findAll(useFrontendCache, params?.skipBackendCache || false)
     commit('setPermissionGroups', permissionGroups)
   },
   async acceptTermsOfUse ({ commit }: { commit: Commit }): Promise<void> {

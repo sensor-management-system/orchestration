@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within
 the Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021, 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 
@@ -55,7 +55,7 @@ const syncGroups = (getIdTokenFunc: () => string | null): null | Promise<AxiosRe
   return axios.get('/')
 }
 
-const loginSuccessMiddleware: Middleware = function (context: Context) {
+const loginSuccessMiddleware: Middleware = async function (context: Context) {
   const institute: string = context.env.institute
   // just when on /login-success and for GFZ only
   if (context.route.path.match('^/login-success/?$') && institute.toLowerCase() === 'gfz') {
@@ -63,7 +63,13 @@ const loginSuccessMiddleware: Middleware = function (context: Context) {
       // @ts-ignore
       return context.$auth.strategy.token.get()
     }
-    syncGroups(getIdToken)
+    await syncGroups(getIdToken)
+    // And we must force the backend to invalide its caches as we want to see the
+    // new groups right away.
+    Promise.all([
+      context.store.dispatch('permissions/loadUserInfo', { skipBackendCache: true }),
+      context.store.dispatch('permissions/loadPermissionGroups', { skipBackendCache: true })
+    ])
   }
 }
 export default loginSuccessMiddleware

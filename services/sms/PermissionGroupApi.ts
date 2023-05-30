@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022
+ * Copyright (C) 2022 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -46,9 +46,9 @@ export class PermissionGroupApi {
     this.serializer = new PermissionGroupSerializer()
   }
 
-  async findAll (useCache: boolean = false): Promise<PermissionGroup[]> {
-    const response = await this.axiosApi.get(this.basePath)
-    if (useCache && this.cachedItems.length) {
+  async findAll (useFrontendCache: boolean = false, skipBackendCache: boolean = false): Promise<PermissionGroup[]> {
+    const response = await this.axiosApi.get(this.basePath, { params: { skip_cache: skipBackendCache } })
+    if (useFrontendCache && this.cachedItems.length) {
       return this.cachedItems
     }
     this.cachedItems = this.serializer.convertJsonApiObjectListToModelList(response.data)
