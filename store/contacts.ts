@@ -51,6 +51,7 @@ export interface ContactsState {
   pageNumber: number,
   pageSize: number,
   totalPages: number
+  totalCount: number
 }
 
 const state = (): ContactsState => ({
@@ -59,7 +60,8 @@ const state = (): ContactsState => ({
   configurationContacts: [],
   pageNumber: 1,
   pageSize: PAGE_SIZES[0],
-  totalPages: 1
+  totalPages: 1,
+  totalCount: 0
 })
 
 export type SearchContactsGetter = Contact[]
@@ -101,6 +103,7 @@ const actions: ActionTree<ContactsState, RootState> = {
 
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
+    commit('setTotalCount', totalCount)
   },
   async loadContact ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const contact = await this.$api.contacts.findById(id)
@@ -142,6 +145,9 @@ const mutations = {
   },
   setTotalPages (state: ContactsState, count: number) {
     state.totalPages = count
+  },
+  setTotalCount (state: ContactsState, count: number) {
+    state.totalCount = count
   }
 }
 

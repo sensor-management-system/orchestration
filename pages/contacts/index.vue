@@ -100,12 +100,7 @@ permissions and limitations under the Licence.
           md="3"
         >
           <v-subheader>
-            <template v-if="contacts.length == 1">
-              1 contact found
-            </template>
-            <template v-else>
-              {{ contacts.length }} contacts found
-            </template>
+            <FoundEntries v-model="totalCount" entity-name="contact" />
             <v-spacer />
           </v-subheader>
         </v-col>
@@ -210,9 +205,11 @@ import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { CanDeleteContactGetter } from '@/store/permissions'
+import FoundEntries from '@/components/shared/FoundEntries.vue'
 
 @Component({
   components: {
+    FoundEntries,
     ContactsListItem,
     BaseList,
     DeleteDialog,
@@ -220,7 +217,7 @@ import { CanDeleteContactGetter } from '@/store/permissions'
     PageSizeSelect
   },
   computed: {
-    ...mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'contacts']),
+    ...mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'totalCount', 'contacts']),
     ...mapGetters('contacts', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteContact'])
   },
@@ -242,6 +239,7 @@ export default class SearchContactsPage extends Vue {
   pageSize!: ContactsState['pageSize']
   setPageSize!: SetPageSizeAction
   pageSizes!: PageSizesGetter
+  totalCount!: ContactsState['totalCount']
   searchContactsPaginated!: SearchContactsPaginatedAction
   deleteContact!: DeleteContactAction
   setTabs!: SetTabsAction
