@@ -19,6 +19,7 @@ from project.api.models import (
     Device,
     DeviceMountAction,
     DeviceProperty,
+    TsmEndpoint,
     User,
 )
 from project.api.models.base_model import db
@@ -77,9 +78,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -87,6 +90,7 @@ class TestDatastreamLinks(BaseTestCase):
         datastream_link2 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount2,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -98,6 +102,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_mount2,
                 device_property,
+                tsm_endpoint,
                 datastream_link1,
                 datastream_link2,
             ]
@@ -158,9 +163,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -168,6 +175,7 @@ class TestDatastreamLinks(BaseTestCase):
         datastream_link2 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount2,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -179,6 +187,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_mount2,
                 device_property,
+                tsm_endpoint,
                 datastream_link1,
                 datastream_link2,
             ]
@@ -233,12 +242,14 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         db.session.add_all(
             [
                 device,
                 begin_contact,
                 device_mount,
                 device_property,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -258,6 +269,12 @@ class TestDatastreamLinks(BaseTestCase):
                         "data": {
                             "id": device_property.id,
                             "type": "device_property",
+                        }
+                    },
+                    "tsm_endpoint": {
+                        "data": {
+                            "id": tsm_endpoint.id,
+                            "type": "tsm_endpoint",
                         }
                     },
                 },
@@ -308,12 +325,14 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         db.session.add_all(
             [
                 device,
                 begin_contact,
                 device_mount,
                 device_property,
+                tsm_endpoint,
                 user,
             ]
         )
@@ -326,7 +345,6 @@ class TestDatastreamLinks(BaseTestCase):
                     "datasource_id": "1",
                     "thing_id": "2",
                     "datastream_id": "3",
-                    "tsm_endpoint": "somewhere",
                 },
                 "relationships": {
                     "device_mount_action": {
@@ -339,6 +357,12 @@ class TestDatastreamLinks(BaseTestCase):
                         "data": {
                             "id": device_property.id,
                             "type": "device_property",
+                        }
+                    },
+                    "tsm_endpoint": {
+                        "data": {
+                            "id": tsm_endpoint.id,
+                            "type": "tsm_endpoint",
                         }
                     },
                 },
@@ -397,12 +421,14 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         db.session.add_all(
             [
                 device,
                 begin_contact,
                 device_mount,
                 device_property,
+                tsm_endpoint,
                 user,
             ]
         )
@@ -415,7 +441,6 @@ class TestDatastreamLinks(BaseTestCase):
                     "datasource_id": "1",
                     "thing_id": "2",
                     "datastream_id": "3",
-                    "tsm_endpoint": "somewhere",
                 },
                 "relationships": {
                     "device_mount_action": {
@@ -428,6 +453,12 @@ class TestDatastreamLinks(BaseTestCase):
                         "data": {
                             "id": device_property.id,
                             "type": "device_property",
+                        }
+                    },
+                    "tsm_endpoint": {
+                        "data": {
+                            "id": tsm_endpoint.id,
+                            "type": "tsm_endpoint",
                         }
                     },
                 },
@@ -487,12 +518,14 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         db.session.add_all(
             [
                 device,
                 begin_contact,
                 device_mount,
                 device_property,
+                tsm_endpoint,
                 user,
             ]
         )
@@ -505,7 +538,6 @@ class TestDatastreamLinks(BaseTestCase):
                     "datasource_id": "1",
                     "thing_id": "2",
                     "datastream_id": "3",
-                    "tsm_endpoint": "somewhere",
                 },
                 "relationships": {
                     "device_mount_action": {
@@ -518,6 +550,12 @@ class TestDatastreamLinks(BaseTestCase):
                         "data": {
                             "id": device_property.id,
                             "type": "device_property",
+                        }
+                    },
+                    "tsm_endpoint": {
+                        "data": {
+                            "id": tsm_endpoint.id,
+                            "type": "tsm_endpoint",
                         }
                     },
                 },
@@ -577,12 +615,14 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         db.session.add_all(
             [
                 device,
                 begin_contact,
                 device_mount,
                 device_property,
+                tsm_endpoint,
                 user,
             ]
         )
@@ -595,7 +635,6 @@ class TestDatastreamLinks(BaseTestCase):
                     "datasource_id": "1",
                     "thing_id": "2",
                     "datastream_id": "3",
-                    "tsm_endpoint": "somewhere",
                 },
                 "relationships": {
                     "device_mount_action": {
@@ -608,6 +647,12 @@ class TestDatastreamLinks(BaseTestCase):
                         "data": {
                             "id": device_property.id,
                             "type": "device_property",
+                        }
+                    },
+                    "tsm_endpoint": {
+                        "data": {
+                            "id": tsm_endpoint.id,
+                            "type": "tsm_endpoint",
                         }
                     },
                 },
@@ -655,9 +700,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -669,6 +716,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -723,9 +771,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -737,6 +787,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -797,9 +848,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -811,6 +864,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -879,9 +933,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -893,6 +949,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -966,9 +1023,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -982,6 +1041,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
                 user,
                 super_user,
             ]
@@ -1070,9 +1130,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -1085,6 +1147,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -1141,9 +1204,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -1155,6 +1220,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -1203,9 +1269,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -1217,6 +1285,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -1273,9 +1342,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -1287,6 +1358,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -1348,9 +1420,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -1364,6 +1438,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
                 user,
                 super_user,
             ]
@@ -1421,9 +1496,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link1 = DatastreamLink(
             device_property=device_property,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -1436,6 +1513,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount1,
                 device_property,
                 datastream_link1,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -1504,9 +1582,11 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property2",
             device=device2,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link = DatastreamLink(
             device_property=device_property1,
             device_mount_action=device_mount1,
+            tsm_endpoint=tsm_endpoint,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -1523,6 +1603,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_property1,
                 device_property2,
                 datastream_link,
+                tsm_endpoint,
             ]
         )
         db.session.commit()

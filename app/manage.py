@@ -7,6 +7,10 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""CLI commands for the flask maange.py."""
+
+import json
+import pathlib
 import sys
 import unittest
 
@@ -16,7 +20,7 @@ from flask.cli import FlaskGroup
 
 from project import create_app
 from project.api.helpers.errors import ErrorResponse
-from project.api.models import User, Contact
+from project.api.models import Contact, User
 from project.api.models.base_model import db
 from project.api.services.userservice import user_deactivation
 
@@ -26,6 +30,7 @@ cli = FlaskGroup(create_app=create_app)
 
 @cli.command("recreate_db")
 def recreate_db():
+    """Short command to completely recreate the database."""
     db.drop_all()
     db.create_all()
     db.session.commit()
@@ -34,7 +39,7 @@ def recreate_db():
 @cli.command()
 @click.argument("test_names", nargs=-1)
 def test(test_names):
-    """ Runs the tests without code coverage """
+    """Run the tests without code coverage."""
     # To run an oly test just pass th test-model-name
     # an example:
     # "python manage.py test project.tests.api.test_platform_software_update_action_attachment"
@@ -56,7 +61,7 @@ def test(test_names):
 @cli.command()
 @click.argument("test_names", nargs=-1)
 def cov(test_names):
-    """Runs the unit tests with coverage."""
+    """Run the unit tests with coverage."""
     coverage_ = coverage.coverage(
         branch=True,
         include="project/*",
@@ -102,7 +107,7 @@ def es():
 @es.command("reindex")
 def es_reindex():
     """Reindex all the models that should be used in the es."""
-    from project.api.models import Configuration, Device, Platform, Contact, Site
+    from project.api.models import Configuration, Contact, Device, Platform, Site
 
     for model_type in [Platform, Device, Configuration, Contact, Site]:
         model_type.reindex()
@@ -110,11 +115,13 @@ def es_reindex():
 
 @app.after_request
 def add_header(response):
+    """Add some headers if needed."""
     return response
 
 
 @app.errorhandler(ErrorResponse)
 def handle_exception(error: ErrorResponse):
+    """Add an overall error hanlder for the flask rest json error responses."""
     return error.respond()
 
 
@@ -129,7 +136,9 @@ def users():
 @click.option("--dest-user-subject", default=None, help="A substituted user subject")
 def deactivate_a_user(src_user_subject, dest_user_subject):
     """
-    Deactivate a user in these steps:
+    Deactivate a user.
+
+    Take the following steps:
      - Set the active attribute to False
      - Replace contact entities with a deactivation message.
      - If a there is substituted user then add it to all objects where
@@ -162,6 +171,7 @@ def deactivate_a_user(src_user_subject, dest_user_subject):
 def reactivate_a_user(subject_user, given_name, family_name, email):
     """
     Reactivate a user.
+
     The user active attribute will be set to True and then the contact
     Info will be asked by Prompting.
 
@@ -228,6 +238,64 @@ def downgrade_to_user(user_subject):
     click.secho(
         f"{user.contact.given_name} is now a downgraded to a normal user!", fg="green"
     )
+
+
+@cli.command("loaddata")
+@click.argument("fixture_file")
+@click.option(
+    "-m",
+    "--skip-missing-file",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="Skip if the file is missing.",
+)
+@click.option(
+    "-e",
+    "--skip-empty-file",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="Skip if the file is empty.",
+)
+def loaddata(fixture_file, skip_missing_file, skip_empty_file):
+    """
+    Load data from a json fixture file into the database.
+
+    Should mimik the behaviour of the django loaddata command,
+    but uses Model names ("TsmEndpoint") instead of the django
+    like table names that are composed by app & plural name
+    ("app_tsm_endpoints").
+    """
+    from project.api import models
+
+    path = pathlib.Path(fixture_file)
+
+    # Same fast tests to ensure we can skip loading the data.
+    if skip_missing_file and not path.exists():
+        return
+    if skip_empty_file and path.stat().st_size == 0:
+        return
+
+    # Read the file
+    with path.open() as infile:
+        # Only support for json files.
+        entries = json.load(infile)
+    # And put the entries in the database.
+    for entry in entries:
+        model = getattr(models, entry["model"])
+        existing_entry = db.session.get(model, entry["pk"])
+        if existing_entry:
+            for key, value in entry["fields"].items():
+                setattr(existing_entry, key, value)
+            db.session.add(existing_entry)
+        else:
+            new_entry = model(**entry["fields"])
+            # No support for composed primary keys at the moment.
+            pk = model.__mapper__.primary_key[0].name
+            setattr(new_entry, pk, entry["pk"])
+            db.session.add(new_entry)
+    db.session.commit()
 
 
 if __name__ == "__main__":

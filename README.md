@@ -166,6 +166,37 @@ python manage.py db upgrade
 python manage.py db downgrade
 ```
 
+**loading of fixture data**
+
+We support a command that mimics the django loaddata command.
+It can be used to integrate data from an json file like this:
+
+```javascript
+[
+  {
+    "fields": {
+      "name": "some endpoint",
+      "url": "http://localhost"
+    },
+    "model": "TsmEndpoint",
+    "pk": 1
+  }
+]
+```
+
+```bash
+python3 manage.py loadata path/to/file.json
+```
+Please note:
+- we currently just support json files as input
+- there is no support for composed primary keys at the moment
+- the pk maps to the id column all of our current cases
+- the value for model is the name of the class (not the table).
+- field names map to the column names in the SqlAlchemy class
+- setting foreign keys will be done with the foreign key attribute and
+  not with the sqlalchemy relationship.
+
+
 </details>
 
 ### Authors

@@ -48,7 +48,12 @@ class DatastreamLink(db.Model, AuditMixin):
     # We also store a tsm endpoint entry (to support multiple centres).
     # And we save the names of the datasources, things & datastreams
     # to display them in the sms easily.
-    tsm_endpoint = db.Column(db.String(256))
+    tsm_endpoint_id = db.Column(
+        db.Integer, db.ForeignKey("tsm_endpoint.id"), nullable=True
+    )
+    tsm_endpoint = db.relationship(
+        "TsmEndpoint", backref=db.backref("datastream_links")
+    )
     datasource_id = db.Column(db.String(256), nullable=False)
     datasource_name = db.Column(db.String(256), nullable=True)
     thing_id = db.Column(db.String(256), nullable=False)
