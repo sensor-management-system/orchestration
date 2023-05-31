@@ -80,6 +80,41 @@ You can watch the output of the containers witch `docker-compose logs`:
 docker-compose logs --follow 
 ```
 
+## TSM Endpoints
+
+We include all the tsm endpoints in the database and can use the `manage.py loaddata <path>` command to add or
+update those.
+
+The current approach is to store them in the TSM_ENDPOINTS env variable as an json array, to write it to an temporary file
+and to load it with the `loaddata` command:
+
+```
+    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend sh -c "echo '$TSM_ENDPOINTS' > /tmp/tsm_endpoint_fixture.json"
+    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend python3 manage.py loaddata /tmp/tsm_endpoint_fixture.json
+```
+
+The content of the TSM_ENDPOINTS variable looks like this:
+
+```javascript
+[
+  {
+    "pk": 1,
+    "model": "TsmEndpoint",
+    "fields": {
+      "name": "Specific tsm endpoint",
+      "url": "https://somewhere.in.the/web"
+    }
+  }
+]
+```
+
+Feel free to add your tsm endpoint here.
+
+Please note: Regarding that we may want to provide a central instance in the future, it makes sense to keep the ids of the
+ids of the endpoints distinct. So to have pk=1 for GFZ, pk=2 for UFZ, pk=3 for FZJ, pk=4 for KIT and so on. Doing so can
+make an merge of the data much easier (but it is also possible to work around it).
+
+
 ## Additional step UFZ developer for Frontend local development - Identity Provider
 
 You can't use `localhost` for local development to authenticate against an Identity Provider, but
