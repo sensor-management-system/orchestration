@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -150,6 +150,7 @@ components = {
                                             "site_type_uri": "https://cv/sites/345",
                                             "site_usage_name": "example usage",
                                             "site_usage_uri": "https://cv/usages/345",
+                                            "website": "https://some.web/site",
                                         },
                                         "type": "site",
                                         "id": "0",
@@ -210,6 +211,7 @@ components = {
                                         "site_type_uri": "https://cv/sites/345",
                                         "site_usage_name": "example usage",
                                         "site_usage_uri": "https://cv/usages/345",
+                                        "website": "https://some.web/site",
                                     },
                                     "type": "site",
                                     "id": "0",
@@ -287,6 +289,9 @@ components = {
                                             "site_usage_name": {
                                                 "type": "string",
                                             },
+                                            "website": {
+                                                "type": "string",
+                                            },
                                         },
                                     }
                                 },
@@ -313,6 +318,7 @@ components = {
                                         "site_type_uri": "https://cv/sites/345",
                                         "site_usage_name": "example usage",
                                         "site_usage_uri": "https://cv/usages/345",
+                                        "website": "https://some.web/site",
                                     },
                                     "type": "site",
                                 },
@@ -379,6 +385,7 @@ components = {
                                 "site_usage_name": {
                                     "type": "string",
                                 },
+                                "website": {"type": "string"},
                             },
                         },
                         "relationships": {
@@ -448,6 +455,7 @@ components = {
                             "site_type_uri": "https://cv/sites/345",
                             "site_usage_name": "example usage",
                             "site_usage_uri": "https://cv/usages/345",
+                            "website": "https://some.web/site",
                         },
                         "type": "site",
                         "relationships": {
