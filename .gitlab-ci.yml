@@ -459,7 +459,7 @@ deploy-gfz-staging:
     # Delete the volume for the static files of the backend.
     # The volume is used so that the nginx can deliver those files.
     # But we need it fresh so that we can put new files in.
-    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
+    - docker volume rm ${COMPOSE_PROJECT_NAME}-backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py migrate
@@ -530,7 +530,7 @@ deploy-gfz-staging-develop:
     # Delete the volume for the static files of the backend.
     # The volume is used so that the nginx can deliver those files.
     # But we need it fresh so that we can put new files in.
-    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
+    - docker volume rm ${COMPOSE_PROJECT_NAME}-backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml up -d
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py migrate
@@ -585,7 +585,16 @@ deploy-gfz-prod:
     # Delete the volume for the static files of the backend.
     # The volume is used so that the nginx can deliver those files.
     # But we need it fresh so that we can put new files in.
+    # Depending on the docker compose version the volume name uses a
+    # minus instead of an underscore (underscore was for docker-compose,
+    # minus for docker compose v2).
+    # We are currently in a transition. Staging already uses docker compose v2
+    # while prod still uses version 1.
+    # First one is version 1 (with _).
+    # Second one is version 2 (with -)
+    # TODO: Remove the task for version 1 after a deployment.
     - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
+    - docker volume rm ${COMPOSE_PROJECT_NAME}-backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py migrate
