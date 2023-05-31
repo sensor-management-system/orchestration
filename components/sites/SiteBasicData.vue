@@ -68,6 +68,19 @@ permissions and limitations under the Licence.
         {{ value.description | orDefault }}
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <label>Website</label>
+        {{ value.website | orDefault }}
+        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+          <v-icon
+            small
+          >
+            mdi-open-in-new
+          </v-icon>
+        </a>
+      </v-col>
+    </v-row>
     <v-divider class="my-4" />
     <v-row v-if="value.geometry.length != 0">
       <v-col cols="12">
