@@ -1,0 +1,54 @@
+
+-- CONTACT
+-- -- Insert new contact
+INSERT INTO public.contact (id, given_name, family_name, website, email, active, created_at, updated_at, created_by_id, updated_by_id) VALUES (1, 'Tobias', 'Kuhnert', null, 'tobias.kuhnert@ufz.de', true, '2023-03-30 06:32:16.145872 +00:00', '2023-03-30 06:32:16.145883 +00:00', null, null);
+-- -- Update SEQUENCE (otherwise new inserts via frontend would fail)
+alter SEQUENCE contact_id_seq restart with 2;
+-- USER
+-- -- Insert new user
+INSERT INTO public."user" (id, subject, contact_id, active, is_superuser, apikey) VALUES (1, 'kuhnertt@ufz.de', 1, true, false, 'c908272607c48963b6fb612d77af4ee3899ab68e5dbd82746e53831d57dab0e70e44339107e6d84d803a5d5c535b10ddfda431029a6c0eca8531b98074852c0f');
+-- -- Update SEQUENCE (otherwise new inserts via frontend would fail)
+alter SEQUENCE user_id_seq restart with 2;
+
+-- Device
+-- -- Insert new devices
+INSERT INTO public.device (created_at, updated_at, id, description, short_name, long_name, serial_number, manufacturer_uri, manufacturer_name, dual_use, model, inventory_number, persistent_identifier, website, device_type_uri, device_type_name, status_uri, status_name, created_by_id, updated_by_id, group_ids, is_private, is_internal, is_public, update_description, archived, identifier_type, schema_version) VALUES ('2023-03-30 06:32:25.841285 +00:00', '2023-03-30 06:32:35.673986 +00:00', 1, '', 'dd1', '', '', '', '', false, '', '', null, '', '', '', '', '', 1, 1, '{dpvm-1}', false, true, false, 'create;measured quantity', false, 'handler', '1.0');
+INSERT INTO public.device (created_at, updated_at, id, description, short_name, long_name, serial_number, manufacturer_uri, manufacturer_name, dual_use, model, inventory_number, persistent_identifier, website, device_type_uri, device_type_name, status_uri, status_name, created_by_id, updated_by_id, group_ids, is_private, is_internal, is_public, update_description, archived, identifier_type, schema_version) VALUES ('2023-03-30 06:33:03.988098 +00:00', '2023-03-30 06:33:18.095545 +00:00', 2, '', 'dd2', '', '', '', '', false, '', '', null, '', '', '', '', '', 1, 1, '{dpvm-1}', false, true, false, 'create;measured quantity', false, 'handler', '1.0');
+
+-- -- Update SEQUENCE (otherwise new inserts via frontend would fail)
+alter SEQUENCE device_id_seq restart with 3;
+
+-- Device Contact Role
+-- -- Insert new contact roles
+INSERT INTO public.device_contact_role (role_name, role_uri, id, contact_id, device_id) VALUES ('Owner', 'https://localhost.localdomain/cv/api/v1/contactroles/4/', 1, 1, 1);
+INSERT INTO public.device_contact_role (role_name, role_uri, id, contact_id, device_id) VALUES ('Owner', 'https://localhost.localdomain/cv/api/v1/contactroles/4/', 2, 1, 2);
+
+-- Device Property
+-- -- Insert new device properties
+INSERT INTO public.device_property (id, measuring_range_min, measuring_range_max, failure_value, accuracy, label, unit_uri, unit_name, compartment_uri, compartment_name, property_uri, property_name, sampling_media_uri, sampling_media_name, device_id, resolution, resolution_unit_name, resolution_unit_uri) VALUES (1, null, null, null, null, 'mq 1', '', '', 'https://localhost.localdomain/cv/api/v1/compartments/1/', 'Atmosphere', 'https://localhost.localdomain/cv/api/v1/measuredquantities/173/', 'Absorbance', 'https://localhost.localdomain/cv/api/v1/samplingmedia/9/', 'Weather', 1, null, '', '');
+INSERT INTO public.device_property (id, measuring_range_min, measuring_range_max, failure_value, accuracy, label, unit_uri, unit_name, compartment_uri, compartment_name, property_uri, property_name, sampling_media_uri, sampling_media_name, device_id, resolution, resolution_unit_name, resolution_unit_uri) VALUES (2, null, null, null, null, 'mq2', '', '', 'https://localhost.localdomain/cv/api/v1/compartments/2/', 'Biosphere', 'https://localhost.localdomain/cv/api/v1/measuredquantities/185/', 'Benthos', 'https://localhost.localdomain/cv/api/v1/samplingmedia/4/', 'Plants', 1, null, '', '');
+INSERT INTO public.device_property (id, measuring_range_min, measuring_range_max, failure_value, accuracy, label, unit_uri, unit_name, compartment_uri, compartment_name, property_uri, property_name, sampling_media_uri, sampling_media_name, device_id, resolution, resolution_unit_name, resolution_unit_uri) VALUES (3, null, null, null, null, 'mq3', '', '', 'https://localhost.localdomain/cv/api/v1/compartments/5/', 'Technical Parameters', 'https://localhost.localdomain/cv/api/v1/measuredquantities/36/', 'CPU usage', 'https://localhost.localdomain/cv/api/v1/samplingmedia/1/', 'Devices', 2, null, '', '');
+INSERT INTO public.device_property (id, measuring_range_min, measuring_range_max, failure_value, accuracy, label, unit_uri, unit_name, compartment_uri, compartment_name, property_uri, property_name, sampling_media_uri, sampling_media_name, device_id, resolution, resolution_unit_name, resolution_unit_uri) VALUES (4, null, null, null, null, 'mq4', '', '', 'https://localhost.localdomain/cv/api/v1/compartments/1/', 'Atmosphere', 'https://localhost.localdomain/cv/api/v1/measuredquantities/149/', 'Throughfall', 'https://localhost.localdomain/cv/api/v1/samplingmedia/9/', 'Weather', 2, null, '', '');
+INSERT INTO public.device_property (id, measuring_range_min, measuring_range_max, failure_value, accuracy, label, unit_uri, unit_name, compartment_uri, compartment_name, property_uri, property_name, sampling_media_uri, sampling_media_name, device_id, resolution, resolution_unit_name, resolution_unit_uri) VALUES (5, null, null, null, null, 'mq5', '', '', 'https://localhost.localdomain/cv/api/v1/compartments/4/', 'Pedosphere', 'https://localhost.localdomain/cv/api/v1/measuredquantities/223/', 'Grain size', 'https://localhost.localdomain/cv/api/v1/samplingmedia/6/', 'Soil', 2, null, '', '');
+
+-- -- Update SEQUENCE (otherwise new inserts via frontend would fail)
+alter SEQUENCE device_property_id_seq restart with 6;
+
+-- Configuration
+-- -- Insert new Configuration
+INSERT INTO public.configuration (created_at, updated_at, id, start_date, end_date, created_by_id, updated_by_id, label, status, cfg_permission_group, is_internal, is_public, update_description, archived, site_id) VALUES ('2023-03-30 06:33:55.210618 +00:00', '2023-03-30 06:34:15.827000 +00:00', 1, null, null, 1, 1, 'cc1', '', 'dpvm-1', true, false, 'create;device mount action', false, null);
+
+-- -- Update SEQUENCE (otherwise new inserts via frontend would fail)
+alter SEQUENCE configuration_id_seq restart with 2;
+
+-- Device Contact Role
+-- -- Insert new Device Contact role
+INSERT INTO public.configuration_contact_role (role_name, role_uri, id, contact_id, configuration_id) VALUES ('Owner', 'https://localhost.localdomain/cv/api/v1/contactroles/4/', 1, 1, 1);
+
+-- Device Mount Action
+-- -- Insert new Device Mount Action
+INSERT INTO public.device_mount_action (created_at, updated_at, id, configuration_id, device_id, parent_platform_id, begin_date, begin_description, begin_contact_id, offset_x, offset_y, offset_z, created_by_id, updated_by_id, end_date, end_description, end_contact_id) VALUES ('2023-03-30 06:34:15.678759 +00:00', '2023-03-30 06:34:15.678768 +00:00', 1, 1, 1, null, '2023-03-30 06:32:00.000000 +00:00', '', 1, 0, 0, 0, null, null, '2023-03-31 12:00:00.000000 +00:00', '', 1);
+INSERT INTO public.device_mount_action (created_at, updated_at, id, configuration_id, device_id, parent_platform_id, begin_date, begin_description, begin_contact_id, offset_x, offset_y, offset_z, created_by_id, updated_by_id, end_date, end_description, end_contact_id) VALUES ('2023-03-30 06:35:11.106035 +00:00', '2023-03-30 06:35:11.106046 +00:00', 2, 1, 1, null, '2023-04-01 06:32:00.000000 +00:00', '', 1, 0, 0, 0, null, null, '2023-04-30 12:00:00.000000 +00:00', '', 1);
+INSERT INTO public.device_mount_action (created_at, updated_at, id, configuration_id, device_id, parent_platform_id, begin_date, begin_description, begin_contact_id, offset_x, offset_y, offset_z, created_by_id, updated_by_id, end_date, end_description, end_contact_id) VALUES ('2023-03-30 06:35:29.939164 +00:00', '2023-03-30 06:35:29.939182 +00:00', 3, 1, 2, null, '2023-03-30 06:32:00.000000 +00:00', '', 1, 0, 0, 0, null, null, null, null, null);
+-- -- Update SEQUENCE (otherwise new inserts via frontend would fail)
+alter SEQUENCE device_mount_action_id_seq restart with 4;

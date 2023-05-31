@@ -1,3 +1,12 @@
+# SPDX-FileCopyrightText: 2021 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 #
@@ -54,6 +63,7 @@ services:
 
   backend:
     image: python:3.11-slim-buster
+    restart: unless-stopped
     container_name: sms_backend
     working_dir: /usr/src/app
     volumes:
@@ -92,6 +102,7 @@ services:
       SCHEMA_VERSION: ${SCHEMA_VERSION:-0.1}
       IDENTIFIER_TYPE: ${IDENTIFIER_TYPE:-Handler}
       PID_SUFFIX: ${PID_SUFFIX:-SMS}
+      TSM_ENDPOINTS: ${TSM_ENDPOINTS:-[]}
     depends_on:
       - db
     command: >
@@ -107,6 +118,8 @@ services:
       && pip install --no-cache-dir --upgrade pip
       && pip install --no-cache-dir -r requirements.txt
       && python manage.py db upgrade
+      && python -c 'import os; print(os.getenv(\"TSM_ENDPOINTS\"))' > /tmp/tsm_endpoint_fixture.json
+      && python manage.py loaddata /tmp/tsm_endpoint_fixture.json --skip-empty-file
       && gunicorn -b 0.0.0.0:5000 manage:app --reload --log-level debug --timeout 50
       "
     networks:
@@ -122,6 +135,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - ./backend/app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+      - ./sql:/mnt/sql
     networks:
       - sms
     command: -p 5433

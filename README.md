@@ -1,3 +1,15 @@
+<!--
+SPDX-FileCopyrightText: 2021 - 2023
+- Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Norman Ziegner <norman.ziegner@ufz.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+
+SPDX-License-Identifier: HEESIL-1.0
+-->
+
 # Orchestration
 
 ![SMS work flow](docs/images/sms.png)
@@ -67,6 +79,41 @@ You can watch the output of the containers witch `docker-compose logs`:
 ```bash
 docker-compose logs --follow 
 ```
+
+## TSM Endpoints
+
+We include all the tsm endpoints in the database and can use the `manage.py loaddata <path>` command to add or
+update those.
+
+The current approach is to store them in the TSM_ENDPOINTS env variable as an json array, to write it to an temporary file
+and to load it with the `loaddata` command:
+
+```
+    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend sh -c "echo '$TSM_ENDPOINTS' > /tmp/tsm_endpoint_fixture.json"
+    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend python3 manage.py loaddata /tmp/tsm_endpoint_fixture.json
+```
+
+The content of the TSM_ENDPOINTS variable looks like this:
+
+```javascript
+[
+  {
+    "pk": 1,
+    "model": "TsmEndpoint",
+    "fields": {
+      "name": "Specific tsm endpoint",
+      "url": "https://somewhere.in.the/web"
+    }
+  }
+]
+```
+
+Feel free to add your tsm endpoint here.
+
+Please note: Regarding that we may want to provide a central instance in the future, it makes sense to keep the ids of the
+ids of the endpoints distinct. So to have pk=1 for GFZ, pk=2 for UFZ, pk=3 for FZJ, pk=4 for KIT and so on. Doing so can
+make an merge of the data much easier (but it is also possible to work around it).
+
 
 ## Additional step UFZ developer for Frontend local development - Identity Provider
 
@@ -138,6 +185,15 @@ For the minio the restore is different:
 - There is currently no strategy to restore the metadata - we save them to keep track of the user uploads (if the user wasn't allowed
   to upload a file, we can check who was responsible for that)
 
+## Test data for faster development
+- You can use your own test data to be inserted directly into the database during your development process
+- Do the following steps:
+  - __Make sure that you `db` service is up and running__ 
+  - `chmod +x preset-database.sh`
+  - `cp ./sql/preset-development-and-test-data.sql.example ./sql/preset-development-and-test-data.sql`
+  - Update the `./sql/preset-development-and-test-data.sql` file to your needs
+    - __HINT__: If you use hard coded IDs make sure to update the corresponding sequences or you'll encounter problems 
+  - run `./preset-database.sh`
 ## How to add new environment variables to the project
 You have to look for many places. Keep in mind, that you always have look in the specific repository (e.g. `frontend` or `backend`) __and__ the orchestration repository 
 
