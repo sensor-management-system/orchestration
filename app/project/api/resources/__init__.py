@@ -137,6 +137,10 @@ from .site_role_resources import (  # noqa: F401
     SiteRoleDetail,
     SiteRoleList,
 )
+from .tsm_endpoint_resources import (  # noqa: F401
+    TsmEndpointDetail,
+    TsmEndpointList,
+)
 from .usage_statistics import UsageStatistics  # noqa: F401
 from .user_info import UserInfo  # noqa: F401
 from .user_modification import AcceptTermsOfUse, RevokeApikey  # noqa: F401

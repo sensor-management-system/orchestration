@@ -474,3 +474,10 @@ api.route(
     "/configurations/<int:configuration_id>/datastream-links",
 )
 api.route(DatastreamLinkDetail, "datastream_link_detail", "/datastream-links/<int:id>")
+# TSM Endpoints
+api.route(
+    TsmEndpointList,
+    "tsm_endpoint_list",
+    "/tsm-endpoints",
+)
+api.route(TsmEndpointDetail, "tsm_endpoint_detail", "/tsm-endpoints/<int:id>")

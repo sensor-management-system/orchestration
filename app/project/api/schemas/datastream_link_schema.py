@@ -27,7 +27,6 @@ class DatastreamLinkSchema(Schema):
     id = fields.Integer(as_string=True)
     begin_date = fields.DateTime(allow_none=True)
     end_date = fields.DateTime(allow_none=True)
-    tsm_endpoint = fields.Str(required=True)
     datasource_id = fields.Str(required=True)
     datasource_name = fields.Str(allow_none=True)
     thing_id = fields.Str(required=True)
@@ -73,6 +72,15 @@ class DatastreamLinkSchema(Schema):
         include_resource_linkage=True,
         schema="DevicePropertySchema",
         type_="device_property",
+        id_field="id",
+        required=True,
+    )
+    tsm_endpoint = Relationship(
+        related_view="api.tsm_endpoint_detail",
+        related_view_kwargs={"id": "<tsm_endpoint_id>"},
+        include_resource_linkage=True,
+        schema="TsmEndpointSchema",
+        type_="tsm_endpoint",
         id_field="id",
         required=True,
     )

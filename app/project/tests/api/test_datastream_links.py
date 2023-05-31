@@ -20,6 +20,7 @@ from project.api.models import (
     Device,
     DeviceMountAction,
     DeviceProperty,
+    TsmEndpoint,
     User,
 )
 from project.api.models.base_model import db
@@ -80,6 +81,7 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
 
         db.session.add_all(
             [
@@ -88,6 +90,7 @@ class TestDatastreamLinks(BaseTestCase):
                 begin_contact,
                 configuration,
                 device_mount,
+                tsm_endpoint,
                 user,
             ]
         )
@@ -102,13 +105,15 @@ class TestDatastreamLinks(BaseTestCase):
                     "device_mount_action": {
                         "data": {"type": "device_mount_action", "id": device_mount.id}
                     },
+                    "tsm_endpoint": {
+                        "data": {"type": "tsm_endpoint", "id": tsm_endpoint.id}
+                    },
                 },
                 "attributes": {
                     "datastream_id": "22",
                     "datastream_name": "AirTemp+22m",
                     "thing_id": "1",
                     "thing_name": "Station1",
-                    "tsm_endpoint": "foo",
                     "datasource_id": "1",
                     "datasource_name": "DB1",
                     "begin_date": str(begin_date),
@@ -122,8 +127,6 @@ class TestDatastreamLinks(BaseTestCase):
 
         with self.run_requests_as(user):
             with self.client:
-                # You may want to look up self.add_object in the BaseTestCase
-                # and compare if something doesn't work anymore
                 response = self.client.post(
                     self.url,
                     data=json.dumps(payload),
@@ -149,7 +152,7 @@ class TestDatastreamLinks(BaseTestCase):
         self.assertEqual(datastream_link.datasource_name, "DB1")
         self.assertEqual(datastream_link.device_property_id, device_property.id)
         self.assertEqual(datastream_link.device_mount_action_id, device_mount.id)
-        self.assertEqual(datastream_link.tsm_endpoint, "foo")
+        self.assertEqual(datastream_link.tsm_endpoint_id, tsm_endpoint.id)
         self.assertEqual(datastream_link.license_uri, "http://cv/api/licenses/123")
         self.assertEqual(datastream_link.license_name, "HEESIL")
         self.assertEqual(datastream_link.aggregation_period, 0.2)
@@ -185,6 +188,7 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
 
         db.session.add_all(
             [
@@ -192,6 +196,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_property,
                 begin_contact,
                 configuration,
+                tsm_endpoint,
             ]
         )
         db.session.commit()
@@ -205,13 +210,15 @@ class TestDatastreamLinks(BaseTestCase):
                     "device_mount_action": {
                         "data": None,
                     },
+                    "tsm_endpoint": {
+                        "data": {"type": "tsm_endpoint", "id": tsm_endpoint.id}
+                    },
                 },
                 "attributes": {
                     "datastream_id": "22",
                     "datastream_name": "AirTemp+22m",
                     "thing_id": "1",
                     "thing_name": "Station1",
-                    "tsm_endpoint": "foo",
                     "datasource_id": "1",
                     "datasource_name": "DB1",
                     "begin_date": str(begin_date),
@@ -221,14 +228,100 @@ class TestDatastreamLinks(BaseTestCase):
         }
 
         with self.client:
-            # You may want to look up self.add_object in the BaseTestCase
-            # and compare if something doesn't work anymore
             response = self.client.post(
                 self.url,
                 data=json.dumps(payload),
                 content_type="application/vnd.api+json",
                 headers=create_token(),
             )
+
+        self.assertEqual(response.status_code, 422)
+
+    def test_post_datastream_link_missing_tsm_endpoint(self):
+        """Ensure we can't add a datastream link without a tsm endpoint."""
+        userinfo = generate_userinfo_data()
+        device = Device(
+            short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        begin_contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        user = User(
+            subject=begin_contact.email,
+            contact=begin_contact,
+            is_superuser=True,
+        )
+        configuration = generate_configuration_model()
+        configuration.cfg_permission_group = "123"
+        begin_date = fake.future_datetime()
+        end_date = begin_date + datetime.timedelta(days=2)
+        device_mount = DeviceMountAction(
+            begin_date=begin_date,
+            end_date=end_date,
+            configuration=configuration,
+            begin_contact=begin_contact,
+            device=device,
+        )
+        device_property = DeviceProperty(
+            label="device property1",
+            property_name="device_property1",
+            device=device,
+        )
+
+        db.session.add_all(
+            [
+                device,
+                device_property,
+                begin_contact,
+                configuration,
+                device_mount,
+                user,
+            ]
+        )
+        db.session.commit()
+        payload = {
+            "data": {
+                "type": "datastream_link",
+                "relationships": {
+                    "device_property": {
+                        "data": {"type": "device_property", "id": device_property.id}
+                    },
+                    "device_mount_action": {
+                        "data": {"type": "device_mount_action", "id": device_mount.id}
+                    },
+                    "tsm_endpoint": {
+                        "data": None,
+                    },
+                },
+                "attributes": {
+                    "datastream_id": "22",
+                    "datastream_name": "AirTemp+22m",
+                    "thing_id": "1",
+                    "thing_name": "Station1",
+                    "datasource_id": "1",
+                    "datasource_name": "DB1",
+                    "begin_date": str(begin_date),
+                    "end_date": str(end_date),
+                    "license_uri": "http://cv/api/licenses/123",
+                    "license_name": "HEESIL",
+                    "aggregation_period": 0.2,
+                },
+            }
+        }
+
+        with self.run_requests_as(user):
+            with self.client:
+                response = self.client.post(
+                    self.url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
 
         self.assertEqual(response.status_code, 422)
 
@@ -276,6 +369,7 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property1",
             device=device2,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         db.session.add_all(
             [
                 device1,
@@ -283,6 +377,7 @@ class TestDatastreamLinks(BaseTestCase):
                 begin_contact,
                 device_mount,
                 device_property,
+                tsm_endpoint,
                 user,
             ]
         )
@@ -295,7 +390,6 @@ class TestDatastreamLinks(BaseTestCase):
                     "datasource_id": "1",
                     "thing_id": "2",
                     "datastream_id": "3",
-                    "tsm_endpoint": "somewhere",
                 },
                 "relationships": {
                     "device_mount_action": {
@@ -309,6 +403,9 @@ class TestDatastreamLinks(BaseTestCase):
                             "id": device_property.id,
                             "type": "device_property",
                         }
+                    },
+                    "tsm_endpoint": {
+                        "data": {"type": "tsm_endpoint", "id": tsm_endpoint.id}
                     },
                 },
             }
@@ -377,11 +474,12 @@ class TestDatastreamLinks(BaseTestCase):
             property_name="device_property2",
             device=device2,
         )
+        tsm_endpoint = TsmEndpoint(name="XYZ", url="https://somewhere")
         datastream_link = DatastreamLink(
             datasource_id="1",
             thing_id="2",
             datastream_id="3",
-            tsm_endpoint="somewhere",
+            tsm_endpoint=tsm_endpoint,
             device_mount_action=device_mount,
             device_property=device_property1,
         )
@@ -394,6 +492,7 @@ class TestDatastreamLinks(BaseTestCase):
                 device_mount,
                 device_property1,
                 device_property2,
+                tsm_endpoint,
                 user,
             ]
         )
@@ -465,11 +564,13 @@ class TestDatastreamLinks(BaseTestCase):
         )
         property1 = DeviceProperty(device=device1, property_name="prop1")
         property2 = DeviceProperty(device=device2, property_name="prop2")
+        tsm_endpoint1 = TsmEndpoint(name="tsm1", url="https://somewhere")
+        tsm_endpoint2 = TsmEndpoint(name="tsm2", url="https://somewhereelse")
 
         linking1 = DatastreamLink(
             device_mount_action=mount1,
             device_property=property1,
-            tsm_endpoint="tsm1",
+            tsm_endpoint=tsm_endpoint1,
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
@@ -477,7 +578,7 @@ class TestDatastreamLinks(BaseTestCase):
         linking2 = DatastreamLink(
             device_mount_action=mount2,
             device_property=property2,
-            tsm_endpoint="tsm2",
+            tsm_endpoint=tsm_endpoint2,
             datasource_id="2",
             thing_id="2",
             datastream_id="2",
@@ -493,6 +594,8 @@ class TestDatastreamLinks(BaseTestCase):
                 mount2,
                 property1,
                 property2,
+                tsm_endpoint1,
+                tsm_endpoint2,
                 linking1,
                 linking2,
             ]
@@ -508,3 +611,54 @@ class TestDatastreamLinks(BaseTestCase):
         self.assertEqual(len(resp2.json["data"]), 1)
         self.assertEqual(resp1.json["data"][0]["id"], str(linking1.id))
         self.assertEqual(resp2.json["data"][0]["id"], str(linking2.id))
+
+    def test_get_elements_with_included_tsm_endpoint(self):
+        """Ensure we can include the tsm endpoint."""
+        configuration1 = Configuration(
+            label="c1", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        device1 = Device(short_name="d1", is_public=True, is_internal=False)
+        begin_contact = Contact(
+            given_name="begin", family_name="contact", email="begin.contact@localhost"
+        )
+        mount1 = DeviceMountAction(
+            configuration=configuration1,
+            device=device1,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        property1 = DeviceProperty(device=device1, property_name="prop1")
+        tsm_endpoint1 = TsmEndpoint(name="tsm1", url="https://somewhere")
+
+        linking1 = DatastreamLink(
+            device_mount_action=mount1,
+            device_property=property1,
+            tsm_endpoint=tsm_endpoint1,
+            datasource_id="1",
+            thing_id="1",
+            datastream_id="1",
+        )
+        db.session.add_all(
+            [
+                configuration1,
+                device1,
+                begin_contact,
+                mount1,
+                property1,
+                tsm_endpoint1,
+                linking1,
+            ]
+        )
+        db.session.commit()
+        url1 = f"{self.url}?include=tsm_endpoint"
+        resp1 = self.client.get(url1)
+        self.assertEqual(resp1.status_code, 200)
+        self.assertEqual(len(resp1.json["data"]), 1)
+        self.assertEqual(resp1.json["data"][0]["id"], str(linking1.id))
+        self.assertEqual(len(resp1.json["included"]), 1)
+        self.assertEqual(resp1.json["included"][0]["id"], str(tsm_endpoint1.id))
+        self.assertEqual(resp1.json["included"][0]["type"], "tsm_endpoint")
+        self.assertEqual(resp1.json["included"][0]["attributes"]["name"], "tsm1")
+        self.assertEqual(
+            resp1.json["included"][0]["attributes"]["url"], "https://somewhere"
+        )

@@ -87,7 +87,6 @@ components = {
                                     "attributes": {
                                         "type": "object",
                                         "properties": {
-                                            "tsm_endpoint": {"type": "string"},
                                             "datasource_id": {"type": "string"},
                                             "thing_id": {"type": "string"},
                                             "datastream_id": {"type": "string"},
@@ -145,6 +144,21 @@ components = {
                                                     }
                                                 },
                                             },
+                                            "tsm_endpoint": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {"type": "string"},
+                                                            "type": {
+                                                                "type": "string",
+                                                                "default": "tsm_endpoint",
+                                                            },
+                                                        },
+                                                    }
+                                                },
+                                            },
                                         },
                                     },
                                 },
@@ -172,7 +186,6 @@ components = {
                                     "attributes": {
                                         "type": "object",
                                         "properties": {
-                                            "tsm_endpoint": {"type": "string"},
                                             "datasource_id": {"type": "string"},
                                             "thing_id": {"type": "string"},
                                             "datastream_id": {"type": "string"},
@@ -232,6 +245,21 @@ components = {
                                                     }
                                                 },
                                             },
+                                            "tsm_endpoint": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {"type": "string"},
+                                                            "type": {
+                                                                "type": "string",
+                                                                "default": "tsm_endpoint",
+                                                            },
+                                                        },
+                                                    }
+                                                },
+                                            },
                                         },
                                     },
                                 },
@@ -263,7 +291,6 @@ components = {
                                         "attributes": {
                                             "type": "object",
                                             "properties": {
-                                                "tsm_endpoint": {"type": "string"},
                                                 "datasource_id": {"type": "string"},
                                                 "thing_id": {"type": "string"},
                                                 "datastream_id": {"type": "string"},
@@ -318,6 +345,22 @@ components = {
                                                     },
                                                 },
                                                 "device_property": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "data": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                },
+                                                            },
+                                                        }
+                                                    },
+                                                },
+                                                "tsm_endpoint": {
                                                     "type": "object",
                                                     "properties": {
                                                         "data": {
@@ -393,7 +436,6 @@ components = {
                                     "attributes": {
                                         "type": "object",
                                         "properties": {
-                                            "tsm_endpoint": {"type": "string"},
                                             "datasource_id": {"type": "string"},
                                             "thing_id": {"type": "string"},
                                             "datastream_id": {"type": "string"},
@@ -446,6 +488,20 @@ components = {
                                                 },
                                             },
                                             "device_property": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {"type": "string"},
+                                                            "type": {
+                                                                "type": "string",
+                                                            },
+                                                        },
+                                                    }
+                                                },
+                                            },
+                                            "tsm_endpoint": {
                                                 "type": "object",
                                                 "properties": {
                                                     "data": {

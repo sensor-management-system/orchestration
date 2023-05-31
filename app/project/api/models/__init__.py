@@ -61,4 +61,5 @@ from .software_update_actions import (  # noqa: F401
     DeviceSoftwareUpdateAction,
     PlatformSoftwareUpdateAction,
 )
+from .tsm_endpoint import TsmEndpoint  # noqa: F401
 from .user import User  # noqa: F401
