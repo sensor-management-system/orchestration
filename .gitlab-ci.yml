@@ -456,6 +456,10 @@ deploy-gfz-staging:
   script:
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
+    # Delete the volume for the static files of the backend.
+    # The volume is used so that the nginx can deliver those files.
+    # But we need it fresh so that we can put new files in.
+    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py migrate
@@ -523,6 +527,10 @@ deploy-gfz-staging-develop:
     - ./scripts/ensure_vm_max_map_count.sh
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml down --remove-orphans
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml rm -f
+    # Delete the volume for the static files of the backend.
+    # The volume is used so that the nginx can deliver those files.
+    # But we need it fresh so that we can put new files in.
+    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml up -d
     - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py migrate
@@ -574,6 +582,10 @@ deploy-gfz-prod:
   script:
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml down --remove-orphans
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml rm -f
+    # Delete the volume for the static files of the backend.
+    # The volume is used so that the nginx can deliver those files.
+    # But we need it fresh so that we can put new files in.
+    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py migrate
