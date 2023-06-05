@@ -58,8 +58,8 @@ paths = {
         "get": {
             "tags": ["Contacts"],
             "parameters": [
-                {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/contact_id"},
+                {"$ref": "#/components/parameters/include"},
             ],
             "responses": {"200": {"$ref": "#/components/responses/Contact_inst"}},
             "description": "Retrieve Contact from contact",
@@ -124,7 +124,7 @@ components = {
                             "organization": "",
                             "orcid": "1234-1234-1234-1234",
                         },
-                        "type": "Contact",
+                        "type": "contact",
                         "id": "0",
                     },
                 }
@@ -169,7 +169,7 @@ components = {
                                         "organization": "",
                                         "orcid": "1234-1234-1234-1234",
                                     },
-                                    "type": "Contact",
+                                    "type": "contact",
                                 },
                             }
                         },
@@ -197,7 +197,7 @@ components = {
                                             "organization": "",
                                             "orcid": "1234-1234-1234-1234",
                                         },
-                                        "type": "Contact",
+                                        "type": "contact",
                                         "id": "0",
                                         "relationships": {
                                             "user": {
@@ -229,7 +229,7 @@ components = {
                                         "organization": "",
                                         "orcid": "1234-1234-1234-1234",
                                     },
-                                    "type": "Contact",
+                                    "type": "contact",
                                     "id": "0",
                                     "relationships": {
                                         "user": {"data": [], "links": {"self": None}}
