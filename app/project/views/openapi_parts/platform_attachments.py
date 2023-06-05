@@ -105,6 +105,7 @@ paths = {
                         "how this parameter is set. "
                         "Backend needs this to allow linking of filenames for uploads."
                     ),
+                    "schema": {"type": "string", "default": "file"},
                 },
             ],
             "responses": {
