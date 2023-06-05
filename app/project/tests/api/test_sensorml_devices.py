@@ -364,6 +364,112 @@ class TestSensorMLDevice(BaseTestCase):
             "5",
         )
 
+    def test_get_public_device_contact_with_orcid(self):
+        """Test with a device with contact with orcid."""
+        owner_name = "Owner"
+        owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
+        contact1 = Contact(
+            given_name="Given",
+            family_name="Fam",
+            email="given@family",
+            orcid="0000-1111-2222-3333",
+            organization="Dummy organization",
+        )
+        contact_role1 = DeviceContactRole(
+            contact=contact1,
+            device=self.device,
+            role_name=owner_name,
+            role_uri=owner_uri,
+        )
+
+        db.session.add_all([contact1, contact_role1])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_contacts = root.find("{http://www.opengis.net/sensorml/2.0}contacts")
+        sml_contact_list = sml_contacts.find(
+            "{http://www.opengis.net/sensorml/2.0}ContactList"
+        )
+        sml_contact_entries = sml_contact_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}contact"
+        )
+        self.assertEqual(len(sml_contact_entries), 1)
+        first_contact = sml_contact_entries[0]
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}onlineResource")
+            .find("{http://www.isotc211.org/2005/gmd}CI_OnlineResource")
+            .find("{http://www.isotc211.org/2005/gmd}linkage")
+            .find("{http://www.isotc211.org/2005/gmd}URL")
+            .text,
+            "https://orcid.org/0000-1111-2222-3333",
+        )
+
+    def test_get_public_device_contact_with_website_and_orcid(self):
+        """
+        Ensure we prefer to show the orcid instead of the website.
+
+        In the data model that the sensorML uses, it is not possible
+        to add two different links for a person.
+
+        So in case we have both (the orcid & the website) we want
+        to prefer the orcid, as the person can add many links for
+        them in their orcid profile.
+        """
+        owner_name = "Owner"
+        owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
+        contact1 = Contact(
+            given_name="Given",
+            family_name="Fam",
+            email="given@family",
+            orcid="0000-1111-2222-3333",
+            organization="Dummy organization",
+            website="https://dummy/stuff/given.fam",
+        )
+        contact_role1 = DeviceContactRole(
+            contact=contact1,
+            device=self.device,
+            role_name=owner_name,
+            role_uri=owner_uri,
+        )
+
+        db.session.add_all([contact1, contact_role1])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_contacts = root.find("{http://www.opengis.net/sensorml/2.0}contacts")
+        sml_contact_list = sml_contacts.find(
+            "{http://www.opengis.net/sensorml/2.0}ContactList"
+        )
+        sml_contact_entries = sml_contact_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}contact"
+        )
+        self.assertEqual(len(sml_contact_entries), 1)
+        first_contact = sml_contact_entries[0]
+
+        self.assertEqual(
+            first_contact.find("{http://www.isotc211.org/2005/gmd}CI_ResponsibleParty")
+            .find("{http://www.isotc211.org/2005/gmd}contactInfo")
+            .find("{http://www.isotc211.org/2005/gmd}CI_Contact")
+            .find("{http://www.isotc211.org/2005/gmd}onlineResource")
+            .find("{http://www.isotc211.org/2005/gmd}CI_OnlineResource")
+            .find("{http://www.isotc211.org/2005/gmd}linkage")
+            .find("{http://www.isotc211.org/2005/gmd}URL")
+            .text,
+            "https://orcid.org/0000-1111-2222-3333",
+        )
+
     def test_get_public_device_with_long_name(self):
         """Check that we give out the long name."""
         self.device.long_name = "some long name"
