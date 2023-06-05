@@ -53,7 +53,6 @@ paths = {
                 "$ref": "#/components/requestBodies/GenericPlatformActionAttachment_inst_patch"
             },
             "description": "",
-            "required": True,
             "responses": {
                 "200": {
                     "$ref": "#/components/responses/GenericPlatformActionAttachment_coll"
