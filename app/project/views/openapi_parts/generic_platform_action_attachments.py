@@ -238,6 +238,7 @@ components = {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
+                        "type": "object",
                         "properties": {
                             "jsonapi": {
                                 "type": "object",
@@ -251,35 +252,38 @@ components = {
                             },
                             "data": {
                                 "type": "array",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {"type": "object", "properties": {}},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {"type": "string"},
-                                                        },
-                                                    }
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {"type": "string"},
+                                        "type": {"type": "string"},
+                                        "attributes": {"type": "object", "properties": {}},
+                                        "relationships": {
+                                            "type": "object",
+                                            "properties": {
+                                                "action": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "data": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {"type": "string"},
+                                                                "type": {"type": "string"},
+                                                            },
+                                                        }
+                                                    },
                                                 },
-                                            },
-                                            "attachment": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {"type": "string"},
-                                                        },
-                                                    }
+                                                "attachment": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "data": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {"type": "string"},
+                                                                "type": {"type": "string"},
+                                                            },
+                                                        }
+                                                    },
                                                 },
                                             },
                                         },
@@ -328,6 +332,7 @@ components = {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
+                        "type": "object",
                         "properties": {
                             "jsonapi": {
                                 "type": "object",

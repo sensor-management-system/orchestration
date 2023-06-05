@@ -14,7 +14,16 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Platform was archived succesfully."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
                 "409": {"$ref": "#/components/errors/conflict"},

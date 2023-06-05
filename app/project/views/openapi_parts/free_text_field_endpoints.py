@@ -34,7 +34,17 @@ def template(endpoint, description, operation_id, response_description):
                         },
                         "description": response_description,
                     },
-                    "401": {"$ref": "#/components/errors/authentification_required"},
+
+                    "401": {
+                        "description": "Authentification required.",
+                        "content": {
+                            "application/vnd.api+json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/authentification_required"
+                                }
+                            }
+                        },
+                    },
                 },
                 "description": description,
                 "operationId": operation_id,

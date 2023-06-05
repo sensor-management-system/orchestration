@@ -1110,15 +1110,29 @@
           "$ref": "#/components/requestBodies/Platform_inst"
         },
         "responses": {
-          "201": {
-            "$ref": "#/components/responses/Platform_single"
-          },
-          "401": {
-            "$ref": "#/components/errors/authentification_required"
-          },
-          "409": {
-            "$ref": "#/components/errors/conflict"
-          }
+            "201": {
+                "$ref": "#/components/responses/Platform_single"
+            },
+            "401": {
+                "description": "Authentification required.",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/authentification_required"
+                        }
+                    }
+                }
+            },
+            "409": {
+                "description": "Conflict on performing the operation",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/conflict"
+                        }
+                    }
+                }
+            }
         },
         "operationId": "CreatePlatform_0",
         "parameters": []
@@ -1169,15 +1183,22 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "$ref": "#/components/responses/Platform_single"
-          },
-          "401": {
-            "$ref": "#/components/errors/authentification_required"
-          },
-          "404": {
-            "$ref": "#/components/errors/not_found"
-          }
+            "200": {
+                "$ref": "#/components/responses/Platform_single"
+            },
+            "401": {
+                "description": "Authentification required.",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/authentification_required"
+                        }
+                    }
+                }
+            },
+            "404": {
+                "$ref": "#/components/errors/not_found"
+            }
         },
         "description": "Update Platform attributes",
         "operationId": "UpdatePlatform_0"
@@ -1192,15 +1213,22 @@
           }
         ],
         "responses": {
-          "200": {
-            "$ref": "#/components/responses/object_deleted"
-          },
-          "401": {
-            "$ref": "#/components/errors/authentification_required"
-          },
-          "404": {
-            "$ref": "#/components/errors/not_found"
-          }
+            "200": {
+                "$ref": "#/components/responses/object_deleted"
+            },
+            "401": {
+                "description": "Authentification required.",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/authentification_required"
+                        }
+                    }
+                }
+            },
+            "404": {
+                "$ref": "#/components/errors/not_found"
+            }
         },
         "operationId": "DeletePlatformfromplatform_3"
       }
@@ -5776,30 +5804,51 @@
     },
     "errors" : {
       "authentification_required": {
-        "content": {
-          "application/vnd.api+json": {
-            "schema": {
-              "properties": {
-                "errors": {
-                  "example": [
-                    {
-                        "status": "401",
-                        "source": "Authentification required.",
-                        "title": "Unauthorized"
-                    }
-                  ],
-                  "type": "array"
-                },
-                "jsonapi": {
-                  "example": {
-                    "version": "1.0"
-                  },
-                  "type": "object"
-                }
+          "description": "Authentification is required for this operation.",
+          "content": {
+              "application/vnd.api+json": {
+                  "schema": {
+                      "type": "object",
+                      "properties": {
+                          "errors": {
+                              "example": [
+                                  {
+                                      "status": "401",
+                                      "source": "Authentification required.",
+                                      "title": "Unauthorized"
+                                  }
+                              ],
+                              "type": "array",
+                              "items": {
+                                  "type": "object",
+                                  "properties": {
+                                      "status": {
+                                          "type": "string"
+                                      },
+                                      "source": {
+                                          "type": "string"
+                                      },
+                                      "title": {
+                                          "type": "string"
+                                      }
+                                  }
+                              }
+                          },
+                          "jsonapi": {
+                              "example": {
+                                  "version": "1.0"
+                              },
+                              "type": "object",
+                              "properties": {
+                                  "version": {
+                                      "type": "string"
+                                  }
+                              }
+                          }
+                      }
+                  }
               }
-            }
           }
-        }
       },
       "conflict": {
         "content": {

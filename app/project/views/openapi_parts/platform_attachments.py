@@ -46,7 +46,16 @@ paths = {
             },
             "responses": {
                 "201": {"$ref": "#/components/responses/PlatformAttachment_single"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
             },
             "operationId": "CreatePlatformAttachment_0",
         },

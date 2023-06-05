@@ -110,7 +110,16 @@ paths = {
                 "401": {"$ref": "#/components/errors/authentification_required"},
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
-                "409": {"$ref": "#/components/errors/conflict"},
+                "409": {
+                    "description": "Conflict on performing the operation",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/conflict"
+                            }
+                        }
+                    }
+                }
             },
             "description": "Archive a configuration.",
             "operationId": "ArchiveConfiguration",
