@@ -123,7 +123,15 @@ class ContactRoleConverter:
                 )
             )
             gmd_online_resource = None
-            if contact_role.contact.website:
+            if contact_role.contact.orcid:
+                gmd_online_resource = GmdOnlineResource(
+                    gmd_ci_online_resource=GmdCiOnlineResource(
+                        gmd_linkage=GmdLinkage(
+                            gmd_url=GmdUrl(text=f"https://orcid.org/{contact_role.contact.orcid}")
+                        ),
+                    )
+                )
+            elif contact_role.contact.website:
                 gmd_online_resource = GmdOnlineResource(
                     gmd_ci_online_resource=GmdCiOnlineResource(
                         gmd_linkage=GmdLinkage(
