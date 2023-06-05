@@ -1155,9 +1155,7 @@
           "200": {
             "$ref": "#/components/responses/Platform_single"
           },
-          "404": {
-            "$ref": "#/components/errors/not_found"
-          }
+          "404": {"$ref": "#/components/responses/jsonapi_error_404"}
         },
         "description": "Retrieve Platform from platform",
         "operationId": "RetrievePlatforminstance_0"
@@ -1196,9 +1194,7 @@
                     }
                 }
             },
-            "404": {
-                "$ref": "#/components/errors/not_found"
-            }
+            "404": {"$ref": "#/components/responses/jsonapi_error_404"}
         },
         "description": "Update Platform attributes",
         "operationId": "UpdatePlatform_0"
@@ -1226,9 +1222,7 @@
                     }
                 }
             },
-            "404": {
-                "$ref": "#/components/errors/not_found"
-            }
+            "404": {"$ref": "#/components/responses/jsonapi_error_404"}
         },
         "operationId": "DeletePlatformfromplatform_3"
       }

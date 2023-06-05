@@ -107,19 +107,26 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Configuration was archived succesfully."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
                 "409": {
                     "description": "Conflict on performing the operation",
                     "content": {
                         "application/vnd.api+json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/conflict"
-                            }
+                            "schema": {"$ref": "#/components/schemas/conflict"}
                         }
-                    }
-                }
+                    },
+                },
             },
             "description": "Archive a configuration.",
             "operationId": "ArchiveConfiguration",
@@ -133,7 +140,16 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Restoring of the configuration was succesful."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },

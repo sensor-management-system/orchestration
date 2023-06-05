@@ -53,7 +53,6 @@ paths = {
                 "$ref": "#/components/requestBodies/GenericConfigurationActionAttachment_inst_patch"
             },
             "description": "",
-            "required": True,
             "responses": {
                 "200": {
                     "$ref": "#/components/responses/GenericConfigurationActionAttachment_coll"
@@ -78,36 +77,31 @@ components = {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
+                        "type": "object",
                         "properties": {
                             "data": {
                                 "type": "object",
                                 "properties": {
                                     "id": {"type": "string"},
-                                    "type": {"type": "string", "required": True},
+                                    "type": {"type": "string"},
                                     "attributes": {
                                         "type": "object",
-                                        "required": True,
                                         "properties": {},
                                     },
                                     "relationships": {
                                         "type": "object",
-                                        "required": True,
                                         "properties": {
                                             "action": {
                                                 "type": "object",
-                                                "required": True,
                                                 "properties": {
                                                     "data": {
                                                         "type": "object",
-                                                        "required": True,
                                                         "properties": {
                                                             "id": {
                                                                 "type": "string",
-                                                                "required": True,
                                                             },
                                                             "type": {
                                                                 "type": "string",
-                                                                "required": True,
                                                             },
                                                         },
                                                     }
@@ -115,18 +109,14 @@ components = {
                                             },
                                             "attachment": {
                                                 "type": "object",
-                                                "required": True,
                                                 "properties": {
                                                     "data": {
                                                         "type": "object",
-                                                        "required": True,
                                                         "properties": {
                                                             "id": {
-                                                                "required": True,
                                                                 "type": "string",
                                                             },
                                                             "type": {
-                                                                "required": True,
                                                                 "type": "string",
                                                             },
                                                         },
@@ -152,7 +142,7 @@ components = {
                                     },
                                 },
                             }
-                        }
+                        },
                     }
                 }
             },

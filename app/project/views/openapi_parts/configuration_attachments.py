@@ -119,7 +119,7 @@ paths = {
                     "$ref": "#/components/errors/not_found",
                 },
             },
-            "description": ("Endpoint to get the content of the uploaded file.",),
+            "description": ("Endpoint to get the content of the uploaded file."),
         }
     },
 }

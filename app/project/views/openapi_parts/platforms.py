@@ -26,7 +26,14 @@ paths = {
                 },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
-                "409": {"$ref": "#/components/errors/conflict"},
+                "409": {
+                    "description": "Conflict on performing the operation",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {"$ref": "#/components/schemas/conflict"}
+                        }
+                    },
+                },
             },
             "description": "Archive a platform.",
             "operationId": "ArchivePlatform",
@@ -40,7 +47,16 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Restoring of the platform was succesful."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },

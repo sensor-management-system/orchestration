@@ -34,7 +34,6 @@ def template(endpoint, description, operation_id, response_description):
                         },
                         "description": response_description,
                     },
-
                     "401": {
                         "description": "Authentification required.",
                         "content": {
@@ -135,7 +134,16 @@ paths = {
                         }
                     }
                 },
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
             },
             "description": "Get the list of distinct serial numbers of all platforms.",
             "operationId": "controller_platform_serial_numbers",
@@ -221,9 +229,18 @@ paths = {
                                 }
                             }
                         }
-                    }
+                    },
                 },
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
             },
             "description": "Get the list of distinct serial numbers of all devices.",
             "operationId": "controller_device_serial_numbers",
