@@ -1090,7 +1090,13 @@
             "$ref": "#/components/responses/Platform_coll"
           },
           "400": {
-            "$ref": "#/components/errors/invalid_filters"
+              "content": {
+                  "application/vnd.api+json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/invalid_filters"
+                      }
+                  }
+              }
           }
         },
         "description": "Retrieve Platform",
@@ -5769,32 +5775,6 @@
       {% endfor %}
     },
     "errors" : {
-      "invalid_filters": {
-        "content": {
-          "application/vnd.api+json": {
-            "schema": {
-              "properties": {
-                "errors": {
-                  "example": [
-                    {
-                        "detail": "Parse error",
-                        "status": "400",
-                        "title": "Invalid filters querystring parameter."
-                    }
-                  ],
-                  "type": "array"
-                },
-                "jsonapi": {
-                  "example": {
-                    "version": "1.0"
-                  },
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      },
       "authentification_required": {
         "content": {
           "application/vnd.api+json": {

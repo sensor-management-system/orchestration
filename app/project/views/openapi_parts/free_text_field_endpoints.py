@@ -199,6 +199,7 @@ paths = {
             ],
             "responses": {
                 "200": {
+                    "description": "List of distinct serial numbers for devices.",
                     "content": {
                         "application/vnd.api+json": {
                             "schema": {
