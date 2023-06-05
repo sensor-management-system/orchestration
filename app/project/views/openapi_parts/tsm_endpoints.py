@@ -36,6 +36,7 @@ paths = {
 components = {
     "responses": {
         "TsmEndpoint_coll": {
+            "description": "Data of a list of a TSM endpoints",
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
@@ -68,6 +69,7 @@ components = {
             }
         },
         "TsmEndpoint_inst": {
+            "description": "Data of an instance of a TSM endpoint",
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
