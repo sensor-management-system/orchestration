@@ -22,8 +22,7 @@ paths = {
                     "name": "skip_cache",
                     "in": "query",
                     "required": False,
-                    "default": False,
-                    "schema": {"type": "boolean"},
+                    "schema": {"type": "boolean", "default": False},
                 }
             ],
             "responses": {"200": {"$ref": "#/components/responses/Userinfo"}},

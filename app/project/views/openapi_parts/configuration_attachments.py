@@ -115,9 +115,7 @@ paths = {
                         }
                     },
                 },
-                "404": {
-                    "$ref": "#/components/errors/not_found",
-                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "description": ("Endpoint to get the content of the uploaded file."),
         }

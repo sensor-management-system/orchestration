@@ -81,7 +81,16 @@ paths = {
             },
             "responses": {
                 "200": {"$ref": "#/components/responses/PlatformAttachment_single"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
                 "409": {
                     "description": "Conflict on performing the operation",
@@ -100,7 +109,16 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/platform_attachment_id"}],
             "responses": {
                 "200": {"$ref": "#/components/responses/object_deleted"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "operationId": "DeletePlatformAttachmentfromplatformattachment_0",
@@ -132,7 +150,14 @@ paths = {
                     ),
                 },
                 "401": {
-                    "$ref": "#/components/errors/authentification_required",
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
                 },
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },

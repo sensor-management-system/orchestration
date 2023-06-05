@@ -121,6 +121,7 @@ paths = {
             ],
             "responses": {
                 "200": {
+                    "description": "Distinct list of serial numbers.",
                     "content": {
                         "application/vnd.api+json": {
                             "schema": {
@@ -132,7 +133,7 @@ paths = {
                                 }
                             }
                         }
-                    }
+                    },
                 },
                 "401": {
                     "description": "Authentification required.",

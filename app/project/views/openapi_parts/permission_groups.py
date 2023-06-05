@@ -32,6 +32,7 @@ components = {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
+                        "type": "object",
                         "properties": {
                             "jsonapi": {
                                 "type": "object",
@@ -45,14 +46,16 @@ components = {
                             },
                             "data": {
                                 "type": "array",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "name": {"type": "string"},
-                                            "description": {"type": "string"},
+                                "items": {
+                                    "properties": {
+                                        "id": {"type": "string"},
+                                        "type": {"type": "string"},
+                                        "attributes": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {"type": "string"},
+                                                "description": {"type": "string"},
+                                            },
                                         },
                                     },
                                 },
@@ -75,7 +78,7 @@ components = {
                                     },
                                 ],
                             },
-                        }
+                        },
                     }
                 }
             },

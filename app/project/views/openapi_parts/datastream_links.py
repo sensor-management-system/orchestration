@@ -272,6 +272,7 @@ components = {
     },
     "responses": {
         "DatastreamLink_coll": {
+            "description": "List of datastream links.",
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
@@ -416,9 +417,10 @@ components = {
                         }
                     }
                 }
-            }
+            },
         },
         "DatastreamLink_inst": {
+            "description": "A single datastream link.",
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
@@ -551,7 +553,7 @@ components = {
                         }
                     }
                 }
-            }
+            },
         },
     },
     "parameters": {

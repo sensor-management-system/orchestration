@@ -5276,7 +5276,7 @@
           "items": {
             "type": "integer"
           },
-          "default": ""
+          "default": []
         }
       },
       "timepoint": {
