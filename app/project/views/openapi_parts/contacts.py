@@ -9,9 +9,8 @@
 paths = {
     "/contacts": {
         "get": {
-            "tags": ["Contact"],
+            "tags": ["Contacts"],
             "parameters": [
-                {"$ref": "#/components/parameters/configuration_id"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {"$ref": "#/components/parameters/website"},
@@ -19,6 +18,28 @@ paths = {
                 {"$ref": "#/components/parameters/given_name"},
                 {"$ref": "#/components/parameters/family_name"},
                 {"$ref": "#/components/parameters/email"},
+                {
+                    "name": "filter[organization]",
+                    "in": "query",
+                    "required": False,
+                    "description": "Filter the contacts by organization name.",
+                    "schema": {
+                        "type": "string",
+                        "format": "string",
+                        "default": "",
+                    }
+                },
+                {
+                    "name": "filter[orcid]",
+                    "in": "query",
+                    "required": False,
+                    "description": "Filter the contacts by orcid.",
+                    "schema": {
+                        "type": "string",
+                        "format": "string",
+                        "default": "",
+                    }
+                },
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {"200": {"$ref": "#/components/responses/Contact_coll1"}},
@@ -26,7 +47,7 @@ paths = {
             "operationId": "RetrieveacollectionofContactobjects_0",
         },
         "post": {
-            "tags": ["Contact"],
+            "tags": ["Contacts"],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": {
@@ -43,7 +64,7 @@ paths = {
     },
     "/contacts/{contact_id}": {
         "get": {
-            "tags": ["Contact"],
+            "tags": ["Contacts"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/contact_id"},
@@ -53,7 +74,7 @@ paths = {
             "operationId": "RetrieveContactinstance_0",
         },
         "patch": {
-            "tags": ["Contact"],
+            "tags": ["Contacts"],
             "parameters": [{"$ref": "#/components/parameters/contact_id"}],
             "requestBody": {
                 "content": {
@@ -73,7 +94,7 @@ paths = {
             "operationId": "UpdateContact_0",
         },
         "delete": {
-            "tags": ["Contact"],
+            "tags": ["Contacts"],
             "parameters": [{"$ref": "#/components/parameters/contact_id"}],
             "responses": {"200": {"$ref": "#/components/responses/object_deleted"}},
             "operationId": "DeleteContactfromcontact_5",
