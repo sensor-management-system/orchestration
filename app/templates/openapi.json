@@ -7,10 +7,10 @@
     "contact": {
       "email": "gitlab-incoming+hub-terra-sms-service-desk-4415-issue-@hzdr.de",
       "name": "sms-service-desk",
-      "url": "https://gitlab.hzdr.de/hub-terra/sms/service-desk"
+      "url": "https://codebase.helmholtz.cloud/hub-terra/sms/service-desk"
     },
     "license": {
-      "url": "https://gitext.gfz-potsdam.de/software/heesil",
+      "url": "https://git.gfz-potsdam.de/rse/heesil",
       "name": "HEESIL-license"
     },
     "termsOfService": "{{ term_of_use_url }}"
@@ -5880,7 +5880,7 @@
     }
   },
   "externalDocs": {
-    "url": "https://gitlab.hzdr.de/hub-terra/sms/backend",
-    "description": "https://gitlab.hzdr.de/hub-terra/sms/backend/-/blob/master/README.md"
+    "url": "https://codebase.helmholtz.cloud/hub-terra/sms/backend",
+    "description": "https://codebase.helmholtz.cloud/hub-terra/sms/backend/-/blob/master/README.md"
   }
 }
