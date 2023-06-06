@@ -244,7 +244,6 @@ components = {
                     }
                 }
             },
-            "description": "Contact",
         },
     },
     "parameters": {
