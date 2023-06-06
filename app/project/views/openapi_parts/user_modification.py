@@ -14,7 +14,16 @@ paths = {
             "parameters": [],
             "responses": {
                 "200": {"$ref": "#/components/responses/RevokeApikey"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
             },
             "requestBody": {"$ref": "#/components/requestBodies/RevokeApikey"},
         }
@@ -26,7 +35,16 @@ paths = {
             "parameters": [],
             "responses": {
                 "200": {"$ref": "#/components/responses/AcceptTermsOfUse"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
             },
             "requestBody": {"$ref": "#/components/requestBodies/AcceptTermsOfUse"},
         }

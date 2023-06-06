@@ -144,9 +144,6 @@ components = {
                                     },
                                     "attributes": {
                                         "type": "object",
-                                        "required": [
-                                            required_attributes_for_request_body
-                                        ],
                                         "properties": {
                                             "begin_description": {"type": "string"},
                                             "end_description": {"type": "string"},
@@ -178,7 +175,6 @@ components = {
                                     },
                                     "relationships": {
                                         "type": "object",
-                                        "required": ["begin_contact"],
                                         "properties": {
                                             "begin_contact": {
                                                 "type": "object",
@@ -302,7 +298,6 @@ components = {
                         "id": {"type": "string"},
                         "attributes": {
                             "type": "object",
-                            "required": ["id", "begin_date"],
                             "properties": {
                                 "begin_description": {"type": "string"},
                                 "end_description": {"type": "string"},
@@ -325,7 +320,6 @@ components = {
                         },
                         "relationships": {
                             "type": "object",
-                            "required": ["begin_contact", "configuration"],
                             "properties": {
                                 "begin_contact": {
                                     "type": "object",

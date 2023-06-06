@@ -111,7 +111,14 @@ paths = {
                     ),
                 },
                 "401": {
-                    "$ref": "#/components/errors/authentification_required",
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
                 },
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },

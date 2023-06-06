@@ -155,8 +155,8 @@ components = {
                             "data": {
                                 "type": "object",
                                 "properties": {
-                                    "id": {"type": "string", "required": True},
-                                    "type": {"type": "string", "required": True},
+                                    "id": {"type": "string"},
+                                    "type": {"type": "string"},
                                     "attributes": {"type": "object", "properties": {}},
                                     "relationships": {
                                         "type": "object",
@@ -169,11 +169,9 @@ components = {
                                                         "properties": {
                                                             "id": {
                                                                 "type": "string",
-                                                                "required": True,
                                                             },
                                                             "type": {
                                                                 "type": "string",
-                                                                "required": True,
                                                             },
                                                         },
                                                     }
@@ -186,11 +184,9 @@ components = {
                                                         "type": "object",
                                                         "properties": {
                                                             "id": {
-                                                                "required": True,
                                                                 "type": "string",
                                                             },
                                                             "type": {
-                                                                "required": True,
                                                                 "type": "string",
                                                             },
                                                         },

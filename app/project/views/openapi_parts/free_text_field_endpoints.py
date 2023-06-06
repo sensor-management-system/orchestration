@@ -370,8 +370,8 @@ paths = {
     **template(
         endpoint="/controller/platform-software-update-action-repository-urls",
         description=(
-            "Get the list of distinct repository urls of all ",
-            "platform software update actions.",
+            "Get the list of distinct repository urls of all "
+            "platform software update actions."
         ),
         operation_id="controller_platform_software_update_action_repository_urls",
         response_description="List of distinct software update action repository urls for platforms.",

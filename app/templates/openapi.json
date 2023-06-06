@@ -152,14 +152,7 @@
         },
         "responses": {
           "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/responses/Device_coll"
-                }
-              }
-            }
+              "$ref": "#/components/responses/Device_coll"
           }
         },
         "operationId": "CreateDevice_0",
@@ -1096,7 +1089,8 @@
                         "$ref": "#/components/schemas/invalid_filters"
                       }
                   }
-              }
+              },
+              "description": "Invalid filter parameter."
           }
         },
         "description": "Retrieve Platform",
@@ -1425,17 +1419,10 @@
         },
         "responses": {
           "201": {
-            "description": "OK",
-            "content": {
-              "application/vnd.api+json": {
-                "schema": {
-                  "$ref": "#/components/requestBodies/Upload_inst1"
-                }
-              }
-            }
+            "$ref": "#/components/responses/Upload_inst1"
           }
         },
-        "operationId": "UplaodAttachment_0",
+        "operationId": "UploadAttachment_0",
         "parameters": []
       }
     },
@@ -2313,22 +2300,6 @@
                         }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "Upload_inst1": {
-        "content": {
-          "application/vnd.api+json": {
-            "schema": {
-              "properties": {
-                "data": {
-                  "example": {
-                    "message": "object stored in sms-attachments",
-                    "url": ""
                   }
                 }
               }
@@ -3687,6 +3658,24 @@
       {% endfor %}
     },
     "responses": {
+      "Upload_inst1": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "example": {
+                    "message": "object stored in sms-attachments",
+                    "url": ""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Upload successful."
+      },
       "mountingActions_coll": {
         "content": {
           "application/vnd.api+json": {
@@ -5026,111 +5015,128 @@
         "description": "Device"
       },
       "Platform_coll": {
-        "content": {
-          "application/vnd.api+json": {
-            "schema": {
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "example": [{
-                    "attributes": {
-                      "created_at": "2022-08-31T12:00:00",
-                      "updated_at": "2022-08-31T12:00:00",
-                      "description": "",
-                      "short_name": "",
-                      "long_name": "",
-                      "manufacturer_uri": "",
-                      "manufacturer_name": "",
-                      "model": "",
-                      "platform_type_uri": "",
-                      "platform_type_name": "",
-                      "status_uri": "",
-                      "status_name": "",
-                      "website": "",
-                      "inventory_number": "",
-                      "serial_number": "",
-                      "persistent_identifier": "",
-                      "group_ids": [
-                        "1",
-                        "2"
-                      ],
-                      "is_public": false,
-                      "is_internal": true,
-                      "is_private": false,
-                      "archived": false
-                    },
-                    "type": "platform",
-                    "id": "0",
-                    "relationships": {
-                      "created_by": {
-                        "links": {
-                          "related": null
-                        },
-                        "data": {
-                          "type": "user",
-                          "id": "0"
-                        }
+          "content": {
+              "application/vnd.api+json": {
+                  "schema": {
+                      "properties": {
+                          "data": {
+                              "type": "array",
+                              "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "attributes": {
+                                        "type": "object"
+                                    },
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "relationships": {
+                                        "type": "object"
+                                    }
+                                  }
+                              },
+                              "example": [{
+                                  "attributes": {
+                                      "created_at": "2022-08-31T12:00:00",
+                                      "updated_at": "2022-08-31T12:00:00",
+                                      "description": "",
+                                      "short_name": "",
+                                      "long_name": "",
+                                      "manufacturer_uri": "",
+                                      "manufacturer_name": "",
+                                      "model": "",
+                                      "platform_type_uri": "",
+                                      "platform_type_name": "",
+                                      "status_uri": "",
+                                      "status_name": "",
+                                      "website": "",
+                                      "inventory_number": "",
+                                      "serial_number": "",
+                                      "persistent_identifier": "",
+                                      "group_ids": [
+                                          "1",
+                                          "2"
+                                      ],
+                                      "is_public": false,
+                                      "is_internal": true,
+                                      "is_private": false,
+                                      "archived": false
+                                  },
+                                  "type": "platform",
+                                  "id": "0",
+                                  "relationships": {
+                                      "created_by": {
+                                          "links": {
+                                              "related": null
+                                          },
+                                          "data": {
+                                              "type": "user",
+                                              "id": "0"
+                                          }
+                                      },
+                                      "platform_attachments": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "generic_platform_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "platform_mount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "outer_platform_mount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "outer_device_mount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "platform_software_update_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "platform_unmount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "updated_by": {
+                                          "links": {
+                                              "related": null
+                                          },
+                                          "data": {
+                                              "type": "user",
+                                              "id": "0"
+                                          }
+                                      }
+                                  }
+                              }]
+                          }
                       },
-                      "platform_attachments": {
-                        "data": [],
-                        "links": {
-                          "related": null
-                        }
-                      },
-                      "generic_platform_actions": {
-                        "data": [],
-                        "links": {
-                          "related": null
-                        }
-                      },
-                      "platform_mount_actions": {
-                        "data": [],
-                        "links": {
-                          "related": null
-                        }
-                      },
-                      "outer_platform_mount_actions": {
-                        "data": [],
-                        "links": {
-                          "related": null
-                        }
-                      },
-                      "outer_device_mount_actions": {
-                        "data": [],
-                        "links": {
-                          "related": null
-                        }
-                      },
-                      "platform_software_update_actions": {
-                        "data": [],
-                        "links": {
-                          "related": null
-                        }
-                      },
-                      "platform_unmount_actions": {
-                        "data": [],
-                        "links": {
-                          "related": null
-                        }
-                      },
-                      "updated_by": {
-                        "links": {
-                          "related": null
-                        },
-                        "data": {
-                          "type": "user",
-                          "id": "0"
-                        }
-                      }
-                    }
-                  }]
-                }
-              },
-              "description": "Platform get;"
-            }
-          }
-        },
-        "description": "Platform"
+                      "description": "Platform get;"
+                  }
+              }
+          },
+          "description": "Platform"
       },
       "Platform_single": {
         "content": {
@@ -5795,107 +5801,6 @@
       {% for component in parameter_components %}
       "{{ component }}": {{ parameter_components[component]}} {% if not loop.last %},{%endif %}
       {% endfor %}
-    },
-    "errors" : {
-      "authentification_required": {
-          "description": "Authentification is required for this operation.",
-          "content": {
-              "application/vnd.api+json": {
-                  "schema": {
-                      "type": "object",
-                      "properties": {
-                          "errors": {
-                              "example": [
-                                  {
-                                      "status": "401",
-                                      "source": "Authentification required.",
-                                      "title": "Unauthorized"
-                                  }
-                              ],
-                              "type": "array",
-                              "items": {
-                                  "type": "object",
-                                  "properties": {
-                                      "status": {
-                                          "type": "string"
-                                      },
-                                      "source": {
-                                          "type": "string"
-                                      },
-                                      "title": {
-                                          "type": "string"
-                                      }
-                                  }
-                              }
-                          },
-                          "jsonapi": {
-                              "example": {
-                                  "version": "1.0"
-                              },
-                              "type": "object",
-                              "properties": {
-                                  "version": {
-                                      "type": "string"
-                                  }
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      },
-      "conflict": {
-        "content": {
-          "application/vnd.api+json": {
-            "schema": {
-              "properties": {
-                "errors": {
-                  "example": [
-                    {
-                        "status": "409",
-                        "source": "",
-                        "title": "Conflict"
-                    }
-                  ],
-                  "type": "array"
-                },
-                "jsonapi": {
-                  "example": {
-                    "version": "1.0"
-                  },
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      },
-      "not_found": {
-        "content": {
-          "application/vnd.api+json": {
-            "schema": {
-              "properties": {
-                "errors": {
-                  "example": [
-                    {
-                        "status": "404",
-                        "source": "Object not found",
-                        "title": "Object not found"
-                    }
-                  ],
-                  "type": "array"
-                },
-                "jsonapi": {
-                  "example": {
-                    "version": "1.0"
-                  },
-                  "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
     },
     "links": {
     },
