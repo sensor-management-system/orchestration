@@ -62,14 +62,7 @@ paths = {
                 "required": True,
             },
             "responses": {
-                "200": {
-                    "description": "Request fulfilled, document follows",
-                    "content": {
-                        "application/vnd.api+json": {
-                            "schema": {"$ref": "#/components/responses/Site_inst"}
-                        }
-                    },
-                }
+                "200": {"$ref": "#/components/responses/Site_inst"},
             },
             "description": "Update Site attributes",
             "operationId": "UpdateSite_0",
@@ -89,10 +82,26 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Site was archived succesfully."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
-                "409": {"$ref": "#/components/errors/conflict"},
+                "409": {
+                    "description": "Conflict on performing the operation",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {"$ref": "#/components/schemas/conflict"}
+                        }
+                    },
+                },
             },
             "description": "Archive a site.",
             "operationId": "ArchiveSite",
@@ -106,7 +115,16 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Restoring of the site was succesful."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
@@ -183,6 +201,7 @@ components = {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
+                        "type": "object",
                         "properties": {
                             "data": {
                                 "example": {
@@ -233,8 +252,7 @@ components = {
                                 "type": "string",
                             }
                         },
-                        "description": "Site get;",
-                    }
+                    },
                 }
             },
             "description": "Request fulfilled, document follows",
