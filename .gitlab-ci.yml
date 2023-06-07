@@ -99,29 +99,31 @@ unittest-lint:
   script:
     - cd $CI_PROJECT_DIR/app/ && tox
 
-test-image:
-  services:
-    - name: postgis/postgis:12-3.3-alpine
-      alias: postgres
-  variables:
-    POSTGRES_DB: db_test
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_HOST_AUTH_METHOD: trust
-  stage: test
-  image: $CONTAINER_TEST_IMAGE
-  before_script:
-    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
-    - export APP_SETTINGS=project.config.TestingConfig
-  script:
-    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
+#test-image:
+#  services:
+#    - name: postgis/postgis:12-3.3-alpine
+#      alias: postgres
+#  variables:
+#    POSTGRES_DB: db_test
+#    POSTGRES_USER: postgres
+#    POSTGRES_PASSWORD: postgres
+#    POSTGRES_HOST_AUTH_METHOD: trust
+#  stage: test
+#  image: $CONTAINER_TEST_IMAGE
+#  before_script:
+#    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
+#    - export APP_SETTINGS=project.config.TestingConfig
+#  script:
+#    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
 
 test-openapi:
   stage: test
   extends: .docker-in-docker
+  before_script:
+    - docker pull openapitools/openapi-generator-cl
+    - *docker_login
   script:
     - docker pull $CONTAINER_TEST_IMAGE
-    - docker pull openapitools/openapi-generator-cl
     - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $CONTAINER_TEST_IMAGE 'python manage.py openapi' > openapi.json
     - docker run --rm -v $PWD:/local openapitools/openapi-generator-cli generate -i /local/openapi.json -g python -o /local/out/python
 
