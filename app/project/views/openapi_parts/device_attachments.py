@@ -52,7 +52,7 @@ paths = {
             "tags": ["Device attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
-                {"$ref": "#/components/parameters/device_attachments_id"},
+                {"$ref": "#/components/parameters/device_attachment_id"},
             ],
             "responses": {
                 "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
@@ -62,7 +62,7 @@ paths = {
         },
         "patch": {
             "tags": ["Device attachments"],
-            "parameters": [{"$ref": "#/components/parameters/device_attachments_id"}],
+            "parameters": [{"$ref": "#/components/parameters/device_attachment_id"}],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": {
@@ -80,7 +80,7 @@ paths = {
         },
         "delete": {
             "tags": ["Device attachments"],
-            "parameters": [{"$ref": "#/components/parameters/device_attachments_id"}],
+            "parameters": [{"$ref": "#/components/parameters/device_attachment_id"}],
             "responses": {"200": {"$ref": "#/components/responses/object_deleted"}},
             "operationId": "DeleteDeviceAttachmentfromdeviceattachment_0",
         },
