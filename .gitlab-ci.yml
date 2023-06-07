@@ -112,23 +112,22 @@ unittest-lint:
   script:
     - cd $CI_PROJECT_DIR/app/ && tox
 
-# TODO: Remove comments
-#test-image:
-#  services:
-#    - name: postgis/postgis:12-3.3-alpine
-#      alias: postgres
-#  variables:
-#    POSTGRES_DB: db_test
-#    POSTGRES_USER: postgres
-#    POSTGRES_PASSWORD: postgres
-#    POSTGRES_HOST_AUTH_METHOD: trust
-#  stage: test
-#  image: $CONTAINER_TEST_IMAGE
-#  before_script:
-#    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
-#    - export APP_SETTINGS=project.config.TestingConfig
-#  script:
-#    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
+test-image:
+  services:
+    - name: postgis/postgis:12-3.3-alpine
+      alias: postgres
+  variables:
+    POSTGRES_DB: db_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
+  stage: test
+  image: $CONTAINER_TEST_IMAGE
+  before_script:
+    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
+    - export APP_SETTINGS=project.config.TestingConfig
+  script:
+    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
 
 test-openapi:
   stage: test
