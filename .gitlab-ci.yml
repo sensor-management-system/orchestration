@@ -116,6 +116,15 @@ test-image:
   script:
     - cd $CI_PROJECT_DIR/app/ && python manage.py cov
 
+test-openapi:
+  stage: test
+  extends: .docker-in-docker
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker pull openapitools/openapi-generator-cl
+    - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $CONTAINER_TEST_IMAGE 'python manage.py openapi' > openapi.json
+    - docker run --rm -v $PWD:/local openapitools/openapi-generator-cli generate -i /local/openapi.json -g python -o /local/out/python
+
 release-image:
   stage: release
   extends: .docker-in-docker
