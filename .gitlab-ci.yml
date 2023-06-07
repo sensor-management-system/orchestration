@@ -12,6 +12,7 @@
 
 stages:
   - build
+  - extract
   - test
   - release
   - deploy
@@ -99,6 +100,7 @@ unittest-lint:
   script:
     - cd $CI_PROJECT_DIR/app/ && tox
 
+# TODO: Remove comments
 #test-image:
 #  services:
 #    - name: postgis/postgis:12-3.3-alpine
@@ -116,16 +118,16 @@ unittest-lint:
 #  script:
 #    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
 
-test-openapi:
-  stage: test
+extract-openapi:
+  stage: extract
   extends: .docker-in-docker
-  before_script:
-    - docker pull openapitools/openapi-generator-cl
-    - *docker_login
   script:
     - docker pull $CONTAINER_TEST_IMAGE
     - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $CONTAINER_TEST_IMAGE 'python manage.py openapi' > openapi.json
-    - docker run --rm -v $PWD:/local openapitools/openapi-generator-cli generate -i /local/openapi.json -g python -o /local/out/python
+    #- docker run --rm -v $PWD:/local openapitools/openapi-generator-cli generate -i /local/openapi.json -g python -o /local/out/python
+  artifacts:
+    paths:
+      - openapi.json
 
 release-image:
   stage: release
