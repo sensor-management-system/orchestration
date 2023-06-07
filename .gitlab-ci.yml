@@ -97,7 +97,6 @@ extract-openapi:
   script:
     - docker pull $CONTAINER_TEST_IMAGE
     - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $CONTAINER_TEST_IMAGE python manage.py openapi > openapi.json
-    #- docker run --rm -v $PWD:/local openapitools/openapi-generator-cli generate -i /local/openapi.json -g python -o /local/out/python
   artifacts:
     expire_in: 1 day
     public: false
@@ -135,7 +134,7 @@ test-openapi:
   stage: test
   image: openapitools/openapi-generator-cli
   script:
-    - openapi-generator-cli generate -i openapi.json -g python -o ./generated_clients/python
+    - docker-entrypoint.sh generate -i openapi.json -g python -o ./generated_clients/python
   artifacts:
     expire_in: 1 day
     public: false
