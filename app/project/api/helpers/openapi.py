@@ -162,6 +162,7 @@ class MarshmallowJsonApiToOpenApiMapper:
         attribute_properties = {}
         relationship_properties = {}
 
+        required_attributes = []
         for name, field in self.schema._declared_fields.items():
             if name == "id" or getattr(field, "dump_only", False):
                 continue
@@ -170,7 +171,7 @@ class MarshmallowJsonApiToOpenApiMapper:
             else:
                 attribute_properties[name] = self._field_to_openapi_type(field)
                 if getattr(field, "required", False):
-                    attribute_properties[name]["required"] = True
+                    required_attributes.append(name)
 
         properties = {
             "data": {
@@ -180,6 +181,7 @@ class MarshmallowJsonApiToOpenApiMapper:
                     "attributes": {
                         "type": "object",
                         "properties": attribute_properties,
+                        "required": required_attributes,
                     },
                     "relationships": {
                         "type": "object",

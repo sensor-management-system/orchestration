@@ -332,7 +332,7 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
                             "attributes": {
                                 "type": "object",
                                 "properties": {
-                                    "label": {"type": "string", "required": True},
+                                    "label": {"type": "string"},
                                     "description": {
                                         "type": "string",
                                     },
@@ -341,6 +341,7 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
                                     },
                                     "unit_name": {"type": "string"},
                                 },
+                                "required": ["label"],
                             },
                             "relationships": {
                                 "type": "object",
