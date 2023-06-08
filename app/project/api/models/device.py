@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -177,7 +177,6 @@ class Device(
             # For the group ids we just want it to be exact.
             "group_ids": type_keyword,
             "attachments": {
-                "type": "nested",
                 "properties": {
                     # The label should be searchable via text & via keyword
                     "label": type_keyword_and_full_searchable,
@@ -186,18 +185,15 @@ class Device(
                 },
             },
             "device_contact_roles": {
-                "type": "nested",
                 "properties": {
                     "role_name": type_keyword_and_full_searchable,
                     "role_uri": type_keyword,
                     "contact": {
-                        "type": "nested",
                         "properties": Contact.get_search_index_properties(),
                     },
                 },
             },
             "customfields": {
-                "type": "nested",
                 "properties": {
                     # The key should use keyword behaviour by default
                     # but should also searchable as text.
@@ -207,7 +203,6 @@ class Device(
                 },
             },
             "properties": {
-                "type": "nested",
                 "properties": {
                     # All the "normal" text fields searchable via text & keyword.
                     "label": type_keyword_and_full_searchable,
@@ -227,7 +222,6 @@ class Device(
                 },
             },
             "generic_actions": {
-                "type": "nested",
                 "properties": {
                     "action_type_uri": type_keyword,
                     "action_type_name": type_keyword_and_full_searchable,
@@ -235,7 +229,6 @@ class Device(
                 },
             },
             "software_update_actions": {
-                "type": "nested",
                 "properties": {
                     "software_type_name": type_keyword_and_full_searchable,
                     "software_type_uri": type_keyword,
