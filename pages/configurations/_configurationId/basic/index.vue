@@ -207,15 +207,24 @@ export default class ConfigurationShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
+  downloadSensorML (url: string, label: string) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${label}.xml`
+    link.click()
+  }
+
   async openSensorML () {
     if (this.configuration?.visibility === Visibility.Public) {
       const url = await this.getSensorMLUrl(this.configurationId)
       window.open(url)
+      this.downloadSensorML(url, this.configuration.label)
     } else {
       try {
         const blob = await this.exportAsSensorML(this.configurationId)
         const url = window.URL.createObjectURL(blob)
         window.open(url)
+        this.downloadSensorML(url, this.configuration.label)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
       }

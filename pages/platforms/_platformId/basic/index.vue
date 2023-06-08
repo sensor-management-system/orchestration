@@ -206,15 +206,26 @@ export default class PlatformShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
+  downloadSensorML (url: string, shortName: string) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${shortName}.xml`
+    link.click()
+  }
+
   async openSensorML () {
     if (this.platform?.visibility === Visibility.Public) {
       const url = await this.getSensorMLUrl(this.platformId)
       window.open(url)
+      this.downloadSensorML(url, this.platform?.shortName)
     } else {
       try {
         const blob = await this.exportAsSensorML(this.platformId)
         const url = window.URL.createObjectURL(blob)
         window.open(url)
+        if (this.platform) {
+          this.downloadSensorML(url, this.platform?.shortName)
+        }
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
       }

@@ -405,7 +405,7 @@ export type LoadAllConfigurationActionsAction = IdParamReturnsVoidPromiseAction
 
 export type RemoveConfigurationContactRoleAction = (params: { configurationContactRoleId: string }) => Promise<void>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
-export type GetSensorMLUrlAction = (id: string) => string
+export type GetSensorMLUrlAction = (id: string) => Promise<string>
 
 export type UpdateDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
 export type UpdatePlatformMountActionAction = (params: { configurationId: string, platformMountAction: PlatformMountAction }) => Promise<string>

@@ -200,7 +200,7 @@ export type DeleteDeviceAction = (id: string) => Promise<void>
 export type ArchiveDeviceAction = (id: string) => Promise<void>
 export type RestoreDeviceAction = (id: string) => Promise<void>
 export type ExportAsCsvAction = (searchParams: IDeviceSearchParams) => Promise<Blob>
-export type GetSensorMLUrlAction = (id: string) => string
+export type GetSensorMLUrlAction = (id: string) => Promise<string>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void

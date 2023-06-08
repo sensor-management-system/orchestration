@@ -686,15 +686,24 @@ export default class SearchConfigurationsPage extends Vue {
     this.setTitle('Configurations')
   }
 
+  downloadSensorML (url: string, label: string) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${label}.xml`
+    link.click()
+  }
+
   async openSensorML (configuration: Configuration) {
     if (configuration.visibility === Visibility.Public) {
       const url = await this.getSensorMLUrl(configuration.id!)
       window.open(url)
+      this.downloadSensorML(url, configuration.label)
     } else {
       try {
         const blob = await this.exportAsSensorML(configuration.id)
         const url = window.URL.createObjectURL(blob)
         window.open(url)
+        this.downloadSensorML(url, configuration.label)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
       }

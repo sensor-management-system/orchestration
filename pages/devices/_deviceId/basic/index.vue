@@ -202,15 +202,26 @@ export default class DeviceShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
+  downloadSensorML (url: string, shortName: string) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${shortName}.xml`
+    link.click()
+  }
+
   async openSensorML () {
     if (this.device?.visibility === Visibility.Public) {
       const url = await this.getSensorMLUrl(this.deviceId)
       window.open(url)
+      this.downloadSensorML(url, this.device?.shortName)
     } else {
       try {
         const blob = await this.exportAsSensorML(this.deviceId)
         const url = window.URL.createObjectURL(blob)
         window.open(url)
+        if (this.device) {
+          this.downloadSensorML(url, this.device?.shortName)
+        }
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
       }
