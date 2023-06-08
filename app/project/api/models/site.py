@@ -160,12 +160,10 @@ class Site(
                     "site_usage_name": type_keyword_and_full_searchable,
                     "site_usage_uri": type_keyword,
                     "site_contact_roles": {
-                        "type": "nested",
                         "properties": {
                             "role_name": type_keyword_and_full_searchable,
                             "role_uri": type_keyword,
                             "contact": {
-                                "type": "nested",
                                 "properties": Contact.get_search_index_properties(),
                             },
                         },
