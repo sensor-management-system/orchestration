@@ -522,15 +522,24 @@ export default class SearchPlatformsPage extends Vue {
     this.setTitle('Platforms')
   }
 
+  downloadSensorML (url: string, shortName: string) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${shortName}.xml`
+    link.click()
+  }
+
   async openSensorML (platform: Platform) {
     if (platform.visibility === Visibility.Public) {
       const url = await this.getSensorMLUrl(platform.id!)
       window.open(url)
+      this.downloadSensorML(url, platform.shortName)
     } else {
       try {
         const blob = await this.exportAsSensorML(platform.id!)
         const url = window.URL.createObjectURL(blob)
         window.open(url)
+        this.downloadSensorML(url, platform.shortName)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
       }

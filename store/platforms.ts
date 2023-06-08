@@ -193,7 +193,7 @@ export type UpdatePlatformAction = (platform: Platform) => void
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
 export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, originalPlatformId: string}) => Promise<string>
 export type ExportAsCsvAction = () => Promise<Blob>
-export type GetSensorMLUrlAction = (id: string) => string
+export type GetSensorMLUrlAction = (id: string) => Promise<string>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type DeletePlatformAction = (id: string) => Promise<void>
 export type ArchivePlatformAction = (id: string) => Promise<void>

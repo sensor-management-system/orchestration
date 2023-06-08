@@ -809,15 +809,24 @@ export default class SearchDevicesPage extends Vue {
     this.setTitle('Devices')
   }
 
+  downloadSensorML (url: string, shortName: string) {
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${shortName}.xml`
+    link.click()
+  }
+
   async openSensorML (device: Device) {
     if (device.visibility === Visibility.Public) {
       const url = await this.getSensorMLUrl(device.id!)
       window.open(url)
+      this.downloadSensorML(url, device.shortName)
     } else {
       try {
         const blob = await this.exportAsSensorML(device.id!)
         const url = window.URL.createObjectURL(blob)
         window.open(url)
+        this.downloadSensorML(url, device.shortName)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
       }
