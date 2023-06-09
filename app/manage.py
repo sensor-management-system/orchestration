@@ -298,5 +298,15 @@ def loaddata(fixture_file, skip_missing_file, skip_empty_file):
     db.session.commit()
 
 
+@cli.command("openapi")
+def openapi():
+    """Dump the openapi spec file."""
+    from project.views.docs import openapi_json
+
+    answer = openapi_json()
+    openapi_text = answer[0]
+    print(openapi_text)
+
+
 if __name__ == "__main__":
     cli()

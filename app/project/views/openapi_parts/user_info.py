@@ -22,8 +22,7 @@ paths = {
                     "name": "skip_cache",
                     "in": "query",
                     "required": False,
-                    "default": False,
-                    "schema": {"type": "boolean"},
+                    "schema": {"type": "boolean", "default": False},
                 }
             ],
             "responses": {"200": {"$ref": "#/components/responses/Userinfo"}},
@@ -48,8 +47,14 @@ components = {
                                     "attributes": {
                                         "type": "object",
                                         "properties": {
-                                            "admin": {"type": "array"},
-                                            "member": {"type": "array"},
+                                            "admin": {
+                                                "type": "array",
+                                                "items": {"type": "string"},
+                                            },
+                                            "member": {
+                                                "type": "array",
+                                                "items": {"type": "string"},
+                                            },
                                             "active": {"type": "boolean"},
                                             "is_superuser": {"type": "boolean"},
                                             "apikey": {"type": "string"},

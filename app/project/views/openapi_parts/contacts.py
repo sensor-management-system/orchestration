@@ -181,6 +181,7 @@ components = {
     },
     "responses": {
         "Contact_coll": {
+            "description": "List of contacts.",
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
@@ -211,9 +212,10 @@ components = {
                         }
                     }
                 }
-            }
+            },
         },
         "Contact_inst": {
+            "description": "Single contact instance",
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
@@ -242,7 +244,6 @@ components = {
                     }
                 }
             },
-            "description": "Contact",
         },
     },
     "parameters": {

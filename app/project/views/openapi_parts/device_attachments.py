@@ -52,7 +52,7 @@ paths = {
             "tags": ["Device attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
-                {"$ref": "#/components/parameters/device_attachments_id"},
+                {"$ref": "#/components/parameters/device_attachment_id"},
             ],
             "responses": {
                 "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
@@ -62,7 +62,7 @@ paths = {
         },
         "patch": {
             "tags": ["Device attachments"],
-            "parameters": [{"$ref": "#/components/parameters/device_attachments_id"}],
+            "parameters": [{"$ref": "#/components/parameters/device_attachment_id"}],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": {
@@ -80,7 +80,7 @@ paths = {
         },
         "delete": {
             "tags": ["Device attachments"],
-            "parameters": [{"$ref": "#/components/parameters/device_attachments_id"}],
+            "parameters": [{"$ref": "#/components/parameters/device_attachment_id"}],
             "responses": {"200": {"$ref": "#/components/responses/object_deleted"}},
             "operationId": "DeleteDeviceAttachmentfromdeviceattachment_0",
         },
@@ -100,6 +100,7 @@ paths = {
                         " how this parameter is set. "
                         "Backend needs this to allow linking of filenames for uploads."
                     ),
+                    "schema": {"type": "string", "default": "file"},
                 },
             ],
             "responses": {
@@ -110,11 +111,16 @@ paths = {
                     ),
                 },
                 "401": {
-                    "$ref": "#/components/errors/authentification_required",
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
                 },
-                "404": {
-                    "$ref": "#/components/errors/not_found",
-                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "description": "Endpoint to get the content of the uploaded file.",
         }

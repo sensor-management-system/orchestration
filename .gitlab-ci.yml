@@ -12,6 +12,7 @@
 
 stages:
   - build
+  - extract
   - test
   - release
   - deploy
@@ -90,6 +91,18 @@ build-image-nginx-ufz:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-.*/'
 
+extract-openapi:
+  stage: extract
+  extends: .docker-in-docker
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $CONTAINER_TEST_IMAGE python manage.py openapi > openapi.json
+  artifacts:
+    expire_in: 1 day
+    public: false
+    paths:
+      - openapi.json
+
 unittest-lint:
   stage: test
   image: $CONTAINER_TEST_IMAGE
@@ -115,6 +128,19 @@ test-image:
     - export APP_SETTINGS=project.config.TestingConfig
   script:
     - cd $CI_PROJECT_DIR/app/ && python manage.py cov
+
+test-openapi:
+  stage: test
+  image: openapitools/openapi-generator-cli
+  script:
+    - docker-entrypoint.sh generate -i openapi.json -g python -o ./generated_clients/python
+  artifacts:
+    expire_in: 1 day
+    public: false
+    paths:
+      - generated_clients/python
+  tags:
+    - docker
 
 release-image:
   stage: release
