@@ -157,26 +157,21 @@ class Configuration(
                     "start_date": {"type": "date"},
                     "end_date": {"type": "date"},
                     "platforms": {
-                        "type": "nested",
                         "properties": Platform.get_search_index_properties(),
                     },
                     "devices": {
-                        "type": "nested",
                         "properties": Device.get_search_index_properties(),
                     },
                     "configuration_contact_roles": {
-                        "type": "nested",
                         "properties": {
                             "role_name": type_keyword_and_full_searchable,
                             "role_uri": type_keyword,
                             "contact": {
-                                "type": "nested",
                                 "properties": Contact.get_search_index_properties(),
                             },
                         },
                     },
                     "attachments": {
-                        "type": "nested",
                         "properties": {
                             # Allow search via text & keyword
                             "label": type_keyword_and_full_searchable,
@@ -185,7 +180,6 @@ class Configuration(
                         },
                     },
                     "generic_actions": {
-                        "type": "nested",
                         "properties": {
                             "action_type_uri": type_keyword,
                             "action_type_name": type_keyword_and_full_searchable,
@@ -193,7 +187,6 @@ class Configuration(
                         },
                     },
                     "configuration_static_location_actions": {
-                        "type": "nested",
                         "properties": {
                             "begin_description": type_text_full_searchable,
                             "end_description": type_text_full_searchable,
@@ -201,7 +194,6 @@ class Configuration(
                         },
                     },
                     "configuration_dynamic_location_actions": {
-                        "type": "nested",
                         "properties": {
                             "begin_description": type_text_full_searchable,
                             "end_description": type_text_full_searchable,
@@ -209,29 +201,24 @@ class Configuration(
                         },
                     },
                     "platform_mount_actions": {
-                        "type": "nested",
                         "properties": {
                             "begin_description": type_text_full_searchable,
                             "end_description": type_text_full_searchable,
                             "platform": {
-                                "type": "nested",
                                 "properties": Platform.get_search_index_properties(),
                             },
                         },
                     },
                     "device_mount_actions": {
-                        "type": "nested",
                         "properties": {
                             "begin_description": type_text_full_searchable,
                             "end_description": type_text_full_searchable,
                             "device": {
-                                "type": "nested",
                                 "properties": Device.get_search_index_properties(),
                             },
                         },
                     },
                     "customfields": {
-                        "type": "nested",
                         "properties": {
                             # The key should use keyword behaviour by default
                             # but should also searchable as text.

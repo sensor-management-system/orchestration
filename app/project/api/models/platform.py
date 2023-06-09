@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -155,7 +155,6 @@ class Platform(
             },
             "group_ids": type_keyword,
             "attachments": {
-                "type": "nested",
                 "properties": {
                     # Allow search via text & keyword
                     "label": type_keyword_and_full_searchable,
@@ -164,18 +163,15 @@ class Platform(
                 },
             },
             "platform_contact_roles": {
-                "type": "nested",
                 "properties": {
                     "role_name": type_keyword_and_full_searchable,
                     "role_uri": type_keyword,
                     "contact": {
-                        "type": "nested",
                         "properties": Contact.get_search_index_properties(),
                     },
                 },
             },
             "generic_actions": {
-                "type": "nested",
                 "properties": {
                     "action_type_uri": type_keyword,
                     "action_type_name": type_keyword_and_full_searchable,
@@ -183,7 +179,6 @@ class Platform(
                 },
             },
             "software_update_actions": {
-                "type": "nested",
                 "properties": {
                     "software_type_name": type_keyword_and_full_searchable,
                     "software_type_uri": type_keyword,
