@@ -91,7 +91,7 @@ services:
       - vocabulary-db
 
   idl:
-    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.2.1
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.3
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'
