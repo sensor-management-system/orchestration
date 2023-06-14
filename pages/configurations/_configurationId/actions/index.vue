@@ -68,6 +68,12 @@ permissions and limitations under the Licence.
         </v-timeline>
       </v-card-text>
     </v-card>
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedAttachmentFilename"
+      :url="selectedAttachmentUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -79,11 +85,15 @@ import { ConfigurationsState, TimelineActionsGetter, DownloadAttachmentAction } 
 
 import HintCard from '@/components/HintCard.vue'
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
+
 import { Attachment } from '@/models/Attachment'
 import { Visibility } from '@/models/Visibility'
 
+import { getLastPathElement } from '@/utils/urlHelpers'
+
 @Component({
-  components: { ConfigurationsTimelineActionCard, HintCard },
+  components: { ConfigurationsTimelineActionCard, HintCard, DownloadDialog },
   computed: {
     ...mapGetters('configurations', ['timelineActions']),
     ...mapState('configurations', ['configuration'])
@@ -99,18 +109,46 @@ export default class ConfigurationShowActionPage extends Vue {
     configuration!: ConfigurationsState['configuration']
     downloadAttachment!: DownloadAttachmentAction
 
+    private showDownloadDialog: boolean = false
+    private attachmentToDownload: Attachment | null = null
+
     get configurationId (): string {
       return this.$route.params.configurationId
     }
 
-    async openAttachment (attachment: Attachment) {
+    initDowloadDialog (attachment: Attachment) {
+      this.attachmentToDownload = attachment
+      this.showDownloadDialog = true
+    }
+
+    closeDownloadDialog () {
+      this.showDownloadDialog = false
+      this.attachmentToDownload = null
+    }
+
+    openAttachment (attachment: Attachment) {
+      this.initDowloadDialog(attachment)
+    }
+
+    get selectedAttachmentFilename (): string {
+      if (this.attachmentToDownload) {
+        return getLastPathElement(this.attachmentToDownload.url)
+      }
+      return 'attachment'
+    }
+
+    async selectedAttachmentUrl (): Promise<string | null> {
+      if (!this.attachmentToDownload) {
+        return null
+      }
       try {
-        const blob = await this.downloadAttachment(attachment.url)
+        const blob = await this.downloadAttachment(this.attachmentToDownload.url)
         const url = window.URL.createObjectURL(blob)
-        window.open(url)
+        return url
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
       }
+      return null
     }
 
     get isPublic (): boolean {

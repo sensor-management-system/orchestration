@@ -247,7 +247,7 @@ permissions and limitations under the Licence.
               #dot-menu-items
             >
               <DotMenuActionSensorML
-                @click="openSensorML(item)"
+                @click="openSensorMLDialog(item)"
               />
               <DotMenuActionArchive
                 v-if="canArchiveEntity(item)"
@@ -288,6 +288,12 @@ permissions and limitations under the Licence.
       @cancel-archiving="closeArchiveDialog"
       @submit-archiving="archiveAndCloseDialog"
     />
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedConfigurationSensorMLFilename"
+      :url="selectedConfigurationSensorMLUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -303,6 +309,7 @@ import { SearchSitesAction, SitesState } from '@/store/sites'
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import ConfigurationArchiveDialog from '@/components/configurations/ConfigurationArchiveDialog.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
@@ -327,6 +334,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     DotMenuActionDelete,
     DotMenuActionSensorML,
     DeleteDialog,
+    DownloadDialog,
     ConfigurationsListItem,
     BaseList,
     PageSizeSelect,
@@ -366,6 +374,9 @@ export default class SearchConfigurationsPage extends Vue {
 
   private showArchiveDialog: boolean = false
   private configurationToArchive: Configuration | null = null
+
+  private showDownloadDialog: boolean = false
+  private configurationForSensorML: Configuration | null = null
 
   // vuex definition for typescript check
   canDeleteEntity!: CanDeleteEntityGetter
@@ -684,26 +695,36 @@ export default class SearchConfigurationsPage extends Vue {
     this.setTitle('Configurations')
   }
 
-  downloadSensorML (url: string, label: string) {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${label}.xml`
-    link.click()
+  openSensorMLDialog (configuration: Configuration) {
+    this.configurationForSensorML = configuration
+    this.showDownloadDialog = true
   }
 
-  async openSensorML (configuration: Configuration) {
-    if (configuration.visibility === Visibility.Public) {
-      const url = await this.getSensorMLUrl(configuration.id!)
-      window.open(url)
-      this.downloadSensorML(url, configuration.label)
+  closeDownloadDialog () {
+    this.configurationForSensorML = null
+    this.showDownloadDialog = false
+  }
+
+  get selectedConfigurationSensorMLFilename (): string {
+    if (this.configurationForSensorML != null) {
+      return `${this.configurationForSensorML.label}.xml`
+    }
+    return 'configuration.xml'
+  }
+
+  async selectedConfigurationSensorMLUrl (): Promise<string | null> {
+    if (!this.configurationForSensorML) {
+      return null
+    }
+    if (this.configurationForSensorML?.visibility === Visibility.Public) {
+      return await this.getSensorMLUrl(this.configurationForSensorML.id!)
     } else {
       try {
-        const blob = await this.exportAsSensorML(configuration.id)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url)
-        this.downloadSensorML(url, configuration.label)
+        const blob = await this.exportAsSensorML(this.configurationForSensorML!.id!)
+        return window.URL.createObjectURL(blob)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+        return null
       }
     }
   }

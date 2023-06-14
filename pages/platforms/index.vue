@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -110,7 +110,7 @@ permissions and limitations under the Licence.
                 <v-list>
                   <v-list-item
                     dense
-                    @click.prevent="exportCsv"
+                    @click.prevent="showCsvDownloadDialog = true"
                   >
                     <v-list-item-content>
                       <v-list-item-title>
@@ -168,7 +168,7 @@ permissions and limitations under the Licence.
               #dot-menu-items
             >
               <DotMenuActionSensorML
-                @click="openSensorML(item)"
+                @click="openSensorMLDialog(item)"
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
@@ -213,13 +213,23 @@ permissions and limitations under the Licence.
       @cancel-archiving="closeArchiveDialog"
       @submit-archiving="archiveAndCloseDialog"
     />
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedPlatformSensorMLFilename"
+      :url="selectedPlatformSensorMLUrl"
+      @cancel="closeDownloadDialog"
+    />
+    <download-dialog
+      v-model="showCsvDownloadDialog"
+      filename="platforms.csv"
+      :url="exportCsvUrl"
+      @cancel="showCsvDownloadDialog = false"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { saveAs } from 'file-saver'
 
 import { mapState, mapActions, mapGetters } from 'vuex'
 
@@ -252,6 +262,7 @@ import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
@@ -277,6 +288,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     DotMenuActionSensorML,
     DotMenuActionCopy,
     DeleteDialog,
+    DownloadDialog,
     ManufacturerSelect,
     PlatformTypeSelect,
     StatusSelect,
@@ -301,9 +313,13 @@ export default class SearchPlatformsPage extends Vue {
 
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
+  private showDownloadDialog: boolean = false
+  private showCsvDownloadDialog: boolean = false
 
   private platformToDelete: Platform | null = null
   private platformToArchive: Platform | null = null
+  private platformForSensorML: Platform | null = null
+
   // vuex definition for typescript check
   platforms!: PlatformsState['platforms']
   pageNumber!: PlatformsState['pageNumber']
@@ -377,18 +393,11 @@ export default class SearchPlatformsPage extends Vue {
     return Array.from(resultSet).sort((a, b) => a - b)
   }
 
-  async exportCsv () {
-    if (this.platforms.length > 0) {
-      try {
-        this.processing = true
-        const blob = await this.exportAsCsv()
-        saveAs(blob, 'platforms.csv')
-      } catch (e) {
-        this.$store.commit('snackbar/setError', 'CSV export failed')
-      } finally {
-        this.processing = false
-      }
-    }
+  async exportCsvUrl (): Promise<string> {
+    this.processing = true
+    const blob = await this.exportAsCsv()
+    this.processing = false
+    return window.URL.createObjectURL(blob)
   }
 
   initDeleteDialog (platform: Platform) {
@@ -522,26 +531,36 @@ export default class SearchPlatformsPage extends Vue {
     this.setTitle('Platforms')
   }
 
-  downloadSensorML (url: string, shortName: string) {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${shortName}.xml`
-    link.click()
+  openSensorMLDialog (platform: Platform) {
+    this.platformForSensorML = platform
+    this.showDownloadDialog = true
   }
 
-  async openSensorML (platform: Platform) {
-    if (platform.visibility === Visibility.Public) {
-      const url = await this.getSensorMLUrl(platform.id!)
-      window.open(url)
-      this.downloadSensorML(url, platform.shortName)
+  closeDownloadDialog () {
+    this.platformForSensorML = null
+    this.showDownloadDialog = false
+  }
+
+  get selectedPlatformSensorMLFilename (): string {
+    if (this.platformForSensorML != null) {
+      return `${this.platformForSensorML.shortName}.xml`
+    }
+    return 'platform.xml'
+  }
+
+  async selectedPlatformSensorMLUrl (): Promise<string | null> {
+    if (!this.platformForSensorML) {
+      return null
+    }
+    if (this.platformForSensorML?.visibility === Visibility.Public) {
+      return await this.getSensorMLUrl(this.platformForSensorML.id!)
     } else {
       try {
-        const blob = await this.exportAsSensorML(platform.id!)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url)
-        this.downloadSensorML(url, platform.shortName)
+        const blob = await this.exportAsSensorML(this.platformForSensorML!.id!)
+        return window.URL.createObjectURL(blob)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+        return null
       }
     }
   }

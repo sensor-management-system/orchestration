@@ -308,7 +308,10 @@ export class DeviceApi {
         ...this.commonParams
       }
     }).then((response) => {
-      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+      // usaually, it should be text/csv
+      // but in order to allow the user to view it in the browser
+      // it needs to be something more simple
+      return new Blob([response.data], { type: 'text/plain;charset=utf-8' })
     })
   }
 

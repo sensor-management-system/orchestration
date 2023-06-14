@@ -41,6 +41,10 @@
     {
       "name": "Daniel Sielaff",
       "email": "daniel.sielaff@ufz.de"
+    },
+    {
+      "name": "Rubankumar Moorthy",
+      "email": "r.moorthy@fz-juelich.de"
     }
   ],
   "private": true,
@@ -67,7 +71,6 @@
     "@turf/kinks": "^6.5.0",
     "@turf/turf": "^6.5.0",
     "core-js": "^3.27.1",
-    "file-saver": "^2.0.5",
     "jwt-decode": "^3.1.2",
     "leaflet-geosearch": "^3.7.0",
     "luxon": "^3.2.1",
@@ -84,6 +87,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.19.1",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@nuxt/types": "^2.15.8",
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/eslint-config-typescript": "^11.0.0",

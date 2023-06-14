@@ -307,7 +307,8 @@ export class PlatformApi {
         ...this.commonParams
       }
     }).then((response) => {
-      return new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+      // we use text/plain here to allow the easier display in the browser
+      return new Blob([response.data], { type: 'text/plain;charset=utf-8' })
     })
   }
 

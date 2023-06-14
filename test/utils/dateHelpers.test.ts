@@ -95,7 +95,7 @@ describe('dateTimesEqual', () => {
   })
   it('should return true for eqivalent objects that are not equal themselves', () => {
     const date1 = DateTime.utc(2020, 1, 1, 0, 0, 0, 0)
-    const date2 = DateTime.fromISO(date1.toISO())
+    const date2 = DateTime.fromISO(date1.toISO()!)
 
     // they are not really equal
     // but they must be equivalent
