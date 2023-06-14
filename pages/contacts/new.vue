@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -80,6 +80,7 @@ import { Contact } from '@/models/Contact'
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHelpers'
 
 @Component({
   components: {
@@ -139,8 +140,19 @@ export default class ContactNewPage extends mixins(Rules) {
       } else {
         this.$router.push('/contacts/' + savedContact.id)
       }
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Creation of contact failed')
+    } catch (e: any) {
+      const msg = new ErrorMessageDispatcher()
+        .forCase({
+          // 409 is a conflict
+          status: 409,
+          // and a message with mail as source of the error points
+          // to our unique constraint
+          predicate: sourceLowerCaseIncludes('mail'),
+          text: 'User with E-mail exists already'
+        })
+        .defaultText('Creation of contact failed')
+        .dispatch(e)
+      this.$store.commit('snackbar/setError', msg)
     } finally {
       this.isLoading = false
     }

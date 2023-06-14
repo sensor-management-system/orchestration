@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -75,6 +75,7 @@ import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
+import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHelpers'
 
 @Component({
   components: {
@@ -141,8 +142,20 @@ export default class ContactEditPage extends mixins(CheckEditAccess) {
       await this.saveContact(this.contactCopy)
       this.loadContact(this.contactId)
       this.$router.push('/contacts/' + this.contactId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Saving of contact failed')
+    } catch (e: any) {
+      const msg = new ErrorMessageDispatcher()
+        .forCase({
+          // 409 is a conflict
+          status: 409,
+          // and a message with mail as source of the error points
+          // to our unique constraint
+          predicate: sourceLowerCaseIncludes('mail'),
+          text: 'User with E-mail exists already'
+        })
+        .defaultText('Saving of contact failed')
+        .dispatch(e)
+
+      this.$store.commit('snackbar/setError', msg)
     } finally {
       this.isLoading = false
     }
