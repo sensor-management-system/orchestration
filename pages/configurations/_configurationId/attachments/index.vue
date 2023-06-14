@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -104,6 +104,12 @@ permissions and limitations under the Licence.
     >
       Do you really want to delete the attachment <em>{{ attachmentToDelete.label }}</em>?
     </DeleteDialog>
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedAttachmentFilename"
+      :url="selectedAttachmentUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -119,12 +125,14 @@ import { Visibility } from '@/models/Visibility'
 import BaseList from '@/components/shared/BaseList.vue'
 import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
-  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList },
+  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
   computed: mapState('configurations', ['configurationAttachments', 'configuration']),
   methods: mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment', 'downloadAttachment'])
 })
@@ -135,6 +143,9 @@ export default class ConfigurationAttachmentShowPage extends Vue {
   private isSaving = false
   private showDeleteDialog = false
   private attachmentToDelete: Attachment | null = null
+
+  private showDownloadDialog: boolean = false
+  private attachmentToDownload: Attachment | null = null
 
   // vuex definition for typescript check
   configurationAttachments!: ConfigurationsState['configurationAttachments']
@@ -175,14 +186,39 @@ export default class ConfigurationAttachmentShowPage extends Vue {
     }
   }
 
-  async openAttachment (attachment: Attachment) {
+  initDowloadDialog (attachment: Attachment) {
+    this.attachmentToDownload = attachment
+    this.showDownloadDialog = true
+  }
+
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+    this.attachmentToDownload = null
+  }
+
+  openAttachment (attachment: Attachment) {
+    this.initDowloadDialog(attachment)
+  }
+
+  get selectedAttachmentFilename (): string {
+    if (this.attachmentToDownload) {
+      return getLastPathElement(this.attachmentToDownload.url)
+    }
+    return 'attachment'
+  }
+
+  async selectedAttachmentUrl (): Promise<string | null> {
+    if (!this.attachmentToDownload) {
+      return null
+    }
     try {
-      const blob = await this.downloadAttachment(attachment.url)
+      const blob = await this.downloadAttachment(this.attachmentToDownload.url)
       const url = window.URL.createObjectURL(blob)
-      window.open(url)
+      return url
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
     }
+    return null
   }
 
   get isPublic () {

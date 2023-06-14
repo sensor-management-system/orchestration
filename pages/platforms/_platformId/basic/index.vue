@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -51,7 +51,7 @@ permissions and limitations under the Licence.
       <DotMenu>
         <template #actions>
           <DotMenuActionSensorML
-            @click="openSensorML"
+            @click="openSensorMLDialog"
           />
           <DotMenuActionCopy
             v-if="$auth.loggedIn"
@@ -91,7 +91,7 @@ permissions and limitations under the Licence.
       <DotMenu>
         <template #actions>
           <DotMenuActionSensorML
-            @click="openSensorML"
+            @click="openSensorMLDialog"
           />
           <DotMenuActionCopy
             v-if="$auth.loggedIn"
@@ -129,6 +129,12 @@ permissions and limitations under the Licence.
       @cancel-archiving="closeArchiveDialog"
       @submit-archiving="archiveAndCloseDialog"
     />
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="platformSensorMLFilename"
+      :url="platformSensorMLUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -144,6 +150,7 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import PlatformArchiveDialog from '@/components/platforms/PlatformArchiveDialog.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
@@ -158,6 +165,7 @@ import { Visibility } from '@/models/Visibility'
     DotMenuActionSensorML,
     DotMenuActionCopy,
     DotMenu,
+    DownloadDialog,
     PlatformBasicData,
     DotMenuActionArchive,
     DotMenuActionRestore,
@@ -184,6 +192,7 @@ export default class PlatformShowBasicPage extends Vue {
   private isSaving = false
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
+  private showDownloadDialog: boolean = false
 
   // vuex definition for typescript check
   platform!: PlatformsState['platform']
@@ -206,28 +215,34 @@ export default class PlatformShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
-  downloadSensorML (url: string, shortName: string) {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${shortName}.xml`
-    link.click()
+  openSensorMLDialog () {
+    this.showDownloadDialog = true
   }
 
-  async openSensorML () {
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+  }
+
+  get platformSensorMLFilename (): string {
+    if (this.platform != null) {
+      return `${this.platform.shortName}.xml`
+    }
+    return 'platform.xml'
+  }
+
+  async platformSensorMLUrl (): Promise<string | null> {
+    if (!this.platform) {
+      return null
+    }
     if (this.platform?.visibility === Visibility.Public) {
-      const url = await this.getSensorMLUrl(this.platformId)
-      window.open(url)
-      this.downloadSensorML(url, this.platform?.shortName)
+      return await this.getSensorMLUrl(this.platform.id!)
     } else {
       try {
-        const blob = await this.exportAsSensorML(this.platformId)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url)
-        if (this.platform) {
-          this.downloadSensorML(url, this.platform?.shortName)
-        }
+        const blob = await this.exportAsSensorML(this.platform!.id!)
+        return window.URL.createObjectURL(blob)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Platform could not be exported as SensorML')
+        return null
       }
     }
   }

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
       <DotMenu>
         <template #actions>
           <DotMenuActionSensorML
-            @click="openSensorML"
+            @click="openSensorMLDialog"
           />
           <DotMenuActionCopy
             v-if="$auth.loggedIn"
@@ -88,7 +88,7 @@ permissions and limitations under the Licence.
       <DotMenu>
         <template #actions>
           <DotMenuActionSensorML
-            @click="openSensorML"
+            @click="openSensorMLDialog"
           />
           <DotMenuActionCopy
             v-if="$auth.loggedIn"
@@ -126,6 +126,12 @@ permissions and limitations under the Licence.
       @cancel-archiving="closeArchiveDialog"
       @submit-archiving="archiveAndCloseDialog"
     />
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="deviceSensorMLFilename"
+      :url="deviceSensorMLUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -144,6 +150,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Visibility } from '@/models/Visibility'
 
@@ -158,7 +165,8 @@ import { Visibility } from '@/models/Visibility'
     DeviceBasicData,
     DotMenuActionRestore,
     DotMenuActionArchive,
-    DeviceArchiveDialog
+    DeviceArchiveDialog,
+    DownloadDialog
   },
   computed: mapState('devices', ['device']),
   methods: mapActions('devices', ['loadDevice', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'getSensorMLUrl'])
@@ -180,6 +188,7 @@ export default class DeviceShowBasicPage extends Vue {
 
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
+  private showDownloadDialog: boolean = false
 
   // vuex definition for typescript check
   device!: DevicesState['device']
@@ -202,28 +211,34 @@ export default class DeviceShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
-  downloadSensorML (url: string, shortName: string) {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${shortName}.xml`
-    link.click()
+  openSensorMLDialog () {
+    this.showDownloadDialog = true
   }
 
-  async openSensorML () {
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+  }
+
+  get deviceSensorMLFilename (): string {
+    if (this.device != null) {
+      return `${this.device.shortName}.xml`
+    }
+    return 'device.xml'
+  }
+
+  async deviceSensorMLUrl (): Promise<string | null> {
+    if (!this.device) {
+      return null
+    }
     if (this.device?.visibility === Visibility.Public) {
-      const url = await this.getSensorMLUrl(this.deviceId)
-      window.open(url)
-      this.downloadSensorML(url, this.device?.shortName)
+      return await this.getSensorMLUrl(this.device.id!)
     } else {
       try {
-        const blob = await this.exportAsSensorML(this.deviceId)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url)
-        if (this.device) {
-          this.downloadSensorML(url, this.device?.shortName)
-        }
+        const blob = await this.exportAsSensorML(this.device!.id!)
+        return window.URL.createObjectURL(blob)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+        return null
       }
     }
   }

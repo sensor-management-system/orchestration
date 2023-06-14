@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -53,7 +53,7 @@ permissions and limitations under the Licence.
         <DotMenu>
           <template #actions>
             <DotMenuActionSensorML
-              @click="openSensorML"
+              @click="openSensorMLDialog"
             />
             <DotMenuActionDelete
               v-if="$auth.loggedIn"
@@ -92,7 +92,7 @@ permissions and limitations under the Licence.
         <DotMenu>
           <template #actions>
             <DotMenuActionSensorML
-              @click="openSensorML"
+              @click="openSensorMLDialog"
             />
             <DotMenuActionArchive
               :readonly="!archivable"
@@ -125,6 +125,12 @@ permissions and limitations under the Licence.
         @cancel-archiving="closeArchiveDialog"
         @submit-archiving="archiveAndCloseDialog"
       />
+      <download-dialog
+        v-model="showDownloadDialog"
+        :filename="configurationSensorMLFilename"
+        :url="configurationSensorMLUrl"
+        @cancel="closeDownloadDialog"
+      />
     </v-card>
   </div>
 </template>
@@ -142,6 +148,7 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import { IConfiguration } from '@/models/Configuration'
 import { Visibility } from '@/models/Visibility'
 import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, GetSensorMLUrlAction } from '@/store/configurations'
@@ -156,7 +163,8 @@ import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurati
     ConfigurationsBasicData,
     ConfigurationArchiveDialog,
     DotMenuActionArchive,
-    DotMenuActionRestore
+    DotMenuActionRestore,
+    DownloadDialog
   },
   computed: mapState('configurations', ['configuration']),
   methods: mapActions('configurations', [
@@ -185,6 +193,7 @@ export default class ConfigurationShowBasicPage extends Vue {
 
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
+  private showDownloadDialog: boolean = false
 
   // vuex definition for typescript check
   configuration!: IConfiguration
@@ -207,26 +216,34 @@ export default class ConfigurationShowBasicPage extends Vue {
     this.showDeleteDialog = false
   }
 
-  downloadSensorML (url: string, label: string) {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${label}.xml`
-    link.click()
+  openSensorMLDialog () {
+    this.showDownloadDialog = true
   }
 
-  async openSensorML () {
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+  }
+
+  get configurationSensorMLFilename (): string {
+    if (this.configuration != null) {
+      return `${this.configuration.label}.xml`
+    }
+    return 'configuration.xml'
+  }
+
+  async configurationSensorMLUrl (): Promise<string | null> {
+    if (!this.configuration) {
+      return null
+    }
     if (this.configuration?.visibility === Visibility.Public) {
-      const url = await this.getSensorMLUrl(this.configurationId)
-      window.open(url)
-      this.downloadSensorML(url, this.configuration.label)
+      return await this.getSensorMLUrl(this.configuration.id!)
     } else {
       try {
-        const blob = await this.exportAsSensorML(this.configurationId)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url)
-        this.downloadSensorML(url, this.configuration.label)
+        const blob = await this.exportAsSensorML(this.configuration!.id!)
+        return window.URL.createObjectURL(blob)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Configuration could not be exported as SensorML')
+        return null
       }
     }
   }

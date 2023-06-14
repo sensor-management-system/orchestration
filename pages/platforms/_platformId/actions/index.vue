@@ -127,6 +127,12 @@ permissions and limitations under the Licence.
     >
       Do you really want to delete the action?
     </DeleteDialog>
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedAttachmentFilename"
+      :url="selectedAttachmentUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -151,12 +157,14 @@ import HintCard from '@/components/HintCard.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 import PlatformMountActionCard from '@/components/actions/PlatformMountActionCard.vue'
 import PlatformUnmountActionCard from '@/components/actions/PlatformUnmountActionCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Attachment } from '@/models/Attachment'
 import { Visibility } from '@/models/Visibility'
+import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
   components: {
@@ -166,6 +174,7 @@ import { Visibility } from '@/models/Visibility'
     SoftwareUpdateActionCard,
     DeleteDialog,
     DotMenuActionDelete,
+    DownloadDialog,
     GenericActionCard,
     HintCard,
     PlatformActionTimeline
@@ -189,6 +198,9 @@ export default class PlatformActionsShowPage extends Vue {
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
   private showDeleteDialog: boolean = false
+
+  private showDownloadDialog: boolean = false
+  private attachmentToDownload: Attachment | null = null
 
   // vuex definition for typescript check
   actions!: ActionsGetter
@@ -281,14 +293,39 @@ export default class PlatformActionsShowPage extends Vue {
     }
   }
 
-  async openAttachment (attachment: Attachment) {
+  initDowloadDialog (attachment: Attachment) {
+    this.attachmentToDownload = attachment
+    this.showDownloadDialog = true
+  }
+
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+    this.attachmentToDownload = null
+  }
+
+  openAttachment (attachment: Attachment) {
+    this.initDowloadDialog(attachment)
+  }
+
+  get selectedAttachmentFilename (): string {
+    if (this.attachmentToDownload) {
+      return getLastPathElement(this.attachmentToDownload.url)
+    }
+    return 'attachment'
+  }
+
+  async selectedAttachmentUrl (): Promise<string | null> {
+    if (!this.attachmentToDownload) {
+      return null
+    }
     try {
-      const blob = await this.downloadAttachment(attachment.url)
+      const blob = await this.downloadAttachment(this.attachmentToDownload.url)
       const url = window.URL.createObjectURL(blob)
-      window.open(url)
+      return url
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
     }
+    return null
   }
 
   get isPublic (): boolean {

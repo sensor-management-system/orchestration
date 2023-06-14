@@ -238,7 +238,7 @@ permissions and limitations under the Licence.
                 <v-list>
                   <v-list-item
                     dense
-                    @click.prevent="exportCsv"
+                    @click.prevent="showCsvDownloadDialog = true"
                   >
                     <v-list-item-content>
                       <v-list-item-title>
@@ -296,7 +296,7 @@ permissions and limitations under the Licence.
               #dot-menu-items
             >
               <DotMenuActionSensorML
-                @click="openSensorML(item)"
+                @click="openSensorMLDialog(item)"
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
@@ -341,13 +341,23 @@ permissions and limitations under the Licence.
       @cancel-archiving="closeArchiveDialog"
       @submit-archiving="archiveAndCloseDialog"
     />
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedDeviceSensorMLFilename"
+      :url="selectedDeviceSensorMLUrl"
+      @cancel="closeDownloadDialog"
+    />
+    <download-dialog
+      v-model="showCsvDownloadDialog"
+      filename="devices.csv"
+      :url="exportCsvUrl"
+      @cancel="showCsvDownloadDialog = false"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
-import { saveAs } from 'file-saver'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 
@@ -398,6 +408,7 @@ import DeviceTypeSelect from '@/components/DeviceTypeSelect.vue'
 import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import DeviceArchiveDialog from '@/components/devices/DeviceArchiveDialog.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -420,6 +431,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     DotMenuActionCopy,
     DotMenuActionSensorML,
     DeleteDialog,
+    DownloadDialog,
     DotMenuActionArchive,
     DotMenuActionRestore,
     DeviceArchiveDialog,
@@ -460,6 +472,11 @@ export default class SearchDevicesPage extends Vue {
 
   private showArchiveDialog: boolean = false
   private deviceToArchive: Device | null = null
+
+  private showDownloadDialog: boolean = false
+  private deviceForSensorML: Device | null = null
+
+  private showCsvDownloadDialog: boolean = false
 
   // vuex definition for typescript check
   devices!: DevicesState['devices']
@@ -625,18 +642,11 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  async exportCsv () {
-    if (this.devices.length > 0) {
-      try {
-        this.processing = true
-        const blob = await this.exportAsCsv(this.searchParams)
-        saveAs(blob, 'devices.csv')
-      } catch (e) {
-        this.$store.commit('snackbar/setError', 'CSV export failed')
-      } finally {
-        this.processing = false
-      }
-    }
+  async exportCsvUrl (): Promise<string> {
+    this.processing = true
+    const blob = await this.exportAsCsv(this.searchParams)
+    this.processing = false
+    return window.URL.createObjectURL(blob)
   }
 
   initDeleteDialog (device: Device) {
@@ -809,26 +819,36 @@ export default class SearchDevicesPage extends Vue {
     this.setTitle('Devices')
   }
 
-  downloadSensorML (url: string, shortName: string) {
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${shortName}.xml`
-    link.click()
+  openSensorMLDialog (device: Device) {
+    this.deviceForSensorML = device
+    this.showDownloadDialog = true
   }
 
-  async openSensorML (device: Device) {
-    if (device.visibility === Visibility.Public) {
-      const url = await this.getSensorMLUrl(device.id!)
-      window.open(url)
-      this.downloadSensorML(url, device.shortName)
+  closeDownloadDialog () {
+    this.deviceForSensorML = null
+    this.showDownloadDialog = false
+  }
+
+  get selectedDeviceSensorMLFilename (): string {
+    if (this.deviceForSensorML != null) {
+      return `${this.deviceForSensorML.shortName}.xml`
+    }
+    return 'device.xml'
+  }
+
+  async selectedDeviceSensorMLUrl (): Promise<string | null> {
+    if (!this.deviceForSensorML) {
+      return null
+    }
+    if (this.deviceForSensorML?.visibility === Visibility.Public) {
+      return await this.getSensorMLUrl(this.deviceForSensorML.id!)
     } else {
       try {
-        const blob = await this.exportAsSensorML(device.id!)
-        const url = window.URL.createObjectURL(blob)
-        window.open(url)
-        this.downloadSensorML(url, device.shortName)
+        const blob = await this.exportAsSensorML(this.deviceForSensorML!.id!)
+        return window.URL.createObjectURL(blob)
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Device could not be exported as SensorML')
+        return null
       }
     }
   }

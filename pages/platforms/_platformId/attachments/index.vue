@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -106,6 +106,12 @@ permissions and limitations under the Licence.
     >
       Do you really want to delete the attachment <em>{{ attachmentToDelete.label }}</em>?
     </DeleteDialog>
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedAttachmentFilename"
+      :url="selectedAttachmentUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -124,9 +130,12 @@ import BaseList from '@/components/shared/BaseList.vue'
 import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
+
+import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
-  components: { DeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, ProgressIndicator },
+  components: { DeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, ProgressIndicator, DownloadDialog },
   computed: mapState('platforms', ['platformAttachments', 'platform']),
   methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment', 'downloadAttachment'])
 })
@@ -137,6 +146,9 @@ export default class PlatformAttachmentShowPage extends Vue {
   private isSaving = false
   private showDeleteDialog = false
   private attachmentToDelete: Attachment|null = null
+
+  private showDownloadDialog: boolean = false
+  private attachmentToDownload: Attachment | null = null
 
   // vuex definition for typescript check
   platformAttachments!: PlatformsState['platformAttachments']
@@ -159,6 +171,16 @@ export default class PlatformAttachmentShowPage extends Vue {
     this.attachmentToDelete = null
   }
 
+  initDowloadDialog (attachment: Attachment) {
+    this.attachmentToDownload = attachment
+    this.showDownloadDialog = true
+  }
+
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+    this.attachmentToDownload = null
+  }
+
   async deleteAndCloseDialog () {
     if (this.attachmentToDelete === null || this.attachmentToDelete.id === null) {
       return
@@ -177,14 +199,29 @@ export default class PlatformAttachmentShowPage extends Vue {
     }
   }
 
-  async openAttachment (attachment: Attachment) {
+  openAttachment (attachment: Attachment) {
+    this.initDowloadDialog(attachment)
+  }
+
+  get selectedAttachmentFilename (): string {
+    if (this.attachmentToDownload) {
+      return getLastPathElement(this.attachmentToDownload.url)
+    }
+    return 'attachment'
+  }
+
+  async selectedAttachmentUrl (): Promise<string | null> {
+    if (!this.attachmentToDownload) {
+      return null
+    }
     try {
-      const blob = await this.downloadAttachment(attachment.url)
+      const blob = await this.downloadAttachment(this.attachmentToDownload.url)
       const url = window.URL.createObjectURL(blob)
-      window.open(url)
+      return url
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
     }
+    return null
   }
 
   get isPublic () {
