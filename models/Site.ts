@@ -78,7 +78,9 @@ export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo 
   updatedBy: IContact | null
   createdByUserId: string | null
   visibility: Visibility
-  permissionGroups: IPermissionGroup[]}
+  permissionGroups: IPermissionGroup[]
+  website: string
+}
 
 export class Site implements ISite, IVisible {
   private _id: string = ''
@@ -104,6 +106,7 @@ export class Site implements ISite, IVisible {
 
   private _visibility: Visibility = Visibility.Internal
   private _permissionGroups: PermissionGroup[] = []
+  private _website: string = ''
 
   get id (): string {
     return this._id
@@ -257,6 +260,14 @@ export class Site implements ISite, IVisible {
     this._permissionGroups = permissionGroups
   }
 
+  get website (): string {
+    return this._website
+  }
+
+  set website (newWebsite: string) {
+    this._website = newWebsite
+  }
+
   // get isPrivate (): boolean {
   //   return this._visibility === Visibility.Private
   // }
@@ -308,6 +319,8 @@ export class Site implements ISite, IVisible {
     newObject.updatedBy = someObject.updatedBy ? Contact.createFromObject(someObject.updatedBy) : null
     newObject.visibility = someObject.visibility
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
+
+    newObject.website = someObject.website
 
     return newObject
   }

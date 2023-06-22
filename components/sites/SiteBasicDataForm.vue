@@ -220,6 +220,30 @@ permissions and limitations under the Licence.
 
       <v-row>
         <v-col cols="12" md="9">
+          <v-text-field
+            :value="value.website"
+            :readonly="readonly"
+            :disabled="readonly"
+            label="Website"
+            placeholder="https://"
+            type="url"
+            @input="update('website', $event)"
+          >
+            <template slot="append">
+              <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+                <v-icon
+                  small
+                >
+                  mdi-open-in-new
+                </v-icon>
+              </a>
+            </template>
+          </v-text-field>
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12" md="9">
           <v-select
             :value="value.epsgCode"
             class="required"
@@ -563,6 +587,10 @@ export default class SiteBasicDataForm extends mixins(Rules) {
 
       case 'description':
         newObj.description = value as string
+        break
+
+      case 'website':
+        newObj.website = value as string
         break
 
       case 'epsgCode':

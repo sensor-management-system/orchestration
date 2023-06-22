@@ -141,6 +141,8 @@ export class SiteSerializer {
       result.siteUsageUri = attributes.site_usage_uri || ''
       result.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
       result.updatedAt = attributes.updated_at != null ? DateTime.fromISO(attributes.updated_at, { zone: 'UTC' }) : null
+      result.website = attributes.website || ''
+
       if (attributes.is_internal) {
         result.visibility = Visibility.Internal
       }
@@ -230,7 +232,8 @@ export class SiteSerializer {
         site_usage_name: site.siteUsageName,
         site_usage_uri: site.siteUsageUri,
         site_type_name: site.siteTypeName,
-        site_type_uri: site.siteTypeUri
+        site_type_uri: site.siteTypeUri,
+        website: site.website
 
         // these properties are set by the db, so we wont send anything related here:
         // archived
