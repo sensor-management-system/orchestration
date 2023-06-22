@@ -53,8 +53,6 @@ check-lint:
     - npm ci
   script:
     - npm run lint
-  tags:
-    - docker
   allow_failure: true
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -69,8 +67,6 @@ check-build:
     - npm ci
   script:
     - npm run build
-  tags:
-    - docker
   allow_failure: false
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -85,8 +81,6 @@ check-license:
     - npm ci
   script:
     - npm run licenseCheck
-  tags:
-    - docker
   allow_failure: true
   cache:
     key: ${CI_COMMIT_REF_SLUG}
@@ -101,8 +95,6 @@ test-frontend-unit-tests:
     - npm ci
   script:
     - npm test
-  tags:
-    - docker
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
