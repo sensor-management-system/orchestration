@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
                 <v-select
                   v-model="suggestion.aggregationTypeId"
                   :items="aggregationtypes"
-                  label="Aggregation type"
+                  label="Default aggregation type"
                   item-value="id"
                   clearable
                   required
