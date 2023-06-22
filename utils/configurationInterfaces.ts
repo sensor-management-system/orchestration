@@ -263,11 +263,16 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction<Platf
   }
 
   get contact (): IContact | null {
-    return this._mountAction.endContact
+    return this._mountAction.endContact || this._mountAction.beginContact
   }
 
-  get mountInfo (): null {
-    return null
+  get mountInfo (): IMountInfo {
+    return {
+      parentPlatform: this._mountAction.parentPlatform,
+      offsetX: this._mountAction.offsetX,
+      offsetY: this._mountAction.offsetY,
+      offsetZ: this._mountAction.offsetZ
+    }
   }
 
   get description (): string {
@@ -311,11 +316,16 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceM
   }
 
   get contact (): IContact | null {
-    return this._mountAction.endContact
+    return this._mountAction.endContact || this._mountAction.beginContact
   }
 
-  get mountInfo (): null {
-    return null
+  get mountInfo (): IMountInfo {
+    return {
+      parentPlatform: this._mountAction.parentPlatform,
+      offsetX: this._mountAction.offsetX,
+      offsetY: this._mountAction.offsetY,
+      offsetZ: this._mountAction.offsetZ
+    }
   }
 
   get description (): string {
@@ -413,7 +423,7 @@ export class StaticLocationEndTimelineAction implements IStaticLocationTimelineA
   }
 
   get contact (): Contact {
-    return this.staticLocationEndAction.endContact!
+    return this.staticLocationEndAction.endContact || this.staticLocationEndAction.beginContact!
   }
 
   get date (): DateTime {
@@ -540,7 +550,7 @@ export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelin
   }
 
   get contact (): Contact {
-    return this.dynamicLocationEndAction.endContact!
+    return this.dynamicLocationEndAction.endContact || this.dynamicLocationEndAction.beginContact!
   }
 
   get date (): DateTime {
