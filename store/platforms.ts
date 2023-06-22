@@ -155,7 +155,23 @@ const getters: GetterTree<PlatformsState, RootState> = {
     // sort the actions
     actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
       if (a.date === null || b.date === null) { return 0 }
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
+      if (a.date < b.date) {
+        return 1
+      }
+      if (a.date > b.date) {
+        return -1
+      }
+      // In case we have mount & unmount at the very same point in time,
+      // the mount needs to be the earlier one (you need a mount to unmount later).
+      // So in case we sort the latest (newest/freshed) actions to be on top, we also need
+      // to ensure that the ummounts are earilier in the list then the mounts.
+      if (a instanceof PlatformUnmountActionWrapper && b instanceof PlatformMountActionWrapper) {
+        return -1
+      }
+      if (a instanceof PlatformMountActionWrapper && b instanceof PlatformUnmountActionWrapper) {
+        return 1
+      }
+      return 0
     })
     return actions
   },

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -52,7 +52,7 @@ permissions and limitations under the Licence.
         no-gutters
       >
         <v-col>
-          {{ value.endContact.toString() }}
+          {{ contact }}
         </v-col>
         <v-col
           align-self="end"
@@ -83,6 +83,20 @@ permissions and limitations under the Licence.
         <v-card-text
           class="grey lighten-5 text--primary pt-2"
         >
+          <div v-if="value.parentPlatform !== null">
+            <label>Parent platform</label>{{ value.parentPlatform.shortName }}
+          </div>
+          <v-row dense>
+            <v-col cols="12" md="4">
+              <label>Offset x</label>{{ value.basicData.offsetX }} m
+            </v-col>
+            <v-col cols="12" md="4">
+              <label>Offset y</label>{{ value.basicData.offsetY }} m
+            </v-col>
+            <v-col cols="12" md="4">
+              <label>Offset z</label>{{ value.basicData.offsetZ }} m
+            </v-col>
+          </v-row>
           <label>Description</label>
           {{ value.basicData.endDescription }}
         </v-card-text>
@@ -100,6 +114,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
+import { ContactBasicData } from '@/models/basic/ContactBasicData'
 
 /**
  * A class component for Device Unmount Action card
@@ -125,5 +140,12 @@ export default class DeviceUnmountActionCard extends Vue {
   readonly value!: DeviceMountAction
 
   private show: boolean = false
+
+  get contact (): ContactBasicData {
+    if (this.value.endContact !== null) {
+      return this.value.endContact
+    }
+    return this.value.beginContact
+  }
 }
 </script>

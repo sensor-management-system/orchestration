@@ -40,6 +40,7 @@ permissions and limitations under the Licence.
         <v-card-subtitle class="pb-0">
           <span>{{ action.date | dateToDateTimeString }}</span>
           <span v-if="action.endDate"> - {{ action.endDate | dateToDateTimeString }}</span>
+          <span class="text-caption text--secondary">(UTC)</span>
         </v-card-subtitle>
       </template>
       <v-row no-gutters>

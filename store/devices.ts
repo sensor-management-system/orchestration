@@ -132,7 +132,7 @@ export type ActionsGetter = (GenericAction | SoftwareUpdateAction | DeviceMountA
 export type PageSizesGetter = number[]
 
 const getters: GetterTree<DevicesState, RootState> = {
-  actions: (state: DevicesState): (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[] => { // Todo actions sortieren, wobei ehrlich gesagt, eine extra route im Backend mit allen Actions (sortiert) besser wäre
+  actions: (state: DevicesState): (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[] => {
     let actions: (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[] = [
       ...state.deviceGenericActions,
       ...state.deviceSoftwareUpdateActions,
@@ -144,11 +144,26 @@ const getters: GetterTree<DevicesState, RootState> = {
         actions.push(new DeviceUnmountActionWrapper(deviceMountAction))
       }
     }
-    // TODO: Extra deviceUnmountActionWrapper befüllen
     // sort the actions
     actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
       if (a.date === null || b.date === null) { return 0 }
-      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0
+      if (a.date < b.date) {
+        return 1
+      }
+      if (a.date > b.date) {
+        return -1
+      }
+      // In case we have mount & unmount at the very same point in time,
+      // the mount needs to be the earlier one (you need a mount to unmount later).
+      // So in case we sort the latest (newest/freshed) actions to be on top, we also need
+      // to ensure that the ummounts are earilier in the list then the mounts.
+      if (a instanceof DeviceUnmountActionWrapper && b instanceof DeviceMountActionWrapper) {
+        return -1
+      }
+      if (a instanceof DeviceMountActionWrapper && b instanceof DeviceUnmountActionWrapper) {
+        return 1
+      }
+      return 0
     })
     return actions
   },
