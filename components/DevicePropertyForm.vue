@@ -600,6 +600,16 @@ export default class DevicePropertyForm extends mixins(Rules) {
   private showNewUnitDialog = false
   private showNewAggregationTypeDialog = false
 
+  // We could filter here for the default aggregation type that the
+  // property in the CV uses.
+  // That makes sense in a lot of cases: For example you don't want
+  // to sum temperatures over time.
+  // But doing the filtering here and allowing only the default choice
+  // in that case prevents us from saying that we use the max or min
+  // of this temperature.
+  // So we skip the filtering.
+  private filterForDefaultAggregationType = false
+
   /**
    * a DeviceProperty
    */
@@ -858,12 +868,17 @@ export default class DevicePropertyForm extends mixins(Rules) {
           }
         }
         // And update the aggregation type.
-        const aggregationTypeId = this.properties[propertyIndex].aggregationTypeId
-        const possibleAggregationTypes = this.aggregationTypes.filter(a => a.id === aggregationTypeId)
-        if (possibleAggregationTypes) {
-          const firstAggregationType = possibleAggregationTypes[0]
-          newObj.aggregationTypeName = firstAggregationType.name
-          newObj.aggregationTypeUri = firstAggregationType.uri
+        // But we want to set it only if we reduce the choices to the default aggregation type
+        // of that property (average for temperature for example).
+        // Still, we also want to set it to this default value if the current item is null.
+        if (this.filterForDefaultAggregationType || this.valueAggregationTypeItem === null) {
+          const aggregationTypeId = this.properties[propertyIndex].aggregationTypeId
+          const possibleAggregationTypes = this.aggregationTypes.filter(a => a.id === aggregationTypeId)
+          if (possibleAggregationTypes) {
+            const firstAggregationType = possibleAggregationTypes[0]
+            newObj.aggregationTypeName = firstAggregationType.name
+            newObj.aggregationTypeUri = firstAggregationType.uri
+          }
         }
       }
       newObj.unitName = ''
@@ -1131,7 +1146,7 @@ export default class DevicePropertyForm extends mixins(Rules) {
 
   get aggregationTypeItems (): AggregationType[] {
     let aggregationTypes = this.aggregationTypes
-    if (this.valuePropertyItem && this.valuePropertyItem.id) {
+    if (this.filterForDefaultAggregationType && this.valuePropertyItem && this.valuePropertyItem.id) {
       const property = this.valuePropertyItem as Property
       if (property.aggregationTypeId) {
         aggregationTypes = aggregationTypes.filter(a => a.id === property.aggregationTypeId)
