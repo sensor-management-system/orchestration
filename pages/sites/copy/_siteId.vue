@@ -183,12 +183,12 @@ export default class SiteCopyPage extends Vue {
           this.loadCountries()
         ])
       } catch (e) {
-        this.$store.commit('snackbar/setError', 'Failed to load site types or usages')
+        this.$store.commit('snackbar/setError', 'Failed to load types or usages')
       }
 
       if (!this.site || !this.canAccessEntity(this.site)) {
         this.$router.replace('/sites/')
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to copy this site.')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to copy this site / lab.')
         return
       }
 
@@ -197,7 +197,7 @@ export default class SiteCopyPage extends Vue {
         this.siteToCopy = siteCopy
       }
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Loading site failed')
+      this.$store.commit('snackbar/setError', 'Loading site / lab failed')
     } finally {
       this.isLoading = false
     }
@@ -248,7 +248,7 @@ export default class SiteCopyPage extends Vue {
         copyContacts: this.copyContacts,
         originalSiteId: this.siteId
       })
-      this.$store.commit('snackbar/setSuccess', 'Site copied')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab copied')
       this.$router.push('/sites/' + savedSiteId)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Copy failed')
@@ -268,7 +268,7 @@ export default class SiteCopyPage extends Vue {
         disabled: true
       }
     ])
-    this.setTitle('Copy Site')
+    this.setTitle('Copy Site / Lab')
   }
 
   @Watch('site', { immediate: true, deep: true })

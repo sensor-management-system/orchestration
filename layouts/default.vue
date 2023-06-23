@@ -92,7 +92,7 @@ permissions and limitations under the Licence.
             <v-icon>mdi-map-marker-radius</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Sites</v-list-item-title>
+            <v-list-item-title>Sites &amp; Labs</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -201,10 +201,10 @@ export default class SiteShowBasicPage extends Vue {
     try {
       this.isSaving = true
       await this.deleteSite(this.site.id)
-      this.$store.commit('snackbar/setSuccess', 'Site deleted')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab deleted')
       this.$router.push('/sites')
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Site could not be deleted')
+      this.$store.commit('snackbar/setError', 'Site / Lab could not be deleted')
     } finally {
       this.isSaving = false
     }
@@ -229,9 +229,9 @@ export default class SiteShowBasicPage extends Vue {
       await this.loadSite({
         siteId: this.siteId
       })
-      this.$store.commit('snackbar/setSuccess', 'Site archived')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab archived')
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Site could not be archived')
+      this.$store.commit('snackbar/setError', 'Site / Lab could not be archived')
     } finally {
       this.isSaving = false
       this.showArchiveDialog = false
@@ -248,9 +248,9 @@ export default class SiteShowBasicPage extends Vue {
       await this.loadSite({
         siteId: this.siteId
       })
-      this.$store.commit('snackbar/setSuccess', 'Site restored')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab restored')
     } catch (error) {
-      this.$store.commit('snackbar/setError', 'Site could not be restored')
+      this.$store.commit('snackbar/setError', 'Site / Lab could not be restored')
     } finally {
       this.isSaving = false
     }

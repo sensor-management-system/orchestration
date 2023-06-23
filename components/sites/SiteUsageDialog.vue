@@ -43,10 +43,10 @@ permissions and limitations under the Licence.
       scrollable
     >
       <v-card>
-        <v-card-title>Suggest new site usage</v-card-title>
+        <v-card-title>Suggest new site / lab usage</v-card-title>
         <v-card-text>
           <p>
-            You can suggest a new site usage for the controlled vocabulary. This is submitted as a proposal.
+            You can suggest a new site / lab usage for the controlled vocabulary. This is submitted as a proposal.
           </p>
           <p>
             A curator reviews your contribution before accepting it and including it in the full controlled vocabulary.
@@ -227,7 +227,7 @@ export default class SiteUsageDialog extends mixins(Rules) {
       this.$emit('aftersubmit', result)
       this.$store.commit('snackbar/setSuccess', 'Your proposal has been successfully submitted. Your changes will be reviewed soon.')
     } catch (err) {
-      this.$store.commit('snackbar/setError', 'Error on submitting the siteUsage')
+      this.$store.commit('snackbar/setError', 'Error on submitting the site / lab usage')
     } finally {
       this.isSaving = false
       this.resetInputs()

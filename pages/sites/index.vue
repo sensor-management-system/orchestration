@@ -40,7 +40,7 @@ permissions and limitations under the Licence.
             <v-text-field
               v-model="searchText"
               label="Search term"
-              placeholder="Search sites"
+              placeholder="Search sites & labs"
               hint="Please enter at least 3 characters"
               @keydown.enter="basicSearch"
             />
@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
               nuxt
               to="/sites/new"
             >
-              New Site
+              New Site / Lab
             </v-btn>
           </v-col>
         </v-row>
@@ -82,7 +82,7 @@ permissions and limitations under the Licence.
             <v-text-field
               v-model="searchText"
               label="Search term"
-              placeholder="Search sites"
+              placeholder="Search sites & labs"
               hint="Please enter at least 3 characters"
               @keydown.enter="extendedSearch"
             />
@@ -92,14 +92,14 @@ permissions and limitations under the Licence.
           dense
         >
           <v-col cols="12" md="12">
-            <SiteUsageSelect v-model="selectedSearchSiteUsages" label="Select a site usage" />
+            <SiteUsageSelect v-model="selectedSearchSiteUsages" label="Select usage" />
           </v-col>
         </v-row>
         <v-row
           dense
         >
           <v-col cols="12" md="12">
-            <SiteTypeSelect v-model="selectedSearchSiteTypes" label="Select a site type" />
+            <SiteTypeSelect v-model="selectedSearchSiteTypes" label="Select type" />
           </v-col>
         </v-row>
         <v-row
@@ -113,10 +113,10 @@ permissions and limitations under the Licence.
           dense
         >
           <v-col v-if="$auth.loggedIn" cols="12" md="3">
-            <v-checkbox v-model="onlyOwnSites" label="Only own sites" />
+            <v-checkbox v-model="onlyOwnSites" label="Only own sites & labs" />
           </v-col>
           <v-col cols="12" md="3">
-            <v-checkbox v-model="includeArchivedSites" label="Include archived sites" />
+            <v-checkbox v-model="includeArchivedSites" label="Include archived sites & labs" />
           </v-col>
         </v-row>
         <v-row
@@ -152,7 +152,7 @@ permissions and limitations under the Licence.
               nuxt
               to="/sites/new"
             >
-              New Site
+              New Site / Lab
             </v-btn>
           </v-col>
         </v-row>
@@ -168,7 +168,7 @@ permissions and limitations under the Licence.
 
     <div v-if="sites.length <= 0 && !loading">
       <p class="text-center">
-        There are no sites that match your search criteria.
+        There are no sites / labs that match your search criteria.
       </p>
     </div>
 
@@ -179,7 +179,7 @@ permissions and limitations under the Licence.
           md="3"
         >
           <v-subheader>
-            <FoundEntries v-model="totalCount" entity-name="site" />
+            <FoundEntries v-model="totalCount" entity-name="site / lab" entity-name-plural="sites & labs" />
             <v-spacer />
 
             <template v-if="sites.length > 0">
@@ -422,7 +422,7 @@ export default class SearchSitesPage extends Vue {
       this.initSearchQueryParams()
       await this.runInitialSearch()
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Loading of sites failed')
+      this.$store.commit('snackbar/setError', 'Loading of sites & labs failed')
     } finally {
       this.loading = false
     }
@@ -524,7 +524,7 @@ export default class SearchSitesPage extends Vue {
       this.setPageInUrl()
       this.setSizeInUrl()
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Loading of sites failed')
+      this.$store.commit('snackbar/setError', 'Loading of sites & labs failed')
     } finally {
       this.loading = false
     }
@@ -548,9 +548,9 @@ export default class SearchSitesPage extends Vue {
       this.loading = true
       await this.deleteSite(this.siteToDelete.id)
       this.runSearch()
-      this.$store.commit('snackbar/setSuccess', 'Site deleted')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab deleted')
     } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Site could not be deleted')
+      this.$store.commit('snackbar/setError', 'Site / Lab could not be deleted')
     } finally {
       this.loading = false
       this.closeDialog()
@@ -578,9 +578,9 @@ export default class SearchSitesPage extends Vue {
         siteId: this.siteToArchive.id
       })
       await this.replaceSiteInSites(this.site!)
-      this.$store.commit('snackbar/setSuccess', 'Site archived')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab archived')
     } catch (_error) {
-      this.$store.commit('snackbar/setError', 'Site could not be archived')
+      this.$store.commit('snackbar/setError', 'Site / Lab could not be archived')
     } finally {
       this.loading = false
       this.closeArchiveDialog()
@@ -596,9 +596,9 @@ export default class SearchSitesPage extends Vue {
           siteId: site.id
         })
         await this.replaceSiteInSites(this.site!)
-        this.$store.commit('snackbar/setSuccess', 'Site restored')
+        this.$store.commit('snackbar/setSuccess', 'Site / Lab restored')
       } catch (error) {
-        this.$store.commit('snackbar/setError', 'Site could not be restored')
+        this.$store.commit('snackbar/setError', 'Site / Lab could not be restored')
       } finally {
         this.loading = false
       }
@@ -690,7 +690,7 @@ export default class SearchSitesPage extends Vue {
       'Search',
       'Extended Search'
     ])
-    this.setTitle('Sites')
+    this.setTitle('Sites & Labs')
   }
 }
 </script>

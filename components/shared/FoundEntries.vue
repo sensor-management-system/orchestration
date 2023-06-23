@@ -55,8 +55,15 @@ export default class FoundEntries extends Vue {
   })
     entityName!: string
 
+  @Prop({
+    required: false,
+    type: String,
+    default: ''
+  })
+    entityNamePlural!: string
+
   get foundText (): String {
-    return `${this.value} ${pluralize(this.value, this.entityName)} found`
+    return `${this.value} ${pluralize(this.value, this.entityName, this.entityNamePlural)} found`
   }
 }
 </script>

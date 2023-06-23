@@ -89,9 +89,9 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row v-else>
       <v-col cols="12">
-        <label>This site does not have location data.</label>
+        <label>This site / lab does not have location data.</label>
         <v-subheader>
-          Edit the site to add coordinates.
+          Edit the site / lab to add coordinates.
         </v-subheader>
         <v-divider class="my-4" />
       </v-col>
@@ -118,7 +118,7 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12">
-        <label>Configurations on site</label>
+        <label>Configurations on site / lab</label>
         <div v-if="siteConfigurations.length>0">
           <BaseList
             :list-items="siteConfigurations"
@@ -132,7 +132,7 @@ permissions and limitations under the Licence.
         </div>
         <div v-else>
           <v-subheader>
-            There are no configurations on this site.
+            There are no configurations on this site / lab.
           </v-subheader>
         </div>
       </v-col>

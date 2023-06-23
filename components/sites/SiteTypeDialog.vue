@@ -44,10 +44,10 @@ permissions and limitations under the Licence.
       scrollable
     >
       <v-card>
-        <v-card-title>Suggest new site type</v-card-title>
+        <v-card-title>Suggest new site / lab type</v-card-title>
         <v-card-text>
           <p>
-            You can suggest a new site type for the controlled vocabulary. This is submitted as a proposal.
+            You can suggest a new site / lab type for the controlled vocabulary. This is submitted as a proposal.
           </p>
           <p>
             A curator reviews your contribution before accepting it and including it in the full controlled vocabulary.
@@ -61,7 +61,7 @@ permissions and limitations under the Licence.
                 <v-select
                   v-model="suggestion.siteUsageId"
                   :items="siteUsages"
-                  label="Site Usage"
+                  label="Site / Lab Usage"
                   item-value="id"
                   clearable
                   required
@@ -250,7 +250,7 @@ export default class SiteTypeDialog extends mixins(Rules) {
       this.$emit('aftersubmit', result)
       this.$store.commit('snackbar/setSuccess', 'Your proposal has been successfully submitted. Your changes will be reviewed soon.')
     } catch (err) {
-      this.$store.commit('snackbar/setError', 'Error on submitting the siteType')
+      this.$store.commit('snackbar/setError', 'Error on submitting the site / lab type')
     } finally {
       this.isSaving = false
       this.resetInputs()

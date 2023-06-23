@@ -148,7 +148,7 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
    * @returns {string} a message string
    */
   getRedirectMessage (): string {
-    return 'You\'re not allowed to edit this Site.'
+    return 'You\'re not allowed to edit this Site / Lab.'
   }
 
   async fetch () {
@@ -206,7 +206,7 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
         siteId: savedSite.id
       })
       this.hasSaved = true
-      this.$store.commit('snackbar/setSuccess', 'Site updated')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab updated')
       this.$router.push('/sites/' + this.siteId + '/basic')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')

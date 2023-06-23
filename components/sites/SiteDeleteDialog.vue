@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -40,10 +40,10 @@ permissions and limitations under the Licence.
   >
     <v-card v-if="hasSiteToDelete">
       <v-card-title class="headline">
-        Delete site
+        Delete site / lab
       </v-card-title>
       <v-card-text>
-        Do you really want to delete the site <em>{{ siteToDelete.label }}</em>?
+        Do you really want to delete the site / lab <em>{{ siteToDelete.label }}</em>?
       </v-card-text>
       <v-card-actions>
         <v-btn

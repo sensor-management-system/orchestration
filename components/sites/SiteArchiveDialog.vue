@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -40,15 +40,15 @@ permissions and limitations under the Licence.
   >
     <v-card v-if="hasSiteToArchive">
       <v-card-title class="headline">
-        Archive site
+        Archive site / lab
       </v-card-title>
       <v-card-text>
-        <p>Do you really want to archive the site <em>{{ siteToArchive.label }}</em>?</p>
+        <p>Do you really want to archive the site / lab <em>{{ siteToArchive.label }}</em>?</p>
         <p>
-          Achived sites can no longer be edited or used until they are restored.
+          Achived sites &amp; labs can no longer be edited or used until they are restored.
         </p>
         <p>
-          They are not included in the site search by default.
+          They are not included in the sites &amp; labs search by default.
         </p>
       </v-card-text>
       <v-card-actions>
