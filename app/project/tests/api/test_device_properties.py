@@ -8,11 +8,26 @@
 
 """Tests for the device property endpoints."""
 
+import datetime
 import json
 import time
 
+import pytz
+
 from project import base_url
-from project.api.models import Contact, Device, DeviceProperty, User
+from project.api.models import (
+    Configuration,
+    ConfigurationDynamicLocationBeginAction,
+    Contact,
+    DatastreamLink,
+    Device,
+    DeviceCalibrationAction,
+    DeviceMountAction,
+    DeviceProperty,
+    DevicePropertyCalibration,
+    TsmEndpoint,
+    User,
+)
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
@@ -498,3 +513,118 @@ class TestDevicePropertyServices(BaseTestCase):
             response1.json["data"]["attributes"]["updated_at"]
             < response2.json["data"]["attributes"]["updated_at"]
         )
+
+
+class TestDevicePropertyDeletion(BaseTestCase):
+    """Test class for deleting with some relationships."""
+
+    url = base_url + "/device-properties"
+
+    def setUp(self):
+        """Set some test data up."""
+        super().setUp()
+        self.device = Device(
+            short_name="Very new device",
+            manufacturer_name="Some company",
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        self.device_property = DeviceProperty(
+            label="device property1",
+            property_name="device_property1",
+            device=self.device,
+        )
+        self.contact = Contact(
+            given_name="first", family_name="contact", email="first@contact.org"
+        )
+        self.super_user = User(
+            contact=self.contact, subject=self.contact.email, is_superuser=True
+        )
+        db.session.add_all(
+            [self.device, self.device_property, self.contact, self.super_user]
+        )
+        db.session.commit()
+
+    def test_delete_with_existing_datastream_link(self):
+        """Ensure we can't delete if there is a datastream link pointing to the property."""
+        configuration = Configuration(
+            label="config1",
+            is_internal=True,
+            is_public=False,
+            cfg_permission_group="1",
+        )
+        device_mount = DeviceMountAction(
+            configuration=configuration,
+            device=self.device,
+            begin_contact=self.contact,
+            begin_date=datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+            end_date=datetime.datetime(2023, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+        )
+        tsm_endpoint = TsmEndpoint(url="https://somewhere", name="Somewhere")
+        datastream_link = DatastreamLink(
+            device_mount_action=device_mount,
+            device_property=self.device_property,
+            tsm_endpoint=tsm_endpoint,
+            datasource_id="1",
+            datasource_name="1",
+            thing_id="2",
+            thing_name="2",
+            datastream_id="3",
+            datastream_name="3",
+            begin_date=device_mount.begin_date,
+            end_date=device_mount.end_date,
+        )
+        db.session.add_all([configuration, device_mount, tsm_endpoint, datastream_link])
+        db.session.commit()
+
+        with self.run_requests_as(self.super_user):
+            resp = self.client.delete(f"{self.url}/{self.device_property.id}")
+        self.assertEqual(resp.status_code, 409)
+
+    def test_delete_with_existing_dynamic_location(self):
+        """Ensure we can't delete if there is a dynamic location pointing to the property."""
+        configuration = Configuration(
+            label="config1",
+            is_internal=True,
+            is_public=False,
+            cfg_permission_group="1",
+        )
+        device_mount = DeviceMountAction(
+            configuration=configuration,
+            device=self.device,
+            begin_contact=self.contact,
+            begin_date=datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+            end_date=datetime.datetime(2023, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+        )
+        location = ConfigurationDynamicLocationBeginAction(
+            configuration=configuration,
+            x_property=self.device_property,
+            y_property=self.device_property,
+            z_property=self.device_property,
+            begin_date=device_mount.begin_date,
+            end_date=device_mount.end_date,
+            begin_contact=self.contact,
+        )
+        db.session.add_all([configuration, device_mount, location])
+        with self.run_requests_as(self.super_user):
+            resp = self.client.delete(f"{self.url}/{self.device_property.id}")
+        self.assertEqual(resp.status_code, 409)
+
+    def test_delete_with_existing_calibration(self):
+        """Ensure we can't delete if there is a calibration action pointing to the property."""
+        calibration = DeviceCalibrationAction(
+            device=self.device,
+            contact=self.contact,
+            current_calibration_date=datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=pytz.utc
+            ),
+        )
+        property_calibration = DevicePropertyCalibration(
+            calibration_action=calibration,
+            device_property=self.device_property,
+        )
+        db.session.add_all([calibration, property_calibration])
+        with self.run_requests_as(self.super_user):
+            resp = self.client.delete(f"{self.url}/{self.device_property.id}")
+        self.assertEqual(resp.status_code, 409)
