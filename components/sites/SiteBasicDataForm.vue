@@ -416,7 +416,7 @@ export default class SiteBasicDataForm extends mixins(Rules) {
   private showNewSiteTypeDialog = false
   private states: Status[] = []
   private userInfo: DetailedUserInfo | null = null
-  private entityName: string = 'site'
+  private entityName: string = 'site / lab'
 
   // vuex definition for typescript check
   epsgCodes!: VocabularyState['epsgCodes']

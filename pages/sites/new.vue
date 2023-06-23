@@ -125,7 +125,7 @@ export default class SiteNewPage extends Vue {
         this.loadCountries()
       ])
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to load site usages or types')
+      this.$store.commit('snackbar/setError', 'Failed to load usages or types')
     }
   }
 
@@ -149,7 +149,7 @@ export default class SiteNewPage extends Vue {
       this.isLoading = true
       const savedSite = await this.saveSite(this.site)
 
-      this.$store.commit('snackbar/setSuccess', 'Site created')
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab created')
       this.$router.push('/sites/' + savedSite.id)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
@@ -169,7 +169,7 @@ export default class SiteNewPage extends Vue {
         disabled: true
       }
     ])
-    this.setTitle('New Site')
+    this.setTitle('New Site / Lab')
   }
 }
 </script>

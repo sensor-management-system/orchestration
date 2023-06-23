@@ -137,7 +137,7 @@ permissions and limitations under the Licence.
           :item-value="(x) => x.id"
           :item-text="(x) => x.label"
           :items="sites"
-          label="Site"
+          label="Site / Lab"
           :readonly="readonly"
           @input="update('siteId',$event)"
         />
@@ -215,7 +215,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
     try {
       await this.searchSites()
     } catch (error) {
-      this.$store.commit('snackbar/setError', 'Failed to load sites')
+      this.$store.commit('snackbar/setError', 'Failed to load sites & labs')
     }
   }
 

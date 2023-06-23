@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020-2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -50,7 +50,7 @@ permissions and limitations under the Licence.
           outlined
           prominent
         >
-          The site is archived. It is not possible to change the values. To edit it, ask a group administrator to restore the entity.
+          The site / lab is archived. It is not possible to change the values. To edit it, ask a group administrator to restore the entity.
         </v-alert>
       </center>
       <NuxtChild
@@ -134,7 +134,7 @@ export default class SitePage extends Vue {
 
       if (!this.site || !this.canAccessEntity(this.site)) {
         this.$router.replace('/sites/')
-        this.$store.commit('snackbar/setError', 'You\'re not allowed to access this site.')
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to access this site / lab.')
         return
       }
 
@@ -144,7 +144,7 @@ export default class SitePage extends Vue {
         this.$router.replace('/sites/' + this.siteId + '/basic')
       }
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Loading of site failed')
+      this.$store.commit('snackbar/setError', 'Loading of site / lab failed')
     } finally {
       this.isLoading = false
     }

@@ -67,7 +67,7 @@ export default class SiteBasicPage extends Vue {
         this.loadSiteTypes()
       ])
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch site types or usages')
+      this.$store.commit('snackbar/setError', 'Failed to fetch types or usages')
     } finally {
       this.isLoading = false
     }

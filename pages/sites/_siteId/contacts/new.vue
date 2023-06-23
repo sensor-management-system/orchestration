@@ -111,7 +111,7 @@ export default class SiteAssignContactPage extends mixins(CheckEditAccess) {
    * @returns {string} a message string
    */
   getRedirectMessage (): string {
-    return 'You\'re not allowed to edit this site.'
+    return 'You\'re not allowed to edit this site / lab.'
   }
 
   async fetch (): Promise<void> {

@@ -110,7 +110,7 @@ permissions and limitations under the Licence.
         {{ value.project | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
-        <label>Site</label>
+        <label>Site / Lab</label>
         <span v-if="value.siteId && site">
           <nuxt-link :to="'/sites/' + value.siteId" target="_blank">{{ site.label }}</nuxt-link><v-icon small>mdi-open-in-new</v-icon>
         </span>
@@ -182,7 +182,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
           siteId: this.value.siteId
         })
       } catch (error) {
-        this.$store.commit('snackbar/setError', 'Failed to site')
+        this.$store.commit('snackbar/setError', 'Failed to load site / lab')
       }
     }
   }
