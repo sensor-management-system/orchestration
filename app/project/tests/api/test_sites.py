@@ -644,3 +644,29 @@ class TestSiteApi(BaseTestCase):
             data_entry["attributes"]["elevation_datum_uri"], "https://cv/elevation/45"
         )
         self.assertEqual(data_entry["attributes"]["elevation"], 42.0)
+
+    def test_post_website(self):
+        """Ensure that we can post the website."""
+        payload = {
+            "data": {
+                "type": "site",
+                "attributes": {
+                    "label": "some new site",
+                    "is_public": True,
+                    "website": "https://gfz-potsdam.de",
+                },
+            }
+        }
+
+        with self.run_requests_as(self.super_user):
+            resp = self.client.post(
+                self.sites_url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
+        self.assertEqual(resp.status_code, 201)
+        data_entry = resp.json["data"]
+        self.assertEqual(
+            data_entry["attributes"]["website"],
+            "https://gfz-potsdam.de",
+        )

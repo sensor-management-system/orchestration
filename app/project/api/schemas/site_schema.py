@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -48,6 +48,7 @@ class SiteSchema(Schema):
     elevation = fields.Float(allow_none=True)
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)
+    website = fields.Str(allow_none=True)
 
     created_by = Relationship(
         attribute="created_by",

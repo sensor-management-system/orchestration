@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -62,14 +62,7 @@ paths = {
                 "required": True,
             },
             "responses": {
-                "200": {
-                    "description": "Request fulfilled, document follows",
-                    "content": {
-                        "application/vnd.api+json": {
-                            "schema": {"$ref": "#/components/responses/Site_inst"}
-                        }
-                    },
-                }
+                "200": {"$ref": "#/components/responses/Site_inst"},
             },
             "description": "Update Site attributes",
             "operationId": "UpdateSite_0",
@@ -89,10 +82,26 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Site was archived succesfully."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
-                "409": {"$ref": "#/components/errors/conflict"},
+                "409": {
+                    "description": "Conflict on performing the operation",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {"$ref": "#/components/schemas/conflict"}
+                        }
+                    },
+                },
             },
             "description": "Archive a site.",
             "operationId": "ArchiveSite",
@@ -106,7 +115,16 @@ paths = {
             ],
             "responses": {
                 "204": {"description": "Restoring of the site was succesful."},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
                 "403": {"$ref": "#/components/responses/jsonapi_error_403"},
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
@@ -150,6 +168,7 @@ components = {
                                             "site_type_uri": "https://cv/sites/345",
                                             "site_usage_name": "example usage",
                                             "site_usage_uri": "https://cv/usages/345",
+                                            "website": "https://some.web/site",
                                         },
                                         "type": "site",
                                         "id": "0",
@@ -182,6 +201,7 @@ components = {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
+                        "type": "object",
                         "properties": {
                             "data": {
                                 "example": {
@@ -210,6 +230,7 @@ components = {
                                         "site_type_uri": "https://cv/sites/345",
                                         "site_usage_name": "example usage",
                                         "site_usage_uri": "https://cv/usages/345",
+                                        "website": "https://some.web/site",
                                     },
                                     "type": "site",
                                     "id": "0",
@@ -231,8 +252,7 @@ components = {
                                 "type": "string",
                             }
                         },
-                        "description": "Site get;",
-                    }
+                    },
                 }
             },
             "description": "Request fulfilled, document follows",
@@ -287,6 +307,9 @@ components = {
                                             "site_usage_name": {
                                                 "type": "string",
                                             },
+                                            "website": {
+                                                "type": "string",
+                                            },
                                         },
                                     }
                                 },
@@ -313,6 +336,7 @@ components = {
                                         "site_type_uri": "https://cv/sites/345",
                                         "site_usage_name": "example usage",
                                         "site_usage_uri": "https://cv/usages/345",
+                                        "website": "https://some.web/site",
                                     },
                                     "type": "site",
                                 },
@@ -379,6 +403,7 @@ components = {
                                 "site_usage_name": {
                                     "type": "string",
                                 },
+                                "website": {"type": "string"},
                             },
                         },
                         "relationships": {
@@ -448,6 +473,7 @@ components = {
                             "site_type_uri": "https://cv/sites/345",
                             "site_usage_name": "example usage",
                             "site_usage_uri": "https://cv/usages/345",
+                            "website": "https://some.web/site",
                         },
                         "type": "site",
                         "relationships": {

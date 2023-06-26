@@ -23,17 +23,20 @@ components = {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
+                        "type": "object",
                         "properties": {
                             "data": {
                                 "type": "array",
-                                "properties": {
-                                    "timepoint": {
-                                        "type": "string",
-                                        "format": "datetime",
+                                "items": {
+                                    "properties": {
+                                        "timepoint": {
+                                            "type": "string",
+                                            "format": "datetime",
+                                        },
+                                        "type": {"type": "string"},
+                                        "id": {"type": "string"},
+                                        "label": {"type": "string"},
                                     },
-                                    "type": {"type": "string"},
-                                    "id": {"type": "string"},
-                                    "label": {"type": "string"},
                                 },
                                 "example": [
                                     {
@@ -56,7 +59,7 @@ components = {
                                     },
                                 ],
                             }
-                        }
+                        },
                     }
                 }
             },

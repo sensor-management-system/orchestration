@@ -6,6 +6,11 @@
 
 """External openapi spec file for platform attachments."""
 
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.platform_attachment_schema import PlatformAttachmentSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(PlatformAttachmentSchema)
+
 paths = {
     "/platform-attachments": {
         "get": {
@@ -26,7 +31,12 @@ paths = {
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/PlatformAttachment_coll"}
+                "200": {
+                    "description": "List of platform attachments",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list()
+                    }
+                }
             },
             "description": "Retrieve PlatformAttachment from platform_attachment",
             "operationId": "RetrieveacollectionofPlatformAttachmentobjects_0",
@@ -35,18 +45,28 @@ paths = {
             "tags": ["Platform attachments"],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/PlatformAttachmentPost"
-                        }
-                    }
+                    "application/vnd.api+json": schema_mapper.post(),
                 },
                 "description": "PlatformAttachment attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/PlatformAttachment_single"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
+                "201": {
+                    "description": "Payload of the created platform attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    }
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
             },
             "operationId": "CreatePlatformAttachment_0",
         },
@@ -59,7 +79,12 @@ paths = {
                 {"$ref": "#/components/parameters/platform_attachment_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/PlatformAttachment_single"}
+                "200": {
+                    "description": "Instance of a platform attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    }
+                }
             },
             "description": "Retrieve PlatformAttachment from platform_attachment",
             "operationId": "RetrievePlatformAttachmentinstance_0",
@@ -68,13 +93,37 @@ paths = {
             "tags": ["Platform attachments"],
             "parameters": [{"$ref": "#/components/parameters/platform_attachment_id"}],
             "requestBody": {
-                "$ref": "#/components/requestBodies/PlatformAttachment_inst"
+                "description": "Payload to update a platform attachment",
+                "content": {
+                    "application/vnd.api+json": schema_mapper.patch(),
+                }
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/PlatformAttachment_single"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
-                "404": {"$ref": "#/components/errors/not_found"},
-                "409": {"$ref": "#/components/errors/conflict"},
+                "200": {
+                    "description": "Updated platform attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    }
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+                "409": {
+                    "description": "Conflict on performing the operation",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {"$ref": "#/components/schemas/conflict"}
+                        }
+                    },
+                },
             },
             "description": "Update PlatformAttachment attributes",
             "operationId": "UpdatePlatformAttachment_0",
@@ -84,8 +133,17 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/platform_attachment_id"}],
             "responses": {
                 "200": {"$ref": "#/components/responses/object_deleted"},
-                "401": {"$ref": "#/components/errors/authentification_required"},
-                "404": {"$ref": "#/components/errors/not_found"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "operationId": "DeletePlatformAttachmentfromplatformattachment_0",
         },
@@ -105,6 +163,7 @@ paths = {
                         "how this parameter is set. "
                         "Backend needs this to allow linking of filenames for uploads."
                     ),
+                    "schema": {"type": "string", "default": "file"},
                 },
             ],
             "responses": {
@@ -115,11 +174,16 @@ paths = {
                     ),
                 },
                 "401": {
-                    "$ref": "#/components/errors/authentification_required",
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
                 },
-                "404": {
-                    "$ref": "#/components/errors/not_found",
-                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "description": "Endpoint to get the content of the uploaded file.",
         }
@@ -128,303 +192,10 @@ paths = {
 
 components = {
     "requestBodies": {
-        "PlatformAttachment_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["platform"],
-                                        "properties": {
-                                            "platform": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "platform_attachment",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            }
-                                        },
-                                    },
-                                    "type": {"type": "string"},
-                                },
-                            }
-                        },
-                        "description": "PlatformAttachment patch;",
-                    }
-                }
-            }
-        },
     },
     "schemas": {
-        "PlatformAttachmentPost": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "label": {"type": "string"},
-                                "url": {"type": "string", "format": "url"},
-                            },
-                        },
-                        "type": {"type": "string"},
-                        "id": {"type": "string"},
-                    },
-                    "example": {
-                        "attributes": {"label": "", "url": ""},
-                        "relationships": {
-                            "platform": {"data": {"type": "platform", "id": "0"}}
-                        },
-                        "type": "platform_attachment",
-                    },
-                }
-            },
-            "description": "PlatformAttachment post;",
-        },
     },
     "responses": {
-        "PlatformAttachment_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "list",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                            "is_internal": {"type": "boolean"},
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                        },
-                                    },
-                                    "type": {"type": "string"},
-                                    "id": {"type": "string"},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "platform": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "created_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": [
-                                    {
-                                        "attributes": {
-                                            "label": "",
-                                            "url": "",
-                                            "is_upload": False,
-                                            "created_at": "2023-03-14T12:00:00+00:00",
-                                            "updated_at": "2023-03-14T13:00:00+00:00",
-                                        },
-                                        "relationships": {
-                                            "platform": {
-                                                "data": {"type": "platform", "id": "0"}
-                                            },
-                                            "created_by": {
-                                                "data": {
-                                                    "type": "user",
-                                                    "id": "123",
-                                                }
-                                            },
-                                            "updated_by": {
-                                                "data": {
-                                                    "type": "user",
-                                                    "id": "124",
-                                                }
-                                            },
-                                        },
-                                        "type": "platform_attachment",
-                                        "id": "0",
-                                    }
-                                ],
-                            }
-                        },
-                        "description": "PlatformAttachment get;",
-                    }
-                }
-            },
-            "description": "Platform Attachment",
-        },
-        "PlatformAttachment_single": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                            "is_upload": {"type": "boolean"},
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                        },
-                                    },
-                                    "type": {"type": "string"},
-                                    "id": {"type": "string"},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "platform": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "created_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "label": "",
-                                        "url": "",
-                                        "is_upload": False,
-                                        "created_at": "2023-03-14T12:00:00+00:00",
-                                        "updated_at": "2023-03-14T13:00:00+00:00",
-                                    },
-                                    "relationships": {
-                                        "platform": {
-                                            "data": {"type": "platform", "id": "0"}
-                                        },
-                                        "created_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "123",
-                                            }
-                                        },
-                                        "updated_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "124",
-                                            }
-                                        },
-                                    },
-                                    "type": "platform_attachment",
-                                    "id": "0",
-                                },
-                            }
-                        },
-                        "description": "PlatformAttachment get;",
-                    }
-                }
-            },
-            "description": "Platform Attachment",
-        },
     },
     "parameters": {
         "platform_attachment_id": {

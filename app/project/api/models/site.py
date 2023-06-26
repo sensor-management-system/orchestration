@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -49,6 +49,7 @@ class Site(
     site_type_name = db.Column(db.String(256), nullable=True)
     site_usage_uri = db.Column(db.String(256), nullable=True)
     site_usage_name = db.Column(db.String(256), nullable=True)
+    website = db.Column(db.String(1024), nullable=True)
 
     # SiteContactRoles have a backref to the sites, so there is no need
     # to put it here explicitly.
@@ -98,6 +99,7 @@ class Site(
             "site_contact_roles": [
                 scr.to_search_entry() for scr in self.site_contact_roles
             ],
+            "website": self.website,
             # For the moment we don't include the configurations as it would
             # require us to keep all the data up to date (not only for
             # every change in the configuration, but also for changes in
@@ -158,16 +160,16 @@ class Site(
                     "site_usage_name": type_keyword_and_full_searchable,
                     "site_usage_uri": type_keyword,
                     "site_contact_roles": {
-                        "type": "nested",
                         "properties": {
                             "role_name": type_keyword_and_full_searchable,
                             "role_uri": type_keyword,
                             "contact": {
-                                "type": "nested",
                                 "properties": Contact.get_search_index_properties(),
                             },
                         },
                     },
+                    # We won't search for the very same website.
+                    "website": type_text_full_searchable,
                     # As mentioned we don't include the data for the
                     # configurations here.
                 }

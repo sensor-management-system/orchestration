@@ -12,11 +12,11 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..helpers.errors import ConflictError
 from ..helpers.resource_checks import DevicePropertyValidator
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
+from ..models import DatastreamLink, Device, DeviceProperty, DevicePropertyCalibration
 from ..models.base_model import db
-from ..models.device import Device
-from ..models.device_property import DeviceProperty
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.device_property_schema import DevicePropertySchema
@@ -125,6 +125,14 @@ class DevicePropertyDetail(ResourceDetail):
         )
         if device_property is None:
             raise ObjectNotFound("Object not found!")
+        if db.session.query(DevicePropertyCalibration).filter(
+            DevicePropertyCalibration.device_property == device_property
+        ).first():
+            raise ConflictError("Calibration associated with device property")
+        if db.session.query(DatastreamLink).filter(
+            DatastreamLink.device_property == device_property
+        ).first():
+            raise ConflictError("Datastream associated with device property")
         device = device_property.get_parent()
         msg = "delete;measured quantity"
         set_update_description_text_and_update_by_user(device, msg)
