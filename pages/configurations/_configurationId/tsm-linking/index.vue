@@ -30,6 +30,11 @@
  -->
 <template>
   <div>
+    <v-alert text type="info">
+      The feature to link measured quantities to datastreams of time series management systems is currently in an experimental phase.
+      It could be that some of the functionality is only accessible from your institutes intranet.
+      If you encounter any problems, feel free to use the gitlab service desk &amp; report the issue.
+    </v-alert>
     <v-card flat>
       <v-card-actions>
         <v-spacer />
