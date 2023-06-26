@@ -33,7 +33,7 @@ import Vue from 'vue'
 
 import { DateTime } from 'luxon'
 
-import { dateToDateTimeString } from '@/utils/dateHelper'
+import { dateToDateTimeString, dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 import { shortenRight, shortenLeft, shortenMiddle } from '@/utils/stringHelpers'
 
 /**
@@ -55,6 +55,9 @@ Vue.filter('orDefault', (value: string | number | null | undefined, defaultValue
 
 Vue.filter('toUtcDateTimeString', (value: DateTime, defaultValue: string = ''): string => {
   return dateToDateTimeString(value) || defaultValue
+})
+Vue.filter('toUtcDateTimeStringHHMM', (value: DateTime, defaultValue: string = ''): string => {
+  return dateToDateTimeStringHHMM(value) || defaultValue
 })
 
 /**

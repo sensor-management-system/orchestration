@@ -624,3 +624,10 @@ export interface IOffsets {
   offsetY: number
   offsetZ: number
 }
+
+export type TsmDeviceMountPropertyCombination = {
+  action: DeviceMountAction,
+  measuredQuantities: DeviceProperty[]
+}
+
+export type TsmDeviceMountPropertyCombinationList = Array<TsmDeviceMountPropertyCombination>

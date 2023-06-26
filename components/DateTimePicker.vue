@@ -74,6 +74,8 @@ permissions and limitations under the Licence.
                 <v-date-picker
                   :value="datePickerValue"
                   class="height-adjustment"
+                  :min="minDate"
+                  :max="maxDate"
                   @input="setDatePickerValue"
                 />
               </v-tab-item>
@@ -138,6 +140,9 @@ export default class DateTimePicker extends Vue {
 
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
   @Prop({ default: false, type: Boolean }) readonly required!: boolean
+
+  @Prop({ type: String, required: false }) minDate!: string
+  @Prop({ type: String, required: false }) maxDate!: string
 
   private isDatetimeUsed: boolean = true
   private usesDate: boolean = false

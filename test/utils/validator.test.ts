@@ -34,6 +34,13 @@ import Validator from '@/utils/validator'
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 import { LocationTypes } from '@/store/configurations'
 import { IPermissionGroup, PermissionGroup } from '@/models/PermissionGroup'
+import { Configuration } from '@/models/Configuration'
+import { dateToDateTimeStringHHMM, dateToString } from '@/utils/dateHelper'
+import { LocationType } from '@/models/Location'
+import { Visibility } from '@/models/Visibility'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { Device } from '@/models/Device'
+import { Contact } from '@/models/Contact'
 
 const isValidEmailAddress = Validator.isValidEmailAddress
 const startDateMustBeAfterPreviousAction = Validator.startDateMustBeAfterPreviousAction
@@ -41,6 +48,14 @@ const endDateMustBeBeforeNextAction = Validator.endDateMustBeBeforeNextAction
 const validateStartDateIsBeforeEndDate = Validator.validateStartDateIsBeforeEndDate
 const canNotIntersectWithExistingInterval = Validator.canNotIntersectWithExistingInterval
 const canNotStartAnActionAfterAnActiveAction = Validator.canNotStartAnActionAfterAnActiveAction
+const validateMountingTimeRange = Validator.validateMountingTimeRange
+const validateMountingDates = Validator.validateMountingDates
+const validateInputForLocationType = Validator.validateInputForLocationType
+const validateVisibility = Validator.validateVisibility
+const endDateMustBeBeforeEndOfMountAction = Validator.endDateMustBeBeforeEndOfMountAction
+const startDateMustBeAfterStartOfMountAction = Validator.startDateMustBeAfterStartOfMountAction
+const endDateMustBeBeforeEndDateOfRelatedDevice = Validator.endDateMustBeBeforeEndDateOfRelatedDevice
+const dateMustBeInRangeOfConfigurationDates = Validator.dateMustBeInRangeOfConfigurationDates
 
 describe('#isValidEmailAddress()', () => {
   it('should return true with an valid email address', () => {
@@ -172,6 +187,7 @@ describe('#startDateMustBeAfterPreviousAction', () => {
     expect(startDateMustBeAfterPreviousAction(checkDate, endDate, locationTimepoints)).toBe('Start date must be after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm'))
   })
 })
+
 describe('#endDateMustBeBeforeNextAction', () => {
   it('should return true if no location actions exists', () => {
     const checkDate = DateTime.fromISO('1990-09-19', { zone: 'UTC' })
@@ -279,6 +295,7 @@ describe('#validateStartDateIsBeforeEndDate', () => {
     expect(validateStartDateIsBeforeEndDate(startDate, endDate)).toBe('Start date must not be after end date')
   })
 })
+
 describe('#canNotIntersectWithExistingInterval', () => {
   it('should return true if startDate is missing', () => {
     const startDate = null
@@ -477,5 +494,606 @@ describe('#validatePermissionGroups', () => {
     const checkFunction = Validator.validatePermissionGroups(isPrivate, 'site', canBePrivate)
     const result = checkFunction(groups)
     expect(result).toEqual('You must add groups.')
+  })
+})
+
+describe('#validateInputForStartDate', () => {
+  it('should return true if value is empty string \'\'', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForStartDate(configuration)
+
+    const value = ''
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if start date of configuration is null', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForStartDate(configuration)
+
+    configuration.startDate = null
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if end date of configuration is not set', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForStartDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = null
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if start date of configuration is before end date of configuration', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForStartDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if start date of configuration is same as end date of configuration', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForEndDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return message if start date of configuration is after end date of configuration', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForStartDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual('Start date must not be after end date')
+  })
+})
+
+describe('#validateInputForEndDate', () => {
+  it('should return true if value is empty string \'\'', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForEndDate(configuration)
+
+    const value = ''
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if end date of configuration is null', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForEndDate(configuration)
+
+    configuration.endDate = null
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if start date of configuration is not set', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForEndDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = null
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if end date of configuration is after start date of configuration', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForEndDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return true if start date of configuration is same as end date of configuration', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForEndDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual(true)
+  })
+  it('should return message if start date of configuration is after end date of configuration', () => {
+    const configuration = new Configuration()
+    const validateInputForStartDate = Validator.validateInputForEndDate(configuration)
+
+    configuration.startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const value = 'something'
+
+    expect(validateInputForStartDate(value)).toEqual('End date must not be before start date')
+  })
+})
+
+describe('#validateMountingTimeRange', () => {
+  it('should return message if startDate is null', () => {
+    const startDate = null
+    const endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual('Start date is required')
+  })
+  it('should return message if startDate is before parentStartDate', () => {
+    const startDate = DateTime.fromISO('2023-05-01', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual(`Start date must not be before start date of the parent platform (${dateToString(parentStartDate)})`)
+  })
+  it('should return message if startDate is after parentEndDate', () => {
+    const startDate = DateTime.fromISO('2023-06-04', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual(`Start date must be before end date of the parent platform (${dateToString(parentEndDate)})`)
+  })
+  it('should return message if endDate is before parentStartDate', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('2023-05-02', { zone: 'UTC' })
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual(`End date must be after start date of the parent platform (${dateToString(parentStartDate)})`)
+  })
+  it('should return message if parentEndDate is set but endDate is not set', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = null
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual(`End date must be before end date of the parent platform (${dateToString(parentEndDate)})`)
+  })
+  it('should return message if endDate is after parentEndDate', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('2023-06-04', { zone: 'UTC' })
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual(`End date must be before end date of the parent platform (${dateToString(parentEndDate)})`)
+  })
+  it('should return true if startDate is after parentStartDate', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = null
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = null
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if endDate is after parentStartDate and endDate is after parentStartDate', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+    const parentStartDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const parentEndDate = null
+
+    const actual = validateMountingTimeRange(startDate, endDate, parentStartDate, parentEndDate)
+    expect(actual).toEqual(true)
+  })
+})
+
+describe('#validateMountingDates', () => {
+  it('should return message if startDate is null', () => {
+    const startDate = null
+    const endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const actual = validateMountingDates(startDate, endDate)
+    expect(actual).toEqual('Start date is required')
+  })
+  it('should return true if startDate is set and endDate is null', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = null
+    const actual = validateMountingDates(startDate, endDate)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if startDate is before endDate', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+    const actual = validateMountingDates(startDate, endDate)
+    expect(actual).toEqual(true)
+  })
+  it('should return message if startDate is after endDate', () => {
+    const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const endDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const actual = validateMountingDates(startDate, endDate)
+    expect(actual).toEqual('End date must be after start date')
+  })
+})
+
+describe('#validateInputForLocationType', () => {
+  it('should return true if value is LocationType.Stationary (=Stationary)', () => {
+    const value = LocationType.Stationary
+    const actual = validateInputForLocationType(value)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if value is LocationType.Dynamic (=Dynamic)', () => {
+    const value = LocationType.Dynamic
+    const actual = validateInputForLocationType(value)
+    expect(actual).toEqual(true)
+  })
+  it('should return message if value is not of LocationType.Stationary or LocationType.Dynamic', () => {
+    const value = ''
+    const actual = validateInputForLocationType(value)
+    expect(actual).toEqual('Location type must be set')
+  })
+})
+
+describe('#mustBeProvided', () => {
+  it('should return message if value is null', () => {
+    const fieldName = 'fieldName'
+    const mustBeProvided = Validator.mustBeProvided(fieldName)
+    const value = null
+
+    const actual = mustBeProvided(value)
+    expect(actual).toEqual(fieldName + ' must be provided')
+  })
+  it('should return message if value is empty string', () => {
+    const fieldName = 'fieldName'
+    const mustBeProvided = Validator.mustBeProvided(fieldName)
+    const value = ''
+
+    const actual = mustBeProvided(value)
+    expect(actual).toEqual(fieldName + ' must be provided')
+  })
+  it('should return true if value is provided', () => {
+    const fieldName = 'fieldName'
+    const mustBeProvided = Validator.mustBeProvided(fieldName)
+    const value = 'a value'
+
+    const actual = mustBeProvided(value)
+    expect(actual).toEqual(true)
+  })
+})
+
+describe('validatePermissionGroup', () => {
+  it('should eturn message if isPrivate is true and a group is provided', () => {
+    const isPrivate = true
+    const validatePermissionGroup = Validator.validatePermissionGroup(isPrivate)
+    const group = new PermissionGroup()
+
+    const actual = validatePermissionGroup(group)
+    expect(actual).toEqual('You are not allowed to add a group.')
+  })
+  it('should return message if isPrivate is false and group is null', () => {
+    const isPrivate = false
+    const validatePermissionGroup = Validator.validatePermissionGroup(isPrivate)
+    const group = null
+
+    const actual = validatePermissionGroup(group)
+    expect(actual).toEqual('You must add a group.')
+  })
+  it('should return true if isPrivate is true and group is null', () => {
+    const isPrivate = true
+    const validatePermissionGroup = Validator.validatePermissionGroup(isPrivate)
+    const group = null
+
+    const actual = validatePermissionGroup(group)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if isPrivate is false and group is provided', () => {
+    const isPrivate = false
+    const validatePermissionGroup = Validator.validatePermissionGroup(isPrivate)
+    const group = new PermissionGroup()
+
+    const actual = validatePermissionGroup(group)
+    expect(actual).toEqual(true)
+  })
+})
+
+describe('#validateVisibility', () => {
+  it('should return message if visibility is private and groups are provided ', () => {
+    const visibility = Visibility.Private
+    const groups: IPermissionGroup[] = [new PermissionGroup()]
+    const entityName = 'entityName'
+
+    const actual = validateVisibility(visibility, groups, entityName)
+    expect(actual).toEqual(`You are not allowed to set the visibility to private as long as the ${entityName} has permission groups.`)
+  })
+  it('should return true if visibility is internal and groups are provided ', () => {
+    const visibility = Visibility.Internal
+    const groups: IPermissionGroup[] = [new PermissionGroup()]
+    const entityName = 'entityName'
+
+    const actual = validateVisibility(visibility, groups, entityName)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if visibility is public and groups are provided ', () => {
+    const visibility = Visibility.Internal
+    const groups: IPermissionGroup[] = [new PermissionGroup()]
+    const entityName = 'entityName'
+
+    const actual = validateVisibility(visibility, groups, entityName)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if visibility is private and no groups are provided ', () => {
+    const visibility = Visibility.Private
+    const groups: IPermissionGroup[] = []
+    const entityName = 'entityName'
+
+    const actual = validateVisibility(visibility, groups, entityName)
+    expect(actual).toEqual(true)
+  })
+})
+
+describe('#endDateMustBeBeforeEndOfMountAction', () => {
+  it('should return true if action has no endDate', () => {
+    const endDate = null
+
+    const action = new DeviceMountAction(
+      '1',
+      new Device(),
+      null,
+      DateTime.fromISO('2023-06-02', { zone: 'UTC' }),
+      null,
+      0,
+      0,
+      0,
+      new Contact(),
+      null,
+      '',
+      ''
+    )
+
+    const actual = endDateMustBeBeforeEndOfMountAction(endDate, action)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if action is undefined', () => {
+    const endDate = null
+    const action = undefined
+
+    const actual = endDateMustBeBeforeEndOfMountAction(endDate, action)
+    expect(actual).toEqual(true)
+  })
+  it('should return message if no endDate is provided (of falsely type)', () => {
+    const endDate = null
+    const action = new DeviceMountAction(
+      '1',
+      new Device(),
+      null,
+      DateTime.fromISO('2023-06-02', { zone: 'UTC' }),
+      null,
+      0,
+      0,
+      0,
+      new Contact(),
+      null,
+      '',
+      ''
+    )
+    action.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+
+    const actual = endDateMustBeBeforeEndOfMountAction(endDate, action)
+    expect(actual).toEqual('End date must be before ' + dateToDateTimeStringHHMM(action.endDate) + ' (end of mount)')
+  })
+  it('should return message endDate is after endDate of action', () => {
+    const endDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+    const action = new DeviceMountAction(
+      '1',
+      new Device(),
+      null,
+      DateTime.fromISO('2023-06-02', { zone: 'UTC' }),
+      null,
+      0,
+      0,
+      0,
+      new Contact(),
+      null,
+      '',
+      ''
+    )
+    action.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+
+    const actual = endDateMustBeBeforeEndOfMountAction(endDate, action)
+    expect(actual).toEqual('End date must be before ' + dateToDateTimeStringHHMM(action.endDate) + ' (end of mount)')
+  })
+  it('should return true if endDate is before endDate of action', () => {
+    const endDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const action = new DeviceMountAction(
+      '1',
+      new Device(),
+      null,
+      DateTime.fromISO('2023-06-02', { zone: 'UTC' }),
+      null,
+      0,
+      0,
+      0,
+      new Contact(),
+      null,
+      '',
+      ''
+    )
+    action.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+
+    const actual = endDateMustBeBeforeEndOfMountAction(endDate, action)
+    expect(actual).toEqual(true)
+  })
+})
+
+describe('#startDateMustBeAfterStartOfMountAction', () => {
+  it('should return true if no action is provided (of falsely type) ', () => {
+    const startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const action = undefined
+
+    const actual = startDateMustBeAfterStartOfMountAction(startDate, action)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if no action is provided (of falsely type)', () => {
+    const startDate = null
+    const action = new DeviceMountAction(
+      '1',
+      new Device(),
+      null,
+      DateTime.fromISO('2023-06-02', { zone: 'UTC' }),
+      null,
+      0,
+      0,
+      0,
+      new Contact(),
+      null,
+      '',
+      ''
+    )
+
+    const actual = startDateMustBeAfterStartOfMountAction(startDate, action)
+    expect(actual).toEqual('Start date must be after ' + dateToDateTimeStringHHMM(action.beginDate) + ' (begin of mount)')
+  })
+  it('should return message if startDate is before startDate of action', () => {
+    const startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const action = new DeviceMountAction(
+      '1',
+      new Device(),
+      null,
+      DateTime.fromISO('2023-06-02', { zone: 'UTC' }),
+      null,
+      0,
+      0,
+      0,
+      new Contact(),
+      null,
+      '',
+      ''
+    )
+
+    const actual = startDateMustBeAfterStartOfMountAction(startDate, action)
+    expect(actual).toEqual('Start date must be after ' + dateToDateTimeStringHHMM(action.beginDate) + ' (begin of mount)')
+  })
+  it('should return message if startDate is before startDate of action', () => {
+    const startDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+    const action = new DeviceMountAction(
+      '1',
+      new Device(),
+      null,
+      DateTime.fromISO('2023-06-02', { zone: 'UTC' }),
+      null,
+      0,
+      0,
+      0,
+      new Contact(),
+      null,
+      '',
+      ''
+    )
+
+    const actual = startDateMustBeAfterStartOfMountAction(startDate, action)
+    expect(actual).toEqual(true)
+  })
+})
+
+describe('#endDateMustBeBeforeEndDateOfRelatedDevice', () => {
+  it('should return true if endDateOfDynamicAction is null and earliestEndDateOfRelatedDevice is null', () => {
+    const endDateOfDynamicAction = null
+    const earliestEndDateOfRelatedDevice = null
+    const actual = endDateMustBeBeforeEndDateOfRelatedDevice(endDateOfDynamicAction, earliestEndDateOfRelatedDevice)
+
+    expect(actual).toEqual(true)
+  })
+  it('should return message if endDateOfDynamicAction is null and earliestEndDateOfRelatedDevice is Date', () => {
+    const endDateOfDynamicAction = null
+    const earliestEndDateOfRelatedDevice = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const actual = endDateMustBeBeforeEndDateOfRelatedDevice(endDateOfDynamicAction, earliestEndDateOfRelatedDevice)
+
+    expect(actual).toEqual('End date must be before ' + dateToDateTimeStringHHMM(earliestEndDateOfRelatedDevice) + ' (planned unmount).')
+  })
+  it('should return message if endDateOfDynamicAction is after earliestEndDateOfRelatedDevice', () => {
+    const endDateOfDynamicAction = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+    const earliestEndDateOfRelatedDevice = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const actual = endDateMustBeBeforeEndDateOfRelatedDevice(endDateOfDynamicAction, earliestEndDateOfRelatedDevice)
+
+    expect(actual).toEqual('End date must be before ' + dateToDateTimeStringHHMM(earliestEndDateOfRelatedDevice) + ' (planned unmount).')
+  })
+  it('should return true if earliestEndDateOfRelatedDevice is before earliestEndDateOfRelatedDevice', () => {
+    const endDateOfDynamicAction = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    const earliestEndDateOfRelatedDevice = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const actual = endDateMustBeBeforeEndDateOfRelatedDevice(endDateOfDynamicAction, earliestEndDateOfRelatedDevice)
+
+    expect(actual).toEqual(true)
+  })
+})
+
+describe('#dateMustBeInRangeOfConfigurationDates', () => {
+  it('should return true if configuration is null', () => {
+    const configuration = null
+    const dateToValidate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual(true)
+  })
+  it('should return true if dateToValidate is null', () => {
+    const configuration = new Configuration()
+    const dateToValidate = null
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual(true)
+  })
+  it('should return message if configuration has a start date but no end date and dateToValidate is before start date of configuration', () => {
+    const configuration = new Configuration()
+    configuration.startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const dateToValidate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual('Date must be after ' + dateToDateTimeStringHHMM(configuration.startDate) + ' ( start date of configuration)')
+  })
+  it('should return message if configuration has a end date but no start date and dateToValidate is after end date of configuration', () => {
+    const configuration = new Configuration()
+    configuration.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const dateToValidate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual('Date must be before ' + dateToDateTimeStringHHMM(configuration.endDate) + ' ( end date of configuration)')
+  })
+  it('should return message if dateToValidate is before start date of configuration', () => {
+    const configuration = new Configuration()
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const dateToValidate = DateTime.fromISO('2023-05-03', { zone: 'UTC' })
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual('Date must be in the range of ' + dateToDateTimeStringHHMM(configuration.startDate) + ' -- ' + dateToDateTimeStringHHMM(configuration.endDate) + ' (dates of configuration)')
+  })
+  it('should return message if dateToValidate is after end date of configuration', () => {
+    const configuration = new Configuration()
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const dateToValidate = DateTime.fromISO('2023-07-03', { zone: 'UTC' })
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual('Date must be in the range of ' + dateToDateTimeStringHHMM(configuration.startDate) + ' -- ' + dateToDateTimeStringHHMM(configuration.endDate) + ' (dates of configuration)')
+  })
+  it('should return message if dateToValidate is after end date of configuration', () => {
+    const configuration = new Configuration()
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+    const dateToValidate = DateTime.fromISO('2023-07-03', { zone: 'UTC' })
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual('Date must be in the range of ' + dateToDateTimeStringHHMM(configuration.startDate) + ' -- ' + dateToDateTimeStringHHMM(configuration.endDate) + ' (dates of configuration)')
+  })
+  it('should return true if dateToValidate is between after end date of configuration', () => {
+    const configuration = new Configuration()
+    configuration.startDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
+    configuration.endDate = DateTime.fromISO('2023-06-03', { zone: 'UTC' })
+    const dateToValidate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
+
+    const actual = dateMustBeInRangeOfConfigurationDates(configuration, dateToValidate)
+    expect(actual).toEqual(true)
   })
 })

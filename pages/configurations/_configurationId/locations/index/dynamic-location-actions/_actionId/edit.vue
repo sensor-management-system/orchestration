@@ -66,7 +66,7 @@ import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import {
   ActiveDevicesWithPropertiesForDateGetter,
   ConfigurationsState,
-  LoadDeviceMountActionsForDynamicLocationAction,
+  LoadDeviceMountActionsIncludingDeviceInformationAction,
   LoadDynamicLocationActionAction, LoadLocationActionTimepointsAction, UpdateDynamicLocationActionAction
 } from '@/store/configurations'
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
@@ -84,7 +84,7 @@ import DynamicLocationActionDataForm from '@/components/configurations/DynamicLo
     ...mapGetters('configurations', ['activeDevicesWithPropertiesForDate'])
   },
   methods: {
-    ...mapActions('configurations', ['loadDynamicLocationAction', 'updateDynamicLocationAction', 'loadDeviceMountActionsForDynamicLocation', 'loadLocationActionTimepoints'])
+    ...mapActions('configurations', ['loadDynamicLocationAction', 'updateDynamicLocationAction', 'loadDeviceMountActionsIncludingDeviceInformation', 'loadLocationActionTimepoints'])
   }
 })
 export default class DynamicLocationActionEdit extends mixins(CheckEditAccess) {
@@ -96,7 +96,7 @@ export default class DynamicLocationActionEdit extends mixins(CheckEditAccess) {
   dynamicLocationAction!: ConfigurationsState['dynamicLocationAction']
   selectedLocationDate!: ConfigurationsState['selectedLocationDate']
   loadDynamicLocationAction!: LoadDynamicLocationActionAction
-  loadDeviceMountActionsForDynamicLocation!: LoadDeviceMountActionsForDynamicLocationAction
+  loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
   updateDynamicLocationAction!: UpdateDynamicLocationActionAction
   activeDevicesWithPropertiesForDate!: ActiveDevicesWithPropertiesForDateGetter
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
@@ -128,7 +128,7 @@ export default class DynamicLocationActionEdit extends mixins(CheckEditAccess) {
       this.isLoading = true
 
       await this.loadDynamicLocationAction(this.actionId)
-      await this.loadDeviceMountActionsForDynamicLocation(this.configurationId)
+      await this.loadDeviceMountActionsIncludingDeviceInformation(this.configurationId)
       if (this.dynamicLocationAction) {
         this.valueCopy = DynamicLocationAction.createFromObject(this.dynamicLocationAction)
       }

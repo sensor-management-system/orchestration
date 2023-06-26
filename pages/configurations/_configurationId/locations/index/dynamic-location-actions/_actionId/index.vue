@@ -50,10 +50,10 @@ import * as VueRouter from 'vue-router'
 import { mapActions, mapState } from 'vuex'
 import {
   ConfigurationsState,
-  LoadDeviceMountActionsForDynamicLocationAction,
   LoadDynamicLocationActionAction,
   SetSelectedLocationDateAction,
-  SetSelectedTimepointItemAction
+  SetSelectedTimepointItemAction,
+  LoadDeviceMountActionsIncludingDeviceInformationAction
 } from '@/store/configurations'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -76,7 +76,7 @@ import DynamicLocationView from '@/components/configurations/DynamicLocationView
     ...mapActions('configurations',
       [
         'loadDynamicLocationAction',
-        'loadDeviceMountActionsForDynamicLocation',
+        'loadDeviceMountActionsIncludingDeviceInformation',
         'setSelectedTimepointItem',
         'setSelectedLocationDate'
       ]
@@ -92,12 +92,12 @@ export default class DynamicLocationActionView extends Vue {
   // vuex definition for typescript check
   dynamicLocationAction!: ConfigurationsState['dynamicLocationAction']
   loadDynamicLocationAction!: LoadDynamicLocationActionAction
-  loadDeviceMountActionsForDynamicLocation!: LoadDeviceMountActionsForDynamicLocationAction
   selectedTimepointItem!: ConfigurationsState['selectedTimepointItem']
   selectedLocationDate!: ConfigurationsState['selectedLocationDate']
   setSelectedTimepointItem!: SetSelectedTimepointItemAction
   setSelectedLocationDate!: SetSelectedLocationDateAction
   configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
+  loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
 
   async fetch () {
     await this.loadLocationAction()
@@ -117,7 +117,7 @@ export default class DynamicLocationActionView extends Vue {
 
       await Promise.all([
         this.loadDynamicLocationAction(this.actionId),
-        this.loadDeviceMountActionsForDynamicLocation(this.configurationId)
+        this.loadDeviceMountActionsIncludingDeviceInformation(this.configurationId)
       ])
 
       // set the date field and the date select to the correct values

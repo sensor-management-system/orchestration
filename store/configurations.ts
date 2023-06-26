@@ -120,7 +120,7 @@ export interface ConfigurationsState {
   selectedTimepointItem: ILocationTimepoint| null
   staticLocationAction: StaticLocationAction|null
   dynamicLocationAction: DynamicLocationAction|null
-  deviceMountActionsForDynamicLocation: DeviceMountAction []
+  deviceMountActionsIncludingDeviceInformation: DeviceMountAction []
   selectedLocationDate: DateTime|null
   configurationStaticLocationActions: StaticLocationAction[]
   configurationDynamicLocationActions: DynamicLocationAction[]
@@ -154,7 +154,7 @@ const state = (): ConfigurationsState => ({
   selectedTimepointItem: null,
   staticLocationAction: null,
   dynamicLocationAction: null,
-  deviceMountActionsForDynamicLocation: [],
+  deviceMountActionsIncludingDeviceInformation: [],
   selectedLocationDate: null,
   configurationStaticLocationActions: [],
   configurationDynamicLocationActions: [],
@@ -255,8 +255,8 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     if (!selectedDate) {
       return []
     }
-    if (state.deviceMountActionsForDynamicLocation.length > 0) {
-      return state.deviceMountActionsForDynamicLocation.filter((value) => {
+    if (state.deviceMountActionsIncludingDeviceInformation.length > 0) {
+      return state.deviceMountActionsIncludingDeviceInformation.filter((value) => {
         return selectedDate >= value.beginDate && (!value.endDate || selectedDate <= value.endDate) && value.device.properties.length > 0
       }
       ).map((value) => {
@@ -266,8 +266,8 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     return []
   },
   devicesForDynamicLocation: (state: ConfigurationsState) => {
-    if (state.deviceMountActionsForDynamicLocation.length > 0) {
-      return state.deviceMountActionsForDynamicLocation.map((value) => {
+    if (state.deviceMountActionsIncludingDeviceInformation.length > 0) {
+      return state.deviceMountActionsIncludingDeviceInformation.map((value) => {
         return value.device
       })
     }
@@ -282,10 +282,10 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     return state.configurationLocationActionTimepoints
   },
   hasDeviceMountActionsForDynamicLocation: (state: ConfigurationsState) => {
-    return state.deviceMountActionsForDynamicLocation.length > 0
+    return state.deviceMountActionsIncludingDeviceInformation.length > 0
   },
   hasMountedDevicesWithProperties: (state: ConfigurationsState) => {
-    return state.deviceMountActionsForDynamicLocation.filter((action: DeviceMountAction) => {
+    return state.deviceMountActionsIncludingDeviceInformation.filter((action: DeviceMountAction) => {
       return action.device.properties.length > 0
     }).length > 0
   },
@@ -312,8 +312,8 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     return false
   },
   earliestEndDateOfRelatedDeviceOfDynamicAction: (state: ConfigurationsState) => (action: DynamicLocationAction) => {
-    if (state.deviceMountActionsForDynamicLocation.length > 0 && action.beginDate !== null) {
-      const deviceMountActionsForDate = state.deviceMountActionsForDynamicLocation.filter((value) => {
+    if (state.deviceMountActionsIncludingDeviceInformation.length > 0 && action.beginDate !== null) {
+      const deviceMountActionsForDate = state.deviceMountActionsIncludingDeviceInformation.filter((value) => {
         return action.beginDate! >= value.beginDate && (!value.endDate || action.beginDate! <= value.endDate) && value.device.properties.length > 0
       }
       )
@@ -392,7 +392,7 @@ export type LoadConfigurationStaticLocationActionsAction = IdParamReturnsVoidPro
 export type LoadLocationActionTimepointsAction = IdParamReturnsVoidPromiseAction
 export type LoadStaticLocationActionAction = IdParamReturnsVoidPromiseAction
 export type LoadDynamicLocationActionAction = IdParamReturnsVoidPromiseAction
-export type LoadDeviceMountActionsForDynamicLocationAction = IdParamReturnsVoidPromiseAction
+export type LoadDeviceMountActionsIncludingDeviceInformationAction = IdParamReturnsVoidPromiseAction
 export type LoadConfigurationAttachmentsAction = (id: string) => Promise<void>
 export type LoadConfigurationAttachmentAction = (id: string) => Promise<void>
 export type LoadConfigurationCustomFieldsAction = (id: string) => Promise<void>
@@ -544,8 +544,8 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async exportAsSensorML (_, id: string): Promise<Blob> {
     return await this.$api.configurations.getSensorML(id)
   },
-  async loadDeviceMountActionsForDynamicLocation ({ commit }: { commit: Commit }, id: string): Promise<void> {
-    commit('setDeviceMountActionsForDynamicLocation', await this.$api.configurations.findRelatedDeviceMountActionsIncludingDeviceInformation(id))
+  async loadDeviceMountActionsIncludingDeviceInformation ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    commit('setDeviceMountActionsIncludingDeviceInformation', await this.$api.configurations.findRelatedDeviceMountActionsIncludingDeviceInformation(id))
   },
   async loadPlatformMountActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
     commit('setConfigurationPlatformMountActions', await this.$api.configurations.findRelatedPlatformMountActions(id))
@@ -859,8 +859,8 @@ const mutations = {
   setConfigurationGenericAction (state: ConfigurationsState, configurationGenericAction: GenericAction) {
     state.configurationGenericAction = configurationGenericAction
   },
-  setDeviceMountActionsForDynamicLocation (state: ConfigurationsState, deviceMountActionsForDynamicLocation: []) {
-    state.deviceMountActionsForDynamicLocation = deviceMountActionsForDynamicLocation
+  setDeviceMountActionsIncludingDeviceInformation (state: ConfigurationsState, deviceMountActionsIncludingDeviceInformation: []) {
+    state.deviceMountActionsIncludingDeviceInformation = deviceMountActionsIncludingDeviceInformation
   },
   setSelectedLocationDate (state: ConfigurationsState, newVal: DateTime|null) {
     state.selectedLocationDate = newVal

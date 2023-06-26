@@ -172,6 +172,10 @@ export default class ConfigurationsIdPage extends Vue {
       {
         to: '/configurations/' + this.configurationId + '/actions',
         name: 'Actions'
+      },
+      {
+        to: '/configurations/' + this.configurationId + '/tsm-linking',
+        name: 'TSM-Linkings'
       }
     ])
     this.setTitle(this.configuration?.label || 'Configuration')

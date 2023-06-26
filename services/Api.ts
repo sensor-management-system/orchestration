@@ -99,6 +99,11 @@ import { LocationActionTimepointControllerApi } from '@/services/sms/LocationAct
 import { SiteApi } from '@/services/sms/SiteApi'
 import { SiteConfigurationsApi } from '@/services/sms/SiteConfigurationsApi'
 import { UserModificationApi } from '@/services/sms/UserModificationApi'
+import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
+import { TsmdlDatastreamApi } from '@/services/tsmdl/DatastreamApi'
+import { TsmdlDatasourceApi } from '@/services/tsmdl/DatasourceApi'
+import { TsmdlThingApi } from '@/services/tsmdl/ThingApi'
+import { TsmEndpointApi } from '@/services/sms/TsmEndpointApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -137,6 +142,13 @@ export class Api {
   private readonly _uploadApi: UploadApi
   private readonly _statisticsApi: StatisticsApi
   private readonly _pidApi: PidApi
+
+  private readonly _tsmLinkingApi: TsmLinkingApi
+  private readonly _tsmdlDatastreamApi: TsmdlDatastreamApi
+  private readonly _tsmdlDatasourceApi: TsmdlDatasourceApi
+  private readonly _tsmdlThingApi: TsmdlThingApi
+
+  private readonly _tsmEndpointApi: TsmEndpointApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -259,6 +271,10 @@ export class Api {
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/controller/configurations'
     )
+    this._tsmLinkingApi = new TsmLinkingApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/datastream-links'
+    )
     this._configurationApi = new ConfigurationApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/configurations',
@@ -268,6 +284,7 @@ export class Api {
       this._dynamicLocationActionApi,
       this._locationActionTimepointControllerApi,
       this._mountingActionsControllerApi,
+      this._tsmLinkingApi,
       // callback function to fetch permission groups
       async (): Promise<PermissionGroup[]> => {
         const api = new PermissionGroupApi(
@@ -477,6 +494,30 @@ export class Api {
       '/countries/'
     )
 
+    // and here we can set settings for all the tsmdl api calls
+    const tsmdlConfig: AxiosRequestConfig = {
+      headers: {
+
+      }
+    }
+    this._tsmdlDatastreamApi = new TsmdlDatastreamApi(
+      createAxios(undefined, tsmdlConfig, getIdToken),
+      ''
+    )
+    this._tsmdlDatasourceApi = new TsmdlDatasourceApi(
+      createAxios(undefined, tsmdlConfig, getIdToken),
+      ''
+    )
+    this._tsmdlThingApi = new TsmdlThingApi(
+      createAxios(undefined, tsmdlConfig, getIdToken),
+      ''
+    )
+
+    this._tsmEndpointApi = new TsmEndpointApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/tsm-endpoints'
+    )
+
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
 
@@ -677,5 +718,21 @@ export class Api {
 
   get userModificationApi (): UserModificationApi {
     return this._userModificationApi
+  }
+
+  get datastreams (): TsmdlDatastreamApi {
+    return this._tsmdlDatastreamApi
+  }
+
+  get datasources (): TsmdlDatasourceApi {
+    return this._tsmdlDatasourceApi
+  }
+
+  get things (): TsmdlThingApi {
+    return this._tsmdlThingApi
+  }
+
+  get tsmEndpoints (): TsmEndpointApi {
+    return this._tsmEndpointApi
   }
 }

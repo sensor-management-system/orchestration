@@ -33,6 +33,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 export class Pluralizer {
   private knownPluralForms: {[key: string]: string } = {}
@@ -114,4 +115,14 @@ export function shortenMiddle (text: string, length: number = DEFAULT_SHORTEN_LE
     b = Math.floor(targetLength / 2)
   }
   return text.substring(0, a) + replacement + text.substring(text.length - b)
+}
+
+export function generatePropertyTitle (property: DeviceProperty) {
+  if (property) {
+    const propertyName = property.propertyName ?? ''
+    const label = property.label ?? ''
+    const unit = property.unitName ?? ''
+    return `${propertyName} ${label ? `- ${label}` : ''} ${unit ? `(${unit})` : ''}`
+  }
+  return ''
 }
