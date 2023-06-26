@@ -28,7 +28,7 @@
 
 FROM node:16.17.1-buster as js-builder
 
-# First the urls for sms backend and cv backend
+# First the urls for sms backend, cv backend
 ARG SMS_BACKEND_URL_ARG
 ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
 

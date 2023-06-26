@@ -67,6 +67,8 @@ import { GenericConfigurationActionSerializer } from '@/serializers/jsonapi/Gene
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 import { Site } from '@/models/Site'
+import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
+import { TsmLinking } from '@/models/TsmLinking'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -102,6 +104,8 @@ export class ConfigurationApi {
   private _locationActionTimepointControllerApi: LocationActionTimepointControllerApi
   private _mountingActionsControllerApi: MountingActionsControllerApi
 
+  private _tsmLinkingApi: TsmLinkingApi
+
   private _searchedStates: string[] = []
   private _searchedProjects: string[] = []
   private _searchedSites: Site[] = []
@@ -123,6 +127,7 @@ export class ConfigurationApi {
     dynamicLocationActionApi: DynamicLocationActionApi,
     locationActionTimepointControllerApi: LocationActionTimepointControllerApi,
     mountingActionsControllerApi: MountingActionsControllerApi,
+    tsmLinkingApi: TsmLinkingApi,
     permissionFetcher?: ConfigurationPermissionFetchFunction
   ) {
     this.axiosApi = axiosInstance
@@ -135,6 +140,8 @@ export class ConfigurationApi {
     this._dynamicLocationActionApi = dynamicLocationActionApi
     this._locationActionTimepointControllerApi = locationActionTimepointControllerApi
     this._mountingActionsControllerApi = mountingActionsControllerApi
+
+    this._tsmLinkingApi = tsmLinkingApi
 
     this.serializer = new ConfigurationSerializer()
 
@@ -169,6 +176,10 @@ export class ConfigurationApi {
 
   get searchedStates (): string[] {
     return this._searchedStates
+  }
+
+  get tsmLinkingApi (): TsmLinkingApi {
+    return this._tsmLinkingApi
   }
 
   setSearchedStates (value: string[]) {
@@ -546,6 +557,10 @@ export class ConfigurationApi {
       return new GenericConfigurationActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
     return result
+  }
+
+  async findRelatedTsmLinkings (configurationId: string): Promise<TsmLinking[]> {
+    return await this._tsmLinkingApi.getRelatedTsmLinkings(configurationId)
   }
 
   removeContact (configurationContactRoleId: string): Promise<void> {

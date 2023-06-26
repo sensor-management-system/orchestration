@@ -170,6 +170,11 @@ export default class ConfigurationNewPage extends Vue {
         name:
         'Actions',
         disabled: true
+      },
+      {
+        name:
+        'TSM-Linkings',
+        disabled: true
       }
     ])
     this.setTitle('New Configuration')

@@ -127,89 +127,52 @@ export class DeviceMountActionSerializer {
   }
 
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): DeviceMountAction {
-    if (jsonApiObject.included) {
-      this.convertJsonApiIncluded(jsonApiObject.included)
-    }
-    return this.convertJsonApiEntityToModel(jsonApiObject.data)
+    const included = jsonApiObject.included || []
+    return this.convertJsonApiDataToModel(jsonApiObject.data, included)
   }
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): DeviceMountAction[] {
-    if (jsonApiObjectList.included) {
-      this.convertJsonApiIncluded(jsonApiObjectList.included)
-    }
-    const data = jsonApiObjectList.data
-    const result = []
-    for (const deviceMountActionPayload of data) {
-      result.push(
-        this.convertJsonApiEntityToModel(deviceMountActionPayload)
-      )
-    }
-    return result
+    const included = jsonApiObjectList.included || []
+
+    return jsonApiObjectList.data.map((model: IJsonApiEntity) => {
+      return this.convertJsonApiDataToModel(model, included)
+    })
   }
 
-  private convertJsonApiIncluded (included: IJsonApiEntityWithOptionalAttributes[]): void {
-    this.contactLookup = {}
-    this.deviceLookup = {}
-    this.platformLookup = {}
+  convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes, included: IJsonApiEntityWithOptionalAttributes[]): DeviceMountAction {
+    const contactLookup: {[idx: string]: Contact} = {}
+    const platformLookup: {[idx: string]: Platform} = {}
+    const deviceLookup: {[idx: string]: Device} = {}
 
-    for (const entity of included) {
-      if (entity.type === 'contact') {
-        const contact = this.contactSerializer.convertJsonApiDataToModel(entity)
+    const attributes = jsonApiData.attributes
+    const relationships = jsonApiData.relationships as IJsonApiRelationships
+
+    for (const includedEntry of included) {
+      if (includedEntry.type === 'contact') {
+        const contact = this.contactSerializer.convertJsonApiDataToModel(includedEntry)
         if (contact.id !== null) {
-          this.contactLookup[contact.id] = contact
+          contactLookup[contact.id] = contact
         }
-      } else if (entity.type === 'platform') {
-        const platform = this.platformSerializer.convertJsonApiDataToModel(entity, [])
+      } else if (includedEntry.type === 'platform') {
+        const platform = this.platformSerializer.convertJsonApiDataToModel(includedEntry, [])
         if (platform.platform.id !== null) {
-          this.platformLookup[platform.platform.id] = platform.platform
+          platformLookup[platform.platform.id] = platform.platform
         }
-      } else if (entity.type === 'device') {
-        const device = this.deviceSerializer.convertJsonApiDataToModel(entity, included)
+      } else if (includedEntry.type === 'device') {
+        const device = this.deviceSerializer.convertJsonApiDataToModel(includedEntry, included)
         if (device.device.id !== null) {
-          this.deviceLookup[device.device.id] = device.device
+          deviceLookup[device.device.id] = device.device
         }
       }
     }
-  }
 
-  private convertJsonApiEntityToModel (data: IJsonApiEntity): DeviceMountAction {
-    const attributes = data.attributes
-    const relationships = data.relationships as IJsonApiRelationships
+    const device = this.getDevice(relationships, deviceLookup)
+    const parentPlatform = this.getPlatform(relationships, platformLookup)
+    const beginContact = this.getBeginContact(relationships, contactLookup)
+    const endContact = this.getEndContact(relationships, contactLookup)
 
-    // device is mandatory
-    const deviceRelationship = relationships.device as IJsonApiRelationships
-    const deviceData = deviceRelationship.data as IJsonApiEntityWithoutDetails
-    const deviceId = deviceData.id
-    const device = this.deviceLookup[deviceId]
-
-    // beginContact is mandatory
-    const beginContactRelationship = relationships.begin_contact as IJsonApiRelationships
-    const beginContactData = beginContactRelationship.data as IJsonApiEntityWithoutDetails
-    const beginContactId = beginContactData.id
-    const beginContact = this.contactLookup[beginContactId]
-
-    let endContactId = null
-    if (relationships.end_contact && relationships.end_contact.data) {
-      const endContactData = relationships.end_contact.data as IJsonApiEntityWithoutDetails
-      endContactId = endContactData.id
-    }
-    let endContact = null
-    if (endContactId !== null && this.contactLookup[endContactId]) {
-      endContact = this.contactLookup[endContactId]
-    }
-
-    let parentPlatformId = null
-    if (relationships.parent_platform && relationships.parent_platform.data) {
-      const parentPlatformData = relationships.parent_platform.data as IJsonApiEntityWithoutDetails
-      parentPlatformId = parentPlatformData.id
-    }
-    let parentPlatform = null
-    if (parentPlatformId !== null && this.platformLookup[parentPlatformId]) {
-      parentPlatform = this.platformLookup[parentPlatformId]
-    }
-
-    const deviceMountAction = new DeviceMountAction(
-      data.id || '',
+    const result = new DeviceMountAction(
+      jsonApiData.id.toString() || '',
       device,
       parentPlatform,
       DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' }),
@@ -223,6 +186,50 @@ export class DeviceMountActionSerializer {
       attributes?.end_description || ''
     )
 
-    return deviceMountAction
+    return result
+  }
+
+  private getBeginContact (relationships: IJsonApiRelationships, contactLookup: { [p: string]: Contact }) {
+    const beginContactRelationship = relationships.begin_contact as IJsonApiRelationships
+    return this.getContact(beginContactRelationship, contactLookup)
+  }
+
+  private getEndContact (relationships: IJsonApiRelationships, contactLookup: { [p: string]: Contact }) {
+    if (relationships.end_contact && relationships.end_contact.data) {
+      const endContactRelationship = relationships.end_contact as IJsonApiRelationships
+      return this.getContact(endContactRelationship, contactLookup)
+    }
+
+    return null
+  }
+
+  private getContact (contactRelationship: IJsonApiRelationships, contactLookup: { [p: string]: Contact }) {
+    const contactData = contactRelationship.data as IJsonApiEntityWithoutDetails
+    const contactId = contactData.id
+    return contactLookup[contactId]
+  }
+
+  private getDevice (relationships: IJsonApiRelationships, lookup: { [p: string]: Device }) {
+    const deviceRelationship = relationships.device as IJsonApiRelationships
+    const deviceData = deviceRelationship.data as IJsonApiEntityWithoutDetails
+    const deviceId = deviceData.id
+    const device = lookup[deviceId]
+    return device
+  }
+
+  private getPlatform (relationships: IJsonApiRelationships, lookup: { [p: string]: Platform }) {
+    let parentPlatformId = null
+    let parentPlatform = null
+
+    if (relationships.parent_platform && relationships.parent_platform.data) {
+      const parentPlatformData = relationships.parent_platform.data as IJsonApiEntityWithoutDetails
+      parentPlatformId = parentPlatformData.id
+    }
+
+    if (parentPlatformId !== null && lookup[parentPlatformId]) {
+      parentPlatform = lookup[parentPlatformId]
+    }
+
+    return parentPlatform
   }
 }

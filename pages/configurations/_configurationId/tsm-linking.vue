@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Erik Pongratz (UFZ, erik.pongratz@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ
@@ -43,53 +44,30 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-
 import { mapActions } from 'vuex'
-
-import {
-  LoadEpsgCodesAction,
-  LoadElevationDataAction
-} from '@/store/vocabulary'
-import {
-  LoadDeviceMountActionsIncludingDeviceInformationAction,
-  LoadLocationActionTimepointsAction
-} from '@/store/configurations'
-import { LoadAllContactsAction } from '@/store/contacts'
-
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { LoadConfigurationTsmLinkingsAction, LoadTsmEndpointsAction } from '@/store/tsmLinking'
 
 @Component({
-  components: {
-    ProgressIndicator
-  },
+  components: { ProgressIndicator },
   methods: {
-    ...mapActions('vocabulary', ['loadEpsgCodes', 'loadElevationData']),
-    ...mapActions('contacts', ['loadAllContacts']),
-    ...mapActions('configurations', ['loadLocationActionTimepoints', 'loadDeviceMountActionsIncludingDeviceInformation'])
+    ...mapActions('tsmLinking', ['loadConfigurationTsmLinkings', 'loadTsmEndpoints'])
   }
 })
-export default class ConfigurationLocations extends Vue {
+export default class ConfigurationTsmLinking extends Vue {
   private isLoading = false
 
   // vuex definition for typescript check
-  loadEpsgCodes!: LoadEpsgCodesAction
-  loadElevationData!: LoadElevationDataAction
-  loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
-  loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
-  loadAllContacts!: LoadAllContactsAction
+  loadConfigurationTsmLinkings!: LoadConfigurationTsmLinkingsAction
+  loadTsmEndpoints!: LoadTsmEndpointsAction
 
-  async fetch () {
+  async created () {
     try {
       this.isLoading = true
-      await Promise.all([
-        this.loadEpsgCodes(),
-        this.loadElevationData(),
-        this.loadAllContacts(),
-        this.loadLocationActionTimepoints(this.configurationId),
-        this.loadDeviceMountActionsIncludingDeviceInformation(this.configurationId)
-      ])
+      await this.loadConfigurationTsmLinkings(this.configurationId)
+      await this.loadTsmEndpoints()
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch locations')
+      this.$store.commit('snackbar/setError', 'Failed to fetch linkings')
     } finally {
       this.isLoading = false
     }
@@ -97,6 +75,12 @@ export default class ConfigurationLocations extends Vue {
 
   get configurationId () {
     return this.$route.params.configurationId
+  }
+
+  head () {
+    return {
+      titleTemplate: 'TSM Linking - %s'
+    }
   }
 }
 </script>

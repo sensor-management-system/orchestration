@@ -70,7 +70,7 @@ import {
   ActiveDevicesWithPropertiesForDateGetter,
   AddDynamicLocationBeginActionAction,
   ConfigurationsState, HasActiveDevicesWithPropertiesForDate,
-  LoadDeviceMountActionsForDynamicLocationAction,
+  LoadDeviceMountActionsIncludingDeviceInformationAction,
   LoadLocationActionTimepointsAction
 } from '@/store/configurations'
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
@@ -85,7 +85,7 @@ import { Device } from '@/models/Device'
     ...mapState('configurations', ['selectedLocationDate'])
   },
   methods: {
-    ...mapActions('configurations', ['addDynamicLocationBeginAction', 'loadLocationActionTimepoints', 'loadDeviceMountActionsForDynamicLocation'])
+    ...mapActions('configurations', ['addDynamicLocationBeginAction', 'loadLocationActionTimepoints', 'loadDeviceMountActionsIncludingDeviceInformation'])
   }
 })
 export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
@@ -98,7 +98,7 @@ export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
   contacts!: ContactsState['contacts']
   selectedLocationDate!: ConfigurationsState['selectedLocationDate']
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
-  loadDeviceMountActionsForDynamicLocation!: LoadDeviceMountActionsForDynamicLocationAction
+  loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
   addDynamicLocationBeginAction!: AddDynamicLocationBeginActionAction
   hasActiveDevicesWithPropertiesForDate!: HasActiveDevicesWithPropertiesForDate
   activeDevicesWithPropertiesForDate!: ActiveDevicesWithPropertiesForDateGetter

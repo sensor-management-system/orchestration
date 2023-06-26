@@ -56,16 +56,29 @@ permissions and limitations under the Licence.
     </template>
     <template #actions>
       <v-btn
-        :to="'/devices/' + device.id"
+        v-if="target=='_blank'"
+        small
+        @click.stop.prevent="openLink"
+      >
+        <v-icon
+          small
+        >
+          mdi-open-in-new
+        </v-icon>
+        Open in new tab
+      </v-btn>
+      <v-btn
+        v-else
         color="primary"
         text
         small
-        @click.stop.prevent
+        @click.stop.prevent="openLink"
       >
         View
       </v-btn>
     </template>
     <template #default>
+      <slot name="additional-actions" />
       <v-tooltip v-if="device.archived" right>
         <template #activator="{ on, attrs }">
           <v-icon v-bind="attrs" v-on="on">
@@ -242,6 +255,12 @@ export default class DevicesListItem extends Vue {
   })
   private hideHeader!: boolean
 
+  @Prop({
+    default: '_self',
+    type: String
+  })
+  private target!: string
+
   public readonly NO_TYPE: string = 'Unknown type'
 
   // vuex definition for typescript check
@@ -269,6 +288,14 @@ export default class DevicesListItem extends Vue {
       return deviceStatus!.name
     }
     return ''
+  }
+
+  openLink () {
+    if (this.target === '_self') {
+      this.$router.push(`/devices/${this.device.id}`)
+    } else {
+      window.open(`/devices/${this.device.id}`, this.target)
+    }
   }
 }
 </script>

@@ -44,6 +44,7 @@ import { dateTimesEqual, dateToDateTimeStringHHMM, dateToString, sortCriteriaAsc
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
 import { LocationTypes } from '@/store/configurations'
 import { getActiveActionOrNull, getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
 
 function sortedTimepoints (timepoints: ILocationTimepoint[]): ILocationTimepoint[] {
   return [...timepoints].sort((a, b) => sortCriteriaAscending(a.timepoint, b.timepoint))
@@ -52,7 +53,7 @@ function sortedTimepoints (timepoints: ILocationTimepoint[]): ILocationTimepoint
 export default {
   validateInputForStartDate (configuration: Configuration): (v: string) => (boolean | string) {
     return (v) => {
-      if (v === null || v === '' || configuration.startDate === null) {
+      if (v === '' || configuration.startDate === null) {
         return true
       }
       if (!configuration.endDate) {
@@ -67,7 +68,7 @@ export default {
 
   validateInputForEndDate (configuration: Configuration): (v: string) => (boolean | string) {
     return (v) => {
-      if (v === null || v === '' || configuration.endDate === null) {
+      if (v === '' || configuration.endDate === null) {
         return true
       }
       if (!configuration.startDate) {
@@ -323,6 +324,33 @@ export default {
 
     if (startDate <= filteredArray[filteredArray.length - 1].timepoint) {
       return 'Start date must be after ' + dateToDateTimeStringHHMM(filteredArray[filteredArray.length - 1].timepoint)
+    }
+
+    return true
+  },
+  endDateMustBeBeforeEndOfMountAction (endDate: DateTime | null, action: DeviceMountAction | undefined) {
+    if (!action?.endDate) {
+      return true
+    }
+    if (!endDate) {
+      return 'End date must be before ' + dateToDateTimeStringHHMM(action.endDate) + ' (end of mount)'
+    }
+
+    if (endDate > action.endDate) {
+      return 'End date must be before ' + dateToDateTimeStringHHMM(action.endDate) + ' (end of mount)'
+    }
+
+    return true
+  },
+  startDateMustBeAfterStartOfMountAction (startDate: DateTime | null, action: DeviceMountAction | undefined) {
+    if (!action) {
+      return true
+    }
+    if (!startDate) {
+      return 'Start date must be after ' + dateToDateTimeStringHHMM(action.beginDate) + ' (begin of mount)'
+    }
+    if (startDate < action.beginDate) {
+      return 'Start date must be after ' + dateToDateTimeStringHHMM(action.beginDate) + ' (begin of mount)'
     }
 
     return true
