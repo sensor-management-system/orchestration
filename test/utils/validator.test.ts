@@ -349,7 +349,7 @@ describe('#canNotIntersectWithExistingInterval', () => {
       }
     ]
 
-    const expectedValidationMessage = 'Must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' or after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
+    const expectedValidationMessage = 'Must be before ' + date1.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' or after ' + date2.setZone('UTC').toFormat('yyyy-MM-dd HH:mm') + ' (of existing location action)'
     expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)
     locationTimepoints.reverse()
     expect(canNotIntersectWithExistingInterval(startDate, locationTimepoints)).toBe(expectedValidationMessage)

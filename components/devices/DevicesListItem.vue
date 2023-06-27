@@ -76,6 +76,7 @@ permissions and limitations under the Licence.
       >
         View
       </v-btn>
+      <slot name="additional-actions" />
     </template>
     <template #default>
       <slot name="additional-actions" />

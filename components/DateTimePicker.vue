@@ -318,6 +318,10 @@ export default class DateTimePicker extends Vue {
     }
     return rulesList
   }
+
+  public resetTextInput (): void {
+    this.textInput = ''
+  }
 }
 </script>
 

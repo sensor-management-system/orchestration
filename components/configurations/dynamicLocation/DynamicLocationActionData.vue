@@ -97,7 +97,7 @@ permissions and limitations under the Licence.
       <v-row>
         <v-col cols="12" md="6">
           <label>Contact</label>
-          {{ value.beginContact.toString() }}
+          {{ value.beginContact?.toString() }}
         </v-col>
       </v-row>
     </v-card-text>

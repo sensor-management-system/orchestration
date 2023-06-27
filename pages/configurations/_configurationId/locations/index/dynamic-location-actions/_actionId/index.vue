@@ -57,7 +57,7 @@ import {
 } from '@/store/configurations'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import DynamicLocationView from '@/components/configurations/DynamicLocationView.vue'
+import DynamicLocationView from '@/components/configurations/dynamicLocation/DynamicLocationView.vue'
 
 @Component({
   components: { DynamicLocationView, ProgressIndicator },
@@ -125,7 +125,9 @@ export default class DynamicLocationActionView extends Vue {
         const currentItem = this.selectedTimepointItem
         if (!currentItem || (currentItem.id !== this.dynamicLocationAction.id || currentItem.type !== 'configuration_dynamic_location_end')) {
           // date field
-          this.setSelectedLocationDate(this.dynamicLocationAction.beginDate)
+          if (!this.selectedLocationDate) {
+            this.setSelectedLocationDate(this.dynamicLocationAction.beginDate)
+          }
 
           // select the corresponding timepoint item
           const item = this.configurationLocationActionTimepoints.find((item) => {

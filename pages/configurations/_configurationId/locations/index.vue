@@ -45,37 +45,8 @@ permissions and limitations under the Licence.
       >
         Start Static Location
       </v-btn>
-      <v-tooltip
-        v-if="isDynamicStartButtonDisabled"
-        bottom
-      >
-        <template #activator="{ on }">
-          <div v-on="on">
-            <v-btn
-              class="extraMarginForTooltipBtn"
-              color="primary"
-              small
-              disabled
-            >
-              Start Dynamic Location
-              <v-icon
-                right
-                dark
-              >
-                mdi-help-circle
-              </v-icon>
-            </v-btn>
-          </div>
-        </template>
-        <div>
-          <div><span>The configuration has no devices with properties mounted.</span></div>
-          <div>
-            <span>To start a new action, you must mount devices with suitable properties.</span>
-          </div>
-        </div>
-      </v-tooltip>
       <v-btn
-        v-else-if="$auth.loggedIn"
+        v-if="$auth.loggedIn"
         color="primary"
         :disabled="isDisabled"
         small
@@ -179,14 +150,17 @@ export default class ConfigurationShowLocationPage extends Vue {
 
   selectDefaultAction (): void {
     if (!this.hasActionParam && !this.isEditPage && !this.isNewPage) {
-      const now = currentAsUtcDateSecondsAsZeros()
-      // when the begin date of the configuration is past the current date, set the current date
-      if (!this.configuration?.startDate || this.configuration?.startDate < now) {
-        this.selectedDate = now
-      } else {
-        // otherwise set the (future) begin of the configuration as date
-        this.selectedDate = this.configuration.startDate
+      if (!this.selectedDate) {
+        const now = currentAsUtcDateSecondsAsZeros()
+        // when the begin date of the configuration is past the current date, set the current date
+        if (!this.configuration?.startDate || this.configuration?.startDate < now) {
+          this.selectedDate = now
+        } else {
+          // otherwise set the (future) begin of the configuration as date
+          this.selectedDate = this.configuration.startDate
+        }
       }
+
       this.updateTimepointItemWhenDateSelected()
     }
   }
@@ -225,10 +199,6 @@ export default class ConfigurationShowLocationPage extends Vue {
 
   get isDisabled () {
     return this.$route.path.endsWith('/new') || this.$route.path.endsWith('/edit') || this.$route.path.endsWith('/stop')
-  }
-
-  get isDynamicStartButtonDisabled () {
-    return !this.hasMountedDevicesWithProperties || !this.hasActiveDevicesWithPropertiesForDate(this.selectedDate)
   }
 
   selectTimepoint () {

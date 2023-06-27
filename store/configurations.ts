@@ -251,13 +251,31 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
       value: item.timepoint
     })).reverse()
   },
-  activeDevicesWithPropertiesForDate: (state: ConfigurationsState) => (selectedDate: DateTime | null): Device[] => {
-    if (!selectedDate) {
+  activeDevicesWithPropertiesForDate: (state: ConfigurationsState) => (beginDate: DateTime | null, endDate: DateTime | null): Device[] => {
+    if (!beginDate) {
       return []
     }
+
     if (state.deviceMountActionsIncludingDeviceInformation.length > 0) {
-      return state.deviceMountActionsIncludingDeviceInformation.filter((value) => {
-        return selectedDate >= value.beginDate && (!value.endDate || selectedDate <= value.endDate) && value.device.properties.length > 0
+      return state.deviceMountActionsIncludingDeviceInformation.filter((deviceMountAction) => {
+        // deviceMountAction.endDate is null
+        if (!deviceMountAction.endDate) {
+          return beginDate >= deviceMountAction.beginDate && deviceMountAction.device.properties.length > 0
+        }
+        // deviceMountAction.endDate is not null && endDate is null
+        if (!endDate && deviceMountAction.endDate) {
+          return false // endDate needed!
+        }
+        //  deviceMountAction.endDate is not null && endDate is not null
+        if (endDate && deviceMountAction && deviceMountAction.endDate) {
+          return beginDate <= endDate &&
+              beginDate >= deviceMountAction.beginDate &&
+              beginDate <= deviceMountAction.endDate &&
+              endDate >= deviceMountAction.beginDate &&
+              endDate <= deviceMountAction.endDate &&
+              deviceMountAction.device.properties.length > 0
+        }
+        return false
       }
       ).map((value) => {
         return value.device
@@ -350,7 +368,7 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
   }
 }
 
-export type ActiveDevicesWithPropertiesForDateGetter = (selectedDate: DateTime | null) => Device[]
+export type ActiveDevicesWithPropertiesForDateGetter = (beginDate: DateTime | null, endDate: DateTime | null) => Device[]
 export type DevicesForDynamicLocationGetter = Device[]
 export type ActiveLocationActionTimepointGetter = ILocationTimepoint | null
 export type activeDevicesWithPropertiesForDate = ILocationTimepoint | null

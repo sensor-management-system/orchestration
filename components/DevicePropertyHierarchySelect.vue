@@ -39,14 +39,39 @@ permissions and limitations under the Licence.
         :label="deviceSelectLabel"
         :rules="deviceSelectRules"
         clearable
+        no-data-text="No devices available for the selected date range"
         :disabled="disabled"
         @change="selectDevice"
-      />
+      >
+        <template v-if="unselectableDevices.length > 0" #append-item>
+          <v-divider />
+          <v-list>
+            <v-list-item v-for="(value,index) in unselectableDevices" :key="index">
+              <v-label disabled>
+                {{ value.device.shortName }}
+              </v-label>
+              <v-spacer />
+              <v-tooltip left>
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    v-bind="attrs"
+                    color="warning"
+                    v-on="on"
+                  >
+                    mdi-alert
+                  </v-icon>
+                </template>
+                <span>{{ value.invalidReason }}</span>
+              </v-tooltip>
+            </v-list-item>
+          </v-list>
+        </template>
+      </v-select>
       <v-select
         v-if="device"
         :value="value"
         :items="propertiesOfDevice"
-        :item-text="(property) => property.propertyName"
+        :item-text="(property) => generatePropertyName(property)"
         :item-value="(property) => property"
         :label="propertySelectLabel"
         :rules="propertySelectRules"
@@ -98,6 +123,17 @@ export default class DevicePropertyHierarchySelect extends Vue {
   })
   // @ts-ignore
   readonly devices!: Device[]
+
+  /**
+   * the list of devices which are unselectable for a specific reason
+   */
+  @Prop({
+    required: false,
+    type: Array,
+    default: () => []
+  })
+  // @ts-ignore
+  readonly unselectableDevices!: {device: Device, invalidReason: string}[]
 
   /**
    * the label of the device select
@@ -245,7 +281,17 @@ export default class DevicePropertyHierarchySelect extends Vue {
   }
 
   get propertyName (): string {
-    return this.$options.filters?.orDefault(this.value?.propertyName)
+    return this.$options.filters?.orDefault(this.generatePropertyName(this.value))
+  }
+
+  generatePropertyName (value: DeviceProperty) {
+    if (value) {
+      const propertyName = value.propertyName ?? ''
+      const label = value.label ?? ''
+      const unit = value.unitName ?? ''
+      return `${propertyName} ${label ? `- ${label}` : ''} ${unit ? `(${unit})` : ''}`
+    }
+    return ''
   }
 }
 </script>

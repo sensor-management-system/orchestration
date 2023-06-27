@@ -60,7 +60,10 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import StaticLocationView from '@/components/configurations/StaticLocationView.vue'
 
 @Component({
-  components: { StaticLocationView, ProgressIndicator },
+  components: {
+    StaticLocationView,
+    ProgressIndicator
+  },
   middleware: ['auth'],
   computed: {
     ...mapState('configurations',
@@ -120,7 +123,9 @@ export default class StaticLocationActionView extends Vue {
         // if we already have a timepoint item for the end action, don't overwrite it
         if (!currentItem || (currentItem.id !== this.staticLocationAction.id || currentItem.type !== 'configuration_static_location_end')) {
           // date field
-          this.setSelectedLocationDate(this.staticLocationAction.beginDate)
+          if (!this.selectedLocationDate) {
+            this.setSelectedLocationDate(this.staticLocationAction.beginDate)
+          }
 
           // select the corresponding timepoint item
           const item = this.configurationLocationActionTimepoints.find((item) => {
