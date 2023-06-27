@@ -85,7 +85,7 @@ import {
   DevicesForDynamicLocationGetter, LoadDynamicLocationActionAction, LoadLocationActionTimepointsAction,
   UpdateDynamicLocationActionAction
 } from '@/store/configurations'
-import DynamicLocationActionData from '@/components/configurations/DynamicLocationActionData.vue'
+import DynamicLocationActionData from '@/components/configurations/dynamicLocation/DynamicLocationActionData.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 @Component({
   components: { DeleteDialog, DynamicLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu, ProgressIndicator },

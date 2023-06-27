@@ -253,7 +253,7 @@ export default {
       const correspondingEndAction = getEndLocationTimepointForBeginning(lastEntry, sortedlocationTimepoints)
 
       if (correspondingEndAction) {
-        return 'Must be before ' + dateToDateTimeStringHHMM(lastEntry.timepoint) + ' or after ' + dateToDateTimeStringHHMM(correspondingEndAction.timepoint)
+        return 'Must be before ' + dateToDateTimeStringHHMM(lastEntry.timepoint) + ' or after ' + dateToDateTimeStringHHMM(correspondingEndAction.timepoint) + ' (of existing location action)'
       }
 
       if (lastEntry.type === LocationTypes.staticEnd || lastEntry.type === LocationTypes.dynamicEnd) {

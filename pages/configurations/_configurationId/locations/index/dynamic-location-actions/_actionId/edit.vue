@@ -36,23 +36,35 @@ permissions and limitations under the Licence.
       v-model="isInProgress"
       :dark="isSaving"
     />
-    <DynamicLocationActionDataForm
-      ref="editDynamicLocationForm"
+    <v-card-actions>
+      <v-card-title class="pl-0">
+        Edit Dynamic Location
+      </v-card-title>
+      <v-spacer />
+      <v-btn
+        v-if="$auth.loggedIn"
+        small
+        nuxt
+        :to="'/configurations/' + configurationId + '/locations'"
+      >
+        cancel
+      </v-btn>
+    </v-card-actions>
+    <DynamicLocationWizard
+      v-if="valueCopy"
+      ref="DynamicLocationWizard"
       v-model="valueCopy"
-      :devices="allActiveDevices"
     >
-      <template #actions>
-        <v-card-actions v-if="$auth.loggedIn">
-          <v-spacer />
-          <v-btn small @click="closeEditDynamicLocationForm">
-            Cancel
-          </v-btn>
-          <v-btn color="accent" small @click="saveEditedDynamicLocation">
-            Apply
-          </v-btn>
-        </v-card-actions>
+      <template #save>
+        <v-btn
+          block
+          color="primary"
+          @click="save"
+        >
+          Submit
+        </v-btn>
       </template>
-    </DynamicLocationActionDataForm>
+    </DynamicLocationWizard>
   </div>
 </template>
 
@@ -71,11 +83,13 @@ import {
 } from '@/store/configurations'
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
 import { Device } from '@/models/Device'
-import DynamicLocationActionDataForm from '@/components/configurations/DynamicLocationActionDataForm.vue'
+import DynamicLocationWizard from '@/components/configurations/dynamicLocation/DynamicLocationWizard.vue'
+import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
-    DynamicLocationActionDataForm,
+    SaveAndCancelButtons,
+    DynamicLocationWizard,
     ProgressIndicator
   },
   middleware: ['auth'],
@@ -88,7 +102,7 @@ import DynamicLocationActionDataForm from '@/components/configurations/DynamicLo
   }
 })
 export default class DynamicLocationActionEdit extends mixins(CheckEditAccess) {
-  private valueCopy: DynamicLocationAction = new DynamicLocationAction()
+  private valueCopy: DynamicLocationAction|null = null
   private isSaving: boolean = false
   private isLoading: boolean = false
 
@@ -156,22 +170,26 @@ export default class DynamicLocationActionEdit extends mixins(CheckEditAccess) {
   }
 
   get allActiveDevices (): Device[] {
-    return this.activeDevicesWithPropertiesForDate(this.valueCopy.beginDate)
-  }
-
-  get hasEndAction () {
-    return this.valueCopy.endContact != null
+    if (!this.valueCopy) {
+      return []
+    }
+    return this.activeDevicesWithPropertiesForDate(this.valueCopy.beginDate, this.valueCopy.endDate)
   }
 
   closeEditDynamicLocationForm (): void {
     this.$router.push('/configurations/' + this.configurationId + '/locations/dynamic-location-actions/' + this.actionId)
   }
 
-  async saveEditedDynamicLocation () {
-    if (!(this.$refs.editDynamicLocationForm as Vue & { isValid: () => boolean }).isValid()) {
+  async save () {
+    if (!this.valueCopy) {
+      return
+    }
+
+    if (!(this.$refs.DynamicLocationWizard as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
+
     try {
       this.isSaving = true
       await this.updateDynamicLocationAction({

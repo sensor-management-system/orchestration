@@ -36,23 +36,34 @@ permissions and limitations under the Licence.
       v-model="isSaving"
       dark
     />
-    <DynamicLocationActionDataForm
-      ref="newDynamicLocationForm"
+    <v-card-actions>
+      <v-card-title class="pl-0">
+        New Dynamic Location
+      </v-card-title>
+      <v-spacer />
+      <v-btn
+        v-if="$auth.loggedIn"
+        small
+        nuxt
+        :to="'/configurations/' + configurationId + '/locations'"
+      >
+        cancel
+      </v-btn>
+    </v-card-actions>
+    <DynamicLocationWizard
+      ref="DynamicLocationWizard"
       v-model="beginAction"
-      :devices="allActiveDevices"
     >
-      <template #actions>
-        <v-card-actions v-if="$auth.loggedIn">
-          <v-spacer />
-          <v-btn small @click="closeNewDynamicLocationForm">
-            Cancel
-          </v-btn>
-          <v-btn color="accent" small @click="saveNewDynamicLocation">
-            Add
-          </v-btn>
-        </v-card-actions>
+      <template #save>
+        <v-btn
+          block
+          color="primary"
+          @click="save"
+        >
+          Submit
+        </v-btn>
       </template>
-    </DynamicLocationActionDataForm>
+    </DynamicLocationWizard>
   </div>
 </template>
 
@@ -62,26 +73,24 @@ import { DateTime } from 'luxon'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import DynamicLocationActionDataForm from '@/components/configurations/DynamicLocationActionDataForm.vue'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { VocabularyState } from '@/store/vocabulary'
 import { ContactsState } from '@/store/contacts'
 import {
-  ActiveDevicesWithPropertiesForDateGetter,
   AddDynamicLocationBeginActionAction,
-  ConfigurationsState, HasActiveDevicesWithPropertiesForDate,
+  ConfigurationsState,
   LoadDeviceMountActionsIncludingDeviceInformationAction,
   LoadLocationActionTimepointsAction
 } from '@/store/configurations'
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
-import { Device } from '@/models/Device'
+import DynamicLocationWizard from '@/components/configurations/dynamicLocation/DynamicLocationWizard.vue'
 @Component({
-  components: { DynamicLocationActionDataForm, ProgressIndicator },
+  components: { DynamicLocationWizard, ProgressIndicator },
   middleware: ['auth'],
   computed: {
     ...mapState('vocabulary', ['epsgCodes', 'elevationData']),
     ...mapState('contacts', ['contacts']),
-    ...mapGetters('configurations', ['activeDevicesWithPropertiesForDate', 'hasActiveDevicesWithPropertiesForDate']),
+    ...mapGetters('configurations', ['activeDevicesWithPropertiesForDate']),
     ...mapState('configurations', ['selectedLocationDate'])
   },
   methods: {
@@ -100,8 +109,6 @@ export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
   loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
   addDynamicLocationBeginAction!: AddDynamicLocationBeginActionAction
-  hasActiveDevicesWithPropertiesForDate!: HasActiveDevicesWithPropertiesForDate
-  activeDevicesWithPropertiesForDate!: ActiveDevicesWithPropertiesForDateGetter
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -127,10 +134,6 @@ export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
 
   created () {
     this.beginAction.beginDate = this.selectedDate
-    if (!this.hasActiveDevicesWithPropertiesForDate(this.beginAction.beginDate)) {
-      this.$store.commit('snackbar/setError', 'No devices with properties for selected date exist')
-      this.$router.push('/configurations/' + this.configurationId + '/locations')
-    }
   }
 
   get configurationId (): string {
@@ -141,16 +144,12 @@ export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
     return this.selectedLocationDate !== null ? this.selectedLocationDate : currentAsUtcDateSecondsAsZeros()
   }
 
-  get allActiveDevices (): Device[] {
-    return this.activeDevicesWithPropertiesForDate(this.beginAction.beginDate)
-  }
-
   closeNewDynamicLocationForm (): void {
     this.$router.push('/configurations/' + this.configurationId + '/locations')
   }
 
-  async saveNewDynamicLocation () {
-    if (!(this.$refs.newDynamicLocationForm as Vue & { isValid: () => boolean }).isValid()) {
+  async save () {
+    if (!(this.$refs.DynamicLocationWizard as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
