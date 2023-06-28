@@ -114,6 +114,7 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
     TsmLinkingForm,
     ProgressIndicator
   },
+  middleware: ['auth'],
   computed: {
     ...mapState('tsmLinking', ['linking'])
   },
