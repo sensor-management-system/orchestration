@@ -50,6 +50,7 @@ import { LoadConfigurationTsmLinkingsAction, LoadTsmEndpointsAction } from '@/st
 
 @Component({
   components: { ProgressIndicator },
+  middleware: ['auth'],
   methods: {
     ...mapActions('tsmLinking', ['loadConfigurationTsmLinkings', 'loadTsmEndpoints'])
   }

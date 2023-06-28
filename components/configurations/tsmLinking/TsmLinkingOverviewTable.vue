@@ -46,6 +46,7 @@
       </template>
       <template #[`item.actions`]="{ item }">
         <v-icon
+          v-if="$auth.loggedIn && canModifyEntity(configuration)"
           small
           class="mr-2"
           @click="editItem(item)"
@@ -53,6 +54,7 @@
           mdi-pencil
         </v-icon>
         <v-icon
+          v-if="$auth.loggedIn && canModifyEntity(configuration)"
           small
           color="error"
           @click="initDeleteDialog(item)"
@@ -81,7 +83,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import TsmLinkingBasicDataTable from '@/components/configurations/tsmLinking/TsmLinkingBasicDataTable.vue'
 import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
@@ -94,6 +96,8 @@ import {
   LoadConfigurationTsmLinkingsAction
 } from '@/store/tsmLinking'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { ConfigurationsState } from '@/store/configurations'
+import { CanModifyEntityGetter } from '@/store/permissions'
 
 @Component({
   components: {
@@ -103,7 +107,9 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     TsmLinkingBasicDataTable
   },
   computed: {
-    ...mapState('tsmLinking', ['linkings'])
+    ...mapState('tsmLinking', ['linkings']),
+    ...mapState('configurations', ['configuration']),
+    ...mapGetters('permissions', ['canModifyEntity'])
   },
   methods: {
     ...mapActions('tsmLinking', ['deleteConfigurationTsmLinking', 'loadConfigurationTsmLinkings'])
@@ -135,9 +141,11 @@ export default class TsmLinkingOverviewTable extends Vue {
   private isLoading: boolean = false
   private showDeleteDialog: boolean = false
   // vuex definition for typescript check
+  configuration!: ConfigurationsState['configuration']
   linkings!: ITsmLinkingState['linkings']
   deleteConfigurationTsmLinking!: DeleteConfigurationTsmLinkingAction
   loadConfigurationTsmLinkings!: LoadConfigurationTsmLinkingsAction
+  canModifyEntity!: CanModifyEntityGetter
 
   get configurationId (): string {
     return this.$route.params.configurationId

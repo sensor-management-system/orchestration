@@ -39,6 +39,7 @@
       <v-card-actions>
         <v-spacer />
         <v-btn
+          v-if="editable"
           color="primary"
           small
           nuxt
@@ -53,13 +54,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
 import TsmLinkingOverviewTable from '@/components/configurations/tsmLinking/TsmLinkingOverviewTable.vue'
 
 @Component({
   components: { TsmLinkingOverviewTable }
 })
 export default class ConfigurationShowTsmLinkingPage extends Vue {
+  @InjectReactive()
+    editable!: boolean
+
   get configurationId (): string {
     return this.$route.params.configurationId
   }
