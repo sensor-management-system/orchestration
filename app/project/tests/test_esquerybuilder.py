@@ -13,6 +13,7 @@ import unittest
 from project.api.datalayers.esalchemy import (
     AndFilter,
     EsQueryBuilder,
+    ExistsFilter,
     FilterParser,
     MultiFieldMatchFilter,
     MustNotFilter,
@@ -304,6 +305,18 @@ class TestTermEqualsExactStringFilter(unittest.TestCase):
         self.assertNotEqual(filter1, filter3)
         self.assertNotEqual(filter1, filter4)
         self.assertNotEqual(filter1, None)
+
+
+class TestExistsFilter(unittest.TestCase):
+    """Tests for the ExistsFilter."""
+
+    def test_to_query(self):
+        """Ensure the to_query method works as expected."""
+        fields = ["short_name", "description"]
+        for field in fields:
+            es_query = ExistsFilter(field=field).to_query()
+            expected = {"exists": {"field": field}}
+            self.assertEqual(es_query, expected)
 
 
 class TestTermExactInListFilter(unittest.TestCase):
@@ -626,4 +639,48 @@ class TestFilterParser(unittest.TestCase):
             ),
         )
 
+        self.assertEqual(output_filter, expected)
+
+    def test_parse_eq_not_null(self):
+        """Test the parsing of an eq operation with a non null value."""
+        filter_raw = [
+            {"name": "manufacturer_name", "op": "eq", "val": "Campbell"},
+        ]
+        output_filter = FilterParser.parse(filter_raw)
+
+        expected = TermEqualsExactStringFilter(
+            term="manufacturer_name", value="Campbell"
+        )
+        self.assertEqual(output_filter, expected)
+
+    def test_parse_eq_null(self):
+        """Test the parsing of an eq operation with a null value."""
+        filter_raw = [
+            {"name": "manufacturer_name", "op": "eq", "val": None},
+        ]
+        output_filter = FilterParser.parse(filter_raw)
+
+        expected = MustNotFilter(ExistsFilter(field="manufacturer_name"))
+        self.assertEqual(output_filter, expected)
+
+    def test_parse_ne_not_null(self):
+        """Test the parsing of a ne operation with a non null value."""
+        filter_raw = [
+            {"name": "manufacturer_name", "op": "ne", "val": "Campbell"},
+        ]
+        output_filter = FilterParser.parse(filter_raw)
+
+        expected = MustNotFilter(
+            TermEqualsExactStringFilter(term="manufacturer_name", value="Campbell")
+        )
+        self.assertEqual(output_filter, expected)
+
+    def test_parse_ne_null(self):
+        """Test the parsing of a ne operation with a null value."""
+        filter_raw = [
+            {"name": "manufacturer_name", "op": "ne", "val": None},
+        ]
+        output_filter = FilterParser.parse(filter_raw)
+
+        expected = ExistsFilter(field="manufacturer_name")
         self.assertEqual(output_filter, expected)

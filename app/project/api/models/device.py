@@ -99,6 +99,7 @@ class Device(
             "is_private": self.is_private,
             "created_by_id": self.created_by_id,
             "group_ids": self.group_ids,
+            "updated_at": self.updated_at,
         }
 
     def get_parent_search_entities(self):
@@ -176,6 +177,10 @@ class Device(
             "status_uri": type_keyword,
             # For the group ids we just want it to be exact.
             "group_ids": type_keyword,
+            "updated_at": {
+                "type": "date",
+                "format": "strict_date_optional_time",
+            },
             "attachments": {
                 "properties": {
                     # The label should be searchable via text & via keyword

@@ -87,6 +87,7 @@ class Platform(
             "is_private": self.is_private,
             "created_by_id": self.created_by_id,
             "group_ids": self.group_ids,
+            "updated_at": self.updated_at,
         }
 
     def get_parent_search_entities(self):
@@ -154,6 +155,10 @@ class Platform(
                 "type": "integer",
             },
             "group_ids": type_keyword,
+            "updated_at": {
+                "type": "date",
+                "format": "strict_date_optional_time",
+            },
             "attachments": {
                 "properties": {
                     # Allow search via text & keyword
