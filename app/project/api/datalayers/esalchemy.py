@@ -59,6 +59,22 @@ class MustNotFilter:
         return f"MustNotFilter(inner_filter={repr(self.inner_filter)})"
 
 
+@dataclass
+class ExistsFilter:
+    """
+    Class to represent a filter that checks if any value exists.
+
+    Together with the MustNotFilter we can create checks that a value
+    is null or not.
+    """
+
+    field: str
+
+    def to_query(self):
+        """Convert the filter to a query."""
+        return {"exists": {"field": self.field}}
+
+
 class TermEqualsExactStringFilter:
     """Class to search for an exact string match in the field."""
 
@@ -300,13 +316,27 @@ class FilterParser:
         """Parse a single filter."""
         SUPPORTED_OPS = {
             "eq": lambda name, val: cls.wrap_for_nested_elements(
-                name, TermEqualsExactStringFilter(term=name, value=val)
+                name,
+                TermEqualsExactStringFilter(term=name, value=val)
+                if val is not None
+                else MustNotFilter(ExistsFilter(field=name)),
             ),
             "in_": lambda name, val: cls.wrap_for_nested_elements(
                 name, TermExactInListFilter(term=name, values=val)
             ),
             "any": lambda name, val: cls.wrap_for_nested_elements(
                 name, TermHasAnyExactFilter(term=name, value=val)
+            ),
+            "ne": lambda name, val: cls.wrap_for_nested_elements(
+                name,
+                # It is going to be a little bit complex here.
+                # In case we use the "ne" with a value of None,
+                # then we want the query that makes sure our field exists.
+                # Otherwise we want to check that the value that we search
+                # for is not the one that we give in the query.
+                ExistsFilter(field=name)
+                if val is None
+                else MustNotFilter(TermEqualsExactStringFilter(term=name, value=val)),
             ),
         }
         # First check if we have a more complex filter

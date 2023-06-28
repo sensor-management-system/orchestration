@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -75,6 +75,7 @@ class Configuration(
             "project": self.project,
             "status": self.status,
             "cfg_permission_group": self.cfg_permission_group,
+            "updated_at": self.updated_at,
             "configuration_contact_roles": [
                 ccr.to_search_entry() for ccr in self.configuration_contact_roles
             ],
@@ -156,6 +157,10 @@ class Configuration(
                     "cfg_permission_group": type_keyword,
                     "start_date": {"type": "date"},
                     "end_date": {"type": "date"},
+                    "updated_at": {
+                        "type": "date",
+                        "format": "strict_date_optional_time",
+                    },
                     "platforms": {
                         "properties": Platform.get_search_index_properties(),
                     },

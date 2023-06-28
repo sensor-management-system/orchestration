@@ -100,6 +100,7 @@ class Site(
                 scr.to_search_entry() for scr in self.site_contact_roles
             ],
             "website": self.website,
+            "updated_at": self.updated_at,
             # For the moment we don't include the configurations as it would
             # require us to keep all the data up to date (not only for
             # every change in the configuration, but also for changes in
@@ -170,6 +171,10 @@ class Site(
                     },
                     # We won't search for the very same website.
                     "website": type_text_full_searchable,
+                    "updated_at": {
+                        "type": "date",
+                        "format": "strict_date_optional_time",
+                    },
                     # As mentioned we don't include the data for the
                     # configurations here.
                 }
