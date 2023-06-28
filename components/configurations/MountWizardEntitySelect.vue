@@ -180,8 +180,8 @@ permissions and limitations under the Licence.
               :list-items="selectedEntities"
             >
               <template #list-item="{item}">
-                <platforms-list-item v-if="item.type === 'platform'" :platform="item" :hide-header="true" />
-                <devices-list-item v-if="item.type === 'device'" :device="item" :hide-header="true" />
+                <platforms-list-item v-if="item.type === 'platform'" :platform="item" :hide-header="true" target="_blank" />
+                <devices-list-item v-if="item.type === 'device'" :device="item" :hide-header="true" target="_blank" />
               </template>
             </BaseList>
           </v-container>

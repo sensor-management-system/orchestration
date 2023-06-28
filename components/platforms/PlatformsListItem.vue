@@ -56,7 +56,20 @@ permissions and limitations under the Licence.
     </template>
     <template #actions>
       <v-btn
-        :to="'/platforms/' + platform.id"
+        v-if="target=='_blank'"
+        small
+        @click.stop.prevent="openLink"
+      >
+        <v-icon
+          small
+        >
+          mdi-open-in-new
+        </v-icon>
+        Open in new tab
+      </v-btn>
+      <v-btn
+        v-else
+        :to="link"
         color="primary"
         text
         small
@@ -244,6 +257,12 @@ export default class PlatformsListItem extends Vue {
   })
   private hideHeader!: boolean
 
+  @Prop({
+    default: '_self',
+    type: String
+  })
+  private target!: string
+
   public readonly NO_TYPE: string = 'Unknown type'
 
   // vuex definition for typescript check
@@ -271,6 +290,18 @@ export default class PlatformsListItem extends Vue {
       return platformStatus!.name
     }
     return ''
+  }
+
+  get link (): string {
+    return `/platforms/${this.platform.id}`
+  }
+
+  openLink () {
+    if (this.target === '_self') {
+      this.$router.push(this.link)
+    } else {
+      window.open(this.link, this.target)
+    }
   }
 }
 </script>

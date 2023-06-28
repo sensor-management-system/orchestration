@@ -69,10 +69,11 @@ permissions and limitations under the Licence.
       </v-btn>
       <v-btn
         v-else
+        :to="link"
         color="primary"
         text
         small
-        @click.stop.prevent="openLink"
+        @click.stop.prevent
       >
         View
       </v-btn>
@@ -290,11 +291,15 @@ export default class DevicesListItem extends Vue {
     return ''
   }
 
+  get link (): string {
+    return `/devices/${this.device.id}`
+  }
+
   openLink () {
     if (this.target === '_self') {
-      this.$router.push(`/devices/${this.device.id}`)
+      this.$router.push(this.link)
     } else {
-      window.open(`/devices/${this.device.id}`, this.target)
+      window.open(this.link, this.target)
     }
   }
 }
