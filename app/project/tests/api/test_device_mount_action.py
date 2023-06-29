@@ -17,10 +17,13 @@ from project import base_url
 from project.api.models import (
     Configuration,
     Contact,
+    DatastreamLink,
     Device,
     DeviceMountAction,
+    DeviceProperty,
     Platform,
     PlatformMountAction,
+    TsmEndpoint,
 )
 from project.api.models.base_model import db
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
@@ -206,6 +209,41 @@ class TestDeviceMountAction(BaseTestCase):
         )
         msg = "delete;device mount action"
         self.assertEqual(msg, related_configuration.update_description)
+
+    def test_delete_device_mount_action_with_datastream(self):
+        """Ensure we can't delete a device mount that is associated with a datastream."""
+        mount_device_action = add_mount_device_action_model()
+        device = mount_device_action.device
+        device_property = DeviceProperty(
+            device=device,
+            label="example device property",
+            property_name="measurment",
+        )
+        tsm_endpoint = TsmEndpoint(name="example", url="http://somewhere")
+        datastream = DatastreamLink(
+            device_mount_action=mount_device_action,
+            device_property=device_property,
+            tsm_endpoint=tsm_endpoint,
+            datasource_name="1",
+            datasource_id="1",
+            thing_name="2",
+            thing_id="2",
+            datastream_id="3",
+            datastream_name="3",
+        )
+        db.session.add_all([device_property, tsm_endpoint, datastream])
+        db.session.commit()
+        access_headers = create_token()
+        # As long as there is no permission group for the configuration,
+        # an authentificated user is allowed to delete the action.
+        # (At least in our current implementation.)
+        with self.client:
+            response = self.client.delete(
+                f"{self.url}/{mount_device_action.id}",
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""
