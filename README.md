@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2020 - 2023
 - Martin Abbrent <martin.abbrent@ufz.de>
 - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
 - Norman Ziegner <norman.ziegner@ufz.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
@@ -199,7 +200,16 @@ Please note:
 
 </details>
 
-### Authors
+## Deployment
+
+### UFZ
+- The following environment variable secrets will be set by the admins of the kubernetes cluster (wombat) and are therefore not appearing in the Dockerfiles nor in the CI pipeline: 
+  - DATABASE_URL
+  - MINIO_SECRET_KEY
+  - SMS_IDL_TOKEN
+  - PID_SERVICE_PASSWORD 
+
+## Authors
 
 - Dirk Pohle
 - Kotyba Alhaj Taha
@@ -207,3 +217,4 @@ Please note:
 - Nils Brinckmann
 - Norman Ziegner
 - Wilhelm Becker
+- Tobias Kuhnert
