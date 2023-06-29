@@ -12,13 +12,11 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ..helpers.errors import ConflictError
 from ..helpers.mounting_checks import DeviceMountActionValidator
 from ..helpers.resource_mixin import add_updated_by_id, decode_json_request_data
+from ..models import Configuration, DatastreamLink, Device, DeviceMountAction, Platform
 from ..models.base_model import db
-from ..models.configuration import Configuration
-from ..models.device import Device
-from ..models.mount_actions import DeviceMountAction
-from ..models.platform import Platform
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..resources.base_resource import (
@@ -148,6 +146,12 @@ class DeviceMountActionDetail(ResourceDetail):
         )
         if mount_action is None:
             raise ObjectNotFound("Object not found!")
+        if (
+            db.session.query(DatastreamLink)
+            .filter(DatastreamLink.device_mount_action == mount_action)
+            .first()
+        ):
+            raise ConflictError("device mount action is linked to a datastream")
         configuration = mount_action.configuration
         msg = "delete;device mount action"
         set_update_description_text_and_update_by_user(configuration, msg)
