@@ -261,6 +261,9 @@ def organization_names():
                                 name = name_en or name_de
                                 organizations[scope_text] = name
 
+    for key in organizations:
+        organizations[key] = organizations[key].encode("latin1").decode("utf8")
+
     output_file = (
         pathlib.Path(__file__).parent
         / "app"
@@ -268,7 +271,9 @@ def organization_names():
         / "static"
         / "organization_names.json"
     )
-    json.dump(organizations, output_file.open("wt"), indent=4, sort_keys=True)
+    json.dump(
+        organizations, output_file.open("wt", encoding="utf8"), indent=4, sort_keys=True
+    )
 
 
 if __name__ == "__main__":
