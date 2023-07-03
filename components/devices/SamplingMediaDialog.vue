@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -101,6 +101,11 @@ permissions and limitations under the Licence.
                 />
               </v-col>
             </v-row>
+            <v-row class="mt-0">
+              <v-col class="pt-0 pb-0">
+                <provenance-hint />
+              </v-col>
+            </v-row>
             <v-row>
               <v-col>
                 <v-text-field
@@ -155,6 +160,7 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { AddSamplingMediaAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
@@ -167,7 +173,8 @@ import { AddSamplingMediaAction, LoadGlobalProvenancesAction, VocabularyState } 
     ...mapActions('vocabulary', ['loadGlobalProvenances', 'addSamplingMedia'])
   },
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ProvenanceHint
   }
 })
 export default class SamplingMediaDialog extends mixins(Rules) {

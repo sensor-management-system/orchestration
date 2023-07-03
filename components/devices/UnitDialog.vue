@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -73,8 +73,8 @@ permissions and limitations under the Licence.
                 />
               </v-col>
             </v-row>
-            <v-row>
-              <v-col>
+            <v-row class="mt-0">
+              <v-col class="pt-0 pb-0">
                 <v-text-field
                   v-model="unit.provenance"
                   label="Provenance"
@@ -85,6 +85,11 @@ permissions and limitations under the Licence.
                   v-model="unit.provenanceUri"
                   label="Provenance URI"
                 />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <provenance-hint />
               </v-col>
             </v-row>
             <v-row>
@@ -141,6 +146,7 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { Unit } from '@/models/Unit'
 import { AddUnitAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
@@ -153,7 +159,8 @@ import { AddUnitAction, LoadGlobalProvenancesAction, VocabularyState } from '@/s
     ...mapActions('vocabulary', ['addUnit', 'loadGlobalProvenances'])
   },
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ProvenanceHint
   }
 })
 export default class UnitDialog extends mixins(Rules) {

@@ -89,6 +89,11 @@ permissions and limitations under the Licence.
                 />
               </v-col>
             </v-row>
+            <v-row class="mt-0">
+              <v-col class="pt-0 pb-0">
+                <provenance-hint />
+              </v-col>
+            </v-row>
             <v-row>
               <v-col>
                 <v-text-field
@@ -143,6 +148,7 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { SiteUsage } from '@/models/SiteUsage'
 import { AddSiteUsageAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
@@ -155,7 +161,8 @@ import { AddSiteUsageAction, LoadGlobalProvenancesAction, VocabularyState } from
     ...mapActions('vocabulary', ['addSiteUsage', 'loadGlobalProvenances'])
   },
   components: {
-    ProgressIndicator
+    ProgressIndicator,
+    ProvenanceHint
   }
 })
 export default class SiteUsageDialog extends mixins(Rules) {
