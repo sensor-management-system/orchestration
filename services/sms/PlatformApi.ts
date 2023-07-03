@@ -278,7 +278,8 @@ export class PlatformApi {
           'page[number]': 1,
           sort: '-updated_at',
           include: 'updated_by.contact',
-          hide_archived: false
+          hide_archived: false,
+          filter: JSON.stringify([{ name: 'updated_at', op: 'ne', val: null }])
         }
       }
 
