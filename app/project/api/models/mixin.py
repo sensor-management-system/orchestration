@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -11,8 +11,8 @@
 import collections
 import itertools
 from datetime import datetime
-import pytz
 
+import pytz
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.mutable import MutableList
@@ -29,6 +29,7 @@ from .base_model import db
 
 
 def utc_now():
+    """Return the datetime in utc."""
     now = datetime.utcnow()
     return pytz.utc.localize(now)
 
@@ -213,14 +214,25 @@ class SearchableMixin:
     """
 
     @classmethod
-    def search(cls, query, page, per_page):
-        """Search the model with a given query and pagination settings."""
-        ids, total = query_index(cls.__tablename__, query, page, per_page)
+    def search(cls, query, page, per_page, ordering):
+        """
+        Search the model with a given query and pagination settings.
+
+        Ordering is optional.
+        """
+        ids, total = query_index(cls.__tablename__, query, page, per_page, ordering)
         if total == 0 or not ids:
             return cls.query.filter(sqlalchemy.sql.false()), total
+
+        # Now we build with db case a kind of lookup table that we want
+        # to search for.
+        # So overall we want to set the index in our ids list as
+        # a key to search for.
+        # So if we have a specific id, we give it this index.
         when = []
         for i in range(len(ids)):
             when.append((ids[i], i))
+
         return (
             cls.query.filter(cls.id.in_(ids)).order_by(db.case(when, value=cls.id)),
             total,
