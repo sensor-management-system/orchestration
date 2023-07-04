@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -31,15 +31,25 @@ def remove_from_index(index, model):
     current_app.elasticsearch.delete(index=index, id=model.id)
 
 
-def query_index(index, query, page, per_page):
-    """Query the index with custom filters & pagination settings."""
+def query_index(index, query, page, per_page, ordering=None):
+    """
+    Query the index with custom filters & pagination settings.
+
+    Ordering is optional as in any case we sort by the score first.
+    Everthing else comes as secondary criteria.
+    """
     if not current_app.elasticsearch:
         return [], 0
+    sort = ["_score"]
+    if ordering:
+        for entry in ordering:
+            sort.append(entry)
     body = {
         "query": query,
         # the from value is the beginning & starts counting with 0
         "from": (page - 1) * per_page,
         "size": per_page,
+        "sort": sort,
     }
     search = current_app.elasticsearch.search(
         index=index,

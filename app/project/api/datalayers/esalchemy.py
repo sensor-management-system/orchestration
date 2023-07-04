@@ -511,14 +511,16 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
             search_filter = AndFilter([search_filter, es_filter_query])
         search_query = search_filter.to_query()
 
-        query, object_count = self.model.search(search_query, page, per_page)
-        # And as Elasticsearch handles pagination, we don't have to care here.
-        # Normally same is true for sorting. Elasticsearch sorts by relevance.
-        # But in case an explicit sorting is given, we want to support it
-        # as well:
+        ordering = []
         if qs.sorting:
-            query = self.sort_query(query, qs.sorting)
-
+            # order can be list of dicts like this:
+            # [{"field": "short_name", "order": "asc"}]
+            # We need to make it ready for the elasticsearch,
+            # which expects it as [{"short_name": "asc"}]
+            for entry in qs.sorting:
+                ordering.append({entry["field"]: entry["order"]})
+        # Elasticsearch handles here filtering, pagination & sorting.
+        query, object_count = self.model.search(search_query, page, per_page, ordering)
         # Still we want to include the data if we are asked.
         if getattr(self, "eagerload_includes", True):
             query = self.eagerload_includes(query, qs)

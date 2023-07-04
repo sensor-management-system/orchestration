@@ -39,7 +39,8 @@ def settings_with_ngrams(
                         filter_name,
                     ],
                     "type": "custom",
-                    "tokenizer": "standard",
+                    "tokenizer": "uax_url_email",
+
                 },
             },
         },
