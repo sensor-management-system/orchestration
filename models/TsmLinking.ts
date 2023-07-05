@@ -51,8 +51,11 @@ export interface ITsmLinking {
   thing: TsmdlThing | null
   datastream: TsmdlDatastream | null
   tsmEndpoint: TsmEndpoint | null
+  licenseUri: string
+  licenseName: string
+  aggregationPeriod: number | null
 }
-export class TsmLinking {
+export class TsmLinking implements ITsmLinking {
   private _id: string = ''
   private _configurationId: string = ''
   private _deviceMountAction: DeviceMountAction|null = null
@@ -64,6 +67,9 @@ export class TsmLinking {
   private _thing: TsmdlThing | null = null
   private _datastream: TsmdlDatastream | null = null
   private _tsmEndpoint: TsmEndpoint | null = null
+  private _licenseUri: string = ''
+  private _licenseName: string = ''
+  private _aggregationPeriod: number | null = null
 
   get id (): string {
     return this._id
@@ -153,6 +159,42 @@ export class TsmLinking {
     this._tsmEndpoint = value
   }
 
+  get licenseName (): string {
+    return this._licenseName
+  }
+
+  set licenseName (newLicenseName: string) {
+    this._licenseName = newLicenseName
+  }
+
+  get licenseUri (): string {
+    return this._licenseUri
+  }
+
+  set licenseUri (newLicenseUri: string) {
+    this._licenseUri = newLicenseUri
+  }
+
+  get aggregationPeriod (): number | null {
+    return this._aggregationPeriod
+  }
+
+  set aggregationPeriod (newAggregationPeriod: number | null) {
+    this._aggregationPeriod = newAggregationPeriod
+  }
+
+  get aggregationText (): string {
+    if (!this.aggregationPeriod) {
+      return ''
+    }
+    const partPeriod = `${this.aggregationPeriod} s`
+    if (this.deviceProperty?.aggregationTypeName) {
+      const partType = this.deviceProperty?.aggregationTypeName
+      return `${partPeriod} ${partType}`
+    }
+    return partPeriod
+  }
+
   static createFromObject (someObject: ITsmLinking): TsmLinking {
     const result = new TsmLinking()
     result.id = someObject.id
@@ -166,6 +208,9 @@ export class TsmLinking {
     result.startDate = someObject.startDate
     result.thing = someObject.thing
     result.tsmEndpoint = someObject.tsmEndpoint
+    result.licenseName = someObject.licenseName
+    result.licenseUri = someObject.licenseUri
+    result.aggregationPeriod = someObject.aggregationPeriod
     return result
   }
 }

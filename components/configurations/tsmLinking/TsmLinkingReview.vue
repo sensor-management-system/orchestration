@@ -45,6 +45,8 @@
                 <th>Thing</th>
                 <th>Datastream</th>
                 <th>Date range</th>
+                <th>License</th>
+                <th>Aggregation</th>
               </tr>
             </thead>
             <tbody>
@@ -73,6 +75,8 @@
                     :to="formLinking.endDate"
                   />
                 </td>
+                <td>{{ formLinking.licenseName }}</td>
+                <td>{{ formLinking.aggregationText }}</td>
               </tr>
             </tbody>
           </v-simple-table>

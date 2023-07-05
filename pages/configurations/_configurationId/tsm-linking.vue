@@ -47,12 +47,14 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { LoadConfigurationTsmLinkingsAction, LoadTsmEndpointsAction } from '@/store/tsmLinking'
+import { LoadLicensesAction } from '@/store/vocabulary'
 
 @Component({
   components: { ProgressIndicator },
   middleware: ['auth'],
   methods: {
-    ...mapActions('tsmLinking', ['loadConfigurationTsmLinkings', 'loadTsmEndpoints'])
+    ...mapActions('tsmLinking', ['loadConfigurationTsmLinkings', 'loadTsmEndpoints']),
+    ...mapActions('vocabulary', ['loadLicenses'])
   }
 })
 export default class ConfigurationTsmLinking extends Vue {
@@ -61,12 +63,16 @@ export default class ConfigurationTsmLinking extends Vue {
   // vuex definition for typescript check
   loadConfigurationTsmLinkings!: LoadConfigurationTsmLinkingsAction
   loadTsmEndpoints!: LoadTsmEndpointsAction
+  loadLicenses!: LoadLicensesAction
 
   async created () {
     try {
       this.isLoading = true
-      await this.loadConfigurationTsmLinkings(this.configurationId)
-      await this.loadTsmEndpoints()
+      await Promise.all([
+        this.loadConfigurationTsmLinkings(this.configurationId),
+        this.loadTsmEndpoints(),
+        this.loadLicenses()
+      ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch linkings')
     } finally {

@@ -29,201 +29,291 @@
  permissions and limitations under the Licence.
  -->
 <template>
-  <v-form
-    ref="tsmLinkingForm"
-    @submit.prevent
-  >
-    <v-card flat>
-      <v-card-title>Linking</v-card-title>
-      <v-container>
-        <v-row
-          dense
-        >
-          <v-col
-            cols="12"
+  <div>
+    <v-form
+      ref="tsmLinkingForm"
+      @submit.prevent
+    >
+      <v-card flat>
+        <v-card-title>Linking</v-card-title>
+        <v-container>
+          <v-row
+            dense
           >
-            <v-autocomplete
-              :items="tsmEndpoints"
-              :value="value.tsmEndpoint"
-              label="Select endpoint"
-              item-text="name"
-              return-object
-              required
-              :rules="[rules.required]"
-              clearable
-              class="required"
-              :menu-props="{closeOnContentClick: true}"
-              @input="update('endpoint',$event)"
+            <v-col
+              cols="12"
             >
-              <template v-if="suggestedTsmEndpoint" #prepend-item>
-                <v-list-item @click="update('endpoint', suggestedTsmEndpoint)">
-                  <v-list-item-title>
-                    <label>
-                      Suggested TSMDL Endpoint
-                      <v-tooltip top>
-                        <template #activator="{ on }">
-                          <v-icon
-                            small
-                            v-on="on"
-                          >
-                            mdi-information-outline
-                          </v-icon>
-                        </template>
-                        This endpoint is suggested based on recent selected datasources for this device.
-                      </v-tooltip>
-                    </label>
-                    {{ suggestedTsmEndpoint.name }}
-                  </v-list-item-title>
-                </v-list-item>
-                <v-divider class="mt-2" />
-              </template>
-            </v-autocomplete>
-          </v-col>
-          <v-col
-            cols="12"
-          >
-            <v-autocomplete
-              :items="datasources"
-              :value="value.datasource"
-              :loading="isLaodingDatasource"
-              label="Select datasource"
-              item-text="id"
-              return-object
-              required
-              :rules="[rules.required]"
-              clearable
-              :disabled="datasourceSelectionDisabled"
-              class="required"
-              :menu-props="{closeOnContentClick: true}"
-              @input="update('datasource',$event)"
+              <v-autocomplete
+                :items="tsmEndpoints"
+                :value="value.tsmEndpoint"
+                label="Select endpoint"
+                item-text="name"
+                return-object
+                required
+                :rules="[rules.required]"
+                clearable
+                class="required"
+                :menu-props="{closeOnContentClick: true}"
+                @input="update('endpoint',$event)"
+              >
+                <template v-if="suggestedTsmEndpoint" #prepend-item>
+                  <v-list-item @click="update('endpoint', suggestedTsmEndpoint)">
+                    <v-list-item-title>
+                      <label>
+                        Suggested TSMDL Endpoint
+                        <v-tooltip top>
+                          <template #activator="{ on }">
+                            <v-icon
+                              small
+                              v-on="on"
+                            >
+                              mdi-information-outline
+                            </v-icon>
+                          </template>
+                          This endpoint is suggested based on recent selected datasources for this device.
+                        </v-tooltip>
+                      </label>
+                      {{ suggestedTsmEndpoint.name }}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider class="mt-2" />
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col
+              cols="12"
             >
-              <template v-if="suggestedDatasource" #prepend-item>
-                <v-list-item @click="update('datasource', suggestedDatasource)">
-                  <v-list-item-title>
-                    <label>
-                      Suggested Datasource
-                      <v-tooltip top>
-                        <template #activator="{ on }">
-                          <v-icon
-                            small
-                            v-on="on"
-                          >
-                            mdi-information-outline
-                          </v-icon>
-                        </template>
-                        This datasource is suggested based on recent selected datasources for this device.
-                      </v-tooltip>
-                    </label>
-                    {{ suggestedDatasource.id }}
-                  </v-list-item-title>
-                </v-list-item>
-                <v-divider class="mt-2" />
-              </template>
-            </v-autocomplete>
-          </v-col>
-          <v-col
-            cols="12"
-          >
-            <v-autocomplete
-              :items="things"
-              :value="value.thing"
-              :loading="isLoadingThing"
-              label="Select thing"
-              item-text="name"
-              return-object
-              required
-              :rules="[rules.required]"
-              clearable
-              class="required"
-              :disabled="thingSelectionDisabled"
-              :menu-props="{closeOnContentClick: true}"
-              @input="update('thing',$event)"
+              <v-autocomplete
+                :items="datasources"
+                :value="value.datasource"
+                :loading="isLaodingDatasource"
+                label="Select datasource"
+                item-text="id"
+                return-object
+                required
+                :rules="[rules.required]"
+                clearable
+                :disabled="datasourceSelectionDisabled"
+                class="required"
+                :menu-props="{closeOnContentClick: true}"
+                @input="update('datasource',$event)"
+              >
+                <template v-if="suggestedDatasource" #prepend-item>
+                  <v-list-item @click="update('datasource', suggestedDatasource)">
+                    <v-list-item-title>
+                      <label>
+                        Suggested Datasource
+                        <v-tooltip top>
+                          <template #activator="{ on }">
+                            <v-icon
+                              small
+                              v-on="on"
+                            >
+                              mdi-information-outline
+                            </v-icon>
+                          </template>
+                          This datasource is suggested based on recent selected datasources for this device.
+                        </v-tooltip>
+                      </label>
+                      {{ suggestedDatasource.id }}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider class="mt-2" />
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col
+              cols="12"
             >
-              <template v-if="suggestedThing" #prepend-item>
-                <v-list-item @click="update('thing', suggestedThing)">
-                  <v-list-item-title>
-                    <label>
-                      Suggested Thing
-                      <v-tooltip top>
-                        <template #activator="{ on }">
-                          <v-icon
-                            small
-                            v-on="on"
-                          >
-                            mdi-information-outline
-                          </v-icon>
-                        </template>
-                        This thing is suggested based on recent selected things for this device.
-                      </v-tooltip>
-                    </label>
-                    {{ suggestedThing.name }}
-                  </v-list-item-title>
-                </v-list-item>
-                <v-divider class="mt-2" />
-              </template>
-            </v-autocomplete>
-          </v-col>
+              <v-autocomplete
+                :items="things"
+                :value="value.thing"
+                :loading="isLoadingThing"
+                label="Select thing"
+                item-text="name"
+                return-object
+                required
+                :rules="[rules.required]"
+                clearable
+                class="required"
+                :disabled="thingSelectionDisabled"
+                :menu-props="{closeOnContentClick: true}"
+                @input="update('thing',$event)"
+              >
+                <template v-if="suggestedThing" #prepend-item>
+                  <v-list-item @click="update('thing', suggestedThing)">
+                    <v-list-item-title>
+                      <label>
+                        Suggested Thing
+                        <v-tooltip top>
+                          <template #activator="{ on }">
+                            <v-icon
+                              small
+                              v-on="on"
+                            >
+                              mdi-information-outline
+                            </v-icon>
+                          </template>
+                          This thing is suggested based on recent selected things for this device.
+                        </v-tooltip>
+                      </label>
+                      {{ suggestedThing.name }}
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-divider class="mt-2" />
+                </template>
+              </v-autocomplete>
+            </v-col>
 
-          <v-col
-            cols="12"
-            class="nowrap-truncate"
-          >
-            <v-autocomplete
-              :items="datastreams"
-              :value="value.datastream"
-              :loading="isLoadingDatastream"
-              label="Select datastream"
-              item-text="name"
-              return-object
-              required
-              :rules="[rules.required]"
-              clearable
-              class="required"
-              :disabled="datastreamSelectionDisabled"
-              @input="update('datastream',$event)"
-            />
-          </v-col>
-          <v-col
-            md="12"
-            lg="6"
-            xl="6"
-          >
-            <DateTimePicker
-              :value="value.startDate"
-              :min-date="dateToString(selectedDeviceActionPropertyCombination.action.beginDate)"
-              :max-date="dateToString(selectedDeviceActionPropertyCombination.action.endDate)"
-              label="Select begin date"
-              hint="Start date"
-              :required="true"
-              :rules="[rules.required,...startDateExtraRules]"
-              @input="update('startDate',$event)"
-            />
-          </v-col>
-          <v-col
-            md="12"
-            lg="6"
-            xl="6"
-          >
-            <DateTimePicker
-              :value="value.endDate"
-              :min-date="dateToString(selectedDeviceActionPropertyCombination.action.beginDate)"
-              :max-date="dateToString(selectedDeviceActionPropertyCombination.action.endDate)"
-              placeholder="Open End"
-              label="Select end date"
-              :rules="[...endDateExtraRules]"
-              hint="Optional. Leave blank for open end"
-              @input="update('endDate',$event)"
-            />
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card>
-  </v-form>
+            <v-col
+              cols="12"
+              class="nowrap-truncate"
+            >
+              <v-autocomplete
+                :items="datastreams"
+                :value="value.datastream"
+                :loading="isLoadingDatastream"
+                label="Select datastream"
+                item-text="name"
+                return-object
+                required
+                :rules="[rules.required]"
+                clearable
+                class="required"
+                :disabled="datastreamSelectionDisabled"
+                @input="update('datastream',$event)"
+              />
+            </v-col>
+            <v-col
+              md="12"
+              lg="6"
+              xl="6"
+            >
+              <DateTimePicker
+                :value="value.startDate"
+                :min-date="dateToString(selectedDeviceActionPropertyCombination.action.beginDate)"
+                :max-date="dateToString(selectedDeviceActionPropertyCombination.action.endDate)"
+                label="Select begin date"
+                hint="Start date"
+                :required="true"
+                :rules="[rules.required,...startDateExtraRules]"
+                @input="update('startDate',$event)"
+              />
+            </v-col>
+            <v-col
+              md="12"
+              lg="6"
+              xl="6"
+            >
+              <DateTimePicker
+                :value="value.endDate"
+                :min-date="dateToString(selectedDeviceActionPropertyCombination.action.beginDate)"
+                :max-date="dateToString(selectedDeviceActionPropertyCombination.action.endDate)"
+                placeholder="Open End"
+                label="Select end date"
+                :rules="[...endDateExtraRules]"
+                hint="Optional. Leave blank for open end"
+                @input="update('endDate',$event)"
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              class="nowrap-truncate"
+            >
+              <combobox
+                label="License"
+                clearable
+                :items="licenseItems"
+                item-text="name"
+                :value="valueLicense"
+                @input="updateLicense"
+              >
+                <template #append-outer>
+                  <v-tooltip
+                    v-if="valueLicenseDefinition"
+                    right
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ valueLicenseDefinition }}</span>
+                  </v-tooltip>
+                  <v-btn icon @click="showNewLicenseDialog = true">
+                    <v-icon>
+                      mdi-tooltip-plus-outline
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <template #item="data">
+                  <template v-if="(typeof data.item) !== 'object'">
+                    <v-item-content>
+                      {{ data.item }}
+                    </v-item-content>
+                  </template>
+                  <template v-else>
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        {{ data.item.name }}
+                        <v-tooltip
+                          v-if="data.item.definition"
+                          bottom
+                        >
+                          <template #activator="{ on, attrs }">
+                            <v-icon
+                              color="primary"
+                              small
+                              v-bind="attrs"
+                              v-on="on"
+                            >
+                              mdi-help-circle-outline
+                            </v-icon>
+                          </template>
+                          <span>{{ data.item.definition }}</span>
+                        </v-tooltip>
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </template>
+                </template>
+              </combobox>
+            </v-col>
+            <v-col
+              md="12"
+              lg="6"
+              xl="6"
+            >
+              <v-text-field
+                :label="aggregationPeriodLabel"
+                :value="value.aggregationPeriod"
+                type="number"
+                step="any"
+                @input="update('aggregationPeriod', $event)"
+                @wheel.prevent
+              />
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
+    </v-form>
+    <license-dialog
+      v-model="showNewLicenseDialog"
+      :initial-term="valueLicense ? valueLicense.name : null"
+      @aftersubmit="updateLicense"
+    />
+  </div>
 </template>
 <script lang="ts">
 import { Component, mixins, Prop, Vue } from 'nuxt-property-decorator'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import LicenseDialog from '@/components/devices/LicenseDialog.vue'
+import Combobox from '@/components/shared/Combobox.vue'
 import Validator from '@/utils/validator'
 import { Rules } from '@/mixins/Rules'
 import { TsmLinking } from '@/models/TsmLinking'
@@ -240,12 +330,22 @@ import {
 } from '@/store/tsmLinking'
 import { dateToString } from '@/utils/dateHelper'
 import { TsmEndpoint } from '@/models/TsmEndpoint'
+import { License } from '@/models/License'
+import { VocabularyState } from '@/store/vocabulary'
+import { CvSelectItem, ICvSelectItem } from '@/models/CvSelectItem'
+
+type LicenseComboboxValue = License | string | undefined
 
 @Component({
-  components: { DateTimePicker },
+  components: {
+    Combobox,
+    DateTimePicker,
+    LicenseDialog
+  },
   computed: {
     ...mapState('tsmLinking', ['datastreams', 'datasources', 'things', 'linkings', 'tsmEndpoints']),
-    ...mapGetters('tsmLinking', ['suggestedThingId', 'suggestedDatasourceId', 'suggestedTsmEndpointId'])
+    ...mapGetters('tsmLinking', ['suggestedThingId', 'suggestedDatasourceId', 'suggestedTsmEndpointId']),
+    ...mapState('vocabulary', ['licenses'])
   },
   methods: {
     dateToString,
@@ -268,11 +368,14 @@ export default class TsmLinkingForm extends mixins(Rules) {
   private isLoadingThing = false
   private isLoadingDatastream = false
 
+  private showNewLicenseDialog = false
+
   // vuex definition for typescript check
   datasources!: ITsmLinkingState['datasources']
   things!: ITsmLinkingState['things']
   datastreams!: ITsmLinkingState['datastreams']
   tsmEndpoints!: ITsmLinkingState['tsmEndpoints']
+  licenses!: VocabularyState['licenses']
   suggestedThingId!: SuggestedThingIdGetter
   suggestedDatasourceId!: SuggestedDatasourceIdGetter
   suggestedTsmEndpointId!: SuggestedTsmEndpointIdGetter
@@ -348,6 +451,75 @@ export default class TsmLinkingForm extends mixins(Rules) {
     await new Promise(resolve => setTimeout(resolve, stallTime))
   }
 
+  get aggregationPeriodLabel (): string {
+    if (this.value.deviceProperty?.aggregationTypeName) {
+      return `Aggregation period in seconds - ${this.value.deviceProperty?.aggregationTypeName}`
+    }
+    return 'Aggregation period in seconds'
+  }
+
+  get licenseItems (): License[] {
+    const licenseIndex = this.licenses.findIndex(l => l.uri === this.value.licenseUri)
+    if (licenseIndex > -1 || (!this.valueLicense)) {
+      return this.licenses
+    }
+    const additionalLicense = License.createFromObject({
+      id: '',
+      name: this.value.licenseName,
+      definition: '',
+      provenance: '',
+      provenanceUri: '',
+      category: '',
+      note: '',
+      uri: this.value.licenseUri,
+      globalProvenanceId: null
+    })
+
+    return [additionalLicense, ...this.licenses]
+  }
+
+  get valueLicense (): ICvSelectItem | null {
+    if (!this.value.licenseName && !this.value.licenseUri) {
+      return null
+    }
+    const license = this.licenses.find(l => l.uri === this.value.licenseUri)
+    if (license) {
+      return license
+    }
+    return new CvSelectItem({
+      name: this.value.licenseName,
+      uri: this.value.licenseUri,
+      definition: '',
+      id: null
+    })
+  }
+
+  get valueLicenseDefinition (): string {
+    return this.valueLicense?.definition || ''
+  }
+
+  updateLicense (value: LicenseComboboxValue) {
+    const newObj = TsmLinking.createFromObject(this.value)
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.licenseName = value
+        const licenseIndex = this.licenses.findIndex(l => l.name === value)
+        if (licenseIndex > -1) {
+          newObj.licenseUri = this.licenses[licenseIndex].uri
+        } else {
+          newObj.licenseUri = ''
+        }
+      } else {
+        newObj.licenseName = value.name
+        newObj.licenseUri = value.uri
+      }
+    } else {
+      newObj.licenseUri = ''
+      newObj.licenseName = ''
+    }
+    this.$emit('input', newObj)
+  }
+
   async update (key: string, result: any) {
     const newObj = TsmLinking.createFromObject(this.value)
     switch (key) {
@@ -406,6 +578,9 @@ export default class TsmLinkingForm extends mixins(Rules) {
         break
       case 'endDate':
         newObj.endDate = result
+        break
+      case 'aggregationPeriod':
+        newObj.aggregationPeriod = result
         break
     }
     this.$emit('input', newObj)

@@ -105,6 +105,7 @@ import {
 } from '@/store/tsmLinking'
 import TsmLinkingFormItemHeader from '@/components/configurations/tsmLinking/TsmLinkingFormItemHeader.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
+import { LoadLicensesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -121,7 +122,8 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
   methods: {
     ...mapActions('tsmLinking', [
       'loadConfigurationTsmLinkings', 'updateConfigurationTsmLinking', 'loadThingsForDatasource', 'loadDatastreamsForDatasourceAndThing', 'loadDatasources'
-    ])
+    ]),
+    ...mapActions('vocabulary', ['loadLicenses'])
   }
 
 })
@@ -140,6 +142,7 @@ export default class TsmLinkingEditPage extends Vue {
   loadTsmEndpoints!: LoadTsmEndpointsAction
   loadThingsForDatasource!: LoadThingsForDatasourceAction
   loadDatastreamsForDatasourceAndThing!: LoadDatastreamsForDatasourceAndThingAction
+  loadLicenses!: LoadLicensesAction
 
   async created () {
     this.editLinking = TsmLinking.createFromObject(this.linking!)
@@ -150,7 +153,8 @@ export default class TsmLinkingEditPage extends Vue {
         endpoint: this.editLinking.tsmEndpoint!,
         datasource: this.editLinking.datasource!,
         thing: this.editLinking.thing!
-      })
+      }),
+      this.loadLicenses()
     ])
   }
 

@@ -81,6 +81,7 @@ import { AggregationTypeApi } from '@/services/cv/AggregationTypeApi'
 import { ActionCategoryApi } from '@/services/cv/ActionCategoryApi'
 import { SiteUsageApi } from '@/services/cv/SiteUsageApi'
 import { CountryApi } from '@/services/cv/CountryApi'
+import { LicenseApi } from '@/services/cv/LicenseApi'
 
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
@@ -169,6 +170,7 @@ export class Api {
   private readonly _siteUsageApi: SiteUsageApi
   private readonly _siteTypeApi: SiteTypeApi
   private readonly _countryApi: CountryApi
+  private readonly _licenseApi: LicenseApi
 
   private readonly _elevationDatumApi: ElevationDatumApi
   private readonly _epsgCodeApi: EpsgCodeApi
@@ -493,6 +495,10 @@ export class Api {
       createAxios(cvBaseUrl, cvConfig, getIdToken),
       '/countries/'
     )
+    this._licenseApi = new LicenseApi(
+      createAxios(cvBaseUrl, cvConfig, getIdToken),
+      '/licenses/'
+    )
 
     // and here we can set settings for all the tsmdl api calls
     const tsmdlConfig: AxiosRequestConfig = {
@@ -702,6 +708,10 @@ export class Api {
 
   get countries (): CountryApi {
     return this._countryApi
+  }
+
+  get licenses (): LicenseApi {
+    return this._licenseApi
   }
 
   get userInfoApi (): UserInfoApi {

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within the
  * Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2022 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -91,15 +91,19 @@ export class TsmLinkingSerializer {
       tsmLinking.endDate = attributes.end_date ? DateTime.fromISO(attributes.end_date, { zone: 'UTC' }) : null
 
       const datastream = new TsmdlDatastream(attributes.datastream_id.toString())
-      datastream.name = attributes.datastream_name
+      datastream.name = attributes.datastream_name || ''
       const datasource = new TsmdlDatasource(attributes.datasource_id.toString())
-      datasource.name = attributes.datasource_name
+      datasource.name = attributes.datasource_name || ''
       const thing = new TsmdlThing(attributes.thing_id.toString())
-      thing.name = attributes.thing_name
+      thing.name = attributes.thing_name || ''
 
       tsmLinking.datastream = datastream
       tsmLinking.thing = thing
       tsmLinking.datasource = datasource
+
+      tsmLinking.licenseName = attributes.license_name || ''
+      tsmLinking.licenseUri = attributes.license_uri || ''
+      tsmLinking.aggregationPeriod = !isNaN(attributes.aggregation_period) ? attributes.aggregation_period : null
     }
 
     for (const includedEntry of included) {
@@ -132,17 +136,17 @@ export class TsmLinkingSerializer {
     const deviceMountActionRelationship = relationships.device_mount_action as IJsonApiRelationships
     const deviceMountActionData = deviceMountActionRelationship.data as IJsonApiEntityWithoutDetails
     const deviceMountActionId = deviceMountActionData.id
-    const deviceMountAction = deviceMountActionLookup[deviceMountActionId]
+    const deviceMountAction = deviceMountActionLookup[deviceMountActionId] || null
 
     const devicePropertyRelationship = relationships.device_property as IJsonApiRelationships
     const devicePropertyData = devicePropertyRelationship.data as IJsonApiEntityWithoutDetails
     const devicePropertyId = devicePropertyData.id
-    const deviceProperty = devicePropertyLookup[devicePropertyId]
+    const deviceProperty = devicePropertyLookup[devicePropertyId] || null
 
     const tsmEndpointRelationship = relationships.tsm_endpoint as IJsonApiRelationships
     const tsmEndpointData = tsmEndpointRelationship.data as IJsonApiEntityWithoutDetails
     const tsmEndpointId = tsmEndpointData.id
-    const tsmEndpoint = tsmEndpointLookup[tsmEndpointId]
+    const tsmEndpoint = tsmEndpointLookup[tsmEndpointId] || null
 
     const includedDevices: Device[] = Object.values(deviceLookup)
     const device = includedDevices.find(
@@ -165,7 +169,7 @@ export class TsmLinkingSerializer {
     const data: any = {
       type: 'datastream_link',
       attributes: {
-        begin_date: tsmLinking.startDate!.setZone('UTC').toISO(),
+        begin_date: tsmLinking.startDate?.setZone('UTC').toISO() ?? null,
         end_date: tsmLinking.endDate?.setZone('UTC').toISO() ?? null,
         datasource_id: tsmLinking.datasource!.id,
         datastream_id: tsmLinking.datastream!.id,
@@ -173,7 +177,9 @@ export class TsmLinkingSerializer {
         datasource_name: tsmLinking.datasource!.name,
         datastream_name: tsmLinking.datastream!.name,
         thing_name: tsmLinking.thing!.name,
-        tsm_endpoint: tsmLinking.tsmEndpoint!.url
+        license_name: tsmLinking.licenseName,
+        license_uri: tsmLinking.licenseUri,
+        aggregation_period: tsmLinking.aggregationPeriod
       },
       relationships: {
         device_mount_action: {
