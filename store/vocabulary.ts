@@ -54,6 +54,7 @@ import { CvContactRole } from '@/models/CvContactRole'
 import { SiteType } from '@/models/SiteType'
 import { SiteUsage } from '@/models/SiteUsage'
 import { Country } from '@/models/Country'
+import { License } from '@/models/License'
 
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION, ActionTypeApiFilterType } from '@/services/cv/ActionTypeApi'
 import { GlobalProvenance } from '@/models/GlobalProvenance'
@@ -87,6 +88,7 @@ export interface VocabularyState {
   siteUsages: SiteUsage[],
   siteTypes: SiteType[],
   countries: Country[],
+  licenses: License[]
 }
 
 const state = (): VocabularyState => ({
@@ -110,7 +112,8 @@ const state = (): VocabularyState => ({
   actionCategories: [],
   siteUsages: [],
   siteTypes: [],
-  countries: []
+  countries: [],
+  licenses: []
 })
 
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
@@ -237,6 +240,7 @@ export type LoadActionCategoriesAction = () => Promise<void>
 export type LoadSiteUsagesAction = () => Promise<void>
 export type LoadSiteTypesAction = () => Promise<void>
 export type LoadCountriesAction = () => Promise<void>
+export type LoadLicensesAction = () => Promise<void>
 export type AddDeviceTypeAction = ({ devicetype }: {devicetype: DeviceType}) => Promise<DeviceType>
 export type AddPlatformTypeAction = ({ platformtype }: {platformtype: PlatformType}) => Promise<PlatformType>
 export type AddManufacturerAction = ({ manufacturer }: { manufacturer: Manufacturer}) => Promise<Manufacturer>
@@ -251,6 +255,7 @@ export type AddMeasuredQuantityUnitAction = ({ measuredQuantityUnit }: { measure
 export type AddSiteUsageAction = ({ siteUsage }: { siteUsage: SiteUsage }) => Promise<SiteUsage>
 export type AddSiteTypeAction = ({ siteType }: { siteType: SiteType }) => Promise<SiteType>
 export type AddAggregationTypeAction = ({ aggregationType }: { aggregationType: AggregationType}) => Promise<AggregationType>
+export type AddLicenseAction = ({ license }: { license: License }) => Promise<License>
 
 const actions: ActionTree<VocabularyState, RootState> = {
   async loadManufacturers ({ commit }: { commit: Commit }): Promise<void> {
@@ -320,6 +325,9 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadCountries ({ commit }: { commit: Commit }): Promise<void> {
     commit('setCountries', await this.$api.countries.findAll())
+  },
+  async loadLicenses ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setLicenses', await this.$api.licenses.findAll())
   },
   async addDevicetype ({ commit, state }: {commit: Commit, state: VocabularyState }, { devicetype }: {devicetype: DeviceType }): Promise<DeviceType> {
     const newDevicetype = await this.$api.deviceTypes.add(devicetype)
@@ -412,6 +420,12 @@ const actions: ActionTree<VocabularyState, RootState> = {
     const aggregationTypes = [...state.aggregationtypes, newAggregationType]
     await commit('setAggregationtypes', aggregationTypes)
     return newAggregationType
+  },
+  async addLicense ({ commit, state }: {commit: Commit, state: VocabularyState}, { license }: { license: License}): Promise<License> {
+    const newLicense = await this.$api.licenses.add(license)
+    const licenses = [...state.licenses, newLicense]
+    await commit('setLicenses', licenses)
+    return newLicense
   }
 }
 
@@ -478,6 +492,9 @@ const mutations = {
   },
   setCountries (state: VocabularyState, countries: Country[]) {
     state.countries = countries
+  },
+  setLicenses (state: VocabularyState, licenses: License[]) {
+    state.licenses = licenses
   }
 }
 

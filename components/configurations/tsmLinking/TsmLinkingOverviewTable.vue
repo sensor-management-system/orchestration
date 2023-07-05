@@ -133,8 +133,13 @@ export default class TsmLinkingOverviewTable extends Vue {
     }, {
       text: 'End date',
       value: 'endDate'
-    },
-    { text: 'Actions', value: 'actions', sortable: false }
+    }, {
+      text: 'License',
+      value: 'licenseName'
+    }, {
+      text: 'Aggregation',
+      value: 'aggregationText'
+    }, { text: 'Actions', value: 'actions', sortable: false }
   ]
 
   private itemToDelete: TsmLinking | null = null
@@ -165,7 +170,9 @@ export default class TsmLinkingOverviewTable extends Vue {
         datasource: linking.datasource,
         datastream: linking.datastream,
         thing: linking.thing,
-        tsmEndpoint: linking.tsmEndpoint
+        tsmEndpoint: linking.tsmEndpoint,
+        licenseName: linking.licenseName,
+        aggregationText: linking.aggregationText
       }
     })
   }
