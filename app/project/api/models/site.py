@@ -182,7 +182,7 @@ class Site(
             "settings": settings_with_ngrams(
                 analyzer_name="ngram_analyzer",
                 filter_name="ngram_filter",
-                min_ngram=3,
+                min_ngram=1,
                 max_ngram=10,
                 max_ngram_diff=10,
             ),
