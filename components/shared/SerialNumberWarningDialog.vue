@@ -62,7 +62,7 @@ permissions and limitations under the Licence.
           color="warning"
           @click="confirm"
         >
-          Save anyways
+          Save anyway
         </v-btn>
       </v-card-actions>
     </v-card>
