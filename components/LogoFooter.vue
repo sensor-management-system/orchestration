@@ -34,26 +34,31 @@ permissions and limitations under the Licence.
     <v-row no-gutters>
       <v-col>
         <v-row class="image-footer elevation-4" :class="{'mb-10' : !isLandingPage, 'pb-16' : $vuetify.breakpoint.smAndDown}">
-          <v-col cols="12" md="9">
+          <v-col cols="10" md="9">
             <v-row class="d-flex justify-space-around justify-center align-center">
-              <v-col cols="3" class="align-self-center">
+              <v-col cols="2" class="align-self-center">
                 <a href="https://www.ufz.de/index.php?en=33573" target="_blank"><v-img contain height="4em" src="logos/UFZ_Logo_CMYK_EN.svg" /></a>
               </v-col>
-              <v-col cols="3" class="align-self-center">
+              <v-col cols="2" class="align-self-center">
                 <a href="https://www.ufz.de/index.php?en=45348" target="_blank"><v-img contain height="3em" src="logos/RDM_fullcolor.svg" /></a>
               </v-col>
-              <v-col cols="3" class="align-self-center">
+              <v-col cols="2" class="align-self-center">
                 <a href="https://www.gfz-potsdam.de/en/" target="_blank">
                   <v-img contain height="3em" src="logos/GFZ-Logo_eng_RGB.svg" />
                 </a>
               </v-col>
-              <v-col cols="3" class="align-self-center">
+              <v-col cols="2" class="align-self-center">
+                <a href="https://www.fz-juelich.de/en/" target="_blank">
+                  <v-img contain height="2.3em" src="logos/FZJ-Logo.svg" />
+                </a>
+              </v-col>
+              <v-col cols="2" class="align-self-center">
                 <a href="https://datahub.erde-und-umwelt.de/en/" target="_blank"><v-img contain height="2.5em" src="logos/datahublogo.svg" /></a>
               </v-col>
             </v-row>
           </v-col>
           <v-col align-self="center" class="body-2 footer-text" cols="12" md="3">
-            SMS, developed by <a href="https://www.gfz-potsdam.de/en/" target="_blank">GFZ</a> and <a href="https://www.ufz.de/index.php?en=45348" target="_blank">RDM</a> at <a href="https://www.ufz.de/index.php?en=33573" target="_blank">UFZ</a> as part of the <a href="https://datahub.erde-und-umwelt.de/en/" target="_blank">DataHub</a> initiative.
+            SMS, developed by <a href="https://www.gfz-potsdam.de/en/" target="_blank">GFZ,</a> <a href="https://www.fz-juelich.de/en/" target="_blank">FZJ</a> and <a href="https://www.ufz.de/index.php?en=45348" target="_blank">RDM</a> at <a href="https://www.ufz.de/index.php?en=33573" target="_blank">UFZ</a> as part of the <a href="https://datahub.erde-und-umwelt.de/en/" target="_blank">DataHub</a> initiative.
           </v-col>
         </v-row>
       </v-col>
