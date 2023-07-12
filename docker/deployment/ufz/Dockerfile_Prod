@@ -26,13 +26,13 @@ ENV FLASK_DEBUG $FLASK_DEBUG_ARG
 ARG ELASTICSEARCH_URL_ARG=https://webapp.ufz.de:443/sms/elasticsearch/
 ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL_ARG
 
-ARG WELL_KNOWN_URL_ARG=https://idc.ufz.de/realms/webapp-base-extern/.well-known/openid-configuration
+ARG WELL_KNOWN_URL_ARG=https://login.helmholtz.de/oauth2/.well-known/openid-configuration
 ENV WELL_KNOWN_URL $WELL_KNOWN_URL_ARG
 
 ARG OIDC_CLIENT_ID_ARG
 ENV OIDC_CLIENT_ID $OIDC_CLIENT_ID_ARG
 
-ARG OIDC_USERNAME_CLAIM_ARG=sub
+ARG OIDC_USERNAME_CLAIM_ARG=eduperson_principal_name
 ENV OIDC_USERNAME_CLAIM $OIDC_USERNAME_CLAIM_ARG
 
 ARG HTTP_ORIGINS_ARG=https://webapp.ufz.de
