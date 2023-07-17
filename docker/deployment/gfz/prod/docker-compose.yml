@@ -70,7 +70,7 @@ services:
       SQL_HOST: vocabulary-db
       SQL_PORT: 5432
       CORS_ORIGIN_WHITELIST: 'https://sensors.gfz-potsdam.de'
-      EMAIL_HOST: 'mail.gfz-potsdam.de'
+      GITLAB_TOKEN: $SMS_CV_GITLAB_TOKEN
     volumes:
       - vocabulary-static-files:/static/cv
     networks:
