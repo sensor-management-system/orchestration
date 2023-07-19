@@ -1,8 +1,12 @@
-# SPDX-FileCopyrightText: 2021
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
+
+"""Tests for the platform model."""
 
 from project.api.models.base_model import db
 from project.api.models.platform import Platform
@@ -11,12 +15,10 @@ from project.tests.base import BaseTestCase
 
 
 class TestPlatformModel(BaseTestCase):
-    """
-    Test Event Services
-    """
+    """Test class for the platform model."""
 
     def test_add_platform_model(self):
-        """""Ensure Add platform model """
+        """Ensure we can add a platform model to the database."""
         platform = Platform(
             id=13,
             short_name="short_name test",
@@ -43,3 +45,9 @@ class TestPlatformModel(BaseTestCase):
 
         p = db.session.query(Platform).filter_by(id=platform.id).one()
         self.assertIn(p.persistent_identifier, "persistent_identifier_test")
+
+    def test_text_search_fields(self):
+        """Ensure the most important fields are in the fields for full text search."""
+        text_fields = Platform.text_search_fields()
+        self.assertTrue("short_name" in text_fields)
+        self.assertFalse("created_by_id" in text_fields)

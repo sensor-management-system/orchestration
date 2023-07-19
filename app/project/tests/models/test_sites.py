@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -78,3 +78,9 @@ class TestSites(BaseTestCase):
         site.is_public = True
         db.session.add(site)
         db.session.commit()
+
+    def test_text_search_fields(self):
+        """Ensure the most important fields are in the fields for full text search."""
+        text_fields = Site.text_search_fields()
+        self.assertTrue("label" in text_fields)
+        self.assertFalse("created_by_id" in text_fields)

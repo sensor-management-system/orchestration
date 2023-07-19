@@ -24,6 +24,15 @@ from project.api.datalayers.esalchemy import (
 )
 
 
+class FakeModel:
+    """Fake model to test the es query builder."""
+
+    @classmethod
+    def text_search_fields(cls):
+        """Return the list entry to search in all fields."""
+        return ["*"]
+
+
 class TestEsQueryBuilder(unittest.TestCase):
     """This are the test cases for the es query builder."""
 
@@ -49,67 +58,91 @@ class TestEsQueryBuilder(unittest.TestCase):
         """
         expected_filters = {
             # Some very simple cases
-            "search1": MultiFieldMatchFilter(query="search1", type_="phrase"),
-            "search2": MultiFieldMatchFilter(query="search2", type_="phrase"),
+            "search1": MultiFieldMatchFilter(
+                query="search1", type_="phrase", fields=["*"]
+            ),
+            "search2": MultiFieldMatchFilter(
+                query="search2", type_="phrase", fields=["*"]
+            ),
             # A multi word query => search for each of the terms.
             "something different": AndFilter(
                 sub_filters=[
-                    MultiFieldMatchFilter(query="something", type_="phrase"),
-                    MultiFieldMatchFilter(query="different", type_="phrase"),
+                    MultiFieldMatchFilter(
+                        query="something", type_="phrase", fields=["*"]
+                    ),
+                    MultiFieldMatchFilter(
+                        query="different", type_="phrase", fields=["*"]
+                    ),
                 ]
             ),
             # Use quoting to search for both terms in one field.
             'something "very different"': AndFilter(
                 sub_filters=[
-                    MultiFieldMatchFilter(query="something", type_="phrase"),
-                    MultiFieldMatchFilter(query="very different", type_="phrase"),
+                    MultiFieldMatchFilter(
+                        query="something", type_="phrase", fields=["*"]
+                    ),
+                    MultiFieldMatchFilter(
+                        query="very different", type_="phrase", fields=["*"]
+                    ),
                 ]
             ),
             # Allow to use alternatives.
             "term1 OR term2": OrFilter(
                 sub_filters=[
-                    MultiFieldMatchFilter(query="term1", type_="phrase"),
-                    MultiFieldMatchFilter(query="term2", type_="phrase"),
+                    MultiFieldMatchFilter(query="term1", type_="phrase", fields=["*"]),
+                    MultiFieldMatchFilter(query="term2", type_="phrase", fields=["*"]),
                 ]
             ),
             # Support the AND as well
             "term1 AND term2": AndFilter(
                 sub_filters=[
-                    MultiFieldMatchFilter(query="term1", type_="phrase"),
-                    MultiFieldMatchFilter(query="term2", type_="phrase"),
+                    MultiFieldMatchFilter(query="term1", type_="phrase", fields=["*"]),
+                    MultiFieldMatchFilter(query="term2", type_="phrase", fields=["*"]),
                 ]
             ),
             # And we want to be able to negate things
             "-term3": MustNotFilter(
-                inner_filter=MultiFieldMatchFilter(query="term3", type_="phrase"),
+                inner_filter=MultiFieldMatchFilter(
+                    query="term3", type_="phrase", fields=["*"]
+                ),
             ),
             # And to make sure we don't run into errors when query strings
             # are a bit strange.
             # We ignore ANDs anyway (as it is our default combination of
             # search terms), so this is simple.
-            "term1 AND": MultiFieldMatchFilter(query="term1", type_="phrase"),
+            "term1 AND": MultiFieldMatchFilter(
+                query="term1", type_="phrase", fields=["*"]
+            ),
             # If we don't have an or filter term, then we just use the
             # query as we has it so far.
-            "term1 OR": MultiFieldMatchFilter(query="term1", type_="phrase"),
+            "term1 OR": MultiFieldMatchFilter(
+                query="term1", type_="phrase", fields=["*"]
+            ),
             # If we have OR as first term then we are just skip it, as
             # we have nothing to combine it with.
-            "OR term1": MultiFieldMatchFilter(query="term1", type_="phrase"),
+            "OR term1": MultiFieldMatchFilter(
+                query="term1", type_="phrase", fields=["*"]
+            ),
             # And we support multiple level of or filters.
             "term1 OR term2 OR term3": OrFilter(
                 sub_filters=[
                     OrFilter(
                         sub_filters=[
-                            MultiFieldMatchFilter(query="term1", type_="phrase"),
-                            MultiFieldMatchFilter(query="term2", type_="phrase"),
+                            MultiFieldMatchFilter(
+                                query="term1", type_="phrase", fields=["*"]
+                            ),
+                            MultiFieldMatchFilter(
+                                query="term2", type_="phrase", fields=["*"]
+                            ),
                         ],
                     ),
-                    MultiFieldMatchFilter(query="term3", type_="phrase"),
+                    MultiFieldMatchFilter(query="term3", type_="phrase", fields=["*"]),
                 ]
             ),
             # We ingore some stranger quoting. Better to search for those,
             # then to thrown an error.
             "\"super strange 'quoting": MultiFieldMatchFilter(
-                query="super strange 'quoting", type_="phrase"
+                query="super strange 'quoting", type_="phrase", fields=["*"]
             ),
         }
         for q, expected_filter in expected_filters.items():
@@ -119,7 +152,8 @@ class TestEsQueryBuilder(unittest.TestCase):
             is_set = builder.is_set()
             self.assertTrue(is_set)
 
-            used_filter = builder.to_filter()
+            fake_model = FakeModel()
+            used_filter = builder.to_filter(fake_model)
             self.assertEqual(used_filter, expected_filter)
 
     def test_fill_query_string_from_request_args(self):
@@ -151,7 +185,8 @@ class TestEsQueryBuilder(unittest.TestCase):
         is_set = builder.is_set()
         self.assertTrue(is_set)
 
-        used_filter = builder.to_filter()
+        fake_model = FakeModel()
+        used_filter = builder.to_filter(fake_model)
         expected_filter = TermEqualsExactStringFilter(term="short_name", value="boeken")
 
         self.assertEqual(used_filter, expected_filter)
@@ -170,7 +205,8 @@ class TestEsQueryBuilder(unittest.TestCase):
         is_set = builder.is_set()
         self.assertTrue(is_set)
 
-        used_filter = builder.to_filter()
+        fake_model = FakeModel()
+        used_filter = builder.to_filter(fake_model)
         expected_filter = NestedElementFilterWrapper(
             "contacts",
             TermEqualsExactStringFilter(
@@ -189,7 +225,8 @@ class TestEsQueryBuilder(unittest.TestCase):
         is_set = builder.is_set()
         self.assertTrue(is_set)
 
-        used_filter = builder.to_filter()
+        fake_model = FakeModel()
+        used_filter = builder.to_filter(fake_model)
         expected_filter = NestedElementFilterWrapper(
             "devices",
             NestedElementFilterWrapper(
@@ -227,10 +264,11 @@ class TestEsQueryBuilder(unittest.TestCase):
         builder.q = "Boeken"  # Search on all the fields
         builder.filters.append({"short_name": "boeken"})
 
-        es_filter = builder.to_filter()
+        fake_model = FakeModel()
+        es_filter = builder.to_filter(fake_model)
         expected = AndFilter(
             [
-                MultiFieldMatchFilter(query="Boeken", type_="phrase"),
+                MultiFieldMatchFilter(query="Boeken", type_="phrase", fields=["*"]),
                 TermEqualsExactStringFilter(term="short_name", value="boeken"),
             ]
         )
@@ -248,7 +286,7 @@ class TestMultiMatchStringFilter(unittest.TestCase):
     def test_to_query(self):
         """Test the query generation for the filter."""
         for q in ["search1", "search2", "something different"]:
-            multi_match_filter = MultiFieldMatchFilter(query=q)
+            multi_match_filter = MultiFieldMatchFilter(query=q, fields=["*"])
             es_query = multi_match_filter.to_query()
             expected = {
                 "multi_match": {"query": q, "type": "best_fields", "fields": ["*"]}
@@ -256,7 +294,9 @@ class TestMultiMatchStringFilter(unittest.TestCase):
             self.assertEqual(es_query, expected)
 
         for q in ["search1", "search2", "something different"]:
-            multi_match_filter = MultiFieldMatchFilter(query=q, type_="phrase")
+            multi_match_filter = MultiFieldMatchFilter(
+                query=q, type_="phrase", fields=["*"]
+            )
             es_query = multi_match_filter.to_query()
             expected = {"multi_match": {"query": q, "type": "phrase", "fields": ["*"]}}
             self.assertEqual(es_query, expected)
@@ -268,6 +308,12 @@ class TestMultiMatchStringFilter(unittest.TestCase):
         filter3 = MultiFieldMatchFilter(query="b")
         filter4 = MultiFieldMatchFilter(query="b", type_="phrase")
         filter5 = MultiFieldMatchFilter(query="a", type_="best_fields")
+        filter6 = MultiFieldMatchFilter(
+            query="a", type_="best_fields", fields=["a", "b"]
+        )
+        filter7 = MultiFieldMatchFilter(
+            query="a", type_="best_fields", fields=["a", "b"]
+        )
 
         self.assertEqual(filter1, filter2)
         self.assertNotEqual(filter1, filter3)
@@ -275,6 +321,8 @@ class TestMultiMatchStringFilter(unittest.TestCase):
 
         self.assertEqual(filter1, filter5)
         self.assertNotEqual(filter4, filter5)
+        self.assertNotEqual(filter5, filter6)
+        self.assertEqual(filter6, filter7)
 
 
 class TestTermEqualsExactStringFilter(unittest.TestCase):
