@@ -10,7 +10,8 @@
 
 import csv
 import io
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 from flask import current_app, request
 from flask_rest_jsonapi.data_layers.alchemy import SqlalchemyDataLayer
@@ -22,6 +23,7 @@ class MultiFieldMatchFilter:
 
     query: str
     type_: str = "best_fields"
+    fields: List[str] = field(default_factory=lambda: ["*"])
     # The type_ of best_fields is the default value that
     # the elasticsearch uses if no explicit value is given.
     # Ok to search full words, but for substring matches
@@ -30,7 +32,11 @@ class MultiFieldMatchFilter:
     def to_query(self):
         """Convert the filter to a query."""
         result = {
-            "multi_match": {"query": self.query, "type": self.type_, "fields": ["*"]},
+            "multi_match": {
+                "query": self.query,
+                "type": self.type_,
+                "fields": self.fields,
+            },
         }
         return result
 
@@ -394,13 +400,14 @@ class EsQueryBuilder:
         values = [x.strip() for x in next(csv.reader(io.StringIO(q), delimiter=" "))]
         return values
 
-    def to_filter(self):
+    def to_filter(self, model):
         """Return the filter out of the settings."""
         sub_filters = []
         if self.q:
             and_filters = []
             parts = self.split_query(self.q)
             idx = 0
+            text_search_fields = model.text_search_fields()
             while idx < len(parts):
                 part = parts[idx]
                 if part == "AND":
@@ -411,7 +418,9 @@ class EsQueryBuilder:
                     if idx + 1 < len(parts) and and_filters:
                         or1 = and_filters[-1]
                         or2 = MultiFieldMatchFilter(
-                            query=parts[idx + 1], type_="phrase"
+                            query=parts[idx + 1],
+                            type_="phrase",
+                            fields=text_search_fields,
                         )
                         and_filters[-1] = OrFilter(sub_filters=[or1, or2])
                         idx += 2
@@ -422,12 +431,18 @@ class EsQueryBuilder:
                     if part.startswith("-"):
                         and_filters.append(
                             MustNotFilter(
-                                MultiFieldMatchFilter(query=part[1:], type_="phrase")
+                                MultiFieldMatchFilter(
+                                    query=part[1:],
+                                    type_="phrase",
+                                    fields=text_search_fields,
+                                )
                             )
                         )
                     else:
                         and_filters.append(
-                            MultiFieldMatchFilter(query=part, type_="phrase")
+                            MultiFieldMatchFilter(
+                                query=part, type_="phrase", fields=text_search_fields
+                            )
                         )
                     idx += 1
             sub_filters.append(AndFilter(and_filters).simplify())
@@ -506,7 +521,7 @@ class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
         per_page = pagination["size"]
 
         # Then we run our search.
-        search_filter = query_builder.to_filter()
+        search_filter = query_builder.to_filter(self.model)
         if es_filter_query:
             search_filter = AndFilter([search_filter, es_filter_query])
         search_query = search_filter.to_query()

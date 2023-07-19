@@ -18,6 +18,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.mutable import MutableList
 
 from ..helpers.errors import ConflictError
+from ..helpers.memorize import memorize
 from ..search import (
     add_to_index,
     create_index,
@@ -348,6 +349,62 @@ class SearchableMixin:
         for obj in cls.query:
             entry = obj.to_search_entry()
             add_to_index(cls.__tablename__, obj, entry)
+
+    @classmethod
+    @memorize
+    def text_search_fields(cls):
+        """
+        Get the list of text search fields that the elasticsearch can use.
+
+        A list of ["*"] will use every field in the index.
+        Otherwise it needs to be a list like ["name", "description"].
+
+        If we don't add a field, we can exclude it to be used from the search.
+        And we can boost some of the fields to be more important:
+        ["name^3", "description"]
+        """
+        if not hasattr(cls, "get_search_index_definition"):
+            return ["*"]
+        # However, if we have the search index definition, we can
+        # use this one to create a list of fields.
+        properties = cls.get_search_index_definition()["mappings"]["properties"]
+        result = []
+
+        def yield_search_fields(prefix, properties):
+            for key, value in properties.items():
+                # if it is nested, then we want to go deeper.
+                if value.get("properties"):
+                    new_prefix = key
+                    if prefix:
+                        new_prefix = prefix + "." + new_prefix
+                    yield from yield_search_fields(new_prefix, value.get("properties"))
+                else:
+                    # Otherweise we don't want to deal with booleans, dates,
+                    # or integers for the full text search.
+                    # (Integers are in our case system ids, that we
+                    # don't want to include in the full text search).
+                    if value.get("type") not in [
+                        "boolean",
+                        "date",
+                        "integer",
+                        "geo_shape",
+                        "float",
+                    ]:
+                        res = key
+                        if prefix:
+                            res = prefix + "." + key
+                        yield res
+                        for field in value.get("fields", {}).keys():
+                            # In case we have multiple representations
+                            # (keyword and search_as_you_type for example)
+                            # we want to have all of them to be used for the text search.
+                            yield res + "." + field
+
+        result = list(yield_search_fields(prefix="", properties=properties))
+        # Child classes could take the list & ignore some of the fields.
+        # Or can start boosting some of them. But this can't be part of
+        # this mixin here.
+        return result
 
 
 db.event.listen(db.session, "before_commit", SearchableMixin.before_commit)

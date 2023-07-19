@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -86,3 +86,9 @@ class TestConfigurationsModel(BaseTestCase):
 
         c = db.session.query(Configuration).filter_by(label="Config1").first()
         self.assertEqual("Config1", c.label)
+
+    def test_text_search_fields(self):
+        """Ensure the most important fields are in the fields for full text search."""
+        text_fields = Configuration.text_search_fields()
+        self.assertTrue("label" in text_fields)
+        self.assertFalse("created_by_id" in text_fields)
