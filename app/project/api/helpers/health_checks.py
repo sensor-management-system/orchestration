@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -6,15 +6,17 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""Health checks for our application."""
+
 import logging
 
 import requests
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
-from ..models.base_model import db
 from ... import minio
-from ...extensions.instances import pid
+from ...extensions.instances import pidinst
+from ..models.base_model import db
 
 
 def health_check_elastic_search():
@@ -52,7 +54,6 @@ def health_check_migrations():
 
     :return: boolean and a message
     """
-
     from alembic.runtime import migration
 
     with db.engine.begin() as conn:
@@ -73,12 +74,12 @@ def health_check_migrations():
 
 def health_check_minio():
     """
-    Check health status of minio-server
-    and proof if booth connection and the sms-bucket are True.
+    Check health status of minio-server.
+
+    Also check if both the connection and the sms-bucket are True.
 
     :return: boolean and a message
     """
-
     minio_bucket_name = current_app.config["MINIO_BUCKET_NAME"]
     try:
         minio_is_connected_and_bucket_exist = minio.connection.bucket_exists(
@@ -93,14 +94,14 @@ def health_check_minio():
         return False, "Error connecting to MinIO server."
 
 
-def health_check_pid_handler():
+def health_check_pidinst_handler():
     """
-    Check health status of the pid-Handler
+    Check health status of the pidinst handler.
 
     :return: boolean and a Message
     """
     try:
-        pid.list()
+        pidinst.check_availability()
         return True, "Handler server is ok"
     except requests.exceptions.HTTPError as e:
         logging.error("Error" + repr(e))

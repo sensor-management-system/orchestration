@@ -29,8 +29,8 @@ from ..schemas.configuration_static_location_actions_schema import (
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_configuration_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_configuration_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -78,7 +78,7 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
         """
         result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "create;static location action"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -125,7 +125,7 @@ class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "update;static location action"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -137,9 +137,22 @@ class ConfigurationStaticLocationBeginActionDetail(ResourceDetail):
         )
         if location_action is None:
             raise ObjectNotFound("Object not found!")
+        self.tasks_after_delete = []
+
         configuration = location_action.get_parent()
         msg = "delete;static location action"
-        set_update_description_text_and_update_by_user(configuration, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(configuration, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = ConfigurationStaticLocationBeginActionSchema
     decorators = (token_required,)

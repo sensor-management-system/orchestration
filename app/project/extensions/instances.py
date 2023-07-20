@@ -12,9 +12,11 @@ from .auth import Auth
 from .auth.mechanisms.apikey import ApikeyAuthMechanism
 from .auth.mechanisms.openidconnect import OpenIdConnectAuthMechanism
 from .auth.mechanisms.session import SessionAuthMechanism
+from .b2inst.extension import B2Inst
 from .idl import Idl
 from .openidconnect import WellKnownUrlConfigLoader
 from .pid import Pid
+from .pidinst import Pidinst
 
 well_known_url_config_loader = WellKnownUrlConfigLoader()
 session_auth_mechanism = SessionAuthMechanism()
@@ -28,4 +30,4 @@ auth = Auth(
     ]
 )
 idl = Idl()
-pid = Pid()
+pidinst = Pidinst(pid=Pid(), b2inst=B2Inst())

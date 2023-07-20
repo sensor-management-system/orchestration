@@ -27,8 +27,8 @@ from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
-    query_platform_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_platform_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -74,7 +74,7 @@ class PlatformAttachmentList(ResourceList):
         platform_id = result[0]["data"]["relationships"]["platform"]["data"]["id"]
         attachment_id = result[0]["data"]["id"]
         msg = "create;attachment"
-        query_platform_and_set_update_description_text(msg, platform_id)
+        query_platform_set_update_description_and_update_pidinst(msg, platform_id)
 
         data = db.session.query(PlatformAttachment).filter_by(id=attachment_id).first()
         if data and data.url.startswith(minio.download_endpoint(internal=True)):
@@ -137,21 +137,8 @@ class PlatformAttachmentDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["platform"]["data"]["id"]
         msg = "update;attachment"
-        query_platform_and_set_update_description_text(msg, result_id)
+        query_platform_set_update_description_and_update_pidinst(msg, result_id)
         return result
-
-    def before_delete(self, args, kwargs):
-        """Update the platform update description text."""
-        platform_attachment = (
-            db.session.query(PlatformAttachment)
-            .filter_by(id=kwargs["id"])
-            .one_or_none()
-        )
-        if platform_attachment is None:
-            raise ObjectNotFound("Object not found!")
-        platform = platform_attachment.get_parent()
-        msg = "delete;attachment"
-        set_update_description_text_and_update_by_user(platform, msg)
 
     def delete(self, *args, **kwargs):
         """
@@ -167,6 +154,8 @@ class PlatformAttachmentDetail(ResourceDetail):
         )
         if attachment is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
+        platform = attachment.get_parent()
+        msg = "delete;attachment"
         internal_url = attachment.internal_url
         try:
             super().delete(*args, **kwargs)
@@ -177,6 +166,7 @@ class PlatformAttachmentDetail(ResourceDetail):
 
         if internal_url:
             delete_attachments_in_minio_by_url(internal_url)
+        set_update_description_text_user_and_pidinst(platform, msg)
         final_result = {"meta": {"message": "Object successfully deleted"}}
 
         return final_result

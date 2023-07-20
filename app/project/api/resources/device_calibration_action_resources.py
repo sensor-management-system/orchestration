@@ -23,8 +23,8 @@ from ..schemas.calibration_actions_schema import DeviceCalibrationActionSchema
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_device_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_device_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -67,7 +67,7 @@ class DeviceCalibrationActionList(ResourceList):
         """
         result_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
         msg = "create;calibration action"
-        query_device_and_set_update_description_text(msg, result_id)
+        query_device_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -101,7 +101,7 @@ class DeviceCalibrationActionDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["device"]["data"]["id"]
         msg = "update;calibration action"
-        query_device_and_set_update_description_text(msg, result_id)
+        query_device_set_update_description_and_update_pidinst(msg, result_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -113,9 +113,21 @@ class DeviceCalibrationActionDetail(ResourceDetail):
         )
         if action is None:
             raise ObjectNotFound("Object not found!")
+        self.tasks_after_delete = []
         device = action.get_parent()
         msg = "delete;calibration action"
-        set_update_description_text_and_update_by_user(device, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(device, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = DeviceCalibrationActionSchema
     decorators = (token_required,)

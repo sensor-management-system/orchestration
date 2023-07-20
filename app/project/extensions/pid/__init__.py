@@ -6,13 +6,12 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Extension for the PID."""
-import json
 import string
+from uuid import uuid4
 
 import requests
 from flask import current_app
 from requests.auth import HTTPBasicAuth
-from uuid import uuid4
 
 from ...api.helpers.errors import ConflictError, ServiceIsUnreachableError
 
@@ -35,17 +34,17 @@ class Pid:
 
     @property
     def pid_service_url(self):
-        """The service url and prefix."""
+        """Get the service url and prefix."""
         return current_app.config["PID_SERVICE_URL"]
 
     @property
     def pid_service_user(self):
-        """The pid service username."""
+        """Get the pid service username."""
         return current_app.config["PID_SERVICE_USER"]
 
     @property
     def pid_service_password(self):
-        """The pid service password."""
+        """Get the pid service password."""
         return current_app.config["PID_SERVICE_PASSWORD"]
 
     @property
@@ -69,6 +68,7 @@ class Pid:
         return current_app.config["PID_CERT_KEY"]
 
     def get_request_body_admin_part(self):
+        """Create the payload for the admin part."""
         part = {
             "index": 100,
             "type": "HS_ADMIN",
@@ -208,7 +208,7 @@ class Pid:
                     "idx": 9,
                     "type": "Manufacturer",
                     "parsed_data": "https://localhost.localdomain/cv/api/v1/manufacturers/22/",
-                    "data": "aHR0cHM6Ly9sb2NhbGhvc3QubG9jYWxkb21haW4vY3YvYXBpL3YxL21hbnVm\nYWN0dXJlcnMvMjIv",
+                    "data": "aHR0cHM6Ly9sb2NhbGhvc3QubG9jYWxkb21haW4vY3YvYXBpL3YxL21hbnVm/nYWN0dXJlcnMvMjIv",
                     "timestamp": "2022-07-25T12:27:12Z",
                     "ttl_type": 0,
                     "ttl": 86400,
@@ -282,7 +282,7 @@ class Pid:
 
     def search(self, term=None, limit=0):
         """
-        search for a PID by using a term.
+        Search for a PID by using a term.
 
         :param limit: the limit of results
         :param term: a string to Search and get the PID of an object with the selected url.
@@ -298,14 +298,23 @@ class Pid:
         )
         return response.json()
 
-    def create(self, instrument_data) -> string:
+    def create(self, url) -> string:
         """
         Create a new PID.
 
-        :param instrument_data: the url for the source object.
+        :param url: the url for the source object.
         :return str: the pid of the object.
         """
-
+        instrument_data = [
+            {
+                "index": 1,
+                "type": "URL",
+                "data": {
+                    "format": "string",
+                    "value": url,
+                },
+            }
+        ]
         header = {
             "Content-Type": "application/json",
             "Authorization": 'Handle clientCert="true"',

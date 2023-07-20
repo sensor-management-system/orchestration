@@ -20,8 +20,8 @@ from ..schemas.customfield_schema import CustomFieldSchema
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_device_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_device_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -68,7 +68,7 @@ class CustomFieldList(ResourceList):
         """
         result_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
         msg = "create;custom field"
-        query_device_and_set_update_description_text(msg, result_id)
+        query_device_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -103,7 +103,7 @@ class CustomFieldDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["device"]["data"]["id"]
         msg = "update;custom field"
-        query_device_and_set_update_description_text(msg, result_id)
+        query_device_set_update_description_and_update_pidinst(msg, result_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -113,9 +113,21 @@ class CustomFieldDetail(ResourceDetail):
         )
         if custom_field is None:
             raise ObjectNotFound("Object not found!")
+        self.tasks_after_delete = []
         device = custom_field.get_parent()
         msg = "delete;custom field"
-        set_update_description_text_and_update_by_user(device, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(device, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = CustomFieldSchema
     decorators = (token_required,)

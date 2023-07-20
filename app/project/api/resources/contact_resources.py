@@ -8,19 +8,27 @@
 
 """Resource classes for contacts."""
 
+import itertools
+
 from flask_rest_jsonapi import ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...extensions.instances import pidinst
 from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
+from ..models import (
+    Configuration,
+    ConfigurationContactRole,
+    Contact,
+    Device,
+    DeviceContactRole,
+    Platform,
+    PlatformContactRole,
+)
 from ..models.base_model import db
-from ..models.configuration import Configuration
-from ..models.contact import Contact
-from ..models.device import Device
-from ..models.platform import Platform
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.contact_schema import ContactSchema
@@ -142,6 +150,56 @@ class ContactDetail(ResourceDetail):
             )
             if has_email:
                 raise ConflictError("Email already used.")
+
+    def after_patch(self, result, *args, **kwargs):
+        """Run some actions after patching the entry."""
+        contact_id = result["data"]["id"]
+        for instrument in itertools.chain(
+            db.session.query(Device)
+            .join(DeviceContactRole)
+            .filter(DeviceContactRole.contact_id == contact_id),
+            db.session.query(Platform)
+            .join(PlatformContactRole)
+            .filter(PlatformContactRole.contact_id == contact_id),
+            db.session.query(Configuration)
+            .join(ConfigurationContactRole)
+            .filter(ConfigurationContactRole.contact_id == contact_id),
+        ):
+            if pidinst.has_external_metadata(instrument):
+                pidinst.update_external_metadata(instrument)
+        return result
+
+    def before_delete(self, args, kwargs):
+        """Collect some tasks to run for the point after the deletion."""
+        contact_id = kwargs["id"]
+        instruments_with_external_metadata = []
+        for instrument in itertools.chain(
+            db.session.query(Device)
+            .join(DeviceContactRole)
+            .filter(DeviceContactRole.contact_id == contact_id),
+            db.session.query(Platform)
+            .join(PlatformContactRole)
+            .filter(PlatformContactRole.contact_id == contact_id),
+            db.session.query(Configuration)
+            .join(ConfigurationContactRole)
+            .filter(ConfigurationContactRole.contact_id == contact_id),
+        ):
+            if pidinst.has_external_metadata(instrument):
+                instruments_with_external_metadata.append(instrument)
+
+        self.tasks_after_delete = []
+
+        def run_updates():
+            for instrument in instruments_with_external_metadata:
+                pidinst.update_external_metadata(instrument)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some tasks after the deletion."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = ContactSchema
     decorators = (token_required,)

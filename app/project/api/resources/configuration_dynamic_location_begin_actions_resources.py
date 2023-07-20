@@ -34,8 +34,8 @@ from ..schemas.configuration_dynamic_location_actions_schema import (
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_configuration_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_configuration_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -124,14 +124,14 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
 
     def after_post(self, result):
         """
-        Add update description to related platform.
+        Add update description to related configuration.
 
         :param result:
         :return:
         """
         result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "create;dynamic location action"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -172,7 +172,7 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "update;dynamic location action"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -190,9 +190,21 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
                 device = xyz_property.device
                 if device.archived:
                     raise ConflictError("Device for property is archived")
+        self.tasks_after_delete = []
         configuration = location_action.get_parent()
         msg = "delete;dynamic location action"
-        set_update_description_text_and_update_by_user(configuration, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(configuration, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = ConfigurationDynamicLocationBeginActionSchema
     decorators = (token_required,)

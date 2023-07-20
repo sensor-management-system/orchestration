@@ -7,14 +7,24 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Tests for the platforms."""
+import datetime
 import os
+from unittest.mock import patch
+
+import pytz
+from flask import current_app
 
 from project import base_url
+from project.api.models import (
+    Configuration,
+    Contact,
+    Platform,
+    PlatformAttachment,
+    PlatformMountAction,
+    User,
+)
 from project.api.models.base_model import db
-from project.api.models.contact import Contact
-from project.api.models.platform import Platform
-from project.api.models.platform_attachment import PlatformAttachment
-from project.api.models.user import User
+from project.extensions.instances import pidinst
 from project.tests.base import (
     BaseTestCase,
     fake,
@@ -311,3 +321,109 @@ class TestPlatformServices(BaseTestCase):
         self.assertEqual(data[0]["attributes"]["archived"], False)
         self.assertEqual(data[1]["attributes"]["short_name"], "archived platform")
         self.assertEqual(data[1]["attributes"]["archived"], True)
+
+    def test_update_external_b2inst_metadata(self):
+        """Make sure that we ask the system to update the external metadata after a patch."""
+        platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
+
+        platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
+        result = super().add_object(
+            url=self.platform_url,
+            data_object=platform_data,
+            object_type=self.object_type,
+        )
+        result_id = result["data"]["id"]
+
+        user = add_user()
+        user.is_superuser = True
+        db.session.add(user)
+        db.session.commit()
+
+        platform = db.session.query(Platform).filter_by(id=result_id).first()
+        platform.b2inst_record_id = "123"
+        db.session.add(platform)
+        db.session.commit()
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+
+        with self.run_requests_as(user):
+            with self.client:
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    resp = self.client.patch(
+                        self.platform_url + "/" + result_id,
+                        json={
+                            "data": {
+                                "id": result_id,
+                                "type": "platform",
+                                "attributes": {
+                                    "long_name": "updated long name",
+                                },
+                            }
+                        },
+                        headers={"Content-Type": "application/vnd.api+json"},
+                    )
+                    update_external_metadata.assert_called_once()
+                    self.assertEqual(
+                        update_external_metadata.call_args.args[0].id, platform.id
+                    )
+        self.assertEqual(resp.status_code, 200)
+
+    def test_update_external_b2inst_metadata_for_configuration(self):
+        """Make sure that we ask the system to update the external metadata for configuration after a patch."""
+        platforms_json = extract_data_from_json_file(self.json_data_url, "platforms")
+
+        platform_data = {"data": {"type": "platform", "attributes": platforms_json[0]}}
+        result = super().add_object(
+            url=self.platform_url,
+            data_object=platform_data,
+            object_type=self.object_type,
+        )
+        result_id = result["data"]["id"]
+
+        user = add_user()
+        user.is_superuser = True
+        db.session.add(user)
+        db.session.commit()
+
+        platform = db.session.query(Platform).filter_by(id=result_id).first()
+        configuration = Configuration(label="Test config", b2inst_record_id="42")
+        platform_mount_action = PlatformMountAction(
+            configuration=configuration,
+            platform=platform,
+            begin_contact=user.contact,
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+        )
+        db.session.add_all([configuration, platform_mount_action])
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+
+        with self.run_requests_as(user):
+            with self.client:
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    resp = self.client.patch(
+                        self.platform_url + "/" + result_id,
+                        json={
+                            "data": {
+                                "id": result_id,
+                                "type": "platform",
+                                "attributes": {
+                                    "long_name": "updated long name",
+                                },
+                            }
+                        },
+                        headers={"Content-Type": "application/vnd.api+json"},
+                    )
+                    update_external_metadata.assert_called_once()
+                    self.assertEqual(
+                        update_external_metadata.call_args.args[0].id, configuration.id
+                    )
+        self.assertEqual(resp.status_code, 200)

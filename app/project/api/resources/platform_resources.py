@@ -11,11 +11,11 @@
 
 import os
 
-from flask import current_app, g, request
+from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
-from ...extensions.instances import pid
+from ...extensions.instances import pidinst
 from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     AndFilter,
@@ -28,9 +28,8 @@ from ..helpers.resource_mixin import (
     add_updated_by_id,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
+from ..models import Configuration, Platform, PlatformContactRole, PlatformMountAction
 from ..models.base_model import db
-from ..models.contact_role import PlatformContactRole
-from ..models.platform import Platform
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.platform_schema import PlatformSchema
@@ -116,11 +115,6 @@ class PlatformList(ResourceList):
 
         save_to_db(platform)
 
-        # if current_app.config["INSTITUTE"] == "ufz":
-        #    sms_frontend_url = current_app.config["SMS_FRONTEND_URL"]
-        #    source_object_url = f"{sms_frontend_url}/platforms/{str(platform.id)}"
-        #    add_pid(platform, source_object_url)
-
         return result
 
     schema = PlatformSchema
@@ -162,6 +156,17 @@ class PlatformDetail(ResourceDetail):
         platform.update_description = msg
         save_to_db(platform)
 
+        if pidinst.has_external_metadata(platform):
+            pidinst.update_external_metadata(platform)
+
+        for configuration in (
+            db.session.query(Configuration)
+            .join(PlatformMountAction)
+            .filter(PlatformMountAction.platform_id == result_id)
+        ):
+            if pidinst.has_external_metadata(configuration):
+                pidinst.update_external_metadata(configuration)
+
         return result
 
     def delete(self, *args, **kwargs):
@@ -174,11 +179,6 @@ class PlatformDetail(ResourceDetail):
         :return:
         """
         platform = db.session.query(Platform).filter_by(id=kwargs["id"]).first()
-
-        if current_app.config["INSTITUTE"] == "ufz":
-            pid_to_delete = platform.persistent_identifier
-            if pid_to_delete and pid.get(pid_to_delete).status_code == 200:
-                pid.delete(pid_to_delete)
 
         if platform is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
