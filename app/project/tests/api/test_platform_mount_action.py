@@ -10,12 +10,15 @@
 
 import datetime
 import json
+from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
+from flask import current_app
 
 from project import base_url
 from project.api.models import Configuration, Contact, Platform, PlatformMountAction
 from project.api.models.base_model import db
+from project.extensions.instances import pidinst
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import (
@@ -928,3 +931,118 @@ class TestPlatformMountAction(BaseTestCase):
                 headers=access_headers,
             )
         self.assertEqual(response.status_code, 409)
+
+    def test_update_external_metadata_after_post_of_platform_mount_action(self):
+        """Ensure we trigger the update_external_metadata when posting a platform mount action."""
+        userinfo = generate_userinfo_data()
+        platform = Platform(
+            short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        begin_contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        configuration = generate_configuration_model()
+        configuration.b2inst_record_id = "42"
+        begin_date = fake.future_datetime()
+
+        db.session.add_all(
+            [
+                platform,
+                begin_contact,
+                configuration,
+            ]
+        )
+        db.session.commit()
+
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "begin_description": "Test PlatformMountAction",
+                    "begin_date": str(begin_date),
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                },
+                "relationships": {
+                    "platform": {"data": {"type": "platform", "id": platform.id}},
+                    "begin_contact": {
+                        "data": {"type": "contact", "id": begin_contact.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": configuration.id}
+                    },
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with patch.object(
+            pidinst, "update_external_metadata"
+        ) as update_external_metadata:
+            update_external_metadata.return_value = None
+            super().add_object(
+                url=f"{self.url}?include="
+                + "platform,begin_contact,end_contact,parent_platform,configuration",
+                data_object=data,
+                object_type=self.object_type,
+            )
+            update_external_metadata.assert_called_once()
+            self.assertEqual(
+                update_external_metadata.call_args.args[0].id, configuration.id
+            )
+
+    def test_update_external_metadata_after_patch_of_platform_mount_action(self):
+        """Ensure we trigger the update_external_metadata when patching a platform mount action."""
+        mount_platform_action = add_mount_platform_action_model()
+        mount_platform_action.parent_platform = None
+        configuration = mount_platform_action.configuration
+        configuration.b2inst_record_id = "42"
+        db.session.add_all([configuration, mount_platform_action])
+        mount_platform_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_platform_action.id,
+                "attributes": {"begin_description": "updated"},
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with patch.object(
+            pidinst, "update_external_metadata"
+        ) as update_external_metadata:
+            update_external_metadata.return_value = None
+            super().update_object(
+                url=f"{self.url}/{mount_platform_action.id}",
+                data_object=mount_platform_action_updated,
+                object_type=self.object_type,
+            )
+            update_external_metadata.assert_called_once()
+            self.assertEqual(
+                update_external_metadata.call_args.args[0].id, configuration.id
+            )
+
+    def test_update_external_metadata_after_delete_of_platform_mount_action(self):
+        """Ensure we trigger the update_external_metadata when deleting a platform mount action."""
+        mount_platform_action = add_mount_platform_action_model()
+        mount_platform_action.parent_platform = None
+        configuration = mount_platform_action.configuration
+        configuration.b2inst_record_id = "42"
+        db.session.add_all([configuration, mount_platform_action])
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with patch.object(
+            pidinst, "update_external_metadata"
+        ) as update_external_metadata:
+            update_external_metadata.return_value = None
+            super().delete_object(
+                url=f"{self.url}/{mount_platform_action.id}",
+            )
+            update_external_metadata.assert_called_once()
+            self.assertEqual(
+                update_external_metadata.call_args.args[0].id, configuration.id
+            )

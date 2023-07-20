@@ -11,8 +11,10 @@
 import datetime
 import json
 import time
+from unittest.mock import patch
 
 import pytz
+from flask import current_app
 
 from project import base_url
 from project.api.models import (
@@ -29,6 +31,7 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
+from project.extensions.instances import pidinst
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
@@ -628,3 +631,320 @@ class TestDevicePropertyDeletion(BaseTestCase):
         with self.run_requests_as(self.super_user):
             resp = self.client.delete(f"{self.url}/{self.device_property.id}")
         self.assertEqual(resp.status_code, 409)
+
+    def test_update_external_metadata_post_device_property(self):
+        """Ensure we ask the system to update external metadata after posting a device property."""
+        device = Device(
+            short_name="Very new device",
+            manufacturer_name=fake.company(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+            b2inst_record_id="42",
+        )
+        db.session.add(device)
+        db.session.commit()
+
+        # Now we can write the request to add a device property
+        payload = {
+            "data": {
+                "type": "device_property",
+                "attributes": {
+                    "label": "device property1",
+                    "property_name": "device_property1",
+                    "compartment_name": "climate",
+                    "sampling_media_name": "air",
+                    "aggregation_type_name": "Average",
+                    "aggregation_type_uri": "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        url_post = base_url + "/device-properties"
+        with self.client:
+
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                self.client.post(
+                    url_post,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, device.id
+                )
+
+    def test_update_external_metadata_patch_device_property(self):
+        """Ensure we ask the system to update external metadata after patching a device property."""
+        device1 = Device(
+            short_name="Just a device",
+            manufacturer_name=fake.company(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+            b2inst_record_id="42",
+        )
+
+        db.session.add(device1)
+        db.session.commit()
+
+        device_property1 = DeviceProperty(
+            label="property 1",
+            property_name="device_property1",
+            device=device1,
+        )
+        db.session.add(device_property1)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "id": str(device_property1.id),
+                "attributes": {
+                    "label": "property 2",
+                    "property_name": "device_property2",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device1.id)}}
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        url_patch = base_url + "/device-properties/" + str(device_property1.id)
+        with self.client:
+
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                self.client.patch(
+                    url_patch,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, device1.id
+                )
+
+    def test_update_external_metadata_delete_device_property(self):
+        """Ensure we ask the system to update external metadata after deleting a device property."""
+        device1 = Device(
+            short_name="Just a device",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+            b2inst_record_id="42",
+        )
+        db.session.add(device1)
+        db.session.commit()
+        device_property1 = DeviceProperty(
+            label="property 1",
+            property_name="device_property1",
+            device=device1,
+        )
+        db.session.add(device_property1)
+        db.session.commit()
+
+        access_headers = create_token()
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.client:
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                self.client.delete(
+                    base_url + "/device-properties/" + str(device_property1.id),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, device1.id
+                )
+
+    def test_update_external_metadata_for_configuration_post_device_property(self):
+        """Ensure to update pidinst for the configuration after posting device property."""
+        device = Device(
+            short_name="Very new device",
+            manufacturer_name=fake.company(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        configuration = Configuration(label="test config", b2inst_record_id="42")
+        contact = Contact(
+            given_name="test", family_name="user", email="test.user@localhost"
+        )
+        device_mount_action = DeviceMountAction(
+            device=device,
+            begin_contact=contact,
+            configuration=configuration,
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+        )
+
+        db.session.add_all([device, configuration, contact, device_mount_action])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "attributes": {
+                    "label": "device property1",
+                    "property_name": "device_property1",
+                    "compartment_name": "climate",
+                    "sampling_media_name": "air",
+                    "aggregation_type_name": "Average",
+                    "aggregation_type_uri": "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        url_post = base_url + "/device-properties"
+        with self.client:
+
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                self.client.post(
+                    url_post,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, configuration.id
+                )
+
+    def test_update_external_metadata_for_configuration_patch_device_property(self):
+        """Ensure to update pidinst for the configuration after patching device property."""
+        device = Device(
+            short_name="Very new device",
+            manufacturer_name=fake.company(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        configuration = Configuration(label="test config", b2inst_record_id="42")
+        contact = Contact(
+            given_name="test", family_name="user", email="test.user@localhost"
+        )
+        device_mount_action = DeviceMountAction(
+            device=device,
+            begin_contact=contact,
+            configuration=configuration,
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+        )
+
+        db.session.add_all([device, configuration, contact, device_mount_action])
+        db.session.commit()
+
+        device_property1 = DeviceProperty(
+            label="property 1",
+            property_name="device_property1",
+            device=device,
+        )
+        db.session.add(device_property1)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_property",
+                "id": str(device_property1.id),
+                "attributes": {
+                    "label": "property 2",
+                    "property_name": "device_property2",
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": str(device.id)}}
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        url_patch = base_url + "/device-properties/" + str(device_property1.id)
+        with self.client:
+
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                self.client.patch(
+                    url_patch,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                    headers=create_token(),
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, configuration.id
+                )
+
+    def test_update_external_metadata_for_configuration_delete_device_property(self):
+        """Ensure to update pidinst for the configuration after deleting a device property."""
+        device = Device(
+            short_name="Very new device",
+            manufacturer_name=fake.company(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        configuration = Configuration(label="test config", b2inst_record_id="42")
+        contact = Contact(
+            given_name="test", family_name="user", email="test.user@localhost"
+        )
+        device_mount_action = DeviceMountAction(
+            device=device,
+            begin_contact=contact,
+            configuration=configuration,
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+        )
+
+        db.session.add_all([device, configuration, contact, device_mount_action])
+        db.session.commit()
+        device_property1 = DeviceProperty(
+            label="property 1",
+            property_name="device_property1",
+            device=device,
+        )
+        db.session.add(device_property1)
+        db.session.commit()
+
+        access_headers = create_token()
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.client:
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                self.client.delete(
+                    base_url + "/device-properties/" + str(device_property1.id),
+                    content_type="application/vnd.api+json",
+                    headers=access_headers,
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, configuration.id
+                )

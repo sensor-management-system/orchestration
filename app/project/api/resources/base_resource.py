@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,12 +8,11 @@
 
 """Some methods to use in various resource classes."""
 
-import datetime
-
 from flask import g
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ...api import minio
+from ...extensions.instances import pidinst
 from ..helpers.db import save_to_db
 from ..models import (
     Configuration,
@@ -113,14 +112,21 @@ def check_if_object_not_found(model_class, kwargs):
         return object_to_be_checked
 
 
-def set_update_description_text_and_update_by_user(obj_, msg):
-    """Set the update description & user and save it to the db."""
+def set_update_description_text_user_and_pidinst(obj_, msg):
+    """
+    Set the update description & user and save it to the db.
+
+    Also update the metadata in case we have a pidinst record
+    on the entry.
+    """
     obj_.update_description = msg
     obj_.updated_by_id = g.user.id
     save_to_db(obj_)
+    if pidinst.has_external_metadata(obj_):
+        pidinst.update_external_metadata(obj_)
 
 
-def query_device_and_set_update_description_text(msg, result_id):
+def query_device_set_update_description_and_update_pidinst(msg, result_id):
     """
     Get the device and add update_description text to it.
 
@@ -128,10 +134,10 @@ def query_device_and_set_update_description_text(msg, result_id):
     :param result_id: the id of the object
     """
     device = db.session.query(Device).filter_by(id=result_id).first()
-    set_update_description_text_and_update_by_user(device, msg)
+    set_update_description_text_user_and_pidinst(device, msg)
 
 
-def query_platform_and_set_update_description_text(msg, result_id):
+def query_platform_set_update_description_and_update_pidinst(msg, result_id):
     """
     Get the platform and add update_description text to it.
 
@@ -139,41 +145,21 @@ def query_platform_and_set_update_description_text(msg, result_id):
     :param result_id: the id of the object
     """
     platform = db.session.query(Platform).filter_by(id=result_id).first()
-    set_update_description_text_and_update_by_user(platform, msg)
+    set_update_description_text_user_and_pidinst(platform, msg)
 
 
-def query_configuration_and_set_update_description_text(msg, result_id):
+def query_configuration_set_update_description_and_update_pidinst(msg, result_id):
     """
-    obj_.persistent_identifier = pid.create(source_object_url)
-    obj_.schema_version = current_app.config["SCHEMA_VERSION"]
-    obj_.identifier_type = current_app.config["IDENTIFIER_TYPE"]
-    Get the configuration and add update_description text to it.
+    Get the configuration and set the update_description text.
 
     :param msg: a text of what did change.
     :param result_id: the id of the object
     """
     configuration = db.session.query(Configuration).filter_by(id=result_id).first()
-    set_update_description_text_and_update_by_user(configuration, msg)
+    set_update_description_text_user_and_pidinst(configuration, msg)
 
 
-def query_site_and_set_update_description_text(msg, result_id):
+def query_site_set_update_description_and_update_pidinst(msg, result_id):
     """Get the configuration and add udpate description text."""
     site = db.session.query(Site).filter_by(id=result_id).first()
-    set_update_description_text_and_update_by_user(site, msg)
-
-
-def add_pid(obj_, pid_string):
-    """
-    Add PID to an existed object.
-
-    :param obj_: the existed object.
-    :param pid_string: pid of the entity.
-    """
-    obj_.persistent_identifier = pid_string
-    # Set the datetime and user how did ask to
-    # add a pid to the entity
-    obj_.updated_at = datetime.datetime.utcnow()
-    obj_.updated_by = g.user
-
-    db.session.add(obj_)
-    db.session.commit()
+    set_update_description_text_user_and_pidinst(site, msg)

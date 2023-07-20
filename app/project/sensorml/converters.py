@@ -8,6 +8,7 @@
 
 from typing import List, Optional
 
+from ..extensions.instances import pidinst
 from . import cleanup
 from .models import (
     GcoCharacterString,
@@ -127,7 +128,9 @@ class ContactRoleConverter:
                 gmd_online_resource = GmdOnlineResource(
                     gmd_ci_online_resource=GmdCiOnlineResource(
                         gmd_linkage=GmdLinkage(
-                            gmd_url=GmdUrl(text=f"https://orcid.org/{contact_role.contact.orcid}")
+                            gmd_url=GmdUrl(
+                                text=f"https://orcid.org/{contact_role.contact.orcid}"
+                            )
                         ),
                     )
                 )
@@ -271,6 +274,20 @@ class ConfigurationConverter:
         sml_document_list = AttachmentConverter(
             self.configuration.configuration_attachments, self.gml_id()
         ).sml_document_list()
+        if self.configuration.b2inst_record_id:
+            sml_document = SmlDocument(
+                xlink_arcrole="PIDINST",
+                gmd_ci_online_resource=GmdCiOnlineResource(
+                    gmd_linkage=GmdLinkage(
+                        gmd_url=GmdUrl(
+                            text=pidinst.b2inst.get_record_frontend_url(
+                                self.configuration.b2inst_record_id
+                            )
+                        )
+                    ),
+                ),
+            )
+            sml_document_list.append(sml_document)
         if not sml_document_list:
             return None
         return SmlDocumentation(sml_document_list=sml_document_list)
@@ -812,6 +829,21 @@ class DeviceConverter:
             )
             sml_document_list.append(sml_document)
 
+        if self.device.b2inst_record_id:
+            sml_document = SmlDocument(
+                xlink_arcrole="PIDINST",
+                gmd_ci_online_resource=GmdCiOnlineResource(
+                    gmd_linkage=GmdLinkage(
+                        gmd_url=GmdUrl(
+                            text=pidinst.b2inst.get_record_frontend_url(
+                                self.device.b2inst_record_id
+                            )
+                        )
+                    ),
+                ),
+            )
+            sml_document_list.append(sml_document)
+
         if not sml_document_list:
             return None
         return SmlDocumentation(sml_document_list=sml_document_list)
@@ -1067,6 +1099,21 @@ class PlatformConverter:
                     gmd_linkage=GmdLinkage(
                         gmd_url=GmdUrl(
                             text=self.platform.website,
+                        )
+                    ),
+                ),
+            )
+            sml_document_list.append(sml_document)
+
+        if self.platform.b2inst_record_id:
+            sml_document = SmlDocument(
+                xlink_arcrole="PIDINST",
+                gmd_ci_online_resource=GmdCiOnlineResource(
+                    gmd_linkage=GmdLinkage(
+                        gmd_url=GmdUrl(
+                            text=pidinst.b2inst.get_record_frontend_url(
+                                self.platform.b2inst_record_id
+                            )
                         )
                     ),
                 ),

@@ -37,6 +37,7 @@ class Configuration(
     is_internal = db.Column(db.Boolean, default=False)
     is_public = db.Column(db.Boolean, default=False)
     update_description = db.Column(db.String(256), nullable=True)
+    b2inst_record_id = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     configuration_attachments = db.relationship(
         "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"

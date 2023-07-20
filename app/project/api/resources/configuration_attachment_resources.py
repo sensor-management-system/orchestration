@@ -24,8 +24,8 @@ from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
-    query_configuration_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_configuration_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -69,7 +69,9 @@ class ConfigurationAttachmentList(ResourceList):
         ]
         attachment_id = result[0]["data"]["id"]
         msg = "create;attachment"
-        query_configuration_and_set_update_description_text(msg, configuration_id)
+        query_configuration_set_update_description_and_update_pidinst(
+            msg, configuration_id
+        )
         data = (
             db.session.query(ConfigurationAttachment)
             .filter_by(id=attachment_id)
@@ -130,21 +132,8 @@ class ConfigurationAttachmentDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "update;attachment"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
         return result
-
-    def before_delete(self, args, kwargs):
-        """Update the configurations update description."""
-        configuration_attachment = (
-            db.session.query(ConfigurationAttachment)
-            .filter_by(id=kwargs["id"])
-            .one_or_none()
-        )
-        if configuration_attachment is None:
-            raise ObjectNotFound("Object not found!")
-        configuration = configuration_attachment.get_parent()
-        msg = "delete;attachment"
-        set_update_description_text_and_update_by_user(configuration, msg)
 
     def delete(self, *args, **kwargs):
         """
@@ -160,6 +149,8 @@ class ConfigurationAttachmentDetail(ResourceDetail):
         )
         if attachment is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
+        configuration = attachment.get_parent()
+        msg = "delete;attachment"
         internal_url = attachment.internal_url
         try:
             super().delete(*args, **kwargs)
@@ -170,6 +161,7 @@ class ConfigurationAttachmentDetail(ResourceDetail):
 
         if internal_url:
             delete_attachments_in_minio_by_url(internal_url)
+        set_update_description_text_user_and_pidinst(configuration, msg)
         final_result = {"meta": {"message": "Object successfully deleted"}}
 
         return final_result

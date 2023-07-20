@@ -10,12 +10,12 @@
 
 import os
 
-from flask import current_app, g, request
+from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...extensions.instances import pid
+from ...extensions.instances import pidinst
 from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     AndFilter,
@@ -175,6 +175,8 @@ class ConfigurationDetail(ResourceDetail):
         configuration.update_description = msg
 
         save_to_db(configuration)
+        if pidinst.has_external_metadata(configuration):
+            pidinst.update_external_metadata(configuration)
         return result
 
     def delete(self, *args, **kwargs):
@@ -187,10 +189,6 @@ class ConfigurationDetail(ResourceDetail):
         :return:
         """
         configuration = check_if_object_not_found(Configuration, kwargs)
-        if current_app.config["INSTITUTE"] == "ufz":
-            pid_to_delete = configuration.persistent_identifier
-            if pid_to_delete and pid.get(pid_to_delete).status_code == 200:
-                pid.delete(pid_to_delete)
 
         urls = [
             a.internal_url

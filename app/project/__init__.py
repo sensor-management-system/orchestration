@@ -14,22 +14,23 @@
 from elasticsearch import Elasticsearch
 from flask import Blueprint, Flask
 from flask_cors import CORS
+from flask_executor import Executor
 from flask_migrate import Migrate
 from healthcheck import HealthCheck
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .api import minio
-from .api.permissions.permission_manager import permission_manager
 from .api.helpers.health_checks import (
     health_check_db,
     health_check_elastic_search,
     health_check_migrations,
     health_check_minio,
-    health_check_pid_handler,
+    health_check_pidinst_handler,
 )
 from .api.models.base_model import db
+from .api.permissions.permission_manager import permission_manager
 from .config import env
-from .extensions.instances import auth, idl, well_known_url_config_loader
+from .extensions.instances import auth, idl, pidinst, well_known_url_config_loader
 from .urls import api
 from .views import (
     additional_configuration_routes,
@@ -37,14 +38,15 @@ from .views import (
     additional_platforms_routes,
     additional_site_routes,
     docs_routes,
+    download_routes,
     free_text_field_routes,
     login_routes,
     sensor_ml_routes,
     upload_routes,
-    download_routes,
 )
 
 migrate = Migrate()
+executor = Executor()
 base_url = env("URL_PREFIX", "/rdm/svm-api/v1")
 static_url_path = env("STATIC_URL", "/static/backend")
 health = HealthCheck()
@@ -78,6 +80,7 @@ def create_app():
     db.init_app(app)
     api.init_app(app, Blueprint("api", __name__, url_prefix=base_url))
     migrate.init_app(app, db)
+    executor.init_app(app)
     api.permission_manager(permission_manager)
 
     # instantiate minio client
@@ -86,6 +89,7 @@ def create_app():
     well_known_url_config_loader.init_app(app)
     auth.init_app(app)
     idl.init_app(app)
+    pidinst.init_app(app)
 
     # shell context for flask cli
     @app.shell_context_processor
@@ -109,8 +113,7 @@ def create_app():
     health.add_check(health_check_db)
     health.add_check(health_check_migrations)
     health.add_check(health_check_minio)
-    if app.config["INSTITUTE"] == "ufz":
-        health.add_check(health_check_pid_handler)
+    health.add_check(health_check_pidinst_handler)
     app.add_url_rule(base_url + "/health", "health", view_func=lambda: health.run())
 
     app.register_blueprint(additional_devices_routes)

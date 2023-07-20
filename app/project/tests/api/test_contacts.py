@@ -10,10 +10,23 @@
 
 import json
 import os
+from unittest.mock import patch
+
+from flask import current_app
 
 from project import base_url
-from project.api.models import Contact, User
+from project.api.models import (
+    Configuration,
+    ConfigurationContactRole,
+    Contact,
+    Device,
+    DeviceContactRole,
+    Platform,
+    PlatformContactRole,
+    User,
+)
 from project.api.models.base_model import db
+from project.extensions.instances import pidinst
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -513,3 +526,239 @@ class TestContactServices(BaseTestCase):
         self.assertEqual(contact.family_name, "User")
         self.assertEqual(contact.email, "test.user@abcdef.foo")
         self.assertIsNone(contact.organization)
+
+    def test_update_external_metadata_for_device_after_patch_of_contact(self):
+        """Ensure we trigger the update of external metadata if we update a contact with a device."""
+        contact = Contact(
+            given_name="Test", family_name="User", email="test.user@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+        device = Device(short_name="Test device", b2inst_record_id="42")
+        device_contact_role = DeviceContactRole(
+            device=device,
+            contact=contact,
+            role_name="Owner",
+            role_uri="https://localhost/cv/roles/1",
+        )
+        db.session.add_all([contact, super_user, device, device_contact_role])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "contact",
+                "id": str(contact.id),
+                "attributes": {
+                    "family_name": "married",
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.run_requests_as(super_user):
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                resp = self.client.patch(
+                    f"{self.url}/{contact.id}",
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, device.id
+                )
+            self.assertEqual(resp.status_code, 200)
+
+    def test_update_external_metadata_for_platform_after_patch_of_contact(self):
+        """Ensure we trigger the update of external metadata if we update a contact with a platform."""
+        contact = Contact(
+            given_name="Test", family_name="User", email="test.user@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+        platform = Platform(short_name="Test platform", b2inst_record_id="42")
+        platform_contact_role = PlatformContactRole(
+            platform=platform,
+            contact=contact,
+            role_name="Owner",
+            role_uri="https://localhost/cv/roles/1",
+        )
+        db.session.add_all([contact, super_user, platform, platform_contact_role])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "contact",
+                "id": str(contact.id),
+                "attributes": {
+                    "family_name": "married",
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.run_requests_as(super_user):
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                resp = self.client.patch(
+                    f"{self.url}/{contact.id}",
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, platform.id
+                )
+            self.assertEqual(resp.status_code, 200)
+
+    def test_update_external_metadata_for_configuration_after_patch_of_contact(self):
+        """Ensure we trigger the update of external metadata if we update a contact with a configuration."""
+        contact = Contact(
+            given_name="Test", family_name="User", email="test.user@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+        configuration = Configuration(label="Test configuration", b2inst_record_id="42")
+        configuration_contact_role = ConfigurationContactRole(
+            configuration=configuration,
+            contact=contact,
+            role_name="Owner",
+            role_uri="https://localhost/cv/roles/1",
+        )
+        db.session.add_all(
+            [contact, super_user, configuration, configuration_contact_role]
+        )
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "contact",
+                "id": str(contact.id),
+                "attributes": {
+                    "family_name": "married",
+                },
+            }
+        }
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.run_requests_as(super_user):
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                resp = self.client.patch(
+                    f"{self.url}/{contact.id}",
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, configuration.id
+                )
+            self.assertEqual(resp.status_code, 200)
+
+    def test_update_external_metadata_for_device_after_delete_of_contact(self):
+        """Ensure we trigger the update of external metadata if we delete a contact with a device."""
+        contact1 = Contact(
+            given_name="Test1", family_name="User", email="test1.user@localhost"
+        )
+        contact2 = Contact(
+            given_name="Test2", family_name="User", email="test2.user@localhost"
+        )
+        super_user = User(contact=contact2, subject=contact2.email, is_superuser=True)
+        device = Device(short_name="Test device", b2inst_record_id="42")
+        device_contact_role = DeviceContactRole(
+            device=device,
+            contact=contact1,
+            role_name="Owner",
+            role_uri="https://localhost/cv/roles/1",
+        )
+        db.session.add_all(
+            [contact1, contact2, super_user, device, device_contact_role]
+        )
+        db.session.commit()
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.run_requests_as(super_user):
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                resp = self.client.delete(
+                    f"{self.url}/{contact1.id}",
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, device.id
+                )
+            self.assertEqual(resp.status_code, 200)
+
+    def test_update_external_metadata_for_platform_after_delete_of_contact(self):
+        """Ensure we trigger the update of external metadata if we delete a contact with a platform."""
+        contact1 = Contact(
+            given_name="Test1", family_name="User", email="test1.user@localhost"
+        )
+        contact2 = Contact(
+            given_name="Test2", family_name="User", email="test2.user@localhost"
+        )
+        super_user = User(contact=contact2, subject=contact2.email, is_superuser=True)
+        platform = Platform(short_name="Test platform", b2inst_record_id="42")
+        platform_contact_role = PlatformContactRole(
+            platform=platform,
+            contact=contact1,
+            role_name="Owner",
+            role_uri="https://localhost/cv/roles/1",
+        )
+        db.session.add_all(
+            [contact1, contact2, super_user, platform, platform_contact_role]
+        )
+        db.session.commit()
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.run_requests_as(super_user):
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                resp = self.client.delete(
+                    f"{self.url}/{contact1.id}",
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, platform.id
+                )
+            self.assertEqual(resp.status_code, 200)
+
+    def test_update_external_metadata_for_configuration_after_delete_of_contact(self):
+        """Ensure we trigger the update of external metadata if we delete a contact with a configuration."""
+        contact1 = Contact(
+            given_name="Test1", family_name="User", email="test1.user@localhost"
+        )
+        contact2 = Contact(
+            given_name="Test2", family_name="User", email="test2.user@localhost"
+        )
+        super_user = User(contact=contact2, subject=contact2.email, is_superuser=True)
+        configuration = Configuration(label="Test configuration", b2inst_record_id="42")
+        configuration_contact_role = ConfigurationContactRole(
+            configuration=configuration,
+            contact=contact1,
+            role_name="Owner",
+            role_uri="https://localhost/cv/roles/1",
+        )
+        db.session.add_all(
+            [contact1, contact2, super_user, configuration, configuration_contact_role]
+        )
+        db.session.commit()
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+        with self.run_requests_as(super_user):
+            with patch.object(
+                pidinst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                resp = self.client.delete(
+                    f"{self.url}/{contact1.id}",
+                )
+                update_external_metadata.assert_called_once()
+                self.assertEqual(
+                    update_external_metadata.call_args.args[0].id, configuration.id
+                )
+            self.assertEqual(resp.status_code, 200)

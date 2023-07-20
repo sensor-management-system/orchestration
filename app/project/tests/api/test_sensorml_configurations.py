@@ -311,6 +311,46 @@ class TestSensorMLConfiguration(BaseTestCase):
             self.configuration.project,
         )
 
+    def test_get_public_configuration_with_b2inst_record(self):
+        """Check that we give out the website."""
+        self.configuration.b2inst_record_id = "123"
+        current_app.config.update({"B2INST_URL": "https://b2inst-test.gwdg.de"})
+
+        db.session.add(self.configuration)
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_documentation = root.find(
+            "{http://www.opengis.net/sensorml/2.0}documentation"
+        )
+        sml_document_list = sml_documentation.find(
+            "{http://www.opengis.net/sensorml/2.0}DocumentList"
+        )
+        sml_documents = sml_document_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}document"
+        )
+        self.assertEqual(len(sml_documents), 1)
+        sml_document_website = sml_documents[0]
+
+        self.assertEqual(
+            sml_document_website.attrib.get("{http://www.w3.org/1999/xlink}arcrole"),
+            "PIDINST",
+        )
+        self.assertEqual(
+            sml_document_website.find(
+                "{http://www.isotc211.org/2005/gmd}CI_OnlineResource"
+            )
+            .find("{http://www.isotc211.org/2005/gmd}linkage")
+            .find("{http://www.isotc211.org/2005/gmd}URL")
+            .text,
+            f"https://b2inst-test.gwdg.de/records/{self.configuration.b2inst_record_id}",
+        )
+
     def test_get_public_configuration_contacts(self):
         """Test with a configuration with some contacts."""
         owner_name = "Owner"

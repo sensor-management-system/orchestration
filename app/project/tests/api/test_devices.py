@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -7,18 +7,27 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Tests for the devices."""
+import datetime
 import json
 import os
 from unittest.mock import patch
 
+import pytz
+from flask import current_app
+
 from project import base_url, idl
+from project.api.models import (
+    Configuration,
+    Contact,
+    CustomField,
+    Device,
+    DeviceAttachment,
+    DeviceMountAction,
+    DeviceProperty,
+    User,
+)
 from project.api.models.base_model import db
-from project.api.models.contact import Contact
-from project.api.models.customfield import CustomField
-from project.api.models.device import Device
-from project.api.models.device_attachment import DeviceAttachment
-from project.api.models.device_property import DeviceProperty
-from project.api.models.user import User
+from project.extensions.instances import pidinst
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -595,3 +604,105 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(data[0]["attributes"]["archived"], False)
         self.assertEqual(data[1]["attributes"]["short_name"], "archived device")
         self.assertEqual(data[1]["attributes"]["archived"], True)
+
+    def test_update_external_b2inst_metadata(self):
+        """Make sure that we ask the system to update the external metadata after a patch."""
+        devices_json = extract_data_from_json_file(self.json_data_url, "devices")
+
+        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
+        result = super().add_object(
+            url=self.device_url, data_object=device_data, object_type=self.object_type
+        )
+        result_id = result["data"]["id"]
+
+        user = add_user()
+        user.is_superuser = True
+        db.session.add(user)
+        db.session.commit()
+
+        device = db.session.query(Device).filter_by(id=result_id).first()
+        device.b2inst_record_id = "123"
+        db.session.add(device)
+        db.session.commit()
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+
+        with self.run_requests_as(user):
+            with self.client:
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    resp = self.client.patch(
+                        self.device_url + "/" + result_id,
+                        json={
+                            "data": {
+                                "id": result_id,
+                                "type": "device",
+                                "attributes": {
+                                    "long_name": "updated long name",
+                                },
+                            }
+                        },
+                        headers={"Content-Type": "application/vnd.api+json"},
+                    )
+                    update_external_metadata.assert_called_once()
+                    self.assertEqual(
+                        update_external_metadata.call_args.args[0].id, device.id
+                    )
+        self.assertEqual(resp.status_code, 200)
+
+    def test_update_external_b2inst_metadata_for_configuration(self):
+        """Make sure that we ask the system to update the external metadata for configuration after a patch."""
+        devices_json = extract_data_from_json_file(self.json_data_url, "devices")
+
+        device_data = {"data": {"type": "device", "attributes": devices_json[0]}}
+        result = super().add_object(
+            url=self.device_url, data_object=device_data, object_type=self.object_type
+        )
+        result_id = result["data"]["id"]
+
+        user = add_user()
+        user.is_superuser = True
+        db.session.add(user)
+        db.session.commit()
+
+        device = db.session.query(Device).filter_by(id=result_id).first()
+        configuration = Configuration(label="Test config", b2inst_record_id="42")
+        device_mount_action = DeviceMountAction(
+            configuration=configuration,
+            device=device,
+            begin_contact=user.contact,
+            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+        )
+        db.session.add_all([configuration, device_mount_action])
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+
+        with self.run_requests_as(user):
+            with self.client:
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    resp = self.client.patch(
+                        self.device_url + "/" + result_id,
+                        json={
+                            "data": {
+                                "id": result_id,
+                                "type": "device",
+                                "attributes": {
+                                    "long_name": "updated long name",
+                                },
+                            }
+                        },
+                        headers={"Content-Type": "application/vnd.api+json"},
+                    )
+                    update_external_metadata.assert_called_once()
+                    self.assertEqual(
+                        update_external_metadata.call_args.args[0].id, configuration.id
+                    )
+        self.assertEqual(resp.status_code, 200)

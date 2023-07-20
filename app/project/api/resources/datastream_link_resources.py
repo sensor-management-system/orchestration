@@ -20,7 +20,7 @@ from ..schemas.datastream_link_schema import DatastreamLinkSchema
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_configuration_and_set_update_description_text,
+    query_configuration_set_update_description_and_update_pidinst,
 )
 
 
@@ -85,7 +85,7 @@ class DatastreamLinkList(ResourceList):
             result[0]["data"]["relationships"]["device_mount_action"]["data"]["id"]
         )
         msg = "create;datastream link"
-        query_configuration_and_set_update_description_text(
+        query_configuration_set_update_description_and_update_pidinst(
             msg, device_mount_action.configuration_id
         )
         return result
@@ -132,7 +132,7 @@ class DatastreamLinkDetail(ResourceDetail):
             result["data"]["relationships"]["device_mount_action"]["data"]["id"]
         )
         msg = "update;datastream link"
-        query_configuration_and_set_update_description_text(
+        query_configuration_set_update_description_and_update_pidinst(
             msg, device_mount_action.configuration_id
         )
 
@@ -143,9 +143,21 @@ class DatastreamLinkDetail(ResourceDetail):
         object_ = check_if_object_not_found(self._data_layer.model, kwargs)
         device_mount_action = object_.device_mount_action
         msg = "delete;datastream link"
-        query_configuration_and_set_update_description_text(
-            msg, device_mount_action.configuration_id
-        )
+        configuration_id = device_mount_action.configuration_id
+        self.tasks_after_delete = []
+
+        def run_updates():
+            query_configuration_set_update_description_and_update_pidinst(
+                msg, configuration_id
+            )
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = DatastreamLinkSchema
     decorators = (token_required,)

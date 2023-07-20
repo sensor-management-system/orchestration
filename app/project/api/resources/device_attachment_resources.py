@@ -27,8 +27,8 @@ from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
-    query_device_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_device_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -78,7 +78,7 @@ class DeviceAttachmentList(ResourceList):
         device_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
         attachment_id = result[0]["data"]["id"]
         msg = "create;attachment"
-        query_device_and_set_update_description_text(msg, device_id)
+        query_device_set_update_description_and_update_pidinst(msg, device_id)
 
         data = db.session.query(DeviceAttachment).filter_by(id=attachment_id).first()
         if data and data.url.startswith(minio.download_endpoint(internal=True)):
@@ -145,19 +145,8 @@ class DeviceAttachmentDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["device"]["data"]["id"]
         msg = "update;attachment"
-        query_device_and_set_update_description_text(msg, result_id)
+        query_device_set_update_description_and_update_pidinst(msg, result_id)
         return result
-
-    def before_delete(self, args, kwargs):
-        """Set the update description for the device if we delete the attachment."""
-        device_attachment = (
-            db.session.query(DeviceAttachment).filter_by(id=kwargs["id"]).one_or_none()
-        )
-        if device_attachment is None:
-            raise ObjectNotFound("Object not found!")
-        device = device_attachment.get_parent()
-        msg = "delete;attachment"
-        set_update_description_text_and_update_by_user(device, msg)
 
     def delete(self, *args, **kwargs):
         """
@@ -173,6 +162,8 @@ class DeviceAttachmentDetail(ResourceDetail):
         )
         if attachment is None:
             raise ObjectNotFound({"pointer": ""}, "Object Not Found")
+        device = attachment.get_parent()
+        msg = "delete;attachment"
         internal_url = attachment.internal_url
         try:
             super().delete(*args, **kwargs)
@@ -183,6 +174,7 @@ class DeviceAttachmentDetail(ResourceDetail):
 
         if internal_url:
             delete_attachments_in_minio_by_url(internal_url)
+        set_update_description_text_user_and_pidinst(device, msg)
         final_result = {"meta": {"message": "Object successfully deleted"}}
 
         return final_result

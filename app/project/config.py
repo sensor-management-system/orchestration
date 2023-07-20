@@ -10,6 +10,8 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""Config for the app."""
+
 from environs import Env
 
 env = Env()
@@ -17,12 +19,15 @@ env.read_env()
 
 
 class BaseConfig:
-    """Base configuration"""
+    """Base configuration."""
 
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "top_secret"
     DEFAULT_POOL_TIMEOUT = 600
+    # This will help us to see exceptions on background task to be visible
+    # in the logging at least.
+    EXECUTOR_PROPAGATE_EXCEPTIONS = True
     SQLALCHEMY_POOL_TIMEOUT = env.int("POOL_TIMEOUT", DEFAULT_POOL_TIMEOUT)
     # name of token entry that will become distinct flask identity username
     # example in our case it is {'sub':'username@ufz.de'}
@@ -68,10 +73,14 @@ class BaseConfig:
     PID_PREFIX = env("PID_PREFIX", None)
     PID_CERT_FILE = env("PID_CERT_FILE", None)
     PID_CERT_KEY = env("PID_CERT_KEY", None)
+    # Or, as an alternative b2inst.
+    B2INST_URL = env("B2INST_URL", "https://b2inst-test.gwdg.de")
+    B2INST_TOKEN = env("B2INST_TOKEN", "")
+    B2INST_COMMUNITY = env("B2INST_COMMUNITY", "EUDAT")
 
 
 class DevelopmentConfig(BaseConfig):
-    """Development configuration"""
+    """Development configuration."""
 
     SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)
     ELASTICSEARCH_URL = env("ELASTICSEARCH_URL", None)
@@ -88,7 +97,7 @@ class DevelopmentConfig(BaseConfig):
 
 
 class TestingConfig(BaseConfig):
-    """Testing configuration"""
+    """Testing configuration."""
 
     TESTING = True
     SQLALCHEMY_DATABASE_URI = env("DATABASE_TEST_URL", None)
@@ -97,12 +106,11 @@ class TestingConfig(BaseConfig):
     # AssertionError: Popped wrong request context
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     INSTITUTE = None
-    PID_SERVICE_URL = None
     SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"options": "-c timezone=utc"}}
 
 
 class ProductionConfig(BaseConfig):
-    """Production configuration"""
+    """Production configuration."""
 
     SECRET_KEY = env("SECRET_KEY", "top_secret")
     SQLALCHEMY_DATABASE_URI = env("DATABASE_URL", None)

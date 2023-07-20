@@ -12,10 +12,18 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ...extensions.instances import pidinst
 from ..helpers.errors import ConflictError
 from ..helpers.resource_checks import DevicePropertyValidator
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
-from ..models import DatastreamLink, Device, DeviceProperty, DevicePropertyCalibration
+from ..models import (
+    Configuration,
+    DatastreamLink,
+    Device,
+    DeviceMountAction,
+    DeviceProperty,
+    DevicePropertyCalibration,
+)
 from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
@@ -23,8 +31,8 @@ from ..schemas.device_property_schema import DevicePropertySchema
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_device_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_device_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -73,7 +81,17 @@ class DevicePropertyList(ResourceList):
         """
         result_id = result[0]["data"]["relationships"]["device"]["data"]["id"]
         msg = "create;measured quantity"
-        query_device_and_set_update_description_text(msg, result_id)
+        # The external device metadata are updated here.
+        query_device_set_update_description_and_update_pidinst(msg, result_id)
+        # However, there is also the need to update configurations, as
+        # they refer to the measured variables too.
+        for configuration in (
+            db.session.query(Configuration)
+            .join(DeviceMountAction)
+            .filter(DeviceMountAction.device_id == result_id)
+        ):
+            if pidinst.has_external_metadata(configuration):
+                pidinst.update_external_metadata(configuration)
 
         return result
 
@@ -114,7 +132,17 @@ class DevicePropertyDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["device"]["data"]["id"]
         msg = "update;measured quantity"
-        query_device_and_set_update_description_text(msg, result_id)
+        # The external device metadata are updated here.
+        query_device_set_update_description_and_update_pidinst(msg, result_id)
+        # However, there is also the need to update configurations, as
+        # they refer to the measured variables too.
+        for configuration in (
+            db.session.query(Configuration)
+            .join(DeviceMountAction)
+            .filter(DeviceMountAction.device_id == result_id)
+        ):
+            if pidinst.has_external_metadata(configuration):
+                pidinst.update_external_metadata(configuration)
         return result
 
     def before_delete(self, args, kwargs):
@@ -125,17 +153,44 @@ class DevicePropertyDetail(ResourceDetail):
         )
         if device_property is None:
             raise ObjectNotFound("Object not found!")
-        if db.session.query(DevicePropertyCalibration).filter(
-            DevicePropertyCalibration.device_property == device_property
-        ).first():
+        if (
+            db.session.query(DevicePropertyCalibration)
+            .filter(DevicePropertyCalibration.device_property == device_property)
+            .first()
+        ):
             raise ConflictError("Calibration associated with device property")
-        if db.session.query(DatastreamLink).filter(
-            DatastreamLink.device_property == device_property
-        ).first():
+        if (
+            db.session.query(DatastreamLink)
+            .filter(DatastreamLink.device_property == device_property)
+            .first()
+        ):
             raise ConflictError("Datastream associated with device property")
+        self.tasks_after_delete = []
         device = device_property.get_parent()
         msg = "delete;measured quantity"
-        set_update_description_text_and_update_by_user(device, msg)
+
+        configurations_with_external_metadata = []
+        for configuration in (
+            db.session.query(Configuration)
+            .join(DeviceMountAction)
+            .filter(DeviceMountAction.device_id == device.id)
+        ):
+            if pidinst.has_external_metadata(configuration):
+                configurations_with_external_metadata.append(configuration)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(device, msg)
+            for configuration in configurations_with_external_metadata:
+                pidinst.update_external_metadata(configuration)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = DevicePropertySchema
     decorators = (token_required,)

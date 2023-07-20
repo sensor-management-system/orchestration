@@ -20,8 +20,8 @@ from ..schemas.role import SiteRoleSchema
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_site_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_site_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -53,7 +53,7 @@ class SiteRoleList(ResourceList):
         """Run some hooks after the post."""
         result_id = result[0]["data"]["relationships"]["site"]["data"]["id"]
         msg = "create;contact"
-        query_site_and_set_update_description_text(msg, result_id)
+        query_site_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -87,7 +87,7 @@ class SiteRoleDetail(ResourceDetail):
         """Rune some hooks after the patch of the contact role."""
         site_id = result["data"]["relationships"]["site"]["data"]["id"]
         msg = "update;contact"
-        query_site_and_set_update_description_text(msg, site_id)
+        query_site_set_update_description_and_update_pidinst(msg, site_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -97,9 +97,21 @@ class SiteRoleDetail(ResourceDetail):
         )
         if contact_role is None:
             raise ObjectNotFound("Object not found!")
+        self.tasks_after_delete = []
         site = contact_role.get_parent()
         msg = "delete;contact"
-        set_update_description_text_and_update_by_user(site, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(site, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = SiteRoleSchema
     decorators = (token_required,)

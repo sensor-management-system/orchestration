@@ -41,12 +41,8 @@ class Device(
     dual_use = db.Column(db.Boolean, default=False)
     model = db.Column(db.String(256), nullable=True)
     inventory_number = db.Column(db.String(256), nullable=True)
+    b2inst_record_id = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
-    # The type of the identifier depends on the provider being used to register the instrument PID.
-    # In the case of ePIC, the value of identifierType would be "Handle".
-    identifier_type = db.Column(db.String(256), nullable=True, default="handler")
-    # The value of SchemaVersion is defined to be equal to the version number for each release version of the schema.
-    schema_version = db.Column(db.String(256), nullable=True, default="1.0")
     website = db.Column(db.String(1024), nullable=True)
     device_type_uri = db.Column(db.String(256), nullable=True)
     device_type_name = db.Column(db.String(256), nullable=True)

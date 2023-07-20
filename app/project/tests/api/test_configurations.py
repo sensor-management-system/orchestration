@@ -11,6 +11,8 @@
 import os
 from unittest.mock import patch
 
+from flask import current_app
+
 from project import base_url
 from project.api.models import Contact, PlatformMountAction, User
 from project.api.models.base_model import db
@@ -19,7 +21,7 @@ from project.api.models.device import Device
 from project.api.models.platform import Platform
 from project.api.models.site import Site
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.extensions.instances import idl, pidinst
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -30,6 +32,7 @@ from project.tests.base import (
 from project.tests.models.test_generic_actions_models import (
     generate_configuration_action_model,
 )
+from project.tests.models.test_user_model import add_user
 from project.tests.permissions import create_a_test_contact
 from project.tests.read_from_json import extract_data_from_json_file
 
@@ -1102,3 +1105,48 @@ class TestConfigurationsService(BaseTestCase):
             response.json["data"]["attributes"]["persistent_identifier"],
             configuration.persistent_identifier,
         )
+
+    def test_update_external_b2inst_metadata(self):
+        """Make sure that we ask the system to update the external metadata after a patch."""
+        configuration = Configuration(
+            label="configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="123",
+            persistent_identifier="pid0-0000-0001-1234",
+            b2inst_record_id="123",
+        )
+        db.session.add(configuration)
+        db.session.commit()
+
+        user = add_user()
+        user.is_superuser = True
+        db.session.add(user)
+        db.session.commit()
+
+        current_app.config.update({"B2INST_TOKEN": "123"})
+
+        with self.run_requests_as(user):
+            with self.client:
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    resp = self.client.patch(
+                        self.configurations_url + "/" + str(configuration.id),
+                        json={
+                            "data": {
+                                "id": str(configuration.id),
+                                "type": "configuration",
+                                "attributes": {
+                                    "label": "updated long name",
+                                },
+                            }
+                        },
+                        headers={"Content-Type": "application/vnd.api+json"},
+                    )
+                    update_external_metadata.assert_called_once()
+                    self.assertEqual(
+                        update_external_metadata.call_args.args[0].id, configuration.id
+                    )
+        self.assertEqual(resp.status_code, 200)

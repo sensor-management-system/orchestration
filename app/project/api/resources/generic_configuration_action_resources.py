@@ -21,8 +21,8 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..resources.base_resource import (
     check_if_object_not_found,
-    query_configuration_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_configuration_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
 from ..token_checker import token_required
@@ -69,7 +69,7 @@ class GenericConfigurationActionList(ResourceList):
         """
         result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "create;action"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -103,7 +103,7 @@ class GenericConfigurationActionDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "update;action"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -115,9 +115,21 @@ class GenericConfigurationActionDetail(ResourceDetail):
         )
         if action is None:
             raise ObjectNotFound("Object not found!")
+        self.tasks_after_delete = []
         configuration = action.get_parent()
         msg = "delete;action"
-        set_update_description_text_and_update_by_user(configuration, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(configuration, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = GenericConfigurationActionSchema
     decorators = (token_required,)

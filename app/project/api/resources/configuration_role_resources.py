@@ -22,8 +22,8 @@ from ..schemas.role import ConfigurationRoleSchema
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_configuration_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_configuration_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -62,7 +62,7 @@ class ConfigurationRoleList(ResourceList):
         """
         result_id = result[0]["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "create;contact"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -101,7 +101,7 @@ class ConfigurationRoleDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["configuration"]["data"]["id"]
         msg = "update;contact"
-        query_configuration_and_set_update_description_text(msg, result_id)
+        query_configuration_set_update_description_and_update_pidinst(msg, result_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -113,9 +113,22 @@ class ConfigurationRoleDetail(ResourceDetail):
         )
         if contact_role is None:
             raise ObjectNotFound("Object not found!")
+        self.tasks_after_delete = []
+
         configuration = contact_role.get_parent()
         msg = "delete;contact"
-        set_update_description_text_and_update_by_user(configuration, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(configuration, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = ConfigurationRoleSchema
     decorators = (token_required,)

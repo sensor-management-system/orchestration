@@ -22,8 +22,8 @@ from ..schemas.role import PlatformRoleSchema
 from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
-    query_platform_and_set_update_description_text,
-    set_update_description_text_and_update_by_user,
+    query_platform_set_update_description_and_update_pidinst,
+    set_update_description_text_user_and_pidinst,
 )
 
 
@@ -64,7 +64,7 @@ class PlatformRoleList(ResourceList):
         """
         result_id = result[0]["data"]["relationships"]["platform"]["data"]["id"]
         msg = "create;contact"
-        query_platform_and_set_update_description_text(msg, result_id)
+        query_platform_set_update_description_and_update_pidinst(msg, result_id)
 
         return result
 
@@ -99,7 +99,7 @@ class PlatformRoleDetail(ResourceDetail):
         """
         result_id = result["data"]["relationships"]["platform"]["data"]["id"]
         msg = "update;contact"
-        query_platform_and_set_update_description_text(msg, result_id)
+        query_platform_set_update_description_and_update_pidinst(msg, result_id)
         return result
 
     def before_delete(self, args, kwargs):
@@ -111,9 +111,22 @@ class PlatformRoleDetail(ResourceDetail):
         )
         if contact_role is None:
             raise ObjectNotFound("Object not found!")
+
+        self.tasks_after_delete = []
         platform = contact_role.get_parent()
         msg = "delete;contact"
-        set_update_description_text_and_update_by_user(platform, msg)
+
+        def run_updates():
+            """Set the update description & update external metadata for pidinst."""
+            set_update_description_text_user_and_pidinst(platform, msg)
+
+        self.tasks_after_delete.append(run_updates)
+
+    def after_delete(self, *args, **kwargs):
+        """Run some hooks after deleting."""
+        for task in self.tasks_after_delete:
+            task()
+        return super().after_delete(*args, **kwargs)
 
     schema = PlatformRoleSchema
     decorators = (token_required,)
