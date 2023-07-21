@@ -199,6 +199,7 @@ import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permissions'
+import { SetActiveTabAction } from '@/store/appbar'
 
 @Component({
   components: { ProgressIndicator, PlatformTypeSelect, StatusSelect, ManufacturerSelect, PermissionGroupSearchSelect },
@@ -230,7 +231,8 @@ import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permission
       'setIncludeArchivedPlatforms',
       'setSearchText'
     ]),
-    ...mapActions('permissions', ['loadPermissionGroups'])
+    ...mapActions('permissions', ['loadPermissionGroups']),
+    ...mapActions('appbar', ['setActiveTab'])
   }
 })
 export default class PlatformSearch extends Vue {
@@ -263,6 +265,7 @@ export default class PlatformSearch extends Vue {
   platformtypes!: VocabularyState['platformtypes']
   manufacturers!: VocabularyState['manufacturers']
   permissionGroups!: PermissionsState['permissionGroups']
+  setActiveTab!: SetActiveTabAction
 
   get activeTab (): number | null {
     return this.$store.state.appbar.activeTab
@@ -324,7 +327,14 @@ export default class PlatformSearch extends Vue {
     this.setSearchText(newVal)
   }
 
-  async created () {
+  created () {
+    this.selectedManufacturers = []
+    this.selectedStates = []
+    this.selectedPlatformTypes = []
+    this.selectedPermissionGroups = []
+    this.selectOnlyOwnPlatforms = false
+    this.selectIncludeArchivedPlatforms = false
+    this.searchedText = ''
   }
 
   async fetch (): Promise<void> {
@@ -337,7 +347,7 @@ export default class PlatformSearch extends Vue {
         this.loadPermissionGroups()
       ])
       this.initSearchQueryParams()
-      // await this.runInitialSearch()
+      await this.runInitialSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
@@ -345,15 +355,19 @@ export default class PlatformSearch extends Vue {
     }
   }
 
-  // get searchParams () {
-  //   return {
-  //     searchText: this.searchedText,
-  //     manufacturer: this.selectedManufacturers,
-  //     states: this.selectedStates,
-  //     types: this.selectedPlatformTypes,
-  //     onlyOwnPlatforms: this.selectOnlyOwnPlatforms && this.$auth.loggedIn
-  //   }
-  // }
+  isExtendedSearch (): boolean {
+    return this.onlyOwnPlatforms === true ||
+      !!this.selectedSearchStates.length ||
+      !!this.selectedSearchPlatformTypes.length ||
+      !!this.selectedSearchManufacturers.length ||
+      !!this.selectedSearchPermissionGroups.length ||
+      this.includeArchivedPlatforms === true
+  }
+
+  async runInitialSearch (): Promise<void> {
+    this.setActiveTab(this.isExtendedSearch() ? 1 : 0)
+    await this.searchPlatformsPaginated()
+  }
 
   basicSearch () {
     this.selectedManufacturers = []
@@ -391,9 +405,7 @@ export default class PlatformSearch extends Vue {
       this.isLoading = true
       this.setPageNumber(1) // important for query
       this.initUrlQueryParams()
-      // await this.searchPlatformsPaginated(this.searchParams(this.$auth.loggedIn))
       await this.searchPlatformsPaginated()
-      // this.setPageInUrl() // todo muss das eigentlich rein?
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {

@@ -140,6 +140,9 @@ permissions and limitations under the Licence.
                           Clear
                         </v-btn>
                       </v-col>
+                      <ProgressIndicator
+                        v-model="isLoading"
+                      />
                     </v-row>
                     <div v-if="platforms.length>0 && platformAvailabilities.length>0">
                       <v-subheader>

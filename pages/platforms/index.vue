@@ -308,7 +308,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   }
 })
 export default class SearchPlatformsPage extends Vue {
-  private loading: boolean = true
+  private loading: boolean = false
   private processing: boolean = false
 
   private showDeleteDialog: boolean = false
@@ -350,15 +350,10 @@ export default class SearchPlatformsPage extends Vue {
     this.initializeAppBar()
   }
 
-  async fetch (): Promise<void> {
-    try {
-      this.loading = true
-      await this.searchPlatformsPaginated()
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Loading of platforms failed')
-    } finally {
-      this.loading = false
-    }
+  fetch () {
+    // search is done by the fetch in the PlatformSearch component.
+    this.page = this.getPageFromUrl()
+    this.size = this.getSizeFromUrl()
   }
 
   get page () {
