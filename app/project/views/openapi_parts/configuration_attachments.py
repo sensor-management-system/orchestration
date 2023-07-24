@@ -15,7 +15,6 @@ paths = {
                 {"$ref": "#/components/parameters/sort"},
                 {"$ref": "#/components/parameters/label"},
                 {"$ref": "#/components/parameters/url"},
-                {"$ref": "#/components/parameters/configuration_id"},
                 {"$ref": "#/components/parameters/id"},
                 {"$ref": "#/components/parameters/filter"},
             ],
@@ -152,7 +151,7 @@ components = {
                                                             "type": {
                                                                 "type": "string",
                                                                 "default": (
-                                                                    "configuration_attachment"
+                                                                    "configuration"
                                                                 ),
                                                             },
                                                             "id": {"type": "string"},
