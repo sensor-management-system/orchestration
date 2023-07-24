@@ -160,6 +160,7 @@ def query_configuration_set_update_description_and_update_pidinst(msg, result_id
 
 
 def query_site_set_update_description_and_update_pidinst(msg, result_id):
-    """Get the configuration and add udpate description text."""
+    """Get the configuration and add update description text."""
+    # Honestly we don't have pidinst support for the sites yet.
     site = db.session.query(Site).filter_by(id=result_id).first()
     set_update_description_text_user_and_pidinst(site, msg)

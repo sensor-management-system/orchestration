@@ -65,11 +65,6 @@ class Configuration(
         All the fields here will be searchable and can be used as
         filters in our full text search.
         """
-        # TODO: With the change for the mount & unmount Actions
-        # this here must be improved.
-        # Also we need to update the configurations in case that
-        # we have a change in the platform or device
-
         return {
             "label": self.label,
             "description": self.description,

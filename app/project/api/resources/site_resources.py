@@ -8,7 +8,7 @@
 import os
 
 from flask import g, request
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import JsonApiException, ResourceDetail
 
 from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
@@ -17,7 +17,7 @@ from ..datalayers.esalchemy import (
     TermEqualsExactStringFilter,
 )
 from ..helpers.db import save_to_db
-from ..helpers.errors import ConflictError
+from ..helpers.errors import ConflictError, ForbiddenError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import Configuration, Site, SiteContactRole
 from ..models.base_model import db
@@ -25,7 +25,7 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.site_schema import SiteSchema
 from ..token_checker import token_required
-from .base_resource import check_if_object_not_found
+from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
 class SiteList(ResourceList):
@@ -123,6 +123,32 @@ class SiteDetail(ResourceDetail):
         )
         if associated_configuration:
             raise ConflictError("There are configurations associated to this site.")
+
+    def delete(self, *args, **kwargs):
+        """
+        Try to delete an object through sqlalchemy.
+
+        If could not be done give a ConflictError.
+        :param args: args from the resource view
+        :param kwargs: kwargs from the resource view
+        :return:
+        """
+        site = check_if_object_not_found(Site, kwargs)
+
+        urls = [a.internal_url for a in site.site_attachments if a.internal_url]
+        try:
+            super().delete(*args, **kwargs)
+        except ForbiddenError as e:
+            # Just re-raise it
+            raise e
+        except JsonApiException as e:
+            raise ConflictError("Deletion failed for the site.", str(e))
+
+        for url in urls:
+            delete_attachments_in_minio_by_url(url)
+
+        final_result = {"meta": {"message": "Object successfully deleted"}}
+        return final_result
 
     def before_get(self, args, kwargs):
         """Run some tests before the get method."""

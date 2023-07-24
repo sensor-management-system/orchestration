@@ -9,7 +9,12 @@ import requests
 from flask import Blueprint, current_app, g, redirect
 
 from ..api.helpers.errors import ErrorResponse, ForbiddenError, UnauthorizedError
-from ..api.models import ConfigurationAttachment, DeviceAttachment, PlatformAttachment
+from ..api.models import (
+    ConfigurationAttachment,
+    DeviceAttachment,
+    PlatformAttachment,
+    SiteAttachment,
+)
 from ..api.models.base_model import db
 from ..api.permissions.rules import can_see
 from ..config import env
@@ -114,6 +119,32 @@ def get_configuration_attachment_content(id, filename):
         return redirect(configuration_attachment.url)
 
     url = configuration_attachment.internal_url
+    mimetype = get_content_type(url)
+
+    # See https://flask.palletsprojects.com/en/2.1.x/patterns/streaming/
+    # for the streaming content
+    return current_app.response_class(build_response(url), mimetype=mimetype)
+
+
+@download_routes.route("/site-attachments/<int:id>/file/<filename>", methods=["GET"])
+def get_site_attachment_content(id, filename):
+    """Get the file content response for the site attachment."""
+    site_attachment = db.session.query(SiteAttachment).filter_by(id=id).first()
+    if not site_attachment:
+        return {"details": "Object not found"}, 404
+
+    try:
+        if not can_see(site_attachment):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Attachment not accessable")
+    except ErrorResponse as e:
+        return e.respond()
+
+    if not site_attachment.is_upload:
+        return redirect(site_attachment.url)
+
+    url = site_attachment.internal_url
     mimetype = get_content_type(url)
 
     # See https://flask.palletsprojects.com/en/2.1.x/patterns/streaming/

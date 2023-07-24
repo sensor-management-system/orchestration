@@ -4,100 +4,86 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-"""External openapi spec file for device attachments."""
-
+"""External openapi spec file for site attachments."""
 paths = {
-    "/device-attachments": {
+    "/site-attachments": {
         "get": {
-            "tags": ["Device attachments"],
+            "tags": ["Site attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
-                {
-                    "name": "filter[label]",
-                    "in": "query",
-                    "required": False,
-                    "description": "label attribute filter.",
-                    "schema": {"type": "string", "format": "string", "default": ""},
-                },
+                {"$ref": "#/components/parameters/label"},
                 {"$ref": "#/components/parameters/url"},
-                {
-                    "name": "filter[device_id]",
-                    "in": "query",
-                    "required": False,
-                    "description": "device_id attribute filter.",
-                    "schema": {"type": "string", "format": "string", "default": ""},
-                },
                 {"$ref": "#/components/parameters/id"},
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "200": {"$ref": "#/components/responses/SiteAttachment_coll"}
             },
-            "description": "Retrieve DeviceAttachment from device_attachment",
-            "operationId": "RetrieveacollectionofDeviceAttachmentobjects_0",
+            "description": "Retrieve SiteAttachment from site_attachment",
+            "operationId": "RetrieveacollectionofSiteAttachmentobjects_0",
         },
         "post": {
-            "tags": ["Device attachments"],
-            "requestBody": {"$ref": "#/components/requestBodies/DeviceAttachment_inst"},
+            "tags": ["Site attachments"],
+            "requestBody": {"$ref": "#/components/requestBodies/SiteAttachment_inst"},
             "responses": {
-                "201": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "201": {"$ref": "#/components/responses/SiteAttachment_coll"}
             },
-            "operationId": "CreateDeviceAttachment_0",
+            "operationId": "CreateSiteAttachment_0",
         },
     },
-    "/device-attachments/{device_attachment_id}": {
+    "/site-attachments/{site_attachment_id}": {
         "get": {
-            "tags": ["Device attachments"],
+            "tags": ["Site attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
-                {"$ref": "#/components/parameters/device_attachment_id"},
+                {"$ref": "#/components/parameters/site_attachment_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "200": {"$ref": "#/components/responses/SiteAttachment_coll"}
             },
-            "description": "Retrieve DeviceAttachment from device_attachment",
-            "operationId": "RetrieveDeviceAttachmentinstance_0",
+            "description": "Retrieve SiteAttachment from site_attachment",
+            "operationId": "RetrieveSiteAttachmentinstance_0",
         },
         "patch": {
-            "tags": ["Device attachments"],
-            "parameters": [{"$ref": "#/components/parameters/device_attachment_id"}],
+            "tags": ["Site attachments"],
+            "parameters": [{"$ref": "#/components/parameters/site_attachment_id"}],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/DeviceAttachment"}
+                        "schema": {"$ref": "#/components/schemas/SiteAttachment"}
                     }
                 },
-                "description": "DeviceAttachment attributes",
+                "description": "SiteAttachment attributes",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "200": {"$ref": "#/components/responses/SiteAttachment_coll"}
             },
-            "description": "Update DeviceAttachment attributes",
-            "operationId": "UpdateDeviceAttachment_0",
+            "description": "Update SiteAttachment attributes",
+            "operationId": "UpdateSiteAttachment_0",
         },
         "delete": {
-            "tags": ["Device attachments"],
-            "parameters": [{"$ref": "#/components/parameters/device_attachment_id"}],
+            "tags": ["Site attachments"],
+            "parameters": [{"$ref": "#/components/parameters/site_attachment_id"}],
             "responses": {"200": {"$ref": "#/components/responses/object_deleted"}},
-            "operationId": "DeleteDeviceAttachmentfromdeviceattachment_0",
+            "operationId": "DeleteSiteAttachmentfromsiteattachment_0",
         },
     },
-    "/device-attachments/{device_attachment_id}/file/{filename}": {
+    "/site-attachments/{site_attachment_id}/file/{filename}": {
         "get": {
-            "tags": ["Device attachments"],
+            "tags": ["Site attachments"],
             "parameters": [
-                {"$ref": "#/components/parameters/device_attachment_id"},
+                {"$ref": "#/components/parameters/site_attachment_id"},
                 {
                     "name": "filename",
                     "in": "path",
                     "required": True,
                     "description": (
-                        "Filename of the file. Can be arbitrary, it "
-                        "will always return the same file - no matter"
-                        " how this parameter is set. "
+                        "Filename of the file. Can be arbitrary, "
+                        "it will always return the same file - no "
+                        "matter how this parameter is set. "
                         "Backend needs this to allow linking of filenames for uploads."
                     ),
                     "schema": {"type": "string", "default": "file"},
@@ -106,9 +92,9 @@ paths = {
             "responses": {
                 "200": {
                     "description": (
-                        "Content of the file. Content-Type is the "
-                        "same as the original upload."
-                    ),
+                        "Content of the file. Content-Type "
+                        "is the same as the original upload."
+                    )
                 },
                 "401": {
                     "description": "Authentification required.",
@@ -122,14 +108,13 @@ paths = {
                 },
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
-            "description": "Endpoint to get the content of the uploaded file.",
+            "description": ("Endpoint to get the content of the uploaded file."),
         }
     },
 }
-
 components = {
     "requestBodies": {
-        "DeviceAttachment_inst": {
+        "SiteAttachment_inst": {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
@@ -137,8 +122,13 @@ components = {
                             "data": {
                                 "type": "object",
                                 "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "default": "site_attachment",
+                                    },
                                     "attributes": {
                                         "type": "object",
+                                        "required": ["label", "url"],
                                         "properties": {
                                             "label": {"type": "string"},
                                             "url": {"type": "string", "format": "url"},
@@ -146,9 +136,9 @@ components = {
                                     },
                                     "relationships": {
                                         "type": "object",
-                                        "required": ["device"],
+                                        "required": ["site"],
                                         "properties": {
-                                            "device": {
+                                            "site": {
                                                 "type": "object",
                                                 "properties": {
                                                     "data": {
@@ -156,7 +146,7 @@ components = {
                                                         "properties": {
                                                             "type": {
                                                                 "type": "string",
-                                                                "default": "device",
+                                                                "default": ("site"),
                                                             },
                                                             "id": {"type": "string"},
                                                         },
@@ -165,18 +155,17 @@ components = {
                                             }
                                         },
                                     },
-                                    "type": {"type": "string", "default": "device_attachment"},
                                 },
                             }
                         },
-                        "description": "DeviceAttachment post",
+                        "description": "SiteAttachment post;",
                     }
                 }
             }
         },
     },
     "schemas": {
-        "DeviceAttachment": {
+        "SiteAttachment": {
             "properties": {
                 "data": {
                     "type": "object",
@@ -186,33 +175,24 @@ components = {
                             "properties": {
                                 "label": {"type": "string"},
                                 "url": {"type": "string", "format": "url"},
-                                "is_upload": {
-                                    "type": "boolean",
-                                },
+                                "is_upload": {"type": "boolean"},
                             },
                         },
                         "type": {"type": "string"},
                         "id": {"type": "string"},
                     },
                     "example": {
-                        "attributes": {
-                            "label": "",
-                            "url": "",
-                            "is_upload": False,
-                        },
-                        "relationships": {
-                            "device": {"data": {"type": "device", "id": "0"}}
-                        },
-                        "type": "device_attachment",
+                        "attributes": {"label": "", "url": ""},
+                        "type": "site_attachment",
                         "id": "0",
                     },
                 }
             },
-            "description": "DeviceAttachment post;",
+            "description": "SiteAttachment Schema;",
         },
     },
     "responses": {
-        "DeviceAttachment_coll": {
+        "SiteAttachment_coll": {
             "content": {
                 "application/vnd.api+json": {
                     "schema": {
@@ -243,7 +223,7 @@ components = {
                                     "relationships": {
                                         "type": "object",
                                         "properties": {
-                                            "device": {
+                                            "site": {
                                                 "type": "object",
                                                 "properties": {
                                                     "data": {
@@ -297,9 +277,7 @@ components = {
                                         "updated_at": "2023-03-14T13:00:00+00:00",
                                     },
                                     "relationships": {
-                                        "device": {
-                                            "data": {"type": "device", "id": "0"}
-                                        },
+                                        "site": {"data": {"type": "site", "id": "0"}},
                                         "created_by": {
                                             "data": {
                                                 "type": "user",
@@ -313,21 +291,21 @@ components = {
                                             }
                                         },
                                     },
-                                    "type": "device_attachment",
+                                    "type": "site_attachment",
                                     "id": "0",
                                 },
                             }
                         },
-                        "description": "DeviceAttachment get;",
+                        "description": "SiteAttachment get;",
                     }
                 }
             },
-            "description": "DeviceAttachment",
+            "description": "SiteAttachment",
         },
     },
     "parameters": {
-        "device_attachment_id": {
-            "name": "device_attachment_id",
+        "site_attachment_id": {
+            "name": "site_attachment_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},

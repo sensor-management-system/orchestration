@@ -57,6 +57,18 @@ api.route(
     "configuration_attachment_detail",
     "/configuration-attachments/<int:id>",
 )
+# site Attachment
+api.route(
+    SiteAttachmentList,
+    "site_attachment_list",
+    "/site-attachments",
+    "/sites/<int:site_id>/site-attachments",
+)
+api.route(
+    SiteAttachmentDetail,
+    "site_attachment_detail",
+    "/site-attachments/<int:id>",
+)
 # Device
 api.route(
     DeviceList,

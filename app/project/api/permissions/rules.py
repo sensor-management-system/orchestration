@@ -46,6 +46,7 @@ from ..models import (
     PlatformSoftwareUpdateAction,
     PlatformSoftwareUpdateActionAttachment,
     Site,
+    SiteAttachment,
     SiteContactRole,
     User,
 )
@@ -1549,3 +1550,13 @@ def can_delete(entity):
 def filter_visible(query):
     """Filter the query based on the visibility settings."""
     return filter_visible.delegate(Site, query.join(Site))
+
+
+# SiteAttachment
+for model in [SiteAttachment]:
+    can_see.register_same(model, handler=SiteContactRole)
+    can_create.register_same(model, handler=SiteContactRole)
+    can_edit.register_same(model, handler=SiteContactRole)
+    can_change.register_same(model, handler=SiteContactRole)
+    can_delete.register_same(model, handler=SiteContactRole)
+    filter_visible.register_same(model, handler=SiteContactRole)

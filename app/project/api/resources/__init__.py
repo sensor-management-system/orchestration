@@ -104,7 +104,6 @@ from .generic_platform_action_resources import (  # noqa: F401
     GenericPlatformActionDetail,
     GenericPlatformActionList,
 )
-from .pid_resources import PidList, PidDetail  # noqa: F401
 from .mounting_availabilities import (  # noqa: F401
     DeviceAvailabilities,
     PlatformAvailabilities,
@@ -132,6 +131,10 @@ from .platform_software_update_action_resource import (  # noqa: F401
 from .site_resources import (  # noqa: F401
     SiteDetail,
     SiteList,
+)
+from .site_attachment_resources import (  # noqa: F401
+    SiteAttachmentDetail,
+    SiteAttachmentList,
 )
 from .site_role_resources import (  # noqa: F401
     SiteRoleDetail,

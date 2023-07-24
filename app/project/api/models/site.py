@@ -50,6 +50,9 @@ class Site(
     site_usage_uri = db.Column(db.String(256), nullable=True)
     site_usage_name = db.Column(db.String(256), nullable=True)
     website = db.Column(db.String(1024), nullable=True)
+    site_attachments = db.relationship(
+        "SiteAttachment", cascade="save-update, merge, delete, delete-orphan"
+    )
 
     # SiteContactRoles have a backref to the sites, so there is no need
     # to put it here explicitly.
@@ -99,6 +102,7 @@ class Site(
             "site_contact_roles": [
                 scr.to_search_entry() for scr in self.site_contact_roles
             ],
+            "site_attachments": [a.to_search_entry() for a in self.site_attachments],
             "website": self.website,
             "updated_at": self.updated_at,
             # For the moment we don't include the configurations as it would
@@ -174,6 +178,14 @@ class Site(
                     "updated_at": {
                         "type": "date",
                         "format": "strict_date_optional_time",
+                    },
+                    "site_attachments": {
+                        "properties": {
+                            # Allow search via text & keyword
+                            "label": type_keyword_and_full_searchable,
+                            # But don't allow search for the very same url (unlikely to be needed).
+                            "url": type_text_full_searchable,
+                        },
                     },
                     # As mentioned we don't include the data for the
                     # configurations here.

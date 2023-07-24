@@ -22,6 +22,7 @@ from .calibration_actions import (  # noqa: F401
 from .calibration_attachments import DeviceCalibrationAttachment  # noqa: F401
 from .configuration import Configuration  # noqa: F401
 from .configuration_attachment import ConfigurationAttachment  # noqa: F401
+from .configuration_customfield import ConfigurationCustomField  # noqa: F401
 from .configuration_location_actions import (  # noqa: F401
     ConfigurationDynamicLocationBeginAction,
     ConfigurationStaticLocationBeginAction,
@@ -33,7 +34,6 @@ from .contact_role import (  # noqa: F401
     PlatformContactRole,
     SiteContactRole,
 )
-from .configuration_customfield import ConfigurationCustomField  # noqa: F401
 from .customfield import CustomField  # noqa: F401
 from .datastream_link import DatastreamLink  # noqa: F401
 from .device import Device  # noqa: F401
@@ -53,6 +53,7 @@ from .mount_actions import DeviceMountAction, PlatformMountAction  # noqa: F401
 from .platform import Platform  # noqa: F401
 from .platform_attachment import PlatformAttachment  # noqa: F401
 from .site import Site  # noqa: F401
+from .site_attachment import SiteAttachment  # noqa: F401
 from .software_update_action_attachments import (  # noqa: F401
     DeviceSoftwareUpdateActionAttachment,
     PlatformSoftwareUpdateActionAttachment,
