@@ -45,6 +45,10 @@ export interface IWithDate {
   date: DateTime | null
 }
 
+export interface IWithLogicOrder {
+  logicOrder: number
+}
+
 export function byDateOldestFirst (a: IWithDate, b: IWithDate): number {
   if (!a.date && !b.date) {
     return 0
@@ -77,6 +81,16 @@ export function byDateOldestLast (a: IWithDate, b: IWithDate): number {
     return 1
   } else if (a.date > b.date) {
     return -1
+  }
+  return 0
+}
+
+export function byLogicOrderHighestFirst (a: IWithLogicOrder, b: IWithLogicOrder): number {
+  if (a.logicOrder > b.logicOrder) {
+    return -1
+  }
+  if (a.logicOrder < b.logicOrder) {
+    return 1
   }
   return 0
 }

@@ -51,7 +51,7 @@ import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchPara
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 
-import { byDateOldestLast } from '@/modelUtils/mountHelpers'
+import { byDateOldestLast, byLogicOrderHighestFirst } from '@/modelUtils/mountHelpers'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
@@ -195,18 +195,10 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
       if (result !== 0) {
         return result
       }
-      if (!('isUnmountAction' in a) || !('isUnmountAction' in b)) {
+      if (!('logicOrder' in a) || !('logicOrder' in b)) {
         return result
       }
-      // display unmount above mount action when dates are the same
-      if (a.isUnmountAction && !b.isUnmountAction) {
-        return -1
-      }
-      // display mount below unmount action when dates are the same
-      if (!a.isUnmountAction && b.isUnmountAction) {
-        return 1
-      }
-      return 0
+      return byLogicOrderHighestFirst(a, b)
     }
 
     const result: ITimelineAction[] = []
@@ -223,7 +215,6 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
         result.push(new DeviceUnmountTimelineAction(deviceMountAction))
       }
     }
-
     for (const staticLocationAction of state.configurationStaticLocationActions) {
       result.push(new StaticLocationBeginTimelineAction(staticLocationAction))
       if (staticLocationAction.endDate !== null) {
