@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
       </v-card-title>
 
       <v-card-text>
-        Saving without a serial number is not recommend. You might not be able to find this {{ entity }} again.
+        Saving without a serial number is not recommended. You might not be able to find this {{ entity }} again.
       </v-card-text>
 
       <v-card-actions>
