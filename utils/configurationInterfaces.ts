@@ -91,6 +91,9 @@ export interface IMountTimelineAction <T> {
   description: string
   isUnmountAction: boolean
   mountAction: T
+  // Logic order defines the ordering in the overview
+  // of actions in case they have the same point in time.
+  logicOrder: number
 }
 
 export interface IStaticLocationTimelineAction {
@@ -180,6 +183,10 @@ export class PlatformMountTimelineAction implements IMountTimelineAction<Platfor
   get mountAction (): PlatformMountAction {
     return this._mountAction
   }
+
+  get logicOrder (): number {
+    return 100
+  }
 }
 
 export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMountAction> {
@@ -232,6 +239,10 @@ export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMou
 
   get mountAction (): DeviceMountAction {
     return this._mountAction
+  }
+
+  get logicOrder (): number {
+    return 200
   }
 }
 
@@ -286,6 +297,10 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction<Platf
   get mountAction (): PlatformMountAction {
     return this._mountAction
   }
+
+  get logicOrder (): number {
+    return 400
+  }
 }
 
 export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceMountAction> {
@@ -338,6 +353,10 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceM
 
   get mountAction (): DeviceMountAction {
     return this._mountAction
+  }
+
+  get logicOrder (): number {
+    return 300
   }
 }
 
