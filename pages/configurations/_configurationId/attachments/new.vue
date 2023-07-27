@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -134,7 +134,7 @@ import { IUploadResult } from '@/services/sms/UploadApi'
 
 import { Attachment } from '@/models/Attachment'
 
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { Rules } from '@/mixins/Rules'
@@ -220,13 +220,13 @@ export default class ConfigurationAttachmentAddPage extends mixins(Rules, Upload
       this.$store.commit('snackbar/setSuccess', 'New attachment added')
       this.$router.push('/configurations/' + this.configurationId + '/attachments')
     } catch (error: any) {
-      this.handelError(error, theFailureCanBeFromUpload)
+      this.handleError(error, theFailureCanBeFromUpload)
     } finally {
       this.isSaving = false
     }
   }
 
-  private handelError (error: any, theFailureCanBeFromUpload: boolean) {
+  private handleError (error: any, theFailureCanBeFromUpload: boolean) {
     let message = 'Failed to save an attachment'
 
     if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {

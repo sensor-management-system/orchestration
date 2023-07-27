@@ -2,9 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -40,7 +42,7 @@ permissions and limitations under the Licence.
         <SaveAndCancelButtons
           v-if="editable"
           :save-btn-text="attachmentType === 'url' ? 'Add' : 'Upload'"
-          :to="'/devices/' + deviceId + '/attachments'"
+          :to="'/sties/' + siteId + '/attachments'"
           @save="add"
         />
       </v-card-actions>
@@ -101,7 +103,7 @@ permissions and limitations under the Licence.
           text
           small
           nuxt
-          :to="'/devices/' + deviceId + '/attachments'"
+          :to="'/sites/' + siteId + '/attachments'"
         >
           Cancel
         </v-btn>
@@ -120,12 +122,11 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, mixins, Watch } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
-
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { AddDeviceAttachmentAction, LoadDeviceAttachmentsAction } from '@/store/devices'
+import { AddSiteAttachmentAction, LoadSiteAttachmentsAction } from '@/store/sites'
 
 import UploadConfig from '@/config/uploads'
 
@@ -143,11 +144,11 @@ import { UploadRules } from '@/mixins/UploadRules'
   components: { ProgressIndicator, SaveAndCancelButtons },
   middleware: ['auth'],
   methods: {
-    ...mapActions('devices', ['addDeviceAttachment', 'loadDeviceAttachments']),
+    ...mapActions('sites', ['addSiteAttachment', 'loadSiteAttachments']),
     ...mapActions('files', ['uploadFile'])
   }
 })
-export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, CheckEditAccess) {
+export default class SiteAttachmentAddPage extends mixins(Rules, UploadRules, CheckEditAccess) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
@@ -155,8 +156,8 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
 
   // vuex definition for typescript check
   uploadFile!: (file: File) => Promise<IUploadResult>
-  addDeviceAttachment!: AddDeviceAttachmentAction
-  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  addSiteAttachment!: AddSiteAttachmentAction
+  loadSiteAttachments!: LoadSiteAttachmentsAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -166,7 +167,7 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
    * @returns {string} a valid route path
    */
   getRedirectUrl (): string {
-    return '/devices/' + this.deviceId + '/attachments'
+    return '/sites/' + this.siteId + '/attachments'
   }
 
   /**
@@ -177,7 +178,7 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
    * @returns {string} a message string
    */
   getRedirectMessage (): string {
-    return 'You\'re not allowed to edit this device.'
+    return 'You\'re not allowed to edit this site.'
   }
 
   /**
@@ -189,8 +190,8 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
     return UploadConfig.allowedMimeTypes.join(',')
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get siteId (): string {
+    return this.$route.params.siteId
   }
 
   async add () {
@@ -211,21 +212,21 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
         theFailureCanBeFromUpload = false
       }
 
-      await this.addDeviceAttachment({
-        deviceId: this.deviceId,
+      await this.addSiteAttachment({
+        siteId: this.siteId,
         attachment: this.attachment
       })
-      this.loadDeviceAttachments(this.deviceId)
+      this.loadSiteAttachments(this.siteId)
       this.$store.commit('snackbar/setSuccess', 'New attachment added')
-      this.$router.push('/devices/' + this.deviceId + '/attachments')
+      this.$router.push('/sites/' + this.siteId + '/attachments')
     } catch (error: any) {
-      this.handelError(error, theFailureCanBeFromUpload)
+      this.handleError(error, theFailureCanBeFromUpload)
     } finally {
       this.isSaving = false
     }
   }
 
-  private handelError (error: any, theFailureCanBeFromUpload: boolean) {
+  private handleError (error: any, theFailureCanBeFromUpload: boolean) {
     let message = 'Failed to save an attachment'
 
     if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {
@@ -236,6 +237,17 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
       }
     }
     this.$store.commit('snackbar/setError', message)
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/sites/' + this.siteId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this site.')
+      })
+    }
   }
 }
 </script>

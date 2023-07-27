@@ -82,7 +82,7 @@ import { Configuration } from '@/models/Configuration'
 import { CreatePidAction, SaveConfigurationAction } from '@/store/configurations'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 

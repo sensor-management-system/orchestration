@@ -34,7 +34,6 @@
  * permissions and limitations under the Licence.
  */
 
-import { DateTime } from 'luxon'
 import { Attachment, IAttachment } from '@/models/Attachment'
 import {
   IJsonApiEntityEnvelope,
@@ -46,120 +45,37 @@ import {
   IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
 
-import { IAttachmentsAndMissing, IAttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
+import { IAttachmentsAndMissing, IAttachmentSerializer, AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 
 export class ConfigurationAttachmentSerializer implements IAttachmentSerializer {
+  // Delegate to a generalized serializer.
+  private serializer = new AttachmentSerializer('configuration_attachment', 'configuration')
+
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment {
-    const data = jsonApiObject.data
-    return this.convertJsonApiDataToModel(data)
+    return this.serializer.convertJsonApiObjectToModel(jsonApiObject)
   }
 
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Attachment {
-    const attributes = jsonApiData.attributes
-
-    const newEntry = Attachment.createEmpty()
-
-    newEntry.id = jsonApiData.id.toString()
-    if (attributes) {
-      newEntry.url = attributes.url || ''
-      newEntry.label = attributes.label || ''
-      newEntry.isUpload = attributes.is_upload || false
-      newEntry.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
-    }
-
-    return newEntry
+    return this.serializer.convertJsonApiDataToModel(jsonApiData)
   }
 
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Attachment[] {
-    return jsonApiObjectList.data.map(this.convertJsonApiDataToModel)
+    return this.serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
   }
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IAttachmentsAndMissing {
-    const attachmentIds = []
-    if (relationships.configuration_attachments) {
-      const attachmentObject = relationships.configuration_attachments
-      if (attachmentObject.data && (attachmentObject.data as IJsonApiEntityWithoutDetails[]).length > 0) {
-        for (const relationShipAttachmentData of (attachmentObject.data as IJsonApiEntityWithoutDetails[])) {
-          const attachmentId = relationShipAttachmentData.id
-          attachmentIds.push(attachmentId)
-        }
-      }
-    }
-
-    const possibleAttachments: { [key: string]: Attachment } = {}
-    if (included && included.length > 0) {
-      for (const includedEntry of included) {
-        if (includedEntry.type === 'configuration_attachment') {
-          const attachmentId = includedEntry.id
-          if (attachmentIds.includes(attachmentId)) {
-            const attachment = this.convertJsonApiDataToModel(includedEntry)
-            possibleAttachments[attachmentId] = attachment
-          }
-        }
-      }
-    }
-
-    const attachments = []
-    const missingDataForAttachmentIds = []
-
-    for (const attachmentId of attachmentIds) {
-      if (possibleAttachments[attachmentId]) {
-        attachments.push(possibleAttachments[attachmentId])
-      } else {
-        missingDataForAttachmentIds.push(attachmentId)
-      }
-    }
-
-    return {
-      attachments,
-      missing: {
-        ids: missingDataForAttachmentIds
-      }
-    }
+    return this.serializer.convertJsonApiRelationshipsModelList(relationships, included)
   }
 
   convertModelListToJsonApiRelationshipObject (attachments: IAttachment[]): IJsonApiTypedEntityWithoutDetailsDataDictList {
-    return {
-      configuration_attachments: {
-        data: this.convertModelListToTupleListWithIdAndType(attachments)
-      }
-    }
+    return this.serializer.convertModelListToJsonApiRelationshipObject(attachments)
   }
 
   convertModelListToTupleListWithIdAndType (attachments: IAttachment[]): IJsonApiEntityWithoutDetails[] {
-    const result: IJsonApiEntityWithoutDetails[] = []
-    for (const attachment of attachments) {
-      if (attachment.id !== null) {
-        result.push({
-          id: attachment.id,
-          type: 'configuration_attachment'
-        })
-      }
-    }
-    return result
+    return this.serializer.convertModelListToTupleListWithIdAndType(attachments)
   }
 
   convertModelToJsonApiData (attachment: Attachment, configurationId: string): IJsonApiEntityWithOptionalId {
-    const data: any = {
-      type: 'configuration_attachment',
-      attributes: {
-        url: attachment.url,
-        label: attachment.label
-        // no need to set 'is_upload' - it is a read only field
-        // Also the field for the created_at entry is set automatically
-      },
-      relationships: {
-        configuration: {
-          data: {
-            type: 'configuration',
-            id: configurationId
-          }
-        }
-      }
-    }
-    if (attachment.id) {
-      data.id = attachment.id
-    }
-    return data
+    return this.serializer.convertModelToJsonApiData(attachment, configurationId)
   }
 }

@@ -87,7 +87,7 @@ import { Site } from '@/models/Site'
 
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
 import { hasSelfIntersection } from '@/utils/mapHelpers'

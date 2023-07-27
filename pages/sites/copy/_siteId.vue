@@ -64,8 +64,11 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row dense>
-          <v-col cols="12">
+          <v-col cols="12" md="2">
             <v-checkbox v-model="copyContacts" label="Contacts" />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-checkbox v-model="copyAttachments" label="Attachments" />
           </v-col>
         </v-row>
       </v-alert>
@@ -90,8 +93,11 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row dense>
-          <v-col cols="12">
+          <v-col cols="12" md="2">
             <v-checkbox v-model="copyContacts" label="Contacts" />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-checkbox v-model="copyAttachments" label="Attachments" />
           </v-col>
         </v-row>
       </v-alert>
@@ -119,7 +125,7 @@ import { LoadSiteAction, CopySiteAction, SitesState } from '@/store/sites'
 import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 import { Site } from '@/models/Site'
 
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { hasSelfIntersection } from '@/utils/mapHelpers'
@@ -151,6 +157,7 @@ export default class SiteCopyPage extends Vue {
   private isLoading = false
 
   private copyContacts: boolean = true
+  private copyAttachments: boolean = false
 
   // vuex definition for typescript check
   site!: SitesState['site']
@@ -246,6 +253,7 @@ export default class SiteCopyPage extends Vue {
       const savedSiteId = await this.copySite({
         site: this.siteToCopy,
         copyContacts: this.copyContacts,
+        copyAttachments: this.copyAttachments,
         originalSiteId: this.siteId
       })
       this.$store.commit('snackbar/setSuccess', 'Site / Lab copied')
@@ -265,6 +273,10 @@ export default class SiteCopyPage extends Vue {
       },
       {
         name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
         disabled: true
       }
     ])

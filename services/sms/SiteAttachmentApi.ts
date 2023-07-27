@@ -3,10 +3,9 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022 - 2023
+ * Copyright (C) 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
  *   Geosciences (GFZ, https://www.gfz-potsdam.de)
  *
@@ -33,17 +32,17 @@
 import { AxiosInstance } from 'axios'
 
 import { Attachment } from '@/models/Attachment'
-import { ConfigurationAttachmentSerializer } from '@/serializers/jsonapi/ConfigurationAttachmentSerializer'
+import { SiteAttachmentSerializer } from '@/serializers/jsonapi/SiteAttachmentSerializer'
 
-export class ConfigurationAttachmentApi {
+export class SiteAttachmentApi {
   private axiosApi: AxiosInstance
   readonly basePath: string
-  private serializer: ConfigurationAttachmentSerializer
+  private serializer: SiteAttachmentSerializer
 
   constructor (axiosInstance: AxiosInstance, basePath: string) {
     this.axiosApi = axiosInstance
     this.basePath = basePath
-    this.serializer = new ConfigurationAttachmentSerializer()
+    this.serializer = new SiteAttachmentSerializer()
   }
 
   findById (id: string): Promise<Attachment> {
@@ -57,15 +56,15 @@ export class ConfigurationAttachmentApi {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
 
-  add (configurationId: string, attachment: Attachment): Promise<Attachment> {
+  add (siteId: string, attachment: Attachment): Promise<Attachment> {
     const url = this.basePath
-    const data = this.serializer.convertModelToJsonApiData(attachment, configurationId)
+    const data = this.serializer.convertModelToJsonApiData(attachment, siteId)
     return this.axiosApi.post(url, { data }).then((serverResponse) => {
       return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
     })
   }
 
-  update (configurationId: string, attachment: Attachment): Promise<Attachment> {
+  update (siteId: string, attachment: Attachment): Promise<Attachment> {
     return new Promise<string>((resolve, reject) => {
       if (attachment.id) {
         resolve(attachment.id)
@@ -73,7 +72,7 @@ export class ConfigurationAttachmentApi {
         reject(new Error('no id for the Attachment'))
       }
     }).then((attachmentId) => {
-      const data = this.serializer.convertModelToJsonApiData(attachment, configurationId)
+      const data = this.serializer.convertModelToJsonApiData(attachment, siteId)
       return this.axiosApi.patch(this.basePath + '/' + attachmentId, { data }).then((serverResponse) => {
         return this.serializer.convertJsonApiObjectToModel(serverResponse.data)
       })

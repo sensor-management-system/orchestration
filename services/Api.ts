@@ -98,6 +98,7 @@ import { UserInfoApi } from '@/services/sms/UserInfoApi'
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 
 import { SiteApi } from '@/services/sms/SiteApi'
+import { SiteAttachmentApi } from '@/services/sms/SiteAttachmentApi'
 import { SiteConfigurationsApi } from '@/services/sms/SiteConfigurationsApi'
 import { UserModificationApi } from '@/services/sms/UserModificationApi'
 import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
@@ -128,6 +129,7 @@ export class Api {
   private readonly _genericPlatformActionAttachmentApi: GenericPlatformActionAttachmentApi
   private readonly _genericConfigurationActionAttachmentApi: GenericConfigurationActionAttachmentApi
   private readonly _configurationCustomfieldsApi: ConfigurationCustomfieldsApi
+  private readonly _siteAttachmentApi: SiteAttachmentApi
 
   private readonly _deviceSoftwareUpdateActionApi: DeviceSoftwareUpdateActionApi
   private readonly _deviceSoftwareUpdateActionAttachmentApi: DeviceSoftwareUpdateActionAttachmentApi
@@ -247,6 +249,11 @@ export class Api {
         )
         return await api.findAll(true)
       }
+    )
+
+    this._siteAttachmentApi = new SiteAttachmentApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/site-attachments'
     )
 
     const deviceMountActionApi = new DeviceMountActionApi(
@@ -568,6 +575,10 @@ export class Api {
 
   get configurationAttachments (): ConfigurationAttachmentApi {
     return this._configurationAttachmentApi
+  }
+
+  get siteAttachments (): SiteAttachmentApi {
+    return this._siteAttachmentApi
   }
 
   get configurationCustomfields (): ConfigurationCustomfieldsApi {

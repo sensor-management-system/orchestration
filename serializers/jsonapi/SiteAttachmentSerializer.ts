@@ -7,6 +7,7 @@
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Tim Eder (UFZ, tim.eder@ufz.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
  * (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -37,17 +38,18 @@ import { Attachment, IAttachment } from '@/models/Attachment'
 import {
   IJsonApiEntityEnvelope,
   IJsonApiEntityListEnvelope,
+  IJsonApiRelationships,
+  IJsonApiTypedEntityWithoutDetailsDataDictList,
   IJsonApiEntityWithoutDetails,
   IJsonApiEntityWithOptionalId,
-  IJsonApiEntityWithOptionalAttributes,
-  IJsonApiTypedEntityWithoutDetailsDataDictList,
-  IJsonApiRelationships
+  IJsonApiEntityWithOptionalAttributes
 } from '@/serializers/jsonapi/JsonApiTypes'
+
 import { IAttachmentsAndMissing, IAttachmentSerializer, AttachmentSerializer } from '@/serializers/jsonapi/AttachmentSerializer'
 
-export class PlatformAttachmentSerializer implements IAttachmentSerializer {
+export class SiteAttachmentSerializer implements IAttachmentSerializer {
   // Delegate to a generalized serializer.
-  private serializer = new AttachmentSerializer('platform_attachment', 'platform')
+  private serializer = new AttachmentSerializer('site_attachment', 'site')
 
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment {
     return this.serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -73,7 +75,7 @@ export class PlatformAttachmentSerializer implements IAttachmentSerializer {
     return this.serializer.convertModelListToTupleListWithIdAndType(attachments)
   }
 
-  convertModelToJsonApiData (attachment: Attachment, platformId: string): IJsonApiEntityWithOptionalId {
-    return this.serializer.convertModelToJsonApiData(attachment, platformId)
+  convertModelToJsonApiData (attachment: Attachment, siteId: string): IJsonApiEntityWithOptionalId {
+    return this.serializer.convertModelToJsonApiData(attachment, siteId)
   }
 }

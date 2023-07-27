@@ -2,9 +2,11 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -38,7 +40,7 @@ permissions and limitations under the Licence.
       <v-spacer />
       <SaveAndCancelButtons
         save-btn-text="Apply"
-        :to="'/devices/' + deviceId + '/attachments'"
+        :to="'/sites/' + siteId + '/attachments'"
         @save="save"
       />
     </v-card-actions>
@@ -87,17 +89,16 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Vue, mixins, Watch } from 'nuxt-property-decorator'
 import { mapState, mapActions } from 'vuex'
-
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
-  DevicesState,
-  LoadDeviceAttachmentAction,
-  LoadDeviceAttachmentsAction,
-  UpdateDeviceAttachmentAction
-} from '@/store/devices'
+  SitesState,
+  LoadSiteAttachmentsAction,
+  LoadSiteAttachmentAction,
+  UpdateSiteAttachmentAction
+} from '@/store/sites'
 
 import { Attachment } from '@/models/Attachment'
 
@@ -118,8 +119,8 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
     ProgressIndicator
   },
   middleware: ['auth'],
-  computed: mapState('devices', ['deviceAttachment']),
-  methods: mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment'])
+  computed: mapState('sites', ['siteAttachment']),
+  methods: mapActions('sites', ['loadSiteAttachment', 'loadSiteAttachments', 'updateSiteAttachment'])
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, CheckEditAccess) {
@@ -128,10 +129,10 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
   private valueCopy: Attachment = new Attachment()
 
   // vuex definition for typescript check
-  deviceAttachment!: DevicesState['deviceAttachment']
-  loadDeviceAttachment!: LoadDeviceAttachmentAction
-  loadDeviceAttachments!: LoadDeviceAttachmentsAction
-  updateDeviceAttachment!: UpdateDeviceAttachmentAction
+  siteAttachment!: SitesState['siteAttachment']
+  loadSiteAttachment!: LoadSiteAttachmentAction
+  loadSiteAttachments!: LoadSiteAttachmentsAction
+  updateSiteAttachment!: UpdateSiteAttachmentAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -141,7 +142,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
    * @returns {string} a valid route path
    */
   getRedirectUrl (): string {
-    return '/devices/' + this.deviceId + '/attachments'
+    return '/sites/' + this.siteId + '/attachments'
   }
 
   /**
@@ -152,15 +153,15 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
    * @returns {string} a message string
    */
   getRedirectMessage (): string {
-    return 'You\'re not allowed to edit this device.'
+    return 'You\'re not allowed to edit this site.'
   }
 
   async fetch (): Promise<void> {
     try {
       this.isLoading = true
-      await this.loadDeviceAttachment(this.attachmentId)
-      if (this.deviceAttachment) {
-        this.valueCopy = Attachment.createFromObject(this.deviceAttachment)
+      await this.loadSiteAttachment(this.attachmentId)
+      if (this.siteAttachment) {
+        this.valueCopy = Attachment.createFromObject(this.siteAttachment)
       }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load attachment')
@@ -169,8 +170,8 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     }
   }
 
-  get deviceId (): string {
-    return this.$route.params.deviceId
+  get siteId (): string {
+    return this.$route.params.siteId
   }
 
   get attachmentId (): string {
@@ -188,17 +189,28 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     }
     try {
       this.isSaving = true
-      await this.updateDeviceAttachment({
-        deviceId: this.deviceId,
+      await this.updateSiteAttachment({
+        siteId: this.siteId,
         attachment: this.valueCopy
       })
-      this.loadDeviceAttachments(this.deviceId)
+      this.loadSiteAttachments(this.siteId)
       this.$store.commit('snackbar/setSuccess', 'Attachment updated')
-      this.$router.push('/devices/' + this.deviceId + '/attachments')
+      this.$router.push('/sites/' + this.siteId + '/attachments')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  @Watch('editable', {
+    immediate: true
+  })
+  onEditableChanged (value: boolean, oldValue: boolean | undefined) {
+    if (!value && typeof oldValue !== 'undefined') {
+      this.$router.replace('/sites/' + this.siteId + '/attachments', () => {
+        this.$store.commit('snackbar/setError', 'You\'re not allowed to edit this site.')
+      })
     }
   }
 }

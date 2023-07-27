@@ -89,7 +89,7 @@ import { SetTitleAction } from '@/store/appbar'
 
 import { Configuration, IConfiguration } from '@/models/Configuration'
 
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'

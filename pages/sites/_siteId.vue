@@ -167,6 +167,10 @@ export default class SitePage extends Vue {
       {
         to: '/sites/' + this.siteId + '/contacts',
         name: 'Contacts'
+      },
+      {
+        to: '/sites/' + this.siteId + '/attachments',
+        name: 'Attachments'
       }
     ])
     if (this.site) {

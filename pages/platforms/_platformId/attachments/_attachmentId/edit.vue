@@ -105,7 +105,7 @@ import {
 
 import { Attachment } from '@/models/Attachment'
 
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'

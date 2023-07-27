@@ -73,7 +73,7 @@ import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHelpers'
 
