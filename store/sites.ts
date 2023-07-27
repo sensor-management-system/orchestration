@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -39,11 +39,13 @@ import { Commit, GetterTree, ActionTree, Dispatch } from 'vuex'
 // import { DateTime } from 'luxon'
 import { RootState } from '@/store'
 
+import { Attachment } from '@/models/Attachment'
 import { Site } from '@/models/Site'
 import { ISiteSearchParams } from '@/modelUtils/SiteSearchParams'
 import { IncludedRelationships } from '@/services/sms/SiteApi'
 import { Configuration } from '@/models/Configuration'
 import { ContactRole } from '@/models/ContactRole'
+import { getLastPathElement } from '@/utils/urlHelpers'
 
 const PAGE_SIZES = [
   25,
@@ -55,7 +57,9 @@ export interface SitesState {
   sites: Site[],
   site: Site | null,
   siteContactRoles: ContactRole[],
-  siteConfigurations: Configuration[]
+  siteConfigurations: Configuration[],
+  siteAttachments: Attachment[],
+  siteAttachment: Attachment | null,
   pageNumber: number,
   pageSize: number,
   totalPages: number,
@@ -67,6 +71,8 @@ const state = (): SitesState => ({
   site: null,
   siteContactRoles: [],
   siteConfigurations: [],
+  siteAttachments: [],
+  siteAttachment: null,
   pageNumber: 1,
   pageSize: PAGE_SIZES[0],
   totalPages: 1,
@@ -88,8 +94,14 @@ export type LoadSiteConfigurationsAction = (id: string) => Promise<void>
 export type LoadSiteContactRolesAction = (id: string) => Promise<void>
 export type AddSiteContactRoleAction = (params: { siteId: string, contactRole: ContactRole }) => Promise<void>
 export type RemoveSiteContactRoleAction = (params: { siteContactRoleId: string }) => Promise<void>
+export type AddSiteAttachmentAction = (params: { siteId: string, attachment: Attachment }) => Promise<Attachment>
+export type DeleteSiteAttachmentAction = (attachmentId: string) => Promise<void>
+export type UpdateSiteAttachmentAction = (params: { siteId: string, attachment: Attachment }) => Promise<Attachment>
+export type LoadSiteAttachmentsAction = (id: string) => Promise<void>
+export type LoadSiteAttachmentAction = (id: string) => Promise<void>
+export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
 export type SaveSiteAction = (site: Site) => Promise<Site>
-export type CopySiteAction = (params: {site: Site, copyContacts: boolean, originalSiteId: string}) => Promise<string>
+export type CopySiteAction = (params: {site: Site, copyContacts: boolean, copyAttachments: boolean, originalSiteId: string}) => Promise<string>
 export type DeleteSiteAction = (id: string) => Promise<void>
 export type ArchiveSiteAction = (id: string) => Promise<void>
 export type RestoreSiteAction = (id: string) => Promise<void>
@@ -163,8 +175,8 @@ const actions: ActionTree<SitesState, RootState> = {
 
   async copySite (
     { dispatch }: { dispatch: Dispatch },
-    { site, copyContacts, originalSiteId }:
-      {site: Site, copyContacts: boolean, originalSiteId: string}
+    { site, copyContacts, copyAttachments, originalSiteId }:
+      {site: Site, copyContacts: boolean, copyAttachments: boolean, originalSiteId: string}
   ): Promise<string> {
     const savedSite = await dispatch('saveSite', site)
     const savedSiteId = savedSite.id!
@@ -182,6 +194,20 @@ const actions: ActionTree<SitesState, RootState> = {
           siteId: savedSiteId,
           contactRole: contactRoleToSave
         }))
+      }
+    }
+    if (copyAttachments) {
+      const attachments = await this.$api.sites.findRelatedSiteAttachments(originalSiteId)
+      for (const attachment of attachments) {
+        attachment.id = null
+        if (attachment.isUpload) {
+          const blob = await dispatch('downloadAttachment', attachment.url)
+          const filename = getLastPathElement(attachment.url)
+          const uplaodResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
+          const newUrl = uplaodResult.url
+          attachment.url = newUrl
+        }
+        related.push(dispatch('addSiteAttachment', { siteId: savedSiteId, attachment }))
       }
     }
 
@@ -207,6 +233,26 @@ const actions: ActionTree<SitesState, RootState> = {
     contactRole
   }: { siteId: string, contactRole: ContactRole }): Promise<string> {
     return this.$api.sites.addContact(siteId, contactRole)
+  },
+  async loadSiteAttachments ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    const siteAttachments = await this.$api.sites.findRelatedSiteAttachments(id)
+    commit('setSiteAttachments', siteAttachments)
+  },
+  async loadSiteAttachment ({ commit }: {commit: Commit}, id: string): Promise<void> {
+    const siteAttachment = await this.$api.siteAttachments.findById(id)
+    commit('setSiteAttachment', siteAttachment)
+  },
+  async addSiteAttachment (_, { siteId, attachment }: { siteId: string, attachment: Attachment }): Promise<Attachment> {
+    return await this.$api.siteAttachments.add(siteId, attachment)
+  },
+  async updateSiteAttachment (_, { siteId, attachment }: { siteId: string, attachment: Attachment }): Promise<Attachment> {
+    return await this.$api.siteAttachments.update(siteId, attachment)
+  },
+  async deleteSiteAttachment (_, { attachmentId }: { attachmentId: string }): Promise<void> {
+    return await this.$api.siteAttachments.deleteById(attachmentId)
+  },
+  async downloadAttachment (_, attachmentUrl: string): Promise<Blob> {
+    return await this.$api.siteAttachments.getFile(attachmentUrl)
   },
   removeSiteContactRole (_, {
     siteContactRoleId
@@ -242,6 +288,12 @@ const mutations = {
   },
   setSiteConfigurations (state: SitesState, configurations: Configuration[]) {
     state.siteConfigurations = configurations
+  },
+  setSiteAttachments (state: SitesState, attachments: Attachment[]) {
+    state.siteAttachments = attachments
+  },
+  setSiteAttachment (state: SitesState, attachment: Attachment) {
+    state.siteAttachment = attachment
   },
   setPageNumber (state: SitesState, newPageNumber: number) {
     state.pageNumber = newPageNumber

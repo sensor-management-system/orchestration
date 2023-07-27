@@ -148,7 +148,7 @@ import { LoadDeviceAction, CopyDeviceAction, DevicesState, CreatePidAction } fro
 
 import { Device } from '@/models/Device'
 
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'

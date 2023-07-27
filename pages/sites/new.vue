@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Site } from '@/models/Site'
@@ -166,6 +166,10 @@ export default class SiteNewPage extends Vue {
       },
       {
         name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Attachments',
         disabled: true
       }
     ])

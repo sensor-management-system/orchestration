@@ -93,7 +93,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import TsmLinkingForm from '@/components/configurations/tsmLinking/TsmLinkingForm.vue'
 import { TsmDeviceMountPropertyCombination } from '@/utils/configurationInterfaces'
 import { TsmLinking } from '@/models/TsmLinking'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import {
   ITsmLinkingState,
   LoadConfigurationTsmLinkingsAction,

@@ -80,7 +80,7 @@ import { CreatePidAction, SavePlatformAction } from '@/store/platforms'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 import SerialNumberWarningDialog from '@/components/shared/SerialNumberWarningDialog.vue'
 

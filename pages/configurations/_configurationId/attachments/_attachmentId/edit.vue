@@ -105,7 +105,7 @@ import { Attachment } from '@/models/Attachment'
 import { Rules } from '@/mixins/Rules'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 

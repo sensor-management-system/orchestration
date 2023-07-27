@@ -46,6 +46,8 @@ import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializ
 import { SiteConfigurationsApi } from '@/services/sms/SiteConfigurationsApi'
 import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
+import { SiteAttachmentSerializer } from '@/serializers/jsonapi/SiteAttachmentSerializer'
+import { Attachment } from '@/models/Attachment'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -240,6 +242,16 @@ export class SiteApi {
 
   async findRelatedConfigurations (siteId: string) {
     return await this.siteConfigurationsApi.findRelatedConfigurations(siteId)
+  }
+
+  async findRelatedSiteAttachments (siteId: string): Promise<Attachment[]> {
+    const url = this.basePath + '/' + siteId + '/site-attachments'
+    const params = {
+      'page[size]': 10000
+    }
+    return await this.axiosApi.get(url, { params }).then((rawServerResponse) => {
+      return new SiteAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
+    })
   }
 
   prepareSearch () {

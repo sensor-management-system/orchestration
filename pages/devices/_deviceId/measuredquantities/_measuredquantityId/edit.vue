@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -111,7 +111,7 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import SaveAndCancelButtons from '@/components/configurations/SaveAndCancelButtons.vue'
+import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import BaseList from '@/components/shared/BaseList.vue'
