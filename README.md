@@ -131,6 +131,10 @@ In case you want to use the `gfz-idl` implementation, as well as the
 Helmholtz AAI, make sure that you set the `OIDC_USERNAME_CLAIM` variable
 to `eduperson_principal_name`.
 
+### Can I import devices?
+
+There is an csv importer script. You can find more details [here](./csv_importer/readme.md).
+
 ## CLI commands for admins
 
 <details>
