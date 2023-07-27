@@ -5,12 +5,15 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Routes for uploading files."""
+from functools import wraps
+
 from flask import Blueprint, current_app, g, request
 
 from ..api import minio
 from ..api.flask_minio import MinioNotAvailableException
 from ..api.helpers.errors import (
     BadRequestError,
+    ErrorResponse,
     ServiceIsUnreachableError,
     UnauthorizedError,
     UnsupportedMediaTypeError,
@@ -24,7 +27,27 @@ upload_routes = Blueprint(
 )
 
 
+def handle_error_response(f):
+    """
+    Wrap a view function so it that can transform ErrorResponses into flask responses.
+
+    All decorated view functions doesn't need to take care anymore about
+    the ErrorResponses, as they are transformed to response objects with
+    their related error status code.
+    """
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except ErrorResponse as e:
+            return e.respond()
+
+    return wrapper
+
+
 @upload_routes.route("/upload", methods=["POST"])
+@handle_error_response
 def upload():
     """Upload files."""
     if not g.user:
@@ -33,7 +56,14 @@ def upload():
     if "file" in request.files:
         file = request.files["file"]
         content_type = file.content_type
-        if file and content_type in content_types:
+        content_type_to_check = content_type
+        if content_type:
+            # It can be that we have content types like
+            # text/csv; charset=utf-8
+            # that we still want to allow, even that those are not
+            # exactly in our allowed list.
+            content_type_to_check = content_type.split(";", 1)[0]
+        if file and content_type_to_check in content_types:
             try:
                 response = minio.upload_object(file)
                 return response, 201
@@ -42,7 +72,7 @@ def upload():
                 raise ServiceIsUnreachableError(str(e))
         else:
             raise UnsupportedMediaTypeError(
-                "{} is Not Permitted".format(file.content_type)
+                "{} is not permitted".format(file.content_type)
             )
     else:
-        raise BadRequestError("No File in request Body was Found")
+        raise BadRequestError("No file in request body found")
