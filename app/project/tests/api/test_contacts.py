@@ -499,7 +499,7 @@ class TestContactServices(BaseTestCase):
         # we have it in our list.
         self.assertEqual(
             contact.organization,
-            "Helmholtz Centre Potsdam - German Research Centre for Geosciences GFZ",
+            "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ",
         )
 
     def test_contact_creation_without_known_organization(self):
