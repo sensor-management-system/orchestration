@@ -101,7 +101,7 @@ test-frontend-unit-tests:
       - node_modules
 
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
-  - echo "$CI_BUILD_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  - echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
 .docker_build:
   image: docker:20.10.7
