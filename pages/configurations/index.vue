@@ -526,8 +526,7 @@ export default class SearchConfigurationsPage extends Vue {
       this.loading = true
       this.initUrlQueryParams()
       await this.searchConfigurationsPaginated(this.searchParams)
-      this.setPageInUrl()
-      this.setSizeInUrl()
+      this.setPageAndSizeInUrl()
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {
@@ -679,6 +678,36 @@ export default class SearchConfigurationsPage extends Vue {
       query = {
         ...this.$route.query,
         size: String(this.size)
+      }
+    }
+    this.$router.push({
+      query,
+      hash: preserveHash ? this.$route.hash : ''
+    })
+  }
+
+  setPageAndSizeInUrl (preserveHash: boolean = true): void {
+    // In general it should be possible to just call
+    // setPageInUrl()
+    // and
+    // setSizeInUrl()
+    // However, it seems that setSizeInUrl removes the page parameter then.
+    // So we do both in one run.
+    let query: QueryParams = {
+      ...this.$route.query
+    }
+    if (this.size) {
+      // add size to the current url params
+      query = {
+        ...query,
+        size: String(this.size)
+      }
+    }
+    if (this.page) {
+      // add query to the current url params
+      query = {
+        ...query,
+        page: String(this.page)
       }
     }
     this.$router.push({
