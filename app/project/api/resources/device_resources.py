@@ -12,10 +12,9 @@
 import os
 
 from flask import g, request
-from flask_rest_jsonapi import JsonApiException, ResourceDetail
+from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
 
 from ...extensions.instances import pidinst
-from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     AndFilter,
     EsSqlalchemyDataLayer,
@@ -34,9 +33,10 @@ from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.device_schema import DeviceSchema
 from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .mixins.csv_export import CsvListMixin
 
 
-class DeviceList(ResourceList):
+class DeviceList(CsvListMixin, ResourceList):
     """
     Resource for the device list endpoint.
 

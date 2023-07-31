@@ -10,10 +10,14 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+
+"""Routing for the urls & the endpoints."""
+
+from flask_rest_jsonapi import Api
+
 from project.api.resources import *
 
 from .api.resources.permission_group_resources import PermissionGroups
-from .frj_csv_export.api import Api
 
 api = Api()
 

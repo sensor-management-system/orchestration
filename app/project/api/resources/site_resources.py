@@ -8,9 +8,8 @@
 import os
 
 from flask import g, request
-from flask_rest_jsonapi import JsonApiException, ResourceDetail
+from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
 
-from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     AndFilter,
     EsSqlalchemyDataLayer,

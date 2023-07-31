@@ -9,9 +9,9 @@
 
 import dateutil.parser
 from flask import request
+from flask_rest_jsonapi import ResourceList
 from sqlalchemy import and_, or_
 
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import (
     BadRequestError,
     ForbiddenError,

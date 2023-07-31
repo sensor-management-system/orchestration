@@ -12,11 +12,10 @@
 import datetime
 
 from flask import g, request
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 
 from ... import db
 from ...extensions.instances import pidinst
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import (
     BadRequestError,
     ConflictError,

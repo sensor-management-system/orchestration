@@ -12,11 +12,10 @@
 import os
 
 from flask import g, request
-from flask_rest_jsonapi import JsonApiException, ResourceDetail
+from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 
 from ...extensions.instances import pidinst
-from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import (
     AndFilter,
     EsSqlalchemyDataLayer,
@@ -35,9 +34,10 @@ from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.platform_schema import PlatformSchema
 from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .mixins.csv_export import CsvListMixin
 
 
-class PlatformList(ResourceList):
+class PlatformList(CsvListMixin, ResourceList):
     """
     Resource for the platform list endpoint.
 
