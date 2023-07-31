@@ -378,7 +378,7 @@ class TestConfigurationPermissions(BaseTestCase):
         self.assertEqual(response.status, "403 FORBIDDEN")
 
     def test_patch_configuration_no_permission_group_set(self):
-        """Ensure a user can change a configuration if cfg_permission_group is not unset."""
+        """Ensure a user can change a configuration if cfg_permission_group is not set."""
         configs = preparation_of_public_and_internal_configuration_data()
         access_headers = create_token()
         for configuration_data in configs:
@@ -386,26 +386,20 @@ class TestConfigurationPermissions(BaseTestCase):
                 idl, "get_all_permission_groups_for_a_user"
             ) as test_get_all_permission_groups:
                 test_get_all_permission_groups.return_value = IDL_USER_ACCOUNT
-                with self.client:
-                    response = self.client.post(
-                        self.configuration_url,
-                        data=json.dumps(configuration_data),
-                        content_type="application/vnd.api+json",
-                        headers=access_headers,
-                    )
-
-                data = json.loads(response.data.decode())
-
-                self.assertEqual(response.status_code, 201)
+                configuration = Configuration(
+                    **configuration_data["data"]["attributes"]
+                )
+                db.session.add(configuration)
+                db.session.commit()
 
                 configuration_data_changed = {
                     "data": {
                         "type": "configuration",
-                        "id": data["data"]["id"],
+                        "id": configuration.id,
                         "attributes": {"label": "Changed"},
                     }
                 }
-                url = f"{self.configuration_url}/{data['data']['id']}"
+                url = f"{self.configuration_url}/{configuration.id}"
                 access_headers = create_token()
                 with self.client:
                     response = self.client.patch(

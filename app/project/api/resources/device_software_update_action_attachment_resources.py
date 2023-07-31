@@ -8,9 +8,8 @@
 
 """Resource classes for the device software update action attachments."""
 
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.software_update_action_attachments import (
     DeviceSoftwareUpdateActionAttachment,

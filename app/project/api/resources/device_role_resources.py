@@ -8,11 +8,10 @@
 
 """Resource classes for the device contact roles."""
 
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..models import Device
 from ..models.base_model import db
 from ..models.contact_role import DeviceContactRole

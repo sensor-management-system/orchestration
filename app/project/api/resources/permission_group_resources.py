@@ -9,10 +9,10 @@
 """Resource class for the list of permission groups."""
 
 from flask import request
+from flask_rest_jsonapi import ResourceList
 
 from ...extensions.idl.models import permission_group
 from ...extensions.instances import idl
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import MethodNotAllowed
 
 

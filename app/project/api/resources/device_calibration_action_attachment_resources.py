@@ -7,9 +7,8 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Resource classes for device calibration attachments."""
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 
-from ...frj_csv_export.resource import ResourceList
 from ..models.base_model import db
 from ..models.calibration_attachments import DeviceCalibrationAttachment
 from ..permissions.common import DelegateToCanFunctions

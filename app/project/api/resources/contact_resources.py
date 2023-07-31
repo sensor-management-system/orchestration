@@ -10,12 +10,11 @@
 
 import itertools
 
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...extensions.instances import pidinst
-from ...frj_csv_export.resource import ResourceList
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id

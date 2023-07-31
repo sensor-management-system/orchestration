@@ -9,9 +9,9 @@
 """Resource classes for the user info endpoint."""
 
 from flask import g, request
+from flask_rest_jsonapi import ResourceList
 
 from ...extensions.instances import idl
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import MethodNotAllowed, UnauthorizedError
 from ..models import User
 from ..models.base_model import db

@@ -8,11 +8,10 @@
 
 """Resource classes for device calibration actions."""
 
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models.base_model import db
 from ..models.calibration_actions import DeviceCalibrationAction

@@ -8,11 +8,10 @@
 
 """Resource classes for platform mount actions."""
 
-from flask_rest_jsonapi import ResourceDetail
+from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.mounting_checks import PlatformMountActionValidator
 from ..helpers.resource_mixin import (
     add_created_by_id,

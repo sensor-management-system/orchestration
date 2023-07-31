@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -8,10 +8,10 @@
 
 import dateutil.parser
 from flask import g, request
+from flask_rest_jsonapi import ResourceList
 from marshmallow import Schema, fields
 from sqlalchemy import and_
 
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.date_time_range import DateTimeRange
 from ..helpers.errors import BadRequestError, MethodNotAllowed, UnauthorizedError
 from ..models import Device, DeviceMountAction, Platform, PlatformMountAction

@@ -10,8 +10,8 @@ import datetime
 
 import pytz
 from flask import g
+from flask_rest_jsonapi import ResourceList
 
-from ...frj_csv_export.resource import ResourceList
 from ..helpers.errors import MethodNotAllowed, UnauthorizedError
 from ..models import User
 from ..models.base_model import db

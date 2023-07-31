@@ -8,7 +8,8 @@
 
 """Custom controller classes to work with location actions for configurations."""
 
-from ...frj_csv_export.resource import ResourceList
+from flask_rest_jsonapi import ResourceList
+
 from ..helpers.errors import ForbiddenError, NotFoundError
 from ..models import (
     Configuration,
