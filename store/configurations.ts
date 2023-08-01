@@ -39,6 +39,7 @@ import { DateTime } from 'luxon'
 
 import { RootState } from '@/store'
 
+import { Attachment } from '@/models/Attachment'
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
 import { ContactRole } from '@/models/ContactRole'
@@ -47,7 +48,11 @@ import { Device } from '@/models/Device'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
+import { GenericAction } from '@/models/GenericAction'
+import { IActionType } from '@/models/ActionType'
 import { IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
+import { Parameter } from '@/models/Parameter'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 
@@ -61,8 +66,9 @@ import {
   DeviceUnmountTimelineAction,
   DynamicLocationBeginTimelineAction,
   DynamicLocationEndTimelineAction,
-  ITimelineAction,
   GenericTimelineAction,
+  ITimelineAction,
+  ParameterChangeTimelineAction,
   PlatformMountTimelineAction,
   PlatformUnmountTimelineAction,
   StaticLocationBeginTimelineAction,
@@ -70,9 +76,6 @@ import {
 } from '@/utils/configurationInterfaces'
 import { dateToDateTimeStringHHMM, sortCriteriaAscending } from '@/utils/dateHelper'
 import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
-import { Attachment } from '@/models/Attachment'
-import { GenericAction } from '@/models/GenericAction'
-import { IActionType } from '@/models/ActionType'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -89,9 +92,14 @@ export enum MountingTypes {
 }
 
 export const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
+export const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
+
+type KindOfActionType =
+  typeof KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
+  | typeof KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
-  kind: typeof KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
+  kind: KindOfActionType
 }
 
 const PAGE_SIZES = [
@@ -126,8 +134,12 @@ export interface ConfigurationsState {
   configurationDynamicLocationActions: DynamicLocationAction[]
   configurationAttachments: Attachment[]
   configurationAttachment: Attachment | null
-  configurationCustomFields: CustomTextField[],
+  configurationCustomFields: CustomTextField[]
   configurationCustomField: CustomTextField | null
+  configurationParameter: Parameter | null
+  configurationParameters: Parameter[]
+  configurationParameterChangeAction: ParameterChangeAction | null
+  configurationParameterChangeActions: ParameterChangeAction[]
   totalPages: number
   totalCount: number
   pageNumber: number
@@ -162,6 +174,10 @@ const state = (): ConfigurationsState => ({
   configurationAttachment: null,
   configurationCustomFields: [],
   configurationCustomField: null,
+  configurationParameter: null,
+  configurationParameters: [],
+  configurationParameterChangeAction: null,
+  configurationParameterChangeActions: [],
   totalPages: 1,
   totalCount: 0,
   pageNumber: 1,
@@ -230,6 +246,10 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
 
     for (const genericAction of state.configurationGenericActions) {
       result.push(new GenericTimelineAction(genericAction))
+    }
+
+    for (const parameterChangeAction of state.configurationParameterChangeActions) {
+      result.push(new ParameterChangeTimelineAction(parameterChangeAction))
     }
 
     result.sort(byDateOldestAndUnmountBeforeMount)
@@ -434,6 +454,17 @@ export type UpdateConfigurationGenericActionAction = (params: {configurationId: 
   genericAction: GenericAction
 }) => Promise<string>
 
+export type AddConfigurationParameterAction = (params: { configurationId: string, parameter: Parameter }) => Promise<Parameter>
+export type AddConfigurationParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>
+export type DeleteConfigurationParameterAction = (parameterId: string) => Promise<void>
+export type DeleteConfigurationParameterChangeActionAction = (actionId: string) => Promise<void>
+export type LoadConfigurationParameterAction = (id: string) => Promise<void>
+export type LoadConfigurationParameterChangeActionAction = (actionId: string) => Promise<void>
+export type LoadConfigurationParameterChangeActionsAction = (id: string) => Promise<void>
+export type LoadConfigurationParametersAction = (id: string) => Promise<void>
+export type UpdateConfigurationParameterAction = (params: { configurationId: string, parameter: Parameter }) => Promise<Parameter>
+export type UpdateConfigurationParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>
+
 export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
 export type SetSelectedLocationDateAction = (newVal: DateTime | null) => void
 export type ReplaceConfigurationInConfigurationsAction = (newConfig: Configuration) => void
@@ -525,6 +556,52 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     const configurationStates = await this.$api.configurationStates.findAll()
     commit('setConfigurationStates', configurationStates)
   },
+  async loadConfigurationParameters ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const configurationParameters = await this.$api.configurations.findRelatedConfigurationParameters(id)
+    commit('setConfigurationParameters', configurationParameters)
+  },
+  async loadConfigurationParameter ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const parameter = await this.$api.configurationParameters.findById(id)
+    commit('setConfigurationParameter', parameter)
+  },
+  deleteConfigurationParameter (_, parameterId: string): Promise<void> {
+    return this.$api.configurationParameters.deleteById(parameterId)
+  },
+  addConfigurationParameter (_, {
+    configurationId,
+    parameter
+  }: { configurationId: string, parameter: Parameter }): Promise<Parameter> {
+    return this.$api.configurationParameters.add(configurationId, parameter)
+  },
+  updateConfigurationParameter (_, {
+    configurationId,
+    parameter
+  }: { configurationId: string, parameter: Parameter }): Promise<Parameter> {
+    return this.$api.configurationParameters.update(configurationId, parameter)
+  },
+  async loadConfigurationParameterChangeActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const actions = await this.$api.configurations.findRelatedParameterChangeActions(id)
+    commit('setConfigurationParameterChangeActions', actions)
+  },
+  async loadConfigurationParameterChangeAction ({ commit }: { commit: Commit }, actionId: string): Promise<void> {
+    const action = await this.$api.configurationParameterChangeActions.findById(actionId)
+    commit('setConfigurationParameterChangeAction', action)
+  },
+  addConfigurationParameterChangeAction (_, {
+    parameterId,
+    action
+  }: { parameterId: string, action: ParameterChangeAction }): Promise<ParameterChangeAction> {
+    return this.$api.configurationParameterChangeActions.add(parameterId, action)
+  },
+  updateConfigurationParameterChangeAction (_, {
+    parameterId,
+    action
+  }: { parameterId: string, action: ParameterChangeAction }): Promise<ParameterChangeAction> {
+    return this.$api.configurationParameterChangeActions.update(parameterId, action)
+  },
+  deleteConfigurationParameterChangeAction (_, actionId: string): Promise<void> {
+    return this.$api.configurationParameterChangeActions.deleteById(actionId)
+  },
   async loadProjects ({ commit }: { commit: Commit }) {
     const projects = await this.$api.autocomplete.getSuggestions('configuration-projects')
     commit('setProjects', projects)
@@ -595,7 +672,8 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
       dispatch('loadPlatformMountActions', id),
       dispatch('loadConfigurationDynamicLocationActions', id),
       dispatch('loadConfigurationStaticLocationActions', id),
-      dispatch('loadConfigurationGenericActions', id)
+      dispatch('loadConfigurationGenericActions', id),
+      dispatch('loadConfigurationParameterChangeActions', id)
     ])
   },
   async deleteConfiguration (_context, id: string) {
@@ -882,6 +960,18 @@ const mutations = {
   },
   setConfigurationCustomField (state: ConfigurationsState, configurationCustomField: CustomTextField) {
     state.configurationCustomField = configurationCustomField
+  },
+  setConfigurationParameters (state: ConfigurationsState, configurationParameters: Parameter[]) {
+    state.configurationParameters = configurationParameters
+  },
+  setConfigurationParameter (state: ConfigurationsState, configurationParameter: Parameter) {
+    state.configurationParameter = configurationParameter
+  },
+  setConfigurationParameterChangeActions (state: ConfigurationsState, configurationParameterChangeActions: ParameterChangeAction[]) {
+    state.configurationParameterChangeActions = configurationParameterChangeActions
+  },
+  setConfigurationParameterChangeAction (state: ConfigurationsState, configurationParameterChangeAction: ParameterChangeAction) {
+    state.configurationParameterChangeAction = configurationParameterChangeAction
   }
 }
 

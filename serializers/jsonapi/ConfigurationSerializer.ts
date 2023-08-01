@@ -45,6 +45,7 @@ import {
 
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { SiteSerializer } from '@/serializers/jsonapi/SiteSerializer'
+import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
 
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
@@ -61,6 +62,7 @@ export interface IConfigurationWithMeta {
 export class ConfigurationSerializer {
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private siteSerializer: SiteSerializer = new SiteSerializer()
+  private parameterSerializer: ParameterSerializer = new ParameterSerializer(ParameterEntityType.CONFIGURATION)
   private _permissionGroups: PermissionGroup[] = []
 
   set permissionGroups (groups: PermissionGroup[]) {
@@ -136,6 +138,8 @@ export class ConfigurationSerializer {
       configuration.siteId = this.siteSerializer.convertJsonApiRelationshipToId(relationships.site)
     }
 
+    configuration.parameters = this.parameterSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+
     // just pick the contact from the relationships that is referenced by the created_by user
     if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {
       const userId = (relationships.created_by.data as IJsonApiEntityWithoutDetails).id
@@ -180,6 +184,7 @@ export class ConfigurationSerializer {
   convertModelToJsonApiData (configuration: Configuration): IJsonApiEntityWithOptionalId {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
     const sites = this.siteSerializer.convertIdToJsonApiRelationshipObject(configuration.siteId)
+    const parameters = this.parameterSerializer.convertModelListToJsonApiRelationshipObject(configuration.parameters)
 
     const result: IJsonApiEntityWithOptionalId = {
       attributes: {
@@ -196,7 +201,8 @@ export class ConfigurationSerializer {
       },
       relationships: {
         ...contacts,
-        ...sites
+        ...sites,
+        ...parameters
       },
       type: 'configuration'
     }

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -172,6 +172,10 @@ export default class DevicePage extends Vue {
       {
         to: '/devices/' + this.deviceId + '/measuredquantities',
         name: 'Measured Quantities'
+      },
+      {
+        to: '/devices/' + this.deviceId + '/parameters',
+        name: 'Parameters'
       },
       {
         to: '/devices/' + this.deviceId + '/customfields',

@@ -164,6 +164,10 @@ export default class PlatformNewPage extends Vue {
         disabled: true
       },
       {
+        name: 'Parameters',
+        disabled: true
+      },
+      {
         name: 'Attachments',
         disabled: true
       },

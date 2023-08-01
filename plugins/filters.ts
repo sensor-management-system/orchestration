@@ -60,6 +60,10 @@ Vue.filter('toUtcDateTimeStringHHMM', (value: DateTime, defaultValue: string = '
   return dateToDateTimeStringHHMM(value) || defaultValue
 })
 
+Vue.filter('toUtcDateTimeStringHHMM', (value: DateTime, defaultValue: string = ''): string => {
+  return dateToDateTimeStringHHMM(value) || defaultValue
+})
+
 /**
  * shortens a string to length characters to the right, adds a replacement character
  *

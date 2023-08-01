@@ -67,6 +67,9 @@ permissions and limitations under the Licence.
             <v-checkbox v-model="copyContacts" label="Contacts" />
           </v-col>
           <v-col cols="12" md="2">
+            <v-checkbox v-model="copyParameters" label="Parameters" />
+          </v-col>
+          <v-col cols="12" md="2">
             <v-checkbox v-model="copyAttachments" label="Attachments" />
           </v-col>
         </v-row>
@@ -103,6 +106,9 @@ permissions and limitations under the Licence.
         <v-row dense>
           <v-col cols="12" md="2">
             <v-checkbox v-model="copyContacts" label="Contacts" />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-checkbox v-model="copyParameters" label="Parameters" />
           </v-col>
           <v-col cols="12" md="2">
             <v-checkbox v-model="copyAttachments" label="Attachments" />
@@ -170,6 +176,7 @@ export default class PlatformCopyPage extends Vue {
 
   private copyContacts: boolean = true
   private copyAttachments: boolean = false
+  private copyParameters: boolean = true
 
   private persistentIdentifierPlaceholder: string | null = null
   private serialNumberPlaceholder: string | null = null
@@ -196,7 +203,8 @@ export default class PlatformCopyPage extends Vue {
       await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: true,
-        includePlatformAttachments: true
+        includePlatformAttachments: true,
+        includePlatformParameters: true
       })
 
       if (!this.platform || !this.canAccessEntity(this.platform)) {
@@ -264,6 +272,7 @@ export default class PlatformCopyPage extends Vue {
         platform: this.platformToCopy,
         copyContacts: this.copyContacts,
         copyAttachments: this.copyAttachments,
+        copyParameters: this.copyParameters,
         originalPlatformId: this.platformId
       })
       if (this.copyOptions.persistentIdentifierShouldBeCreated) {
@@ -286,6 +295,10 @@ export default class PlatformCopyPage extends Vue {
       },
       {
         name: 'Contacts',
+        disabled: true
+      },
+      {
+        name: 'Parameters',
         disabled: true
       },
       {

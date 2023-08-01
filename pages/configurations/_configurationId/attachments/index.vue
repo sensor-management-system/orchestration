@@ -99,6 +99,7 @@ permissions and limitations under the Licence.
       v-if="attachmentToDelete"
       v-model="showDeleteDialog"
       title="Delete Attachment"
+      :disabled="isSaving"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >

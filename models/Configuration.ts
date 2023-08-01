@@ -37,6 +37,7 @@ import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { PermissionGroup, IPermissionGroup, IPermissionableSingleGroup } from '@/models/PermissionGroup'
 import { Visibility, IVisible } from '@/models/Visibility'
+import { Parameter, IParameter } from '@/models/Parameter'
 
 export interface IConfiguration extends IMountActions, IPermissionableSingleGroup {
   id: string
@@ -49,6 +50,7 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   status: string
   archived: boolean
   contacts: IContact[]
+  parameters: IParameter[]
   createdAt: DateTime | null
   updatedAt: DateTime | null
   updateDescription: string
@@ -76,6 +78,7 @@ export class Configuration implements IConfiguration, IVisible {
   private _status: string = ''
   private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
+  private _parameters: Parameter[] = []
   private _deviceMountActions: DeviceMountAction[] = []
   private _platformMountActions: PlatformMountAction[] = []
   private _permissionGroup: IPermissionGroup | null = null
@@ -174,6 +177,14 @@ export class Configuration implements IConfiguration, IVisible {
 
   set platformMountActions (newPlatformMountActions: PlatformMountAction[]) {
     this._platformMountActions = newPlatformMountActions
+  }
+
+  get parameters (): Parameter[] {
+    return this._parameters
+  }
+
+  set parameters (parameters: Parameter[]) {
+    this._parameters = parameters
   }
 
   get permissionGroup (): IPermissionGroup | null {
@@ -286,6 +297,7 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.deviceMountActions = someObject.deviceMountActions.map(DeviceMountAction.createFromObject)
     newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
 
+    newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroup = someObject.permissionGroup ? PermissionGroup.createFromObject(someObject.permissionGroup) : null
 
     newObject.createdAt = someObject.createdAt

@@ -202,6 +202,7 @@ permissions and limitations under the Licence.
       v-if="platformToDelete"
       v-model="showDeleteDialog"
       title="Delete Platform"
+      :disabled="loading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >

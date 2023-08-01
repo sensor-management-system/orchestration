@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -55,55 +55,15 @@ permissions and limitations under the Licence.
       >
         <v-col>
           <label>Key:</label>
-          <span
-            v-if="keyLengthExceedsDefault && !isKeyExpanded"
-          >
-            {{ shortenedKey }}
-          </span>
-          <span
-            v-else
-          >
-            {{ value.key }}
-          </span>
-          <v-btn
-            v-if="keyLengthExceedsDefault"
-            icon
-            small
-            :title="isKeyExpanded ? 'show less' : 'show more'"
-            @click.stop.prevent="isKeyExpanded = !isKeyExpanded"
-          >
-            <v-icon
-              small
-            >
-              {{ isKeyExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-            </v-icon>
-          </v-btn>
+          <expandable-text
+            :value="value.key"
+          />
         </v-col>
         <v-col>
           <label>Value:</label>
-          <span
-            v-if="valueLengthExceedsDefault && !isValueExpanded"
-          >
-            {{ shortenedValue }}
-          </span>
-          <span
-            v-else
-          >
-            {{ value.value }}
-          </span>
-          <v-btn
-            v-if="valueLengthExceedsDefault"
-            icon
-            small
-            :title="isValueExpanded ? 'show less' : 'show more'"
-            @click.stop.prevent="isValueExpanded = !isValueExpanded"
-          >
-            <v-icon
-              small
-            >
-              {{ isValueExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-            </v-icon>
-          </v-btn>
+          <expandable-text
+            :value="value.value"
+          />
         </v-col>
       </v-row>
     </template>
@@ -119,10 +79,12 @@ import { CustomTextField } from '@/models/CustomTextField'
 import { shortenRight } from '@/utils/stringHelpers'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import ExpandableText from '@/components/shared/ExpandableText.vue'
 
 @Component({
   components: {
-    BaseExpandableListItem
+    BaseExpandableListItem,
+    ExpandableText
   }
 })
 export default class CustomFieldListItem extends Vue {

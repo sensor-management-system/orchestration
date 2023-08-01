@@ -70,6 +70,9 @@ permissions and limitations under the Licence.
             <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities" />
           </v-col>
           <v-col cols="12" md="2">
+            <v-checkbox v-model="copyParameters" label="Parameters" />
+          </v-col>
+          <v-col cols="12" md="2">
             <v-checkbox v-model="copyCustomFields" label="Custom fields" />
           </v-col>
           <v-col cols="12" md="2">
@@ -111,6 +114,9 @@ permissions and limitations under the Licence.
           </v-col>
           <v-col cols="12" md="2">
             <v-checkbox v-model="copyMeasuredQuantities" label="Measured quantities" />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-checkbox v-model="copyParameters" label="Parameters" />
           </v-col>
           <v-col cols="12" md="2">
             <v-checkbox v-model="copyCustomFields" label="Custom fields" />
@@ -181,6 +187,7 @@ export default class DeviceCopyPage extends Vue {
 
   private copyContacts: boolean = true
   private copyMeasuredQuantities: boolean = true
+  private copyParameters: boolean = true
   private copyCustomFields: boolean = false
   private copyAttachments: boolean = false
 
@@ -208,7 +215,8 @@ export default class DeviceCopyPage extends Vue {
         includeContacts: true,
         includeCustomFields: true,
         includeDeviceProperties: true,
-        includeDeviceAttachments: true
+        includeDeviceAttachments: true,
+        includeDeviceParameters: true
       })
 
       if (!this.device || !this.canAccessEntity(this.device)) {
@@ -271,6 +279,7 @@ export default class DeviceCopyPage extends Vue {
         copyContacts: this.copyContacts,
         copyAttachments: this.copyAttachments,
         copyMeasuredQuantities: this.copyMeasuredQuantities,
+        copyParameters: this.copyParameters,
         copyCustomFields: this.copyCustomFields,
         originalDeviceId: this.deviceId
       })
@@ -298,6 +307,10 @@ export default class DeviceCopyPage extends Vue {
       },
       {
         name: 'Measured Quantities',
+        disabled: true
+      },
+      {
+        name: 'Parameters',
         disabled: true
       },
       {

@@ -32,11 +32,12 @@
  */
 import { DateTime } from 'luxon'
 
-import { IContact, Contact } from '@/models/Contact'
 import { Attachment, IAttachment } from '@/models/Attachment'
+import { IContact, Contact } from '@/models/Contact'
+import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
+import { Parameter, IParameter } from '@/models/Parameter'
 import { PermissionGroup, IPermissionGroup, IPermissionableMultipleGroups } from '@/models/PermissionGroup'
 import { Visibility, IVisible } from '@/models/Visibility'
-import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
 
 export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationInfo {
   id: string | null
@@ -80,6 +81,7 @@ export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationI
 
   contacts: IContact[]
   attachments: IAttachment[]
+  parameters: IParameter[]
   permissionGroups: IPermissionGroup[]
 
   visibility: Visibility
@@ -120,6 +122,7 @@ export class Platform implements IPlatform, IVisible {
 
   private _contacts: Contact[] = []
   private _attachments: Attachment[] = []
+  private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
 
   private _visibility: Visibility = Visibility.Internal
@@ -300,6 +303,14 @@ export class Platform implements IPlatform, IVisible {
     this._attachments = attachments
   }
 
+  get parameters (): Parameter[] {
+    return this._parameters
+  }
+
+  set parameters (parameters: Parameter[]) {
+    this._parameters = parameters
+  }
+
   get permissionGroups (): PermissionGroup[] {
     return this._permissionGroups
   }
@@ -386,6 +397,7 @@ export class Platform implements IPlatform, IVisible {
     newObject.updatedBy = someObject.updatedBy
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
+    newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
     newObject.createdByUserId = someObject.createdByUserId
 

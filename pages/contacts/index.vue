@@ -30,6 +30,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isLoading"
+      dark
+    />
     <v-row
       dense
     >
@@ -173,6 +177,7 @@ permissions and limitations under the Licence.
       v-if="contactToDelete"
       v-model="showDeleteDialog"
       title="Delete Contact"
+      :disabled="loading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -202,6 +207,7 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { CanDeleteContactGetter } from '@/store/permissions'
@@ -214,7 +220,8 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     BaseList,
     DeleteDialog,
     DotMenuActionDelete,
-    PageSizeSelect
+    PageSizeSelect,
+    ProgressIndicator
   },
   computed: {
     ...mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'totalCount', 'contacts']),

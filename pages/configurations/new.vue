@@ -153,13 +153,15 @@ export default class ConfigurationNewPage extends Vue {
         disabled: true
       },
       {
-        name:
-        'Locations',
+        name: 'Locations',
         disabled: true
       },
       {
-        name:
-        'Custom Fields',
+        name: 'Parameters',
+        disabled: true
+      },
+      {
+        name: 'Custom Fields',
         disabled: true
       },
       {
@@ -167,8 +169,7 @@ export default class ConfigurationNewPage extends Vue {
         disabled: true
       },
       {
-        name:
-        'Actions',
+        name: 'Actions',
         disabled: true
       },
       {

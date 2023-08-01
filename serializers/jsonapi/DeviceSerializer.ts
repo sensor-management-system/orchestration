@@ -59,6 +59,7 @@ import {
   IMissingDevicePropertyData
 } from '@/serializers/jsonapi/DevicePropertySerializer'
 import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
+import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
 import { Visibility } from '@/models/Visibility'
 
 export interface IDeviceMissingData {
@@ -78,6 +79,7 @@ export class DeviceSerializer {
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
+  private parameterSerializer: ParameterSerializer = new ParameterSerializer(ParameterEntityType.DEVICE)
   private _permissionGroups: PermissionGroup[] = []
 
   set permissionGroups (groups: PermissionGroup[]) {
@@ -148,6 +150,8 @@ export class DeviceSerializer {
     const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.contacts = contactsWithMissing.contacts
     const missingDataForContactIds = contactsWithMissing.missing.ids
+
+    result.parameters = this.parameterSerializer.convertJsonApiRelationshipsModelList(relationships, included)
 
     // just pick the contact from the relationships that is referenced by the created_by user
     if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {
@@ -272,11 +276,13 @@ export class DeviceSerializer {
       const customfields = this.customTextFieldSerializer.convertModelListToJsonApiRelationshipObject(device.customFields)
       const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(device.attachments)
       const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
+      const parameters = this.parameterSerializer.convertModelListToJsonApiRelationshipObject(device.parameters)
       data.relationships = {
         ...contacts,
         ...properties,
         ...attachments,
-        ...customfields
+        ...customfields,
+        ...parameters
       }
     }
 

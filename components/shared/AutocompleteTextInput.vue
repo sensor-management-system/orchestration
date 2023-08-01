@@ -36,6 +36,7 @@
 
 <template>
   <combobox
+    ref="combobox"
     v-bind="$attrs"
     :items="suggestionsWithHeader"
     :loading="loading"
@@ -96,6 +97,10 @@ export default class AutocompleteTextInput extends Vue {
     } finally {
       this.loading = false
     }
+  }
+
+  focus (): void {
+    (this.$refs.combobox as Vue & { focus: () => void }).focus()
   }
 }
 </script>

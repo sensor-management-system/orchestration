@@ -258,7 +258,8 @@ describe('MountingActionsSerializer', () => {
             permissionGroups: [],
             visibility: Visibility.Internal,
             archived: false,
-            attachments: []
+            attachments: [],
+            parameters: []
           }),
           parentPlatform: null
         })
@@ -304,6 +305,7 @@ describe('MountingActionsSerializer', () => {
             attachments: [],
             customFields: [],
             properties: [],
+            parameters: [],
             dualUse: false,
             archived: false
           }),
@@ -512,7 +514,8 @@ describe('MountingActionsSerializer', () => {
         permissionGroups: [],
         visibility: Visibility.Internal,
         archived: false,
-        attachments: []
+        attachments: [],
+        parameters: []
       })
       const deviceMountNode = new DeviceNode(
         DeviceMountAction.createFromObject({
@@ -555,6 +558,7 @@ describe('MountingActionsSerializer', () => {
             attachments: [],
             customFields: [],
             properties: [],
+            parameters: [],
             dualUse: false
           }),
           parentPlatform: platform

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -46,6 +46,7 @@ permissions and limitations under the Licence.
       <slot v-if="action.isDeviceCalibrationAction" name="calibration-action" :action="action" :index="index" />
       <slot v-if="action.isDeviceMountAction" name="device-mount-action" :action="action.inner" :index="index" />
       <slot v-if="action.isDeviceUnmountAction" name="device-unmount-action" :action="action.inner" :index="index" />
+      <slot v-if="action.isParameterChangeAction" name="parameter-change-action" :action="action" :index="index" />
     </v-timeline-item>
   </v-timeline>
 </template>

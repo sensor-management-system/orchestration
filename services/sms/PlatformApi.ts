@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,19 +30,20 @@
  * permissions and limitations under the Licence.
  */
 import { AxiosInstance, Method } from 'axios'
-
 import { DateTime } from 'luxon'
+
 import { Attachment } from '@/models/Attachment'
 import { ContactRole } from '@/models/ContactRole'
-import { Platform } from '@/models/Platform'
-import { PlatformType } from '@/models/PlatformType'
-import { Manufacturer } from '@/models/Manufacturer'
-import { Status } from '@/models/Status'
-import { PermissionGroup } from '@/models/PermissionGroup'
-
 import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Parameter } from '@/models/Parameter'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
+import { PermissionGroup } from '@/models/PermissionGroup'
+import { Platform } from '@/models/Platform'
 import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
+import { PlatformType } from '@/models/PlatformType'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { Status } from '@/models/Status'
 
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 
@@ -59,10 +60,13 @@ import { PlatformSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/So
 import { PlatformMountActionSerializer } from '@/serializers/jsonapi/composed/platforms/actions/PlatformMountActionSerializer'
 import { Availability } from '@/models/Availability'
 import { AvailabilitySerializer } from '@/serializers/controller/AvailabilitySerializer'
+import { ParameterChangeActionSerializer, ParameterChangeActionEntityType } from '@/serializers/jsonapi/ParameterChangeActionSerializer'
+import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
   includePlatformAttachments?: boolean
+  includePlatformParameters?: boolean
   includeCreatedBy?: boolean
   includeUpdatedBy?: boolean
 }
@@ -74,6 +78,9 @@ function getIncludeParams (includes: IncludedRelationships): string {
   }
   if (includes.includePlatformAttachments) {
     listIncludedRelationships.push('platform_attachments')
+  }
+  if (includes.includePlatformParameters) {
+    listIncludedRelationships.push('platform_parameters')
   }
   if (includes.includeCreatedBy) {
     listIncludedRelationships.push('created_by.contact')
@@ -504,6 +511,32 @@ export class PlatformApi {
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new PlatformAttachmentSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
+  }
+
+  async findRelatedPlatformParameters (platformId: string): Promise<Parameter[]> {
+    const url = this.basePath + '/' + platformId + '/platform-parameters'
+    const params = {
+      'page[size]': 10000,
+      // The one that was created first, should be first. All others behind.
+      sort: 'created_at'
+    }
+    const response = await this.axiosApi.get(url, { params })
+    return new ParameterSerializer(ParameterEntityType.PLATFORM).convertJsonApiObjectListToModelList(response.data)
+  }
+
+  async findRelatedParameterChangeActions (platformId: string): Promise<ParameterChangeAction[]> {
+    const url = this.basePath + '/' + platformId + '/platform-parameter-value-change-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'platform_parameter'
+      ].join(','),
+      // The one with the smallest date first. All others behind.
+      sort: 'date'
+    }
+    const response = await this.axiosApi.get(url, { params })
+    return new ParameterChangeActionSerializer(ParameterChangeActionEntityType.PLATFORM_PARAMETER_VALUE_CHANGE).convertJsonApiObjectListToModelList(response.data)
   }
 
   findRelatedGenericActions (platformId: string): Promise<GenericAction[]> {

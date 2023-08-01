@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -48,6 +48,7 @@ permissions and limitations under the Licence.
       <v-card-actions>
         <v-btn
           text
+          :disabled="disabled"
           @click="$emit('cancel')"
         >
           Cancel
@@ -56,6 +57,7 @@ permissions and limitations under the Licence.
         <v-btn
           color="error"
           text
+          :disabled="disabled"
           @click="$emit('delete')"
         >
           <v-icon
@@ -87,6 +89,13 @@ export default class DeleteDialog extends Vue {
     type: String
   })
   readonly title!: string
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  readonly disabled!: boolean
 
   get showDialog (): boolean {
     return this.value

@@ -61,6 +61,7 @@ permissions and limitations under the Licence.
       v-if="editable"
       v-model="showBeginDeleteDialog"
       title="Delete Static Location"
+      :disabled="isLoading"
       @cancel="closeBeginDeleteDialog"
       @delete="deleteAndCloseBeginDeleteDialog"
     >
@@ -132,8 +133,6 @@ export default class StaticLocationView extends Vue {
   }
 
   async deleteAndCloseBeginDeleteDialog () {
-    this.closeBeginDeleteDialog()
-
     try {
       this.isLoading = true
       await this.deleteStaticLocationAction(this.action.id)
@@ -144,6 +143,7 @@ export default class StaticLocationView extends Vue {
       this.$store.commit('snackbar/setError', 'Deletion failed')
     } finally {
       this.isLoading = false
+      this.closeBeginDeleteDialog()
     }
   }
 }

@@ -40,72 +40,76 @@ import { createAxios } from '@/utils/axiosHelper'
 
 import { PermissionGroup } from '@/models/PermissionGroup'
 
-import { ContactApi } from '@/services/sms/ContactApi'
-import { DeviceApi } from '@/services/sms/DeviceApi'
-import { DevicePropertyApi } from '@/services/sms/DevicePropertyApi'
-import { PlatformApi } from '@/services/sms/PlatformApi'
+import { AutocompleteApi } from '@/services/sms/AutocompleteApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
-import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
-import { DeviceCustomfieldsApi } from '@/services/sms/DeviceCustomfieldsApi'
-import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
-import { DeviceCalibrationActionApi } from '@/services/sms/DeviceCalibrationActionApi'
-import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
 import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachmentApi'
 import { ConfigurationCustomfieldsApi } from '@/services/sms/ConfigurationCustomfieldsApi'
-import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
-import { GenericConfigurationActionApi } from '@/services/sms/GenericConfigurationActionApi'
-import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi, GenericConfigurationActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
-import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
-import { PlatformSoftwareUpdateActionApi } from '@/services/sms/PlatformSoftwareUpdateActionApi'
-import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
-import { StaticLocationActionApi } from '@/services/sms/StaticLocationActionApi'
-import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
-import { UploadApi } from '@/services/sms/UploadApi'
-import { PermissionGroupApi } from '@/services/sms/PermissionGroupApi'
-import { PidApi } from '@/services/sms/PidApi'
-
-import { CompartmentApi } from '@/services/cv/CompartmentApi'
-import { CvContactRoleApi } from '@/services/cv/CvContactRoleApi'
-import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
-import { ManufacturerApi } from '@/services/cv/ManufacturerApi'
-import { PlatformTypeApi } from '@/services/cv/PlatformTypeApi'
-import { PropertyApi } from '@/services/cv/PropertyApi'
-import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
-import { StatusApi } from '@/services/cv/StatusApi'
-import { UnitApi } from '@/services/cv/UnitApi'
-import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
-import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
-import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
-import { GlobalProvenanceApi } from '@/services/cv/GlobalProvenanceApi'
-import { AggregationTypeApi } from '@/services/cv/AggregationTypeApi'
-import { ActionCategoryApi } from '@/services/cv/ActionCategoryApi'
-import { SiteUsageApi } from '@/services/cv/SiteUsageApi'
-import { CountryApi } from '@/services/cv/CountryApi'
-import { LicenseApi } from '@/services/cv/LicenseApi'
-
-import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
-import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
-import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
+import { ConfigurationParameterApi } from '@/services/sms/ConfigurationParameterApi'
+import { ConfigurationParameterChangeActionApi } from '@/services/sms/ConfigurationParameterChangeActionApi'
+import { ConfigurationStatusApi } from '@/services/sms/ConfigurationStatusApi'
+import { ContactApi } from '@/services/sms/ContactApi'
+import { DeviceApi } from '@/services/sms/DeviceApi'
+import { DeviceAttachmentApi } from '@/services/sms/DeviceAttachmentApi'
+import { DeviceCalibrationActionApi } from '@/services/sms/DeviceCalibrationActionApi'
 import { DeviceCalibrationActionAttachmentApi } from '@/services/sms/DeviceCalibrationActionAttachmentApi'
 import { DeviceCalibrationDevicePropertyApi } from '@/services/sms/DeviceCalibrationDevicePropertyApi'
-import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
-import { StatisticsApi } from '@/services/sms/StatisticsApi'
-import { AutocompleteApi } from '@/services/sms/AutocompleteApi'
-
-import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
-import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
-import { UserInfoApi } from '@/services/sms/UserInfoApi'
+import { DeviceCustomfieldsApi } from '@/services/sms/DeviceCustomfieldsApi'
+import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
+import { DeviceParameterApi } from '@/services/sms/DeviceParameterApi'
+import { DeviceParameterChangeActionApi } from '@/services/sms/DeviceParameterChangeActionApi'
+import { DevicePropertyApi } from '@/services/sms/DevicePropertyApi'
+import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
+import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
+import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
+import { GenericConfigurationActionApi } from '@/services/sms/GenericConfigurationActionApi'
+import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
+import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi, GenericConfigurationActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
+import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
-
+import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
+import { PermissionGroupApi } from '@/services/sms/PermissionGroupApi'
+import { PidApi } from '@/services/sms/PidApi'
+import { PlatformApi } from '@/services/sms/PlatformApi'
+import { PlatformAttachmentApi } from '@/services/sms/PlatformAttachmentApi'
+import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
+import { PlatformParameterApi } from '@/services/sms/PlatformParameterApi'
+import { PlatformParameterChangeActionApi } from '@/services/sms/PlatformParameterChangeActionApi'
+import { PlatformSoftwareUpdateActionApi } from '@/services/sms/PlatformSoftwareUpdateActionApi'
 import { SiteApi } from '@/services/sms/SiteApi'
 import { SiteAttachmentApi } from '@/services/sms/SiteAttachmentApi'
 import { SiteConfigurationsApi } from '@/services/sms/SiteConfigurationsApi'
-import { UserModificationApi } from '@/services/sms/UserModificationApi'
+import { StaticLocationActionApi } from '@/services/sms/StaticLocationActionApi'
+import { StatisticsApi } from '@/services/sms/StatisticsApi'
+import { TsmEndpointApi } from '@/services/sms/TsmEndpointApi'
 import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
+import { UploadApi } from '@/services/sms/UploadApi'
+import { UserInfoApi } from '@/services/sms/UserInfoApi'
+import { UserModificationApi } from '@/services/sms/UserModificationApi'
+
+import { ActionCategoryApi } from '@/services/cv/ActionCategoryApi'
+import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
+import { AggregationTypeApi } from '@/services/cv/AggregationTypeApi'
+import { CompartmentApi } from '@/services/cv/CompartmentApi'
+import { CountryApi } from '@/services/cv/CountryApi'
+import { CvContactRoleApi } from '@/services/cv/CvContactRoleApi'
+import { DeviceTypeApi } from '@/services/cv/DeviceTypeApi'
+import { ElevationDatumApi } from '@/services/cv/ElevationDatumApi'
+import { EpsgCodeApi } from '@/services/cv/EpsgCodeApi'
+import { GlobalProvenanceApi } from '@/services/cv/GlobalProvenanceApi'
+import { LicenseApi } from '@/services/cv/LicenseApi'
+import { ManufacturerApi } from '@/services/cv/ManufacturerApi'
+import { MeasuredQuantityUnitApi } from '@/services/cv/MeasuredQuantityUnitApi'
+import { PlatformTypeApi } from '@/services/cv/PlatformTypeApi'
+import { PropertyApi } from '@/services/cv/PropertyApi'
+import { SamplingMediaApi } from '@/services/cv/SamplingMediaApi'
+import { SiteUsageApi } from '@/services/cv/SiteUsageApi'
+import { SoftwareTypeApi } from '@/services/cv/SoftwareTypeApi'
+import { StatusApi } from '@/services/cv/StatusApi'
+import { UnitApi } from '@/services/cv/UnitApi'
+
 import { TsmdlDatastreamApi } from '@/services/tsmdl/DatastreamApi'
 import { TsmdlDatasourceApi } from '@/services/tsmdl/DatasourceApi'
 import { TsmdlThingApi } from '@/services/tsmdl/ThingApi'
-import { TsmEndpointApi } from '@/services/sms/TsmEndpointApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -119,7 +123,11 @@ export class Api {
   private readonly _configurationStatesApi: ConfigurationStatusApi
   private readonly _deviceCustomfieldsApi: DeviceCustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
+  private readonly _deviceParameterApi: DeviceParameterApi
+  private readonly _deviceParameterChangeActionApi: DeviceParameterChangeActionApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
+  private readonly _platformParameterApi: PlatformParameterApi
+  private readonly _platformParameterChangeActionApi: PlatformParameterChangeActionApi
   private readonly _configurationAttachmentApi: ConfigurationAttachmentApi
   private readonly _devicePropertyApi: DevicePropertyApi
   private readonly _genericDeviceActionApi: GenericDeviceActionApi
@@ -129,6 +137,8 @@ export class Api {
   private readonly _genericPlatformActionAttachmentApi: GenericPlatformActionAttachmentApi
   private readonly _genericConfigurationActionAttachmentApi: GenericConfigurationActionAttachmentApi
   private readonly _configurationCustomfieldsApi: ConfigurationCustomfieldsApi
+  private readonly _configurationParameterApi: ConfigurationParameterApi
+  private readonly _configurationParameterChangeActionApi: ConfigurationParameterChangeActionApi
   private readonly _siteAttachmentApi: SiteAttachmentApi
 
   private readonly _deviceSoftwareUpdateActionApi: DeviceSoftwareUpdateActionApi
@@ -310,6 +320,16 @@ export class Api {
       '/customfields'
     )
 
+    this._deviceParameterApi = new DeviceParameterApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/device-parameters'
+    )
+
+    this._deviceParameterChangeActionApi = new DeviceParameterChangeActionApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/device-parameter-value-change-actions'
+    )
+
     this._deviceAttachmentApi = new DeviceAttachmentApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-attachments'
@@ -320,6 +340,16 @@ export class Api {
       '/platform-attachments'
     )
 
+    this._platformParameterApi = new PlatformParameterApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/platform-parameters'
+    )
+
+    this._platformParameterChangeActionApi = new PlatformParameterChangeActionApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/platform-parameter-value-change-actions'
+    )
+
     this._configurationAttachmentApi = new ConfigurationAttachmentApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/configuration-attachments'
@@ -328,6 +358,16 @@ export class Api {
     this._configurationCustomfieldsApi = new ConfigurationCustomfieldsApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/configuration-customfields'
+    )
+
+    this._configurationParameterApi = new ConfigurationParameterApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/configuration-parameters'
+    )
+
+    this._configurationParameterChangeActionApi = new ConfigurationParameterChangeActionApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/configuration-parameter-value-change-actions'
     )
 
     this._devicePropertyApi = new DevicePropertyApi(
@@ -565,12 +605,28 @@ export class Api {
     return this._deviceCustomfieldsApi
   }
 
+  get deviceParameters (): DeviceParameterApi {
+    return this._deviceParameterApi
+  }
+
+  get deviceParameterChangeActions (): DeviceParameterChangeActionApi {
+    return this._deviceParameterChangeActionApi
+  }
+
   get deviceAttachments (): DeviceAttachmentApi {
     return this._deviceAttachmentApi
   }
 
   get platformAttachments (): PlatformAttachmentApi {
     return this._platformAttachmentApi
+  }
+
+  get platformParameters (): PlatformParameterApi {
+    return this._platformParameterApi
+  }
+
+  get platformParameterChangeActions (): PlatformParameterChangeActionApi {
+    return this._platformParameterChangeActionApi
   }
 
   get configurationAttachments (): ConfigurationAttachmentApi {
@@ -583,6 +639,14 @@ export class Api {
 
   get configurationCustomfields (): ConfigurationCustomfieldsApi {
     return this._configurationCustomfieldsApi
+  }
+
+  get configurationParameters (): ConfigurationParameterApi {
+    return this._configurationParameterApi
+  }
+
+  get configurationParameterChangeActions (): ConfigurationParameterChangeActionApi {
+    return this._configurationParameterChangeActionApi
   }
 
   get deviceProperties (): DevicePropertyApi {

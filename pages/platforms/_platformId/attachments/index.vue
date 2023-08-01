@@ -101,6 +101,7 @@ permissions and limitations under the Licence.
       v-if="attachmentToDelete"
       v-model="showDeleteDialog"
       title="Delete Attachment"
+      :disabled="isSaving"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -188,7 +189,6 @@ export default class PlatformAttachmentShowPage extends Vue {
     try {
       this.isSaving = true
       const attachmentId = this.attachmentToDelete.id
-      this.closeDialog()
       await this.deletePlatformAttachment(attachmentId)
       this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
@@ -196,6 +196,7 @@ export default class PlatformAttachmentShowPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
       this.isSaving = false
+      this.closeDialog()
     }
   }
 

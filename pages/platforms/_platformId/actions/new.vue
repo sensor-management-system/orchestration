@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -87,11 +87,13 @@ import { PlatformActionTypeItemsGetter, LoadPlatformGenericActionTypesAction } f
 import {
   PlatformsState,
   LoadPlatformAttachmentsAction,
+  LoadPlatformParametersAction,
   SetChosenKindOfPlatformActionAction
 } from '@/store/platforms'
 
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
+const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
 
 @Component({
   components: { ActionTypeDialog, ProgressIndicator },
@@ -102,7 +104,7 @@ const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
   },
   methods: {
     ...mapActions('vocabulary', ['loadPlatformGenericActionTypes']),
-    ...mapActions('platforms', ['loadPlatformAttachments', 'setChosenKindOfPlatformAction'])
+    ...mapActions('platforms', ['loadPlatformAttachments', 'setChosenKindOfPlatformAction', 'loadPlatformParameters'])
   }
 })
 export default class NewPlatformAction extends mixins(CheckEditAccess) {
@@ -114,6 +116,7 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
   loadPlatformGenericActionTypes!: LoadPlatformGenericActionTypesAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
   chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
+  loadPlatformParameters!: LoadPlatformParametersAction
   setChosenKindOfPlatformAction!: SetChosenKindOfPlatformActionAction
 
   /**
@@ -144,7 +147,8 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
       this.chosenKindOfAction = null
       await Promise.all([
         this.loadPlatformGenericActionTypes(),
-        this.loadPlatformAttachments(this.platformId)
+        this.loadPlatformAttachments(this.platformId),
+        this.loadPlatformParameters(this.platformId)
       ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
@@ -187,16 +191,21 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
     return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   }
 
+  get parameterChangeActionChosen () {
+    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+  }
+
   updateRoute () {
     if (this.genericActionChosen) {
       this.$router.push(`/platforms/${this.platformId}/actions/new/generic-platform-actions`)
+      return
     }
     if (this.softwareUpdateChosen) {
       this.$router.push(`/platforms/${this.platformId}/actions/new/software-update-actions`)
+      return
     }
-
-    if (!this.chosenKindOfAction) {
-      this.$router.push(`/platforms/${this.platformId}/actions/new`)
+    if (this.parameterChangeActionChosen) {
+      this.$router.push(`/platforms/${this.platformId}/actions/new/parameter-change-actions`)
     }
   }
 }

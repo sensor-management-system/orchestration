@@ -547,34 +547,34 @@ permissions and limitations under the Licence.
 import { Vue, Component, Prop, mixins } from 'nuxt-property-decorator'
 
 import AggregationTypeDialog from '@/components/devices/AggregationTypeDialog.vue'
-import CompartmentDialog from '@/components/devices/CompartmentDialog.vue'
-import CvPropertyDialog from '@/components/devices/CvPropertyDialog.vue'
-import SamplingMediaDialog from '@/components/devices/SamplingMediaDialog.vue'
-import MeasuredQuantityUnitDialog from '@/components/devices/MeasuredQuantityUnitDialog.vue'
-import UnitDialog from '@/components/devices/UnitDialog.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import Combobox from '@/components/shared/Combobox.vue'
+import CompartmentDialog from '@/components/devices/CompartmentDialog.vue'
+import CvPropertyDialog from '@/components/devices/CvPropertyDialog.vue'
+import MeasuredQuantityUnitDialog from '@/components/devices/MeasuredQuantityUnitDialog.vue'
+import SamplingMediaDialog from '@/components/devices/SamplingMediaDialog.vue'
+import UnitDialog from '@/components/devices/UnitDialog.vue'
 
+import { Rules } from '@/mixins/Rules'
+
+import { AggregationType } from '@/models/AggregationType'
 import { Compartment } from '@/models/Compartment'
+import { ICvSelectItem, hasDefinition, CvSelectItem } from '@/models/CvSelectItem'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
 import { Property } from '@/models/Property'
 import { SamplingMedia } from '@/models/SamplingMedia'
 import { Unit } from '@/models/Unit'
-import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
-import { DeviceProperty } from '@/models/DeviceProperty'
-import { ICvSelectItem, hasDefinition, CvSelectItem } from '@/models/CvSelectItem'
 
 import { parseFloatOrNull } from '@/utils/numericsHelper'
 
-import { Rules } from '@/mixins/Rules'
-import { AggregationType } from '@/models/AggregationType'
-
-type CvDictTypes = Compartment | Unit | Property | SamplingMedia | MeasuredQuantityUnit | AggregationType
-type CvDictKeys = 'compartments' | 'units' | 'properties' | 'samplingMedias' | 'measuredQuantityUnits' | 'aggregationTypes'
-type CompartmentComboboxValue = Compartment | string | undefined
-type SamplingMediaComboboxValue = SamplingMedia | string | undefined
-type PropertyComboboxValue = Property | string | undefined
-type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
 type AggregationTypeComboboxValue = AggregationType | string | undefined
+type CompartmentComboboxValue = Compartment | string | undefined
+type CvDictKeys = 'compartments' | 'units' | 'properties' | 'samplingMedias' | 'measuredQuantityUnits' | 'aggregationTypes'
+type CvDictTypes = Compartment | Unit | Property | SamplingMedia | MeasuredQuantityUnit | AggregationType
+type PropertyComboboxValue = Property | string | undefined
+type SamplingMediaComboboxValue = SamplingMedia | string | undefined
+type UnitComboboxValue = MeasuredQuantityUnit | string | undefined
 
 /**
  * A class component that renders a form for a device property
@@ -583,13 +583,13 @@ type AggregationTypeComboboxValue = AggregationType | string | undefined
 @Component({
   components: {
     AggregationTypeDialog,
+    AutocompleteTextInput,
+    Combobox,
     CompartmentDialog,
     CvPropertyDialog,
     MeasuredQuantityUnitDialog,
     SamplingMediaDialog,
-    UnitDialog,
-    AutocompleteTextInput,
-    Combobox
+    UnitDialog
   }
 })
 export default class DevicePropertyForm extends mixins(Rules) {

@@ -330,6 +330,7 @@ permissions and limitations under the Licence.
       v-if="deviceToDelete"
       v-model="showDeleteDialog"
       title="Delete Device"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >

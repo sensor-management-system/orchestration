@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -38,6 +38,8 @@ export interface IActionCommonDetails {
   contact: Contact | null
   attachments: Attachment[]
 }
+
+export type IActionCommonDetailsLike = Partial<IActionCommonDetails>
 
 /**
  * a very unspecific Action class
@@ -84,12 +86,12 @@ export class ActionCommonDetails implements IActionCommonDetails {
     this._attachments = attachments
   }
 
-  static createFromObject (value: IActionCommonDetails): ActionCommonDetails {
+  static createFromObject (value: IActionCommonDetailsLike): ActionCommonDetails {
     const action = new ActionCommonDetails()
-    action.id = value.id
-    action.description = value.description
+    action.id = value.id || null
+    action.description = value.description || ''
     action.contact = value.contact ? Contact.createFromObject(value.contact) : null
-    action.attachments = value.attachments.map(a => Attachment.createFromObject(a))
+    action.attachments = value.attachments ? value.attachments.map(a => Attachment.createFromObject(a)) : []
     return action
   }
 }

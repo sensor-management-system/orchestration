@@ -37,6 +37,7 @@ import { DateTime } from 'luxon'
 import { Contact } from '@/models/Contact'
 import { Platform } from '@/models/Platform'
 import { Attachment } from '@/models/Attachment'
+import { Parameter } from '@/models/Parameter'
 
 import { PlatformSerializer, IPlatformWithMeta, platformWithMetaToPlatformByThrowingErrorOnMissing, platformWithMetaToPlatformByAddingDummyObjects } from '@/serializers/jsonapi/PlatformSerializer'
 import { IJsonApiEntityWithoutDetailsDataDictList, IJsonApiEntity } from '@/serializers/jsonapi/JsonApiTypes'
@@ -75,6 +76,23 @@ const createTestPlatform = () => {
       url: 'http://www.ufz.de',
       isUpload: false,
       createdAt: null
+    })
+  ]
+
+  platform.parameters = [
+    Parameter.createFromObject({
+      id: '3',
+      label: 'Parameter 1',
+      description: 'Some paramter',
+      unitUri: 'unit/Unit1',
+      unitName: 'Unit 1'
+    }),
+    Parameter.createFromObject({
+      id: '4',
+      label: 'Parameter 2',
+      description: 'Some other paramter',
+      unitUri: 'unit/Unit2',
+      unitName: 'Unit 2'
     })
   ]
 
@@ -161,6 +179,16 @@ describe('PlatformSerializer', () => {
                 id: '12'
               }]
             },
+            platform_parameters: {
+              links: {
+                self: '/rdm/svm-api/v1/platforms/37/relationships/platform-parameters',
+                related: '/rdm/svm-api/v1/platforms/37/platform-parameters'
+              },
+              data: [{
+                type: 'platform_parameter',
+                id: '1'
+              }]
+            },
             created_by: {
               links: {
                 self: '/rdm/svm-api/v1/platforms/37/relationships/createdUser'
@@ -213,6 +241,16 @@ describe('PlatformSerializer', () => {
                 related: '/rdm/svm-api/v1/platforms/52/platform-attachments'
               },
               data: []
+            },
+            platform_parameters: {
+              links: {
+                self: '/rdm/svm-api/v1/platforms/37/relationships/platform-parameters',
+                related: '/rdm/svm-api/v1/platforms/37/platform-parameters'
+              },
+              data: [{
+                type: 'platform_parameter',
+                id: '2'
+              }]
             },
             created_by: {
               links: {
@@ -294,6 +332,56 @@ describe('PlatformSerializer', () => {
             links: {
               self: '/rdm/svm-api/v1/platform-attachments/1'
             }
+          },
+          {
+            type: 'platform_parameter',
+            attributes: {
+              label: 'parameter a',
+              description: 'some test value for parameter a',
+              unit_uri: '/units/1',
+              unit_name: 'unit 1'
+            },
+            relationships: {
+              platform: {
+                links: {
+                  self: '/rdm/svm-api/v1/platform-parameters/1/relationships/platform',
+                  related: '/rdm/svm-api/v1/platforms/52'
+                },
+                data: {
+                  type: 'platform',
+                  id: '52'
+                }
+              }
+            },
+            id: '1',
+            links: {
+              self: '/rdm/svm-api/v1/platform-parameters/1'
+            }
+          },
+          {
+            type: 'platform_parameter',
+            attributes: {
+              label: 'parameter b',
+              description: 'some test value for parameter b',
+              unit_uri: '/units/2',
+              unit_name: 'unit 2'
+            },
+            relationships: {
+              platform: {
+                links: {
+                  self: '/rdm/svm-api/v1/platform-parameters/1/relationships/platform',
+                  related: '/rdm/svm-api/v1/platforms/52'
+                },
+                data: {
+                  type: 'platform',
+                  id: '52'
+                }
+              }
+            },
+            id: '2',
+            links: {
+              self: '/rdm/svm-api/v1/platform-parameters/2'
+            }
           }
         ],
         meta: {
@@ -315,6 +403,13 @@ describe('PlatformSerializer', () => {
         url: 'http://test.test',
         isUpload: false,
         createdAt: null
+      })]
+      expectedPlatform1.parameters = [Parameter.createFromObject({
+        id: '1',
+        label: 'parameter a',
+        description: 'some test value for parameter a',
+        unitUri: '/units/1',
+        unitName: 'unit 1'
       })]
       expectedPlatform1.platformTypeUri = 'type/Station'
       expectedPlatform1.statusUri = 'status/inuse'
@@ -350,6 +445,13 @@ describe('PlatformSerializer', () => {
       expectedPlatform2.model = ''
       expectedPlatform2.description = 'Groundwater level KleinTrebbow'
       expectedPlatform2.attachments = []
+      expectedPlatform2.parameters = [Parameter.createFromObject({
+        id: '2',
+        label: 'parameter b',
+        description: 'some test value for parameter b',
+        unitUri: '/units/2',
+        unitName: 'unit 2'
+      })]
       expectedPlatform2.platformTypeUri = 'Station'
       expectedPlatform2.statusUri = ''
       expectedPlatform2.website = ''
@@ -429,12 +531,22 @@ describe('PlatformSerializer', () => {
             },
             platform_attachments: {
               links: {
-                self: '/rdm/svm-api/v1/platforms/52/relationships/platform-attachments',
-                related: '/rdm/svm-api/v1/platforms/52/platform-attachments'
+                self: '/rdm/svm-api/v1/platforms/37/relationships/platform-attachments',
+                related: '/rdm/svm-api/v1/platforms/37/platform-attachments'
               },
               data: [{
                 type: 'platform_attachment',
                 id: '12'
+              }]
+            },
+            platform_parameters: {
+              links: {
+                self: '/rdm/svm-api/v1/platforms/37/relationships/platform-parameters',
+                related: '/rdm/svm-api/v1/platforms/37/platform-parameters'
+              },
+              data: [{
+                type: 'platform_parameter',
+                id: '1'
               }]
             },
             created_by: {
@@ -514,6 +626,31 @@ describe('PlatformSerializer', () => {
             links: {
               self: '/rdm/svm-api/v1/platform-attachments/1'
             }
+          },
+          {
+            type: 'platform_parameter',
+            attributes: {
+              label: 'parameter a',
+              description: 'some test value for parameter a',
+              unit_uri: '/units/1',
+              unit_name: 'unit 1'
+            },
+            relationships: {
+              platform: {
+                links: {
+                  self: '/rdm/svm-api/v1/platform-parameters/1/relationships/platform',
+                  related: '/rdm/svm-api/v1/platforms/37'
+                },
+                data: {
+                  type: 'platform',
+                  id: '37'
+                }
+              }
+            },
+            id: '1',
+            links: {
+              self: '/rdm/svm-api/v1/platform-parameters/1'
+            }
           }
         ],
         meta: {
@@ -535,6 +672,13 @@ describe('PlatformSerializer', () => {
         url: 'http://www.gfz-potsdam.de',
         isUpload: false,
         createdAt: null
+      })]
+      expectedPlatform.parameters = [Parameter.createFromObject({
+        id: '1',
+        label: 'parameter a',
+        description: 'some test value for parameter a',
+        unitUri: '/units/1',
+        unitName: 'unit 1'
       })]
       expectedPlatform.platformTypeUri = 'type/Station'
       expectedPlatform.statusUri = 'status/inuse'
@@ -626,6 +770,18 @@ describe('PlatformSerializer', () => {
               }
             ]
           },
+          platform_parameters: {
+            links: {
+              self: '/rdm/svm-api/v1/platforms/37/relationships/platform-parameters',
+              related: '/rdm/svm-api/v1/platforms/37/platform-parameters'
+            },
+            data: [
+              {
+                type: 'platform_parameter',
+                id: '1'
+              }
+            ]
+          },
           created_by: {
             links: {
               self: '/rdm/svm-api/v1/platforms/37/relationships/createdUser'
@@ -706,6 +862,31 @@ describe('PlatformSerializer', () => {
           links: {
             self: '/rdm/svm-api/v1/platform-attachments/1'
           }
+        },
+        {
+          type: 'platform_parameter',
+          attributes: {
+            label: 'parameter a',
+            description: 'some test value for parameter a',
+            unit_uri: '/units/1',
+            unit_name: 'unit 1'
+          },
+          relationships: {
+            platform: {
+              links: {
+                self: '/rdm/svm-api/v1/platform-parameters/1/relationships/platform',
+                related: '/rdm/svm-api/v1/platforms/37'
+              },
+              data: {
+                type: 'platform',
+                id: '37'
+              }
+            }
+          },
+          id: '1',
+          links: {
+            self: '/rdm/svm-api/v1/platform-parameters/1'
+          }
         }
       ]
 
@@ -721,7 +902,13 @@ describe('PlatformSerializer', () => {
         isUpload: false,
         createdAt: null
       })]
-
+      expectedPlatform.parameters = [Parameter.createFromObject({
+        id: '1',
+        label: 'parameter a',
+        description: 'some test value for parameter a',
+        unitUri: '/units/1',
+        unitName: 'unit 1'
+      })]
       expectedPlatform.platformTypeUri = 'type/Station'
       expectedPlatform.statusUri = 'status/inuse'
       expectedPlatform.website = 'http://www.tereno.net'
@@ -826,6 +1013,21 @@ describe('PlatformSerializer', () => {
       expect(attachmentData[0]).toEqual({
         id: '2',
         type: 'platform_attachment'
+      })
+
+      expect(jsonApiData.relationships).toHaveProperty('platform_parameters')
+      const parameters = jsonApiData.relationships?.platform_parameters as IJsonApiEntityWithoutDetailsDataDictList
+      expect(parameters).toHaveProperty('data')
+      const parameterData = parameters.data
+      expect(Array.isArray(parameterData)).toBeTruthy()
+      expect(parameterData.length).toEqual(2)
+      expect(parameterData[0]).toEqual({
+        id: '3',
+        type: 'platform_parameter'
+      })
+      expect(parameterData[1]).toEqual({
+        id: '4',
+        type: 'platform_parameter'
       })
 
       expect(jsonApiData).toHaveProperty('relationships')
