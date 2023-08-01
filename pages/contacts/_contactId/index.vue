@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -31,6 +31,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <ProgressIndicator
+      v-model="isLoading"
+      dark
+    />
     <v-card flat>
       <center>
         <v-alert
@@ -93,6 +97,7 @@ permissions and limitations under the Licence.
       <DeleteDialog
         v-model="showDeleteDialog"
         title="Delete Contact"
+        :disabled="isLoading"
         @cancel="closeDialog"
         @delete="deleteAndCloseDialog"
       >
@@ -113,9 +118,16 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContactBasicData from '@/components/ContactBasicData.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
 @Component({
-  components: { DeleteDialog, ContactBasicData, DotMenuActionDelete, DotMenu },
+  components: {
+    DeleteDialog,
+    ContactBasicData,
+    DotMenuActionDelete,
+    DotMenu,
+    ProgressIndicator
+  },
   computed: mapState('contacts', ['contact']),
   methods: {
     ...mapActions('contacts', ['deleteContact', 'loadContact'])
@@ -129,6 +141,7 @@ export default class ContactIndexPage extends Vue {
     deletable!: boolean
 
   showDeleteDialog = false
+  isLoading = false
 
   // vuex definition for typescript check
   contact!: ContactsState['contact']
@@ -140,7 +153,9 @@ export default class ContactIndexPage extends Vue {
     // include this page here is a child)
     // However, we can't be sure that this was already loaded
     // so we need to load it here in order to show the right name
+    this.isLoading = true
     await this.loadContact(this.contactId)
+    this.isLoading = false
   }
 
   get contactId () {
@@ -156,17 +171,19 @@ export default class ContactIndexPage extends Vue {
   }
 
   async deleteAndCloseDialog () {
-    this.closeDialog()
-
     if (this.contact === null || this.contact.id === null) {
       return
     }
     try {
+      this.isLoading = true
       await this.deleteContact(this.contact.id)
       this.$router.push('/contacts')
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
+    } finally {
+      this.isLoading = false
+      this.closeDialog()
     }
   }
 }

@@ -34,8 +34,8 @@ import { DateTime } from 'luxon'
 import { IContact, Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
-
 import { Attachment, IAttachment } from '@/models/Attachment'
+import { Parameter, IParameter } from '@/models/Parameter'
 import { PermissionGroup, IPermissionGroup, IPermissionableMultipleGroups } from '@/models/PermissionGroup'
 import { Visibility, IVisible } from '@/models/Visibility'
 import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
@@ -78,6 +78,7 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
   properties: DeviceProperty[]
   customFields: ICustomTextField[]
   attachments: IAttachment[]
+  parameters: IParameter[]
   permissionGroups: IPermissionGroup[]
 
   createdBy: IContact | null
@@ -118,6 +119,7 @@ export class Device implements IDevice, IVisible {
   private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
   private _attachments: Attachment[] = []
+  private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
 
   private _createdBy: IContact | null = null
@@ -312,6 +314,14 @@ export class Device implements IDevice, IVisible {
     this._attachments = attachments
   }
 
+  get parameters (): Parameter[] {
+    return this._parameters
+  }
+
+  set parameters (parameters: Parameter[]) {
+    this._parameters = parameters
+  }
+
   get permissionGroups (): PermissionGroup[] {
     return this._permissionGroups
   }
@@ -408,6 +418,7 @@ export class Device implements IDevice, IVisible {
     newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)
     newObject.customFields = someObject.customFields.map(CustomTextField.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
+    newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
 
     newObject.createdBy = someObject.createdBy ? Contact.createFromObject(someObject.createdBy) : null

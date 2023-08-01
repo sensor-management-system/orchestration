@@ -50,6 +50,7 @@ import {
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
+import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
 import { Visibility } from '@/models/Visibility'
 
 export interface IPlatformMissingData {
@@ -65,6 +66,7 @@ export interface IPlatformWithMeta {
 export class PlatformSerializer {
   private attachmentSerializer: PlatformAttachmentSerializer = new PlatformAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
+  private parameterSerializer: ParameterSerializer = new ParameterSerializer(ParameterEntityType.PLATFORM)
   private _permissionGroups: PermissionGroup[] = []
 
   set permissionGroups (groups: PermissionGroup[]) {
@@ -127,6 +129,8 @@ export class PlatformSerializer {
     const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.contacts = contactsWithMissing.contacts
     const missingDataForContactIds = contactsWithMissing.missing.ids
+
+    result.parameters = this.parameterSerializer.convertJsonApiRelationshipsModelList(relationships, included)
 
     // just pick the contact from the relationships that is referenced by the created_by user
     if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {
@@ -234,9 +238,11 @@ export class PlatformSerializer {
     if (includeRelationships) {
       const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(platform.attachments)
       const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
+      const parameters = this.parameterSerializer.convertModelListToJsonApiRelationshipObject(platform.parameters)
       data.relationships = {
         ...contacts,
-        ...attachments
+        ...attachments,
+        ...parameters
       }
     }
 

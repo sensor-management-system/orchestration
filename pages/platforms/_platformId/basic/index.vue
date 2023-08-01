@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2020 - 2023
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -117,6 +117,7 @@ permissions and limitations under the Licence.
       v-if="platform"
       v-model="showDeleteDialog"
       title="Delete Platform"
+      :disabled="isSaving"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -248,11 +249,9 @@ export default class PlatformShowBasicPage extends Vue {
   }
 
   async deleteAndCloseDialog () {
-    this.showDeleteDialog = false
     if (this.platform === null || this.platform.id === null) {
       return
     }
-
     try {
       this.isSaving = true
       await this.deletePlatform(this.platform.id)
@@ -262,6 +261,7 @@ export default class PlatformShowBasicPage extends Vue {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
     } finally {
       this.isSaving = false
+      this.showDeleteDialog = false
     }
   }
 

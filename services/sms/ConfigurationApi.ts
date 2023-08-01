@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -38,22 +38,28 @@ import { DateTime } from 'luxon'
 import { Attachment } from '@/models/Attachment'
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
+import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { Contact } from '@/models/Contact'
 import { ContactRole } from '@/models/ContactRole'
 import { CustomTextField } from '@/models/CustomTextField'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { GenericAction } from '@/models/GenericAction'
+import { Parameter } from '@/models/Parameter'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { Site } from '@/models/Site'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
-import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
+import { TsmLinking } from '@/models/TsmLinking'
 
 import { DeviceMountActionApi } from '@/services/sms/DeviceMountActionApi'
 import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
+import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
 import { PlatformMountActionApi } from '@/services/sms/PlatformMountActionApi'
 import { StaticLocationActionApi } from '@/services/sms/StaticLocationActionApi'
+import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
 
 import {
   ConfigurationSerializer,
@@ -65,13 +71,12 @@ import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializ
 import { CustomTextFieldSerializer, CustomTextFieldEntityType } from '@/serializers/jsonapi/CustomTextFieldSerializer'
 import { GenericConfigurationActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
-import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
-import { Site } from '@/models/Site'
-import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
-import { TsmLinking } from '@/models/TsmLinking'
+import { ParameterChangeActionSerializer, ParameterChangeActionEntityType } from '@/serializers/jsonapi/ParameterChangeActionSerializer'
+import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
+  includeConfigurationParameters?: boolean
   includeCreatedBy?: boolean
   includeUpdatedBy?: boolean
 }
@@ -80,6 +85,9 @@ function getIncludeParams (includes: IncludedRelationships): string {
   const listIncludedRelationships: string[] = []
   if (includes.includeContacts) {
     listIncludedRelationships.push('contacts')
+  }
+  if (includes.includeConfigurationParameters) {
+    listIncludedRelationships.push('configuration_parameters')
   }
   if (includes.includeCreatedBy) {
     listIncludedRelationships.push('created_by.contact')
@@ -573,5 +581,31 @@ export class ConfigurationApi {
     const url = 'configuration-contact-roles'
     const data = new ContactRoleSerializer().convertModelToJsonApiData(contactRole, 'configuration_contact_role', 'configuration', configurationId)
     return this.axiosApi.post(url, { data }).then(response => response.data.data.id)
+  }
+
+  async findRelatedConfigurationParameters (configurationId: string): Promise<Parameter[]> {
+    const url = this.basePath + '/' + configurationId + '/configuration-parameters'
+    const params = {
+      'page[size]': 10000,
+      // The one that was created first, should be first. All others behind.
+      sort: 'created_at'
+    }
+    const response = await this.axiosApi.get(url, { params })
+    return new ParameterSerializer(ParameterEntityType.CONFIGURATION).convertJsonApiObjectListToModelList(response.data)
+  }
+
+  async findRelatedParameterChangeActions (configurationId: string): Promise<ParameterChangeAction[]> {
+    const url = this.basePath + '/' + configurationId + '/configuration-parameter-value-change-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'configuration_parameter'
+      ].join(','),
+      // The one with the smallest date first. All others behind.
+      sort: 'date'
+    }
+    const response = await this.axiosApi.get(url, { params })
+    return new ParameterChangeActionSerializer(ParameterChangeActionEntityType.CONFIGURATION_PARAMETER_VALUE_CHANGE).convertJsonApiObjectListToModelList(response.data)
   }
 }

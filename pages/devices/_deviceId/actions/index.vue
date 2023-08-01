@@ -129,6 +129,29 @@ permissions and limitations under the Licence.
           </template>
         </DeviceCalibrationActionCard>
       </template>
+      <template #parameter-change-action="{action}">
+        <ParameterChangeActionCard
+          :value="action"
+        >
+          <template #actions>
+            <v-btn
+              v-if="editable"
+              :to="'/devices/' + deviceId + '/actions/parameter-change-actions/' + action.id + '/edit'"
+              color="primary"
+              text
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
+          <template #dot-menu-items>
+            <DotMenuActionDelete
+              :readonly="!editable"
+              @click="initDeleteDialogParameterChangeAction(action)"
+            />
+          </template>
+        </ParameterChangeActionCard>
+      </template>
       <template #device-mount-action="{action}">
         <DeviceMountActionCard
           :value="action"
@@ -144,6 +167,7 @@ permissions and limitations under the Licence.
       v-if="actionToDelete"
       v-model="showDeleteDialog"
       title="Delete Action"
+      :disabled="isSaving"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -167,43 +191,48 @@ import {
   DeleteDeviceSoftwareUpdateAction,
   DeleteDeviceGenericAction,
   DeleteDeviceCalibrationAction,
+  DeleteDeviceParameterChangeActionAction,
   LoadAllDeviceActionsAction,
   DevicesState,
   DownloadAttachmentAction
 } from '@/store/devices'
 
-import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { Attachment } from '@/models/Attachment'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+import { GenericAction } from '@/models/GenericAction'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { Visibility } from '@/models/Visibility'
 
-import HintCard from '@/components/HintCard.vue'
+import { getLastPathElement } from '@/utils/urlHelpers'
+
+import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
-import GenericActionCard from '@/components/actions/GenericActionCard.vue'
-import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationActionCard.vue'
 import DeviceMountActionCard from '@/components/actions/DeviceMountActionCard.vue'
 import DeviceUnmountActionCard from '@/components/actions/DeviceUnmountActionCard.vue'
-import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationActionCard.vue'
-import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
+import GenericActionCard from '@/components/actions/GenericActionCard.vue'
+import HintCard from '@/components/HintCard.vue'
+import ParameterChangeActionCard from '@/components/actions/ParameterChangeActionCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
-import { Visibility } from '@/models/Visibility'
-import { Attachment } from '@/models/Attachment'
-import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
   components: {
-    SoftwareUpdateActionCard,
-    ProgressIndicator,
     DeleteDialog,
-    DeviceCalibrationActionCard,
-    DeviceUnmountActionCard,
-    DeviceMountActionCard,
-    DotMenuActionDelete,
-    GenericActionCard,
     DeviceActionTimeline,
+    DeviceCalibrationActionCard,
+    DeviceMountActionCard,
+    DeviceUnmountActionCard,
+    DotMenuActionDelete,
+    DownloadDialog,
+    GenericActionCard,
     HintCard,
-    DownloadDialog
+    ParameterChangeActionCard,
+    ProgressIndicator,
+    SoftwareUpdateActionCard
   },
   computed: {
     ...mapGetters('devices', ['actions']),
@@ -213,6 +242,7 @@ import { getLastPathElement } from '@/utils/urlHelpers'
     'deleteDeviceSoftwareUpdateAction',
     'deleteDeviceGenericAction',
     'deleteDeviceCalibrationAction',
+    'deleteDeviceParameterChangeAction',
     'loadAllDeviceActions',
     'downloadAttachment'
   ])
@@ -225,6 +255,7 @@ export default class DeviceActionsShowPage extends Vue {
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
   private calibrationActionToDelete: DeviceCalibrationAction | null = null
+  private parameterChangeActionToDelete: ParameterChangeAction | null = null
   private showDeleteDialog: boolean = false
 
   private showDownloadDialog: boolean = false
@@ -237,6 +268,7 @@ export default class DeviceActionsShowPage extends Vue {
   loadAllDeviceActions!: LoadAllDeviceActionsAction
   deleteDeviceSoftwareUpdateAction!: DeleteDeviceSoftwareUpdateAction
   deleteDeviceCalibrationAction!: DeleteDeviceCalibrationAction
+  deleteDeviceParameterChangeAction!: DeleteDeviceParameterChangeActionAction
   downloadAttachment!: DownloadAttachmentAction
 
   get deviceId (): string {
@@ -247,13 +279,14 @@ export default class DeviceActionsShowPage extends Vue {
     if (this.genericActionToDelete) {
       return this.genericActionToDelete
     }
-
     if (this.softwareUpdateActionToDelete) {
       return this.softwareUpdateActionToDelete
     }
-
     if (this.calibrationActionToDelete) {
       return this.calibrationActionToDelete
+    }
+    if (this.parameterChangeActionToDelete) {
+      return this.parameterChangeActionToDelete
     }
     return null
   }
@@ -262,46 +295,68 @@ export default class DeviceActionsShowPage extends Vue {
     this.showDeleteDialog = true
 
     this.genericActionToDelete = action
-    this.softwareUpdateActionToDelete = null
     this.calibrationActionToDelete = null
+    this.parameterChangeActionToDelete = null
+    this.softwareUpdateActionToDelete = null
   }
 
   initDeleteDialogSoftwareUpdateAction (action: SoftwareUpdateAction) {
     this.showDeleteDialog = true
 
     this.softwareUpdateActionToDelete = action
-    this.genericActionToDelete = null
     this.calibrationActionToDelete = null
+    this.genericActionToDelete = null
+    this.parameterChangeActionToDelete = null
   }
 
   initDeleteDialogCalibrationAction (action: DeviceCalibrationAction) {
     this.showDeleteDialog = true
 
     this.calibrationActionToDelete = action
-    this.softwareUpdateActionToDelete = null
     this.genericActionToDelete = null
+    this.parameterChangeActionToDelete = null
+    this.softwareUpdateActionToDelete = null
+  }
+
+  initDeleteDialogParameterChangeAction (action: ParameterChangeAction) {
+    this.showDeleteDialog = true
+
+    this.parameterChangeActionToDelete = action
+    this.calibrationActionToDelete = null
+    this.genericActionToDelete = null
+    this.softwareUpdateActionToDelete = null
   }
 
   closeDialog () {
     this.showDeleteDialog = false
-    this.softwareUpdateActionToDelete = null
+
+    this.calibrationActionToDelete = null
     this.genericActionToDelete = null
+    this.parameterChangeActionToDelete = null
+    this.softwareUpdateActionToDelete = null
   }
 
-  deleteAndCloseDialog () {
+  async deleteAndCloseDialog () {
     if (this.actionToDelete === null || this.actionToDelete.id === null) {
       return
     }
-
-    if (this.genericActionToDelete !== null && this.softwareUpdateActionToDelete === null && this.calibrationActionToDelete === null) {
-      this.deleteGenericAction()
-    }
-
-    if (this.softwareUpdateActionToDelete !== null && this.genericActionToDelete === null && this.calibrationActionToDelete === null) {
-      this.deleteSoftwareUpdateAction()
-    }
-    if (this.calibrationActionToDelete !== null && this.genericActionToDelete === null && this.softwareUpdateActionToDelete === null) {
-      this.deleteCalibrationAction()
+    try {
+      switch (true) {
+        case this.genericActionToDelete !== null:
+          await this.deleteGenericAction()
+          break
+        case this.softwareUpdateActionToDelete !== null:
+          await this.deleteSoftwareUpdateAction()
+          break
+        case this.calibrationActionToDelete !== null:
+          await this.deleteCalibrationAction()
+          break
+        case this.parameterChangeActionToDelete !== null:
+          await this.deleteParameterChangeAction()
+          break
+      }
+    } finally {
+      this.closeDialog()
     }
   }
 
@@ -319,7 +374,6 @@ export default class DeviceActionsShowPage extends Vue {
       this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
     } finally {
       this.isSaving = false
-      this.closeDialog()
     }
   }
 
@@ -336,7 +390,6 @@ export default class DeviceActionsShowPage extends Vue {
       this.$store.commit('snackbar/setError', 'Software update action could not be deleted')
     } finally {
       this.isSaving = false
-      this.closeDialog()
     }
   }
 
@@ -354,7 +407,23 @@ export default class DeviceActionsShowPage extends Vue {
       this.$store.commit('snackbar/setError', 'Calibration action could not be deleted')
     } finally {
       this.isSaving = false
-      this.closeDialog()
+    }
+  }
+
+  async deleteParameterChangeAction () {
+    if (this.parameterChangeActionToDelete === null || this.parameterChangeActionToDelete.id === null) {
+      return
+    }
+
+    try {
+      this.isSaving = true
+      await this.deleteDeviceParameterChangeAction(this.parameterChangeActionToDelete.id)
+      this.loadAllDeviceActions(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Parameter value change action deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Parameter value change action could not be deleted')
+    } finally {
+      this.isSaving = false
     }
   }
 
@@ -398,7 +467,3 @@ export default class DeviceActionsShowPage extends Vue {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

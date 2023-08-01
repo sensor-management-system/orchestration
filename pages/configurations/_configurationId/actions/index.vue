@@ -101,62 +101,58 @@ import { getLastPathElement } from '@/utils/urlHelpers'
   methods: mapActions('configurations', ['downloadAttachment'])
 })
 export default class ConfigurationShowActionPage extends Vue {
-  timelineActions!: TimelineActionsGetter
+  private readonly timelineActions!: TimelineActionsGetter
 
-    @InjectReactive()
-      editable!: boolean
+  @InjectReactive()
+  private editable!: boolean
 
-    configuration!: ConfigurationsState['configuration']
-    downloadAttachment!: DownloadAttachmentAction
+  private readonly configuration!: ConfigurationsState['configuration']
+  private downloadAttachment!: DownloadAttachmentAction
 
-    private showDownloadDialog: boolean = false
-    private attachmentToDownload: Attachment | null = null
+  private showDownloadDialog: boolean = false
+  private attachmentToDownload: Attachment | null = null
 
-    get configurationId (): string {
-      return this.$route.params.configurationId
+  get configurationId (): string {
+    return this.$route.params.configurationId
+  }
+
+  initDowloadDialog (attachment: Attachment) {
+    this.attachmentToDownload = attachment
+    this.showDownloadDialog = true
+  }
+
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+    this.attachmentToDownload = null
+  }
+
+  openAttachment (attachment: Attachment) {
+    this.initDowloadDialog(attachment)
+  }
+
+  get selectedAttachmentFilename (): string {
+    if (this.attachmentToDownload) {
+      return getLastPathElement(this.attachmentToDownload.url)
     }
+    return 'attachment'
+  }
 
-    initDowloadDialog (attachment: Attachment) {
-      this.attachmentToDownload = attachment
-      this.showDownloadDialog = true
-    }
-
-    closeDownloadDialog () {
-      this.showDownloadDialog = false
-      this.attachmentToDownload = null
-    }
-
-    openAttachment (attachment: Attachment) {
-      this.initDowloadDialog(attachment)
-    }
-
-    get selectedAttachmentFilename (): string {
-      if (this.attachmentToDownload) {
-        return getLastPathElement(this.attachmentToDownload.url)
-      }
-      return 'attachment'
-    }
-
-    async selectedAttachmentUrl (): Promise<string | null> {
-      if (!this.attachmentToDownload) {
-        return null
-      }
-      try {
-        const blob = await this.downloadAttachment(this.attachmentToDownload.url)
-        const url = window.URL.createObjectURL(blob)
-        return url
-      } catch (e) {
-        this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
-      }
+  async selectedAttachmentUrl (): Promise<string | null> {
+    if (!this.attachmentToDownload) {
       return null
     }
-
-    get isPublic (): boolean {
-      return (this.configuration?.visibility === Visibility.Public) || false
+    try {
+      const blob = await this.downloadAttachment(this.attachmentToDownload.url)
+      const url = window.URL.createObjectURL(blob)
+      return url
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Attachment could not be loaded')
     }
+    return null
+  }
+
+  get isPublic (): boolean {
+    return (this.configuration?.visibility === Visibility.Public) || false
+  }
 }
 </script>
-
-<style scoped>
-
-</style>

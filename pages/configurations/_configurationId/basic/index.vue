@@ -113,6 +113,7 @@ permissions and limitations under the Licence.
       <DeleteDialog
         v-model="showDeleteDialog"
         title="Delete Configuration"
+        :disabled="isSaving"
         @cancel="closeDialog"
         @delete="deleteAndCloseDialog"
       >

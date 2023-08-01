@@ -57,16 +57,31 @@ permissions and limitations under the Licence.
           </v-card-subtitle>
         </v-col>
       </v-row>
-      <template v-if="action.genericAction" #dot-menu-items>
+      <template #dot-menu-items>
         <DotMenuActionDelete
+          v-if="action.genericAction"
           :readonly="!editable"
           @click="initDeleteDialogGenericAction(action.genericAction)"
+        />
+        <DotMenuActionDelete
+          v-if="action.parameterChangeAction"
+          :readonly="!editable"
+          @click="initDeleteDialogParameterChangeAction(action.parameterChangeAction)"
         />
       </template>
       <template #actions>
         <v-btn
           v-if="action.genericAction && editable"
           :to="'/configurations/' + configurationId + '/actions/generic-configuration-actions/' + action.genericAction.id + '/edit'"
+          color="primary"
+          text
+          @click.stop.prevent
+        >
+          Edit
+        </v-btn>
+        <v-btn
+          v-if="action.parameterChangeAction && editable"
+          :to="'/configurations/' + configurationId + '/actions/parameter-change-actions/' + action.parameterChangeAction.id + '/edit'"
           color="primary"
           text
           @click.stop.prevent
@@ -200,6 +215,26 @@ permissions and limitations under the Licence.
               </v-col>
             </v-row>
           </div>
+          <template
+            v-if="action.parameterChangeAction"
+          >
+            <v-row
+              dense
+            >
+              <v-col>
+                <label>Value</label>
+                {{ action.parameterChangeAction.value | orDefault }}
+              </v-col>
+            </v-row>
+            <v-row
+              dense
+            >
+              <v-col>
+                <label>Unit</label>
+                {{ action.parameterChangeAction.parameter.unitName | orDefault }}
+              </v-col>
+            </v-row>
+          </template>
           <v-row dense>
             <v-col>
               <label>Description</label>
@@ -229,10 +264,12 @@ permissions and limitations under the Licence.
       </template>
     </base-expandable-list-item>
     <DeleteDialog
+      v-if="actionToDelete"
       v-model="showDeleteDialog"
       title="Delete Action"
+      :disabled="isSaving"
       @cancel="closeDialog"
-      @delete="deleteGenericAction"
+      @delete="deleteAndCloseDialog"
     >
       Do you really want to delete the action?
     </DeleteDialog>
@@ -245,6 +282,7 @@ import { mapActions } from 'vuex'
 
 import {
   DeleteConfigurationGenericAction,
+  DeleteConfigurationParameterChangeActionAction,
   LoadAllConfigurationActionsAction
 } from '@/store/configurations'
 
@@ -256,6 +294,7 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import { ITimelineAction } from '@/utils/configurationInterfaces'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 import { Attachment } from '@/models/Attachment'
 
 @Component({
@@ -268,7 +307,7 @@ import { Attachment } from '@/models/Attachment'
     DotMenuActionDelete,
     DeleteDialog
   },
-  methods: mapActions('configurations', ['deleteConfigurationGenericAction', 'loadAllConfigurationActions'])
+  methods: mapActions('configurations', ['deleteConfigurationGenericAction', 'deleteConfigurationParameterChangeAction', 'loadAllConfigurationActions'])
 })
 export default class ConfigurationsTimelineActionCard extends Vue {
   @InjectReactive()
@@ -289,9 +328,11 @@ export default class ConfigurationsTimelineActionCard extends Vue {
   private isSaving: boolean = false
   private showDeleteDialog: boolean = false
   private genericActionToDelete: GenericAction | null = null
+  private parameterChangeActionToDelete: ParameterChangeAction | null = null
 
   // vuex definition for typescript check
   deleteConfigurationGenericAction!: DeleteConfigurationGenericAction
+  deleteConfigurationParameterChangeAction!: DeleteConfigurationParameterChangeActionAction
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
 
   get configurationId (): string {
@@ -305,31 +346,77 @@ export default class ConfigurationsTimelineActionCard extends Vue {
     return ''
   }
 
+  get actionToDelete () {
+    if (this.genericActionToDelete) {
+      return this.genericActionToDelete
+    }
+    if (this.parameterChangeActionToDelete) {
+      return this.parameterChangeActionToDelete
+    }
+    return null
+  }
+
   initDeleteDialogGenericAction (action: GenericAction) {
     this.showDeleteDialog = true
     this.genericActionToDelete = action
+    this.parameterChangeActionToDelete = null
+  }
+
+  initDeleteDialogParameterChangeAction (action: ParameterChangeAction) {
+    this.showDeleteDialog = true
+    this.parameterChangeActionToDelete = action
+    this.genericActionToDelete = null
   }
 
   closeDialog () {
     this.showDeleteDialog = false
     this.genericActionToDelete = null
+    this.parameterChangeActionToDelete = null
+  }
+
+  async deleteAndCloseDialog (): Promise<void> {
+    try {
+      switch (true) {
+        case this.genericActionToDelete !== null:
+          await this.deleteGenericAction()
+          break
+        case this.parameterChangeActionToDelete !== null:
+          await this.deleteParameterChangeAction()
+          break
+      }
+    } finally {
+      this.loadAllConfigurationActions(this.configurationId)
+      this.closeDialog()
+    }
   }
 
   async deleteGenericAction () {
     if (this.genericActionToDelete === null || this.genericActionToDelete.id === null) {
       return
     }
-
     try {
       this.isSaving = true
       await this.deleteConfigurationGenericAction(this.genericActionToDelete.id)
-      this.loadAllConfigurationActions(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
     } finally {
       this.isSaving = false
-      this.closeDialog()
+    }
+  }
+
+  async deleteParameterChangeAction () {
+    if (this.parameterChangeActionToDelete === null || this.parameterChangeActionToDelete.id === null) {
+      return
+    }
+    try {
+      this.isSaving = true
+      await this.deleteConfigurationParameterChangeAction(this.parameterChangeActionToDelete.id)
+      this.$store.commit('snackbar/setSuccess', 'Parameter change action deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Parameter change action could not be deleted')
+    } finally {
+      this.isSaving = false
     }
   }
 

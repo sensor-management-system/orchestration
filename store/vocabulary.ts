@@ -59,12 +59,12 @@ import { License } from '@/models/License'
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION, ActionTypeApiFilterType } from '@/services/cv/ActionTypeApi'
 import { GlobalProvenance } from '@/models/GlobalProvenance'
 
-const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
-const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
-const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
-const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
-
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
+const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
+const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
+const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
+const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 
 export interface VocabularyState {
   manufacturers: Manufacturer[]
@@ -163,6 +163,12 @@ const getters: GetterTree<VocabularyState, RootState> = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
+      {
+        id: 'parameter_change_action',
+        name: 'Parameter Value Change',
+        uri: '',
+        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+      },
       ...state.platformGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,
@@ -187,6 +193,12 @@ const getters: GetterTree<VocabularyState, RootState> = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
+      {
+        id: 'parameter_change_action',
+        name: 'Parameter Value Change',
+        uri: '',
+        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+      },
       ...state.deviceGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,
@@ -199,6 +211,12 @@ const getters: GetterTree<VocabularyState, RootState> = {
   },
   configurationActionTypeItems: (state: VocabularyState) => {
     return [
+      {
+        id: 'parameter_change_action',
+        name: 'Parameter Value Change',
+        uri: '',
+        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+      },
       ...state.configurationGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,

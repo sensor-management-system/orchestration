@@ -105,6 +105,29 @@ permissions and limitations under the Licence.
           </template>
         </SoftwareUpdateActionCard>
       </template>
+      <template #parameter-change-action="{action}">
+        <ParameterChangeActionCard
+          :value="action"
+        >
+          <template #actions>
+            <v-btn
+              v-if="editable"
+              :to="'/platforms/' + platformId + '/actions/parameter-change-actions/' + action.id + '/edit'"
+              color="primary"
+              text
+              @click.stop.prevent
+            >
+              Edit
+            </v-btn>
+          </template>
+          <template #dot-menu-items>
+            <DotMenuActionDelete
+              :readonly="!editable"
+              @click="initDeleteDialogParameterChangeAction(action)"
+            />
+          </template>
+        </ParameterChangeActionCard>
+      </template>
 
       <template #platform-mount-action="{action}">
         <PlatformMountActionCard
@@ -146,38 +169,43 @@ import {
   DeletePlatformSoftwareUpdateActionAction,
   DeletePlatformGenericActionAction,
   DownloadAttachmentAction,
-  PlatformsState
+  PlatformsState,
+  DeletePlatformParameterChangeActionAction
 } from '@/store/platforms'
 
+import { Attachment } from '@/models/Attachment'
 import { GenericAction } from '@/models/GenericAction'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { Visibility } from '@/models/Visibility'
 
-import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
-import HintCard from '@/components/HintCard.vue'
-import GenericActionCard from '@/components/actions/GenericActionCard.vue'
-import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import { getLastPathElement } from '@/utils/urlHelpers'
+
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
+import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
-import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
+import GenericActionCard from '@/components/actions/GenericActionCard.vue'
+import HintCard from '@/components/HintCard.vue'
+import ParameterChangeActionCard from '@/components/actions/ParameterChangeActionCard.vue'
+import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
 import PlatformMountActionCard from '@/components/actions/PlatformMountActionCard.vue'
 import PlatformUnmountActionCard from '@/components/actions/PlatformUnmountActionCard.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { Attachment } from '@/models/Attachment'
-import { Visibility } from '@/models/Visibility'
-import { getLastPathElement } from '@/utils/urlHelpers'
+import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
 @Component({
   components: {
-    ProgressIndicator,
-    PlatformUnmountActionCard,
-    PlatformMountActionCard,
-    SoftwareUpdateActionCard,
     DeleteDialog,
     DotMenuActionDelete,
     DownloadDialog,
     GenericActionCard,
     HintCard,
-    PlatformActionTimeline
+    ParameterChangeActionCard,
+    PlatformActionTimeline,
+    PlatformMountActionCard,
+    PlatformUnmountActionCard,
+    ProgressIndicator,
+    SoftwareUpdateActionCard
   },
   computed: {
     ...mapGetters('platforms', ['actions']),
@@ -187,6 +215,7 @@ import { getLastPathElement } from '@/utils/urlHelpers'
     'loadAllPlatformActions',
     'deletePlatformSoftwareUpdateAction',
     'deletePlatformGenericAction',
+    'deletePlatformParameterChangeAction',
     'downloadAttachment'
   ])
 })
@@ -197,6 +226,7 @@ export default class PlatformActionsShowPage extends Vue {
   private isSaving: boolean = false
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
+  private parameterChangeActionToDelete: ParameterChangeAction | null = null
   private showDeleteDialog: boolean = false
 
   private showDownloadDialog: boolean = false
@@ -208,6 +238,7 @@ export default class PlatformActionsShowPage extends Vue {
   loadAllPlatformActions!: LoadAllPlatformActionsAction
   deletePlatformGenericAction!: DeletePlatformGenericActionAction
   deletePlatformSoftwareUpdateAction!: DeletePlatformSoftwareUpdateActionAction
+  deletePlatformParameterChangeAction!: DeletePlatformParameterChangeActionAction
   downloadAttachment!: DownloadAttachmentAction
 
   get platformId (): string {
@@ -218,9 +249,11 @@ export default class PlatformActionsShowPage extends Vue {
     if (this.genericActionToDelete) {
       return this.genericActionToDelete
     }
-
     if (this.softwareUpdateActionToDelete) {
       return this.softwareUpdateActionToDelete
+    }
+    if (this.parameterChangeActionToDelete) {
+      return this.parameterChangeActionToDelete
     }
     return null
   }
@@ -229,12 +262,21 @@ export default class PlatformActionsShowPage extends Vue {
     this.showDeleteDialog = true
     this.genericActionToDelete = action
     this.softwareUpdateActionToDelete = null
+    this.parameterChangeActionToDelete = null
   }
 
   initDeleteDialogSoftwareUpdateAction (action: SoftwareUpdateAction) {
     this.showDeleteDialog = true
     this.softwareUpdateActionToDelete = action
     this.genericActionToDelete = null
+    this.parameterChangeActionToDelete = null
+  }
+
+  initDeleteDialogParameterChangeAction (action: ParameterChangeAction) {
+    this.showDeleteDialog = true
+    this.parameterChangeActionToDelete = action
+    this.genericActionToDelete = null
+    this.softwareUpdateActionToDelete = null
   }
 
   closeDialog () {
@@ -243,17 +285,25 @@ export default class PlatformActionsShowPage extends Vue {
     this.genericActionToDelete = null
   }
 
-  deleteAndCloseDialog () {
+  async deleteAndCloseDialog () {
     if (this.actionToDelete === null || this.actionToDelete.id === null) {
       return
     }
 
-    if (this.genericActionToDelete !== null && this.softwareUpdateActionToDelete === null) {
-      this.deleteGenericAction()
-    }
-
-    if (this.softwareUpdateActionToDelete !== null && this.genericActionToDelete === null) {
-      this.deleteSoftwareUpdateAction()
+    try {
+      switch (true) {
+        case this.genericActionToDelete !== null:
+          await this.deleteGenericAction()
+          break
+        case this.softwareUpdateActionToDelete !== null:
+          await this.deleteSoftwareUpdateAction()
+          break
+        case this.parameterChangeActionToDelete !== null:
+          await this.deleteParameterChangeAction()
+          break
+      }
+    } finally {
+      this.closeDialog()
     }
   }
 
@@ -271,7 +321,6 @@ export default class PlatformActionsShowPage extends Vue {
       this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
     } finally {
       this.isSaving = false
-      this.closeDialog()
     }
   }
 
@@ -289,7 +338,23 @@ export default class PlatformActionsShowPage extends Vue {
       this.$store.commit('snackbar/setError', 'Software update action could not be deleted')
     } finally {
       this.isSaving = false
-      this.closeDialog()
+    }
+  }
+
+  async deleteParameterChangeAction () {
+    if (this.parameterChangeActionToDelete === null || this.parameterChangeActionToDelete.id === null) {
+      return
+    }
+
+    try {
+      this.isSaving = true
+      await this.deletePlatformParameterChangeAction(this.parameterChangeActionToDelete.id)
+      this.loadAllPlatformActions(this.platformId)
+      this.$store.commit('snackbar/setSuccess', 'Parameter value change action deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Parameter value change action could not be deleted')
+    } finally {
+      this.isSaving = false
     }
   }
 

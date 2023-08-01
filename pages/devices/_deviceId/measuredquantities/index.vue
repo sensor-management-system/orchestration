@@ -112,6 +112,7 @@ permissions and limitations under the Licence.
       v-if="editable && measuredQuantityToDelete"
       v-model="showDeleteDialog"
       title="Delete Measured Quantity"
+      :disabled="isSaving"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >

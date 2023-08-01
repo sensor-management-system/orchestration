@@ -64,5 +64,9 @@ export default class Combobox extends Vue {
   onBlur (): void {
     (this.$refs.combobox as Vue & { updateSelf: () => void}).updateSelf()
   }
+
+  focus (): void {
+    (this.$refs.combobox as Vue & { focus: () => void }).focus()
+  }
 }
 </script>

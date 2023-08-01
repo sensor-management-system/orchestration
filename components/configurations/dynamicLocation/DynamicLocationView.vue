@@ -62,6 +62,7 @@ permissions and limitations under the Licence.
       v-if="editable"
       v-model="showDeleteDialog"
       title="Delete Dynamic Location"
+      :disabled="isLoading"
       @cancel="closeDeleteDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -137,8 +138,6 @@ export default class DynamicLocationView extends Vue {
   }
 
   async deleteAndCloseDialog () {
-    this.closeDeleteDialog()
-
     try {
       this.isLoading = true
       await this.deleteDynamicLocationAction(this.action.id)
@@ -149,6 +148,7 @@ export default class DynamicLocationView extends Vue {
       this.$store.commit('snackbar/setError', 'Deletion failed')
     } finally {
       this.isLoading = false
+      this.closeDeleteDialog()
     }
   }
 }

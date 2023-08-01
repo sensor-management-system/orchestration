@@ -69,7 +69,11 @@ permissions and limitations under the Licence.
         />
       </v-card-actions>
     </v-card>
-    <v-subheader>Existing measured quantities</v-subheader>
+    <v-subheader
+      v-if="deviceMeasuredQuantities.length > 1"
+    >
+      Existing measured quantities
+    </v-subheader>
     <BaseList
       v-if="deviceMeasuredQuantity !== null"
       :list-items="deviceMeasuredQuantities"

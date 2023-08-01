@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,46 +30,48 @@
  * permissions and limitations under the Licence.
  */
 import { AxiosInstance, Method } from 'axios'
-
 import { DateTime } from 'luxon'
+
 import { Attachment } from '@/models/Attachment'
+import { Availability } from '@/models/Availability'
 import { ContactRole } from '@/models/ContactRole'
 import { CustomTextField } from '@/models/CustomTextField'
 import { Device } from '@/models/Device'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceType } from '@/models/DeviceType'
-import { Manufacturer } from '@/models/Manufacturer'
-import { Status } from '@/models/Status'
 import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { Manufacturer } from '@/models/Manufacturer'
+import { Parameter } from '@/models/Parameter'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 import { PermissionGroup } from '@/models/PermissionGroup'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+import { Status } from '@/models/Status'
 
-import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
-
+import { AvailabilitySerializer } from '@/serializers/controller/AvailabilitySerializer'
 import { ContactRoleSerializer } from '@/serializers/jsonapi/ContactRoleSerializer'
 import { CustomTextFieldEntityType, CustomTextFieldSerializer } from '@/serializers/jsonapi/CustomTextFieldSerializer'
-import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
-import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
-import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
-import { DeviceSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
-
-import { DeviceMountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceMountActionSerializer'
-
 import {
   DeviceSerializer,
   deviceWithMetaToDeviceByAddingDummyObjects,
   deviceWithMetaToDeviceThrowingNoErrorOnMissing
 } from '@/serializers/jsonapi/DeviceSerializer'
+import { DeviceAttachmentSerializer } from '@/serializers/jsonapi/DeviceAttachmentSerializer'
 import { DeviceCalibrationActionSerializer } from '@/serializers/jsonapi/DeviceCalibrationActionSerializer'
-import { AvailabilitySerializer } from '@/serializers/controller/AvailabilitySerializer'
-import { Availability } from '@/models/Availability'
+import { DeviceMountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceMountActionSerializer'
+import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
+import { DeviceSoftwareUpdateActionSerializer } from '@/serializers/jsonapi/SoftwareUpdateActionSerializer'
+import { GenericDeviceActionSerializer } from '@/serializers/jsonapi/GenericActionSerializer'
+import { ParameterChangeActionSerializer, ParameterChangeActionEntityType } from '@/serializers/jsonapi/ParameterChangeActionSerializer'
+import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
   includeCustomFields?: boolean
   includeDeviceProperties?: boolean
   includeDeviceAttachments?: boolean
+  includeDeviceParameters?: boolean
   includeCreatedBy?: boolean
   includeUpdatedBy?: boolean
 }
@@ -87,6 +89,9 @@ function getIncludeParams (includes: IncludedRelationships): string {
   }
   if (includes.includeDeviceAttachments) {
     listIncludedRelationships.push('device_attachments')
+  }
+  if (includes.includeDeviceParameters) {
+    listIncludedRelationships.push('device_parameters')
   }
   if (includes.includeCreatedBy) {
     listIncludedRelationships.push('created_by.contact')
@@ -611,6 +616,32 @@ export class DeviceApi {
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new DeviceMountActionSerializer().convertJsonApiObjectListToModelList(rawServerResponse.data)
     })
+  }
+
+  async findRelatedDeviceParameters (deviceId: string): Promise<Parameter[]> {
+    const url = this.basePath + '/' + deviceId + '/device-parameters'
+    const params = {
+      'page[size]': 10000,
+      // The one that was created first, should be first. All others behind.
+      sort: 'created_at'
+    }
+    const response = await this.axiosApi.get(url, { params })
+    return new ParameterSerializer(ParameterEntityType.DEVICE).convertJsonApiObjectListToModelList(response.data)
+  }
+
+  async findRelatedParameterChangeActions (deviceId: string): Promise<ParameterChangeAction[]> {
+    const url = this.basePath + '/' + deviceId + '/device-parameter-value-change-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'contact',
+        'device_parameter'
+      ].join(','),
+      // The one with the smallest date first. All others behind.
+      sort: 'date'
+    }
+    const response = await this.axiosApi.get(url, { params })
+    return new ParameterChangeActionSerializer(ParameterChangeActionEntityType.DEVICE_PARAMETER_VALUE_CHANGE).convertJsonApiObjectListToModelList(response.data)
   }
 
   checkAvailability (ids: (string | null)[], from: DateTime, to: DateTime | null): Promise<Availability[]> {

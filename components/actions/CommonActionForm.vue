@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -65,7 +65,9 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row
+      v-if="!hideAttachments"
+    >
       <v-col>
         <v-select
           v-model="actionAttachments"
@@ -114,7 +116,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
-import { IActionCommonDetails, ActionCommonDetails } from '@/models/ActionCommonDetails'
+import { IActionCommonDetailsLike, ActionCommonDetails } from '@/models/ActionCommonDetails'
 import { dateToDateTimeStringHHMM } from '@/utils/dateHelper'
 
 /**
@@ -139,7 +141,7 @@ export default class CommonActionForm extends Vue {
     type: Object
   })
   // @ts-ignore
-  readonly value!: IActionCommonDetails
+  readonly value!: IActionCommonDetailsLike
 
   /**
    * a list of available attachments
@@ -149,7 +151,6 @@ export default class CommonActionForm extends Vue {
     required: false,
     type: Array
   })
-  // @ts-ignore
   readonly attachments!: Attachment[]
 
   /**
@@ -160,14 +161,21 @@ export default class CommonActionForm extends Vue {
     required: false,
     type: Array
   })
-  // @ts-ignore
   readonly rules!: ((v: any) => boolean | string)[]
 
   @Prop({
+    default: '',
+    required: false,
     type: String
   })
-  // @ts-ignore
-  readonly currentUserMail: string | null
+  readonly currentUserMail!: string | null
+
+  @Prop({
+    default: false,
+    type: Boolean,
+    required: false
+  })
+  readonly hideAttachments!: boolean
 
   async fetch () {
     try {
@@ -178,7 +186,7 @@ export default class CommonActionForm extends Vue {
   }
 
   get description (): string {
-    return this.value.description
+    return this.value.description || ''
   }
 
   /**
@@ -199,7 +207,7 @@ export default class CommonActionForm extends Vue {
   }
 
   get contact (): Contact | null {
-    return this.value.contact
+    return this.value.contact || null
   }
 
   /**
@@ -220,7 +228,7 @@ export default class CommonActionForm extends Vue {
   }
 
   get actionAttachments (): Attachment[] {
-    return this.value.attachments
+    return this.value.attachments || []
   }
 
   /**

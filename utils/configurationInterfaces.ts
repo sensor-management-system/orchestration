@@ -43,6 +43,7 @@ import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 import { GenericAction } from '@/models/GenericAction'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 
 export interface IActionDateWithText {
   date: DateTime
@@ -618,6 +619,54 @@ export class GenericTimelineAction implements IGenericTimelineAction {
 
   get type (): string {
     return 'generic_configuration_action'
+  }
+}
+
+export class ParameterChangeTimelineAction implements IGenericTimelineAction {
+  private _parameterChangeAction: ParameterChangeAction
+
+  constructor (parameterChangeAction: ParameterChangeAction) {
+    this._parameterChangeAction = parameterChangeAction
+  }
+
+  get key (): string {
+    return 'Parameter-change-action-' + this._parameterChangeAction.id
+  }
+
+  get color (): string {
+    return 'purple'
+  }
+
+  get title (): string {
+    let title = 'unknown paramter change action'
+    if (this._parameterChangeAction.parameter) {
+      title = this._parameterChangeAction.parameter.label + ' change'
+    }
+    return title
+  }
+
+  get description (): string | null {
+    return this._parameterChangeAction.description
+  }
+
+  get contact (): Contact {
+    return this._parameterChangeAction.contact!
+  }
+
+  get date (): DateTime {
+    return this._parameterChangeAction.date!
+  }
+
+  get endDate (): DateTime | null {
+    return null
+  }
+
+  get type (): string {
+    return 'parameter_change_action'
+  }
+
+  get parameterChangeAction (): ParameterChangeAction {
+    return this._parameterChangeAction
   }
 }
 

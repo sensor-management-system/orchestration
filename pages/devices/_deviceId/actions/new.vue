@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -81,6 +81,7 @@ import {
   LoadDeviceAttachmentsAction,
   SetChosenKindOfDeviceActionAction,
   LoadDeviceMeasuredQuantitiesAction,
+  LoadDeviceParametersAction,
   DevicesState
 } from '@/store/devices'
 
@@ -94,6 +95,7 @@ import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
 
 @Component({
   components: { ActionTypeDialog, ProgressIndicator },
@@ -104,7 +106,7 @@ const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
   },
   methods: {
     ...mapActions('vocabulary', ['loadDeviceGenericActionTypes']),
-    ...mapActions('devices', ['loadDeviceAttachments', 'setChosenKindOfDeviceAction', 'loadDeviceMeasuredQuantities'])
+    ...mapActions('devices', ['loadDeviceAttachments', 'setChosenKindOfDeviceAction', 'loadDeviceMeasuredQuantities', 'loadDeviceParameters'])
   }
 })
 export default class ActionAddPage extends mixins(CheckEditAccess) {
@@ -117,6 +119,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
   loadDeviceGenericActionTypes!: LoadDeviceGenericActionTypesAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+  loadDeviceParameters!: LoadDeviceParametersAction
   setChosenKindOfDeviceAction!: SetChosenKindOfDeviceActionAction
 
   /**
@@ -141,17 +144,18 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     return 'You\'re not allowed to edit this device.'
   }
 
-  async created () {
+  async fetch (): Promise<void> {
     try {
       this.isLoading = true
       this.chosenKindOfAction = null
       await Promise.all([
         this.loadDeviceGenericActionTypes(),
         this.loadDeviceAttachments(this.deviceId),
-        this.loadDeviceMeasuredQuantities(this.deviceId)
+        this.loadDeviceMeasuredQuantities(this.deviceId),
+        this.loadDeviceParameters(this.deviceId)
       ])
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to fetch action types')
+      this.$store.commit('snackbar/setError', 'Failed to fetch action resources')
     } finally {
       this.isLoading = false
     }
@@ -195,18 +199,25 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
   }
 
+  get parameterChangeActionChosen () {
+    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+  }
+
   updateRoute () {
     if (this.genericActionChosen) {
       this.$router.push(`/devices/${this.deviceId}/actions/new/generic-device-actions`)
+      return
     }
     if (this.softwareUpdateChosen) {
       this.$router.push(`/devices/${this.deviceId}/actions/new/software-update-actions`)
+      return
     }
     if (this.deviceCalibrationChosen) {
       this.$router.push(`/devices/${this.deviceId}/actions/new/device-calibration-actions`)
+      return
     }
-    if (!this.chosenKindOfAction) {
-      this.$router.push(`/devices/${this.deviceId}/actions/new`)
+    if (this.parameterChangeActionChosen) {
+      this.$router.push(`/devices/${this.deviceId}/actions/new/parameter-change-actions`)
     }
   }
 }

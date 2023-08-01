@@ -30,7 +30,14 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import { dateTimesEqual, dateToString, stringToDate, timeStampToUTCDateTime } from '@/utils/dateHelper'
+import {
+  dateTimesEqual,
+  dateToString,
+  stringToDate,
+  timeStampToUTCDateTime,
+  sortCriteriaAscending,
+  sortCriteriaDescending
+} from '@/utils/dateHelper'
 
 describe('dateToString', () => {
   it('should work with by birthday', () => {
@@ -111,5 +118,45 @@ describe('dateTimesEqual', () => {
     const date1 = DateTime.local(2020, 1, 1, 0, 0, 0, 0)
     const date2 = date1.toUTC()
     expect(dateTimesEqual(date1, date2)).toBeTruthy()
+  })
+})
+describe('sortCriteriaAscending', () => {
+  it('should return 0 for same DateTimes', () => {
+    const date1 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const date2 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const result = sortCriteriaAscending(date1, date2)
+    expect(result).toEqual(0)
+  })
+  it('should return -1 if first DateTime is less than second DateTime', () => {
+    const date1 = DateTime.utc(2023, 8, 11, 12, 0, 0, 0)
+    const date2 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const result = sortCriteriaAscending(date1, date2)
+    expect(result).toEqual(-1)
+  })
+  it('should return 1 if first DateTime is greater than second DateTime', () => {
+    const date1 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const date2 = DateTime.utc(2023, 8, 11, 12, 0, 0, 0)
+    const result = sortCriteriaAscending(date1, date2)
+    expect(result).toEqual(1)
+  })
+})
+describe('sortCriteriaDescending', () => {
+  it('should return 0 for same DateTimes', () => {
+    const date1 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const date2 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const result = sortCriteriaDescending(date1, date2)
+    expect(result).toEqual(0)
+  })
+  it('should return -1 if first DateTime is greater than second DateTime', () => {
+    const date1 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const date2 = DateTime.utc(2023, 8, 11, 12, 0, 0, 0)
+    const result = sortCriteriaDescending(date1, date2)
+    expect(result).toEqual(-1)
+  })
+  it('should return 1 if first DateTime is less than second DateTime', () => {
+    const date1 = DateTime.utc(2023, 8, 11, 12, 0, 0, 0)
+    const date2 = DateTime.utc(2023, 9, 8, 10, 0, 0, 0)
+    const result = sortCriteriaDescending(date1, date2)
+    expect(result).toEqual(1)
   })
 })

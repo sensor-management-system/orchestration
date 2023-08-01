@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2023
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -98,4 +98,9 @@ export const sortCriteriaAscending = (a: DateTime, b: DateTime) => {
     return 1
   }
   return 0
+}
+
+export const sortCriteriaDescending = (a: DateTime, b: DateTime) => {
+  // in JS: 0 * -1 = -0, so we return explicitly 0 in this case
+  return sortCriteriaAscending(a, b) * -1 || 0
 }

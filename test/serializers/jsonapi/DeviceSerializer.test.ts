@@ -46,6 +46,7 @@ import { Attachment } from '@/models/Attachment'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 import { CustomTextField } from '@/models/CustomTextField'
+import { Parameter } from '@/models/Parameter'
 import { IJsonApiEntityWithoutDetailsDataDictList } from '@/serializers/jsonapi/JsonApiTypes'
 
 const createTestDevice = () => {
@@ -148,6 +149,23 @@ const createTestDevice = () => {
     })
   ]
 
+  device.parameters = [
+    Parameter.createFromObject({
+      id: '3',
+      label: 'Parameter 1',
+      description: 'Some paramter',
+      unitUri: 'unit/Unit1',
+      unitName: 'Unit 1'
+    }),
+    Parameter.createFromObject({
+      id: '4',
+      label: 'Parameter 2',
+      description: 'Some other paramter',
+      unitUri: 'unit/Unit2',
+      unitName: 'Unit 2'
+    })
+  ]
+
   device.contacts = [
     Contact.createFromObject({
       id: '4',
@@ -247,6 +265,12 @@ describe('DeviceSerializer', () => {
                 related: '/rdm/svm-api/v1/devices/1/relationships/device-attachments'
               },
               data: []
+            },
+            device_parameters: {
+              links: {
+                related: '/rdm/svm-api/v1/devices/1/relationships/device-parameters'
+              },
+              data: []
             }
           },
           id: '46',
@@ -341,6 +365,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.persistentIdentifier = ''
       expectedDevice1.manufacturerUri = ''
       expectedDevice1.contacts = []
+      expectedDevice1.parameters = []
       expectedDevice1.createdByUserId = '123'
       expectedDevice1.archived = false
 
@@ -367,6 +392,7 @@ describe('DeviceSerializer', () => {
       expectedDevice2.persistentIdentifier = ''
       expectedDevice2.manufacturerUri = ''
       expectedDevice2.contacts = []
+      expectedDevice2.parameters = []
       expectedDevice2.archived = false
 
       const serializer = new DeviceSerializer()
@@ -475,6 +501,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
+      expectedDevice.parameters = []
       expectedDevice.archived = false
 
       const serializer = new DeviceSerializer()
@@ -557,6 +584,21 @@ describe('DeviceSerializer', () => {
                 {
                   type: 'device_property',
                   id: '40'
+                }]
+            },
+            device_parameters: {
+              links: {
+                self: '/rdm/svm-api/v1/devices/1/relationships/device-parameters',
+                related: '/rdm/svm-api/v1/devices/1/device-parameters'
+              },
+              data: [
+                {
+                  type: 'device_parameter',
+                  id: '90'
+                },
+                {
+                  type: 'device_parameter',
+                  id: '91'
                 }]
             },
             events: {
@@ -745,6 +787,56 @@ describe('DeviceSerializer', () => {
             links: {
               self: '/rdm/svm-api/v1/device-properties/2'
             }
+          },
+          {
+            type: 'device_parameter',
+            attributes: {
+              label: 'Some parameter',
+              description: 'Some parameter description',
+              unit_name: 'Unit 1',
+              unit_uri: 'cv/units/unit1'
+            },
+            id: '90',
+            relationships: {
+              device: {
+                links: {
+                  self: '/rdm/svm-api/v1/device-parameters/2/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/4'
+                },
+                data: {
+                  type: 'device',
+                  id: '1'
+                }
+              }
+            },
+            links: {
+              self: '/rdm/svm-api/v1/device-parameters/2'
+            }
+          },
+          {
+            type: 'device_parameter',
+            attributes: {
+              label: 'Some other parameter',
+              description: 'Some other parameter description',
+              unit_name: 'Unit 2',
+              unit_uri: 'cv/units/unit2'
+            },
+            id: '91',
+            relationships: {
+              device: {
+                links: {
+                  self: '/rdm/svm-api/v1/device-parameters/2/relationships/device',
+                  related: '/rdm/svm-api/v1/devices/4'
+                },
+                data: {
+                  type: 'device',
+                  id: '1'
+                }
+              }
+            },
+            links: {
+              self: '/rdm/svm-api/v1/device-parameters/2'
+            }
           }
         ],
         jsonapi: {
@@ -849,6 +941,22 @@ describe('DeviceSerializer', () => {
         })
       ]
       expectedDevice.archived = false
+      expectedDevice.parameters = [
+        Parameter.createFromObject({
+          id: '90',
+          label: 'Some parameter',
+          description: 'Some parameter description',
+          unitUri: 'cv/units/unit1',
+          unitName: 'Unit 1'
+        }),
+        Parameter.createFromObject({
+          id: '91',
+          label: 'Some other parameter',
+          description: 'Some other parameter description',
+          unitUri: 'cv/units/unit2',
+          unitName: 'Unit 2'
+        })
+      ]
 
       const serializer = new DeviceSerializer()
       const deviceWithMeta = serializer.convertJsonApiObjectToModel(jsonApiObject)
@@ -938,6 +1046,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
+      expectedDevice.parameters = []
       expectedDevice.archived = false
 
       const included: any[] = []
@@ -1033,6 +1142,7 @@ describe('DeviceSerializer', () => {
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
+      expectedDevice.parameters = []
       expectedDevice.archived = false
 
       const included: any[] = []
@@ -1145,6 +1255,20 @@ describe('DeviceSerializer', () => {
       expect(propertyData[1]).toEqual({
         id: '4',
         type: 'device_property'
+      })
+
+      expect(jsonApiData.relationships).toHaveProperty('device_parameters')
+      const parameters = jsonApiData.relationships?.device_parameters as IJsonApiEntityWithoutDetailsDataDictList
+      expect(Array.isArray(parameters.data)).toBeTruthy()
+
+      expect(parameters.data.length).toEqual(2)
+      expect(parameters.data[0]).toEqual({
+        id: '3',
+        type: 'device_parameter'
+      })
+      expect(parameters.data[1]).toEqual({
+        id: '4',
+        type: 'device_parameter'
       })
 
       expect(jsonApiData).toHaveProperty('relationships')

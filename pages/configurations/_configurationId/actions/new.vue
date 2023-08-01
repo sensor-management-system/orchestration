@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -81,12 +81,17 @@ import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { ActionType } from '@/models/ActionType'
 
-import { ConfigurationActionTypeItemsGetter, LoadConfigurationGenericActionTypesAction } from '@/store/vocabulary'
+import {
+  ConfigurationActionTypeItemsGetter,
+  LoadConfigurationGenericActionTypesAction
+} from '@/store/vocabulary'
 import {
   ConfigurationsState,
   SetChosenKindOfConfigurationActionAction,
   LoadConfigurationAttachmentsAction,
-  KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
+  KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION,
+  KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION,
+  LoadConfigurationParametersAction
 } from '@/store/configurations'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -101,7 +106,7 @@ import { ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeAp
   },
   methods: {
     ...mapActions('vocabulary', ['loadConfigurationGenericActionTypes']),
-    ...mapActions('configurations', ['setChosenKindOfConfigurationAction', 'loadConfigurationAttachments'])
+    ...mapActions('configurations', ['setChosenKindOfConfigurationAction', 'loadConfigurationAttachments', 'loadConfigurationParameters'])
   }
 })
 export default class ActionAddPage extends mixins(CheckEditAccess) {
@@ -114,6 +119,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
 
   loadConfigurationGenericActionTypes!: LoadConfigurationGenericActionTypesAction
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
+  loadConfigurationParameters!: LoadConfigurationParametersAction
   setChosenKindOfConfigurationAction!: SetChosenKindOfConfigurationActionAction
 
   /**
@@ -148,7 +154,8 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
       this.chosenKindOfAction = null
       await Promise.all([
         this.loadConfigurationGenericActionTypes(),
-        this.loadConfigurationAttachments(this.configurationId)
+        this.loadConfigurationAttachments(this.configurationId),
+        this.loadConfigurationParameters(this.configurationId)
       ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
@@ -179,8 +186,22 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     this.updateRoute()
   }
 
+  get genericActionChosen () {
+    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
+  }
+
+  get parameterChangeActionChosen () {
+    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+  }
+
   updateRoute () {
-    this.$router.push(`/configurations/${this.configurationId}/actions/new/generic-configuration-actions`)
+    if (this.genericActionChosen) {
+      this.$router.push(`/configurations/${this.configurationId}/actions/new/generic-configuration-actions`)
+      return
+    }
+    if (this.parameterChangeActionChosen) {
+      this.$router.push(`/configurations/${this.configurationId}/actions/new/parameter-change-actions`)
+    }
   }
 
   @Watch('editable', {

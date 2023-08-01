@@ -114,6 +114,7 @@ permissions and limitations under the Licence.
       v-if="device"
       v-model="showDeleteDialog"
       title="Delete Device"
+      :disabled="isSaving"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -244,7 +245,6 @@ export default class DeviceShowBasicPage extends Vue {
   }
 
   async deleteAndCloseDialog () {
-    this.showDeleteDialog = false
     if (this.device === null || this.device.id === null) {
       return
     }
@@ -257,6 +257,7 @@ export default class DeviceShowBasicPage extends Vue {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
     } finally {
       this.isSaving = false
+      this.showDeleteDialog = false
     }
   }
 

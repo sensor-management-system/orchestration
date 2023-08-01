@@ -99,6 +99,7 @@ permissions and limitations under the Licence.
       v-if="attachmentToDelete"
       v-model="showDeleteDialog"
       title="Delete Attachment"
+      :disabled="isSaving"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -185,8 +186,6 @@ export default class DeviceAttachmentShowPage extends Vue {
     try {
       this.isSaving = true
       const attachmentId = this.attachmentToDelete.id
-      this.closeDialog()
-
       await this.deleteDeviceAttachment(attachmentId)
       await this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
@@ -194,6 +193,7 @@ export default class DeviceAttachmentShowPage extends Vue {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
       this.isSaving = false
+      this.closeDialog()
     }
   }
 

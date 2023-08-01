@@ -111,6 +111,7 @@ permissions and limitations under the Licence.
                 v-if="selectedNode"
                 v-model="isDeleteDialogShown"
                 title="Delete the Mount Action?"
+                :disabled="isLoading"
                 @cancel="isDeleteDialogShown = false"
                 @delete="deleteSelectedNode"
               >
@@ -284,6 +285,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
       return
     }
     const action = this.selectedNode.unpack()
+    this.isLoading = true
     try {
       if ('isDeviceMountAction' in action && action.isDeviceMountAction()) {
         await this.deleteDeviceMountAction(action.id)
@@ -294,13 +296,15 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
       this.$store.commit('snackbar/setSuccess', 'Mount Action deleted.')
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Mount Action could not be deleted.')
+    } finally {
+      this.isLoading = false
+      this.selectedNode = null
+      this.isDeleteDialogShown = false
+      this.$router.replace({
+        query: {}
+      })
+      this.$fetch()
     }
-    this.selectedNode = null
-    this.isDeleteDialogShown = false
-    this.$router.replace({
-      query: {}
-    })
-    this.$fetch()
   }
 
   getRelatedDynamicLocationActions (): DynamicLocationAction[] {

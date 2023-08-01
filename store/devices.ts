@@ -38,34 +38,40 @@ import { Commit, Dispatch, GetterTree, ActionTree } from 'vuex'
 
 import { DateTime } from 'luxon'
 import { RootState } from '@/store'
+import { IncludedRelationships } from '@/services/sms/DeviceApi'
 
-import { Device } from '@/models/Device'
-import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
-import { ContactRole } from '@/models/ContactRole'
 import { Attachment } from '@/models/Attachment'
-import { GenericAction } from '@/models/GenericAction'
-import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
-import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
-import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
-import { IActionType } from '@/models/ActionType'
-import { DeviceProperty } from '@/models/DeviceProperty'
+import { Availability } from '@/models/Availability'
+import { ContactRole } from '@/models/ContactRole'
 import { CustomTextField } from '@/models/CustomTextField'
-import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
+import { Device } from '@/models/Device'
+import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
+import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
+import { DeviceProperty } from '@/models/DeviceProperty'
+import { GenericAction } from '@/models/GenericAction'
+import { IActionType } from '@/models/ActionType'
+import { IDeviceSearchParams } from '@/modelUtils/DeviceSearchParams'
+import { Parameter } from '@/models/Parameter'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
+import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
+
 import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
+import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
 import { IDateCompareable } from '@/modelUtils/Compareables'
 
-import { IncludedRelationships } from '@/services/sms/DeviceApi'
-import { Availability } from '@/models/Availability'
 import { getLastPathElement } from '@/utils/urlHelpers'
 
 const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
 const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
 const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
+const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
 const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
+
 type KindOfActionType =
   typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
   | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+  | typeof KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
   | typeof KIND_OF_ACTION_TYPE_UNKNOWN
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
@@ -79,64 +85,74 @@ const PAGE_SIZES = [
 ]
 
 export interface DevicesState {
-  devices: Device[],
-  device: Device | null,
-  deviceContactRoles: ContactRole[],
-  deviceAttachments: Attachment[],
-  deviceAttachment: Attachment | null,
-  deviceMeasuredQuantities: DeviceProperty[],
-  deviceMeasuredQuantity: DeviceProperty | null,
-  deviceGenericActions: GenericAction[],
-  deviceSoftwareUpdateActions: SoftwareUpdateAction[],
-  deviceCalibrationActions: DeviceCalibrationAction[],
-  deviceGenericAction: GenericAction | null,
-  deviceSoftwareUpdateAction: SoftwareUpdateAction | null,
-  deviceCalibrationAction: DeviceCalibrationAction | null,
-  deviceMountActions: DeviceMountAction[],
-  chosenKindOfDeviceAction: IOptionsForActionType | null,
-  deviceCustomFields: CustomTextField[],
-  deviceCustomField: CustomTextField | null
-  pageNumber: number,
-  pageSize: number,
-  totalPages: number,
-  totalCount: number,
+  chosenKindOfDeviceAction: IOptionsForActionType | null
+  device: Device | null
+  deviceAttachment: Attachment | null
+  deviceAttachments: Attachment[]
   deviceAvailabilities: Availability[]
+  deviceCalibrationAction: DeviceCalibrationAction | null
+  deviceCalibrationActions: DeviceCalibrationAction[]
+  deviceContactRoles: ContactRole[]
+  deviceCustomField: CustomTextField | null
+  deviceCustomFields: CustomTextField[]
+  deviceGenericAction: GenericAction | null
+  deviceGenericActions: GenericAction[]
+  deviceMeasuredQuantities: DeviceProperty[]
+  deviceMeasuredQuantity: DeviceProperty | null
+  deviceMountActions: DeviceMountAction[]
+  deviceParameter: Parameter | null
+  deviceParameterChangeAction: ParameterChangeAction | null
+  deviceParameterChangeActions: ParameterChangeAction[]
+  deviceParameters: Parameter[]
+  deviceSoftwareUpdateAction: SoftwareUpdateAction | null
+  deviceSoftwareUpdateActions: SoftwareUpdateAction[]
+  devices: Device[]
+  pageNumber: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
 }
 
 const state = (): DevicesState => ({
-  devices: [],
+  chosenKindOfDeviceAction: null,
   device: null,
-  deviceContactRoles: [],
-  deviceAttachments: [],
   deviceAttachment: null,
-  deviceMeasuredQuantities: [],
-  deviceMeasuredQuantity: null,
-  deviceGenericActions: [],
-  deviceSoftwareUpdateActions: [],
-  deviceGenericAction: null,
-  deviceSoftwareUpdateAction: null,
+  deviceAttachments: [],
+  deviceAvailabilities: [],
   deviceCalibrationAction: null,
   deviceCalibrationActions: [],
-  deviceMountActions: [],
-  chosenKindOfDeviceAction: null,
-  deviceCustomFields: [],
+  deviceContactRoles: [],
   deviceCustomField: null,
+  deviceCustomFields: [],
+  deviceGenericAction: null,
+  deviceGenericActions: [],
+  deviceMeasuredQuantities: [],
+  deviceMeasuredQuantity: null,
+  deviceMountActions: [],
+  deviceParameter: null,
+  deviceParameterChangeAction: null,
+  deviceParameterChangeActions: [],
+  deviceParameters: [],
+  deviceSoftwareUpdateAction: null,
+  deviceSoftwareUpdateActions: [],
+  devices: [],
   pageNumber: 1,
   pageSize: PAGE_SIZES[0],
-  totalPages: 1,
   totalCount: 0,
-  deviceAvailabilities: []
+  totalPages: 1
 })
 
-export type ActionsGetter = (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[]
+export type PossibleDeviceActions = GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction | ParameterChangeAction
+export type ActionsGetter = (PossibleDeviceActions)[]
 export type PageSizesGetter = number[]
 
 const getters: GetterTree<DevicesState, RootState> = {
-  actions: (state: DevicesState): (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[] => {
-    let actions: (GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction)[] = [
+  actions: (state: DevicesState): (PossibleDeviceActions)[] => {
+    let actions: (PossibleDeviceActions)[] = [
       ...state.deviceGenericActions,
       ...state.deviceSoftwareUpdateActions,
-      ...state.deviceCalibrationActions
+      ...state.deviceCalibrationActions,
+      ...state.deviceParameterChangeActions
     ]
     for (const deviceMountAction of state.deviceMountActions) {
       actions.push(new DeviceMountActionWrapper(deviceMountAction))
@@ -172,60 +188,70 @@ const getters: GetterTree<DevicesState, RootState> = {
   }
 }
 
+export type AddDeviceAttachmentAction = (params: { deviceId: string, attachment: Attachment }) => Promise<Attachment>
+export type AddDeviceCalibrationAction = (params: { deviceId: string, calibrationAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
+export type AddDeviceContactRoleAction = (params: { deviceId: string, contactRole: ContactRole }) => Promise<void>
+export type AddDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
+export type AddDeviceGenericAction = (params: { deviceId: string, genericAction: GenericAction }) => Promise<GenericAction>
+export type AddDeviceMeasuredQuantityAction = (params: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<DeviceProperty>
+export type AddDeviceParameterAction = (params: { deviceId: string, parameter: Parameter }) => Promise<Parameter>
+export type AddDeviceParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>
+export type AddDeviceSoftwareUpdateAction = (params: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
+export type ArchiveDeviceAction = (id: string) => Promise<void>
+export type ClearDeviceAvailabilitiesAction = () => void
+export type CopyDeviceAction = (params: {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyParameters: boolean, copyCustomFields: boolean, originalDeviceId: string}) => Promise<string>
+export type CreatePidAction = (id: string | null) => Promise<string>
+export type DeleteDeviceAction = (id: string) => Promise<void>
+export type DeleteDeviceAttachmentAction = (attachmentId: string) => Promise<void>
+export type DeleteDeviceCalibrationAction = (calibrationActionId: string) => Promise<void>
+export type DeleteDeviceCustomFieldAction = (customFieldId: string) => Promise<void>
+export type DeleteDeviceGenericAction = (genericActionId: string) => Promise<void>
+export type DeleteDeviceMeasuredQuantityAction = (measuredQuantityId: string) => Promise<void>
+export type DeleteDeviceParameterAction = (parameterId: string) => Promise<void>
+export type DeleteDeviceParameterChangeActionAction = (actionId: string) => Promise<void>
+export type DeleteDeviceSoftwareUpdateAction = (softwareUpdateActionId: string) => Promise<void>
+export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
+export type ExportAsCsvAction = (searchParams: IDeviceSearchParams) => Promise<Blob>
+export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
+export type GetSensorMLUrlAction = (id: string) => string
+export type LoadAllDeviceActionsAction = (id: string) => Promise<void>
 export type LoadDeviceAction = (params: { deviceId: string } & IncludedRelationships) => Promise<void>
-export type SearchDevicesPaginatedAction = (searchParams: IDeviceSearchParams) => Promise<void>
-export type SearchDevicesAction = (id: string) => Promise<void>
-export type LoadDeviceContactRolesAction = (id: string) => Promise<void>
-export type LoadDeviceAttachmentsAction = (id: string) => Promise<void>
 export type LoadDeviceAttachmentAction = (id: string) => Promise<void>
+export type LoadDeviceAttachmentsAction = (id: string) => Promise<void>
+export type LoadDeviceAvailabilitiesAction = (params: {ids: (string | null)[], from: DateTime, until: DateTime | null}) => Promise<void>
+export type LoadDeviceCalibrationActionAction = (actionId: string) => Promise<void>
+export type LoadDeviceCalibrationActionsAction = (id: string) => Promise<void>
+export type LoadDeviceContactRolesAction = (id: string) => Promise<void>
+export type LoadDeviceCustomFieldAction = (id: string) => Promise<void>
+export type LoadDeviceCustomFieldsAction = (id: string) => Promise<void>
+export type LoadDeviceGenericActionAction = (actionId: string) => Promise<void>
+export type LoadDeviceGenericActionsAction = (id: string) => Promise<void>
 export type LoadDeviceMeasuredQuantitiesAction = (id: string) => Promise<void>
 export type LoadDeviceMeasuredQuantityAction = (id: string) => Promise<void>
-export type LoadAllDeviceActionsAction = (id: string) => Promise<void>
-export type LoadDeviceGenericActionsAction = (id: string) => Promise<void>
-export type LoadDeviceGenericActionAction = (actionId: string) => Promise<void>
-export type LoadDeviceSoftwareUpdateActionsAction = (id: string) => Promise<void>
-export type LoadDeviceSoftwareUpdateActionAction = (actionId: string) => Promise<void>
-export type LoadDeviceCalibrationActionsAction = (id: string) => Promise<void>
-export type LoadDeviceCalibrationActionAction = (actionId: string) => Promise<void>
 export type LoadDeviceMountActionsAction = (id: string) => Promise<void>
-export type LoadDeviceCustomFieldsAction = (id: string) => Promise<void>
-export type LoadDeviceCustomFieldAction = (id: string) => Promise<void>
-export type LoadDeviceAvailabilitiesAction = (params: {ids: (string | null)[], from: DateTime, until: DateTime | null}) => Promise<void>
-export type AddDeviceSoftwareUpdateAction = (params: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
-export type AddDeviceGenericAction = (params: { deviceId: string, genericAction: GenericAction }) => Promise<GenericAction>
-export type AddDeviceCalibrationAction = (params: { deviceId: string, calibrationAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
-export type UpdateDeviceSoftwareUpdateAction = (params: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
-export type UpdateDeviceGenericAction = (params: { deviceId: string, genericAction: GenericAction }) => Promise<GenericAction>
-export type UpdateDeviceCalibrationAction = (params: { deviceId: string, calibrationAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
-export type DeleteDeviceSoftwareUpdateAction = (softwareUpdateActionId: string) => Promise<void>
-export type DeleteDeviceGenericAction = (genericActionId: string) => Promise<void>
-export type DeleteDeviceCalibrationAction = (calibrationActionId: string) => Promise<void>
-export type DeleteDeviceAttachmentAction = (attachmentId: string) => Promise<void>
-export type AddDeviceAttachmentAction = (params: { deviceId: string, attachment: Attachment }) => Promise<Attachment>
-export type UpdateDeviceAttachmentAction = (params: { deviceId: string, attachment: Attachment }) => Promise<Attachment>
-export type DeleteDeviceCustomFieldAction = (customFieldId: string) => Promise<void>
-export type AddDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
-export type UpdateDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
-export type DeleteDeviceMeasuredQuantityAction = (measuredQuantityId: string) => Promise<void>
-export type AddDeviceMeasuredQuantityAction = (params: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<DeviceProperty>
-export type UpdateDeviceMeasuredQuantityAction = (params: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<DeviceProperty>
-export type AddDeviceContactRoleAction = (params: { deviceId: string, contactRole: ContactRole }) => Promise<void>
+export type LoadDeviceParameterAction = (id: string) => Promise<void>
+export type LoadDeviceParameterChangeActionAction = (actionId: string) => Promise<void>
+export type LoadDeviceParameterChangeActionsAction = (id: string) => Promise<void>
+export type LoadDeviceParametersAction = (id: string) => Promise<void>
+export type LoadDeviceSoftwareUpdateActionAction = (actionId: string) => Promise<void>
+export type LoadDeviceSoftwareUpdateActionsAction = (id: string) => Promise<void>
 export type RemoveDeviceContactRoleAction = (params: { deviceContactRoleId: string }) => Promise<void>
-export type SaveDeviceAction = (device: Device) => Promise<Device>
-export type CopyDeviceAction = (params: {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean, originalDeviceId: string}) => Promise<string>
-export type DeleteDeviceAction = (id: string) => Promise<void>
-export type ArchiveDeviceAction = (id: string) => Promise<void>
+export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
 export type RestoreDeviceAction = (id: string) => Promise<void>
-export type ExportAsCsvAction = (searchParams: IDeviceSearchParams) => Promise<Blob>
-export type GetSensorMLUrlAction = (id: string) => Promise<string>
-export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
+export type SaveDeviceAction = (device: Device) => Promise<Device>
+export type SearchDevicesAction = (id: string) => Promise<void>
+export type SearchDevicesPaginatedAction = (searchParams: IDeviceSearchParams) => Promise<void>
+export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
-export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
-export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
-export type CreatePidAction = (id: string | null) => Promise<string>
-export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
-export type ClearDeviceAvailabilitiesAction = () => void
+export type UpdateDeviceAttachmentAction = (params: { deviceId: string, attachment: Attachment }) => Promise<Attachment>
+export type UpdateDeviceCalibrationAction = (params: { deviceId: string, calibrationAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
+export type UpdateDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
+export type UpdateDeviceGenericAction = (params: { deviceId: string, genericAction: GenericAction }) => Promise<GenericAction>
+export type UpdateDeviceMeasuredQuantityAction = (params: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<DeviceProperty>
+export type UpdateDeviceParameterAction = (params: { deviceId: string, parameter: Parameter }) => Promise<Parameter>
+export type UpdateDeviceParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>
+export type UpdateDeviceSoftwareUpdateAction = (params: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
 
 const actions: ActionTree<DevicesState, RootState> = {
   async searchDevicesPaginated ({
@@ -274,6 +300,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       includeCustomFields,
       includeDeviceProperties,
       includeDeviceAttachments,
+      includeDeviceParameters,
       includeCreatedBy,
       includeUpdatedBy
     }: { deviceId: string } & IncludedRelationships
@@ -283,6 +310,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       includeCustomFields,
       includeDeviceProperties,
       includeDeviceAttachments,
+      includeDeviceParameters,
       includeCreatedBy,
       includeUpdatedBy
     })
@@ -313,7 +341,8 @@ const actions: ActionTree<DevicesState, RootState> = {
       dispatch('loadDeviceGenericActions', id),
       dispatch('loadDeviceSoftwareUpdateActions', id),
       dispatch('loadDeviceMountActions', id),
-      dispatch('loadDeviceCalibrationActions', id)
+      dispatch('loadDeviceCalibrationActions', id),
+      dispatch('loadDeviceParameterChangeActions', id)
     ])
   },
   async loadDeviceGenericActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
@@ -344,6 +373,14 @@ const actions: ActionTree<DevicesState, RootState> = {
     const deviceMountActions = await this.$api.devices.findRelatedMountActions(id)
     commit('setDeviceMountActions', deviceMountActions)
   },
+  async loadDeviceParameterChangeActions ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const actions = await this.$api.devices.findRelatedParameterChangeActions(id)
+    commit('setDeviceParameterChangeActions', actions)
+  },
+  async loadDeviceParameterChangeAction ({ commit }: { commit: Commit }, actionId: string): Promise<void> {
+    const action = await this.$api.deviceParameterChangeActions.findById(actionId)
+    commit('setDeviceParameterChangeAction', action)
+  },
   async loadDeviceCustomFields ({ commit }: {commit: Commit}, id: string): Promise<void> {
     const deviceCustomFields = await this.$api.devices.findRelatedCustomFields(id)
     commit('setDeviceCustomFields', deviceCustomFields)
@@ -364,6 +401,29 @@ const actions: ActionTree<DevicesState, RootState> = {
     const deviceAvailabilities = await this.$api.devices.checkAvailability(ids, from, until)
     commit('setDeviceAvailabilities', deviceAvailabilities)
   },
+  async loadDeviceParameters ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const deviceParameters = await this.$api.devices.findRelatedDeviceParameters(id)
+    commit('setDeviceParameters', deviceParameters)
+  },
+  async loadDeviceParameter ({ commit }: { commit: Commit }, id: string): Promise<void> {
+    const parameter = await this.$api.deviceParameters.findById(id)
+    commit('setDeviceParameter', parameter)
+  },
+  deleteDeviceParameter (_, parameterId: string): Promise<void> {
+    return this.$api.deviceParameters.deleteById(parameterId)
+  },
+  addDeviceParameter (_, {
+    deviceId,
+    parameter
+  }: { deviceId: string, parameter: Parameter }): Promise<Parameter> {
+    return this.$api.deviceParameters.add(deviceId, parameter)
+  },
+  updateDeviceParameter (_, {
+    deviceId,
+    parameter
+  }: { deviceId: string, parameter: Parameter }): Promise<Parameter> {
+    return this.$api.deviceParameters.update(deviceId, parameter)
+  },
   addDeviceSoftwareUpdateAction (_, {
     deviceId,
     softwareUpdateAction
@@ -375,12 +435,6 @@ const actions: ActionTree<DevicesState, RootState> = {
     genericAction
   }: { deviceId: string, genericAction: GenericAction }): Promise<GenericAction> {
     return this.$api.genericDeviceActions.add(deviceId, genericAction)
-  },
-  addDeviceCalibrationAction (_, {
-    deviceId,
-    calibrationAction
-  }: { deviceId: string, calibrationAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
-    return this.$api.deviceCalibrationActions.add(deviceId, calibrationAction)
   },
   updateDeviceSoftwareUpdateAction (_, {
     deviceId,
@@ -400,6 +454,12 @@ const actions: ActionTree<DevicesState, RootState> = {
   deleteDeviceGenericAction (_, genericActionId: string): Promise<void> {
     return this.$api.genericDeviceActions.deleteById(genericActionId)
   },
+  addDeviceCalibrationAction (_, {
+    deviceId,
+    calibrationAction
+  }: { deviceId: string, calibrationAction: DeviceCalibrationAction }): Promise<DeviceCalibrationAction> {
+    return this.$api.deviceCalibrationActions.add(deviceId, calibrationAction)
+  },
   updateDeviceCalibrationAction (_, {
     deviceId,
     calibrationAction
@@ -408,6 +468,21 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   deleteDeviceCalibrationAction (_, calibrationActionId: string): Promise<void> {
     return this.$api.deviceCalibrationActions.deleteById(calibrationActionId)
+  },
+  addDeviceParameterChangeAction (_, {
+    parameterId,
+    action
+  }: { parameterId: string, action: ParameterChangeAction }): Promise<ParameterChangeAction> {
+    return this.$api.deviceParameterChangeActions.add(parameterId, action)
+  },
+  updateDeviceParameterChangeAction (_, {
+    parameterId,
+    action
+  }: { parameterId: string, action: ParameterChangeAction }): Promise<ParameterChangeAction> {
+    return this.$api.deviceParameterChangeActions.update(parameterId, action)
+  },
+  deleteDeviceParameterChangeAction (_, actionId: string): Promise<void> {
+    return this.$api.deviceParameterChangeActions.deleteById(actionId)
   },
   deleteDeviceAttachment (_, attachmentId: string): Promise<void> {
     return this.$api.deviceAttachments.deleteById(attachmentId)
@@ -473,8 +548,8 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   async copyDevice (
     { dispatch }: { dispatch: Dispatch },
-    { device, copyContacts, copyAttachments, copyMeasuredQuantities, copyCustomFields, originalDeviceId }:
-      {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyCustomFields: boolean, originalDeviceId: string}
+    { device, copyContacts, copyAttachments, copyMeasuredQuantities, copyParameters, copyCustomFields, originalDeviceId }:
+      {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyParameters: boolean, copyCustomFields: boolean, originalDeviceId: string}
   ): Promise<string> {
     const savedDevice = await dispatch('saveDevice', device)
     const savedDeviceId = savedDevice.id!
@@ -515,6 +590,13 @@ const actions: ActionTree<DevicesState, RootState> = {
       for (const measuredQuantity of measuredQuantities) {
         measuredQuantity.id = null
         related.push(dispatch('addDeviceMeasuredQuantity', { deviceId: savedDeviceId, deviceMeasuredQuantity: measuredQuantity }))
+      }
+    }
+    if (copyParameters) {
+      const parameters = device.parameters.map(Parameter.createFromObject)
+      for (const parameter of parameters) {
+        parameter.id = null
+        related.push(dispatch('addDeviceParameter', { deviceId: savedDeviceId, parameter }))
       }
     }
     if (copyCustomFields) {
@@ -656,6 +738,18 @@ const mutations = {
   },
   setDeviceAvailabilities (state: DevicesState, deviceAvailabilities: Availability[]) {
     state.deviceAvailabilities = deviceAvailabilities
+  },
+  setDeviceParameters (state: DevicesState, deviceParameters: Parameter[]) {
+    state.deviceParameters = deviceParameters
+  },
+  setDeviceParameter (state: DevicesState, deviceParameter: Parameter) {
+    state.deviceParameter = deviceParameter
+  },
+  setDeviceParameterChangeActions (state: DevicesState, deviceParameterChangeActions: ParameterChangeAction[]) {
+    state.deviceParameterChangeActions = deviceParameterChangeActions
+  },
+  setDeviceParameterChangeAction (state: DevicesState, deviceParameterChangeAction: ParameterChangeAction) {
+    state.deviceParameterChangeAction = deviceParameterChangeAction
   }
 }
 

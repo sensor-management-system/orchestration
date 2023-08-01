@@ -277,6 +277,7 @@ permissions and limitations under the Licence.
       v-if="configurationToDelete"
       v-model="showDeleteDialog"
       title="Delete Configuration"
+      :disabled="loading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
