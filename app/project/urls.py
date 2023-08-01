@@ -37,6 +37,30 @@ api.route(
     "/platforms/<int:id>",
 )
 
+# Platform Parameter
+api.route(
+    PlatformParameterDetail,
+    "platform_parameter_detail",
+    "/platform-parameters/<int:id>",
+)
+api.route(
+    PlatformParameterList,
+    "platform_parameter_list",
+    "/platform-parameters",
+    "/platforms/<int:platform_id>/platform-parameters",
+)
+# Platform Parameter Value Change Action
+api.route(
+    PlatformParameterValueChangeActionDetail,
+    "platform_parameter_value_change_action_detail",
+    "/platform-parameter-value-change-actions/<int:id>",
+)
+api.route(
+    PlatformParameterValueChangeActionList,
+    "platform_parameter_value_change_action_list",
+    "/platform-parameter-value-change-actions",
+    "/platforms/<int:platform_id>/platform-parameter-value-change-actions"
+)
 # Platform Attachment
 api.route(
     PlatformAttachmentList,
@@ -98,7 +122,30 @@ api.route(
     "/device-properties",
     "/devices/<int:device_id>/device-properties",
 )
-
+# Device Parameter
+api.route(
+    DeviceParameterDetail,
+    "device_parameter_detail",
+    "/device-parameters/<int:id>",
+)
+api.route(
+    DeviceParameterList,
+    "device_parameter_list",
+    "/device-parameters",
+    "/devices/<int:device_id>/device-parameters",
+)
+# Device Parameter Value Change Action
+api.route(
+    DeviceParameterValueChangeActionDetail,
+    "device_parameter_value_change_action_detail",
+    "/device-parameter-value-change-actions/<int:id>",
+)
+api.route(
+    DeviceParameterValueChangeActionList,
+    "device_parameter_value_change_action_list",
+    "/device-parameter-value-change-actions",
+    "/devices/<int:device_id>/device-parameter-value-change-actions"
+)
 # Device Attachment
 api.route(
     DeviceAttachmentList,
@@ -148,6 +195,21 @@ api.route(
     ControllerConfigurationMountingActionTimepoints,
     "controller_configuration_mounting_action_timepoints",
     "/controller/configurations/<int:configuration_id>/mounting-action-timepoints",
+)
+api.route(
+    ControllerConfigurationParameterValues,
+    "controller_configuration_parameter_values",
+    "/controller/configurations/<int:configuration_id>/parameter-values"
+)
+api.route(
+    ControllerDeviceParameterValues,
+    "controller_device_parameter_values",
+    "/controller/devices/<int:device_id>/parameter-values"
+)
+api.route(
+    ControllerPlatformParameterValues,
+    "controller_platform_parameter_values",
+    "/controller/platforms/<int:platform_id>/parameter-values"
 )
 api.route(
     DeviceAvailabilities,
@@ -472,6 +534,30 @@ api.route(
     ConfigurationCustomFieldDetail,
     "configuration_customfield_detail",
     "/configuration-customfields/<int:id>",
+)
+# Configuration Parameter
+api.route(
+    ConfigurationParameterDetail,
+    "configuration_parameter_detail",
+    "/configuration-parameters/<int:id>",
+)
+api.route(
+    ConfigurationParameterList,
+    "configuration_parameter_list",
+    "/configuration-parameters",
+    "/configurations/<int:configuration_id>/configuration-parameters",
+)
+# Configuration Parameter Value Change Action
+api.route(
+    ConfigurationParameterValueChangeActionDetail,
+    "configuration_parameter_value_change_action_detail",
+    "/configuration-parameter-value-change-actions/<int:id>",
+)
+api.route(
+    ConfigurationParameterValueChangeActionList,
+    "configuration_parameter_value_change_action_list",
+    "/configuration-parameter-value-change-actions",
+    "/configurations/<int:configuration_id>/configuration-parameter-value-change-actions"
 )
 # Sites
 api.route(SiteList, "site_list", "/sites")

@@ -81,6 +81,16 @@ class PlatformSchema(Schema):
         type_="platform_attachment",
         id_field="id",
     )
+    platform_parameters = Relationship(
+        related_view="api.platform_parameter_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="PlatformParameterSchema",
+        type_="platform_parameter",
+        id_field="id",
+    )
     contacts = Relationship(
         related_view="api.contact_list",
         related_view_kwargs={"id": "<id>"},

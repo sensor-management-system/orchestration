@@ -32,6 +32,17 @@ from .configuration_role_resources import (  # noqa: F401
     ConfigurationRoleDetail,
     ConfigurationRoleList,
 )
+from .configuration_parameter_resources import (  # noqa: F401
+    ConfigurationParameterDetail,
+    ConfigurationParameterList,
+)
+from .configuration_parameter_value_change_action_resources import (  # noqa: F401
+    ConfigurationParameterValueChangeActionDetail,
+    ConfigurationParameterValueChangeActionList,
+)
+from .configuration_parameter_value_controller import (  # noqa: F401
+    ControllerConfigurationParameterValues
+)
 from .configuration_static_location_begin_actions_resources import (  # noqa: F401
     ConfigurationStaticLocationBeginActionDetail,
     ConfigurationStaticLocationBeginActionList,
@@ -61,6 +72,17 @@ from .device_calibration_action_resources import (  # noqa: F401
 from .device_mount_action_resources import (  # noqa: F401
     DeviceMountActionDetail,
     DeviceMountActionList,
+)
+from .device_parameter_resources import (  # noqa: F401
+    DeviceParameterDetail,
+    DeviceParameterList,
+)
+from .device_parameter_value_controller import (  # noqa: F401
+    ControllerDeviceParameterValues
+)
+from .device_parameter_value_change_action_resources import (  # noqa: F401
+    DeviceParameterValueChangeActionDetail,
+    DeviceParameterValueChangeActionList,
 )
 from .device_property_calibration_resources import (  # noqa: F401
     DevicePropertyCalibrationDetail,
@@ -117,6 +139,17 @@ from .platform_attachment_resources import (  # noqa: F401
 from .platform_mount_action_resources import (  # noqa: F401
     PlatformMountActionDetail,
     PlatformMountActionList,
+)
+from .platform_parameter_resources import (  # noqa: F401
+    PlatformParameterDetail,
+    PlatformParameterList,
+)
+from .platform_parameter_value_controller import (  # noqa: F401
+    ControllerPlatformParameterValues
+)
+from .platform_parameter_value_change_action_resources import (  # noqa: F401
+    PlatformParameterValueChangeActionDetail,
+    PlatformParameterValueChangeActionList,
 )
 from .platform_resources import PlatformDetail, PlatformList  # noqa: F401
 from .platform_role_resources import PlatformRoleDetail, PlatformRoleList  # noqa: F401

@@ -114,7 +114,7 @@ class DeletionError(ErrorResponse):
 
 
 class UnsupportedMediaTypeError(ErrorResponse):
-    """Default Class to throw HTTP 405 Exception extinction."""
+    """Default Class to throw HTTP 415 Exception extinction."""
 
     title = "Unsupported Media Type"
     status = 415

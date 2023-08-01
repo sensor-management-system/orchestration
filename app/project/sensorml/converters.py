@@ -38,6 +38,7 @@ from .models import (
     SmlClassifier,
     SmlComponent,
     SmlComponents,
+    SmlConfiguration,
     SmlContact,
     SmlContacts,
     SmlDocument,
@@ -49,7 +50,11 @@ from .models import (
     SmlLabel,
     SmlOutput,
     SmlOutputs,
+    SmlParameter,
+    SmlParameters,
     SmlPhysicalSystem,
+    SmlSettings,
+    SmlSetValue,
     SmlTerm,
     SmlTime,
     SmlValidTime,
@@ -195,6 +200,7 @@ class ConfigurationConverter:
             sml_documentation=self.sml_documentation(),
             sml_contacts=self.sml_contacts(),
             sml_history=self.sml_history(),
+            sml_parameters=self.sml_parameters(),
             sml_components=self.sml_components(),
         )
         return physical_system
@@ -485,9 +491,62 @@ class ConfigurationConverter:
                 sml_classification=sml_classification, sml_time=sml_time
             )
             sml_event_list.append(sml_event)
+        for parameter in self.configuration.configuration_parameters:
+            for action in parameter.configuration_parameter_value_change_actions:
+                sml_classification = SmlClassification(
+                    [
+                        SmlClassifier(
+                            sml_term=SmlTerm(
+                                definition="ParameterChange",
+                                sml_label=SmlLabel(
+                                    text=f"Changed parameter for {parameter.label}"
+                                ),
+                                sml_value=SmlValue(text=action.value),
+                            )
+                        )
+                    ]
+                )
+                sml_time = SmlTime(
+                    gml_time_instant=GmlTimeInstant(
+                        gml_time_position=GmlTimePosition(text=action.date),
+                    )
+                )
+                sml_configuration = SmlConfiguration(
+                    sml_settings=SmlSettings(
+                        sml_set_value=SmlSetValue(
+                            ref=cleanup.identifier(parameter.label, replacement="_"),
+                            text=action.value,
+                        )
+                    )
+                )
+                sml_event = SmlEvent(
+                    sml_classification=sml_classification,
+                    sml_time=sml_time,
+                    sml_configuration=sml_configuration,
+                )
+                sml_event_list.append(sml_event)
         if not sml_event_list:
             return None
         return SmlHistory(sml_event_list=sml_event_list)
+
+    def sml_parameters(self):
+        """Return the sml:parameters."""
+        sml_parameter_list = []
+        for configuration_parameter in self.configuration.configuration_parameters:
+            if configuration_parameter.label:
+                name = cleanup.identifier(
+                    configuration_parameter.label, replacement="_"
+                )
+                swe_quantity = None
+                if configuration_parameter.unit_name:
+                    swe_uom = SweUom(code=configuration_parameter.unit_name)
+                    swe_quantity = SweQuantity(swe_uom=swe_uom)
+                parameter = SmlParameter(name=name, swe_quantity=swe_quantity)
+                sml_parameter_list.append(parameter)
+
+        if not sml_parameter_list:
+            return None
+        return SmlParameters(sml_parameter_list=sml_parameter_list)
 
     def _build_tree(self):
         """Help to build a tree with the platforms & devices as children."""
@@ -606,6 +665,7 @@ class DeviceConverter:
             sml_identification=self.sml_identification(),
             sml_classification=self.sml_classification(),
             sml_outputs=self.sml_outputs(),
+            sml_parameters=self.sml_parameters(),
             sml_documentation=self.sml_documentation(),
             sml_contacts=self.sml_contacts(),
             sml_history=self.sml_history(),
@@ -657,6 +717,23 @@ class DeviceConverter:
         if not sml_output_list:
             return None
         return SmlOutputs(sml_output_list=sml_output_list)
+
+    def sml_parameters(self):
+        """Return the sml:parameters."""
+        sml_parameter_list = []
+        for device_parameter in self.device.device_parameters:
+            if device_parameter.label:
+                name = cleanup.identifier(device_parameter.label, replacement="_")
+                swe_quantity = None
+                if device_parameter.unit_name:
+                    swe_uom = SweUom(code=device_parameter.unit_name)
+                    swe_quantity = SweQuantity(swe_uom=swe_uom)
+                parameter = SmlParameter(name=name, swe_quantity=swe_quantity)
+                sml_parameter_list.append(parameter)
+
+        if not sml_parameter_list:
+            return None
+        return SmlParameters(sml_parameter_list=sml_parameter_list)
 
     def sml_contacts(self) -> Optional[SmlContacts]:
         """Return the sml:contacts."""
@@ -805,6 +882,40 @@ class DeviceConverter:
                 sml_classification=sml_classification, sml_time=sml_time
             )
             sml_event_list.append(sml_event)
+        for parameter in self.device.device_parameters:
+            for action in parameter.device_parameter_value_change_actions:
+                sml_classification = SmlClassification(
+                    [
+                        SmlClassifier(
+                            sml_term=SmlTerm(
+                                definition="ParameterChange",
+                                sml_label=SmlLabel(
+                                    text=f"Changed parameter for {parameter.label}"
+                                ),
+                                sml_value=SmlValue(text=action.value),
+                            )
+                        )
+                    ]
+                )
+                sml_time = SmlTime(
+                    gml_time_instant=GmlTimeInstant(
+                        gml_time_position=GmlTimePosition(text=action.date),
+                    )
+                )
+                sml_configuration = SmlConfiguration(
+                    sml_settings=SmlSettings(
+                        sml_set_value=SmlSetValue(
+                            ref=cleanup.identifier(parameter.label, replacement="_"),
+                            text=action.value,
+                        )
+                    )
+                )
+                sml_event = SmlEvent(
+                    sml_classification=sml_classification,
+                    sml_time=sml_time,
+                    sml_configuration=sml_configuration,
+                )
+                sml_event_list.append(sml_event)
         if not sml_event_list:
             return None
         return SmlHistory(sml_event_list=sml_event_list)
@@ -952,6 +1063,7 @@ class PlatformConverter:
             sml_documentation=self.sml_documentation(),
             sml_contacts=self.sml_contacts(),
             sml_history=self.sml_history(),
+            sml_parameters=self.sml_parameters(),
         )
         return physical_system
 
@@ -1081,9 +1193,60 @@ class PlatformConverter:
                 sml_classification=sml_classification, sml_time=sml_time
             )
             sml_event_list.append(sml_event)
+        for parameter in self.platform.platform_parameters:
+            for action in parameter.platform_parameter_value_change_actions:
+                sml_classification = SmlClassification(
+                    [
+                        SmlClassifier(
+                            sml_term=SmlTerm(
+                                definition="ParameterChange",
+                                sml_label=SmlLabel(
+                                    text=f"Changed parameter for {parameter.label}"
+                                ),
+                                sml_value=SmlValue(text=action.value),
+                            )
+                        )
+                    ]
+                )
+                sml_time = SmlTime(
+                    gml_time_instant=GmlTimeInstant(
+                        gml_time_position=GmlTimePosition(text=action.date),
+                    )
+                )
+                sml_configuration = SmlConfiguration(
+                    sml_settings=SmlSettings(
+                        sml_set_value=SmlSetValue(
+                            ref=cleanup.identifier(parameter.label, replacement="_"),
+                            text=action.value,
+                        )
+                    )
+                )
+                sml_event = SmlEvent(
+                    sml_classification=sml_classification,
+                    sml_time=sml_time,
+                    sml_configuration=sml_configuration,
+                )
+                sml_event_list.append(sml_event)
         if not sml_event_list:
             return None
         return SmlHistory(sml_event_list=sml_event_list)
+
+    def sml_parameters(self):
+        """Return the sml:parameters."""
+        sml_parameter_list = []
+        for platform_parameter in self.platform.platform_parameters:
+            if platform_parameter.label:
+                name = cleanup.identifier(platform_parameter.label, replacement="_")
+                swe_quantity = None
+                if platform_parameter.unit_name:
+                    swe_uom = SweUom(code=platform_parameter.unit_name)
+                    swe_quantity = SweQuantity(swe_uom=swe_uom)
+                parameter = SmlParameter(name=name, swe_quantity=swe_quantity)
+                sml_parameter_list.append(parameter)
+
+        if not sml_parameter_list:
+            return None
+        return SmlParameters(sml_parameter_list=sml_parameter_list)
 
     def sml_documentation(self) -> Optional[SmlDocumentation]:
         """Return the sml:documentation."""

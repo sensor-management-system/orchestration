@@ -296,6 +296,12 @@ paths = {
         response_description="List of distinct custom field values for devices.",
     ),
     **template(
+        endpoint="/controller/device-parameter-labels",
+        description="Get the list of distinct labels of all device parameters.",
+        operation_id="controller_device_parameter_labels",
+        response_description="List of distinct labels for device parameters.",
+    ),
+    **template(
         endpoint="/controller/device-property-labels",
         description="Get the list of distinct labels of all device properties.",
         operation_id="controller_device_property_labels",
@@ -324,6 +330,12 @@ paths = {
         description="Get the list of distinct projects of all configurations.",
         operation_id="controller_configuration_projects",
         response_description="List of distinct projects for configurations.",
+    ),
+    **template(
+        endpoint="/controller/configuration-parameter-labels",
+        description="Get the list of distinct labels of all configuration parameters.",
+        operation_id="controller_configuration_parameter_labels",
+        response_description="List of distinct labels for configuation parameters.",
     ),
     **template(
         endpoint="/controller/generic-device-action-descriptions",
@@ -366,6 +378,12 @@ paths = {
         ),
         operation_id="controller_platform_software_update_action_descriptions",
         response_description="List of distinct software update action descriptions for platforms.",
+    ),
+    **template(
+        endpoint="/controller/platform-parameter-labels",
+        description="Get the list of distinct labels of all platform parameters.",
+        operation_id="controller_platform_parameter_labels",
+        response_description="List of distinct labels for platform parameters.",
     ),
     **template(
         endpoint="/controller/platform-software-update-action-repository-urls",

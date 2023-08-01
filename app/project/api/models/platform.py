@@ -51,6 +51,9 @@ class Platform(
     platform_attachments = db.relationship(
         "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    platform_parameters = db.relationship(
+        "PlatformParameter", cascade="save-update, merge, delete, delete-orphan"
+    )
 
     def to_search_entry(self):
         """Convert the model to a dict to store it in a full text search."""
@@ -77,6 +80,9 @@ class Platform(
             ],
             "software_update_actions": [
                 s.to_search_entry() for s in self.platform_software_update_actions
+            ],
+            "platform_parameters": [
+                p.to_search_entry() for p in self.platform_parameters
             ],
             "is_internal": self.is_internal,
             "is_public": self.is_public,
@@ -186,6 +192,20 @@ class Platform(
                     "description": type_text_full_searchable,
                     "version": type_keyword_and_full_searchable,
                     "repository_url": type_text_full_searchable,
+                },
+            },
+            "platform_parameters": {
+                "properties": {
+                    "label": type_keyword_and_full_searchable,
+                    "description": type_keyword_and_full_searchable,
+                    "unit_uri": type_keyword,
+                    "unit_name": type_keyword_and_full_searchable,
+                    "platform_parameter_value_change_actions": {
+                        "properties": {
+                            "value": type_keyword_and_full_searchable,
+                            "description": type_keyword_and_full_searchable,
+                        },
+                    },
                 },
             },
         }

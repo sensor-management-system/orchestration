@@ -7,6 +7,7 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Tests for the devices."""
+
 import datetime
 import json
 import os
@@ -23,6 +24,8 @@ from project.api.models import (
     Device,
     DeviceAttachment,
     DeviceMountAction,
+    DeviceParameter,
+    DeviceParameterValueChangeAction,
     DeviceProperty,
     User,
 )
@@ -604,6 +607,41 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(data[0]["attributes"]["archived"], False)
         self.assertEqual(data[1]["attributes"]["short_name"], "archived device")
         self.assertEqual(data[1]["attributes"]["archived"], True)
+
+    def test_delete_with_parameter_and_values(self):
+        """
+        Ensure we can delete a device with parameter & associated values.
+
+        We don't want users to delete parameters with associated values,
+        but once we need to delete the complete device it should be
+        possible.
+        """
+        visible_device = Device(
+            short_name="visible device",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        parameter = DeviceParameter(
+            device=visible_device,
+            label="specialvalue",
+            description="some value",
+            unit_name="count",
+            unit_uri="http://foo/count",
+        )
+        value = DeviceParameterValueChangeAction(
+            device_parameter=parameter,
+            contact=self.super_user.contact,
+            date=datetime.datetime(2023, 5, 2, 15, 30, 00, tzinfo=pytz.utc),
+            value="3",
+        )
+        db.session.add_all([visible_device, parameter, value])
+        db.session.commit()
+
+        url = f"{self.device_url}/{visible_device.id}"
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(url)
+        self.assertEqual(response.status_code, 200)
 
     def test_update_external_b2inst_metadata(self):
         """Make sure that we ask the system to update the external metadata after a patch."""

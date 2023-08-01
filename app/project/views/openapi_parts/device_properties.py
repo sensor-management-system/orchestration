@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-"""External openapi spec file for device attachments."""
+"""External openapi spec file for device properties."""
 
 paths = {
     "/device-properties": {
@@ -159,7 +159,8 @@ paths = {
                 {"$ref": "#/components/parameters/device_property_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceProperty_coll1"}
+                "200": {"$ref": "#/components/responses/DeviceProperty_coll1"},
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "description": "Retrieve DeviceProperty from device_property",
             "operationId": "RetrieveDevicePropertyinstance_0",
@@ -251,9 +252,7 @@ components = {
                                                 "type": "string",
                                                 "format": "uri",
                                             },
-                                            "aggregation_type_name": {
-                                                "type": "string"
-                                            },
+                                            "aggregation_type_name": {"type": "string"},
                                         },
                                     },
                                     "type": {"type": "string"},
@@ -357,9 +356,7 @@ components = {
                                                 "type": "string",
                                                 "format": "uri",
                                             },
-                                            "aggregation_type_name": {
-                                                "type": "string"
-                                            },
+                                            "aggregation_type_name": {"type": "string"},
                                             "created_at": {
                                                 "type": "string",
                                                 "format": "date-time",
@@ -527,9 +524,7 @@ components = {
                                     "type": "string",
                                     "format": "uri",
                                 },
-                                "aggregation_type_name": {
-                                    "type": "string"
-                                },
+                                "aggregation_type_name": {"type": "string"},
                             },
                         },
                         "type": {"type": "string"},

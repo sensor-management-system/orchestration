@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,6 +8,8 @@
 
 """Base class & utils for the tests."""
 
+import datetime
+import functools
 import json
 import os
 import time
@@ -180,7 +182,168 @@ class LoginMechanismByTestJwt(CreateNewUserByUserinfoMixin):
             return None
 
 
-class BaseTestCase(TestCase):
+class Fixtures:
+    """Class to register and use functions to provide fixtures."""
+
+    def __init__(self):
+        """Init the object without any known functions."""
+        self.functions = {}
+
+    def register(self, name, scope=None):
+        """
+        Register a function with a name and an optional scope.
+
+        The name is used to request the result of the fixture later.
+
+        In case no scope is given, the function will be not memorize
+        at all.
+        However, for db models complete memorization this is not possible,
+        so those must be bound to the scope of a db session.
+        The scope here must be a function to provide - this way
+        it can handle different sessions.
+
+        The scope result itself must support the `in` test, so
+        we can check if an older result can be reused (is in the scope)
+        or not - and must be recomputed.
+        """
+        # noqa: D202
+
+        def inner(f):
+            scoped_results = {}
+
+            @functools.wraps(f)
+            def wrapper(*args, **kwargs):
+                if scope:
+                    s = scope()
+                    if s in scoped_results.keys():
+                        value = scoped_results[s]
+                        if value in s:
+                            return scoped_results[s]
+                        del scoped_results[s]
+
+                result = f(*args, **kwargs)
+                if scope is not None:
+                    scoped_results[s] = result
+                return result
+
+            self.functions[name] = wrapper
+            return wrapper
+
+        return inner
+
+    def use(self, requested_fixtures, name_mappings=None):
+        """
+        Inject the fixture results in the parameters of the called function.
+
+        Basically all the requested_fixtures are given as **kwargs - and
+        the function can then handle it accordingly.
+
+        Names are used as they are registered for the fixture file.
+        In case a different name should be used, we can use the
+        name_mappings dict parameter.
+
+        It takes the name of the fixture and maps to the one the function
+        is going to use.
+        """
+        if name_mappings is None:
+            name_mappings = {}
+
+        def inner(f):
+            @functools.wraps(f)
+            def wrapper(*args, **kwargs):
+                for name in requested_fixtures:
+                    value = self.functions[name]()
+                    f_name = name_mappings.get(name, name)
+                    kwargs[f_name] = value
+                return f(*args, **kwargs)
+
+            return wrapper
+
+        return inner
+
+
+class Expectation:
+    """Expectation object to let us write our assertions in an easier way."""
+
+    def __init__(self, test_case, value):
+        """
+        Init the object with a test case and a value.
+
+        Due to the way pythons unittest works, we need to have
+        an associated testcase.
+        """
+        self.test_case = test_case
+        self.value = value
+
+    def to_equal(self, expected_value):
+        """Raise an assertion if the value is not equal the expected value."""
+        self.test_case.assertEqual(self.value, expected_value)
+        return self
+
+    def to_have_length(self, expected_length):
+        """Raise an assertion if the length is not the expectd length."""
+        self.test_case.assertEqual(len(self.value), expected_length)
+        return self
+
+    def to_include_all_of(self, list_of_values):
+        """Raise an assertion if one of the values is not included."""
+        for value in list_of_values:
+            self.test_case.assertIn(value, self.value)
+        return self
+
+    def to_be_a_datetime_string(self):
+        """Raise an assertion if the value is not a datetime string."""
+        try:
+            result = datetime.datetime.fromisoformat(self.value)
+            self.test_case.assertTrue(isinstance(result, datetime.datetime))
+        except ValueError:
+            self.test_case.fail("Not a datetime string")
+        return self
+
+    def map(self, f, *args, **kwargs):
+        """Run a function and return an Expectation object with the result."""
+        return Expectation(self, f(self.value, *args, **kwargs))
+
+    @property
+    def not_(self):
+        """Invert the expectation."""
+        return InvertedExpectation(self.test_case, self.value)
+
+
+class InvertedExpectation:
+    """
+    Inverted expectation.
+
+    Can be used to write expect(value).not_.to_be("foo").
+    """
+
+    def __init__(self, test_case, value):
+        """Init the object with the test case and the result value."""
+        self.test_case = test_case
+        self.value = value
+
+    def to_be(self, value):
+        """Raise an assertion if we have identical values."""
+        self.test_case.assertIsNot(self.value, value)
+
+    def to_be_none(self):
+        """Raise an assertion if we have none."""
+        self.test_case.assertIsNotNone(self.value)
+
+
+class ExpectMixin:
+    """
+    Mixin to support expect methods.
+
+    This should mimik the way jest works.
+    """
+
+    def expect(self, value):
+        """Return an Expectation object."""
+        return Expectation(self, value)
+
+
+class BaseTestCase(TestCase, ExpectMixin):
     """Base test case for all testing the code of our app."""
 
     def create_app(self):

@@ -21,6 +21,8 @@ from project.api.models import (
     Platform,
     PlatformAttachment,
     PlatformMountAction,
+    PlatformParameter,
+    PlatformParameterValueChangeAction,
     User,
 )
 from project.api.models.base_model import db
@@ -321,6 +323,41 @@ class TestPlatformServices(BaseTestCase):
         self.assertEqual(data[0]["attributes"]["archived"], False)
         self.assertEqual(data[1]["attributes"]["short_name"], "archived platform")
         self.assertEqual(data[1]["attributes"]["archived"], True)
+
+    def test_delete_with_parameter_and_values(self):
+        """
+        Ensure we can delete a platform with parameter & associated values.
+
+        We don't want users to delete parameters with associated values,
+        but once we need to delete the complete platform it should be
+        possible.
+        """
+        visible_platform = Platform(
+            short_name="visible platform",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        parameter = PlatformParameter(
+            platform=visible_platform,
+            label="specialvalue",
+            description="some value",
+            unit_name="count",
+            unit_uri="http://foo/count",
+        )
+        value = PlatformParameterValueChangeAction(
+            platform_parameter=parameter,
+            contact=self.super_user.contact,
+            date=datetime.datetime(2023, 5, 2, 15, 30, 00, tzinfo=pytz.utc),
+            value="3",
+        )
+        db.session.add_all([visible_platform, parameter, value])
+        db.session.commit()
+
+        url = f"{self.platform_url}/{visible_platform.id}"
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(url)
+        self.assertEqual(response.status_code, 200)
 
     def test_update_external_b2inst_metadata(self):
         """Make sure that we ask the system to update the external metadata after a patch."""

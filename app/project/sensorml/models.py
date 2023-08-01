@@ -117,8 +117,7 @@ class GmlTimeInstant:
     def to_xml(self):
         """Transform to xml element."""
         element = gml.tag("TimeInstant")
-        sub_element = self.gml_time_position.to_xml()
-        element.append(sub_element)
+        element.append(self.gml_time_position.to_xml())
         if self.gml_id:
             element.attrib[gml.attrib("id")] = self.gml_id
         return element
@@ -248,8 +247,8 @@ class SweLabel:
 class SweQuantity:
     """Represent a swe:Quantity."""
 
-    swe_label: SweLabel
     swe_uom: SweUom
+    swe_label: Optional[SweLabel] = None
     definition: Optional[str] = None
 
     def to_xml(self):
@@ -257,7 +256,8 @@ class SweQuantity:
         element = swe.tag("Quantity")
         if self.definition:
             element.attrib["definition"] = self.definition
-        element.append(self.swe_label.to_xml())
+        if self.swe_label:
+            element.append(self.swe_label.to_xml())
         element.append(self.swe_uom.to_xml())
         return element
 
@@ -289,6 +289,38 @@ class SmlOutputs:
         sub_element = sml.tag("OutputList")
 
         for entry in self.sml_output_list:
+            sub_element.append(entry.to_xml())
+        element.append(sub_element)
+        return element
+
+
+@dataclass
+class SmlParameter:
+    """Represent a sml:parameter."""
+
+    name: str
+    swe_quantity: Optional[SweQuantity] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("parameter")
+        element.attrib["name"] = self.name
+        if self.swe_quantity:
+            element.append(self.swe_quantity.to_xml())
+        return element
+
+
+@dataclass
+class SmlParameters:
+    """Represent a sml:parameters."""
+
+    sml_parameter_list: List[SmlParameter] = field(default_factory=lambda: [])
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("parameters")
+        sub_element = sml.tag("ParameterList")
+        for entry in self.sml_parameter_list:
             sub_element.append(entry.to_xml())
         element.append(sub_element)
         return element
@@ -722,11 +754,53 @@ class SmlComponents:
 
 
 @dataclass
+class SmlSetValue:
+    """Represent the sml:setValue."""
+
+    ref: str
+    text: str
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("setValue")
+        element.attrib["ref"] = self.ref
+        element.text = self.text
+        return element
+
+
+@dataclass
+class SmlSettings:
+    """Represent the sml:Settings."""
+
+    sml_set_value: SmlSetValue
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("Settings")
+        element.append(self.sml_set_value.to_xml())
+        return element
+
+
+@dataclass
+class SmlConfiguration:
+    """Represent the sml:configuration."""
+
+    sml_settings: SmlSettings
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("configuration")
+        element.append(self.sml_settings.to_xml())
+        return element
+
+
+@dataclass
 class SmlEvent:
     """Represent a sml:event."""
 
     sml_classification: SmlClassification
     sml_time: SmlTime
+    sml_configuration: Optional[SmlConfiguration] = None
 
     def to_xml(self):
         """Transform to xml element."""
@@ -734,6 +808,8 @@ class SmlEvent:
         sub_element = sml.tag("Event")
         sub_element.append(self.sml_classification.to_xml())
         sub_element.append(self.sml_time.to_xml())
+        if self.sml_configuration:
+            sub_element.append(self.sml_configuration.to_xml())
         element.append(sub_element)
         return element
 
@@ -766,6 +842,7 @@ class SmlPhysicalSystem:
     sml_documentation: Optional[SmlDocumentation] = None
     sml_contacts: Optional[SmlContacts] = None
     sml_outputs: Optional[SmlOutputs] = None
+    sml_parameters: Optional[SmlParameters] = None
     sml_valid_time: Optional[SmlValidTime] = None
     sml_history: Optional[SmlHistory] = None
     sml_components: Optional[SmlComponents] = None
@@ -793,6 +870,8 @@ class SmlPhysicalSystem:
             element.append(self.sml_outputs.to_xml())
         if self.sml_history:
             element.append(self.sml_history.to_xml())
+        if self.sml_parameters:
+            element.append(self.sml_parameters.to_xml())
         if self.sml_components:
             element.append(self.sml_components.to_xml())
 
