@@ -110,6 +110,16 @@ class DeviceSchema(Schema):
         type_="device_attachment",
         id_field="id",
     )
+    device_parameters = Relationship(
+        related_view="api.device_parameter_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="DeviceParameterSchema",
+        type_="device_parameter",
+        id_field="id",
+    )
     contacts = Relationship(
         related_view="api.contact_list",
         related_view_kwargs={"id": "<id>"},

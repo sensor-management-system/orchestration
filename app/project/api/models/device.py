@@ -58,6 +58,9 @@ class Device(
     device_attachments = db.relationship(
         "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
     )
+    device_parameters = db.relationship(
+        "DeviceParameter", cascade="save-update, merge, delete, delete-orphan"
+    )
 
     def to_search_entry(self):
         """Convert the model to an dict to store in the full text search."""
@@ -90,6 +93,7 @@ class Device(
             "software_update_actions": [
                 s.to_search_entry() for s in self.device_software_update_actions
             ],
+            "device_parameters": [p.to_search_entry() for p in self.device_parameters],
             "is_internal": self.is_internal,
             "is_public": self.is_public,
             "is_private": self.is_private,
@@ -220,6 +224,20 @@ class Device(
                     "resolution_unit_uri": type_keyword,
                     "aggregation_type_name": type_keyword_and_full_searchable,
                     "aggregation_type_uri": type_keyword,
+                },
+            },
+            "device_parameters": {
+                "properties": {
+                    "label": type_keyword_and_full_searchable,
+                    "description": type_keyword_and_full_searchable,
+                    "unit_uri": type_keyword,
+                    "unit_name": type_keyword_and_full_searchable,
+                    "device_parameter_value_change_actions": {
+                        "properties": {
+                            "value": type_keyword_and_full_searchable,
+                            "description": type_keyword_and_full_searchable,
+                        },
+                    },
                 },
             },
             "generic_actions": {

@@ -24,16 +24,19 @@ from ..api.helpers.errors import ErrorResponse, UnauthorizedError
 from ..api.models import (
     Configuration,
     ConfigurationCustomField,
+    ConfigurationParameter,
     Contact,
     CustomField,
     Device,
     DeviceCalibrationAction,
+    DeviceParameter,
     DeviceProperty,
     DeviceSoftwareUpdateAction,
     GenericConfigurationAction,
     GenericDeviceAction,
     GenericPlatformAction,
     Platform,
+    PlatformParameter,
     PlatformSoftwareUpdateAction,
     Site,
 )
@@ -185,6 +188,16 @@ class ConfigurationCustomFieldValueEndPoint(AbstractFreeTextFieldEndpoint):
 
 
 @free_text_field_routes.route(
+    "/controller/configuration-parameter-labels", methods=["GET"]
+)
+@class_based_view
+class ConfigurationParameterEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct configuration parameter labels."""
+
+    field = ConfigurationParameter.label
+
+
+@free_text_field_routes.route(
     "/controller/device-calibration-action-descriptions", methods=["GET"]
 )
 @class_based_view
@@ -248,6 +261,17 @@ class DeviceManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct device manufacturer names."""
 
     field = Device.manufacturer_name
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
+
+
+@free_text_field_routes.route("/controller/device-parameter-labels", methods=["GET"])
+@class_based_view
+class DeviceParameterLabelEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct device parameter labels."""
+
+    field = DeviceParameter.label
+    join_field = DeviceParameter.device
     is_private_field = Device.is_private
     created_by_id_field = Device.created_by_id
 
@@ -399,6 +423,17 @@ class PlatformShortNameEndpoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct platform short names."""
 
     field = Platform.short_name
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
+
+
+@free_text_field_routes.route("/controller/platform-parameter-labels", methods=["GET"])
+@class_based_view
+class PlatformParameterLabelEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct platform parameter labels."""
+
+    field = PlatformParameter.label
+    join_field = PlatformParameter.platform
     is_private_field = Platform.is_private
     created_by_id_field = Platform.created_by_id
 

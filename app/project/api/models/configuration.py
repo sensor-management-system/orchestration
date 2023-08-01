@@ -45,6 +45,9 @@ class Configuration(
     configuration_customfields = db.relationship(
         "ConfigurationCustomField", cascade="save-update, merge, delete, delete-orphan"
     )
+    configuration_parameters = db.relationship(
+        "ConfigurationParameter", cascade="save-update, merge, delete, delete-orphan"
+    )
     site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=True)
     site = db.relationship("Site", backref="configurations")
 
@@ -97,6 +100,9 @@ class Configuration(
             ],
             "configuration_customfields": [
                 a.to_search_entry() for a in self.configuration_customfields
+            ],
+            "configuration_parameters": [
+                p.to_search_entry() for p in self.configuration_parameters
             ],
             "archived": self.archived,
             "is_internal": self.is_internal,
@@ -178,6 +184,20 @@ class Configuration(
                             "label": type_keyword_and_full_searchable,
                             # But don't allow search for the very same url (unlikely to be needed).
                             "url": type_text_full_searchable,
+                        },
+                    },
+                    "configuration_parameters": {
+                        "properties": {
+                            "label": type_keyword_and_full_searchable,
+                            "description": type_keyword_and_full_searchable,
+                            "unit_uri": type_keyword,
+                            "unit_name": type_keyword_and_full_searchable,
+                            "configuration_parameter_value_change_actions": {
+                                "properties": {
+                                    "value": type_keyword_and_full_searchable,
+                                    "description": type_keyword_and_full_searchable,
+                                },
+                            },
                         },
                     },
                     "generic_actions": {

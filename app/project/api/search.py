@@ -75,6 +75,14 @@ def create_index(index, payload):
     mappings = payload.get("mappings", {})
     settings = payload.get("settings", {})
 
+    if "mapping" not in settings.keys():
+        settings["mapping"] = {}
+    if "total_fields" not in settings["mapping"].keys():
+        settings["mapping"]["total_fields"] = {}
+    # As we have more and more fields (and quite a lot of ngram levels)
+    # we need to increase the limit of total fields for the index.
+    settings["mapping"]["total_fields"]["limit"] = 2000
+
     current_app.elasticsearch.indices.create(
         index=index,
         aliases=aliases,

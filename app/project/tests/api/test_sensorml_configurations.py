@@ -20,6 +20,8 @@ from project.api.models import (
     ConfigurationAttachment,
     ConfigurationContactRole,
     ConfigurationDynamicLocationBeginAction,
+    ConfigurationParameter,
+    ConfigurationParameterValueChangeAction,
     ConfigurationStaticLocationBeginAction,
     Contact,
     Device,
@@ -489,6 +491,134 @@ class TestSensorMLConfiguration(BaseTestCase):
             .attrib.get("codeListValue"),
             "5",
         )
+
+    def test_get_public_configuration_with_configuration_parameters(self):
+        """Check that we give out the configuration parameters."""
+        parameter = ConfigurationParameter(
+            unit_name="°C",
+            unit_uri="https://cv/units/1",
+            label="Fan start temperature",
+            description="Temperature on that the fan starts",
+            configuration=self.configuration,
+        )
+        db.session.add(parameter)
+        db.session.commit()
+
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.expect(resp.status_code).to_equal(200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_parameters = root.find("{http://www.opengis.net/sensorml/2.0}parameters")
+        sml_parameter_list = sml_parameters.find(
+            "{http://www.opengis.net/sensorml/2.0}ParameterList"
+        )
+        sml_parameter_entries = sml_parameter_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}parameter"
+        )
+        self.expect(sml_parameter_entries).to_have_length(1)
+        sml_parameter = sml_parameter_entries[0]
+
+        self.expect(sml_parameter.attrib.get("name")).to_equal("Fan_start_temperature")
+
+        swe_quantity = sml_parameter.find("{http://www.opengis.net/swe/2.0}Quantity")
+        self.expect(swe_quantity).not_.to_be_none()
+        swe_uom = swe_quantity.find("{http://www.opengis.net/swe/2.0}uom")
+        self.expect(swe_uom).not_.to_be_none()
+
+        self.expect(swe_uom.attrib.get("code")).to_equal(parameter.unit_name)
+
+    def test_get_public_configuration_with_configuration_parameter_value_change_actions(
+        self,
+    ):
+        """Check that we give out the parameter change actions."""
+        parameter = ConfigurationParameter(
+            unit_name="°C",
+            unit_uri="https://cv/units/1",
+            label="Fan start temperature",
+            description="Temperature on that the fan starts",
+            configuration=self.configuration,
+        )
+        contact = Contact(
+            given_name="first", family_name="contact", email="first.contact@localhost"
+        )
+        change_action = ConfigurationParameterValueChangeAction(
+            configuration_parameter=parameter,
+            contact=contact,
+            date=datetime.datetime(2023, 5, 3, 10, 00, 00, tzinfo=pytz.utc),
+            value="42",
+            description="The answer to everything - and the start temperature for the fan.",
+        )
+        db.session.add_all([parameter, contact, change_action])
+        db.session.commit()
+
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.expect(resp.status_code).to_equal(200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+
+        sml_history = root.find("{http://www.opengis.net/sensorml/2.0}history")
+        sml_event_list = sml_history.find(
+            "{http://www.opengis.net/sensorml/2.0}EventList"
+        )
+        sml_events = sml_event_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}event"
+        )
+        self.expect(sml_events).to_have_length(1)
+        sml_change_event = sml_events[0]
+
+        # Test the classification
+        self.expect(
+            sml_change_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .attrib.get("definition")
+        ).to_equal("ParameterChange")
+        self.expect(
+            sml_change_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+        ).to_equal(
+            f"Changed parameter for {parameter.label}",
+        )
+        self.expect(
+            sml_change_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+        ).to_equal(change_action.value)
+        self.expect(
+            sml_change_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+        ).to_equal(
+            "2023-05-03T10:00:00+00:00",
+        )
+        sml_set_value = (
+            sml_change_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}configuration")
+            .find("{http://www.opengis.net/sensorml/2.0}Settings")
+            .find("{http://www.opengis.net/sensorml/2.0}setValue")
+        )
+        self.expect(sml_set_value).not_.to_be_none()
+        self.expect(sml_set_value.attrib.get("ref")).to_equal("Fan_start_temperature")
+        self.expect(sml_set_value.text).to_equal(change_action.value)
 
     def test_get_public_configuration_with_attachments(self):
         """Check that we give out the attachments."""

@@ -19,6 +19,8 @@ from ..models import (
     ConfigurationContactRole,
     ConfigurationCustomField,
     ConfigurationDynamicLocationBeginAction,
+    ConfigurationParameter,
+    ConfigurationParameterValueChangeAction,
     ConfigurationStaticLocationBeginAction,
     Contact,
     CustomField,
@@ -29,6 +31,8 @@ from ..models import (
     DeviceCalibrationAttachment,
     DeviceContactRole,
     DeviceMountAction,
+    DeviceParameter,
+    DeviceParameterValueChangeAction,
     DeviceProperty,
     DevicePropertyCalibration,
     DeviceSoftwareUpdateAction,
@@ -43,6 +47,8 @@ from ..models import (
     PlatformAttachment,
     PlatformContactRole,
     PlatformMountAction,
+    PlatformParameter,
+    PlatformParameterValueChangeAction,
     PlatformSoftwareUpdateAction,
     PlatformSoftwareUpdateActionAttachment,
     Site,
@@ -387,12 +393,14 @@ def filter_visible(query):
 # ConfigurationContactRole
 # ConfigurationCustomField
 # ConfigurationDynamicLocationBeginAction
+# ConfigurationParameter
 # ConfigurationStaticLocationBeginAction
 # GenericConfigurationAction
 for model in [
     ConfigurationContactRole,
     ConfigurationCustomField,
     ConfigurationDynamicLocationBeginAction,
+    ConfigurationParameter,
     ConfigurationStaticLocationBeginAction,
     GenericConfigurationAction,
 ]:
@@ -402,6 +410,57 @@ for model in [
     can_change.register_same(model, handler=ConfigurationAttachment)
     can_delete.register_same(model, handler=ConfigurationAttachment)
     filter_visible.register_same(model, handler=ConfigurationAttachment)
+
+# ConfigurationParameterValueChangeAction
+@can_see.register(ConfigurationParameterValueChangeAction)
+def can_see(entity):
+    """Return if the entity can be seen."""
+    return can_see(entity.configuration_parameter)
+
+
+@can_create.register(ConfigurationParameterValueChangeAction)
+def can_create(type_, data):
+    """Return true if we can create the entity."""
+    configuration_parameter_id = data.get("configuration_parameter")
+    return can_edit(
+        db.session.query(ConfigurationParameter)
+        .filter(ConfigurationParameter.id == configuration_parameter_id)
+        .first()
+    )
+
+
+@can_edit.register(ConfigurationParameterValueChangeAction)
+def can_edit(entity):
+    """Return true fi we can edit the entity."""
+    return can_edit(entity.configuration_parameter)
+
+
+@can_change.register(ConfigurationParameterValueChangeAction)
+def can_change(entity, data):
+    """Return true if we can change the entity accordingly."""
+    if data.get("configuration_parameter"):
+        if not can_edit(
+            db.session.query(ConfigurationParameter)
+            .filter(ConfigurationParameter.id == data["configuration_parameter"])
+            .first()
+        ):
+            return False
+    return True
+
+
+@can_delete.register(ConfigurationParameterValueChangeAction)
+def can_delete(entity):
+    """Return true if we can delete the entity."""
+    return can_edit(entity.configuration_parameter)
+
+
+@filter_visible.register(ConfigurationParameterValueChangeAction)
+def filter_visible(query):
+    """Filter the query based on the visibility settings."""
+    return filter_visible.delegate(
+        ConfigurationParameter, query.join(ConfigurationParameter)
+    )
+
 
 # DeviceMountAction
 @can_see.register(DeviceMountAction)
@@ -624,6 +683,7 @@ def filter_visible(query):
 # DeviceAttachment
 # DeviceCalibrationAction
 # DeviceContactRole
+# DeviceParameter
 # DeviceProperty
 # DeviceSoftwareUpdateAction
 # GenericDeviceAction
@@ -631,6 +691,7 @@ for model in [
     DeviceAttachment,
     DeviceCalibrationAction,
     DeviceContactRole,
+    DeviceParameter,
     DeviceProperty,
     DeviceSoftwareUpdateAction,
     GenericDeviceAction,
@@ -965,6 +1026,55 @@ def filter_visible(query):
     )
 
 
+# DeviceParameterValueChangeAction
+@can_see.register(DeviceParameterValueChangeAction)
+def can_see(entity):
+    """Return if the entity can be seen."""
+    return can_see(entity.device_parameter)
+
+
+@can_create.register(DeviceParameterValueChangeAction)
+def can_create(type_, data):
+    """Return true if we can create the entity."""
+    device_parameter_id = data.get("device_parameter")
+    return can_edit(
+        db.session.query(DeviceParameter)
+        .filter(DeviceParameter.id == device_parameter_id)
+        .first()
+    )
+
+
+@can_edit.register(DeviceParameterValueChangeAction)
+def can_edit(entity):
+    """Return true fi we can edit the entity."""
+    return can_edit(entity.device_parameter)
+
+
+@can_change.register(DeviceParameterValueChangeAction)
+def can_change(entity, data):
+    """Return true if we can change the entity accordingly."""
+    if data.get("device_parameter"):
+        if not can_edit(
+            db.session.query(DeviceParameter)
+            .filter(DeviceParameter.id == data["device_parameter"])
+            .first()
+        ):
+            return False
+    return True
+
+
+@can_delete.register(DeviceParameterValueChangeAction)
+def can_delete(entity):
+    """Return true if we can delete the entity."""
+    return can_edit(entity.device_parameter)
+
+
+@filter_visible.register(DeviceParameterValueChangeAction)
+def filter_visible(query):
+    """Filter the query based on the visibility settings."""
+    return filter_visible.delegate(DeviceParameter, query.join(DeviceParameter))
+
+
 # DevicePropertyCalibration
 @can_see.register(DevicePropertyCalibration)
 def can_see(entity):
@@ -1205,7 +1315,13 @@ def filter_visible(query):
 # PlatformAttachment
 # PlatformContactRole
 # PlatformSoftwareUpdateAction
-for model in [PlatformAttachment, PlatformContactRole, PlatformSoftwareUpdateAction]:
+# PlatformParameter
+for model in [
+    PlatformAttachment,
+    PlatformContactRole,
+    PlatformSoftwareUpdateAction,
+    PlatformParameter,
+]:
     can_see.register_same(model, handler=GenericPlatformAction)
     can_create.register_same(model, handler=GenericPlatformAction)
     can_edit.register_same(model, handler=GenericPlatformAction)
@@ -1344,6 +1460,55 @@ def filter_visible(query):
     return filter_visible.delegate(
         PlatformSoftwareUpdateAction, query.join(PlatformSoftwareUpdateAction)
     )
+
+
+# PlatformParameterValueChangeAction
+@can_see.register(PlatformParameterValueChangeAction)
+def can_see(entity):
+    """Return if the entity can be seen."""
+    return can_see(entity.platform_parameter)
+
+
+@can_create.register(PlatformParameterValueChangeAction)
+def can_create(type_, data):
+    """Return true if we can create the entity."""
+    platform_parameter_id = data.get("platform_parameter")
+    return can_edit(
+        db.session.query(PlatformParameter)
+        .filter(PlatformParameter.id == platform_parameter_id)
+        .first()
+    )
+
+
+@can_edit.register(PlatformParameterValueChangeAction)
+def can_edit(entity):
+    """Return true fi we can edit the entity."""
+    return can_edit(entity.platform_parameter)
+
+
+@can_change.register(PlatformParameterValueChangeAction)
+def can_change(entity, data):
+    """Return true if we can change the entity accordingly."""
+    if data.get("platform_parameter"):
+        if not can_edit(
+            db.session.query(PlatformParameter)
+            .filter(PlatformParameter.id == data["platform_parameter"])
+            .first()
+        ):
+            return False
+    return True
+
+
+@can_delete.register(PlatformParameterValueChangeAction)
+def can_delete(entity):
+    """Return true if we can delete the entity."""
+    return can_edit(entity.platform_parameter)
+
+
+@filter_visible.register(PlatformParameterValueChangeAction)
+def filter_visible(query):
+    """Filter the query based on the visibility settings."""
+    return filter_visible.delegate(PlatformParameter, query.join(PlatformParameter))
 
 
 # Site

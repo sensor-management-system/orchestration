@@ -130,6 +130,16 @@ class ConfigurationSchema(Schema):
         type_="configuration_customfield",
         id_field="id",
     )
+    configuration_parameters = Relationship(
+        related_view="api.configuration_parameter_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="ConfigurationParameterSchema",
+        type_="configuration_parameter",
+        id_field="id",
+    )
     site = Relationship(
         related_view="api.site_detail",
         related_view_kwargs={"id": "<site_id>"},

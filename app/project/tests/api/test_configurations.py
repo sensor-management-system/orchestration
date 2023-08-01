@@ -8,18 +8,26 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Tests for the configuration api of our app."""
+import datetime
 import os
 from unittest.mock import patch
 
+import pytz
 from flask import current_app
 
 from project import base_url
-from project.api.models import Contact, PlatformMountAction, User
+from project.api.models import (
+    Configuration,
+    ConfigurationParameter,
+    ConfigurationParameterValueChangeAction,
+    Contact,
+    Device,
+    Platform,
+    PlatformMountAction,
+    Site,
+    User,
+)
 from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
-from project.api.models.device import Device
-from project.api.models.platform import Platform
-from project.api.models.site import Site
 from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl, pidinst
 from project.tests.base import (
@@ -1105,6 +1113,41 @@ class TestConfigurationsService(BaseTestCase):
             response.json["data"]["attributes"]["persistent_identifier"],
             configuration.persistent_identifier,
         )
+
+    def test_delete_with_parameter_and_values(self):
+        """
+        Ensure we can delete a configuration with parameter & associated values.
+
+        We don't want users to delete parameters with associated values,
+        but once we need to delete the complete configuration it should be
+        possible.
+        """
+        visible_configuration = Configuration(
+            label="visible configuration",
+            is_public=True,
+            is_internal=False,
+            cfg_permission_group="1",
+        )
+        parameter = ConfigurationParameter(
+            configuration=visible_configuration,
+            label="specialvalue",
+            description="some value",
+            unit_name="count",
+            unit_uri="http://foo/count",
+        )
+        value = ConfigurationParameterValueChangeAction(
+            configuration_parameter=parameter,
+            contact=self.super_user.contact,
+            date=datetime.datetime(2023, 5, 2, 15, 30, 00, tzinfo=pytz.utc),
+            value="3",
+        )
+        db.session.add_all([visible_configuration, parameter, value])
+        db.session.commit()
+
+        url = f"{self.configurations_url}/{visible_configuration.id}"
+        with self.run_requests_as(self.super_user):
+            response = self.client.delete(url)
+        self.assertEqual(response.status_code, 200)
 
     def test_update_external_b2inst_metadata(self):
         """Make sure that we ask the system to update the external metadata after a patch."""
