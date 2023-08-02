@@ -199,6 +199,8 @@ permissions and limitations under the Licence.
                 :items="contacts"
                 label="Begin contact"
                 :disabled="readonly"
+                :item-text="(x) => x.toString()"
+                :item-value="(x) => x"
                 required
                 :rules="[rules.required]"
                 class="required"
@@ -214,6 +216,8 @@ permissions and limitations under the Licence.
                 :items="contacts"
                 label="End contact"
                 :disabled="readonly"
+                :item-text="(x) => x.toString()"
+                :item-value="(x) => x"
                 :required="unmountRequired"
                 :clearable="!unmountRequired"
                 :rules="getEndContactRules()"
