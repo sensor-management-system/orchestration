@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,7 +34,7 @@ permissions and limitations under the Licence.
       <v-card-title>Help</v-card-title>
       <v-card-text>
         <p>
-          Information on how to use this application can be found on our <a href="https://gitlab.hzdr.de/hub-terra/sms/service-desk/-/wikis/home" target="_blank" style="text-decoration: none">
+          Information on how to use this application can be found on our <a href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home" target="_blank" style="text-decoration: none">
             <strong>Wiki Page</strong>
           </a>.
         </p>
