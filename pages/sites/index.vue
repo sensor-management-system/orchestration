@@ -228,6 +228,9 @@ permissions and limitations under the Licence.
             <template
               #dot-menu-items
             >
+              <DotMenuActionSensorML
+                @click="openSensorMLDialog(item)"
+              />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
                 :path="'/sites/copy/' + item.id"
@@ -268,6 +271,12 @@ permissions and limitations under the Licence.
       @cancel-archiving="closeArchiveDialog"
       @submit-archiving="archiveAndCloseDialog"
     />
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="selectedSiteSensorMLFilename"
+      :url="selectedSiteSensorMLUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -292,13 +301,16 @@ import {
   ArchiveSiteAction,
   DeleteSiteAction,
   RestoreSiteAction,
-  ReplaceSiteInSitesAction
+  ReplaceSiteInSitesAction,
+  ExportAsSensorMLAction,
+  GetSensorMLUrlAction
 } from '@/store/sites'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import SiteUsageSelect from '@/components/SiteUsageSelect.vue'
 import SiteTypeSelect from '@/components/SiteTypeSelect.vue'
@@ -323,6 +335,7 @@ import { SiteSearchParamsSerializer } from '@/modelUtils/SiteSearchParams'
 import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
 import FoundEntries from '@/components/shared/FoundEntries.vue'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
@@ -339,7 +352,8 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     SiteDeleteDialog,
     SiteUsageSelect,
     SiteTypeSelect,
-    PermissionGroupSearchSelect
+    PermissionGroupSearchSelect,
+    DownloadDialog
   },
   computed: {
     ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
@@ -359,7 +373,9 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
       'archiveSite',
       'restoreSite',
       'loadSite',
-      'replaceSiteInSites'
+      'replaceSiteInSites',
+      'exportAsSensorML',
+      'getSensorMLUrl'
     ]),
     ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
@@ -379,6 +395,9 @@ export default class SearchSitesPage extends Vue {
   private siteToDelete: Site | null = null
   private showArchiveDialog: boolean = false
   private siteToArchive: Site | null = null
+
+  private showDownloadDialog: boolean = false
+  private siteForSensorML: Site | null = null
 
   // vuex definition for typescript check
   setTabs!: SetTabsAction
@@ -409,6 +428,8 @@ export default class SearchSitesPage extends Vue {
   loadSiteTypes!: LoadSiteTypesAction
   siteTypes!: VocabularyState['siteTypes']
   replaceSiteInSites !: ReplaceSiteInSitesAction
+  exportAsSensorML!: ExportAsSensorMLAction
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   async created () {
     this.initializeAppBar()
@@ -720,6 +741,40 @@ export default class SearchSitesPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Sites & Labs')
+  }
+
+  openSensorMLDialog (site: Site) {
+    this.siteForSensorML = site
+    this.showDownloadDialog = true
+  }
+
+  closeDownloadDialog () {
+    this.siteForSensorML = null
+    this.showDownloadDialog = false
+  }
+
+  get selectedSiteSensorMLFilename (): string {
+    if (this.siteForSensorML != null) {
+      return `${this.siteForSensorML.label}.xml`
+    }
+    return 'site.xml'
+  }
+
+  async selectedSiteSensorMLUrl (): Promise<string | null> {
+    if (!this.siteForSensorML) {
+      return null
+    }
+    if (this.siteForSensorML?.visibility === Visibility.Public) {
+      return await this.getSensorMLUrl(this.siteForSensorML.id!)
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(this.siteForSensorML!.id!)
+        return window.URL.createObjectURL(blob)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Site could not be exported as SensorML')
+        return null
+      }
+    }
   }
 }
 </script>

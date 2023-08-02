@@ -111,6 +111,16 @@ export class SiteApi {
     return this._searchedPermissionGroups
   }
 
+  async getSensorML (siteId: string): Promise<Blob> {
+    const url = this.basePath + '/' + siteId + '/sensorml'
+    const response = await this.axiosApi.get(url)
+    return new Blob([response.data], { type: 'text/xml' })
+  }
+
+  getSensorMLUrl (siteId: string): string {
+    return this.axiosApi.defaults.baseURL + this.basePath + '/' + siteId + '/sensorml'
+  }
+
   setSearchedPermissionGroups (value: PermissionGroup[]) {
     this._searchedPermissionGroups = value
     return this
