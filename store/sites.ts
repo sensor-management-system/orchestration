@@ -108,6 +108,8 @@ export type RestoreSiteAction = (id: string) => Promise<void>
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
 export type ReplaceSiteInSitesAction = (newSite: Site) => void
+export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
+export type GetSensorMLUrlAction = (id: string) => Promise<string>
 
 const actions: ActionTree<SitesState, RootState> = {
   async searchSitesPaginated ({
@@ -275,8 +277,13 @@ const actions: ActionTree<SitesState, RootState> = {
       }
     }
     commit('setSites', result)
+  },
+  getSensorMLUrl (_, id: string): string {
+    return this.$api.sites.getSensorMLUrl(id)
+  },
+  async exportAsSensorML (_, id: string): Promise<Blob> {
+    return await this.$api.sites.getSensorML(id)
   }
-
 }
 
 const mutations = {

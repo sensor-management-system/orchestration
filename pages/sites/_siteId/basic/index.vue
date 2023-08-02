@@ -48,6 +48,9 @@ permissions and limitations under the Licence.
       </v-btn>
       <DotMenu>
         <template #actions>
+          <DotMenuActionSensorML
+            @click="openSensorMLDialog"
+          />
           <DotMenuActionCopy
             v-if="$auth.loggedIn"
             :path="'/sites/copy/' + siteId"
@@ -85,6 +88,9 @@ permissions and limitations under the Licence.
       </v-btn>
       <DotMenu>
         <template #actions>
+          <DotMenuActionSensorML
+            @click="openSensorMLDialog"
+          />
           <DotMenuActionCopy
             v-if="$auth.loggedIn"
             :path="'/sites/copy/' + siteId"
@@ -119,6 +125,12 @@ permissions and limitations under the Licence.
       @cancel-archiving="closeArchiveDialog"
       @submit-archiving="archiveAndCloseDialog"
     />
+    <download-dialog
+      v-model="showDownloadDialog"
+      :filename="siteSensorMLFilename"
+      :url="siteSensorMLUrl"
+      @cancel="closeDownloadDialog"
+    />
   </div>
 </template>
 
@@ -136,7 +148,9 @@ import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
-import { ArchiveSiteAction, DeleteSiteAction, LoadSiteAction, RestoreSiteAction, SitesState } from '@/store/sites'
+import DownloadDialog from '@/components/shared/DownloadDialog.vue'
+import { ArchiveSiteAction, DeleteSiteAction, ExportAsSensorMLAction, GetSensorMLUrlAction, LoadSiteAction, RestoreSiteAction, SitesState } from '@/store/sites'
+import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
@@ -149,11 +163,19 @@ import { ArchiveSiteAction, DeleteSiteAction, LoadSiteAction, RestoreSiteAction,
     DotMenuActionRestore,
     DotMenuActionArchive,
     SiteDeleteDialog,
-    SiteArchiveDialog
+    SiteArchiveDialog,
+    DownloadDialog
   },
 
   computed: mapState('sites', ['site']),
-  methods: mapActions('sites', ['loadSite', 'deleteSite', 'archiveSite', 'restoreSite'])
+  methods: mapActions('sites', [
+    'loadSite',
+    'deleteSite',
+    'archiveSite',
+    'restoreSite',
+    'exportAsSensorML',
+    'getSensorMLUrl'
+  ])
 
 })
 export default class SiteShowBasicPage extends Vue {
@@ -173,6 +195,7 @@ export default class SiteShowBasicPage extends Vue {
 
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
+  private showDownloadDialog: boolean = false
 
   // vuex definition for typescript check
   site!: SitesState['site']
@@ -180,6 +203,8 @@ export default class SiteShowBasicPage extends Vue {
   deleteSite!: DeleteSiteAction
   archiveSite!: ArchiveSiteAction
   restoreSite!: RestoreSiteAction
+  exportAsSensorML!: ExportAsSensorMLAction
+  getSensorMLUrl!: GetSensorMLUrlAction
 
   get siteId () {
     return this.$route.params.siteId
@@ -253,6 +278,38 @@ export default class SiteShowBasicPage extends Vue {
       this.$store.commit('snackbar/setError', 'Site / Lab could not be restored')
     } finally {
       this.isSaving = false
+    }
+  }
+
+  openSensorMLDialog () {
+    this.showDownloadDialog = true
+  }
+
+  closeDownloadDialog () {
+    this.showDownloadDialog = false
+  }
+
+  get siteSensorMLFilename (): string {
+    if (this.site != null) {
+      return `${this.site.label}.xml`
+    }
+    return 'site.xml'
+  }
+
+  async siteSensorMLUrl (): Promise<string | null> {
+    if (!this.site) {
+      return null
+    }
+    if (this.site?.visibility === Visibility.Public) {
+      return await this.getSensorMLUrl(this.site.id!)
+    } else {
+      try {
+        const blob = await this.exportAsSensorML(this.site!.id!)
+        return window.URL.createObjectURL(blob)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'Site could not be exported as SensorML')
+        return null
+      }
     }
   }
 }
