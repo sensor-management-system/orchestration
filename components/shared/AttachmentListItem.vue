@@ -7,6 +7,8 @@ Copyright (C) 2020 - 2023
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
+- Rubankumar Moorthy (FZJ, r.moorthy@fz-juelich.de)
+- Forschungszentrum Jülich GmbH (FZJ, https://fz-juelich.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -43,7 +45,8 @@ permissions and limitations under the Licence.
       >
         <div class="d-flex align-center">
           <span class="text-caption">
-            {{ attachment.url | shortenMiddle }}<span v-if="attachment.createdAt && attachment.isUpload">,
+            <ExpandableText v-model="attachment.url" :shorten-at="60" more-icon="mdi-unfold-more-vertical" less-icon="mdi-unfold-less-vertical" />
+            <span v-if="attachment.createdAt && attachment.isUpload">
               uploaded at {{ attachment.createdAt | toUtcDateTimeString }}
             </span>
           </span>
@@ -95,11 +98,13 @@ import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.v
 
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 import DotMenu from '@/components/DotMenu.vue'
+import ExpandableText from '@/components/shared/ExpandableText.vue'
 
 @Component({
   components: {
     DotMenu,
-    BaseExpandableListItem
+    BaseExpandableListItem,
+    ExpandableText
   }
 })
 export default class AttachmentListItem extends mixins(AttachmentsMixin) {
