@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -97,6 +97,30 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/configuration_id"}],
             "responses": {"200": {"$ref": "#/components/responses/object_deleted"}},
             "operationId": "DeleteConfigurationfromconfiguration_0",
+        },
+    },
+    "/configurations/{configuration_id}/sensorml": {
+        "get": {
+            "tags": ["Configurations"],
+            "parameters": [{"$ref": "#/components/parameters/configuration_id"}],
+            "responses": {
+                "200": {
+                    "description": "SensorML response for the configuration",
+                    "content": {"application/xml": {}},
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+            },
+            "description": "Retrieve Configuration sensorML",
+            "operationId": "RetrieveConfigurationSensorML",
         },
     },
     "/configurations/{configuration_id}/archive": {

@@ -22,7 +22,7 @@ from ..api.helpers.errors import (
     NotFoundError,
     UnauthorizedError,
 )
-from ..api.models import Configuration, Device, Platform
+from ..api.models import Configuration, Device, Platform, Site
 from ..api.models.base_model import db
 from ..api.permissions.rules import can_see
 from ..config import env
@@ -30,6 +30,7 @@ from ..sensorml.converters import (
     ConfigurationConverter,
     DeviceConverter,
     PlatformConverter,
+    SiteConverter,
 )
 from ..sensorml.models import gco, gmd, gml, sml, swe, xlink
 
@@ -144,6 +145,80 @@ def configuration_to_sensor_ml(configuration_id):
 
         physical_system = ConfigurationConverter(
             configuration,
+            cv_url,
+            url_lookup,
+        ).sml_physical_system()
+        xml_object = physical_system.to_xml()
+        ET.register_namespace("gml", gml.namespace)
+        ET.register_namespace("gco", gco.namespace)
+        ET.register_namespace("gmd", gmd.namespace)
+        ET.register_namespace("sml", sml.namespace)
+        ET.register_namespace("swe", swe.namespace)
+        ET.register_namespace("xlink", xlink.namespace)
+        text = ET.tostring(xml_object)
+
+        # We need to make sure that our gml:ids are unique in the
+        # overall document.
+        # The strategy here to give different names - with `_dup_{n}`
+        # suffix.
+        dup_count = {}
+
+        def gml_id_replacement(match):
+            original_gml_id = match.group(1)
+            if original_gml_id not in dup_count.keys():
+                dup_count[original_gml_id] = 0
+                return match.group()
+            dup_count[original_gml_id] += 1
+            result = f'gml:id="{original_gml_id}_dup_{dup_count[original_gml_id]}"'
+            return result
+
+        text = re.sub(r'gml:id="([^"]+)"', gml_id_replacement, text.decode())
+        response = make_response(text)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    except ErrorResponse as e:
+        return e.respond()
+    except JsonApiException as e:
+        return e.to_dict(), e.status
+
+
+@sensor_ml_routes.route("/sites/<int:site_id>/sensorml", methods=["GET"])
+def site_to_sensor_ml(site_id):
+    """
+    Export a site as sensorML.
+
+    :param site_id: id
+    :return: xml file
+    """
+    try:
+        site = db.session.query(Site).filter_by(id=site_id).first()
+        if site is None:
+            raise NotFoundError({"pointer": ""}, "Object Not Found")
+        if not can_see(site):
+            if not g.user:
+                raise UnauthorizedError("Authentication required.")
+            raise ForbiddenError("Configuration not accessable")
+        cv_url = current_app.config["CV_URL"]
+
+        def url_lookup(element):
+            if isinstance(element, Platform):
+                return url_for(
+                    "sensorml.platform_to_sensor_ml",
+                    platform_id=element.id,
+                    _external=True,
+                )
+            if isinstance(element, Device):
+                return url_for(
+                    "sensorml.device_to_sensor_ml", device_id=element.id, _external=True
+                )
+            return url_for(
+                "sensorml.configuration_to_sensor_ml",
+                configuration_id=element.id,
+                _external=True,
+            )
+
+        physical_system = SiteConverter(
+            site,
             cv_url,
             url_lookup,
         ).sml_physical_system()
