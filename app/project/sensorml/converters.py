@@ -8,6 +8,11 @@
 
 from typing import List, Optional
 
+from geoalchemy2.shape import to_shape
+
+from ..api.models import Configuration
+from ..api.models.base_model import db
+from ..api.permissions.rules import filter_visible
 from ..extensions.instances import pidinst
 from . import cleanup
 from .models import (
@@ -18,19 +23,28 @@ from .models import (
     GmdCiOnlineResource,
     GmdCiResponsibleParty,
     GmdCiRoleCode,
+    GmdCity,
     GmdContactInfo,
+    GmdCountry,
+    GmdDeliveryPoint,
     GmdElectronicalMailAddress,
     GmdIndividualName,
     GmdLinkage,
     GmdName,
     GmdOnlineResource,
     GmdOrganisationName,
+    GmdPostalCode,
     GmdRole,
     GmdUrl,
     GmlBegin,
     GmlDescription,
     GmlEnd,
+    GmlExterior,
+    GmlLinearRing,
+    GmlLocation,
     GmlName,
+    GmlPolygon,
+    GmlPos,
     GmlTimeInstant,
     GmlTimePeriod,
     GmlTimePosition,
@@ -53,14 +67,17 @@ from .models import (
     SmlParameter,
     SmlParameters,
     SmlPhysicalSystem,
+    SmlPosition,
     SmlSettings,
     SmlSetValue,
     SmlTerm,
     SmlTime,
     SmlValidTime,
     SmlValue,
+    SweExtension,
     SweLabel,
     SweQuantity,
+    SweText,
     SweUom,
 )
 
@@ -1371,3 +1388,206 @@ class PlatformConverter:
         if not sml_identifier_list:
             return None
         return SmlIdentification(sml_identifier_list=sml_identifier_list)
+
+
+class SiteConverter:
+    """Converter for sensorML for sites."""
+
+    def __init__(self, site, cv_url, url_lookup):
+        """Init the object."""
+        self.site = site
+        self.cv_url = cv_url
+        self.url_lookup = url_lookup
+
+    def sml_physical_system(self) -> SmlPhysicalSystem:
+        """Return a sml:PhysicalSystem."""
+        physical_system = SmlPhysicalSystem(
+            gml_id=self.gml_id(),
+            gml_name=self.gml_name(),
+            gml_description=self.gml_description(),
+            gml_location=self.gml_location(),
+            sml_contacts=self.sml_contacts(),
+            sml_documentation=self.sml_documentation(),
+            sml_classification=self.sml_classification(),
+            sml_position=self.sml_position(),
+            sml_components=self.sml_components(),
+        )
+        return physical_system
+
+    def gml_id(self) -> str:
+        """Return the gml id of the physical system."""
+        return f"site_{self.site.id}"
+
+    def gml_name(self) -> GmlName:
+        """Return the gml:name."""
+        return GmlName(text=self.site.label)
+
+    def gml_description(self) -> Optional[GmlDescription]:
+        """Return the gml:description."""
+        if not self.site.description:
+            return None
+        return GmlDescription(text=self.site.description)
+
+    def gml_location(self) -> Optional[GmlLocation]:
+        if not self.site.geometry:
+            return None
+        shape = to_shape(self.site.geometry)
+        exterior = shape.exterior
+        gml_pos_list = []
+        # Must be extended if we use more epsg codes.
+        epsg_codes_with_y_x = ["4326"]
+        for x, y in exterior.coords:
+            # Depending on the EPSG code those elements need to be switched
+            if self.site.epsg_code in epsg_codes_with_y_x:
+                gml_pos_list.append(GmlPos(x=y, y=x))
+            else:
+                gml_pos_list.append(GmlPos(x=x, y=y))
+        gml_linear_ring = GmlLinearRing(gml_pos_list=gml_pos_list)
+        gml_exterior = GmlExterior(gml_linear_ring=gml_linear_ring)
+        gml_id = f"{self.gml_id()}_geometry"
+        srs_name = None
+        if self.site.epsg_code:
+            srs_name = f"http://www.opengis.net/def/crs/EPSG/0/{self.site.epsg_code}"
+        gml_polygon = GmlPolygon(
+            gml_id=gml_id, gml_exterior=gml_exterior, srs_name=srs_name
+        )
+        gml_location = GmlLocation(gml_polygon=gml_polygon)
+        return gml_location
+
+    def sml_contacts(self) -> Optional[SmlContacts]:
+        """Return the sml:contacts."""
+        return ContactRoleConverter(
+            self.site.site_contact_roles, self.cv_url
+        ).sml_contacts()
+
+    def sml_documentation(self) -> Optional[SmlDocumentation]:
+        """Return the sml:documentation."""
+        sml_document_list = AttachmentConverter(
+            self.site.site_attachments, self.gml_id()
+        ).sml_document_list()
+        if self.site.website:
+            sml_document = SmlDocument(
+                xlink_arcrole="Website",
+                gmd_ci_online_resource=GmdCiOnlineResource(
+                    gmd_linkage=GmdLinkage(
+                        gmd_url=GmdUrl(
+                            text=self.site.website,
+                        )
+                    ),
+                ),
+            )
+            sml_document_list.append(sml_document)
+        if not sml_document_list:
+            return None
+        return SmlDocumentation(sml_document_list=sml_document_list)
+
+    def sml_classification(self) -> Optional[SmlClassification]:
+        """Return the sml:classification."""
+        sml_classifier_list = []
+        if self.site.site_usage_name:
+            sml_term = SmlTerm(
+                definition="SiteUsage",
+                sml_label=SmlLabel(text="site usage"),
+                sml_value=SmlValue(text=self.site.site_usage_name),
+            )
+            sml_classifier = SmlClassifier(sml_term=sml_term)
+            sml_classifier_list.append(sml_classifier)
+        if self.site.site_type_name:
+            sml_term = SmlTerm(
+                definition="SiteType",
+                sml_label=SmlLabel(text="site type"),
+                sml_value=SmlValue(text=self.site.site_type_name),
+            )
+            sml_classifier = SmlClassifier(sml_term=sml_term)
+            sml_classifier_list.append(sml_classifier)
+        if not sml_classifier_list:
+            return None
+        return SmlClassification(sml_classifier_list=sml_classifier_list)
+
+    def sml_position(self) -> Optional[SmlPosition]:
+        """Return the sml:position."""
+        if any(
+            [
+                self.site.city,
+                self.site.zip_code,
+                self.site.country,
+                self.site.street,
+                self.site.street_number,
+                self.site.building,
+                self.site.room,
+            ]
+        ):
+            gmd_city = None
+            if self.site.city:
+                gco_character_string = GcoCharacterString(text=self.site.city)
+                gmd_city = GmdCity(gco_character_string=gco_character_string)
+            gmd_postal_code = None
+            if self.site.zip_code:
+                gco_character_string = GcoCharacterString(text=self.site.zip_code)
+                gmd_postal_code = GmdPostalCode(
+                    gco_character_string=gco_character_string
+                )
+            gmd_country = None
+            if self.site.country:
+                gco_character_string = GcoCharacterString(text=self.site.country)
+                gmd_country = GmdCountry(gco_character_string=gco_character_string)
+            gmd_delivery_point = None
+            if any(
+                [
+                    self.site.street,
+                    self.site.street_number,
+                    self.site.building,
+                    self.site.room,
+                ]
+            ):
+                parts = []
+                if self.site.street:
+                    parts.append(self.site.street)
+                if self.site.street_number:
+                    parts.append(self.site.street_number)
+                if self.site.building or self.site.room:
+                    parts.append("-")
+                if self.site.building:
+                    parts.append(f"Building: {self.site.building}")
+                if self.site.room:
+                    parts.append(f"Room: {self.site.room}")
+                gco_character_string = GcoCharacterString(text=" ".join(parts))
+                gmd_delivery_point = GmdDeliveryPoint(
+                    gco_character_string=gco_character_string
+                )
+
+            gmd_ci_address = GmdCiAddress(
+                gmd_city=gmd_city,
+                gmd_postal_code=gmd_postal_code,
+                gmd_country=gmd_country,
+                gmd_delivery_point=gmd_delivery_point,
+            )
+            swe_extension = SweExtension(
+                gmd_ci_address=gmd_ci_address,
+            )
+            swe_text = SweText(swe_extension=swe_extension)
+            sml_position = SmlPosition(swe_text=swe_text)
+            return sml_position
+        return None
+
+    def sml_components(self) -> Optional[SmlComponents]:
+        """Return the sml components."""
+        sml_component_list = []
+
+        for configuration in filter_visible(
+            db.session.query(Configuration).filter_by(site_id=self.site.id)
+        ):
+            sml_physical_system = ConfigurationConverter(
+                configuration, self.cv_url, self.url_lookup
+            ).sml_physical_system()
+            sml_component = SmlComponent(
+                sml_physical_system=sml_physical_system,
+                xlink_href=self.url_lookup(configuration),
+                name=cleanup.identifier(configuration.label),
+                xlink_title=f"Link to Configuration {configuration.id}",
+            )
+            sml_component_list.append(sml_component)
+
+        if not sml_component_list:
+            return None
+        return SmlComponents(sml_component_list=sml_component_list)

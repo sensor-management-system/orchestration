@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -6,6 +6,30 @@
 
 """External openapi spec file for the platform endpoints."""
 paths = {
+    "/platforms/{platform_id}/sensorml": {
+        "get": {
+            "tags": ["Platforms"],
+            "parameters": [{"$ref": "#/components/parameters/platform_id"}],
+            "responses": {
+                "200": {
+                    "description": "SensorML response for the platform",
+                    "content": {"application/xml": {}},
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+            },
+            "description": "Retrieve Platform sensorML",
+            "operationId": "RetrievePlatformSensorML",
+        },
+    },
     "/platforms/{platform_id}/archive": {
         "post": {
             "tags": ["Platform"],

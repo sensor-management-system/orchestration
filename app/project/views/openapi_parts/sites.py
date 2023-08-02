@@ -74,6 +74,30 @@ paths = {
             "operationId": "DeleteSitefromsite_0",
         },
     },
+    "/sites/{site_id}/sensorml": {
+        "get": {
+            "tags": ["Sites"],
+            "parameters": [{"$ref": "#/components/parameters/site_id"}],
+            "responses": {
+                "200": {
+                    "description": "SensorML response for the site",
+                    "content": {"application/xml": {}},
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+            },
+            "description": "Retrieve Site sensorML",
+            "operationId": "RetrieveSiteSensorML",
+        },
+    },
     "/sites/{site_id}/archive": {
         "post": {
             "tags": ["Sites"],

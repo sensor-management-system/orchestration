@@ -77,7 +77,7 @@ class TestSensorMLConfiguration(BaseTestCase):
         self.assertEqual(resp.status_code, 401)
 
     def test_get_internal_config_with_user(self):
-        """Ensure we don't show sensorML for internal configurations without a user."""
+        """Ensure we show sensorML for internal configurations with a user."""
         self.configuration.is_internal = True
         self.configuration.is_public = False
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")

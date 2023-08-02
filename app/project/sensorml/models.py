@@ -366,15 +366,80 @@ class GmdElectronicalMailAddress:
 
 
 @dataclass
+class GmdCity:
+    """Represent a gmd:city."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("city")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
+class GmdPostalCode:
+    """Represent a gmd:postalCode."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("postalCode")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
+class GmdCountry:
+    """Represent a gmd:country."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("country")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
+class GmdDeliveryPoint:
+    """Represent a gmd:deliveryPoint."""
+
+    gco_character_string: GcoCharacterString
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gmd.tag("deliveryPoint")
+        element.append(self.gco_character_string.to_xml())
+        return element
+
+
+@dataclass
 class GmdCiAddress:
     """Represent a gmd:CI_Address."""
 
-    gmd_electronical_mail_address: GmdElectronicalMailAddress
+    gmd_electronical_mail_address: Optional[GmdElectronicalMailAddress] = None
+    gmd_city: Optional[GmdCity] = None
+    gmd_postal_code: Optional[GmdPostalCode] = None
+    gmd_country: Optional[GmdCountry] = None
+    gmd_delivery_point: Optional[GmdDeliveryPoint] = None
 
     def to_xml(self):
         """Transform to xml element."""
         element = gmd.tag("CI_Address")
-        element.append(self.gmd_electronical_mail_address.to_xml())
+        if self.gmd_delivery_point:
+            element.append(self.gmd_delivery_point.to_xml())
+        if self.gmd_city:
+            element.append(self.gmd_city.to_xml())
+        if self.gmd_postal_code:
+            element.append(self.gmd_postal_code.to_xml())
+        if self.gmd_country:
+            element.append(self.gmd_country.to_xml())
+        if self.gmd_electronical_mail_address:
+            element.append(self.gmd_electronical_mail_address.to_xml())
         return element
 
 
@@ -831,12 +896,147 @@ class SmlHistory:
 
 
 @dataclass
+class GmlPos:
+    """Represent a gml:pos."""
+
+    x: float
+    y: float
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("pos")
+        element.text = f"{self.x} {self.y}"
+        return element
+
+
+@dataclass
+class GmlLinearRing:
+    """Represent a gml:LinearRing."""
+
+    gml_pos_list: List[GmlPos]
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("LinearRing")
+        for pos in self.gml_pos_list:
+            element.append(pos.to_xml())
+        return element
+
+
+@dataclass
+class GmlExterior:
+    """Represent a gml:exterior."""
+
+    gml_linear_ring: GmlLinearRing
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("exterior")
+        element.append(self.gml_linear_ring.to_xml())
+        return element
+
+
+@dataclass
+class GmlPolygon:
+    """Represent a gml:Polygon."""
+
+    gml_id: str
+    gml_exterior: GmlExterior
+    srs_name: Optional[str] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("Polygon")
+        element.attrib[gml.attrib("id")] = self.gml_id
+        if self.srs_name:
+            element.attrib["srsName"] = self.srs_name
+        element.append(self.gml_exterior.to_xml())
+        return element
+
+
+@dataclass
+class GmlLocation:
+    """Represents a gml:location."""
+
+    gml_polygon: Optional[GmlPolygon] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("location")
+        if self.gml_polygon:
+            element.append(self.gml_polygon.to_xml())
+        return element
+
+
+@dataclass
+class SweExtension:
+    """Represent a swe:extension."""
+
+    gmd_ci_address: Optional[GmdCiAddress] = None
+    gml_polygon: Optional[GmlPolygon] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = swe.tag("extension")
+        if self.gmd_ci_address:
+            element.append(self.gmd_ci_address.to_xml())
+        if self.gml_polygon:
+            element.append(self.gml_polygon.to_xml())
+        return element
+
+
+@dataclass
+class SweValue:
+    """Represent a swe:value."""
+
+    text: str
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = swe.tag("value")
+        element.text = self.text
+        return element
+
+
+@dataclass
+class SweText:
+    """Represent a swe:Text."""
+
+    swe_value: Optional[SweValue] = None
+    swe_extension: Optional[SweExtension] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = swe.tag("Text")
+        if self.swe_value:
+            element.append(self.swe_value.to_xml())
+        if self.swe_extension:
+            element.append(self.swe_extension.to_xml())
+        return element
+
+
+@dataclass
+class SmlPosition:
+    """Represent a sml:position."""
+
+    swe_text: Optional[SweText] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("position")
+        if self.swe_text:
+            element.append(self.swe_text.to_xml())
+        return element
+
+
+@dataclass
 class SmlPhysicalSystem:
     """Represent a sml:PhysicalSystem."""
 
     gml_id: Optional[str] = None
     gml_name: Optional[GmlName] = None
     gml_description: Optional[GmlDescription] = None
+    gml_location: Optional[GmlLocation] = None
     sml_identification: Optional[SmlIdentification] = None
     sml_classification: Optional[SmlClassification] = None
     sml_documentation: Optional[SmlDocumentation] = None
@@ -846,6 +1046,7 @@ class SmlPhysicalSystem:
     sml_valid_time: Optional[SmlValidTime] = None
     sml_history: Optional[SmlHistory] = None
     sml_components: Optional[SmlComponents] = None
+    sml_position: Optional[SmlPosition] = None
 
     def to_xml(self):
         """Transform to xml element."""
@@ -856,6 +1057,8 @@ class SmlPhysicalSystem:
             element.append(self.gml_description.to_xml())
         if self.gml_name:
             element.append(self.gml_name.to_xml())
+        if self.gml_location:
+            element.append(self.gml_location.to_xml())
         if self.sml_valid_time:
             element.append(self.sml_valid_time.to_xml())
         if self.sml_identification:
@@ -872,6 +1075,8 @@ class SmlPhysicalSystem:
             element.append(self.sml_history.to_xml())
         if self.sml_parameters:
             element.append(self.sml_parameters.to_xml())
+        if self.sml_position:
+            element.append(self.sml_position.to_xml())
         if self.sml_components:
             element.append(self.sml_components.to_xml())
 
