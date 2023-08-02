@@ -6,6 +6,8 @@ Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Rubankumar Moorthy (FZJ, r.moorthy@fz-juelich.de)
+- Forschungszentrum Jülich GmbH (FZJ, https://fz-juelich.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -38,6 +40,7 @@ permissions and limitations under the Licence.
     </span>
     <span
       v-else
+      class="word-break-text"
     >
       {{ value | orDefault }}
     </span>
@@ -51,7 +54,7 @@ permissions and limitations under the Licence.
       <v-icon
         small
       >
-        {{ isValueExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+        {{ isValueExpanded ? lessIcon : moreIcon }}
       </v-icon>
     </v-btn>
   </div>
@@ -64,27 +67,47 @@ import { shortenRight } from '@/utils/stringHelpers'
 
 @Component
 export default class ExpandableText extends Vue {
-  @Prop({
-    required: true,
-    type: String
-  })
-  private value!: string
+    @Prop({
+      default: 'mdi-chevron-up',
+      required: false,
+      type: String
+    })
+  private moreIcon!: string
 
-  @Prop({
-    default: 60,
-    required: false,
-    type: Number
-  })
-  private shortenAt!: number
+    @Prop({
+      default: 'mdi-chevron-down',
+      required: false,
+      type: String
+    })
+    private lessIcon!: string
 
-  private isValueExpanded: boolean = false
+    @Prop({
+      required: true,
+      type: String
+    })
+    private value!: string
 
-  get valueLengthExceedsDefault (): boolean {
-    return this.value.length > this.shortenAt
-  }
+    @Prop({
+      default: 60,
+      required: false,
+      type: Number
+    })
+    private shortenAt!: number
 
-  get shortenedValue (): string {
-    return shortenRight(this.value, this.shortenAt)
-  }
+    private isValueExpanded: boolean = false
+
+    get valueLengthExceedsDefault (): boolean {
+      return this.value.length > this.shortenAt
+    }
+
+    get shortenedValue (): string {
+      return shortenRight(this.value, this.shortenAt)
+    }
 }
 </script>
+
+<style scoped>
+.word-break-text {
+  word-break: break-word;
+}
+</style>
