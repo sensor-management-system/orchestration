@@ -242,29 +242,6 @@ export class PlatformApi {
     })
   }
 
-  async searchAll () {
-    this.prepareSearch()
-    // set the permission groups for the serializer
-    if (this.permissionFetcher) {
-      this.serializer.permissionGroups = await this.permissionFetcher()
-    }
-    return this.axiosApi.get(
-      this.basePath,
-      {
-        params: {
-          ...this.commonParams
-        }
-      }
-    ).then((rawResponse: any) => {
-      const rawData = rawResponse.data
-      // We don't ask the api to load the contacts, so we just add dummy objects
-      // to stay with the relationships
-      return this.serializer
-        .convertJsonApiObjectListToModelList(rawData)
-        .map(platformWithMetaToPlatformByAddingDummyObjects)
-    })
-  }
-
   async getSensorML (platformId: string): Promise<Blob> {
     const url = this.basePath + '/' + platformId + '/sensorml'
     const response = await this.axiosApi.get(url)

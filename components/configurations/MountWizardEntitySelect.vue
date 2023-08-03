@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
                       </v-col>
                       <v-col
                         cols="12"
-                        md="7"
+                        md="5"
                         align-self="center"
                       >
                         <v-btn
@@ -78,28 +78,52 @@ permissions and limitations under the Licence.
                           Clear
                         </v-btn>
                       </v-col>
+                      <v-col cols="12" md="7">
+                        <v-subheader>
+                          <page-size-select
+                            v-model="deviceSearchSearchPageSize"
+                            :items="devicePageSizeItems"
+                            label="Items per page"
+                          />
+                        </v-subheader>
+                      </v-col>
                       <ProgressIndicator
                         v-model="isLoading"
                       />
                     </v-row>
-                    <div v-if="devices.length>0 && deviceAvailabilities.length>0">
+                    <div v-if="devicesTotalCount > 0 && deviceAvailabilities.length>0">
                       <v-subheader>
-                        <template v-if="devices.length == 1">
+                        <template v-if="devicesTotalCount == 1">
                           1 device found
                         </template>
                         <template v-else>
-                          {{ devices.length }} devices found
+                          {{ devicesTotalCount }} devices found
                         </template>
                         <v-spacer />
                       </v-subheader>
+                      <v-pagination
+                        v-if="devicesSearchPage != 1 || devicesTotalPages > 1"
+                        v-model="devicesSearchPage"
+                        :disabled="isLoading"
+                        :length="devicesTotalPages"
+                        :total-visible="7"
+                      />
                       <base-mount-list
-                        v-model="syncedSelectedDevices"
+                        :value="syncedSelectedDevices"
                         :items="devices"
                         :availabilities="deviceAvailabilities"
+                        keep-values-that-are-not-in-items
                         @selectEntity="setDeviceSelection($event)"
                       />
+                      <v-pagination
+                        v-if="devicesSearchPage != 1 || devicesTotalPages > 1"
+                        v-model="devicesSearchPage"
+                        :disabled="isLoading"
+                        :length="devicesTotalPages"
+                        :total-visible="7"
+                      />
                     </div>
-                    <div v-else-if="devices.length <=0 && hasSearchedDevice">
+                    <div v-else-if="devicesTotalCount <=0 && hasSearchedDevice">
                       <v-subheader>
                         There are no devices that match your search criteria.
                       </v-subheader>
@@ -122,7 +146,7 @@ permissions and limitations under the Licence.
                       </v-col>
                       <v-col
                         cols="12"
-                        md="7"
+                        md="5"
                         align-self="center"
                       >
                         <v-btn
@@ -140,28 +164,52 @@ permissions and limitations under the Licence.
                           Clear
                         </v-btn>
                       </v-col>
+                      <v-col cols="12" md="7">
+                        <v-subheader>
+                          <page-size-select
+                            v-model="platformSearchSearchPageSize"
+                            :items="platformPageSizeItems"
+                            label="Items per page"
+                          />
+                        </v-subheader>
+                      </v-col>
                       <ProgressIndicator
                         v-model="isLoading"
                       />
                     </v-row>
-                    <div v-if="platforms.length>0 && platformAvailabilities.length>0">
+                    <div v-if="platformsTotalCount > 0 && platformAvailabilities.length>0">
                       <v-subheader>
-                        <template v-if="platforms.length == 1">
+                        <template v-if="platformsTotalCount == 1">
                           1 platform found
                         </template>
                         <template v-else>
-                          {{ platforms.length }} platforms found
+                          {{ platformsTotalCount }} platforms found
                         </template>
                         <v-spacer />
                       </v-subheader>
+                      <v-pagination
+                        v-if="platformsSearchPage != 1 || platformsTotalPages > 1"
+                        v-model="platformsSearchPage"
+                        :disabled="isLoading"
+                        :length="platformsTotalPages"
+                        :total-visible="7"
+                      />
                       <base-mount-list
-                        v-model="syncedSelectedPlatforms"
+                        :value="syncedSelectedPlatforms"
                         :items="platforms"
                         :availabilities="platformAvailabilities"
+                        keep-values-that-are-not-in-items
                         @selectEntity="setPlatformSelection($event)"
                       />
+                      <v-pagination
+                        v-if="platformsSearchPage != 1 || platformsTotalPages > 1"
+                        v-model="platformsSearchPage"
+                        :disabled="isLoading"
+                        :length="platformsTotalPages"
+                        :total-visible="7"
+                      />
                     </div>
-                    <div v-else-if="platforms.length <=0 && hasSearchedPlatform">
+                    <div v-else-if="platformsTotalCount <=0 && hasSearchedPlatform">
                       <v-subheader>
                         There are no platforms that match your search criteria.
                       </v-subheader>
@@ -195,13 +243,13 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, PropSync, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, Vue, PropSync, InjectReactive, Watch } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
-import { DevicesState, SearchDevicesAction, LoadDeviceAvailabilitiesAction } from '@/store/devices'
-import { PlatformsState, SearchPlatformsAction, LoadPlatformAvailabilitiesAction } from '@/store/platforms'
+import { DevicesState, LoadDeviceAvailabilitiesAction, SearchDevicesPaginatedAction } from '@/store/devices'
+import { PlatformsState, SearchPlatformsPaginatedAction, LoadPlatformAvailabilitiesAction } from '@/store/platforms'
 
 import { Device } from '@/models/Device'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
@@ -213,6 +261,7 @@ import BaseMountList from '@/components/shared/BaseMountList.vue'
 
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
+import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 
@@ -222,15 +271,33 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     PlatformsListItem,
     DevicesListItem,
     BaseList,
-    BaseMountList
+    BaseMountList,
+    PageSizeSelect
+
   },
   computed: {
-    ...mapState('devices', ['devices', 'deviceAvailabilities']),
-    ...mapState('platforms', ['platforms', 'platformAvailabilities'])
+    ...mapState('devices', {
+      devices: 'devices',
+      deviceAvailabilities: 'deviceAvailabilities',
+      devicesTotalCount: 'totalCount',
+      devicesTotalPages: 'totalPages'
+    }),
+    ...mapState('platforms', {
+      platforms: 'platforms',
+      platformAvailabilities: 'platformAvailabilities',
+      platformsTotalCount: 'totalCount',
+      platformsTotalPages: 'totalPages'
+    }),
+    ...mapGetters('devices', {
+      devicePageSizeItems: 'pageSizes'
+    }),
+    ...mapGetters('platforms', {
+      platformPageSizeItems: 'pageSizes'
+    })
   },
   methods: {
-    ...mapActions('devices', ['searchDevices', 'loadDeviceAvailabilities']),
-    ...mapActions('platforms', ['searchPlatforms', 'loadPlatformAvailabilities'])
+    ...mapActions('devices', ['searchDevicesPaginated', 'loadDeviceAvailabilities']),
+    ...mapActions('platforms', ['searchPlatformsPaginated', 'loadPlatformAvailabilities'])
   }
 })
 export default class MountWizardEntitySelect extends Vue {
@@ -261,12 +328,17 @@ export default class MountWizardEntitySelect extends Vue {
   @InjectReactive() selectedDate!: DateTime
   @InjectReactive() selectedEndDate!: DateTime | null
 
+  private resetDeviceSearchToFirstPage = false
+  private resetPlatformSearchToFirstPage = false
+
   // vuex definition for typescript check
   devices!: DevicesState['devices']
   platforms!: PlatformsState['platforms']
-  searchDevices!: SearchDevicesAction
+  devicesTotalPages!: DevicesState['totalPages']
+  platformsTotalPages!: PlatformsState['totalPages']
+  searchDevicesPaginated!: SearchDevicesPaginatedAction
   loadDeviceAvailabilities!: LoadDeviceAvailabilitiesAction
-  searchPlatforms!: SearchPlatformsAction
+  searchPlatformsPaginated!: SearchPlatformsPaginatedAction
   loadPlatformAvailabilities!: LoadPlatformAvailabilitiesAction
 
   private tab = null
@@ -278,21 +350,47 @@ export default class MountWizardEntitySelect extends Vue {
   private hasSearchedDevice = false
   private hasSearchedPlatform = false
 
+  mounted () {
+    // Start with some clean state for devices & platforms search
+    this.$store.commit('devices/setDevices', [])
+    this.$store.commit('devices/setTotalCount', 0)
+    this.$store.commit('devices/setPageNumber', 1)
+    this.$store.commit('platforms/setPlatforms', [])
+    this.$store.commit('platforms/setTotalCount', 0)
+    this.$store.commit('platforms/setPageNumber', 1)
+  }
+
   clearBasicSearchPlatforms () {
     this.searchTextPlatforms = ''
     this.hasSearchedPlatform = false
   }
 
   clearBasicSearchDevices () {
-    this.searchTextPlatforms = ''
+    this.searchTextDevices = ''
     this.hasSearchedDevice = false
   }
 
   async searchDevicesForMount () {
+    if (this.resetDeviceSearchToFirstPage) {
+      this.$store.commit('devices/setPageNumber', 1)
+      this.resetDeviceSearchToFirstPage = false
+    }
     try {
       this.isLoading = true
-      await this.searchDevices(this.searchTextDevices)
+      await this.searchDevicesPaginated({
+        searchText: this.searchTextDevices,
+        manufacturer: [],
+        states: [],
+        types: [],
+        permissionGroups: [],
+        onlyOwnDevices: false,
+        includeArchivedDevices: false
+      })
       await this.checkAvailabilities('device')
+      if (this.devicesSearchPage > this.devicesTotalPages) {
+        // triggers also a new search
+        this.devicesSearchPage = this.devicesTotalPages
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
@@ -302,10 +400,28 @@ export default class MountWizardEntitySelect extends Vue {
   }
 
   async searchPlatformsForMount () {
+    if (this.resetPlatformSearchToFirstPage) {
+      this.$store.commit('platforms/setPageNumber', 1)
+      this.resetPlatformSearchToFirstPage = false
+    }
     try {
       this.isLoading = true
-      await this.searchPlatforms(this.searchTextPlatforms)
+
+      // Not bound as methods, as there can be name conflicts with the devices.
+      this.$store.dispatch('platforms/setSearchText', this.searchTextPlatforms)
+      this.$store.dispatch('platforms/setSelectedSearchManufacturers', [])
+      this.$store.dispatch('platforms/setSelectedSearchStates', [])
+      this.$store.dispatch('platforms/setSelectedSearchPlatformTypes', [])
+      this.$store.dispatch('platforms/setSelectedSearchPermissionGroups', [])
+      this.$store.dispatch('platforms/setOnlyOwnPlatforms', false)
+      this.$store.dispatch('platforms/setIncludeArchivedPlatforms', false)
+
+      await this.searchPlatformsPaginated()
       await this.checkAvailabilities('platform')
+      if (this.platformsSearchPage > this.platformsTotalPages) {
+        // triggers also a new search
+        this.platformsSearchPage = this.platformsTotalPages
+      }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
@@ -348,6 +464,64 @@ export default class MountWizardEntitySelect extends Vue {
 
   get selectedEntities () {
     return [...this.syncedSelectedPlatforms, ...this.syncedSelectedDevices]
+  }
+
+  get deviceSearchSearchPageSize (): number {
+    return this.$store.state.devices.pageSize
+  }
+
+  set deviceSearchSearchPageSize (newVal: number) {
+    const oldVal = this.deviceSearchSearchPageSize
+    if (oldVal !== newVal) {
+      this.$store.dispatch('devices/setPageSize', newVal)
+      this.searchDevicesForMount()
+    }
+  }
+
+  get devicesSearchPage (): number {
+    return this.$store.state.devices.pageNumber
+  }
+
+  set devicesSearchPage (newVal: number) {
+    const oldVal = this.devicesSearchPage
+    if (oldVal !== newVal) {
+      this.$store.dispatch('devices/setPageNumber', newVal)
+      this.searchDevicesForMount()
+    }
+  }
+
+  get platformSearchSearchPageSize (): number {
+    return this.$store.state.platforms.pageSize
+  }
+
+  set platformSearchSearchPageSize (newVal: number) {
+    const oldVal = this.platformSearchSearchPageSize
+    if (oldVal !== newVal) {
+      this.$store.dispatch('platforms/setPageSize', newVal)
+      this.searchPlatformsForMount()
+    }
+  }
+
+  get platformsSearchPage (): number {
+    return this.$store.state.platforms.pageNumber
+  }
+
+  set platformsSearchPage (newVal: number) {
+    const oldVal = this.platformsSearchPage
+    if (oldVal !== newVal) {
+      this.$store.dispatch('platforms/setPageNumber', newVal)
+      this.searchPlatformsForMount()
+    }
+  }
+
+  @Watch('searchTextDevices')
+  onSearchTextDevicesChanged () {
+    this.resetDeviceSearchToFirstPage = true
+  }
+
+  @Watch('searchTextPlatforms')
+  onSearchTextPlatformsChanged () {
+    this.resetPlatformSearchToFirstPage = true
   }
 }
 </script>

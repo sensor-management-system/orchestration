@@ -239,7 +239,6 @@ export type RemoveDeviceContactRoleAction = (params: { deviceContactRoleId: stri
 export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
 export type RestoreDeviceAction = (id: string) => Promise<void>
 export type SaveDeviceAction = (device: Device) => Promise<Device>
-export type SearchDevicesAction = (id: string) => Promise<void>
 export type SearchDevicesPaginatedAction = (searchParams: IDeviceSearchParams) => Promise<void>
 export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
 export type SetPageNumberAction = (newPageNumber: number) => void
@@ -286,12 +285,6 @@ const actions: ActionTree<DevicesState, RootState> = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
     commit('setTotalCount', totalCount)
-  },
-  async searchDevices ({ commit }: { commit: Commit }, searchText: string = ''): Promise<void> {
-    const devices = await this.$api.devices
-      .setSearchText(searchText)
-      .searchAll()
-    commit('setDevices', devices)
   },
   async loadDevice ({ commit }: { commit: Commit },
     {

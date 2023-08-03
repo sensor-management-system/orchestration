@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -33,14 +33,15 @@ permissions and limitations under the Licence.
   <div>
     <v-list>
       <v-list-item-group
-        v-model="selectedEntities"
+        :value="value"
         :value-comparator="compareEntities"
         multiple
         color="primary"
+        @change="change"
       >
         <template v-for="(item, i) in items">
           <v-list-item
-            :key="`item-${i}`"
+            :key="itemKey(item, i)"
             :value="item"
             active-class="primary--text text--accent-4"
             :disabled="!isAvailable(item)"
@@ -117,6 +118,12 @@ export default class BaseMountList extends Vue {
   })
   private availabilities!: Availability[]
 
+  @Prop({
+    default: false,
+    type: Boolean
+  })
+  private keepValuesThatAreNotInItems!: boolean
+
   private availabilitiesWithConfigs: Availability[] = this.availabilities
 
   async fetch () {
@@ -134,12 +141,37 @@ export default class BaseMountList extends Vue {
   async created () {
   }
 
-  get selectedEntities (): [Platform | Device] {
-    return this.value
+  itemKey (item: Platform | Device, i: number): string {
+    if (item.id) {
+      return `item-id-${item.id}`
+    }
+    return `item-index-${i}`
   }
 
-  set selectedEntities (entities: [Platform | Device]) {
-    this.$emit('selectEntity', entities)
+  change (entities: [Platform | Device]) {
+    const result: [Platform | Device] = [...entities]
+
+    if (this.keepValuesThatAreNotInItems) {
+      this.value.forEach((x: Platform | Device) => {
+        if (this.items.findIndex(i => i.id === x.id) < 0) {
+          if (entities.findIndex(e => e.id === x.id) < 0) {
+            // Ok, here we are in this case that the new selection does not
+            // contain an entry that is in the value - and the entry is not
+            // covered by the items nor the entities list.
+            // For those cases we want to stay with those values.
+            result.push(x)
+          }
+        }
+      })
+      // You may wonder why this is needed? In some cases this is the default
+      // behaviour, but in some it wasn't.
+      // The problem was on adding the pagination to the mount wizzard.
+      // After switching to another page, there was an emty entities entry
+      // (while we actually wanted the values to stay in the selection).
+      // So, this is the workaround here.
+    }
+
+    this.$emit('selectEntity', result)
   }
 
   getAvailability (entity: Platform | Device): Availability | undefined {
