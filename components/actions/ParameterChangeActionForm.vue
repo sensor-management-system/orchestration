@@ -95,7 +95,6 @@ import { ActionCommonDetails } from '@/models/ActionCommonDetails'
 import { Parameter } from '@/models/Parameter'
 import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 
-import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import CommonActionForm from '@/components/actions/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 
@@ -105,7 +104,6 @@ import DateTimePicker from '@/components/DateTimePicker.vue'
  */
 @Component({
   components: {
-    AutocompleteTextInput,
     CommonActionForm,
     DateTimePicker
   }

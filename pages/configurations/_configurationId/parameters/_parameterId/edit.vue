@@ -50,6 +50,7 @@ permissions and limitations under the Licence.
           ref="parameterForm"
           v-model="valueCopy"
           :units="units"
+          auto-completion-endpoint="configuration-parameter-labels"
         />
       </v-card-text>
       <v-card-actions>

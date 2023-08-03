@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
             :disabled="readonly"
             class="required"
             :rules="[rules.required]"
-            endpoint="device-parameter-labels"
+            :endpoint="autoCompletionEndpoint"
             @input="update('label', $event)"
           />
         </v-col>
@@ -154,6 +154,7 @@ import { Unit } from '@/models/Unit'
 type CvDictKeys = 'units'
 type CvDictTypes = Unit
 type UnitComboboxValue = Unit | string | undefined
+type AutoCompletionEndpoint = 'device-parameter-labels' | 'platform-parameter-labels' | 'configuration-parameter-labels'
 
 /**
  * A class component that renders a form for a device property
@@ -179,6 +180,12 @@ export default class ParameterForm extends mixins(Rules) {
     type: Parameter
   })
   readonly value!: Parameter
+
+  @Prop({
+    type: String,
+    required: true
+  })
+  readonly autoCompletionEndpoint!: AutoCompletionEndpoint
 
   /**
    * a list of Units
