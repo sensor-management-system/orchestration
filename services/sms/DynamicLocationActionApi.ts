@@ -92,6 +92,7 @@ export class DynamicLocationActionApi {
   getRelatedActions (configurationId: string): Promise<DynamicLocationAction[]> {
     const url = '/configurations/' + configurationId + '/dynamic-location-actions'
     const params = {
+      'page[size]': 10000,
       include: [
         'begin_contact',
         'end_contact',

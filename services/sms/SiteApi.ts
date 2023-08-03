@@ -239,7 +239,8 @@ export class SiteApi {
       this.basePath,
       {
         params: {
-          ...this.commonParams
+          ...this.commonParams,
+          'page[size]': 10000
         }
       }
     ).then((rawResponse: any) => {

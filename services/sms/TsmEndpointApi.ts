@@ -47,7 +47,10 @@ export class TsmEndpointApi {
   }
 
   async findAll (): Promise<TsmEndpoint[]> {
-    const rawServerResponse = await this.axiosApi.get(this.basePath)
+    const params = {
+      'page[size]': 10000
+    }
+    const rawServerResponse = await this.axiosApi.get(this.basePath, { params })
     return this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
   }
 
