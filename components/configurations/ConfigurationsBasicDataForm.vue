@@ -134,11 +134,13 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="3">
         <v-autocomplete
+          :value="value.siteId"
           :item-value="(x) => x.id"
           :item-text="(x) => x.label"
           :items="sites"
           label="Site / Lab"
           :readonly="readonly"
+          clearable
           @input="update('siteId',$event)"
         />
       </v-col>
