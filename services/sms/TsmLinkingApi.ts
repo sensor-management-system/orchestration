@@ -50,6 +50,7 @@ export class TsmLinkingApi {
   getRelatedTsmLinkings (configurationId: string): Promise<TsmLinking[]> {
     const url = '/configurations/' + configurationId + '/datastream-links'
     const params = {
+      'page[size]': 10000,
       include: [
         'device_mount_action',
         'device_mount_action.device',

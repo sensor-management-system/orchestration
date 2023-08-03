@@ -85,6 +85,7 @@ export class StaticLocationActionApi {
   getRelatedActions (configurationId: string): Promise<StaticLocationAction[]> {
     const url = '/configurations/' + configurationId + '/static-location-actions'
     const params = {
+      'page[size]': 10000,
       include: [
         'begin_contact',
         'end_contact'

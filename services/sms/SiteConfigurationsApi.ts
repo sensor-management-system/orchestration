@@ -63,7 +63,10 @@ export class SiteConfigurationsApi {
       this.serializer.permissionGroups = await this.permissionFetcher()
     }
     const url = '/sites/' + siteId + '/configurations'
-    const rawServerResponse = await this.axiosApi.get(url)
+    const params = {
+      'page[size]': 10000
+    }
+    const rawServerResponse = await this.axiosApi.get(url, { params })
     const configs = this.serializer.convertJsonApiObjectListToModelList(rawServerResponse.data)
     const result = configs.map(config => configurationWithMetaToConfigurationByThrowingNoErrorOnMissing(config))
     return result
