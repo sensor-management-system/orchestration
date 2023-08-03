@@ -139,7 +139,8 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
-import { LoadSiteAction, SitesState } from '@/store/sites'
+import { SearchSitesAction, SitesState } from '@/store/sites'
+import { Site } from '@/models/Site'
 
 @Component({
   components: {
@@ -150,8 +151,8 @@ import { LoadSiteAction, SitesState } from '@/store/sites'
   filters: {
     dateToDateTimeString
   },
-  computed: mapState('sites', ['site']),
-  methods: mapActions('sites', ['loadSite'])
+  computed: mapState('sites', ['sites']),
+  methods: mapActions('sites', ['searchSites'])
 })
 export default class ConfigurationsBasicDataForm extends Vue {
   private pidTooltipColor: string = 'default'
@@ -166,28 +167,17 @@ export default class ConfigurationsBasicDataForm extends Vue {
   readonly value!: Configuration
 
   // vuex definition for typescript check
-  site!: SitesState['site']
-  loadSite!: LoadSiteAction
+  sites!: SitesState['sites']
+  searchSites!: SearchSitesAction
 
   async mounted () {
     try {
-      await this.$store.dispatch('configurations/loadConfigurationsStates')
+      await this.searchSites()
     } catch (error) {
-      this.$store.commit('snackbar/setError', 'Failed to load configuration states')
-    }
-
-    if (this.value.siteId !== '') {
-      try {
-        await this.loadSite({
-          siteId: this.value.siteId
-        })
-      } catch (error) {
-        this.$store.commit('snackbar/setError', 'Failed to load site / lab')
-      }
+      this.$store.commit('snackbar/setError', 'Failed to load sites')
     }
   }
 
-  get configurationStates () { return this.$store.state.configurations.configurationStates }
   // @ts-ignore
   update (key: string, value: any) {
     // @ts-ignore
@@ -197,6 +187,17 @@ export default class ConfigurationsBasicDataForm extends Vue {
       newObj[key] = value
       this.$emit('input', newObj)
     }
+  }
+
+  get site (): Site | null {
+    if (!this.value.siteId || !this.sites) {
+      return null
+    }
+    const idx = this.sites.findIndex(s => s.id === this.value.siteId)
+    if (idx > -1) {
+      return this.sites[idx]
+    }
+    return null
   }
 
   public validateForm (): boolean {
