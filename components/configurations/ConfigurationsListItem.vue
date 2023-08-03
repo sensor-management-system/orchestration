@@ -46,7 +46,7 @@ permissions and limitations under the Licence.
           v-model="configuration.visibility"
         />
         <permission-group-chips
-          :value="[configuration.permissionGroup]"
+          :value="configuration.permissionGroup ? [configuration.permissionGroup] : []"
           collapsible
         />
       </div>
