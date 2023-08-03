@@ -46,14 +46,16 @@ permissions and limitations under the Licence.
         @locationfound="onLocationFound"
       >
         <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-        <l-marker
-          v-for="(marker, index) in markers"
-          :key="index"
-          :draggable="!readonly"
-          :lat-lng="marker"
-          @update:latLng="updateMarker($event, index)"
-          @click="removeMarker(index)"
-        />
+        <template v-if="!readonly">
+          <l-marker
+            v-for="(marker, index) in markers"
+            :key="index"
+            :draggable="!readonly"
+            :lat-lng="marker"
+            @update:latLng="updateMarker($event, index)"
+            @click="removeMarker(index)"
+          />
+        </template>
         <l-polygon
           ref="polygon"
           :lat-lngs="polygon"
