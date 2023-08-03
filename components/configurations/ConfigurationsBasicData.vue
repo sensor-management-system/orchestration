@@ -41,7 +41,7 @@ permissions and limitations under the Licence.
           v-model="value.visibility"
         />
         <PermissionGroupChips
-          :value="[value.permissionGroup]"
+          :value="value.permissionGroup ? [value.permissionGroup] : []"
         />
       </v-col>
     </v-row>
