@@ -274,8 +274,8 @@ import MountActionDetailsForm from '@/components/configurations/MountActionDetai
     ...mapState('contacts', ['contacts'])
   },
   methods: {
-    ...mapActions('devices', ['searchDevices', 'clearDeviceAvailabilities']),
-    ...mapActions('platforms', ['searchPlatforms', 'clearPlatformAvailabilities']),
+    ...mapActions('devices', ['clearDeviceAvailabilities']),
+    ...mapActions('platforms', ['clearPlatformAvailabilities']),
     ...mapActions('configurations', ['addDeviceMountAction', 'addPlatformMountAction', 'loadConfiguration', 'loadMountingConfigurationForDate'])
   }
 })

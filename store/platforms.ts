@@ -238,7 +238,6 @@ export type RemovePlatformContactRoleAction = (params: {platformContactRoleId: s
 export type ReplacePlatformInPlatformsAction = (newPlatform: Platform) => void
 export type RestorePlatformAction = (id: string) => Promise<void>
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
-export type SearchPlatformsAction = (searchtext: string) => Promise<void>
 export type SearchPlatformsPaginatedAction = () => Promise<void>
 export type SetChosenKindOfPlatformActionAction = (newval: IOptionsForActionType | null) => void
 export type SetIncludeArchivedPlatformsAction = (includeArchivedPlatforms: boolean) => void
@@ -289,14 +288,6 @@ const actions: ActionTree<PlatformsState, RootState> = {
     const totalPages = Math.ceil(totalCount / state.pageSize)
     commit('setTotalPages', totalPages)
     commit('setTotalCount', totalCount)
-  },
-  async searchPlatforms ({
-    commit
-  }: { commit: Commit }, searchtext: string = ''): Promise<void> {
-    const platforms = await this.$api.platforms
-      .setSearchText(searchtext)
-      .searchAll()
-    commit('setPlatforms', platforms)
   },
   async loadPlatform ({ commit }: { commit: Commit },
     {
