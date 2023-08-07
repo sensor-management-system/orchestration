@@ -14,6 +14,11 @@ Added:
 - attachments for sites
 - b2inst support for PIDs
 - FZJ logo
+- sensorML for sites
+- pagination for device & platform search in mount wizzard
+
+Changed:
+- map to display sites: Only polygon instead of map markers
 
 Fixes:
 - improved file upload for mimetypes with encodings
@@ -21,6 +26,11 @@ Fixes:
 - better handling of url parameters for search pages
 - switch to gitlab API to create issues after submitting new suggestions for CV entries
 - ignore ids of users in the full text search
+- improved display of very long links
+- fixed filter for contact names in mount wizzard
+- form to edit site assignment of configurations
+- increased page sizes for some list queries
+
 
 
 ## 1.3.0 - 2023-07-06
