@@ -24,7 +24,13 @@ class ConfigurationAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
-    configuration = db.relationship("Configuration")
+    configuration = db.relationship(
+        "Configuration",
+        backref=db.backref(
+            "configuration_attachments",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
+    )
 
     @hybrid_property
     def is_upload(self):

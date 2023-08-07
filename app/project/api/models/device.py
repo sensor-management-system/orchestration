@@ -49,18 +49,6 @@ class Device(
     status_uri = db.Column(db.String(256), nullable=True)
     status_name = db.Column(db.String(256), nullable=True)
     update_description = db.Column(db.String(256), nullable=True)
-    customfields = db.relationship(
-        "CustomField", cascade="save-update, merge, delete, delete-orphan"
-    )
-    device_properties = db.relationship(
-        "DeviceProperty", cascade="save-update, merge, delete, delete-orphan"
-    )
-    device_attachments = db.relationship(
-        "DeviceAttachment", cascade="save-update, merge, delete, delete-orphan"
-    )
-    device_parameters = db.relationship(
-        "DeviceParameter", cascade="save-update, merge, delete, delete-orphan"
-    )
 
     def to_search_entry(self):
         """Convert the model to an dict to store in the full text search."""

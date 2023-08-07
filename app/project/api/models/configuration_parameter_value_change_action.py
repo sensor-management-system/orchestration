@@ -22,6 +22,10 @@ class ConfigurationParameterValueChangeAction(
         "ConfigurationParameter",
         uselist=False,
         foreign_keys=[configuration_parameter_id],
+        backref=db.backref(
+            "configuration_parameter_value_change_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     date = db.Column(db.DateTime(timezone=True), nullable=False)
     value = db.Column(db.Text, nullable=False)

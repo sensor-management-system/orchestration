@@ -50,12 +50,9 @@ class Site(
     site_usage_uri = db.Column(db.String(256), nullable=True)
     site_usage_name = db.Column(db.String(256), nullable=True)
     website = db.Column(db.String(1024), nullable=True)
-    site_attachments = db.relationship(
-        "SiteAttachment", cascade="save-update, merge, delete, delete-orphan"
-    )
 
-    # SiteContactRoles have a backref to the sites, so there is no need
-    # to put it here explicitly.
+    # SiteContactRoles & SiteAttachments have a backref to the sites,
+    # so there is no need to put it here explicitly.
     # Configurations also have the backrefs.
 
     def validate(self):

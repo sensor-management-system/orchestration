@@ -17,7 +17,13 @@ class DeviceParameterValueChangeAction(db.Model, AuditMixin, IndirectSearchableM
         db.Integer, db.ForeignKey("device_parameter.id"), nullable=False
     )
     device_parameter = db.relationship(
-        "DeviceParameter", uselist=False, foreign_keys=[device_parameter_id]
+        "DeviceParameter",
+        uselist=False,
+        foreign_keys=[device_parameter_id],
+        backref=db.backref(
+            "device_parameter_value_change_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     date = db.Column(db.DateTime(timezone=True), nullable=False)
     value = db.Column(db.Text, nullable=False)

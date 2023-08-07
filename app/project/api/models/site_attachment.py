@@ -20,7 +20,12 @@ class SiteAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     url = db.Column(db.String(1024), nullable=False)
     internal_url = db.Column(db.String(1024), nullable=True)
     site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=False)
-    site = db.relationship("Site")
+    site = db.relationship(
+        "Site",
+        backref=db.backref(
+            "site_attachments", cascade="save-update, merge, delete, delete-orphan"
+        ),
+    )
 
     @hybrid_property
     def is_upload(self):

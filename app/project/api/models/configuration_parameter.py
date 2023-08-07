@@ -19,17 +19,18 @@ class ConfigurationParameter(db.Model, IndirectSearchableMixin, AuditMixin):
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
     configuration = db.relationship(
-        Configuration, uselist=False, foreign_keys=[configuration_id]
+        Configuration,
+        uselist=False,
+        foreign_keys=[configuration_id],
+        backref=db.backref(
+            "configuration_parameters",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     label = db.Column(db.String(256), nullable=False)
     description = db.Column(db.Text, nullable=True)
     unit_uri = db.Column(db.String(256), nullable=True)
     unit_name = db.Column(db.String(256), nullable=True)
-
-    configuration_parameter_value_change_actions = db.relationship(
-        "ConfigurationParameterValueChangeAction",
-        cascade="save-update, merge, delete, delete-orphan",
-    )
 
     def to_search_entry(self):
         """Transform to a dict to store into full text search index."""

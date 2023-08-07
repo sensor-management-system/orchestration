@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -7,22 +7,28 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""Model class for the configuration custom field."""
+
 from .base_model import db
 from .mixin import IndirectSearchableMixin
 
 
 class CustomField(db.Model, IndirectSearchableMixin):
-    """
-    Custom Field class
-    """
+    """Custom field class (for devices)."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     key = db.Column(db.String(256), nullable=False)
     value = db.Column(db.String(1024), nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
-    device = db.relationship("Device")
+    device = db.relationship(
+        "Device",
+        backref=db.backref(
+            "customfields", cascade="save-update, merge, delete, delete-orphan"
+        ),
+    )
 
     def to_search_entry(self):
+        """Transform to a dict to store into full text search index."""
         return {
             "key": self.key,
             "value": self.value,

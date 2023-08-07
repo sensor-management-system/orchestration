@@ -17,7 +17,13 @@ class PlatformParameterValueChangeAction(db.Model, AuditMixin, IndirectSearchabl
         db.Integer, db.ForeignKey("platform_parameter.id"), nullable=False
     )
     platform_parameter = db.relationship(
-        "PlatformParameter", uselist=False, foreign_keys=[platform_parameter_id]
+        "PlatformParameter",
+        uselist=False,
+        foreign_keys=[platform_parameter_id],
+        backref=db.backref(
+            "platform_parameter_value_change_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
     )
     date = db.Column(db.DateTime(timezone=True), nullable=False)
     value = db.Column(db.Text, nullable=False)

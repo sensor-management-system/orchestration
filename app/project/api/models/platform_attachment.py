@@ -22,7 +22,12 @@ class PlatformAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     url = db.Column(db.String(1024), nullable=False)
     internal_url = db.Column(db.String(1024), nullable=True)
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
-    platform = db.relationship("Platform")
+    platform = db.relationship(
+        "Platform",
+        backref=db.backref(
+            "platform_attachments", cascade="save-update, merge, delete, delete-orphan"
+        ),
+    )
 
     @hybrid_property
     def is_upload(self):

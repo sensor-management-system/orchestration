@@ -21,7 +21,12 @@ class DeviceAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     url = db.Column(db.String(1024), nullable=False)
     internal_url = db.Column(db.String(1024), nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
-    device = db.relationship("Device")
+    device = db.relationship(
+        "Device",
+        backref=db.backref(
+            "device_attachments", cascade="save-update, merge, delete, delete-orphan"
+        ),
+    )
 
     @hybrid_property
     def is_upload(self):

@@ -48,12 +48,6 @@ class Platform(
     b2inst_record_id = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     update_description = db.Column(db.String(256), nullable=True)
-    platform_attachments = db.relationship(
-        "PlatformAttachment", cascade="save-update, merge, delete, delete-orphan"
-    )
-    platform_parameters = db.relationship(
-        "PlatformParameter", cascade="save-update, merge, delete, delete-orphan"
-    )
 
     def to_search_entry(self):
         """Convert the model to a dict to store it in a full text search."""
