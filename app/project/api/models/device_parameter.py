@@ -16,16 +16,18 @@ class DeviceParameter(db.Model, IndirectSearchableMixin, AuditMixin):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
-    device = db.relationship(Device, uselist=False, foreign_keys=[device_id])
+    device = db.relationship(
+        Device,
+        uselist=False,
+        foreign_keys=[device_id],
+        backref=db.backref(
+            "device_parameters", cascade="save-update, merge, delete, delete-orphan"
+        ),
+    )
     label = db.Column(db.String(256), nullable=False)
     description = db.Column(db.Text, nullable=True)
     unit_uri = db.Column(db.String(256), nullable=True)
     unit_name = db.Column(db.String(256), nullable=True)
-
-    device_parameter_value_change_actions = db.relationship(
-        "DeviceParameterValueChangeAction",
-        cascade="save-update, merge, delete, delete-orphan",
-    )
 
     def to_search_entry(self):
         """Transform to a dict to store into full text search index."""

@@ -16,16 +16,18 @@ class PlatformParameter(db.Model, IndirectSearchableMixin, AuditMixin):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
-    platform = db.relationship(Platform, uselist=False, foreign_keys=[platform_id])
+    platform = db.relationship(
+        Platform,
+        uselist=False,
+        foreign_keys=[platform_id],
+        backref=db.backref(
+            "platform_parameters", cascade="save-update, merge, delete, delete-orphan"
+        ),
+    )
     label = db.Column(db.String(256), nullable=False)
     description = db.Column(db.Text, nullable=True)
     unit_uri = db.Column(db.String(256), nullable=True)
     unit_name = db.Column(db.String(256), nullable=True)
-
-    platform_parameter_value_change_actions = db.relationship(
-        "PlatformParameterValueChangeAction",
-        cascade="save-update, merge, delete, delete-orphan",
-    )
 
     def to_search_entry(self):
         """Transform to a dict to store into full text search index."""

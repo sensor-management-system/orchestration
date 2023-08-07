@@ -39,15 +39,6 @@ class Configuration(
     update_description = db.Column(db.String(256), nullable=True)
     b2inst_record_id = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
-    configuration_attachments = db.relationship(
-        "ConfigurationAttachment", cascade="save-update, merge, delete, delete-orphan"
-    )
-    configuration_customfields = db.relationship(
-        "ConfigurationCustomField", cascade="save-update, merge, delete, delete-orphan"
-    )
-    configuration_parameters = db.relationship(
-        "ConfigurationParameter", cascade="save-update, merge, delete, delete-orphan"
-    )
     site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=True)
     site = db.relationship("Site", backref="configurations")
 
