@@ -33,9 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -155,7 +152,7 @@ import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsTreeNodeDetail from '@/components/configurations/ConfigurationsTreeNodeDetail.vue'
 import ConfigurationsTreeTitle from '@/components/configurations/ConfigurationsTreeTitle.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 
 @Component({
@@ -164,7 +161,6 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
     ConfigurationsTreeTitle,
     ConfigurationsTreeView,
     DateTimePicker,
-    ProgressIndicator,
     DeleteDialog
   },
   computed: {
@@ -175,16 +171,20 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
       'configurationMountingActionsForDate',
       'configurationDynamicLocationActions'
     ]),
-    ...mapGetters('configurations', ['mountActionDateItems'])
+    ...mapGetters('configurations', ['mountActionDateItems']),
+    ...mapState('progressindicator', ['isLoading'])
   },
-  methods: mapActions('configurations', [
-    'setSelectedDate',
-    'loadMountingActions',
-    'loadMountingConfigurationForDate',
-    'deleteDeviceMountAction',
-    'deletePlatformMountAction',
-    'loadConfigurationDynamicLocationActions'
-  ])
+  methods: {
+    ...mapActions('configurations', [
+      'setSelectedDate',
+      'loadMountingActions',
+      'loadMountingConfigurationForDate',
+      'deleteDeviceMountAction',
+      'deletePlatformMountAction',
+      'loadConfigurationDynamicLocationActions'
+    ]),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   @InjectReactive()
@@ -193,7 +193,6 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private selectedNode: ConfigurationsTreeNode | null = null
   private tree: ConfigurationsTree = new ConfigurationsTree()
 
-  private isLoading: boolean = false
   private isDeleteDialogShown: boolean = false
 
   @ProvideReactive()
@@ -211,6 +210,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   private deletePlatformMountAction!: DeletePlatformMountActionAction
   private configurationDynamicLocationActions!: ConfigurationsState['configurationDynamicLocationActions']
   private loadConfigurationDynamicLocationActions!: LoadConfigurationDynamicLocationActionsAction
+  setLoading!: SetLoadingAction
 
   created () {
     if (this.$route.query.date) {
@@ -220,7 +220,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadMountingActions(this.configurationId),
         this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate }),
@@ -231,7 +231,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -285,7 +285,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
       return
     }
     const action = this.selectedNode.unpack()
-    this.isLoading = true
+    this.setLoading(true)
     try {
       if ('isDeviceMountAction' in action && action.isDeviceMountAction()) {
         await this.deleteDeviceMountAction(action.id)
@@ -297,7 +297,7 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Mount Action could not be deleted.')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
       this.selectedNode = null
       this.isDeleteDialogShown = false
       this.$router.replace({
@@ -336,13 +336,13 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   @Watch('selectedDate')
   async onPropertyChanged (_value: DateTime, _oldValue: DateTime) {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
       this.createTreeWithConfigAsRootNode()
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

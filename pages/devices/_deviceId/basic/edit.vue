@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -87,7 +83,7 @@ import { CreatePidAction, DevicesState, LoadDeviceAction, SaveDeviceAction } fro
 import { Device } from '@/models/Device'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
@@ -96,17 +92,19 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   components: {
     SaveAndCancelButtons,
     DeviceBasicDataForm,
-    ProgressIndicator,
     NavigationGuardDialog,
     NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: mapState('devices', ['device']),
-  methods: mapActions('devices', ['saveDevice', 'loadDevice', 'createPid'])
+  methods: {
+    ...mapActions('devices', ['saveDevice', 'loadDevice', 'createPid']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
   private deviceCopy: Device | null = null
-  private isSaving: boolean = false
+
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
@@ -119,7 +117,7 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
   saveDevice!: SaveDeviceAction
   loadDevice!: LoadDeviceAction
   createPid!: CreatePidAction
-
+  setLoading!: SetLoadingAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -169,7 +167,7 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const savedDevice = await this.saveDevice(this.deviceCopy)
       if (this.editOptions.persistentIdentifierShouldBeCreated) {
         savedDevice.persistentIdentifier = await this.createPid(savedDevice.id)
@@ -187,7 +185,7 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

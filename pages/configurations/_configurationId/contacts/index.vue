@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -93,13 +89,12 @@ import { LoadConfigurationContactRolesAction, RemoveConfigurationContactRoleActi
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import HintCard from '@/components/HintCard.vue'
 
 @Component({
   components: {
     HintCard,
-    ProgressIndicator,
     DotMenuActionDelete,
     ContactRoleListItem,
     BaseList
@@ -108,17 +103,19 @@ import HintCard from '@/components/HintCard.vue'
     ...mapState('configurations', ['configurationContactRoles']),
     ...mapState('vocabulary', ['cvContactRoles'])
   },
-  methods: mapActions('configurations', ['loadConfigurationContactRoles', 'removeConfigurationContactRole'])
+  methods: {
+    ...mapActions('configurations', ['loadConfigurationContactRoles', 'removeConfigurationContactRole']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationShowContactPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
-
   // vuex definition for typescript check
   loadConfigurationContactRoles!: LoadConfigurationContactRolesAction
   removeConfigurationContactRole!: RemoveConfigurationContactRoleAction
+  setLoading!: SetLoadingAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -126,7 +123,7 @@ export default class ConfigurationShowContactPage extends Vue {
 
   async removeContactRole (contactRoleId: string) {
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.removeConfigurationContactRole({
         configurationContactRoleId: contactRoleId
       })
@@ -135,7 +132,7 @@ export default class ConfigurationShowContactPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

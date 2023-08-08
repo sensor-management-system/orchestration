@@ -30,11 +30,7 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      color="primary"
-    />
-    <NuxtChild :is-fetching="isLoading" />
+    <NuxtChild />
   </div>
 </template>
 
@@ -52,18 +48,17 @@ import {
   LoadAggregationtypesAction
 } from '@/store/vocabulary'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
   methods: {
     ...mapActions('devices', ['loadDeviceMeasuredQuantities']),
-    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits', 'loadAggregationtypes'])
+    ...mapActions('vocabulary', ['loadCompartments', 'loadSamplingMedia', 'loadProperties', 'loadUnits', 'loadMeasuredQuantityUnits', 'loadAggregationtypes']),
+    ...mapActions('progressindicator', ['setLoading'])
+
   }
 })
 export default class DevicePropertiesPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
   loadCompartments!: LoadCompartmentsAction
@@ -72,10 +67,11 @@ export default class DevicePropertiesPage extends Vue {
   loadUnits!: LoadUnitsAction
   loadMeasuredQuantityUnits!: LoadMeasuredQuantityUnitsAction
   loadAggregationtypes!: LoadAggregationtypesAction
+  setLoading!: SetLoadingAction
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadDeviceMeasuredQuantities(this.deviceId),
         this.loadCompartments(),
@@ -88,7 +84,7 @@ export default class DevicePropertiesPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch measured quantities')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

@@ -267,7 +267,7 @@ permissions and limitations under the Licence.
       v-if="actionToDelete"
       v-model="showDeleteDialog"
       title="Delete Action"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -278,7 +278,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import {
   DeleteConfigurationGenericAction,
@@ -290,7 +290,7 @@ import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.v
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
-
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { ITimelineAction } from '@/utils/configurationInterfaces'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
@@ -307,7 +307,11 @@ import { Attachment } from '@/models/Attachment'
     DotMenuActionDelete,
     DeleteDialog
   },
-  methods: mapActions('configurations', ['deleteConfigurationGenericAction', 'deleteConfigurationParameterChangeAction', 'loadAllConfigurationActions'])
+  computed: mapState('progressindicator', ['isLoading']),
+  methods: {
+    ...mapActions('configurations', ['deleteConfigurationGenericAction', 'deleteConfigurationParameterChangeAction', 'loadAllConfigurationActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationsTimelineActionCard extends Vue {
   @InjectReactive()
@@ -325,7 +329,6 @@ export default class ConfigurationsTimelineActionCard extends Vue {
   })
   readonly isPublic!: boolean
 
-  private isSaving: boolean = false
   private showDeleteDialog: boolean = false
   private genericActionToDelete: GenericAction | null = null
   private parameterChangeActionToDelete: ParameterChangeAction | null = null
@@ -334,6 +337,8 @@ export default class ConfigurationsTimelineActionCard extends Vue {
   deleteConfigurationGenericAction!: DeleteConfigurationGenericAction
   deleteConfigurationParameterChangeAction!: DeleteConfigurationParameterChangeActionAction
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -395,13 +400,14 @@ export default class ConfigurationsTimelineActionCard extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteConfigurationGenericAction(this.genericActionToDelete.id)
       this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
+      this.closeDialog()
     }
   }
 
@@ -410,13 +416,13 @@ export default class ConfigurationsTimelineActionCard extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteConfigurationParameterChangeAction(this.parameterChangeActionToDelete.id)
       this.$store.commit('snackbar/setSuccess', 'Parameter change action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Parameter change action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

@@ -159,14 +159,7 @@ permissions and limitations under the Licence.
       </v-tab-item>
     </v-tabs-items>
 
-    <v-progress-circular
-      v-if="loading"
-      class="progress-spinner"
-      color="primary"
-      indeterminate
-    />
-
-    <div v-if="sites.length <= 0 && !loading">
+    <div v-if="sites.length <= 0 && !isLoading">
       <p class="text-center">
         There are no sites / labs that match your search criteria.
       </p>
@@ -182,17 +175,7 @@ permissions and limitations under the Licence.
             <FoundEntries v-model="totalCount" entity-name="site / lab" entity-name-plural="sites & labs" />
             <v-spacer />
 
-            <template v-if="sites.length > 0">
-              <v-dialog v-model="processing" max-width="100">
-                <v-card>
-                  <v-card-text>
-                    <div class="text-center pt-2">
-                      <v-progress-circular indeterminate />
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </v-dialog>
-            </template>
+            <template v-if="sites.length > 0" />
           </v-subheader>
         </v-col>
 
@@ -202,7 +185,7 @@ permissions and limitations under the Licence.
         >
           <v-pagination
             v-model="page"
-            :disabled="loading"
+            :disabled="isLoading"
             :length="totalPages"
             :total-visible="7"
             @input="runSearch"
@@ -253,7 +236,7 @@ permissions and limitations under the Licence.
       </BaseList>
       <v-pagination
         v-model="page"
-        :disabled="loading"
+        :disabled="isLoading"
         :length="totalPages"
         :total-visible="7"
         @input="runSearch"
@@ -336,6 +319,7 @@ import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
 import FoundEntries from '@/components/shared/FoundEntries.vue'
 import { Visibility } from '@/models/Visibility'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 @Component({
   components: {
@@ -357,6 +341,7 @@ import { Visibility } from '@/models/Visibility'
   },
   computed: {
     ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
+    ...mapState('progressindicator', ['isLoading']),
     ...mapState('appbar', ['activeTab']),
     ...mapState('sites', ['sites', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'site']),
     ...mapGetters('sites', ['pageSizes']),
@@ -378,13 +363,12 @@ import { Visibility } from '@/models/Visibility'
       'getSensorMLUrl'
     ]),
     ...mapActions('permissions', ['loadPermissionGroups']),
-    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes']),
+    ...mapActions('progressindicator', ['setLoading'])
 
   }
 })
 export default class SearchSitesPage extends Vue {
-  private loading = false
-  private processing = false
   private selectedSearchSiteUsages: SiteUsage[] = []
   private selectedSearchSiteTypes: SiteType[] = []
   private selectedSearchPermissionGroups: PermissionGroup[] = []
@@ -430,11 +414,13 @@ export default class SearchSitesPage extends Vue {
   replaceSiteInSites !: ReplaceSiteInSitesAction
   exportAsSensorML!: ExportAsSensorMLAction
   getSensorMLUrl!: GetSensorMLUrlAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   async created () {
     this.initializeAppBar()
     try {
-      this.loading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadPermissionGroups(),
         this.loadSiteUsages(),
@@ -445,7 +431,7 @@ export default class SearchSitesPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of sites & labs failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
@@ -539,14 +525,14 @@ export default class SearchSitesPage extends Vue {
 
   async runSearch (): Promise<void> {
     try {
-      this.loading = true
+      this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchSitesPaginated(this.searchParams)
       this.setPageAndSizeInUrl()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of sites & labs failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
@@ -565,14 +551,14 @@ export default class SearchSitesPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.deleteSite(this.siteToDelete.id)
       this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Site / Lab deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Site / Lab could not be deleted')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }
@@ -592,7 +578,7 @@ export default class SearchSitesPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.archiveSite(this.siteToArchive.id)
       await this.loadSite({
         siteId: this.siteToArchive.id
@@ -602,14 +588,14 @@ export default class SearchSitesPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Site / Lab could not be archived')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeArchiveDialog()
     }
   }
 
   async runRestoreSite (site: Site) {
     if (site.id) {
-      this.loading = true
+      this.setLoading(true)
       try {
         await this.restoreSite(site.id)
         await this.loadSite({
@@ -620,7 +606,7 @@ export default class SearchSitesPage extends Vue {
       } catch (error) {
         this.$store.commit('snackbar/setError', 'Site / Lab could not be restored')
       } finally {
-        this.loading = false
+        this.setLoading(false)
       }
     }
   }

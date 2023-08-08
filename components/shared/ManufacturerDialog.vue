@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -145,7 +141,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { Manufacturer } from '@/models/Manufacturer'
@@ -156,20 +152,22 @@ import { AddManufacturerAction, LoadGlobalProvenancesAction, VocabularyState } f
     ...mapState('vocabulary', ['manufacturers', 'globalProvenances'])
   },
   methods: {
-    ...mapActions('vocabulary', ['addManufacturer', 'loadGlobalProvenances'])
+    ...mapActions('vocabulary', ['addManufacturer', 'loadGlobalProvenances']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class ManufacturerDialog extends mixins(Rules) {
   private suggestion = new Manufacturer()
-  private isSaving: boolean = false
   private addManufacturer!: AddManufacturerAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
   private manufacturers!: VocabularyState['manufacturers']
   private globalProvenances!: VocabularyState['globalProvenances']
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -223,7 +221,7 @@ export default class ManufacturerDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     const suggestion = Manufacturer.createFromObject(this.suggestion)
     this.showDialog = false
     try {
@@ -233,7 +231,7 @@ export default class ManufacturerDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the manufacturer')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

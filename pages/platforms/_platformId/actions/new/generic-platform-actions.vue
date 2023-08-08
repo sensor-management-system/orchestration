@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -79,23 +75,26 @@ import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   middleware: ['auth'],
-  components: { ProgressIndicator, SaveAndCancelButtons, GenericActionForm },
+  components: { SaveAndCancelButtons, GenericActionForm },
   computed: mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
-  methods: mapActions('platforms', ['addPlatformGenericAction', 'loadAllPlatformActions'])
+  methods: {
+    ...mapActions('platforms', ['addPlatformGenericAction', 'loadAllPlatformActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class NewGenericPlatformAction extends mixins(CheckEditAccess) {
   private genericPlatformAction: GenericAction = new GenericAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   platformAttachements!: PlatformsState['platformAttachments']
   chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
   addPlatformGenericAction!: AddPlatformGenericActionAction
   loadAllPlatformActions!: LoadAllPlatformActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -139,7 +138,7 @@ export default class NewGenericPlatformAction extends mixins(CheckEditAccess) {
     this.genericPlatformAction.actionTypeUrl = this.chosenKindOfPlatformAction?.uri || ''
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addPlatformGenericAction({ platformId: this.platformId, genericPlatformAction: this.genericPlatformAction })
       this.loadAllPlatformActions(this.platformId)
       const successMessage = this.genericPlatformAction.actionTypeName ?? 'Action'
@@ -148,7 +147,7 @@ export default class NewGenericPlatformAction extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

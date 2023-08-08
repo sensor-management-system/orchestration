@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -147,7 +143,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { SiteUsage } from '@/models/SiteUsage'
@@ -158,20 +154,22 @@ import { AddSiteUsageAction, LoadGlobalProvenancesAction, VocabularyState } from
     ...mapState('vocabulary', ['siteUsages', 'globalProvenances'])
   },
   methods: {
-    ...mapActions('vocabulary', ['addSiteUsage', 'loadGlobalProvenances'])
+    ...mapActions('vocabulary', ['addSiteUsage', 'loadGlobalProvenances']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class SiteUsageDialog extends mixins(Rules) {
   private suggestion = new SiteUsage()
-  private isSaving: boolean = false
   private addSiteUsage!: AddSiteUsageAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
   private siteUsages!: VocabularyState['siteUsages']
   private globalProvenances!: VocabularyState['globalProvenances']
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -225,7 +223,7 @@ export default class SiteUsageDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     // Copy before closing the dialog
     const siteUsage = SiteUsage.createFromObject(this.suggestion)
     this.showDialog = false
@@ -236,7 +234,7 @@ export default class SiteUsageDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the site / lab usage')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

@@ -33,14 +33,11 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-dialog
+    v-if="!isLoading"
     v-model="showDialog"
     max-width="600px"
     persistent
   >
-    <ProgressIndicator
-      v-model="saving"
-      dark
-    />
     <v-card>
       <v-card-title class="headline">
         User agreement
@@ -83,17 +80,20 @@ permissions and limitations under the Licence.
 </template>
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 import { AcceptTermsOfUseAction } from '@/store/permissions'
 
 @Component({
-  components: {
-    ProgressIndicator
+  computed: {
+    ...mapState('progressindicator', ['isLoading'])
   },
-  methods: mapActions('permissions', ['acceptTermsOfUse'])
+  methods: {
+    ...mapActions('permissions', ['acceptTermsOfUse']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class TermsOfUseAcceptanceDialog extends Vue {
   @Prop({
@@ -102,7 +102,6 @@ export default class TermsOfUseAcceptanceDialog extends Vue {
   })
   readonly value!: boolean
 
-  private saving = false
   private willAcceptTermsOfUse = false
   private willAcceptPrivacyPolicy = false
 
@@ -111,6 +110,7 @@ export default class TermsOfUseAcceptanceDialog extends Vue {
   }
 
   acceptTermsOfUse!: AcceptTermsOfUseAction
+  setLoading!: SetLoadingAction
 
   get showDialog (): boolean {
     return this.value
@@ -121,14 +121,15 @@ export default class TermsOfUseAcceptanceDialog extends Vue {
   }
 
   async sendAccept () {
-    this.saving = true
+    this.setLoading(true)
+    this.showDialog = false
     try {
       await this.acceptTermsOfUse()
+      this.$store.commit('snackbar/setSuccess', 'Accepted the terms of use.')
     } catch {
       this.$store.commit('snackbar/setError', 'Accepting the terms of use failed.')
     } finally {
-      this.saving = false
-      this.showDialog = false
+      this.setLoading(false)
     }
   }
 

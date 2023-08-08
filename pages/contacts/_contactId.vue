@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild
       v-if="contact"
     />
@@ -46,18 +43,18 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { SetTitleAction } from '@/store/appbar'
 import { ContactsState, LoadContactAction } from '@/store/contacts'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { CanDeleteContactGetter, CanModifyContactGetter } from '@/store/permissions'
 
 @Component({
-  components: { ProgressIndicator },
   computed: {
     ...mapState('contacts', ['contact']),
     ...mapGetters('permissions', ['canModifyContact', 'canDeleteContact'])
   },
   methods: {
     ...mapActions('contacts', ['loadContact']),
-    ...mapActions('appbar', ['setTitle'])
+    ...mapActions('appbar', ['setTitle']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ContactShowPage extends Vue {
@@ -67,14 +64,13 @@ export default class ContactShowPage extends Vue {
   @ProvideReactive()
     deletable: boolean = false
 
-  private isLoading: boolean = false
-
   // vuex definition for typescript check
   contact!: ContactsState['contact']
   loadContact!: LoadContactAction
   setTitle!: SetTitleAction
   canModifyContact!: CanModifyContactGetter
   canDeleteContact!: CanDeleteContactGetter
+  setLoading!: SetLoadingAction
 
   async created () {
     if (!this.$auth.loggedIn) {
@@ -85,14 +81,14 @@ export default class ContactShowPage extends Vue {
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       this.initializeAppBar()
       await this.loadContact(this.contactId)
       this.updatePermissions(this.contact)
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading contact failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

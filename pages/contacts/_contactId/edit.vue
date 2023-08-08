@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card flat>
       <v-card-actions>
         <v-spacer />
@@ -72,7 +69,7 @@ import { ContactsState, LoadContactAction, SaveContactAction } from '@/store/con
 import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHelpers'
@@ -80,18 +77,17 @@ import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHe
 @Component({
   components: {
     SaveAndCancelButtons,
-    ContactBasicDataForm,
-    ProgressIndicator
+    ContactBasicDataForm
   },
   middleware: ['auth'],
   computed: mapState('contacts', ['contact']),
   methods: {
     ...mapActions('contacts', ['saveContact', 'loadContact']),
-    ...mapActions('appbar', ['setTitle'])
+    ...mapActions('appbar', ['setTitle']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ContactEditPage extends mixins(CheckEditAccess) {
-  private isLoading: boolean = false
   private contactCopy: Contact = new Contact()
 
   // vuex definition for typescript check
@@ -99,6 +95,7 @@ export default class ContactEditPage extends mixins(CheckEditAccess) {
   saveContact!: SaveContactAction
   loadContact!: LoadContactAction
   setTitle!: SetTitleAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -138,7 +135,7 @@ export default class ContactEditPage extends mixins(CheckEditAccess) {
       return
     }
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.saveContact(this.contactCopy)
       this.loadContact(this.contactId)
       this.$router.push('/contacts/' + this.contactId)
@@ -157,7 +154,7 @@ export default class ContactEditPage extends mixins(CheckEditAccess) {
 
       this.$store.commit('snackbar/setError', msg)
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

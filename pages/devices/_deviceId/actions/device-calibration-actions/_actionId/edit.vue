@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-select
       value="Device Calibration"
       :items="['Device Calibration']"
@@ -90,23 +86,26 @@ import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 @Component({
   components: {
-    ProgressIndicator,
     SaveAndCancelButtons,
     DeviceCalibrationActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed: mapState('devices', ['deviceCalibrationAction', 'deviceAttachments', 'deviceMeasuredQuantities']),
-  methods: mapActions('devices', ['loadDeviceCalibrationAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'loadDeviceMeasuredQuantities', 'updateDeviceCalibrationAction'])
+  computed: {
+    ...mapState('devices', ['deviceCalibrationAction', 'deviceAttachments', 'deviceMeasuredQuantities']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('devices', ['loadDeviceCalibrationAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'loadDeviceMeasuredQuantities', 'updateDeviceCalibrationAction']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAccess) {
   private action: DeviceCalibrationAction = new DeviceCalibrationAction()
-  private isSaving = false
-  private isLoading = false
 
   // vuex definition for typescript check
   deviceCalibrationAction!: DevicesState['deviceCalibrationAction']
@@ -117,6 +116,8 @@ export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAcc
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
   updateDeviceCalibrationAction!: UpdateDeviceCalibrationAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -142,7 +143,7 @@ export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAcc
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadDeviceCalibrationAction(this.actionId),
         this.loadDeviceAttachments(this.deviceId),
@@ -154,7 +155,7 @@ export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAcc
     } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -166,10 +167,6 @@ export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAcc
     return this.$route.params.actionId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async save () {
     if (!(this.$refs.deviceCalibrationActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
@@ -177,7 +174,7 @@ export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAcc
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.updateDeviceCalibrationAction({
         deviceId: this.deviceId,
         calibrationAction: this.action
@@ -187,7 +184,7 @@ export default class DeviceCalibrationActionEditPage extends mixins(CheckEditAcc
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 }

@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -93,7 +89,7 @@ import { mapActions, mapState } from 'vuex'
 import { RemovePlatformContactRoleAction, LoadPlatformContactRolesAction } from '@/store/platforms'
 
 import HintCard from '@/components/HintCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -103,24 +99,25 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
     DotMenuActionDelete,
     ContactRoleListItem,
     BaseList,
-    ProgressIndicator,
     HintCard
   },
   computed: {
     ...mapState('platforms', ['platformContactRoles']),
     ...mapState('vocabulary', ['cvContactRoles'])
   },
-  methods: mapActions('platforms', ['removePlatformContactRole', 'loadPlatformContactRoles'])
+  methods: {
+    ...mapActions('platforms', ['removePlatformContactRole', 'loadPlatformContactRoles']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class PlatformShowContactPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
-
   // vuex definition for typescript check
   removePlatformContactRole!: RemovePlatformContactRoleAction
   loadPlatformContactRoles!: LoadPlatformContactRolesAction
+  setLoading!: SetLoadingAction
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -128,7 +125,7 @@ export default class PlatformShowContactPage extends Vue {
 
   async removeContactRole (contactRoleId: string) {
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.removePlatformContactRole({
         platformContactRoleId: contactRoleId
       })
@@ -137,7 +134,7 @@ export default class PlatformShowContactPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

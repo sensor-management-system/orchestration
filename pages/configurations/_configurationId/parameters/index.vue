@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      dark
-    />
     <v-card-actions
       v-if="editable"
     >
@@ -41,7 +37,7 @@ permissions and limitations under the Licence.
       <v-btn
         color="primary"
         small
-        :disabled="isFetching"
+        :disabled="isLoading"
         :to="'/configurations/' + configurationId + '/parameters/new'"
       >
         Add Parameter
@@ -112,7 +108,7 @@ permissions and limitations under the Licence.
       v-if="editable && parameterToDelete"
       v-model="showDeleteDialog"
       title="Delete Parameter"
-      :disabled="isInProgress"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -122,7 +118,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Prop } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import {
@@ -144,7 +140,7 @@ import ExpandableText from '@/components/shared/ExpandableText.vue'
 import HintCard from '@/components/HintCard.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
 import ParameterValueTable from '@/components/shared/ParameterValueTable.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 @Component({
   components: {
@@ -155,30 +151,25 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
     ExpandableText,
     HintCard,
     ParameterListItem,
-    ParameterValueTable,
-    ProgressIndicator
+    ParameterValueTable
   },
   computed: {
     ...mapState('vocabulary', ['units']),
-    ...mapState('configurations', ['configurationParameters', 'configurationParameterChangeActions'])
+    ...mapState('configurations', ['configurationParameters', 'configurationParameterChangeActions']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('configurations', ['deleteConfigurationParameter', 'loadConfigurationParameters'])
+    ...mapActions('configurations', ['deleteConfigurationParameter', 'loadConfigurationParameters']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
 })
-export default class ConfigurationPropertyShowPage extends Vue {
+export default class ConfigurationParameterShowPage extends Vue {
   @InjectReactive()
   private editable!: boolean
 
-  @Prop({
-    type: Boolean
-  })
-  private isFetching!: boolean
-
-  private isInProgress = false
-
   private showDeleteDialog = false
+
   private parameterToDelete: Parameter | null = null
 
   // vuex definition for typescript check
@@ -187,6 +178,8 @@ export default class ConfigurationPropertyShowPage extends Vue {
   configurationParameterChangeActions!: ConfigurationsState['configurationParameterChangeActions']
   loadConfigurationParameters!: LoadConfigurationParametersAction
   deleteConfigurationParameter!: DeleteConfigurationParameterAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -207,7 +200,7 @@ export default class ConfigurationPropertyShowPage extends Vue {
       return
     }
     try {
-      this.isInProgress = true
+      this.setLoading(true)
 
       await this.deleteConfigurationParameter(this.parameterToDelete.id)
       this.loadConfigurationParameters(this.configurationId)
@@ -219,7 +212,7 @@ export default class ConfigurationPropertyShowPage extends Vue {
         this.$store.commit('snackbar/setError', 'Failed to delete parameter')
       }
     } finally {
-      this.isInProgress = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }

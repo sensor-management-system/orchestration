@@ -31,9 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card flat>
       <center>
         <v-alert
@@ -70,13 +67,12 @@ import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, Ca
 
 import { Configuration } from '@/models/Configuration'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ModificationInfo from '@/components/ModificationInfo.vue'
 import { ConfigurationsState } from '@/store/configurations'
 
 @Component({
   components: {
-    ProgressIndicator,
     ModificationInfo
   },
   computed: {
@@ -85,13 +81,12 @@ import { ConfigurationsState } from '@/store/configurations'
   },
   methods: {
     ...mapActions('configurations', ['loadConfiguration']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class ConfigurationsIdPage extends Vue {
-  private isLoading: boolean = false
-
   @ProvideReactive()
     editable: boolean = false
 
@@ -114,10 +109,11 @@ export default class ConfigurationsIdPage extends Vue {
   canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  setLoading!: SetLoadingAction
 
   async created () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       this.initializeAppBar()
       await this.loadConfiguration(this.configurationId)
 
@@ -139,7 +135,7 @@ export default class ConfigurationsIdPage extends Vue {
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Loading configuration failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

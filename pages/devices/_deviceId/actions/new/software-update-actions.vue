@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -78,24 +74,26 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   middleware: ['auth'],
-  components: { ProgressIndicator, SaveAndCancelButtons, SoftwareUpdateActionForm },
+  components: { SaveAndCancelButtons, SoftwareUpdateActionForm },
   computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
-  methods: mapActions('devices', ['addDeviceSoftwareUpdateAction', 'loadAllDeviceActions'])
+  methods: {
+    ...mapActions('devices', ['addDeviceSoftwareUpdateAction', 'loadAllDeviceActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class NewDeviceSoftwareUpdateActions extends mixins(CheckEditAccess) {
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
   deviceAttachments!: DevicesState['deviceAttachments']
   addDeviceSoftwareUpdateAction!: AddDeviceSoftwareUpdateAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
-
+  setLoading!: SetLoadingAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -135,7 +133,7 @@ export default class NewDeviceSoftwareUpdateActions extends mixins(CheckEditAcce
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addDeviceSoftwareUpdateAction({
         deviceId: this.deviceId,
         softwareUpdateAction: this.softwareUpdateAction
@@ -146,7 +144,7 @@ export default class NewDeviceSoftwareUpdateActions extends mixins(CheckEditAcce
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

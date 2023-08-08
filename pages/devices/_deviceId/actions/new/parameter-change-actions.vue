@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -76,28 +72,30 @@ import {
 import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 
 import ParameterChangeActionForm from '@/components/actions/ParameterChangeActionForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   middleware: ['auth'],
   components: {
     SaveAndCancelButtons,
-    ProgressIndicator,
     ParameterChangeActionForm
   },
   computed: mapState('devices', ['chosenKindOfDeviceAction', 'deviceParameters']),
-  methods: mapActions('devices', ['addDeviceParameterChangeAction', 'loadAllDeviceActions'])
+  methods: {
+    ...mapActions('devices', ['addDeviceParameterChangeAction', 'loadAllDeviceActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
   private parameterChangeAction: ParameterChangeAction = new ParameterChangeAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   deviceParameters!: DevicesState['deviceParameters']
   chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
   addDeviceParameterChangeAction!: AddDeviceParameterChangeActionAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -145,7 +143,7 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addDeviceParameterChangeAction({
         parameterId: this.parameterChangeAction.parameter.id,
         action: this.parameterChangeAction
@@ -156,7 +154,7 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

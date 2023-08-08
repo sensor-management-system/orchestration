@@ -34,9 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card flat>
       <center>
         <v-alert
@@ -72,12 +69,11 @@ import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { DevicesState, LoadDeviceAction } from '@/store/devices'
 import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ModificationInfo from '@/components/ModificationInfo.vue'
 
 @Component({
   components: {
-    ProgressIndicator,
     ModificationInfo
   },
   computed: {
@@ -86,8 +82,8 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   methods: {
     ...mapActions('devices', ['loadDevice']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
-
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class DevicePage extends Vue {
@@ -103,8 +99,6 @@ export default class DevicePage extends Vue {
   @ProvideReactive()
     restoreable: boolean = false
 
-  private isLoading: boolean = false
-
   // vuex definition for typescript check
   device!: DevicesState['device']
   loadDevice!: LoadDeviceAction
@@ -115,6 +109,7 @@ export default class DevicePage extends Vue {
   canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  setLoading!: SetLoadingAction
 
   mounted () {
     this.initializeAppBar()
@@ -122,7 +117,7 @@ export default class DevicePage extends Vue {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadDevice({
         deviceId: this.deviceId,
         includeContacts: false,
@@ -147,7 +142,7 @@ export default class DevicePage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of device failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

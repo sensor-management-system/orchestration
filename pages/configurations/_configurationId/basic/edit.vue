@@ -34,10 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-card
       flat
     >
@@ -91,7 +87,7 @@ import { Configuration, IConfiguration } from '@/models/Configuration'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 import { CreatePidAction, LoadConfigurationAction, SaveConfigurationAction } from '@/store/configurations'
@@ -101,19 +97,19 @@ import { CreatePidAction, LoadConfigurationAction, SaveConfigurationAction } fro
     ConfigurationsBasicDataForm,
     NavigationGuardDialog,
     NonModelOptionsForm,
-    ProgressIndicator,
     SaveAndCancelButtons
   },
   middleware: ['auth'],
   computed: mapState('configurations', ['configuration']),
   methods: {
     ...mapActions('configurations', ['saveConfiguration', 'loadConfiguration', 'createPid']),
-    ...mapActions('appbar', ['setTitle'])
+    ...mapActions('appbar', ['setTitle']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) {
   private configurationCopy: Configuration = new Configuration()
-  private isLoading: boolean = false
+
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
@@ -127,7 +123,7 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
   loadConfiguration!: LoadConfigurationAction
   createPid!: CreatePidAction
   setTitle!: SetTitleAction
-
+  setLoading!: SetLoadingAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -171,7 +167,7 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.saveConfiguration(this.configurationCopy)
       if (this.editOptions.persistentIdentifierShouldBeCreated) {
         await this.createPid(this.configurationId)
@@ -184,7 +180,7 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

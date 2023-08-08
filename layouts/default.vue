@@ -34,6 +34,11 @@ permissions and limitations under the Licence.
 -->
 <template>
   <v-app>
+    <div>
+      <ProgressIndicator
+        :value="isLoading"
+      />
+    </div>
     <terms-of-use-acceptance-dialog
       :value="(!infoPage) && needToAcceptTermsOfUse"
       @logout="logout"
@@ -352,19 +357,22 @@ permissions and limitations under the Licence.
 
 import CookieLaw from 'vue-cookie-law'
 import { mapActions, mapState, mapGetters } from 'vuex'
-import AppBarTabsExtension from '@/components/AppBarTabsExtension'
+
 import AppBarEditModeContent from '@/components/AppBarEditModeContent'
+import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import LogoFooter from '@/components/LogoFooter'
+import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import TermsOfUseAcceptanceDialog from '@/components/TermsOfUseAcceptanceDialog.vue'
 
 import { saveCurrentRoute } from '@/utils/loginHelpers'
-import TermsOfUseAcceptanceDialog from '@/components/TermsOfUseAcceptanceDialog.vue'
 
 export default {
   components: {
-    AppBarTabsExtension,
     AppBarEditModeContent,
+    AppBarTabsExtension,
     CookieLaw,
     LogoFooter,
+    ProgressIndicator,
     TermsOfUseAcceptanceDialog
   },
   data () {
@@ -385,6 +393,7 @@ export default {
   },
   computed: {
     ...mapState('defaultlayout', ['fullWidth']),
+    ...mapState('progressindicator', ['isLoading']),
     ...mapGetters('permissions', ['needToAcceptTermsOfUse']),
     browserTitle () {
       if (this.title === this.appBarTitle) {
@@ -566,4 +575,4 @@ export default {
     margin-bottom: 0 !important;
   }
 
-</style>>
+</style>

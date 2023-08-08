@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -77,28 +73,30 @@ import {
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
   middleware: ['auth'],
   components: {
     SaveAndCancelButtons,
-    ProgressIndicator,
     SoftwareUpdateActionForm
   },
   computed: mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
-  methods: mapActions('platforms', ['addPlatformSoftwareUpdateAction', 'loadAllPlatformActions'])
+  methods: {
+    ...mapActions('platforms', ['addPlatformSoftwareUpdateAction', 'loadAllPlatformActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class NewPlatformSoftwareUpdateActions extends mixins(CheckEditAccess) {
   private softwareUpdateAction: SoftwareUpdateAction = new SoftwareUpdateAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   platformAttachments!: PlatformsState['platformAttachments']
   chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
   addPlatformSoftwareUpdateAction!: AddPlatformSoftwareUpdateActionAction
   loadAllPlatformActions!: LoadAllPlatformActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -141,7 +139,7 @@ export default class NewPlatformSoftwareUpdateActions extends mixins(CheckEditAc
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addPlatformSoftwareUpdateAction(
         {
           platformId: this.platformId,
@@ -153,7 +151,7 @@ export default class NewPlatformSoftwareUpdateActions extends mixins(CheckEditAc
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

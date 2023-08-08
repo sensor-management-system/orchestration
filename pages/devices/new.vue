@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-card
       flat
     >
@@ -77,7 +73,7 @@ import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CreatePidAction, SaveDeviceAction } from '@/store/devices'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SerialNumberWarningDialog from '@/components/shared/SerialNumberWarningDialog.vue'
@@ -88,20 +84,20 @@ import { Device } from '@/models/Device'
   components: {
     SaveAndCancelButtons,
     DeviceBasicDataForm,
-    ProgressIndicator,
     NonModelOptionsForm,
     SerialNumberWarningDialog
   },
   middleware: ['auth'],
   methods: {
     ...mapActions('devices', ['saveDevice', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class DeviceNewPage extends Vue {
   private device: Device = new Device()
-  private isLoading: boolean = false
+
   private showSerialNumberWarning = false
   private wantsToSaveWithoutSerialNumber = false
   private createOptions: NonModelOptions = {
@@ -113,6 +109,7 @@ export default class DeviceNewPage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
+  setLoading!: SetLoadingAction
 
   created () {
     this.initializeAppBar()
@@ -137,7 +134,7 @@ export default class DeviceNewPage extends Vue {
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       const savedDevice = await this.saveDevice(this.device)
       if (this.createOptions.persistentIdentifierShouldBeCreated) {
         savedDevice.persistentIdentifier = await this.createPid(savedDevice.id)
@@ -147,7 +144,7 @@ export default class DeviceNewPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

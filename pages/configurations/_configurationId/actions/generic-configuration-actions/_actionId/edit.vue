@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
     <v-select
       :value="action.actionTypeName"
@@ -89,24 +85,27 @@ import {
 import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
-    ProgressIndicator,
     GenericActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed: mapState('configurations', ['configurationGenericAction', 'configurationAttachments']),
-  methods: mapActions('configurations', ['loadConfigurationGenericAction', 'loadAllConfigurationActions', 'loadConfigurationAttachments', 'updateConfigurationGenericAction'])
+  computed: {
+    ...mapState('configurations', ['configurationGenericAction', 'configurationAttachments']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('configurations', ['loadConfigurationGenericAction', 'loadAllConfigurationActions', 'loadConfigurationAttachments', 'updateConfigurationGenericAction']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class GenericConfigurationActionEditPage extends mixins(CheckEditAccess) {
   private action: GenericAction = new GenericAction()
-  private isSaving = false
-  private isLoading = false
 
   // vuex definition for typescript check
   configurationGenericAction!: ConfigurationsState['configurationGenericAction']
@@ -115,6 +114,8 @@ export default class GenericConfigurationActionEditPage extends mixins(CheckEdit
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   updateConfigurationGenericAction!: UpdateConfigurationGenericActionAction
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -140,7 +141,7 @@ export default class GenericConfigurationActionEditPage extends mixins(CheckEdit
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadConfigurationGenericAction(this.actionId),
         this.loadConfigurationAttachments(this.configurationId)
@@ -151,7 +152,7 @@ export default class GenericConfigurationActionEditPage extends mixins(CheckEdit
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -163,17 +164,13 @@ export default class GenericConfigurationActionEditPage extends mixins(CheckEdit
     return this.$route.params.actionId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async save () {
     if (!(this.$refs.genericConfigurationActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.updateConfigurationGenericAction({
         configurationId: this.configurationId,
         genericAction: this.action
@@ -184,7 +181,7 @@ export default class GenericConfigurationActionEditPage extends mixins(CheckEdit
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

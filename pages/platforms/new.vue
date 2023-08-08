@@ -35,10 +35,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-card
       flat
     >
@@ -78,7 +74,7 @@ import { mapActions } from 'vuex'
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CreatePidAction, SavePlatformAction } from '@/store/platforms'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
@@ -90,20 +86,20 @@ import { Platform } from '@/models/Platform'
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
-    ProgressIndicator,
     NonModelOptionsForm,
     SerialNumberWarningDialog
   },
   middleware: ['auth'],
   methods: {
     ...mapActions('platforms', ['savePlatform', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class PlatformNewPage extends Vue {
   private platform: Platform = new Platform()
-  private isLoading: boolean = false
+
   private showSerialNumberWarning = false
   private wantsToSaveWithoutSerialNumber = false
   private createOptions: NonModelOptions = {
@@ -115,6 +111,7 @@ export default class PlatformNewPage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
+  setLoading!: SetLoadingAction
 
   created () {
     this.initializeAppBar()
@@ -139,7 +136,7 @@ export default class PlatformNewPage extends Vue {
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       const savedPlatform = await this.savePlatform(this.platform)
       if (this.createOptions.persistentIdentifierShouldBeCreated) {
         savedPlatform.persistentIdentifier = await this.createPid(savedPlatform.id)
@@ -149,7 +146,7 @@ export default class PlatformNewPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

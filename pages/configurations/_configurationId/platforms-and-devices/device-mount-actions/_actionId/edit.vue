@@ -34,9 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card
       v-if="mountInfoAvailable"
       flat
@@ -104,13 +101,12 @@ import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import MountActionEditForm from '@/components/configurations/MountActionEditForm.vue'
 
 @Component({
   components: {
-    ProgressIndicator,
     NavigationGuardDialog,
     SaveAndCancelButtons,
     MountActionEditForm
@@ -125,7 +121,8 @@ import MountActionEditForm from '@/components/configurations/MountActionEditForm
   },
   methods: {
     ...mapActions('configurations', ['loadMountingConfigurationForDate', 'loadDeviceMountAction', 'updateDeviceMountAction']),
-    ...mapActions('contacts', ['loadAllContacts'])
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationEditDeviceMountActionsPage extends mixins(CheckEditAccess) {
@@ -144,12 +141,15 @@ export default class ConfigurationEditDeviceMountActionsPage extends mixins(Chec
   private showNavigationWarning: boolean = false
   private to: VueRouter.RawLocation | null = null
   private mountActionHasChanged = false
-  private isLoading = false
+
   private tree: ConfigurationsTree = new ConfigurationsTree()
   private formIsValid: boolean = true
   private beginDateErrorMessage: string = ''
   private endDateErrorMessage: string = ''
   private availabilities: Availability[] = []
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -178,7 +178,7 @@ export default class ConfigurationEditDeviceMountActionsPage extends mixins(Chec
   }
 
   async loadActionAndTree (): Promise<void> {
-    this.isLoading = true
+    this.setLoading(true)
     try {
       await Promise.all([
         this.loadDeviceMountAction(this.mountActionId),
@@ -193,7 +193,7 @@ export default class ConfigurationEditDeviceMountActionsPage extends mixins(Chec
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of mount action failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -246,7 +246,7 @@ export default class ConfigurationEditDeviceMountActionsPage extends mixins(Chec
     if (!this.formIsValid) {
       return
     }
-    this.isLoading = true
+    this.setLoading(true)
     try {
       await this.updateDeviceMountAction({ configurationId: this.configurationId, deviceMountAction: this.deviceMountAction })
       this.mountActionHasChanged = false
@@ -254,7 +254,7 @@ export default class ConfigurationEditDeviceMountActionsPage extends mixins(Chec
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Saving of mount action failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

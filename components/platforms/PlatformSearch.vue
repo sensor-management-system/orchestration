@@ -34,9 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-tabs-items
       v-model="activeTab"
     >
@@ -197,12 +194,12 @@ import ManufacturerSelect from '@/components/ManufacturerSelect.vue'
 import StatusSelect from '@/components/StatusSelect.vue'
 import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permissions'
 import { SetActiveTabAction } from '@/store/appbar'
 
 @Component({
-  components: { ProgressIndicator, PlatformTypeSelect, StatusSelect, ManufacturerSelect, PermissionGroupSearchSelect },
+  components: { PlatformTypeSelect, StatusSelect, ManufacturerSelect, PermissionGroupSearchSelect },
   computed: {
     ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus']),
     ...mapState('platforms', [
@@ -218,6 +215,7 @@ import { SetActiveTabAction } from '@/store/appbar'
     ...mapGetters('permissions', ['permissionGroups'])
   },
   methods: {
+    ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadPlatformtypes', 'loadManufacturers']),
     ...mapActions('platforms', [
       'searchPlatformsPaginated',
@@ -236,8 +234,6 @@ import { SetActiveTabAction } from '@/store/appbar'
   }
 })
 export default class PlatformSearch extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   selectedSearchManufacturers!: PlatformsState['selectedSearchManufacturers']
   selectedSearchStates!: PlatformsState['selectedSearchStates']
@@ -266,6 +262,7 @@ export default class PlatformSearch extends Vue {
   manufacturers!: VocabularyState['manufacturers']
   permissionGroups!: PermissionsState['permissionGroups']
   setActiveTab!: SetActiveTabAction
+  setLoading!: SetLoadingAction
 
   get activeTab (): number | null {
     return this.$store.state.appbar.activeTab
@@ -339,7 +336,7 @@ export default class PlatformSearch extends Vue {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadEquipmentstatus(),
         this.loadPlatformtypes(),
@@ -351,7 +348,7 @@ export default class PlatformSearch extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -402,14 +399,14 @@ export default class PlatformSearch extends Vue {
 
   async runSearch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       this.setPageNumber(1) // important for query
       this.initUrlQueryParams()
       await this.searchPlatformsPaginated()
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

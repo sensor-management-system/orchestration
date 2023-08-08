@@ -34,10 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-card
       flat
     >
@@ -78,25 +74,25 @@ import { Rules } from '@/mixins/Rules'
 import { Contact } from '@/models/Contact'
 
 import ContactBasicDataForm from '@/components/ContactBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHelpers'
 
 @Component({
   components: {
     SaveAndCancelButtons,
-    ContactBasicDataForm,
-    ProgressIndicator
+    ContactBasicDataForm
   },
   middleware: ['auth'],
   methods: {
     ...mapActions('contacts', ['saveContact']),
-    ...mapActions('appbar', ['setDefaults', 'setTitle'])
+    ...mapActions('appbar', ['setDefaults', 'setTitle']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ContactNewPage extends mixins(Rules) {
   private contact: Contact = new Contact()
-  private isLoading: boolean = false
+
   private redirect: string = ''
 
   // vuex definition for typescript check
@@ -104,6 +100,7 @@ export default class ContactNewPage extends mixins(Rules) {
   saveContact!: SaveContactAction
   setDefaults!: SetDefaultsAction
   setTitle!: SetTitleAction
+  setLoading!: SetLoadingAction
 
   created () {
     /** this page accepts the query parameter 'redirect' as a html encoded URI
@@ -131,7 +128,7 @@ export default class ContactNewPage extends mixins(Rules) {
     const redirect: string | (string | null)[] = this.$route.query.redirect
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       const savedContact = await this.saveContact(this.contact)
       this.$store.commit('snackbar/setSuccess', 'Contact created')
       // sends the user back to the previous contact creation page
@@ -154,7 +151,7 @@ export default class ContactNewPage extends mixins(Rules) {
         .dispatch(e)
       this.$store.commit('snackbar/setError', msg)
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 }

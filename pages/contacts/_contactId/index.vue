@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-card flat>
       <center>
         <v-alert
@@ -118,19 +114,22 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ContactBasicData from '@/components/ContactBasicData.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   components: {
     DeleteDialog,
     ContactBasicData,
     DotMenuActionDelete,
-    DotMenu,
-    ProgressIndicator
+    DotMenu
   },
-  computed: mapState('contacts', ['contact']),
+  computed: {
+    ...mapState('contacts', ['contact']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
   methods: {
-    ...mapActions('contacts', ['deleteContact', 'loadContact'])
+    ...mapActions('contacts', ['deleteContact', 'loadContact']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ContactIndexPage extends Vue {
@@ -141,21 +140,21 @@ export default class ContactIndexPage extends Vue {
     deletable!: boolean
 
   showDeleteDialog = false
-  isLoading = false
 
   // vuex definition for typescript check
   contact!: ContactsState['contact']
   deleteContact!: DeleteContactAction
   loadContact!: LoadContactAction
+  setLoading!: SetLoadingAction
 
   async created () {
     // We load the contact in the upper context (that component that
     // include this page here is a child)
     // However, we can't be sure that this was already loaded
     // so we need to load it here in order to show the right name
-    this.isLoading = true
+    this.setLoading(true)
     await this.loadContact(this.contactId)
-    this.isLoading = false
+    this.setLoading(false)
   }
 
   get contactId () {
@@ -175,14 +174,14 @@ export default class ContactIndexPage extends Vue {
       return
     }
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.deleteContact(this.contact.id)
       this.$router.push('/contacts')
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }

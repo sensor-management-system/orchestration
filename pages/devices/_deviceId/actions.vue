@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
@@ -43,26 +40,27 @@ import { mapActions } from 'vuex'
 
 import { LoadAllDeviceActionsAction } from '@/store/devices'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
-  methods: mapActions('devices', ['loadAllDeviceActions'])
+  methods: {
+    ...mapActions('devices', ['loadAllDeviceActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceActionsPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+  setLoading!: SetLoadingAction
 
   async created () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadAllDeviceActions(this.deviceId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch actions')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

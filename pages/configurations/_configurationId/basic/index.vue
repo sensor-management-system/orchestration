@@ -34,10 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card flat>
       <v-card-actions>
         <v-spacer />
@@ -113,7 +109,7 @@ permissions and limitations under the Licence.
       <DeleteDialog
         v-model="showDeleteDialog"
         title="Delete Configuration"
-        :disabled="isSaving"
+        :disabled="isLoading"
         @cancel="closeDialog"
         @delete="deleteAndCloseDialog"
       >
@@ -146,7 +142,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import ConfigurationArchiveDialog from '@/components/configurations/ConfigurationArchiveDialog.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
@@ -156,7 +152,6 @@ import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurati
 
 @Component({
   components: {
-    ProgressIndicator,
     DeleteDialog,
     DotMenuActionDelete,
     DotMenuActionSensorML,
@@ -167,15 +162,21 @@ import { ArchiveConfigurationAction, LoadConfigurationAction, RestoreConfigurati
     DotMenuActionRestore,
     DownloadDialog
   },
-  computed: mapState('configurations', ['configuration']),
-  methods: mapActions('configurations', [
-    'deleteConfiguration',
-    'loadConfiguration',
-    'archiveConfiguration',
-    'restoreConfiguration',
-    'exportAsSensorML',
-    'getSensorMLUrl'
-  ])
+  computed: {
+    ...mapState('configurations', ['configuration']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('configurations', [
+      'deleteConfiguration',
+      'loadConfiguration',
+      'archiveConfiguration',
+      'restoreConfiguration',
+      'exportAsSensorML',
+      'getSensorMLUrl'
+    ]),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationShowBasicPage extends Vue {
   @InjectReactive()
@@ -190,8 +191,6 @@ export default class ConfigurationShowBasicPage extends Vue {
   @InjectReactive()
     restoreable!: boolean
 
-  private isSaving = false
-
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
   private showDownloadDialog: boolean = false
@@ -204,6 +203,7 @@ export default class ConfigurationShowBasicPage extends Vue {
   restoreConfiguration!: RestoreConfigurationAction
   exportAsSensorML!: ExportAsSensorMLAction
   getSensorMLUrl!: GetSensorMLUrlAction
+  setLoading!: SetLoadingAction
 
   get configurationId () {
     return this.$route.params.configurationId
@@ -255,14 +255,14 @@ export default class ConfigurationShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteConfiguration(this.configuration.id)
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
       this.$router.push('/configurations')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -280,14 +280,14 @@ export default class ConfigurationShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.archiveConfiguration(this.configuration.id)
       await this.loadConfiguration(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Configuration archived')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Configuration could not be archived')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.showArchiveDialog = false
     }
   }
@@ -296,7 +296,7 @@ export default class ConfigurationShowBasicPage extends Vue {
     if (this.configuration === null || this.configuration.id === null) {
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     try {
       await this.restoreConfiguration(this.configuration.id)
       await this.loadConfiguration(this.configurationId)
@@ -304,7 +304,7 @@ export default class ConfigurationShowBasicPage extends Vue {
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Configuration could not be restored')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

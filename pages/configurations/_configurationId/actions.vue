@@ -35,9 +35,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
@@ -50,20 +47,17 @@ import {
   LoadAllConfigurationActionsAction
 } from '@/store/configurations'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: {
-    ProgressIndicator
-  },
-  methods: mapActions('configurations', [
-    'loadAllConfigurationActions'
-  ])
+  methods: {
+    ...mapActions('configurations', ['loadAllConfigurationActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationActions extends Vue {
-  private isLoading = false
-
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
+  setLoading!: SetLoadingAction
 
   head () {
     return {
@@ -77,12 +71,12 @@ export default class ConfigurationActions extends Vue {
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadAllConfigurationActions(this.configurationId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch actions')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 }

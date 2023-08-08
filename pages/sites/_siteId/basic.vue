@@ -40,10 +40,12 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 import { LoadSiteUsagesAction, LoadSiteTypesAction } from '@/store/vocabulary'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   methods: {
-    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes'])
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class SiteBasicPage extends Vue {
@@ -53,15 +55,14 @@ export default class SiteBasicPage extends Vue {
     }
   }
 
-  private isLoading = false
-
   // vuex definition for typescript check
   loadSiteUsages!: LoadSiteUsagesAction
   loadSiteTypes!: LoadSiteTypesAction
+  setLoading!: SetLoadingAction
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadSiteUsages(),
         this.loadSiteTypes()
@@ -69,7 +70,7 @@ export default class SiteBasicPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch types or usages')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 }

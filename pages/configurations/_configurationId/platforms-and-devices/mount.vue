@@ -32,9 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card-actions>
       <v-card-title class="pl-0">
         Mount devices or platforms
@@ -74,12 +71,11 @@ import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
 
 import MountWizard from '@/components/configurations/MountWizard.vue'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
 @Component({
   components: {
-    ProgressIndicator,
     MountWizard,
     NavigationGuardDialog
   },
@@ -89,7 +85,8 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
   },
   methods: {
     ...mapActions('configurations', ['loadConfiguration']),
-    ...mapActions('contacts', ['loadAllContacts'])
+    ...mapActions('contacts', ['loadAllContacts']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationMountPlatformsAndDevicesPage extends mixins(CheckEditAccess) {
@@ -97,11 +94,11 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends mixins(Ch
   loadConfiguration!: LoadConfigurationAction
   contacts!: ContactsState['contacts']
   loadAllContacts!: LoadAllContactsAction
+  setLoading!: SetLoadingAction
 
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
   private hasSaved = false
-  private isLoading = false
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -128,14 +125,14 @@ export default class ConfigurationMountPlatformsAndDevicesPage extends mixins(Ch
   async created () {
     if (!this.configuration) {
       try {
-        this.isLoading = true
+        this.setLoading(true)
         await this.loadAllContacts()
         await this.loadConfiguration(this.configurationId)
         // })
       } catch (_e) {
         this.$store.commit('snackbar/setError', 'Failed to fetch configuration')
       } finally {
-        this.isLoading = false
+        this.setLoading(false)
       }
     }
   }

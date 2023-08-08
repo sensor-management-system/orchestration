@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
@@ -46,27 +43,25 @@ import {
   LoadConfigurationParameterChangeActionsAction
 } from '@/store/configurations'
 import { LoadUnitsAction } from '@/store/vocabulary'
-
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
   methods: {
     ...mapActions('configurations', ['loadConfigurationParameters', 'loadConfigurationParameterChangeActions']),
-    ...mapActions('vocabulary', ['loadUnits'])
+    ...mapActions('vocabulary', ['loadUnits']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationParametersPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadConfigurationParameters!: LoadConfigurationParametersAction
   loadConfigurationParameterChangeActions!: LoadConfigurationParameterChangeActionsAction
   loadUnits!: LoadUnitsAction
+  setLoading!: SetLoadingAction
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadConfigurationParameters(this.configurationId),
         this.loadConfigurationParameterChangeActions(this.configurationId),
@@ -75,7 +70,7 @@ export default class ConfigurationParametersPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch parameters')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

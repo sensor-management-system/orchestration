@@ -34,10 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <!-- just to be consistent with the new mask, we show the selected action type as an disabled v-select here -->
     <v-select
       :value="action.actionTypeName"
@@ -89,24 +85,27 @@ import {
 import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
-    ProgressIndicator,
     GenericActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed: mapState('platforms', ['platformGenericAction', 'platformAttachments']),
-  methods: mapActions('platforms', ['loadPlatformGenericAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformGenericAction'])
+  computed: {
+    ...mapState('platforms', ['platformGenericAction', 'platformAttachments']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('platforms', ['loadPlatformGenericAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformGenericAction']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class EditPlatformAction extends mixins(CheckEditAccess) {
   private action: GenericAction = new GenericAction()
-  private isSaving = false
-  private isLoading = false
 
   // vuex definition for typescript check
   platforms!: PlatformsState['platforms']
@@ -115,6 +114,8 @@ export default class EditPlatformAction extends mixins(CheckEditAccess) {
   loadPlatformGenericAction!: LoadPlatformGenericActionAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
   updatePlatformGenericAction!: UpdatePlatformGenericActionAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -140,7 +141,7 @@ export default class EditPlatformAction extends mixins(CheckEditAccess) {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadPlatformGenericAction(this.actionId),
         this.loadPlatformAttachments(this.platformId)
@@ -151,7 +152,7 @@ export default class EditPlatformAction extends mixins(CheckEditAccess) {
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -163,10 +164,6 @@ export default class EditPlatformAction extends mixins(CheckEditAccess) {
     return this.$route.params.actionId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async save () {
     if (!(this.$refs.genericPlatformActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
@@ -174,7 +171,7 @@ export default class EditPlatformAction extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.updatePlatformGenericAction({ platformId: this.platformId, genericPlatformAction: this.action })
       this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', `${this.action.actionTypeName} updated`)
@@ -182,7 +179,7 @@ export default class EditPlatformAction extends mixins(CheckEditAccess) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

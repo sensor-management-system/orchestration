@@ -34,10 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-card
       flat
     >
@@ -74,7 +70,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { Site } from '@/models/Site'
 import { SaveSiteAction } from '@/store/sites'
 import { SetTabsAction, SetTitleAction } from '@/store/appbar'
@@ -84,7 +80,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
 
 @Component({
   components: {
-    SaveAndCancelButtons, SiteBasicDataForm, ProgressIndicator
+    SaveAndCancelButtons, SiteBasicDataForm
   },
   middleware: ['auth'],
   computed: {
@@ -95,12 +91,12 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
     ...mapActions('sites', ['saveSite']),
     ...mapActions('vocabulary', ['loadEpsgCodes', 'loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
 
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class SiteNewPage extends Vue {
-  private isLoading = false
   private site: Site = new Site()
 
   // vuex definition for typescript check
@@ -114,6 +110,7 @@ export default class SiteNewPage extends Vue {
   loadSiteTypes!: LoadSiteTypesAction
   loadCountries!: LoadCountriesAction
   countryNames!: CountryNamesGetter
+  setLoading!: SetLoadingAction
 
   async created () {
     this.initializeAppBar()
@@ -146,7 +143,7 @@ export default class SiteNewPage extends Vue {
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       const savedSite = await this.saveSite(this.site)
 
       this.$store.commit('snackbar/setSuccess', 'Site / Lab created')
@@ -154,7 +151,7 @@ export default class SiteNewPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

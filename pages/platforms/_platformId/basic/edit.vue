@@ -35,10 +35,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -88,7 +84,7 @@ import { PlatformsState, LoadPlatformAction, SavePlatformAction, CreatePidAction
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
@@ -97,17 +93,19 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
-    ProgressIndicator,
     NavigationGuardDialog,
     NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: mapState('platforms', ['platform']),
-  methods: mapActions('platforms', ['loadPlatform', 'savePlatform', 'createPid'])
+  methods: {
+    ...mapActions('platforms', ['loadPlatform', 'savePlatform', 'createPid']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
   private platformCopy: Platform | null = null
-  private isSaving: boolean = false
+
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
@@ -120,7 +118,7 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
   savePlatform!: SavePlatformAction
   loadPlatform!: LoadPlatformAction
   createPid!: CreatePidAction
-
+  setLoading!: SetLoadingAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -170,7 +168,7 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const savedPlatform = await this.savePlatform(this.platformCopy)
       if (this.editOptions.persistentIdentifierShouldBeCreated) {
         savedPlatform.persistentIdentifier = await this.createPid(savedPlatform.id)
@@ -188,7 +186,7 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

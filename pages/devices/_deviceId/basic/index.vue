@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -114,7 +110,7 @@ permissions and limitations under the Licence.
       v-if="device"
       v-model="showDeleteDialog"
       title="Delete Device"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -152,12 +148,11 @@ import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
-    ProgressIndicator,
     DotMenuActionDelete,
     DotMenuActionCopy,
     DotMenuActionSensorML,
@@ -169,8 +164,14 @@ import { Visibility } from '@/models/Visibility'
     DeviceArchiveDialog,
     DownloadDialog
   },
-  computed: mapState('devices', ['device']),
-  methods: mapActions('devices', ['loadDevice', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'getSensorMLUrl'])
+  computed: {
+    ...mapState('devices', ['device']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('devices', ['loadDevice', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'getSensorMLUrl']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceShowBasicPage extends Vue {
   @InjectReactive()
@@ -185,8 +186,6 @@ export default class DeviceShowBasicPage extends Vue {
   @InjectReactive()
     restoreable!: boolean
 
-  private isSaving = false
-
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
   private showDownloadDialog: boolean = false
@@ -199,6 +198,8 @@ export default class DeviceShowBasicPage extends Vue {
   restoreDevice!: RestoreDeviceAction
   exportAsSensorML!: ExportAsSensorMLAction
   getSensorMLUrl!: GetSensorMLUrlAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get deviceId () {
     return this.$route.params.deviceId
@@ -249,14 +250,14 @@ export default class DeviceShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteDevice(this.device.id)
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
       this.$router.push('/devices')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.showDeleteDialog = false
     }
   }
@@ -275,7 +276,7 @@ export default class DeviceShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.archiveDevice(this.device.id)
       await this.loadDevice({
         deviceId: this.deviceId,
@@ -290,7 +291,7 @@ export default class DeviceShowBasicPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Device could not be archived')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.showArchiveDialog = false
     }
   }
@@ -299,7 +300,7 @@ export default class DeviceShowBasicPage extends Vue {
     if (this.device === null || this.device.id === null) {
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     try {
       await this.restoreDevice(this.device.id)
       await this.loadDevice({
@@ -315,7 +316,7 @@ export default class DeviceShowBasicPage extends Vue {
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Device could not be restored')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

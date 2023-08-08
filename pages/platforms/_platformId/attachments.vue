@@ -33,7 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator v-model="isLoading" />
     <NuxtChild />
   </div>
 </template>
@@ -44,26 +43,27 @@ import { mapActions } from 'vuex'
 
 import { LoadPlatformAttachmentsAction } from '@/store/platforms'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
-  methods: mapActions('platforms', ['loadPlatformAttachments'])
+  methods: {
+    ...mapActions('platforms', ['loadPlatformAttachments']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class PlatformAttachmentsPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  setLoading!: SetLoadingAction
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadPlatformAttachments(this.platformId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'failed to fetch attachments')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

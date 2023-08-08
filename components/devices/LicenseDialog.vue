@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -145,31 +141,33 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { License } from '@/models/License'
 import { AddLicenseAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   computed: {
     ...mapState('vocabulary', ['licenses', 'globalProvenances'])
   },
   methods: {
-    ...mapActions('vocabulary', ['addLicense', 'loadGlobalProvenances'])
+    ...mapActions('vocabulary', ['addLicense', 'loadGlobalProvenances']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class LicenseDialog extends mixins(Rules) {
   private newLicense = new License()
-  private isSaving: boolean = false
   private addLicense!: AddLicenseAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
   private licenses!: VocabularyState['licenses']
   private globalProvenances!: VocabularyState['globalProvenances']
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -223,7 +221,7 @@ export default class LicenseDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     const license = License.createFromObject(this.newLicense)
     this.showDialog = false
     try {
@@ -233,7 +231,7 @@ export default class LicenseDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the license')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

@@ -32,9 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <DynamicLocationView
       v-if="dynamicLocationAction"
       :action="dynamicLocationAction"
@@ -48,6 +45,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch, InjectReactive } from 'nuxt-property-decorator'
 import * as VueRouter from 'vue-router'
 import { mapActions, mapState } from 'vuex'
+import { SetLoadingAction } from '@/store/progressindicator'
 import {
   ConfigurationsState,
   LoadDynamicLocationActionAction,
@@ -56,11 +54,10 @@ import {
   LoadDeviceMountActionsIncludingDeviceInformationAction
 } from '@/store/configurations'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import DynamicLocationView from '@/components/configurations/dynamicLocation/DynamicLocationView.vue'
 
 @Component({
-  components: { DynamicLocationView, ProgressIndicator },
+  components: { DynamicLocationView },
   middleware: ['auth'],
   computed: {
     ...mapState('configurations',
@@ -80,14 +77,13 @@ import DynamicLocationView from '@/components/configurations/dynamicLocation/Dyn
         'setSelectedTimepointItem',
         'setSelectedLocationDate'
       ]
-    )
+    ),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class DynamicLocationActionView extends Vue {
   @InjectReactive()
     editable!: boolean
-
-  private isLoading = false
 
   // vuex definition for typescript check
   dynamicLocationAction!: ConfigurationsState['dynamicLocationAction']
@@ -98,6 +94,7 @@ export default class DynamicLocationActionView extends Vue {
   setSelectedLocationDate!: SetSelectedLocationDateAction
   configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
   loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
+  setLoading!: SetLoadingAction
 
   async fetch () {
     await this.loadLocationAction()
@@ -113,7 +110,7 @@ export default class DynamicLocationActionView extends Vue {
 
   async loadLocationAction () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
 
       await Promise.all([
         this.loadDynamicLocationAction(this.actionId),
@@ -148,7 +145,7 @@ export default class DynamicLocationActionView extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

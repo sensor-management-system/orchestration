@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -190,7 +186,7 @@ import ParameterChangeActionCard from '@/components/actions/ParameterChangeActio
 import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
 import PlatformMountActionCard from '@/components/actions/PlatformMountActionCard.vue'
 import PlatformUnmountActionCard from '@/components/actions/PlatformUnmountActionCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
 @Component({
@@ -204,26 +200,27 @@ import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionC
     PlatformActionTimeline,
     PlatformMountActionCard,
     PlatformUnmountActionCard,
-    ProgressIndicator,
     SoftwareUpdateActionCard
   },
   computed: {
     ...mapGetters('platforms', ['actions']),
     ...mapState('platforms', ['platform'])
   },
-  methods: mapActions('platforms', [
-    'loadAllPlatformActions',
-    'deletePlatformSoftwareUpdateAction',
-    'deletePlatformGenericAction',
-    'deletePlatformParameterChangeAction',
-    'downloadAttachment'
-  ])
+  methods: {
+    ...mapActions('platforms', [
+      'loadAllPlatformActions',
+      'deletePlatformSoftwareUpdateAction',
+      'deletePlatformGenericAction',
+      'deletePlatformParameterChangeAction',
+      'downloadAttachment'
+    ]),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class PlatformActionsShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving: boolean = false
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
   private parameterChangeActionToDelete: ParameterChangeAction | null = null
@@ -240,6 +237,7 @@ export default class PlatformActionsShowPage extends Vue {
   deletePlatformSoftwareUpdateAction!: DeletePlatformSoftwareUpdateActionAction
   deletePlatformParameterChangeAction!: DeletePlatformParameterChangeActionAction
   downloadAttachment!: DownloadAttachmentAction
+  setLoading!: SetLoadingAction
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -313,14 +311,14 @@ export default class PlatformActionsShowPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deletePlatformGenericAction(this.genericActionToDelete.id)
       this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -330,14 +328,14 @@ export default class PlatformActionsShowPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deletePlatformSoftwareUpdateAction(this.softwareUpdateActionToDelete.id)
       this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Software update action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Software update action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -347,14 +345,14 @@ export default class PlatformActionsShowPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deletePlatformParameterChangeAction(this.parameterChangeActionToDelete.id)
       this.loadAllPlatformActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Parameter value change action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Parameter value change action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

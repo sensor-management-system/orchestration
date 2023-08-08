@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -204,7 +200,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { MeasuredQuantityUnit } from '@/models/MeasuredQuantityUnit'
@@ -216,17 +212,16 @@ import { AddUnitAction, AddMeasuredQuantityUnitAction, LoadGlobalProvenancesActi
     ...mapState('vocabulary', ['units', 'globalProvenances', 'measuredQuantityUnits'])
   },
   methods: {
-    ...mapActions('vocabulary', ['addUnit', 'addMeasuredQuantityUnit', 'loadGlobalProvenances'])
+    ...mapActions('vocabulary', ['addUnit', 'addMeasuredQuantityUnit', 'loadGlobalProvenances']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class MeasuredQuantityUnitDialog extends mixins(Rules) {
   private unit = new Unit()
   private measuredQuantityUnit = new MeasuredQuantityUnit()
-  private isSaving: boolean = false
   private addUnit!: AddUnitAction
   private addMeasuredQuantityUnit!: AddMeasuredQuantityUnitAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
@@ -238,6 +233,9 @@ export default class MeasuredQuantityUnitDialog extends mixins(Rules) {
     { text: 'Existing unit', value: true },
     { text: 'New unit', value: false }
   ]
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -317,7 +315,7 @@ export default class MeasuredQuantityUnitDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     const unit = Unit.createFromObject(this.unit)
     const measuredQuantityUnit = MeasuredQuantityUnit.createFromObject(this.measuredQuantityUnit)
     this.showDialog = false
@@ -341,7 +339,7 @@ export default class MeasuredQuantityUnitDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the unit')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

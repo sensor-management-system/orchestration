@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -104,7 +100,7 @@ import { Attachment } from '@/models/Attachment'
 
 import { Rules } from '@/mixins/Rules'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
@@ -115,17 +111,20 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
  */
 @Component({
   components: {
-    SaveAndCancelButtons,
-    ProgressIndicator
+    SaveAndCancelButtons
   },
   middleware: ['auth'],
-  computed: mapState('sites', ['siteAttachment']),
-  methods: mapActions('sites', ['loadSiteAttachment', 'loadSiteAttachments', 'updateSiteAttachment'])
+  computed: {
+    ...mapState('sites', ['siteAttachment']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('sites', ['loadSiteAttachment', 'loadSiteAttachments', 'updateSiteAttachment']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, CheckEditAccess) {
-  private isSaving = false
-  private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
   // vuex definition for typescript check
@@ -133,6 +132,8 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
   loadSiteAttachment!: LoadSiteAttachmentAction
   loadSiteAttachments!: LoadSiteAttachmentsAction
   updateSiteAttachment!: UpdateSiteAttachmentAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -158,7 +159,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadSiteAttachment(this.attachmentId)
       if (this.siteAttachment) {
         this.valueCopy = Attachment.createFromObject(this.siteAttachment)
@@ -166,7 +167,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load attachment')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -178,17 +179,13 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     return this.$route.params.attachmentId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async save () {
     if (!(this.$refs.attachmentsEditForm as Vue & { validate: () => boolean }).validate()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.updateSiteAttachment({
         siteId: this.siteId,
         attachment: this.valueCopy
@@ -199,7 +196,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachments')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

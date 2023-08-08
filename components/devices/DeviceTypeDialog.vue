@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -145,7 +141,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { DeviceType } from '@/models/DeviceType'
@@ -156,20 +152,22 @@ import { AddDeviceTypeAction, LoadGlobalProvenancesAction, VocabularyState } fro
     ...mapState('vocabulary', ['devicetypes', 'globalProvenances'])
   },
   methods: {
-    ...mapActions('vocabulary', ['addDevicetype', 'loadGlobalProvenances'])
+    ...mapActions('vocabulary', ['addDevicetype', 'loadGlobalProvenances']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class DeviceTypeDialog extends mixins(Rules) {
   private newDeviceType = new DeviceType()
-  private isSaving: boolean = false
   private addDevicetype!: AddDeviceTypeAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
   private devicetypes!: VocabularyState['devicetypes']
   private globalProvenances!: VocabularyState['globalProvenances']
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -223,7 +221,7 @@ export default class DeviceTypeDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     const devicetype = DeviceType.createFromObject(this.newDeviceType)
     this.showDialog = false
     try {
@@ -233,7 +231,7 @@ export default class DeviceTypeDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the device type')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

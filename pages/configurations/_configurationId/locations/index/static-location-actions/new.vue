@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <StaticLocationActionDataForm
       ref="newStaticLocationForm"
       v-model="newAction"
@@ -68,19 +64,21 @@ import {
   LoadLocationActionTimepointsAction
 } from '@/store/configurations'
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import StaticLocationActionDataForm from '@/components/configurations/StaticLocationActionDataForm.vue'
 @Component({
-  components: { StaticLocationActionDataForm, ProgressIndicator },
+  components: { StaticLocationActionDataForm },
   middleware: ['auth'],
-  methods: mapActions('configurations', ['addStaticLocationBeginAction', 'loadLocationActionTimepoints']),
+  methods: {
+    ...mapActions('configurations', ['addStaticLocationBeginAction', 'loadLocationActionTimepoints']),
+    ...mapActions('progressindicator', ['setLoading'])
+  },
   computed: {
     ...mapState('configurations', ['selectedLocationDate'])
   }
 })
 export default class StaticLocationActionNew extends mixins(CheckEditAccess) {
   private newAction: StaticLocationAction = new StaticLocationAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   epsgCodes!: VocabularyState['epsgCodes']
@@ -89,6 +87,7 @@ export default class StaticLocationActionNew extends mixins(CheckEditAccess) {
   selectedLocationDate!: ConfigurationsState['selectedLocationDate']
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
   addStaticLocationBeginAction!: AddStaticLocationBeginActionAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -134,7 +133,7 @@ export default class StaticLocationActionNew extends mixins(CheckEditAccess) {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const newId = await this.addStaticLocationBeginAction({
         configurationId: this.configurationId,
         staticLocationAction: this.newAction
@@ -145,7 +144,7 @@ export default class StaticLocationActionNew extends mixins(CheckEditAccess) {
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

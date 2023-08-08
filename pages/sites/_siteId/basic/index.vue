@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -147,14 +143,13 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import { ArchiveSiteAction, DeleteSiteAction, ExportAsSensorMLAction, GetSensorMLUrlAction, LoadSiteAction, RestoreSiteAction, SitesState } from '@/store/sites'
 import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
-    ProgressIndicator,
     DotMenuActionDelete,
     DotMenuActionCopy,
     DotMenuActionSensorML,
@@ -168,15 +163,17 @@ import { Visibility } from '@/models/Visibility'
   },
 
   computed: mapState('sites', ['site']),
-  methods: mapActions('sites', [
-    'loadSite',
-    'deleteSite',
-    'archiveSite',
-    'restoreSite',
-    'exportAsSensorML',
-    'getSensorMLUrl'
-  ])
-
+  methods: {
+    ...mapActions('sites', [
+      'loadSite',
+      'deleteSite',
+      'archiveSite',
+      'restoreSite',
+      'exportAsSensorML',
+      'getSensorMLUrl'
+    ]),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class SiteShowBasicPage extends Vue {
   @InjectReactive()
@@ -191,8 +188,6 @@ export default class SiteShowBasicPage extends Vue {
   @InjectReactive()
     restoreable!: boolean
 
-  private isSaving = false
-
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
   private showDownloadDialog: boolean = false
@@ -205,6 +200,7 @@ export default class SiteShowBasicPage extends Vue {
   restoreSite!: RestoreSiteAction
   exportAsSensorML!: ExportAsSensorMLAction
   getSensorMLUrl!: GetSensorMLUrlAction
+  setLoading!: SetLoadingAction
 
   get siteId () {
     return this.$route.params.siteId
@@ -224,14 +220,14 @@ export default class SiteShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteSite(this.site.id)
       this.$store.commit('snackbar/setSuccess', 'Site / Lab deleted')
       this.$router.push('/sites')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Site / Lab could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -249,7 +245,7 @@ export default class SiteShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.archiveSite(this.site.id)
       await this.loadSite({
         siteId: this.siteId
@@ -258,7 +254,7 @@ export default class SiteShowBasicPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Site / Lab could not be archived')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.showArchiveDialog = false
     }
   }
@@ -267,7 +263,7 @@ export default class SiteShowBasicPage extends Vue {
     if (this.site === null || this.site.id === null) {
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     try {
       await this.restoreSite(this.site.id)
       await this.loadSite({
@@ -277,7 +273,7 @@ export default class SiteShowBasicPage extends Vue {
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Site / Lab could not be restored')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

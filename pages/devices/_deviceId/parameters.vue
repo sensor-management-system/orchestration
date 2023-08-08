@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
@@ -47,26 +44,25 @@ import {
 } from '@/store/devices'
 import { LoadUnitsAction } from '@/store/vocabulary'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
   methods: {
     ...mapActions('devices', ['loadDeviceParameters', 'loadDeviceParameterChangeActions']),
-    ...mapActions('vocabulary', ['loadUnits'])
+    ...mapActions('vocabulary', ['loadUnits']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class DeviceParametersPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadDeviceParameters!: LoadDeviceParametersAction
   loadDeviceParameterChangeActions!: LoadDeviceParameterChangeActionsAction
   loadUnits!: LoadUnitsAction
+  setLoading!: SetLoadingAction
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadDeviceParameters(this.deviceId),
         this.loadDeviceParameterChangeActions(this.deviceId),
@@ -75,7 +71,7 @@ export default class DeviceParametersPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch parameters')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -90,7 +86,7 @@ import { mapActions, mapState } from 'vuex'
 import { LoadDeviceContactRolesAction, RemoveDeviceContactRoleAction } from '@/store/devices'
 
 import HintCard from '@/components/HintCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -100,24 +96,25 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
     DotMenuActionDelete,
     ContactRoleListItem,
     BaseList,
-    ProgressIndicator,
     HintCard
   },
   computed: {
     ...mapState('devices', ['deviceContactRoles']),
     ...mapState('vocabulary', ['cvContactRoles'])
   },
-  methods: mapActions('devices', ['loadDeviceContactRoles', 'removeDeviceContactRole'])
+  methods: {
+    ...mapActions('devices', ['loadDeviceContactRoles', 'removeDeviceContactRole']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceShowContactPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
-
   // vuex definition for typescript check
   removeDeviceContactRole!: RemoveDeviceContactRoleAction
   loadDeviceContactRoles!: LoadDeviceContactRolesAction
+  setLoading!: SetLoadingAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -125,7 +122,7 @@ export default class DeviceShowContactPage extends Vue {
 
   async removeContactRole (contactRoleId: string) {
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.removeDeviceContactRole({
         deviceContactRoleId: contactRoleId
       })
@@ -134,7 +131,7 @@ export default class DeviceShowContactPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

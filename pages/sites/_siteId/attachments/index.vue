@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions
       v-if="editable"
     >
@@ -128,19 +124,21 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
-  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
+  components: { DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
   computed: mapState('sites', ['siteAttachments', 'site']),
-  methods: mapActions('sites', ['loadSiteAttachments', 'deleteSiteAttachment', 'downloadAttachment'])
+  methods: {
+    ...mapActions('sites', ['loadSiteAttachments', 'deleteSiteAttachment', 'downloadAttachment']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class SiteAttachmentShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
   private showDeleteDialog = false
   private attachmentToDelete: Attachment | null = null
 
@@ -153,6 +151,7 @@ export default class SiteAttachmentShowPage extends Vue {
   deleteSiteAttachment!: DeleteSiteAttachmentAction
   loadSiteAttachments!: LoadSiteAttachmentsAction
   downloadAttachment!: DownloadAttachmentAction
+  setLoading!: SetLoadingAction
 
   get siteId (): string {
     return this.$route.params.siteId
@@ -173,7 +172,7 @@ export default class SiteAttachmentShowPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const attachmendId = this.attachmentToDelete.id
       this.closeDialog()
       await this.deleteSiteAttachment(attachmendId)
@@ -182,7 +181,7 @@ export default class SiteAttachmentShowPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
