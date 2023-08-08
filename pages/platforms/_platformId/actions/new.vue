@@ -34,9 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card
       flat
     >
@@ -76,8 +73,7 @@ import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import ActionTypeDialog from '@/components/shared/ActionTypeDialog.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
+import { SetLoadingAction } from '@/store/progressindicator'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 import { ActionType } from '@/models/ActionType'
 
@@ -96,7 +92,7 @@ const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
 const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
 
 @Component({
-  components: { ActionTypeDialog, ProgressIndicator },
+  components: { ActionTypeDialog },
   middleware: ['auth'],
   computed: {
     ...mapGetters('vocabulary', ['platformActionTypeItems']),
@@ -104,11 +100,11 @@ const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
   },
   methods: {
     ...mapActions('vocabulary', ['loadPlatformGenericActionTypes']),
-    ...mapActions('platforms', ['loadPlatformAttachments', 'setChosenKindOfPlatformAction', 'loadPlatformParameters'])
+    ...mapActions('platforms', ['loadPlatformAttachments', 'setChosenKindOfPlatformAction', 'loadPlatformParameters']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class NewPlatformAction extends mixins(CheckEditAccess) {
-  private isLoading: boolean = false
   private showNewActionTypeDialog = false
 
   // vuex definition for typescript check
@@ -118,6 +114,7 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
   chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
   loadPlatformParameters!: LoadPlatformParametersAction
   setChosenKindOfPlatformAction!: SetChosenKindOfPlatformActionAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -143,7 +140,7 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       this.chosenKindOfAction = null
       await Promise.all([
         this.loadPlatformGenericActionTypes(),
@@ -153,7 +150,7 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

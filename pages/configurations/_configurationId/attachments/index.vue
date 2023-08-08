@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions
       v-if="editable"
     >
@@ -99,7 +95,7 @@ permissions and limitations under the Licence.
       v-if="attachmentToDelete"
       v-model="showDeleteDialog"
       title="Delete Attachment"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -129,19 +125,24 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
-  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
-  computed: mapState('configurations', ['configurationAttachments', 'configuration']),
-  methods: mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment', 'downloadAttachment'])
+  components: { DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
+  computed: {
+    ...mapState('configurations', ['configurationAttachments', 'configuration']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment', 'downloadAttachment']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationAttachmentShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
   private showDeleteDialog = false
   private attachmentToDelete: Attachment | null = null
 
@@ -154,6 +155,7 @@ export default class ConfigurationAttachmentShowPage extends Vue {
   deleteConfigurationAttachment!: DeleteConfigurationAttachmentAction
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   downloadAttachment!: DownloadAttachmentAction
+  setLoading!: SetLoadingAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -174,7 +176,7 @@ export default class ConfigurationAttachmentShowPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const attachmendId = this.attachmentToDelete.id
       this.closeDialog()
       await this.deleteConfigurationAttachment(attachmendId)
@@ -183,7 +185,7 @@ export default class ConfigurationAttachmentShowPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

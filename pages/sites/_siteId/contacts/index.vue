@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -91,7 +87,7 @@ import { mapActions, mapState } from 'vuex'
 import { LoadSiteContactRolesAction, RemoveSiteContactRoleAction } from '@/store/sites'
 
 import HintCard from '@/components/HintCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -101,24 +97,25 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
     DotMenuActionDelete,
     ContactRoleListItem,
     BaseList,
-    ProgressIndicator,
     HintCard
   },
   computed: {
     ...mapState('sites', ['siteContactRoles']),
     ...mapState('vocabulary', ['cvContactRoles'])
   },
-  methods: mapActions('sites', ['loadSiteContactRoles', 'removeSiteContactRole'])
+  methods: {
+    ...mapActions('sites', ['loadSiteContactRoles', 'removeSiteContactRole']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class SiteShowContactPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
-
   // vuex definition for typescript check
   removeSiteContactRole!: RemoveSiteContactRoleAction
   loadSiteContactRoles!: LoadSiteContactRolesAction
+  setLoading!: SetLoadingAction
 
   get siteId (): string {
     return this.$route.params.siteId
@@ -126,7 +123,7 @@ export default class SiteShowContactPage extends Vue {
 
   async removeContactRole (contactRoleId: string) {
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.removeSiteContactRole({
         siteContactRoleId: contactRoleId
       })
@@ -135,7 +132,7 @@ export default class SiteShowContactPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Removing contact failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -117,7 +113,7 @@ permissions and limitations under the Licence.
       v-if="platform"
       v-model="showDeleteDialog"
       title="Delete Platform"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -155,12 +151,11 @@ import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import PlatformArchiveDialog from '@/components/platforms/PlatformArchiveDialog.vue'
 import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { Visibility } from '@/models/Visibility'
 
 @Component({
   components: {
-    ProgressIndicator,
     DeleteDialog,
     DotMenuActionDelete,
     DotMenuActionSensorML,
@@ -173,9 +168,13 @@ import { Visibility } from '@/models/Visibility'
     PlatformArchiveDialog
   },
   computed: {
-    ...mapState('platforms', ['platform'])
+    ...mapState('platforms', ['platform']),
+    ...mapState('progressindicator', ['isLoading'])
   },
-  methods: mapActions('platforms', ['deletePlatform', 'loadPlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'getSensorMLUrl'])
+  methods: {
+    ...mapActions('platforms', ['deletePlatform', 'loadPlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'getSensorMLUrl']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class PlatformShowBasicPage extends Vue {
   @InjectReactive()
@@ -190,7 +189,6 @@ export default class PlatformShowBasicPage extends Vue {
   @InjectReactive()
     restoreable!: boolean
 
-  private isSaving = false
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
   private showDownloadDialog: boolean = false
@@ -203,6 +201,8 @@ export default class PlatformShowBasicPage extends Vue {
   restorePlatform!: RestorePlatformAction
   exportAsSensorML!: ExportAsSensorMLAction
   getSensorMLUrl!: GetSensorMLUrlAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get platformId () {
     return this.$route.params.platformId
@@ -253,14 +253,14 @@ export default class PlatformShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deletePlatform(this.platform.id)
       this.$router.push('/platforms')
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.showDeleteDialog = false
     }
   }
@@ -279,7 +279,7 @@ export default class PlatformShowBasicPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.archivePlatform(this.platform.id)
       await this.loadPlatform({
         platformId: this.platformId,
@@ -291,7 +291,7 @@ export default class PlatformShowBasicPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Platform could not be archived')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.showArchiveDialog = false
     }
   }
@@ -300,7 +300,7 @@ export default class PlatformShowBasicPage extends Vue {
     if (this.platform === null || this.platform.id === null) {
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     try {
       await this.restorePlatform(this.platform.id)
       await this.loadPlatform({
@@ -313,7 +313,7 @@ export default class PlatformShowBasicPage extends Vue {
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Platform could not be restored')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

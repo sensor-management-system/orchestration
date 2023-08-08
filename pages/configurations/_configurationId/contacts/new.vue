@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <contact-role-assignment-form
       :contacts="contacts"
       :contact="selectedContact"
@@ -58,30 +54,29 @@ import { LoadCvContactRolesAction } from '@/store/vocabulary'
 import { Contact } from '@/models/Contact'
 import { ContactRole } from '@/models/ContactRole'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import ContactRoleAssignmentForm from '@/components/shared/ContactRoleAssignmentForm.vue'
 
 @Component({
   components: {
-    ProgressIndicator,
     ContactRoleAssignmentForm
   },
   middleware: ['auth'],
   computed: {
     ...mapState('contacts', ['contacts']),
     ...mapState('configurations', ['configurationContactRoles']),
-    ...mapState('vocabulary', ['cvContactRoles'])
+    ...mapState('vocabulary', ['cvContactRoles']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
     ...mapActions('contacts', ['loadAllContacts']),
     ...mapActions('configurations', ['loadConfigurationContactRoles', 'addConfigurationContactRole']),
-    ...mapActions('vocabulary', ['loadCvContactRoles'])
+    ...mapActions('vocabulary', ['loadCvContactRoles']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationAssignContactPage extends mixins(CheckEditAccess) {
   private selectedContact: Contact | null = null
-  private isLoading: boolean = false
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   configurationContactRoles!: ConfigurationsState['configurationContactRoles']
@@ -90,6 +85,8 @@ export default class ConfigurationAssignContactPage extends mixins(CheckEditAcce
   loadAllContacts!: LoadAllContactsAction
   loadCvContactRoles!: LoadCvContactRolesAction
   addConfigurationContactRole!: AddConfigurationContactRoleAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -115,7 +112,7 @@ export default class ConfigurationAssignContactPage extends mixins(CheckEditAcce
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadAllContacts()
 
       const redirectContactId = this.$route.query.contact
@@ -125,7 +122,7 @@ export default class ConfigurationAssignContactPage extends mixins(CheckEditAcce
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch related contacts')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -133,14 +130,10 @@ export default class ConfigurationAssignContactPage extends mixins(CheckEditAcce
     return this.$route.params.configurationId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async assignContact (contactRole: ContactRole | null) {
     if (this.editable && contactRole) {
       try {
-        this.isSaving = true
+        this.setLoading(true)
         await this.addConfigurationContactRole({
           configurationId: this.configurationId,
           contactRole
@@ -151,7 +144,7 @@ export default class ConfigurationAssignContactPage extends mixins(CheckEditAcce
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to add a contact')
       } finally {
-        this.isSaving = false
+        this.setLoading(false)
       }
     }
   }

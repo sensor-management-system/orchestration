@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
@@ -43,26 +40,27 @@ import { mapActions } from 'vuex'
 
 import { LoadConfigurationCustomFieldsAction } from '@/store/configurations'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
-  methods: mapActions('configurations', ['loadConfigurationCustomFields'])
+  methods: {
+    ...mapActions('configurations', ['loadConfigurationCustomFields']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationCustomFieldsPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadConfigurationCustomFields!: LoadConfigurationCustomFieldsAction
+  setLoading!: SetLoadingAction
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadConfigurationCustomFields(this.configurationId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch custom fields')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

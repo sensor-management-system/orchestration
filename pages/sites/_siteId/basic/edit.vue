@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -86,7 +82,7 @@ import { SitesState, LoadSiteAction, SaveSiteAction } from '@/store/sites'
 import { Site } from '@/models/Site'
 
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 
@@ -97,7 +93,6 @@ import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountri
   components: {
     SaveAndCancelButtons,
     SiteBasicDataForm,
-    ProgressIndicator,
     NavigationGuardDialog
   },
   middleware: ['auth'],
@@ -108,12 +103,12 @@ import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountri
   },
   methods: {
     ...mapActions('sites', ['saveSite', 'loadSite']),
-    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries'])
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   private siteCopy: Site | null = null
-  private isSaving: boolean = false
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
@@ -128,6 +123,7 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   loadSiteTypes!: LoadSiteTypesAction
   countryNames!: CountryNamesGetter
   loadCountries!: LoadCountriesAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -200,7 +196,7 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const savedSite = await this.saveSite(this.siteCopy)
       await this.loadSite({
         siteId: savedSite.id
@@ -211,7 +207,7 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

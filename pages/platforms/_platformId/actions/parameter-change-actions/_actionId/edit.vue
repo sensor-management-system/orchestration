@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-select
       value="Parameter Value Change"
       :items="['Parameter Value Change']"
@@ -85,25 +81,26 @@ import {
 } from '@/store/platforms'
 
 import { ParameterChangeAction } from '@/models/ParameterChangeAction'
-
+import { SetLoadingAction } from '@/store/progressindicator'
 import ParameterChangeActionForm from '@/components/actions/ParameterChangeActionForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
     ParameterChangeActionForm,
-    ProgressIndicator,
     SaveAndCancelButtons
   },
   scrollToTop: true,
   middleware: ['auth'],
   computed: mapState('platforms', ['platformParameterChangeAction', 'platformParameters']),
-  methods: mapActions('platforms', ['loadPlatformParameterChangeAction', 'loadAllPlatformActions', 'loadPlatformParameters', 'updatePlatformParameterChangeAction'])
+  methods: {
+    ...mapActions('platforms', ['loadPlatformParameterChangeAction', 'loadAllPlatformActions', 'loadPlatformParameters', 'updatePlatformParameterChangeAction']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
+
 export default class PlatformParameterChangeActionEditPage extends mixins(CheckEditAccess) {
   private action: ParameterChangeAction = new ParameterChangeAction()
-  private isLoading = false
 
   // vuex definition for typescript check
   platformParameterChangeAction!: PlatformsState['platformParameterChangeAction']
@@ -112,6 +109,7 @@ export default class PlatformParameterChangeActionEditPage extends mixins(CheckE
   loadPlatformParameters!: LoadPlatformParametersAction
   updatePlatformParameterChangeAction!: UpdatePlatformParameterChangeActionAction
   loadAllPlatformActions!: LoadAllPlatformActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -137,7 +135,7 @@ export default class PlatformParameterChangeActionEditPage extends mixins(CheckE
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadPlatformParameterChangeAction(this.actionId),
         this.loadPlatformParameters(this.platformId)
@@ -148,7 +146,7 @@ export default class PlatformParameterChangeActionEditPage extends mixins(CheckE
     } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -171,7 +169,7 @@ export default class PlatformParameterChangeActionEditPage extends mixins(CheckE
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.updatePlatformParameterChangeAction({
         parameterId: this.action.parameter.id,
         action: this.action
@@ -181,7 +179,7 @@ export default class PlatformParameterChangeActionEditPage extends mixins(CheckE
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 }

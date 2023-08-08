@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions
       v-if="editable"
     >
@@ -84,7 +80,7 @@ permissions and limitations under the Licence.
       v-if="customFieldToDelete"
       v-model="showDeleteDialog"
       title="Delete Custom Field"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -106,18 +102,23 @@ import CustomFieldListItem from '@/components/shared/CustomFieldListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator, HintCard, DeleteDialog, DotMenuActionDelete, CustomFieldListItem, BaseList },
-  computed: mapState('devices', ['deviceCustomFields']),
-  methods: mapActions('devices', ['deleteDeviceCustomField', 'loadDeviceCustomFields'])
+  components: { HintCard, DeleteDialog, DotMenuActionDelete, CustomFieldListItem, BaseList },
+  computed: {
+    ...mapState('devices', ['deviceCustomFields']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('devices', ['deleteDeviceCustomField', 'loadDeviceCustomFields']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceCustomFieldsShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
   private showDeleteDialog = false
   private customFieldToDelete: CustomTextField | null = null
 
@@ -125,6 +126,7 @@ export default class DeviceCustomFieldsShowPage extends Vue {
   deviceCustomFields!: DevicesState['deviceCustomFields']
   loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
   deleteDeviceCustomField!: DeleteDeviceCustomFieldAction
+  setLoading!: SetLoadingAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -145,14 +147,14 @@ export default class DeviceCustomFieldsShowPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteDeviceCustomField(this.customFieldToDelete.id)
       this.loadDeviceCustomFields(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Custom field deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete custom field')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }

@@ -30,10 +30,6 @@
  -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-data-table
       :headers="headers"
       :items="dataTableLinkings"
@@ -95,13 +91,12 @@ import {
   ITsmLinkingState,
   LoadConfigurationTsmLinkingsAction
 } from '@/store/tsmLinking'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { ConfigurationsState } from '@/store/configurations'
 import { CanModifyEntityGetter } from '@/store/permissions'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   components: {
-    ProgressIndicator,
     DeleteDialog,
     ExtendedItemName,
     TsmLinkingBasicDataTable
@@ -112,7 +107,8 @@ import { CanModifyEntityGetter } from '@/store/permissions'
     ...mapGetters('permissions', ['canModifyEntity'])
   },
   methods: {
-    ...mapActions('tsmLinking', ['deleteConfigurationTsmLinking', 'loadConfigurationTsmLinkings'])
+    ...mapActions('tsmLinking', ['deleteConfigurationTsmLinking', 'loadConfigurationTsmLinkings']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class TsmLinkingOverviewTable extends Vue {
@@ -146,7 +142,6 @@ export default class TsmLinkingOverviewTable extends Vue {
   ]
 
   private itemToDelete: TsmLinking | null = null
-  private isLoading: boolean = false
   private showDeleteDialog: boolean = false
   // vuex definition for typescript check
   configuration!: ConfigurationsState['configuration']
@@ -154,6 +149,7 @@ export default class TsmLinkingOverviewTable extends Vue {
   deleteConfigurationTsmLinking!: DeleteConfigurationTsmLinkingAction
   loadConfigurationTsmLinkings!: LoadConfigurationTsmLinkingsAction
   canModifyEntity!: CanModifyEntityGetter
+  setLoading!: SetLoadingAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -200,7 +196,7 @@ export default class TsmLinkingOverviewTable extends Vue {
       this.closeDialog()
       return
     }
-    this.isLoading = true
+    this.setLoading(true)
     try {
       this.showDeleteDialog = false
       await this.deleteConfigurationTsmLinking(this.itemToDelete)
@@ -210,7 +206,7 @@ export default class TsmLinkingOverviewTable extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Linking could not be deleted')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

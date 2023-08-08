@@ -250,7 +250,7 @@ const actions: ActionTree<SitesState, RootState> = {
   async updateSiteAttachment (_, { siteId, attachment }: { siteId: string, attachment: Attachment }): Promise<Attachment> {
     return await this.$api.siteAttachments.update(siteId, attachment)
   },
-  async deleteSiteAttachment (_, { attachmentId }: { attachmentId: string }): Promise<void> {
+  async deleteSiteAttachment (_, attachmentId: string): Promise<void> {
     return await this.$api.siteAttachments.deleteById(attachmentId)
   },
   async downloadAttachment (_, attachmentUrl: string): Promise<Blob> {

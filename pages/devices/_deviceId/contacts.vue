@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
@@ -44,25 +41,24 @@ import { mapActions } from 'vuex'
 import { LoadDeviceContactRolesAction } from '@/store/devices'
 import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
   methods: {
     ...mapActions('devices', ['loadDeviceContactRoles']),
-    ...mapActions('vocabulary', ['loadCvContactRoles'])
+    ...mapActions('vocabulary', ['loadCvContactRoles']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class DeviceContactsPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadDeviceContactRoles!: LoadDeviceContactRolesAction
   loadCvContactRoles!: LoadCvContactRolesAction
+  setLoading!: SetLoadingAction
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadDeviceContactRoles(this.deviceId),
         this.loadCvContactRoles()
@@ -70,7 +66,7 @@ export default class DeviceContactsPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

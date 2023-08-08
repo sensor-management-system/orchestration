@@ -87,9 +87,6 @@ permissions and limitations under the Licence.
                           />
                         </v-subheader>
                       </v-col>
-                      <ProgressIndicator
-                        v-model="isLoading"
-                      />
                     </v-row>
                     <div v-if="devicesTotalCount > 0 && deviceAvailabilities.length>0">
                       <v-subheader>
@@ -173,9 +170,6 @@ permissions and limitations under the Licence.
                           />
                         </v-subheader>
                       </v-col>
-                      <ProgressIndicator
-                        v-model="isLoading"
-                      />
                     </v-row>
                     <div v-if="platformsTotalCount > 0 && platformAvailabilities.length>0">
                       <v-subheader>
@@ -263,11 +257,10 @@ import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 @Component({
   components: {
-    ProgressIndicator,
     PlatformsListItem,
     DevicesListItem,
     BaseList,
@@ -288,6 +281,7 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
       platformsTotalCount: 'totalCount',
       platformsTotalPages: 'totalPages'
     }),
+    ...mapState('progressindicator', ['isLoading']),
     ...mapGetters('devices', {
       devicePageSizeItems: 'pageSizes'
     }),
@@ -297,7 +291,8 @@ import ProgressIndicator from '@/components/ProgressIndicator.vue'
   },
   methods: {
     ...mapActions('devices', ['searchDevicesPaginated', 'loadDeviceAvailabilities']),
-    ...mapActions('platforms', ['searchPlatformsPaginated', 'loadPlatformAvailabilities'])
+    ...mapActions('platforms', ['searchPlatformsPaginated', 'loadPlatformAvailabilities']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class MountWizardEntitySelect extends Vue {
@@ -340,9 +335,10 @@ export default class MountWizardEntitySelect extends Vue {
   loadDeviceAvailabilities!: LoadDeviceAvailabilitiesAction
   searchPlatformsPaginated!: SearchPlatformsPaginatedAction
   loadPlatformAvailabilities!: LoadPlatformAvailabilitiesAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   private tab = null
-  private isLoading = false
 
   private searchTextPlatforms: string = ''
   private searchTextDevices: string = ''
@@ -376,7 +372,7 @@ export default class MountWizardEntitySelect extends Vue {
       this.resetDeviceSearchToFirstPage = false
     }
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.searchDevicesPaginated({
         searchText: this.searchTextDevices,
         manufacturer: [],
@@ -394,7 +390,7 @@ export default class MountWizardEntitySelect extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
       this.hasSearchedDevice = true
     }
   }
@@ -405,7 +401,7 @@ export default class MountWizardEntitySelect extends Vue {
       this.resetPlatformSearchToFirstPage = false
     }
     try {
-      this.isLoading = true
+      this.setLoading(true)
 
       // Not bound as methods, as there can be name conflicts with the devices.
       this.$store.dispatch('platforms/setSearchText', this.searchTextPlatforms)
@@ -425,7 +421,7 @@ export default class MountWizardEntitySelect extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
       this.hasSearchedPlatform = true
     }
   }

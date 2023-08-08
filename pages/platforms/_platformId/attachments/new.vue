@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-form ref="attachmentsForm" class="pb-2" @submit.prevent>
       <v-card-actions>
         <v-spacer />
@@ -124,30 +120,29 @@ import { IUploadResult } from '@/services/sms/UploadApi'
 import { Attachment } from '@/models/Attachment'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
+import { SetLoadingAction } from '@/store/progressindicator'
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
 @Component({
-  components: { ProgressIndicator, SaveAndCancelButtons },
+  components: { SaveAndCancelButtons },
   middleware: ['auth'],
   methods: {
     ...mapActions('platforms', ['addPlatformAttachment', 'loadPlatformAttachments']),
-    ...mapActions('files', ['uploadFile'])
+    ...mapActions('files', ['uploadFile']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules, CheckEditAccess) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   uploadFile!: (file: File) => Promise<IUploadResult>
   addPlatformAttachment!: AddPlatformAttachmentAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
-
+  setLoading!: SetLoadingAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -193,7 +188,7 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     let theFailureCanBeFromUpload = true
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
 
       if (this.attachmentType !== 'url' && this.file !== null) {
         // Due to the validation we can be sure that the file is not null
@@ -208,7 +203,7 @@ export default class PlatformAttachmentAddPage extends mixins(Rules, UploadRules
     } catch (error: any) {
       this.handleError(theFailureCanBeFromUpload, error)
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

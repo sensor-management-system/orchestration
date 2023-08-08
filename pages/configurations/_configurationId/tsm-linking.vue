@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -35,39 +35,35 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
-    <NuxtChild v-if="!isLoading" />
+    <NuxtChild />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { LoadConfigurationTsmLinkingsAction, LoadTsmEndpointsAction } from '@/store/tsmLinking'
 import { LoadLicensesAction } from '@/store/vocabulary'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
   middleware: ['auth'],
   methods: {
     ...mapActions('tsmLinking', ['loadConfigurationTsmLinkings', 'loadTsmEndpoints']),
-    ...mapActions('vocabulary', ['loadLicenses'])
+    ...mapActions('vocabulary', ['loadLicenses']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationTsmLinking extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadConfigurationTsmLinkings!: LoadConfigurationTsmLinkingsAction
   loadTsmEndpoints!: LoadTsmEndpointsAction
   loadLicenses!: LoadLicensesAction
+  setLoading!: SetLoadingAction
 
   async created () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadConfigurationTsmLinkings(this.configurationId),
         this.loadTsmEndpoints(),
@@ -76,7 +72,7 @@ export default class ConfigurationTsmLinking extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch linkings')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

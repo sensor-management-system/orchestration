@@ -30,9 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card flat>
       <center>
         <v-alert
@@ -68,12 +65,11 @@ import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { PlatformsState, LoadPlatformAction } from '@/store/platforms'
 import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ModificationInfo from '@/components/ModificationInfo.vue'
 
 @Component({
   components: {
-    ProgressIndicator,
     ModificationInfo
   },
   computed: {
@@ -82,12 +78,11 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class PlatformPage extends Vue {
-  private isLoading: boolean = false
-
   @ProvideReactive()
     editable: boolean = false
 
@@ -111,6 +106,7 @@ export default class PlatformPage extends Vue {
   canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  setLoading!: SetLoadingAction
 
   created () {
     this.initializeAppBar()
@@ -118,7 +114,7 @@ export default class PlatformPage extends Vue {
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: false,
@@ -142,7 +138,7 @@ export default class PlatformPage extends Vue {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
       this.$router.replace('/platforms/')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

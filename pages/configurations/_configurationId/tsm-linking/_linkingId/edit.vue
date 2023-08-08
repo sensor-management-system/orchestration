@@ -30,9 +30,6 @@
  -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-    />
     <v-card-actions>
       <v-card-title class="pl-0">
         Edit TSM-Linking
@@ -42,7 +39,7 @@
         v-if="$auth.loggedIn"
         save-btn-text="Apply"
         :to="redirectRoute"
-        :disabled="isSaving"
+        :disabled="isLoading"
         @save="save"
       />
     </v-card-actions>
@@ -71,7 +68,7 @@
         v-if="$auth.loggedIn"
         save-btn-text="Apply"
         :to="redirectRoute"
-        :disabled="isSaving"
+        :disabled="isLoading"
         @save="save"
       />
     </v-card-actions>
@@ -89,7 +86,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { RawLocation } from 'vue-router'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import TsmLinkingForm from '@/components/configurations/tsmLinking/TsmLinkingForm.vue'
 import { TsmDeviceMountPropertyCombination } from '@/utils/configurationInterfaces'
 import { TsmLinking } from '@/models/TsmLinking'
@@ -112,24 +109,24 @@ import { LoadLicensesAction } from '@/store/vocabulary'
     NavigationGuardDialog,
     TsmLinkingFormItemHeader,
     SaveAndCancelButtons,
-    TsmLinkingForm,
-    ProgressIndicator
+    TsmLinkingForm
   },
   middleware: ['auth'],
   computed: {
-    ...mapState('tsmLinking', ['linking'])
+    ...mapState('tsmLinking', ['linking']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
     ...mapActions('tsmLinking', [
       'loadConfigurationTsmLinkings', 'updateConfigurationTsmLinking', 'loadThingsForDatasource', 'loadDatastreamsForDatasourceAndThing', 'loadDatasources'
     ]),
-    ...mapActions('vocabulary', ['loadLicenses'])
+    ...mapActions('vocabulary', ['loadLicenses']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 
 })
 export default class TsmLinkingEditPage extends Vue {
   private editLinking: TsmLinking | null = null
-  private isSaving = false
   private hasSaved = false
   private to: RawLocation | null = null
   private showNavigationWarning = false
@@ -143,6 +140,8 @@ export default class TsmLinkingEditPage extends Vue {
   loadThingsForDatasource!: LoadThingsForDatasourceAction
   loadDatastreamsForDatasourceAndThing!: LoadDatastreamsForDatasourceAndThingAction
   loadLicenses!: LoadLicensesAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   async created () {
     this.editLinking = TsmLinking.createFromObject(this.linking!)
@@ -184,7 +183,7 @@ export default class TsmLinkingEditPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.updateConfigurationTsmLinking(this.editLinking)
       await this.loadConfigurationTsmLinkings(this.configurationId)
       this.$store.commit('tsmLinking/setLinking', null)
@@ -194,7 +193,7 @@ export default class TsmLinkingEditPage extends Vue {
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.hasSaved = true
     }
   }

@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -160,7 +156,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { ActionType } from '@/models/ActionType'
@@ -172,16 +168,15 @@ import { ActionTypeApiFilterType, ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API
     ...mapState('vocabulary', ['actionCategories', 'globalProvenances', 'platformGenericActionTypes', 'deviceGenericActionTypes', 'configurationGenericActionTypes'])
   },
   methods: {
-    ...mapActions('vocabulary', ['loadGlobalProvenances', 'loadActionCategories', 'addActiontype'])
+    ...mapActions('vocabulary', ['loadGlobalProvenances', 'loadActionCategories', 'addActiontype']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class ActionTypeDialog extends mixins(Rules) {
   private suggestion = new ActionType()
-  private isSaving: boolean = false
   private addActiontype!: AddActiontypeAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
   private loadActionCategories!: LoadActionCategoriesAction
@@ -190,6 +185,9 @@ export default class ActionTypeDialog extends mixins(Rules) {
   private deviceGenericActionTypes!: VocabularyState['deviceGenericActionTypes']
   private configurationGenericActionTypes!: VocabularyState['configurationGenericActionTypes']
   private globalProvenances!: VocabularyState['globalProvenances']
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -259,7 +257,7 @@ export default class ActionTypeDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     // We copy the values as we reset the data when we close the dialog
     const suggestion = ActionType.createFromObject(this.suggestion)
     const actionCategoryTerm = this.initialActionTypeApiFilterType
@@ -271,7 +269,7 @@ export default class ActionTypeDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the action type')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

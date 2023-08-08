@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-select
       value="Software Update"
       :items="['Software Update']"
@@ -87,23 +83,27 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import SoftwareUpdateActionForm from '@/components/actions/SoftwareUpdateActionForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 @Component({
   components: {
-    ProgressIndicator,
     SaveAndCancelButtons,
     SoftwareUpdateActionForm
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed: mapState('devices', ['deviceSoftwareUpdateAction', 'deviceAttachments']),
-  methods: mapActions('devices', ['loadDeviceSoftwareUpdateAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'updateDeviceSoftwareUpdateAction'])
+  computed: {
+    ...mapState('devices', ['deviceSoftwareUpdateAction', 'deviceAttachments']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('devices', ['loadDeviceSoftwareUpdateAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'updateDeviceSoftwareUpdateAction']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceSoftwareUpdateActionEditPage extends mixins(CheckEditAccess) {
   private action: SoftwareUpdateAction = new SoftwareUpdateAction()
-  private isSaving = false
-  private isLoading = false
 
   // vuex definition for typescript check
   deviceSoftwareUpdateAction!: DevicesState['deviceSoftwareUpdateAction']
@@ -112,6 +112,8 @@ export default class DeviceSoftwareUpdateActionEditPage extends mixins(CheckEdit
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
   updateDeviceSoftwareUpdateAction!: UpdateDeviceSoftwareUpdateAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -137,7 +139,7 @@ export default class DeviceSoftwareUpdateActionEditPage extends mixins(CheckEdit
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadDeviceSoftwareUpdateAction(this.actionId),
         this.loadDeviceAttachments(this.deviceId)
@@ -148,7 +150,7 @@ export default class DeviceSoftwareUpdateActionEditPage extends mixins(CheckEdit
     } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -160,10 +162,6 @@ export default class DeviceSoftwareUpdateActionEditPage extends mixins(CheckEdit
     return this.$route.params.actionId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async save () {
     if (!(this.$refs.softwareUpdateActionForm as Vue & { isValid: () => boolean }).isValid()) {
       this.$store.commit('snackbar/setError', 'Please correct the errors')
@@ -171,7 +169,7 @@ export default class DeviceSoftwareUpdateActionEditPage extends mixins(CheckEdit
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.updateDeviceSoftwareUpdateAction({
         deviceId: this.deviceId,
         softwareUpdateAction: this.action
@@ -182,7 +180,7 @@ export default class DeviceSoftwareUpdateActionEditPage extends mixins(CheckEdit
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

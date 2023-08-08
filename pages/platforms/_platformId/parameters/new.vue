@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card
       flat
     >
@@ -99,7 +95,7 @@ import { Parameter } from '@/models/Parameter'
 import BaseList from '@/components/shared/BaseList.vue'
 import ParameterForm from '@/components/shared/ParameterForm.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
@@ -108,7 +104,6 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     BaseList,
     ParameterForm,
     ParameterListItem,
-    ProgressIndicator,
     SaveAndCancelButtons
   },
   computed: {
@@ -116,12 +111,12 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     ...mapState('platforms', ['platformParameters', 'platformParameterChangeActions'])
   },
   methods: {
-    ...mapActions('platforms', ['addPlatformParameter', 'loadPlatformParameters'])
+    ...mapActions('platforms', ['addPlatformParameter', 'loadPlatformParameters']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
 })
 export default class ParametersAddPage extends mixins(CheckEditAccess) {
-  private isSaving = false
   private value: Parameter = new Parameter()
 
   // vuex definition for typescript check
@@ -130,6 +125,7 @@ export default class ParametersAddPage extends mixins(CheckEditAccess) {
   platformParameterChangeActions!: PlatformsState['platformParameterChangeActions']
   addPlatformParameter!: AddPlatformParameterAction
   loadPlatformParameters!: LoadPlatformParametersAction
+  setLoading!: SetLoadingAction
 
   mounted () {
     (this.$refs.parameterForm as ParameterForm).focus()
@@ -168,7 +164,7 @@ export default class ParametersAddPage extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addPlatformParameter({
         platformId: this.platformId,
         parameter: this.value
@@ -179,7 +175,7 @@ export default class ParametersAddPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save parameter')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

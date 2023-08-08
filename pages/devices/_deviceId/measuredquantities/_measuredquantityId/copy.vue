@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card
       flat
     >
@@ -56,6 +52,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         />
       </v-card-text>
       <v-card-actions>
@@ -83,6 +80,7 @@ permissions and limitations under the Licence.
           :properties="properties"
           :units="units"
           :measured-quantity-units="measuredQuantityUnits"
+          :aggregation-types="aggregationtypes"
         />
       </template>
     </BaseList>
@@ -107,26 +105,26 @@ import { VocabularyState } from '@/store/vocabulary'
 import { DeviceProperty } from '@/models/DeviceProperty'
 
 import DevicePropertyForm from '@/components/DevicePropertyForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasuredQuantitiesListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 
 @Component({
-  components: { BaseList, DotMenuActionDelete, DevicesMeasuredQuantitiesListItem, SaveAndCancelButtons, ProgressIndicator, DevicePropertyForm },
+  components: { BaseList, DotMenuActionDelete, DevicesMeasuredQuantitiesListItem, SaveAndCancelButtons, DevicePropertyForm },
   middleware: ['auth'],
   computed: {
-    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits']),
+    ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits', 'aggregationtypes']),
     ...mapState('devices', ['deviceMeasuredQuantity', 'deviceMeasuredQuantities'])
   },
-  methods: mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'addDeviceMeasuredQuantity']),
+  methods: {
+    ...mapActions('devices', ['loadDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities', 'addDeviceMeasuredQuantity']),
+    ...mapActions('progressindicator', ['setLoading'])
+  },
   scrollToTop: true
 })
 export default class DevicePropertyCopyPage extends mixins(CheckEditAccess) {
-  private isSaving = false
-  private isLoading = false
-
   private valueCopy: DeviceProperty = new DeviceProperty()
 
   // vuex definition for typescript check
@@ -140,6 +138,7 @@ export default class DevicePropertyCopyPage extends mixins(CheckEditAccess) {
   loadDeviceMeasuredQuantity!: LoadDeviceMeasuredQuantityAction
   addDeviceMeasuredQuantity!: AddDeviceMeasuredQuantityAction
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -165,7 +164,7 @@ export default class DevicePropertyCopyPage extends mixins(CheckEditAccess) {
 
   async created () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadDeviceMeasuredQuantity(this.measuredquantityId)
       if (this.deviceMeasuredQuantity) {
         this.valueCopy = DeviceProperty.createFromObject(this.deviceMeasuredQuantity)
@@ -177,7 +176,7 @@ export default class DevicePropertyCopyPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load measured quantity')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -189,13 +188,9 @@ export default class DevicePropertyCopyPage extends mixins(CheckEditAccess) {
     return this.$route.params.measuredquantityId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async save () {
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addDeviceMeasuredQuantity({
         deviceId: this.deviceId,
         deviceMeasuredQuantity: this.valueCopy
@@ -206,7 +201,7 @@ export default class DevicePropertyCopyPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save measured quantity')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

@@ -34,9 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <StaticLocationActionData
       v-if="action"
       :value="action"
@@ -74,9 +71,9 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { IStaticLocationAction } from '@/models/StaticLocationAction'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
@@ -88,10 +85,12 @@ import {
 import StaticLocationActionData from '@/components/configurations/StaticLocationActionData.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 @Component({
-  components: { DeleteDialog, StaticLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu, ProgressIndicator },
+  components: { DeleteDialog, StaticLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu },
+  computed: mapState('progressindicator', ['isLoading']),
   middleware: ['auth'],
   methods: {
-    ...mapActions('configurations', ['loadStaticLocationAction', 'updateStaticLocationAction', 'deleteStaticLocationAction', 'loadLocationActionTimepoints'])
+    ...mapActions('configurations', ['loadStaticLocationAction', 'updateStaticLocationAction', 'deleteStaticLocationAction', 'loadLocationActionTimepoints']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class StaticLocationView extends Vue {
@@ -112,13 +111,14 @@ export default class StaticLocationView extends Vue {
   })
   private editable!: boolean
 
-  private isLoading = false
   private showBeginDeleteDialog = false
 
   // vuex definition for typescript check
   loadStaticLocationAction!: LoadStaticLocationActionAction
   deleteStaticLocationAction!: DeleteStaticLocationActionAction
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   openEditStaticLocationForm () {
     this.$router.push('/configurations/' + this.configurationId + '/locations/static-location-actions/' + this.action.id + '/edit')
@@ -134,7 +134,7 @@ export default class StaticLocationView extends Vue {
 
   async deleteAndCloseBeginDeleteDialog () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.deleteStaticLocationAction(this.action.id)
       await this.loadLocationActionTimepoints(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Deletion successful')
@@ -142,7 +142,7 @@ export default class StaticLocationView extends Vue {
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Deletion failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
       this.closeBeginDeleteDialog()
     }
   }

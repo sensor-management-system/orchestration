@@ -86,7 +86,7 @@
               <v-autocomplete
                 :items="datasources"
                 :value="value.datasource"
-                :loading="isLaodingDatasource"
+                :loading="isLoadingDatasource"
                 label="Select datasource"
                 item-text="id"
                 return-object
@@ -364,7 +364,7 @@ export default class TsmLinkingForm extends mixins(Rules) {
   })
   readonly selectedDeviceActionPropertyCombination!: TsmDeviceMountPropertyCombination
 
-  private isLaodingDatasource = false
+  private isLoadingDatasource = false
   private isLoadingThing = false
   private isLoadingDatastream = false
 
@@ -530,12 +530,12 @@ export default class TsmLinkingForm extends mixins(Rules) {
         newObj.datastream = null
 
         try {
-          this.isLaodingDatasource = true
+          this.isLoadingDatasource = true
           await this.loadDatasources({ endpoint: result })
         } catch (e) {
           this.$store.commit('snackbar/setError', 'Failed to load datasources')
         } finally {
-          this.isLaodingDatasource = false
+          this.isLoadingDatasource = false
         }
         break
       case 'datasource':

@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-select
       value="Parameter Value Change"
       :items="['Parameter Value Change']"
@@ -87,23 +83,24 @@ import {
 import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 
 import ParameterChangeActionForm from '@/components/actions/ParameterChangeActionForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
   components: {
     ParameterChangeActionForm,
-    ProgressIndicator,
     SaveAndCancelButtons
   },
   scrollToTop: true,
   middleware: ['auth'],
   computed: mapState('devices', ['deviceParameterChangeAction', 'deviceParameters']),
-  methods: mapActions('devices', ['loadDeviceParameterChangeAction', 'loadAllDeviceActions', 'loadDeviceParameters', 'updateDeviceParameterChangeAction'])
+  methods: {
+    ...mapActions('devices', ['loadDeviceParameterChangeAction', 'loadAllDeviceActions', 'loadDeviceParameters', 'updateDeviceParameterChangeAction']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceParameterChangeActionEditPage extends mixins(CheckEditAccess) {
   private action: ParameterChangeAction = new ParameterChangeAction()
-  private isLoading = false
 
   // vuex definition for typescript check
   deviceParameterChangeAction!: DevicesState['deviceParameterChangeAction']
@@ -112,6 +109,7 @@ export default class DeviceParameterChangeActionEditPage extends mixins(CheckEdi
   loadDeviceParameters!: LoadDeviceParametersAction
   updateDeviceParameterChangeAction!: UpdateDeviceParameterChangeActionAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -137,7 +135,7 @@ export default class DeviceParameterChangeActionEditPage extends mixins(CheckEdi
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadDeviceParameterChangeAction(this.actionId),
         this.loadDeviceParameters(this.deviceId)
@@ -148,7 +146,7 @@ export default class DeviceParameterChangeActionEditPage extends mixins(CheckEdi
     } catch {
       this.$store.commit('snackbar/setError', 'Failed to fetch action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -171,7 +169,7 @@ export default class DeviceParameterChangeActionEditPage extends mixins(CheckEdi
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.updateDeviceParameterChangeAction({
         parameterId: this.action.parameter.id,
         action: this.action
@@ -181,7 +179,7 @@ export default class DeviceParameterChangeActionEditPage extends mixins(CheckEdi
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 }

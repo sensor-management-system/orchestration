@@ -34,9 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <dynamic-location-action-data
       v-if="action"
       :value="action"
@@ -75,8 +72,8 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { mapActions, mapGetters } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { mapActions, mapState, mapGetters } from 'vuex'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { IDynamicLocationAction } from '@/models/DynamicLocationAction'
 import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
@@ -89,16 +86,17 @@ import {
 import DynamicLocationActionData from '@/components/configurations/dynamicLocation/DynamicLocationActionData.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 @Component({
-  components: { DeleteDialog, DynamicLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu, ProgressIndicator },
+  components: { DeleteDialog, DynamicLocationActionData, DotMenuActionEdit, DotMenuActionDelete, DotMenu },
   computed: {
+    ...mapState('progressindicator', ['isLoading']),
     ...mapGetters('configurations', ['devicesForDynamicLocation'])
   },
   methods: {
-    ...mapActions('configurations', ['updateDynamicLocationAction', 'deleteDynamicLocationAction', 'loadDynamicLocationAction', 'loadLocationActionTimepoints'])
+    ...mapActions('configurations', ['updateDynamicLocationAction', 'deleteDynamicLocationAction', 'loadDynamicLocationAction', 'loadLocationActionTimepoints']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class DynamicLocationView extends Vue {
-  private isLoading = false
   private showDeleteDialog = false
 
   // vuex definition for typescript check
@@ -107,6 +105,8 @@ export default class DynamicLocationView extends Vue {
   deleteDynamicLocationAction!: DeleteDynamicLocationActionAction
   loadDynamicLocationAction!: LoadDynamicLocationActionAction
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   @Prop({
     type: String
@@ -139,7 +139,7 @@ export default class DynamicLocationView extends Vue {
 
   async deleteAndCloseDialog () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.deleteDynamicLocationAction(this.action.id)
       await this.loadLocationActionTimepoints(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Deletion successful')
@@ -147,7 +147,7 @@ export default class DynamicLocationView extends Vue {
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Deletion failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
       this.closeDeleteDialog()
     }
   }

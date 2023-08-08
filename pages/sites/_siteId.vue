@@ -34,9 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card flat>
       <center>
         <v-alert
@@ -70,14 +67,13 @@ import { mapActions, mapState, mapGetters } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ModificationInfo from '@/components/ModificationInfo.vue'
 import { LoadSiteAction, LoadSiteConfigurationsAction, SitesState } from '@/store/sites'
 import { CanAccessEntityGetter, CanArchiveEntityGetter, CanDeleteEntityGetter, CanModifyEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
 @Component({
   components: {
-    ProgressIndicator,
     ModificationInfo
   },
   computed: {
@@ -87,7 +83,8 @@ import { CanAccessEntityGetter, CanArchiveEntityGetter, CanDeleteEntityGetter, C
   },
   methods: {
     ...mapActions('sites', ['loadSite', 'loadSiteConfigurations']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
 
   }
 })
@@ -104,8 +101,6 @@ export default class SitePage extends Vue {
   @ProvideReactive()
     restoreable: boolean = false
 
-  private isLoading: boolean = false
-
   // vuex definition for typescript check
   site!: SitesState['site']
   loadSite!: LoadSiteAction
@@ -117,6 +112,7 @@ export default class SitePage extends Vue {
   canRestoreEntity!: CanRestoreEntityGetter
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  setLoading!: SetLoadingAction
 
   mounted () {
     this.initializeAppBar()
@@ -124,7 +120,7 @@ export default class SitePage extends Vue {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadSite({
         siteId: this.siteId
       })
@@ -146,7 +142,7 @@ export default class SitePage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of site / lab failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

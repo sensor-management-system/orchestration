@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -106,8 +102,7 @@ import {
 import { Attachment } from '@/models/Attachment'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
-
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 import { Rules } from '@/mixins/Rules'
 
@@ -116,15 +111,19 @@ import { Rules } from '@/mixins/Rules'
  * @extends Vue
  */
 @Component({
-  components: { ProgressIndicator, SaveAndCancelButtons },
+  components: { SaveAndCancelButtons },
   middleware: ['auth'],
-  computed: mapState('platforms', ['platformAttachment']),
-  methods: mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment'])
+  computed: {
+    ...mapState('platforms', ['platformAttachment']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 // @ts-ignore
 export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, CheckEditAccess) {
-  private isSaving = false
-  private isLoading = false
   private valueCopy: Attachment = new Attachment()
 
   // vuex definition for typescript check
@@ -132,6 +131,8 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
   loadPlatformAttachment!: LoadPlatformAttachmentAction
   updatePlatformAttachment!: UpdatePlatformAttachmentAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -157,7 +158,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadPlatformAttachment(this.attachmentId)
       if (this.platformAttachment) {
         this.valueCopy = Attachment.createFromObject(this.platformAttachment)
@@ -165,7 +166,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load attachment')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -177,17 +178,13 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     return this.$route.params.attachmentId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   async save () {
     if (!(this.$refs.attachmentsEditForm as Vue & { validate: () => boolean }).validate()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.updatePlatformAttachment({
         platformId: this.platformId,
         attachment: this.valueCopy
@@ -198,7 +195,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save attachment')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

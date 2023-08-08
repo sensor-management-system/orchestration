@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-stepper
       v-model="step"
       vertical
@@ -256,7 +252,7 @@ import MountWizardNodeSelect from '@/components/configurations/MountWizardNodeSe
 import MountWizardEntitySelect from '@/components/configurations/MountWizardEntitySelect.vue'
 import MountWizardMountForm from '@/components/configurations/MountWizardMountForm.vue'
 import MountWizardSubmitOverview from '@/components/configurations/MountWizardSubmitOverview.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
 
 @Component({
@@ -266,8 +262,7 @@ import MountActionDetailsForm from '@/components/configurations/MountActionDetai
     MountWizardNodeSelect,
     MountWizardEntitySelect,
     MountWizardMountForm,
-    MountWizardSubmitOverview,
-    ProgressIndicator
+    MountWizardSubmitOverview
   },
   computed: {
     ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate']),
@@ -276,6 +271,7 @@ import MountActionDetailsForm from '@/components/configurations/MountActionDetai
   methods: {
     ...mapActions('devices', ['clearDeviceAvailabilities']),
     ...mapActions('platforms', ['clearPlatformAvailabilities']),
+    ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('configurations', ['addDeviceMountAction', 'addPlatformMountAction', 'loadConfiguration', 'loadMountingConfigurationForDate'])
   }
 })
@@ -286,7 +282,6 @@ export default class MountWizard extends Vue {
   })
     syncedHasSaved!: boolean
 
-  private isSaving = false
   private step = 1
 
   private tree: ConfigurationsTree = new ConfigurationsTree()
@@ -316,6 +311,7 @@ export default class MountWizard extends Vue {
   configurationMountingActionsForDate!: ConfigurationsTree
   clearDeviceAvailabilities!: ClearDeviceAvailabilitiesAction
   clearPlatformAvailabilities!: ClearPlatformAvailabilitiesAction
+  setLoading!: SetLoadingAction
 
   async created () {
     this.syncedHasSaved = false
@@ -427,7 +423,7 @@ export default class MountWizard extends Vue {
         return
       }
 
-      this.isSaving = true
+      this.setLoading(true)
 
       let parentPlatform = null
       if (this.selectedNode && this.selectedNode.canHaveChildren() && !this.selectedNode.isConfiguration()) {
@@ -457,7 +453,7 @@ export default class MountWizard extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add device mount action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -470,7 +466,7 @@ export default class MountWizard extends Vue {
 
       let parentPlatform = null
 
-      this.isSaving = true
+      this.setLoading(true)
 
       if (this.selectedNode && this.selectedNode.canHaveChildren() && !this.selectedNode.isConfiguration()) {
         parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
@@ -499,7 +495,7 @@ export default class MountWizard extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to add platform mount action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

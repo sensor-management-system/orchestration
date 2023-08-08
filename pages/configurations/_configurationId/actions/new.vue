@@ -35,9 +35,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <v-card
       flat
     >
@@ -94,11 +91,11 @@ import {
   LoadConfigurationParametersAction
 } from '@/store/configurations'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeApi'
 
 @Component({
-  components: { ActionTypeDialog, ProgressIndicator },
+  components: { ActionTypeDialog },
   middleware: ['auth'],
   computed: {
     ...mapGetters('vocabulary', ['configurationActionTypeItems']),
@@ -106,11 +103,11 @@ import { ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeAp
   },
   methods: {
     ...mapActions('vocabulary', ['loadConfigurationGenericActionTypes']),
-    ...mapActions('configurations', ['setChosenKindOfConfigurationAction', 'loadConfigurationAttachments', 'loadConfigurationParameters'])
+    ...mapActions('configurations', ['setChosenKindOfConfigurationAction', 'loadConfigurationAttachments', 'loadConfigurationParameters']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ActionAddPage extends mixins(CheckEditAccess) {
-  private isLoading: boolean = false
   private showNewActionTypeDialog = false
 
   // vuex definition for typescript check
@@ -121,6 +118,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   loadConfigurationParameters!: LoadConfigurationParametersAction
   setChosenKindOfConfigurationAction!: SetChosenKindOfConfigurationActionAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -150,7 +148,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       this.chosenKindOfAction = null
       await Promise.all([
         this.loadConfigurationGenericActionTypes(),
@@ -160,7 +158,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch action types')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

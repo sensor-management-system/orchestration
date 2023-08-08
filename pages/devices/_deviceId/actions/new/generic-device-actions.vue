@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -78,23 +74,26 @@ import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   middleware: ['auth'],
-  components: { ProgressIndicator, SaveAndCancelButtons, GenericActionForm },
+  components: { SaveAndCancelButtons, GenericActionForm },
   computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
-  methods: mapActions('devices', ['addDeviceGenericAction', 'loadAllDeviceActions'])
+  methods: {
+    ...mapActions('devices', ['addDeviceGenericAction', 'loadAllDeviceActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class NewGenericDeviceAction extends mixins(CheckEditAccess) {
   private genericDeviceAction: GenericAction = new GenericAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
   chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
   addDeviceGenericAction!: AddDeviceGenericAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -138,7 +137,7 @@ export default class NewGenericDeviceAction extends mixins(CheckEditAccess) {
     this.genericDeviceAction.actionTypeUrl = this.chosenKindOfDeviceAction?.uri || ''
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addDeviceGenericAction({
         deviceId: this.deviceId,
         genericAction: this.genericDeviceAction
@@ -150,7 +149,7 @@ export default class NewGenericDeviceAction extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

@@ -35,10 +35,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card
       flat
     >
@@ -127,34 +123,33 @@ import { Site } from '@/models/Site'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { hasSelfIntersection } from '@/utils/mapHelpers'
 
 @Component({
   components: {
     SaveAndCancelButtons,
-    SiteBasicDataForm,
-    ProgressIndicator
+    SiteBasicDataForm
   },
   middleware: ['auth'],
   computed: {
     ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
     ...mapGetters('vocabulary', ['countryNames']),
     ...mapState('sites', ['site']),
-    ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
+    ...mapState('vocabulary', ['siteUsages', 'siteTypes']),
+    ...mapState('progressindicator', ['isLoading'])
 
   },
   methods: {
     ...mapActions('sites', ['copySite', 'loadSite', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs']),
-    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries'])
+    ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class SiteCopyPage extends Vue {
   private siteToCopy: Site | null = null
-  private isSaving = false
-  private isLoading = false
 
   private copyContacts: boolean = true
   private copyAttachments: boolean = false
@@ -174,11 +169,13 @@ export default class SiteCopyPage extends Vue {
   loadSiteTypes!: LoadSiteTypesAction
   countryNames!: CountryNamesGetter
   loadCountries!: LoadCountriesAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   async created () {
     this.initializeAppBar()
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadSite({
         siteId: this.siteId
       })
@@ -206,16 +203,12 @@ export default class SiteCopyPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading site / lab failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
   get siteId () {
     return this.$route.params.siteId
-  }
-
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
   }
 
   getPreparedSiteForCopy (): Site | null {
@@ -249,7 +242,7 @@ export default class SiteCopyPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const savedSiteId = await this.copySite({
         site: this.siteToCopy,
         copyContacts: this.copyContacts,
@@ -261,7 +254,7 @@ export default class SiteCopyPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Copy failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

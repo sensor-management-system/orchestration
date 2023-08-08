@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card
       flat
     >
@@ -89,7 +85,7 @@ import { CustomTextField } from '@/models/CustomTextField'
 import BaseList from '@/components/shared/BaseList.vue'
 import CustomFieldForm from '@/components/shared/CustomFieldForm.vue'
 import CustomFieldListItem from '@/components/shared/CustomFieldListItem.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
@@ -97,17 +93,19 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     BaseList,
     CustomFieldForm,
     CustomFieldListItem,
-    ProgressIndicator,
     SaveAndCancelButtons
   },
   middleware: ['auth'],
-  computed: mapState('configurations', ['configurationCustomField', 'configurationCustomFields']),
-  methods: mapActions('configurations', ['loadConfigurationCustomField', 'loadConfigurationCustomFields', 'updateConfigurationCustomField'])
+  computed: {
+    ...mapState('configurations', ['configurationCustomField', 'configurationCustomFields']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('configurations', ['loadConfigurationCustomField', 'loadConfigurationCustomFields', 'updateConfigurationCustomField']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class ConfigurationCustomFieldsEditPage extends mixins(CheckEditAccess) {
-  private isSaving = false
-  private isLoading = false
-
   private valueCopy: CustomTextField = new CustomTextField()
 
   // vuex definition for typescript check
@@ -116,6 +114,8 @@ export default class ConfigurationCustomFieldsEditPage extends mixins(CheckEditA
   loadConfigurationCustomField!: LoadConfigurationCustomFieldAction
   updateConfigurationCustomField!: UpdateConfigurationCustomFieldAction
   loadConfigurationCustomFields!: LoadConfigurationCustomFieldsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -141,7 +141,7 @@ export default class ConfigurationCustomFieldsEditPage extends mixins(CheckEditA
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadConfigurationCustomField(this.customFieldId)
       if (this.configurationCustomField) {
         this.valueCopy = CustomTextField.createFromObject(this.configurationCustomField)
@@ -149,7 +149,7 @@ export default class ConfigurationCustomFieldsEditPage extends mixins(CheckEditA
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to load custom field')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -161,17 +161,13 @@ export default class ConfigurationCustomFieldsEditPage extends mixins(CheckEditA
     return this.$route.params.customfieldId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   get configurationCustomFieldsExceptCurrent (): CustomTextField[] {
     return this.configurationCustomFields.filter(i => i.id !== this.customFieldId)
   }
 
   async save () {
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.updateConfigurationCustomField({
         configurationId: this.configurationId,
         configurationCustomField: this.valueCopy
@@ -182,7 +178,7 @@ export default class ConfigurationCustomFieldsEditPage extends mixins(CheckEditA
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

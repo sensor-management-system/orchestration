@@ -30,9 +30,6 @@
  -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild
       v-if="configuration"
     />
@@ -45,36 +42,33 @@ import { mapState, mapActions } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { LoadDeviceMountActionsIncludingDeviceInformationAction } from '@/store/configurations'
 
 @Component({
-  components: {
-    ProgressIndicator
-  },
   computed: {
     ...mapState('configurations', ['configuration'])
   },
   methods: {
-    ...mapActions('configurations', ['loadDeviceMountActionsIncludingDeviceInformation'])
+    ...mapActions('configurations', ['loadDeviceMountActionsIncludingDeviceInformation']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationNewTsmLinkingPageParent extends mixins(CheckEditAccess) {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
+  setLoading!: SetLoadingAction
 
   async created () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       // reset new linkings to remove cached data
       this.$store.commit('tsmLinking/setNewLinkings', [])
       await this.loadDeviceMountActionsIncludingDeviceInformation(this.configurationId)
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading device mount actions failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

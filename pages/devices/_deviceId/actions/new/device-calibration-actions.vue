@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -78,22 +74,23 @@ import {
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 
 import DeviceCalibrationActionForm from '@/components/actions/DeviceCalibrationActionForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
   middleware: ['auth'],
   components: {
     SaveAndCancelButtons,
-    ProgressIndicator,
     DeviceCalibrationActionForm
   },
   computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction', 'deviceMeasuredQuantities']),
-  methods: mapActions('devices', ['addDeviceCalibrationAction', 'loadAllDeviceActions'])
+  methods: {
+    ...mapActions('devices', ['addDeviceCalibrationAction', 'loadAllDeviceActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) {
   private deviceCalibrationAction: DeviceCalibrationAction = new DeviceCalibrationAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
@@ -101,6 +98,7 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
   chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
   addDeviceCalibrationAction!: AddDeviceCalibrationAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -144,7 +142,7 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addDeviceCalibrationAction({
         deviceId: this.deviceId,
         calibrationAction: this.deviceCalibrationAction
@@ -155,7 +153,7 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

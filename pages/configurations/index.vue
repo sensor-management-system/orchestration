@@ -181,13 +181,7 @@ permissions and limitations under the Licence.
         </v-row>
       </v-tab-item>
     </v-tabs-items>
-    <v-progress-circular
-      v-if="loading"
-      class="progress-spinner"
-      color="primary"
-      indeterminate
-    />
-    <div v-if="configurations.length <=0 && !loading">
+    <div v-if="configurations.length <=0 && !isLoading">
       <p class="text-center">
         There are no configurations that match your search criteria.
       </p>
@@ -215,7 +209,7 @@ permissions and limitations under the Licence.
         >
           <v-pagination
             v-model="page"
-            :disabled="loading"
+            :disabled="isLoading"
             :length="totalPages"
             :total-visible="7"
             @input="runSearch"
@@ -267,7 +261,7 @@ permissions and limitations under the Licence.
       </BaseList>
       <v-pagination
         v-model="page"
-        :disabled="loading"
+        :disabled="isLoading"
         :length="totalPages"
         :total-visible="7"
         @input="runSearch"
@@ -277,7 +271,7 @@ permissions and limitations under the Licence.
       v-if="configurationToDelete"
       v-model="showDeleteDialog"
       title="Delete Configuration"
-      :disabled="loading"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -320,6 +314,7 @@ import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 import { Configuration } from '@/models/Configuration'
 import { PermissionGroup } from '@/models/PermissionGroup'
@@ -350,19 +345,19 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     ...mapState('appbar', ['activeTab']),
     ...mapGetters('configurations', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups', 'canArchiveEntity', 'canRestoreEntity']),
-    ...mapState('sites', ['sites'])
+    ...mapState('sites', ['sites']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
     ...mapActions('configurations', ['searchConfigurationsPaginated', 'loadConfiguration', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'archiveConfiguration', 'restoreConfiguration', 'exportAsSensorML', 'replaceConfigurationInConfigurations', 'getSensorMLUrl', 'loadProjects']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
     ...mapActions('permissions', ['loadPermissionGroups']),
-    ...mapActions('sites', ['searchSites'])
+    ...mapActions('sites', ['searchSites']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class SearchConfigurationsPage extends Vue {
-  private loading = false
-
   private searchText: string | null = null
   private selectedConfigurationStates: string[] = []
   private selectedPermissionGroups: PermissionGroup[] = []
@@ -413,10 +408,12 @@ export default class SearchConfigurationsPage extends Vue {
   searchSites!: SearchSitesAction
   sites!: SitesState['sites']
   projects!: ConfigurationsState['projects']
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   async created () {
     try {
-      this.loading = true
+      this.setLoading(true)
       this.initializeAppBar()
       await Promise.all([
         this.loadConfigurationsStates(),
@@ -429,7 +426,7 @@ export default class SearchConfigurationsPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
@@ -524,14 +521,14 @@ export default class SearchConfigurationsPage extends Vue {
 
   async runSearch () {
     try {
-      this.loading = true
+      this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchConfigurationsPaginated(this.searchParams)
       this.setPageAndSizeInUrl()
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
@@ -551,14 +548,14 @@ export default class SearchConfigurationsPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.deleteConfiguration(this.configurationToDelete.id)
       this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Configuration deleted')
     } catch {
       this.$store.commit('snackbar/setError', 'Configuration could not be deleted')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }
@@ -578,7 +575,7 @@ export default class SearchConfigurationsPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.archiveConfiguration(this.configurationToArchive.id)
       await this.loadConfiguration(this.configurationToArchive.id)
       await this.replaceConfigurationInConfigurations(this.configuration!)
@@ -586,14 +583,14 @@ export default class SearchConfigurationsPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Configuration could not be archived')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeArchiveDialog()
     }
   }
 
   async runRestoreConfiguration (configuration: Configuration) {
     if (configuration.id) {
-      this.loading = true
+      this.setLoading(true)
       try {
         await this.restoreConfiguration(configuration.id)
         await this.loadConfiguration(configuration.id)
@@ -602,7 +599,7 @@ export default class SearchConfigurationsPage extends Vue {
       } catch (error) {
         this.$store.commit('snackbar/setError', 'Configuration could not be restored')
       } finally {
-        this.loading = false
+        this.setLoading(false)
       }
     }
   }

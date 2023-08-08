@@ -34,10 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions
       v-if="$auth.loggedIn"
     >
@@ -101,7 +97,7 @@ permissions and limitations under the Licence.
       v-if="attachmentToDelete"
       v-model="showDeleteDialog"
       title="Delete Attachment"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -125,7 +121,7 @@ import { PlatformsState, LoadPlatformAttachmentsAction, DeletePlatformAttachment
 import { Attachment } from '@/models/Attachment'
 import { Visibility } from '@/models/Visibility'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
@@ -136,15 +132,20 @@ import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
-  components: { DeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, ProgressIndicator, DownloadDialog },
-  computed: mapState('platforms', ['platformAttachments', 'platform']),
-  methods: mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment', 'downloadAttachment'])
+  components: { DeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, DownloadDialog },
+  computed: {
+    ...mapState('platforms', ['platformAttachments', 'platform']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment', 'downloadAttachment']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class PlatformAttachmentShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
   private showDeleteDialog = false
   private attachmentToDelete: Attachment|null = null
 
@@ -157,6 +158,8 @@ export default class PlatformAttachmentShowPage extends Vue {
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
   deletePlatformAttachment!: DeletePlatformAttachmentAction
   downloadAttachment!: DownloadAttachmentAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -187,7 +190,7 @@ export default class PlatformAttachmentShowPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const attachmentId = this.attachmentToDelete.id
       await this.deletePlatformAttachment(attachmentId)
       this.loadPlatformAttachments(this.platformId)
@@ -195,7 +198,7 @@ export default class PlatformAttachmentShowPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }

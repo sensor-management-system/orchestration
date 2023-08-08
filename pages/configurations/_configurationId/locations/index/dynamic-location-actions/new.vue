@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-card-title class="pl-0">
         New Dynamic Location
@@ -72,7 +68,7 @@ import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { DateTime } from 'luxon'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { VocabularyState } from '@/store/vocabulary'
 import { ContactsState } from '@/store/contacts'
@@ -85,7 +81,7 @@ import {
 import { currentAsUtcDateSecondsAsZeros } from '@/utils/dateHelper'
 import DynamicLocationWizard from '@/components/configurations/dynamicLocation/DynamicLocationWizard.vue'
 @Component({
-  components: { DynamicLocationWizard, ProgressIndicator },
+  components: { DynamicLocationWizard },
   middleware: ['auth'],
   computed: {
     ...mapState('vocabulary', ['epsgCodes', 'elevationData']),
@@ -94,12 +90,12 @@ import DynamicLocationWizard from '@/components/configurations/dynamicLocation/D
     ...mapState('configurations', ['selectedLocationDate'])
   },
   methods: {
-    ...mapActions('configurations', ['addDynamicLocationBeginAction', 'loadLocationActionTimepoints', 'loadDeviceMountActionsIncludingDeviceInformation'])
+    ...mapActions('configurations', ['addDynamicLocationBeginAction', 'loadLocationActionTimepoints', 'loadDeviceMountActionsIncludingDeviceInformation']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
   private beginAction: DynamicLocationAction = new DynamicLocationAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   epsgCodes!: VocabularyState['epsgCodes']
@@ -109,6 +105,7 @@ export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
   loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
   addDynamicLocationBeginAction!: AddDynamicLocationBeginActionAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -155,7 +152,7 @@ export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const newId = await this.addDynamicLocationBeginAction({
         configurationId: this.configurationId,
         dynamicLocationAction: this.beginAction
@@ -166,7 +163,7 @@ export default class DynamicLocationActionNew extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

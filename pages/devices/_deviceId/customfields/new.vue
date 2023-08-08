@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card
       flat
     >
@@ -92,7 +88,7 @@ import { CustomTextField } from '@/models/CustomTextField'
 import BaseList from '@/components/shared/BaseList.vue'
 import CustomFieldForm from '@/components/shared/CustomFieldForm.vue'
 import CustomFieldListItem from '@/components/shared/CustomFieldListItem.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
@@ -101,21 +97,22 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     BaseList,
     CustomFieldForm,
     CustomFieldListItem,
-    ProgressIndicator,
     SaveAndCancelButtons
   },
   computed: mapState('devices', ['deviceCustomField', 'deviceCustomFields']),
-  methods: mapActions('devices', ['addDeviceCustomField', 'loadDeviceCustomFields'])
+  methods: {
+    ...mapActions('devices', ['addDeviceCustomField', 'loadDeviceCustomFields']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceCustomFieldAddPage extends mixins(CheckEditAccess) {
-  private isSaving = false
-
   private customField: CustomTextField = new CustomTextField()
 
   // vuex definition for typescript check
   deviceCustomFields!: DevicesState['deviceCustomFields']
   loadDeviceCustomFields!: LoadDeviceCustomFieldsAction
   addDeviceCustomField!: AddDeviceCustomFieldAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -149,7 +146,7 @@ export default class DeviceCustomFieldAddPage extends mixins(CheckEditAccess) {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
 
       await this.addDeviceCustomField({
         deviceId: this.deviceId,
@@ -161,7 +158,7 @@ export default class DeviceCustomFieldAddPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save custom field')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

@@ -50,13 +50,7 @@ permissions and limitations under the Licence.
       </PlatformSearch>
     </div>
 
-    <v-progress-circular
-      v-if="loading"
-      class="progress-spinner"
-      color="primary"
-      indeterminate
-    />
-    <div v-if="platforms.length <=0 && !loading">
+    <div v-if="platforms.length <=0 && !isLoading">
       <p class="text-center">
         There are no platforms that match your search criteria.
       </p>
@@ -74,15 +68,6 @@ permissions and limitations under the Licence.
           <v-subheader>
             <FoundEntries v-model="totalCount" entity-name="platform" />
             <template v-if="platforms.length>0">
-              <v-dialog v-model="processing" max-width="100">
-                <v-card>
-                  <v-card-text>
-                    <div class="text-center pt-2">
-                      <v-progress-circular indeterminate />
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </v-dialog>
               <v-menu
                 close-on-click
                 close-on-content-click
@@ -135,7 +120,7 @@ permissions and limitations under the Licence.
         >
           <v-pagination
             v-model="page"
-            :disabled="loading"
+            :disabled="isLoading"
             :length="totalPages"
             :total-visible="7"
             @input="searchPlatformsPaginated"
@@ -192,7 +177,7 @@ permissions and limitations under the Licence.
       </BaseList>
       <v-pagination
         v-model="page"
-        :disabled="loading"
+        :disabled="isLoading"
         :length="totalPages"
         :total-visible="7"
         @input="searchPlatformsPaginated"
@@ -202,7 +187,7 @@ permissions and limitations under the Licence.
       v-if="platformToDelete"
       v-model="showDeleteDialog"
       title="Delete Platform"
-      :disabled="loading"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -269,6 +254,7 @@ import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
 import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
 import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 import { Platform } from '@/models/Platform'
 import { Visibility } from '@/models/Visibility'
@@ -300,18 +286,17 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   },
   computed: {
     ...mapState('platforms', ['platforms', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'platform']),
+    ...mapState('progressindicator', ['isLoading']),
     ...mapGetters('platforms', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'canArchiveEntity', 'canRestoreEntity'])
   },
   methods: {
     ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'loadPlatform', 'replacePlatformInPlatforms', 'getSensorMLUrl']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class SearchPlatformsPage extends Vue {
-  private loading: boolean = false
-  private processing: boolean = false
-
   private showDeleteDialog: boolean = false
   private showArchiveDialog: boolean = false
   private showDownloadDialog: boolean = false
@@ -346,6 +331,8 @@ export default class SearchPlatformsPage extends Vue {
   replacePlatformInPlatforms!: ReplacePlatformInPlatformsAction
   platform!: PlatformsState['platform']
   getSensorMLUrl!: GetSensorMLUrlAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   created () {
     this.initializeAppBar()
@@ -390,9 +377,9 @@ export default class SearchPlatformsPage extends Vue {
   }
 
   async exportCsvUrl (): Promise<string> {
-    this.processing = true
+    this.setLoading(true)
     const blob = await this.exportAsCsv()
-    this.processing = false
+    this.setLoading(false)
     return window.URL.createObjectURL(blob)
   }
 
@@ -411,14 +398,14 @@ export default class SearchPlatformsPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.deletePlatform(this.platformToDelete.id)
       this.searchPlatformsPaginated()
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }
@@ -438,7 +425,7 @@ export default class SearchPlatformsPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.archivePlatform(this.platformToArchive.id)
       await this.loadPlatform({
         platformId: this.platformToArchive.id,
@@ -450,14 +437,14 @@ export default class SearchPlatformsPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Platform could not be archived')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeArchiveDialog()
     }
   }
 
   async runRestorePlatform (platform: Platform) {
     if (platform.id) {
-      this.loading = true
+      this.setLoading(true)
       try {
         await this.restorePlatform(platform.id)
         await this.loadPlatform({
@@ -470,7 +457,7 @@ export default class SearchPlatformsPage extends Vue {
       } catch (error) {
         this.$store.commit('snackbar/setError', 'Platform could not be restored')
       } finally {
-        this.loading = false
+        this.setLoading(false)
       }
     }
   }

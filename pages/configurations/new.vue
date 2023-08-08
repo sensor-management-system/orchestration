@@ -34,10 +34,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-card
       flat
     >
@@ -81,7 +77,7 @@ import { Configuration } from '@/models/Configuration'
 
 import { CreatePidAction, SaveConfigurationAction } from '@/store/configurations'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
@@ -90,18 +86,17 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   components: {
     ConfigurationsBasicDataForm,
     NonModelOptionsForm,
-    SaveAndCancelButtons,
-    ProgressIndicator
+    SaveAndCancelButtons
   },
   middleware: ['auth'],
   methods: {
     ...mapActions('configurations', ['saveConfiguration', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationNewPage extends Vue {
   private configuration: Configuration = new Configuration()
-  private isLoading: boolean = false
   private createOptions: NonModelOptions = {
     persistentIdentifierShouldBeCreated: false
   }
@@ -112,6 +107,7 @@ export default class ConfigurationNewPage extends Vue {
   createPid!: CreatePidAction
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
+  setLoading!: SetLoadingAction
 
   created () {
     this.initializeAppBar()
@@ -124,7 +120,7 @@ export default class ConfigurationNewPage extends Vue {
     }
 
     try {
-      this.isLoading = true
+      this.setLoading(true)
       const savedConfiguration = await this.saveConfiguration(this.configuration)
       if (this.createOptions.persistentIdentifierShouldBeCreated) {
         savedConfiguration.persistentIdentifier = await this.createPid(savedConfiguration.id)
@@ -134,7 +130,7 @@ export default class ConfigurationNewPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Save failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

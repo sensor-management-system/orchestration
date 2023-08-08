@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-      dark
-    />
     <v-row
       dense
     >
@@ -80,13 +76,7 @@ permissions and limitations under the Licence.
       </v-col>
     </v-row>
 
-    <v-progress-circular
-      v-if="loading"
-      class="progress-spinner"
-      color="primary"
-      indeterminate
-    />
-    <div v-if="contacts.length<=0 && !loading">
+    <div v-if="contacts.length<=0 && !isLoading">
       <p class="text-center">
         There are no contacts that match your search criteria.
       </p>
@@ -114,7 +104,7 @@ permissions and limitations under the Licence.
         >
           <v-pagination
             v-model="page"
-            :disabled="loading"
+            :disabled="isLoading"
             :length="totalPages"
             :total-visible="7"
             @input="runSearch"
@@ -167,7 +157,7 @@ permissions and limitations under the Licence.
       </BaseList>
       <v-pagination
         v-model="page"
-        :disabled="loading"
+        :disabled="isLoading"
         :length="totalPages"
         :total-visible="7"
         @input="runSearch"
@@ -177,7 +167,7 @@ permissions and limitations under the Licence.
       v-if="contactToDelete"
       v-model="showDeleteDialog"
       title="Delete Contact"
-      :disabled="loading"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -207,7 +197,7 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { CanDeleteContactGetter } from '@/store/permissions'
@@ -220,21 +210,21 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     BaseList,
     DeleteDialog,
     DotMenuActionDelete,
-    PageSizeSelect,
-    ProgressIndicator
+    PageSizeSelect
   },
   computed: {
     ...mapState('contacts', ['pageNumber', 'pageSize', 'totalPages', 'totalCount', 'contacts']),
+    ...mapState('progressindicator', ['isLoading']),
     ...mapGetters('contacts', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteContact'])
   },
   methods: {
     ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'setPageSize', 'deleteContact']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class SearchContactsPage extends Vue {
-  private loading: boolean = false
   private searchText: string = ''
 
   private showDeleteDialog: boolean = false
@@ -252,6 +242,8 @@ export default class SearchContactsPage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   canDeleteContact!: CanDeleteContactGetter
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   async created () {
     if (!this.$auth.loggedIn) {
@@ -262,14 +254,14 @@ export default class SearchContactsPage extends Vue {
     }
 
     try {
-      this.loading = true
+      this.setLoading(true)
       this.initializeAppBar()
       this.initSearchQueryParams()
       await this.runInitialSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
@@ -325,14 +317,14 @@ export default class SearchContactsPage extends Vue {
 
   async runSearch () {
     try {
-      this.loading = true
+      this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchContactsPaginated(this.searchText)
       this.setPageAndSizeInUrl()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
@@ -352,14 +344,14 @@ export default class SearchContactsPage extends Vue {
     }
 
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.deleteContact(this.contactToDelete.id)
       this.runSearch()// to update the list
       this.$store.commit('snackbar/setSuccess', 'Contact deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Contact could not be deleted')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }

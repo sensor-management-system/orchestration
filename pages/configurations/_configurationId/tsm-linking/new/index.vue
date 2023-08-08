@@ -30,9 +30,6 @@
  -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-    />
     <v-card-actions>
       <v-card-title class="pl-0">
         New TSM-Linking
@@ -40,7 +37,7 @@
       <v-spacer />
       <v-btn
         v-if="$auth.loggedIn"
-        :disabled="isSaving"
+        :disabled="isLoading"
         small
         text
         nuxt
@@ -57,7 +54,7 @@
         <v-btn
           block
           color="primary"
-          :disabled="isSaving"
+          :disabled="isLoading"
           @click="save()"
         >
           Submit
@@ -79,7 +76,7 @@ import { mapActions, mapState } from 'vuex'
 import { RawLocation } from 'vue-router'
 
 import TsmLinkingWizard from '@/components/configurations/tsmLinking/TsmLinkingWizard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { TsmLinking } from '@/models/TsmLinking'
 import {
   AddConfigurationTsmLinkingAction,
@@ -91,19 +88,19 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
 @Component({
   components: {
     NavigationGuardDialog,
-    ProgressIndicator,
     TsmLinkingWizard
   },
   middleware: ['auth'],
   computed: {
-    ...mapState('tsmLinking', ['newLinkings'])
+    ...mapState('tsmLinking', ['newLinkings']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('tsmLinking', ['addConfigurationTsmLinking', 'loadConfigurationTsmLinkings'])
+    ...mapActions('tsmLinking', ['addConfigurationTsmLinking', 'loadConfigurationTsmLinkings']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationNewTsmLinkingPageChild extends Vue {
-  private isSaving = false
   private hasSaved = false
   private errorLinkings: TsmLinking[] = []
   private to: RawLocation | null = null
@@ -113,6 +110,8 @@ export default class ConfigurationNewTsmLinkingPageChild extends Vue {
   newLinkings!: ITsmLinkingState['newLinkings']
   addConfigurationTsmLinking!: AddConfigurationTsmLinkingAction
   loadConfigurationTsmLinkings!: LoadConfigurationTsmLinkingsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get configurationId () {
     return this.$route.params.configurationId
@@ -132,7 +131,7 @@ export default class ConfigurationNewTsmLinkingPageChild extends Vue {
       return
     }
 
-    this.isSaving = true
+    this.setLoading(true)
 
     for (const newLinking of this.newLinkings) {
       try {
@@ -142,7 +141,7 @@ export default class ConfigurationNewTsmLinkingPageChild extends Vue {
       }
     }
 
-    this.isSaving = false
+    this.setLoading(false)
     this.hasSaved = true
 
     if (this.errorLinkings.length > 0) {

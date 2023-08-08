@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -145,7 +141,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { AggregationType } from '@/models/AggregationType'
@@ -156,20 +152,22 @@ import { AddAggregationTypeAction, LoadGlobalProvenancesAction, VocabularyState 
     ...mapState('vocabulary', ['aggregationtypes', 'globalProvenances'])
   },
   methods: {
-    ...mapActions('vocabulary', ['addAggregationType', 'loadGlobalProvenances'])
+    ...mapActions('vocabulary', ['addAggregationType', 'loadGlobalProvenances']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class AggregationTypeDialog extends mixins(Rules) {
   private suggestion = new AggregationType()
-  private isSaving: boolean = false
   private addAggregationType!: AddAggregationTypeAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
   private aggregationtypes!: VocabularyState['aggregationtypes']
   private globalProvenances!: VocabularyState['globalProvenances']
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -223,7 +221,7 @@ export default class AggregationTypeDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     // Copy before closing the dialog
     const aggregationType = AggregationType.createFromObject(this.suggestion)
     this.showDialog = false
@@ -234,7 +232,7 @@ export default class AggregationTypeDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the aggregation type')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

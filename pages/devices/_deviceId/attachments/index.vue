@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions
       v-if="editable"
     >
@@ -99,7 +95,7 @@ permissions and limitations under the Licence.
       v-if="attachmentToDelete"
       v-model="showDeleteDialog"
       title="Delete Attachment"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -128,20 +124,25 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { Visibility } from '@/models/Visibility'
 import { getLastPathElement } from '@/utils/urlHelpers'
 
 @Component({
-  components: { ProgressIndicator, DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
-  computed: mapState('devices', ['deviceAttachments', 'device']),
-  methods: mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment', 'downloadAttachment'])
+  components: { DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
+  computed: {
+    ...mapState('devices', ['deviceAttachments', 'device']),
+    ...mapState('progressindicator', ['isLoading'])
+  },
+  methods: {
+    ...mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment', 'downloadAttachment']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceAttachmentShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving = false
   private showDeleteDialog = false
   private attachmentToDelete: Attachment | null = null
 
@@ -154,6 +155,8 @@ export default class DeviceAttachmentShowPage extends Vue {
   deleteDeviceAttachment!: DeleteDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
   downloadAttachment!: DownloadAttachmentAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -184,7 +187,7 @@ export default class DeviceAttachmentShowPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const attachmentId = this.attachmentToDelete.id
       await this.deleteDeviceAttachment(attachmentId)
       await this.loadDeviceAttachments(this.deviceId)
@@ -192,7 +195,7 @@ export default class DeviceAttachmentShowPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }

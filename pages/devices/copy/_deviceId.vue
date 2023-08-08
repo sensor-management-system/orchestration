@@ -35,10 +35,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card
       flat
     >
@@ -156,14 +152,13 @@ import { Device } from '@/models/Device'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     DeviceBasicDataForm,
-    ProgressIndicator,
     NonModelOptionsForm
   },
   middleware: ['auth'],
@@ -173,14 +168,13 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   },
   methods: {
     ...mapActions('devices', ['copyDevice', 'loadDevice', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class DeviceCopyPage extends Vue {
   private deviceToCopy: Device = new Device()
-  private isSaving = false
-  private isLoading = false
   private copyOptions: NonModelOptions = {
     persistentIdentifierShouldBeCreated: false
   }
@@ -205,11 +199,12 @@ export default class DeviceCopyPage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
+  setLoading!: SetLoadingAction
 
   async created () {
     this.initializeAppBar()
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadDevice({
         deviceId: this.deviceId,
         includeContacts: true,
@@ -232,16 +227,12 @@ export default class DeviceCopyPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading device failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
   get deviceId () {
     return this.$route.params.deviceId
-  }
-
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
   }
 
   getPreparedDeviceForCopy (): Device | null {
@@ -273,7 +264,7 @@ export default class DeviceCopyPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const savedDeviceId = await this.copyDevice({
         device: this.deviceToCopy,
         copyContacts: this.copyContacts,
@@ -291,7 +282,7 @@ export default class DeviceCopyPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Copy failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

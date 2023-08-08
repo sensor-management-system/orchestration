@@ -35,10 +35,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card
       flat
     >
@@ -144,7 +140,7 @@ import { PlatformsState, LoadPlatformAction, CopyPlatformAction, CreatePidAction
 import { Platform } from '@/models/Platform'
 
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
@@ -152,24 +148,23 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   components: {
     SaveAndCancelButtons,
     PlatformBasicDataForm,
-    ProgressIndicator,
     NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: {
     ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
-    ...mapState('platforms', ['platform'])
+    ...mapState('platforms', ['platform']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform', 'copyPlatform', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs'])
+    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 // @ts-ignore
 export default class PlatformCopyPage extends Vue {
   private platformToCopy: Platform = new Platform()
-  private isSaving = false
-  private isLoading = false
   private copyOptions: NonModelOptions = {
     persistentIdentifierShouldBeCreated: false
   }
@@ -192,6 +187,8 @@ export default class PlatformCopyPage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   created () {
     this.initializeAppBar()
@@ -199,7 +196,7 @@ export default class PlatformCopyPage extends Vue {
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: true,
@@ -220,16 +217,12 @@ export default class PlatformCopyPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading platform failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
   get platformId () {
     return this.$route.params.platformId
-  }
-
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
   }
 
   getPreparedPlatformForCopy (): Platform | null {
@@ -267,7 +260,7 @@ export default class PlatformCopyPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       const savedPlatformId = await this.copyPlatform({
         platform: this.platformToCopy,
         copyContacts: this.copyContacts,
@@ -283,7 +276,7 @@ export default class PlatformCopyPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Copy failed')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

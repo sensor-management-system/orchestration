@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions
       v-if="editable"
     >
@@ -41,7 +37,7 @@ permissions and limitations under the Licence.
       <v-btn
         color="primary"
         small
-        :disabled="isFetching"
+        :disabled="isLoading"
         :to="'/devices/' + deviceId + '/measuredquantities/new'"
       >
         Add Measured Quantity
@@ -112,7 +108,7 @@ permissions and limitations under the Licence.
       v-if="editable && measuredQuantityToDelete"
       v-model="showDeleteDialog"
       title="Delete Measured Quantity"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -122,7 +118,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive, Prop } from 'nuxt-property-decorator'
+import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { DeleteDeviceMeasuredQuantityAction, DevicesState, LoadDeviceMeasuredQuantitiesAction } from '@/store/devices'
@@ -134,7 +130,7 @@ import DevicesMeasuredQuantitiesListItem from '@/components/devices/DevicesMeasu
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import HintCard from '@/components/HintCard.vue'
 import BaseList from '@/components/shared/BaseList.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
 
@@ -142,7 +138,6 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
   components: {
     DotMenuActionDelete,
     DotMenuActionCopy,
-    ProgressIndicator,
     BaseList,
     HintCard,
     DeleteDialog,
@@ -150,23 +145,18 @@ import DotMenuActionCopy from '@/components/DotMenuActionCopy.vue'
   },
   computed: {
     ...mapState('vocabulary', ['compartments', 'samplingMedia', 'properties', 'units', 'measuredQuantityUnits', 'aggregationtypes']),
-    ...mapState('devices', ['deviceMeasuredQuantities'])
+    ...mapState('devices', ['deviceMeasuredQuantities']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('devices', ['deleteDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities'])
+    ...mapActions('devices', ['deleteDeviceMeasuredQuantity', 'loadDeviceMeasuredQuantities']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
 })
 export default class DevicePropertyShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
-
-  @Prop({
-    type: Boolean
-  })
-    isFetching!: boolean
-
-  private isSaving = false
 
   private showDeleteDialog = false
   private measuredQuantityToDelete: DeviceProperty | null = null
@@ -181,6 +171,7 @@ export default class DevicePropertyShowPage extends Vue {
   deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
   deleteDeviceMeasuredQuantity!: DeleteDeviceMeasuredQuantityAction
+  setLoading!: SetLoadingAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -201,7 +192,7 @@ export default class DevicePropertyShowPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
 
       await this.deleteDeviceMeasuredQuantity(this.measuredQuantityToDelete.id)
       this.loadDeviceMeasuredQuantities(this.deviceId)
@@ -209,7 +200,7 @@ export default class DevicePropertyShowPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete measured quantity')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }

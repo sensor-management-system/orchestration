@@ -31,10 +31,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -167,7 +163,7 @@ permissions and limitations under the Licence.
       v-if="actionToDelete"
       v-model="showDeleteDialog"
       title="Delete Action"
-      :disabled="isSaving"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -216,7 +212,7 @@ import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
 import HintCard from '@/components/HintCard.vue'
 import ParameterChangeActionCard from '@/components/actions/ParameterChangeActionCard.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
 
 @Component({
@@ -231,27 +227,29 @@ import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionC
     GenericActionCard,
     HintCard,
     ParameterChangeActionCard,
-    ProgressIndicator,
     SoftwareUpdateActionCard
   },
   computed: {
     ...mapGetters('devices', ['actions']),
-    ...mapState('devices', ['device'])
+    ...mapState('devices', ['device']),
+    ...mapState('progressindicator', ['isLoading'])
   },
-  methods: mapActions('devices', [
-    'deleteDeviceSoftwareUpdateAction',
-    'deleteDeviceGenericAction',
-    'deleteDeviceCalibrationAction',
-    'deleteDeviceParameterChangeAction',
-    'loadAllDeviceActions',
-    'downloadAttachment'
-  ])
+  methods: {
+    ...mapActions('devices', [
+      'deleteDeviceSoftwareUpdateAction',
+      'deleteDeviceGenericAction',
+      'deleteDeviceCalibrationAction',
+      'deleteDeviceParameterChangeAction',
+      'loadAllDeviceActions',
+      'downloadAttachment'
+    ]),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class DeviceActionsShowPage extends Vue {
   @InjectReactive()
     editable!: boolean
 
-  private isSaving: boolean = false
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
   private calibrationActionToDelete: DeviceCalibrationAction | null = null
@@ -270,6 +268,8 @@ export default class DeviceActionsShowPage extends Vue {
   deleteDeviceCalibrationAction!: DeleteDeviceCalibrationAction
   deleteDeviceParameterChangeAction!: DeleteDeviceParameterChangeActionAction
   downloadAttachment!: DownloadAttachmentAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -366,14 +366,14 @@ export default class DeviceActionsShowPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteDeviceGenericAction(this.genericActionToDelete.id)
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Generic action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Generic action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -382,14 +382,14 @@ export default class DeviceActionsShowPage extends Vue {
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteDeviceSoftwareUpdateAction(this.softwareUpdateActionToDelete.id)
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Software update action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Software update action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -399,14 +399,14 @@ export default class DeviceActionsShowPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteDeviceCalibrationAction(this.calibrationActionToDelete.id)
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Calibration action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Calibration action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -416,14 +416,14 @@ export default class DeviceActionsShowPage extends Vue {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.deleteDeviceParameterChangeAction(this.parameterChangeActionToDelete.id)
       this.loadAllDeviceActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Parameter value change action deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Parameter value change action could not be deleted')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

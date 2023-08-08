@@ -33,9 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild />
   </div>
 </template>
@@ -47,27 +44,24 @@ import { mapActions } from 'vuex'
 import { LoadPlatformContactRolesAction } from '@/store/platforms'
 import { LoadCvContactRolesAction } from '@/store/vocabulary'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: {
-    ProgressIndicator
-  },
   methods: {
     ...mapActions('platforms', ['loadPlatformContactRoles']),
-    ...mapActions('vocabulary', ['loadCvContactRoles'])
+    ...mapActions('vocabulary', ['loadCvContactRoles']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class PlatformContactsPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadPlatformContactRoles!: LoadPlatformContactRolesAction
   loadCvContactRoles!: LoadCvContactRolesAction
+  setLoading!: SetLoadingAction
 
   async fetch (): Promise<void> {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadPlatformContactRoles(this.platformId),
         this.loadCvContactRoles()
@@ -75,7 +69,7 @@ export default class PlatformContactsPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch contacts')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

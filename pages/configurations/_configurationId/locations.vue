@@ -34,10 +34,7 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
-    <NuxtChild v-if="!isLoading" />
+    <NuxtChild />
   </div>
 </template>
 
@@ -46,41 +43,34 @@ import { Component, Vue } from 'nuxt-property-decorator'
 
 import { mapActions } from 'vuex'
 
-import {
-  LoadEpsgCodesAction,
-  LoadElevationDataAction
-} from '@/store/vocabulary'
+import { LoadEpsgCodesAction, LoadElevationDataAction } from '@/store/vocabulary'
 import {
   LoadDeviceMountActionsIncludingDeviceInformationAction,
   LoadLocationActionTimepointsAction
 } from '@/store/configurations'
 import { LoadAllContactsAction } from '@/store/contacts'
-
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: {
-    ProgressIndicator
-  },
   methods: {
     ...mapActions('vocabulary', ['loadEpsgCodes', 'loadElevationData']),
     ...mapActions('contacts', ['loadAllContacts']),
-    ...mapActions('configurations', ['loadLocationActionTimepoints', 'loadDeviceMountActionsIncludingDeviceInformation'])
+    ...mapActions('configurations', ['loadLocationActionTimepoints', 'loadDeviceMountActionsIncludingDeviceInformation']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationLocations extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   loadEpsgCodes!: LoadEpsgCodesAction
   loadElevationData!: LoadElevationDataAction
   loadLocationActionTimepoints!: LoadLocationActionTimepointsAction
   loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
   loadAllContacts!: LoadAllContactsAction
+  setLoading!: SetLoadingAction
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadEpsgCodes(),
         this.loadElevationData(),
@@ -91,7 +81,7 @@ export default class ConfigurationLocations extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch locations')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

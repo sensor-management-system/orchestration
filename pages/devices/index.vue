@@ -176,14 +176,7 @@ permissions and limitations under the Licence.
       </v-tab-item>
     </v-tabs-items>
 
-    <v-progress-circular
-      v-if="loading"
-      class="progress-spinner"
-      color="primary"
-      indeterminate
-    />
-
-    <div v-if="devices.length <=0 && !loading">
+    <div v-if="devices.length <=0 && !isLoading">
       <p class="text-center">
         There are no devices that match your search criteria.
       </p>
@@ -201,16 +194,6 @@ permissions and limitations under the Licence.
           <v-subheader>
             <FoundEntries v-model="totalCount" entity-name="device" />
             <template v-if="devices.length>0">
-              <v-dialog v-model="processing" max-width="100">
-                <v-card>
-                  <v-card-text>
-                    <div class="text-center pt-2">
-                      <v-progress-circular indeterminate />
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </v-dialog>
-
               <v-menu
                 close-on-click
                 close-on-content-click
@@ -263,7 +246,7 @@ permissions and limitations under the Licence.
         >
           <v-pagination
             v-model="page"
-            :disabled="loading"
+            :disabled="isLoading"
             :length="totalPages"
             :total-visible="7"
             @input="runSearch"
@@ -320,7 +303,7 @@ permissions and limitations under the Licence.
       </BaseList>
       <v-pagination
         v-model="page"
-        :disabled="loading"
+        :disabled="isLoading"
         :length="totalPages"
         :total-visible="7"
         @input="runSearch"
@@ -422,6 +405,7 @@ import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 import { Visibility } from '@/models/Visibility'
 import FoundEntries from '@/components/shared/FoundEntries.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 @Component({
   components: {
@@ -444,6 +428,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   },
   computed: {
     ...mapGetters('permissions', ['canDeleteEntity', 'canArchiveEntity', 'canRestoreEntity', 'canAccessEntity', 'permissionGroups']),
+    ...mapState('progressindicator', ['isLoading']),
     ...mapState('appbar', ['activeTab']),
     ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
     ...mapState('devices', ['devices', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'device']),
@@ -453,13 +438,11 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
     ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'loadDevice', 'replaceDeviceInDevices', 'getSensorMLUrl']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
-    ...mapActions('permissions', ['loadPermissionGroups'])
+    ...mapActions('permissions', ['loadPermissionGroups']),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class SearchDevicesPage extends Vue {
-  private loading: boolean = false
-  private processing: boolean = false
-
   private selectedSearchManufacturers: Manufacturer[] = []
   private selectedSearchStates: Status[] = []
   private selectedSearchDeviceTypes: DeviceType[] = []
@@ -514,11 +497,13 @@ export default class SearchDevicesPage extends Vue {
   replaceDeviceInDevices!: ReplaceDeviceInDevicesAction
   device!: DevicesState['device']
   getSensorMLUrl!: GetSensorMLUrlAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   async created () {
     this.initializeAppBar()
     try {
-      this.loading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadEquipmentstatus(),
         this.loadDevicetypes(),
@@ -530,7 +515,7 @@ export default class SearchDevicesPage extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
@@ -631,21 +616,21 @@ export default class SearchDevicesPage extends Vue {
 
   async runSearch (): Promise<void> {
     try {
-      this.loading = true
+      this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchDevicesPaginated(this.searchParams)
       this.setPageAndSizeInUrl()
     } catch {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
-      this.loading = false
+      this.setLoading(false)
     }
   }
 
   async exportCsvUrl (): Promise<string> {
-    this.processing = true
+    this.setLoading(true)
     const blob = await this.exportAsCsv(this.searchParams)
-    this.processing = false
+    this.setLoading(false)
     return window.URL.createObjectURL(blob)
   }
 
@@ -664,14 +649,14 @@ export default class SearchDevicesPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.deleteDevice(this.deviceToDelete.id)
       this.runSearch()
       this.$store.commit('snackbar/setSuccess', 'Device deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Device could not be deleted')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeDialog()
     }
   }
@@ -691,7 +676,7 @@ export default class SearchDevicesPage extends Vue {
       return
     }
     try {
-      this.loading = true
+      this.setLoading(true)
       await this.archiveDevice(this.deviceToArchive.id)
       await this.loadDevice({
         deviceId: this.deviceToArchive.id,
@@ -703,14 +688,14 @@ export default class SearchDevicesPage extends Vue {
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Device could not be archived')
     } finally {
-      this.loading = false
+      this.setLoading(false)
       this.closeArchiveDialog()
     }
   }
 
   async runRestoreDevice (device: Device) {
     if (device.id) {
-      this.loading = true
+      this.setLoading(true)
       try {
         await this.restoreDevice(device.id)
         await this.loadDevice({
@@ -723,7 +708,7 @@ export default class SearchDevicesPage extends Vue {
       } catch (error) {
         this.$store.commit('snackbar/setError', 'Device could not be restored')
       } finally {
-        this.loading = false
+        this.setLoading(false)
       }
     }
   }

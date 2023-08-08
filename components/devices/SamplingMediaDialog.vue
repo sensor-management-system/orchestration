@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      :dark="true"
-    />
     <v-dialog
       v-model="showDialog"
       max-width="600"
@@ -159,7 +155,7 @@ permissions and limitations under the Licence.
 <script lang="ts">
 import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { SamplingMedia } from '@/models/SamplingMedia'
@@ -170,21 +166,23 @@ import { AddSamplingMediaAction, LoadGlobalProvenancesAction, VocabularyState } 
     ...mapState('vocabulary', ['compartments', 'globalProvenances', 'samplingMedia'])
   },
   methods: {
-    ...mapActions('vocabulary', ['loadGlobalProvenances', 'addSamplingMedia'])
+    ...mapActions('vocabulary', ['loadGlobalProvenances', 'addSamplingMedia']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProgressIndicator,
     ProvenanceHint
   }
 })
 export default class SamplingMediaDialog extends mixins(Rules) {
   private suggestion = new SamplingMedia()
-  private isSaving: boolean = false
   private addSamplingMedia!: AddSamplingMediaAction
   private loadGlobalProvenances!: LoadGlobalProvenancesAction
   private compartments!: VocabularyState['compartments']
   private samplingMedia!: VocabularyState['samplingMedia']
   private globalProvenances!: VocabularyState['globalProvenances']
+
+  // vuex definition for typescript check
+  setLoading!: SetLoadingAction
 
   @Prop({
     required: true,
@@ -245,7 +243,7 @@ export default class SamplingMediaDialog extends mixins(Rules) {
       this.$store.commit('snackbar/setError', 'Please correct the errors before submitting')
       return
     }
-    this.isSaving = true
+    this.setLoading(true)
     const samplingMedium = SamplingMedia.createFromObject(this.suggestion)
     this.showDialog = false
     try {
@@ -255,7 +253,7 @@ export default class SamplingMediaDialog extends mixins(Rules) {
     } catch (err) {
       this.$store.commit('snackbar/setError', 'Error on submitting the sampling medium')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
       this.resetInputs()
     }
   }

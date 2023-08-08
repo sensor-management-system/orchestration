@@ -30,10 +30,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card
       flat
     >
@@ -99,7 +95,7 @@ import { Parameter } from '@/models/Parameter'
 import BaseList from '@/components/shared/BaseList.vue'
 import ParameterForm from '@/components/shared/ParameterForm.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 @Component({
@@ -108,7 +104,6 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     BaseList,
     ParameterForm,
     ParameterListItem,
-    ProgressIndicator,
     SaveAndCancelButtons
   },
   computed: {
@@ -116,12 +111,12 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     ...mapState('devices', ['deviceParameter', 'deviceParameters'])
   },
   methods: {
-    ...mapActions('devices', ['addDeviceParameter', 'loadDeviceParameters', 'loadDeviceParameter'])
+    ...mapActions('devices', ['addDeviceParameter', 'loadDeviceParameters', 'loadDeviceParameter']),
+    ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
 })
 export default class ParametersCopyPage extends mixins(CheckEditAccess) {
-  private isSaving = false
   private valueCopy: Parameter = new Parameter()
 
   // vuex definition for typescript check
@@ -131,6 +126,7 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
   loadDeviceParameters!: LoadDeviceParametersAction
   addDeviceParameter!: AddDeviceParameterAction
   units!: VocabularyState['units']
+  setLoading!: SetLoadingAction
 
   mounted () {
     (this.$refs.parameterForm as ParameterForm).focus()
@@ -187,7 +183,7 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
     }
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addDeviceParameter({
         deviceId: this.deviceId,
         parameter: this.valueCopy
@@ -198,7 +194,7 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to copy parameter')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 }

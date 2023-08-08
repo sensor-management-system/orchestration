@@ -32,10 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isSaving"
-      dark
-    />
     <v-card-actions>
       <v-spacer />
       <SaveAndCancelButtons
@@ -79,23 +75,26 @@ import { GenericAction } from '@/models/GenericAction'
 
 import GenericActionForm from '@/components/actions/GenericActionForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
   middleware: ['auth'],
-  components: { ProgressIndicator, SaveAndCancelButtons, GenericActionForm },
+  components: { SaveAndCancelButtons, GenericActionForm },
   computed: mapState('configurations', ['configurationAttachments', 'chosenKindOfConfigurationAction']),
-  methods: mapActions('configurations', ['addConfigurationGenericAction', 'loadAllConfigurationActions'])
+  methods: {
+    ...mapActions('configurations', ['addConfigurationGenericAction', 'loadAllConfigurationActions']),
+    ...mapActions('progressindicator', ['setLoading'])
+  }
 })
 export default class NewGenericConfigurationAction extends mixins(CheckEditAccess) {
   private genericConfigurationAction: GenericAction = new GenericAction()
-  private isSaving: boolean = false
 
   // vuex definition for typescript check
   configurationAttachments!: ConfigurationsState['configurationAttachments']
   chosenKindOfConfigurationAction!: ConfigurationsState['chosenKindOfConfigurationAction']
   addConfigurationGenericAction!: AddConfigurationGenericAction
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -139,7 +138,7 @@ export default class NewGenericConfigurationAction extends mixins(CheckEditAcces
     this.genericConfigurationAction.actionTypeUrl = this.chosenKindOfConfigurationAction?.uri || ''
 
     try {
-      this.isSaving = true
+      this.setLoading(true)
       await this.addConfigurationGenericAction({
         configurationId: this.configurationId,
         genericAction: this.genericConfigurationAction
@@ -151,7 +150,7 @@ export default class NewGenericConfigurationAction extends mixins(CheckEditAcces
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to save the action')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 

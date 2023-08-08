@@ -33,10 +33,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isInProgress"
-      :dark="isSaving"
-    />
     <v-card-actions>
       <v-card-title class="pl-0">
         Unmount devices or platforms
@@ -153,17 +149,18 @@ import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
 
 import { MountActionValidator } from '@/utils/MountActionValidator'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSelectedItemUnmountForm.vue'
 
 @Component({
-  components: { ProgressIndicator, ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
+  components: { ConfigurationsSelectedItemUnmountForm, ConfigurationsTreeView, DateTimePicker },
   middleware: ['auth'],
   computed: {
     ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate', 'selectedDate', 'configurationDynamicLocationActions', 'deviceMountAction']),
     ...mapState('contacts', ['contacts']),
+    ...mapState('progressindicator', ['isLoading']),
     ...mapGetters('configurations', ['mountActionDateItems'])
   },
   methods: {
@@ -175,15 +172,14 @@ import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSe
       'loadConfigurationDynamicLocationActions',
       'loadDeviceMountAction',
       'loadMountingActions'
-    ])
+    ]),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(CheckEditAccess) {
   private selectedNode: ConfigurationsTreeNode | null = null
   private tree: ConfigurationsTree = ConfigurationsTree.fromArray([])
 
-  private isSaving: boolean = false
-  private isLoading: boolean = false
   private errorMessage: string = ''
   private nodeCanBeUnmounted: boolean = false
 
@@ -200,6 +196,8 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
   private deviceMountAction!: ConfigurationsState['deviceMountAction']
   private loadDeviceMountAction!: LoadDeviceMountActionAction
   private loadMountingActions!: LoadMountingActionsAction
+  isLoading!: LoadingSpinnerState['isLoading']
+  setLoading!: SetLoadingAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -225,7 +223,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
 
   async fetch () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await Promise.all([
         this.loadConfigurationDynamicLocationActions(this.configurationId),
         this.loadMountingActions(this.configurationId),
@@ -234,7 +232,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch resources')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
@@ -318,10 +316,6 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
     return this.$route.params.configurationId
   }
 
-  get isInProgress (): boolean {
-    return this.isLoading || this.isSaving
-  }
-
   get currentUserMail (): string | null {
     if (this.$auth.user && this.$auth.user.email) {
       return this.$auth.user.email as string
@@ -334,7 +328,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
       return
     }
     try {
-      this.isSaving = true
+      this.setLoading(true)
       if (this.selectedNode.isDevice()) {
         await this.unmountDevice((this.selectedNode as DeviceNode).unpack(), contact, description)
         this.$store.commit('snackbar/setSuccess', 'Save successful')
@@ -352,7 +346,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to unmount node')
     } finally {
-      this.isSaving = false
+      this.setLoading(false)
     }
   }
 
@@ -396,13 +390,13 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
   @Watch('selectedDate')
   async onPropertyChanged (_value: DateTime, _oldValue: DateTime) {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadTree()
       this.onNodeSelect(this.selectedNode)
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of configuration tree failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 }

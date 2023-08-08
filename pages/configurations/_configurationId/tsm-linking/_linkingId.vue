@@ -30,9 +30,6 @@
  -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <NuxtChild v-if="linking" />
   </div>
 </template>
@@ -44,35 +41,34 @@ import {
   ITsmLinkingState,
   LoadConfigurationTsmLinkingAction
 } from '@/store/tsmLinking'
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 
 @Component({
-  components: { ProgressIndicator },
   computed: {
     ...mapState('tsmLinking', ['linking'])
   },
   methods: {
     ...mapActions('tsmLinking', [
       'loadConfigurationTsmLinking'
-    ])
+    ]),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class LinkingIdPage extends Vue {
-  private isLoading = false
-
   // vuex definition for typescript check
   linking!: ITsmLinkingState['linking']
   loadConfigurationTsmLinking!: LoadConfigurationTsmLinkingAction
+  setLoading!: SetLoadingAction
 
   async created () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       this.$store.commit('tsmLinking/setLinking', null)
       await this.loadConfigurationTsmLinking(this.linkingId)
     } catch (_e) {
       this.$store.commit('snackbar/setError', 'Loading of linking failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 

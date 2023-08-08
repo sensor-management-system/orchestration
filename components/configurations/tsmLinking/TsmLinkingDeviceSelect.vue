@@ -85,16 +85,13 @@
 
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
-
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import { Device, IDevice } from '@/models/Device'
 import { TsmLinking } from '@/models/TsmLinking'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 
 @Component({
   components: {
-    DevicesListItem,
-    ProgressIndicator
+    DevicesListItem
   }
 })
 export default class TsmLinkingDeviceSelect extends Vue {
@@ -116,7 +113,6 @@ export default class TsmLinkingDeviceSelect extends Vue {
   })
     devices!: Device[]
 
-  private isLoading: boolean = false
   private menu = false
   private search = ''
   private selectedItems: Device[] = []

@@ -32,9 +32,6 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <ProgressIndicator
-      v-model="isLoading"
-    />
     <StaticLocationView
       v-if="staticLocationAction"
       :action="staticLocationAction"
@@ -56,14 +53,11 @@ import {
   SetSelectedTimepointItemAction
 } from '@/store/configurations'
 
-import ProgressIndicator from '@/components/ProgressIndicator.vue'
+import { SetLoadingAction } from '@/store/progressindicator'
 import StaticLocationView from '@/components/configurations/StaticLocationView.vue'
 
 @Component({
-  components: {
-    StaticLocationView,
-    ProgressIndicator
-  },
+  components: { StaticLocationView },
   middleware: ['auth'],
   computed: {
     ...mapState('configurations',
@@ -82,14 +76,13 @@ import StaticLocationView from '@/components/configurations/StaticLocationView.v
         'setSelectedTimepointItem',
         'setSelectedLocationDate'
       ]
-    )
+    ),
+    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class StaticLocationActionView extends Vue {
   @InjectReactive()
     editable!: boolean
-
-  private isLoading = false
 
   // vuex definition for typescript check
   staticLocationAction!: ConfigurationsState['staticLocationAction']
@@ -99,6 +92,7 @@ export default class StaticLocationActionView extends Vue {
   setSelectedTimepointItem!: SetSelectedTimepointItemAction
   setSelectedLocationDate!: SetSelectedLocationDateAction
   configurationLocationActionTimepoints!: ConfigurationsState['configurationLocationActionTimepoints']
+  setLoading!: SetLoadingAction
 
   async fetch () {
     await this.loadLocationAction()
@@ -114,7 +108,7 @@ export default class StaticLocationActionView extends Vue {
 
   async loadLocationAction () {
     try {
-      this.isLoading = true
+      this.setLoading(true)
       await this.loadStaticLocationAction(this.actionId)
 
       // set the date field and the date select to the correct values
@@ -146,7 +140,7 @@ export default class StaticLocationActionView extends Vue {
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading failed')
     } finally {
-      this.isLoading = false
+      this.setLoading(false)
     }
   }
 
