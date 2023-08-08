@@ -128,6 +128,9 @@ export default class TsmLinkingOverviewTable extends Vue {
       text: 'Measured Quantity',
       value: 'measuredQuantity'
     }, {
+      text: 'Offsets (X | Y | Z)',
+      value: 'offsets'
+    }, {
       text: 'Start date',
       value: 'startDate'
     }, {
@@ -162,6 +165,7 @@ export default class TsmLinkingOverviewTable extends Vue {
       return {
         id: linking.id,
         tsmdlEntityNames: this.generateTsmdlEntityNames(linking),
+        offsets: `(${linking?.deviceMountAction?.offsetX} | ${linking?.deviceMountAction?.offsetY} | ${linking?.deviceMountAction?.offsetZ})`,
         startDate: this.$root.$options.filters!.toUtcDateTimeStringHHMM(linking.startDate),
         endDate: this.$root.$options.filters!.toUtcDateTimeStringHHMM(linking.endDate),
         measuredQuantity: this.generatePropertyTitle(linking.deviceProperty),

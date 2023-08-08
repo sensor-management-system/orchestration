@@ -40,6 +40,7 @@
               <tr>
                 <th>Device</th>
                 <th>Mount range</th>
+                <th>Offsets (X | Y | Z)</th>
                 <th>Measured Quantity</th>
                 <th>Datasource</th>
                 <th>Thing</th>
@@ -62,6 +63,9 @@
                     :from="formLinking.deviceMountAction.beginDate"
                     :to="formLinking.deviceMountAction.endDate"
                   />
+                </td>
+                <td>
+                  ({{ formLinking.deviceMountAction.offsetX }} | {{ formLinking.deviceMountAction.offsetY }} | {{ formLinking.deviceMountAction.offsetZ }})
                 </td>
                 <td>
                   {{ formLinking.deviceProperty | generatePropertyTitle }}
