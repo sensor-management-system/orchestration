@@ -160,6 +160,7 @@ permissions and limitations under the Licence.
       v-if="actionToDelete"
       v-model="showDeleteDialog"
       title="Delete Action"
+      :disabled="isLoading"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
@@ -229,7 +230,8 @@ import { LoadPlatformGenericActionTypesAction } from '@/store/vocabulary'
   },
   computed: {
     ...mapGetters('platforms', ['filteredActions']),
-    ...mapState('platforms', ['platform'])
+    ...mapState('platforms', ['platform']),
+    ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
     ...mapActions('vocabulary', ['loadPlatformGenericActionTypes']),
