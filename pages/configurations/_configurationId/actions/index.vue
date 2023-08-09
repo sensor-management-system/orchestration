@@ -33,6 +33,11 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-card-actions>
+      <v-container v-if="!(actions.length === 0 && !isFilterUsed)">
+        <ConfigurationActionsFilter
+          v-model="filter"
+        />
+      </v-container>
       <v-spacer />
       <v-btn
         v-if="editable"
@@ -46,18 +51,22 @@ permissions and limitations under the Licence.
     <v-card
       flat
     >
-      <hint-card v-if="timelineActions.length === 0">
+      <hint-card v-if="actions.length === 0 && !isFilterUsed">
         There are no actions for this configuration.
       </hint-card>
-      <v-card-text v-else>
+      <hint-card v-if="actions.length === 0 && isFilterUsed">
+        There are no actions that match the filter criteria.
+      </hint-card>
+      <v-card-text
+        v-if="actions.length > 0"
+      >
         <v-timeline dense>
           <v-timeline-item
-            v-for="action in timelineActions"
+            v-for="action in actions"
             :key="action.key"
             :color="action.color"
             :icon="action.icon"
             class="mb-4"
-            small
           >
             <ConfigurationsTimelineActionCard
               :action="action"
@@ -66,6 +75,19 @@ permissions and limitations under the Licence.
             />
           </v-timeline-item>
         </v-timeline>
+        <v-card-actions
+          v-if="actions.length > 3"
+        >
+          <v-spacer />
+          <v-btn
+            v-if="editable"
+            color="primary"
+            small
+            :to="'/configurations/' + configurationId + '/actions/new'"
+          >
+            Add Action
+          </v-btn>
+        </v-card-actions>
       </v-card-text>
     </v-card>
     <download-dialog
@@ -81,7 +103,11 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapGetters, mapActions, mapState } from 'vuex'
 
-import { ConfigurationsState, TimelineActionsGetter, DownloadAttachmentAction } from '@/store/configurations'
+import {
+  ConfigurationsState,
+  DownloadAttachmentAction,
+  ConfigurationFilter, FilteredActionsGetter
+} from '@/store/configurations'
 
 import HintCard from '@/components/HintCard.vue'
 import ConfigurationsTimelineActionCard from '@/components/configurations/ConfigurationsTimelineActionCard.vue'
@@ -91,21 +117,37 @@ import { Attachment } from '@/models/Attachment'
 import { Visibility } from '@/models/Visibility'
 
 import { getLastPathElement } from '@/utils/urlHelpers'
+import ConfigurationActionsFilter from '@/components/configurations/ConfigurationActionsFilter.vue'
+import { LoadConfigurationGenericActionTypesAction } from '@/store/vocabulary'
 
 @Component({
-  components: { ConfigurationsTimelineActionCard, HintCard, DownloadDialog },
+  components: {
+    ConfigurationActionsFilter,
+    ConfigurationsTimelineActionCard,
+    HintCard,
+    DownloadDialog
+  },
   computed: {
-    ...mapGetters('configurations', ['timelineActions']),
+    ...mapGetters('configurations', ['filteredActions']),
     ...mapState('configurations', ['configuration'])
   },
-  methods: mapActions('configurations', ['downloadAttachment'])
+  methods: {
+    ...mapActions('vocabulary', ['loadConfigurationGenericActionTypes']),
+    ...mapActions('configurations', ['downloadAttachment'])
+  }
 })
 export default class ConfigurationShowActionPage extends Vue {
-  private readonly timelineActions!: TimelineActionsGetter
+  private filter: ConfigurationFilter = {
+    selectedActionTypes: [],
+    selectedYears: [],
+    selectedContacts: []
+  }
 
   @InjectReactive()
   private editable!: boolean
 
+  filteredActions!: FilteredActionsGetter
+  loadConfigurationGenericActionTypes!: LoadConfigurationGenericActionTypesAction
   private readonly configuration!: ConfigurationsState['configuration']
   private downloadAttachment!: DownloadAttachmentAction
 
@@ -114,6 +156,18 @@ export default class ConfigurationShowActionPage extends Vue {
 
   get configurationId (): string {
     return this.$route.params.configurationId
+  }
+
+  get actions () {
+    return this.filteredActions(this.filter)
+  }
+
+  get isFilterUsed () {
+    return this.filter.selectedActionTypes.length > 0 || this.filter.selectedYears.length > 0 || this.filter.selectedContacts.length > 0
+  }
+
+  async created () {
+    await this.loadConfigurationGenericActionTypes()
   }
 
   initDowloadDialog (attachment: Attachment) {
@@ -156,3 +210,7 @@ export default class ConfigurationShowActionPage extends Vue {
   }
 }
 </script>
+
+<style scoped>
+
+</style>

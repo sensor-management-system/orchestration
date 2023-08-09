@@ -57,7 +57,9 @@ describe('SoftwareUpdateAction', () => {
       version: '1.03',
       repositoryUrl: 'https://git.gfz-potsdam.de/sensor-system-management/frontend',
       contact,
-      attachments: [attachment]
+      attachments: [attachment],
+      icon: '',
+      color: ''
     })
 
     expect(typeof action).toBe('object')

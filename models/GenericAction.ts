@@ -34,6 +34,7 @@ import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { IActionCommonDetails, ActionCommonDetails } from '@/models/ActionCommonDetails'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { IActionKind, KIND_OF_ACTION_TYPE_GENERIC_ACTION } from '@/models/ActionKind'
 
 export interface IGenericAction extends IActionCommonDetails {
   actionTypeName: string
@@ -42,7 +43,11 @@ export interface IGenericAction extends IActionCommonDetails {
   endDate: DateTime | null
 }
 
-export class GenericAction extends ActionCommonDetails implements IGenericAction, IDateCompareable {
+type IconMapping = {
+  [key: string]: string;
+};
+
+export class GenericAction extends ActionCommonDetails implements IGenericAction, IDateCompareable, IActionKind {
   private _actionTypeName: string = ''
   private _actionTypeUrl: string = ''
   private _beginDate: DateTime | null = null
@@ -116,5 +121,31 @@ export class GenericAction extends ActionCommonDetails implements IGenericAction
 
   get date (): DateTime | null {
     return this.beginDate
+  }
+
+  get icon (): string {
+    const iconMapping: IconMapping = {
+      observation: 'mdi-telescope',
+      maintenance: 'mdi-wrench',
+      rental: 'mdi-hand-heart',
+      visit: 'mdi-castle',
+      'platform application': 'mdi-rocket-launch',
+      'manual data retrieval': 'mdi-human-dolly'
+    }
+
+    for (const key in iconMapping) {
+      if (this.actionTypeName.toLowerCase().includes(key)) {
+        return iconMapping[key]
+      }
+    }
+    return 'mdi-card-bulleted'
+  }
+
+  get color (): string {
+    return 'grey'
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_GENERIC_ACTION
   }
 }

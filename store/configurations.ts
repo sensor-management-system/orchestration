@@ -56,7 +56,6 @@ import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 
-import { byDateOldestLast, byLogicOrderHighestFirst } from '@/modelUtils/mountHelpers'
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 
 import { ILocationTimepoint } from '@/serializers/controller/LocationActionTimepointSerializer'
@@ -66,8 +65,8 @@ import {
   DeviceUnmountTimelineAction,
   DynamicLocationBeginTimelineAction,
   DynamicLocationEndTimelineAction,
-  GenericTimelineAction,
   ITimelineAction,
+  GenericTimelineAction,
   ParameterChangeTimelineAction,
   PlatformMountTimelineAction,
   PlatformUnmountTimelineAction,
@@ -76,6 +75,13 @@ import {
 } from '@/utils/configurationInterfaces'
 import { dateToDateTimeStringHHMM, sortCriteriaAscending } from '@/utils/dateHelper'
 import { getEndLocationTimepointForBeginning } from '@/utils/locationHelper'
+import { KindOfConfigurationAction } from '@/models/ActionKind'
+import {
+  filterActions,
+  getDistinctContactsOfActions,
+  getDistinctYearsOfActions,
+  sortActions
+} from '@/utils/actionHelper'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -91,15 +97,8 @@ export enum MountingTypes {
   platform_unmount = 'platform_unmount'
 }
 
-export const KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION = 'generic_configuration_action'
-export const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
-
-type KindOfActionType =
-  typeof KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
-  | typeof KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
-  kind: KindOfActionType
+  kind: KindOfConfigurationAction
 }
 
 const PAGE_SIZES = [
@@ -186,6 +185,8 @@ const state = (): ConfigurationsState => ({
 
 export type TimelineActionsGetter = ITimelineAction[]
 
+export type ConfigurationFilter = {selectedActionTypes: IOptionsForActionType[], selectedYears: number[], selectedContacts: string[]}
+
 function formatMountActionString (value: ConfigurationMountingAction): string {
   const date = dateToDateTimeStringHHMM(value.timepoint)
 
@@ -205,18 +206,20 @@ function formatMountActionString (value: ConfigurationMountingAction): string {
 }
 
 const getters: GetterTree<ConfigurationsState, RootState> = {
-  timelineActions: (state: ConfigurationsState): ITimelineAction[] => {
-    const byDateOldestAndUnmountBeforeMount = (a: ITimelineAction, b: ITimelineAction): number => {
-      const result = byDateOldestLast(a, b)
-      if (result !== 0) {
-        return result
-      }
-      if (!('logicOrder' in a) || !('logicOrder' in b)) {
-        return result
-      }
-      return byLogicOrderHighestFirst(a, b)
-    }
+  availableContactsOfActions: (_state: ConfigurationsState, getters): string[] => {
+    return getDistinctContactsOfActions(getters.actions)
+  },
+  availableYearsOfActions: (_state: ConfigurationsState, getters): number[] => {
+    return getDistinctYearsOfActions(getters.actions)
+  },
+  filteredActions: (_state: ConfigurationsState, getters) => (filter: ConfigurationFilter): ITimelineAction[] => {
+    const filteredActions = filterActions(getters.actions, filter)
+    const sortedFilteredActions = sortActions(filteredActions) as ITimelineAction[]
 
+    // @ts-ignore
+    return sortedFilteredActions
+  },
+  actions: (state: ConfigurationsState): ITimelineAction[] => {
     const result: ITimelineAction[] = []
     const devices = state.configurationDeviceMountActions.map(a => a.device)
     for (const platformMountAction of state.configurationPlatformMountActions) {
@@ -231,6 +234,7 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
         result.push(new DeviceUnmountTimelineAction(deviceMountAction))
       }
     }
+
     for (const staticLocationAction of state.configurationStaticLocationActions) {
       result.push(new StaticLocationBeginTimelineAction(staticLocationAction))
       if (staticLocationAction.endDate !== null) {
@@ -240,7 +244,7 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     for (const dynamicLocationAction of state.configurationDynamicLocationActions) {
       result.push(new DynamicLocationBeginTimelineAction(dynamicLocationAction, devices))
       if (dynamicLocationAction.endDate !== null) {
-        result.push(new DynamicLocationEndTimelineAction(dynamicLocationAction))
+        result.push(new DynamicLocationEndTimelineAction(dynamicLocationAction, devices))
       }
     }
 
@@ -251,8 +255,6 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     for (const parameterChangeAction of state.configurationParameterChangeActions) {
       result.push(new ParameterChangeTimelineAction(parameterChangeAction))
     }
-
-    result.sort(byDateOldestAndUnmountBeforeMount)
 
     return result
   },
@@ -388,6 +390,7 @@ export type HasMountedDevicesWithPropertiesGetter = boolean
 export type HasActiveDevicesWithPropertiesForDate = (selectedDate: DateTime | null) => boolean
 export type LocationActionTimepointsExceptPassedIdAndTypeTypeGetter = (id: string | null, type: string | null) => ILocationTimepoint[]
 export type EarliestEndDateOfRelatedDeviceOfDynamicActionGetter = (action: DynamicLocationAction) => DateTime|null
+export type FilteredActionsGetter = (filter: ConfigurationFilter) => ITimelineAction[]
 
 type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 

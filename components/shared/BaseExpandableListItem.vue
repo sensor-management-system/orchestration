@@ -30,83 +30,85 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover
-    v-slot="{ hover }"
-  >
-    <v-card
-      :elevation="hover ? 6 : 2"
-      class="ma-2"
-      :color="backgroundColor"
+  <div>
+    <v-hover
+      v-slot="{ hover }"
     >
-      <v-card-text
-        class="py-2 px-3"
-        @click.stop.prevent="show = !show"
+      <v-card
+        :elevation="hover ? 6 : 2"
+        class="ma-2"
+        :color="backgroundColor"
       >
-        <div
-          v-if="$slots['header']"
-          class="d-flex align-center"
+        <v-card-text
+          class="py-2 px-3"
+          @click.stop.prevent="show = !show"
         >
-          <slot name="header" />
-          <v-spacer />
-          <DotMenu
-            v-if="$slots['dot-menu-items']"
+          <div
+            v-if="$slots['header']"
+            class="d-flex align-center"
           >
-            <template #actions>
-              <slot name="dot-menu-items" />
-            </template>
-          </DotMenu>
-        </div>
-        <v-row
-          no-gutters
-        >
-          <v-col cols="10" class="text-subtitle-1">
-            <slot />
-          </v-col>
-          <v-col
-            align-self="center"
-            class="text-right"
-          >
-            <slot name="actions" />
+            <slot name="header" />
+            <v-spacer />
             <DotMenu
-              v-if="!$slots['header'] && $slots['dot-menu-items']"
+              v-if="$slots['dot-menu-items']"
             >
               <template #actions>
                 <slot name="dot-menu-items" />
               </template>
             </DotMenu>
-            <v-btn
-              v-if="$slots['expandable']"
-              icon
-              small
-              @click.stop.prevent="show = !show"
-            >
-              <v-icon
-                small
-              >
-                {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-              </v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-expand-transition
-        v-if="$slots['expandable']"
-      >
-        <v-card
-          v-show="show"
-          flat
-          tile
-          :color="expandableColor"
-        >
-          <v-card-text
-            class="py-2 px-3"
+          </div>
+          <v-row
+            no-gutters
           >
-            <slot name="expandable" />
-          </v-card-text>
-        </v-card>
-      </v-expand-transition>
-    </v-card>
-  </v-hover>
+            <v-col cols="10" class="text-subtitle-1">
+              <slot :show="show" />
+            </v-col>
+            <v-col
+              align-self="center"
+              class="text-right"
+            >
+              <slot name="actions" />
+              <DotMenu
+                v-if="!$slots['header'] && $slots['dot-menu-items']"
+              >
+                <template #actions>
+                  <slot name="dot-menu-items" />
+                </template>
+              </DotMenu>
+              <v-btn
+                v-if="$slots['expandable']"
+                icon
+                small
+                @click.stop.prevent="show = !show"
+              >
+                <v-icon
+                  small
+                >
+                  {{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                </v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-expand-transition
+          v-if="$slots['expandable']"
+        >
+          <v-card
+            v-show="show"
+            flat
+            tile
+            :color="expandableColor"
+          >
+            <v-card-text
+              class="py-2 px-3"
+            >
+              <slot name="expandable" />
+            </v-card-text>
+          </v-card>
+        </v-expand-transition>
+      </v-card>
+    </v-hover>
+  </div>
 </template>
 
 <script lang="ts">

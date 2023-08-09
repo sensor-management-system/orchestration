@@ -41,23 +41,26 @@ permissions and limitations under the Licence.
           <span>{{ action.date | dateToDateTimeString }}</span>
           <span v-if="action.endDate"> - {{ action.endDate | dateToDateTimeString }}</span>
           <span class="text-caption text--secondary">(UTC)</span>
+          by {{ contactName | orDefault }}
         </v-card-subtitle>
       </template>
-      <v-row no-gutters>
-        <v-col cols="12">
-          <v-card-title class="text--primary pt-0 pb-0">
-            {{ action.title }}
-          </v-card-title>
-        </v-col>
-      </v-row>
-      <v-row no-gutters>
-        <v-col>
-          <v-card-subtitle class="text--primary pt-0">
-            {{ contactName | orDefault }}
-          </v-card-subtitle>
-        </v-col>
-      </v-row>
-      <template #dot-menu-items>
+      <template #default="{show}">
+        <v-row no-gutters>
+          <v-col cols="12">
+            <v-card-title class="text--primary pt-0 pb-0">
+              {{ action.title }}
+            </v-card-title>
+          </v-col>
+        </v-row>
+        <v-row v-show="!show && action.description" no-gutters>
+          <v-col>
+            <v-card-subtitle class="text--primary pt-0 description-preview">
+              {{ action.description }}
+            </v-card-subtitle>
+          </v-col>
+        </v-row>
+      </template>
+      <template v-if="action.genericAction || action.parameterChangeAction" #dot-menu-items>
         <DotMenuActionDelete
           v-if="action.genericAction"
           :readonly="!editable"
@@ -100,6 +103,24 @@ permissions and limitations under the Licence.
         <v-btn
           v-if="action.mountAction && action.mountAction.device"
           :to="'/devices/' + action.mountAction.device.id"
+          color="primary"
+          text
+          @click.stop.prevent
+        >
+          View
+        </v-btn>
+        <v-btn
+          v-if="action.staticLocationInfo"
+          :to="'/configurations/' + configurationId + '/locations/static-location-actions/' + action.staticLocationInfo.id"
+          color="primary"
+          text
+          @click.stop.prevent
+        >
+          View
+        </v-btn>
+        <v-btn
+          v-if="action.dynamicLocationInfo"
+          :to="'/configurations/' + configurationId + '/locations/dynamic-location-actions/' + action.dynamicLocationInfo.id"
           color="primary"
           text
           @click.stop.prevent
@@ -433,5 +454,10 @@ export default class ConfigurationsTimelineActionCard extends Vue {
 </script>
 
 <style scoped>
-
+.description-preview{
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
 </style>

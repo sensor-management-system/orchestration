@@ -37,9 +37,9 @@ permissions and limitations under the Licence.
     <v-timeline-item
       v-for="(action, index) in value"
       :key="index"
-      :color="action | getActionColor"
+      :color="action.color"
+      :icon="action.icon"
       class="mb-4"
-      small
     >
       <slot v-if="action.isGenericAction" name="generic-action" :action="action" :index="index" />
       <slot v-if="action.isSoftwareUpdateAction" name="software-update-action" :action="action" :index="index" />
@@ -54,9 +54,6 @@ permissions and limitations under the Licence.
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
 
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
-import {
-  getActionColor
-} from '@/modelUtils/actionHelpers'
 
 /**
  * A component to display Platform related actions in a timeline
@@ -66,11 +63,7 @@ import {
  * * value - an Array of actions
  * @augments Vue
  */
-@Component({
-  filters: {
-    getActionColor
-  }
-})
+@Component({})
 export default class PlatformActionTimeline extends Vue {
   @Prop({
     default: () => [],

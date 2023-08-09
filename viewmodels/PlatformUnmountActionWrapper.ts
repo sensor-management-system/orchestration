@@ -36,8 +36,9 @@ import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { IActionKind, KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT } from '@/models/ActionKind'
 
-export class PlatformUnmountActionWrapper implements IActionCommonDetails, IDateCompareable {
+export class PlatformUnmountActionWrapper implements IActionCommonDetails, IDateCompareable, IActionKind {
   inner: PlatformMountAction
 
   constructor (inner: PlatformMountAction) {
@@ -70,5 +71,21 @@ export class PlatformUnmountActionWrapper implements IActionCommonDetails, IDate
 
   get date (): DateTime | null {
     return this.inner.basicData.endDate
+  }
+
+  get icon (): string {
+    return 'mdi-rocket'
+  }
+
+  get color (): string {
+    return 'red'
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT
+  }
+
+  get logicOrder (): number {
+    return 400
   }
 }

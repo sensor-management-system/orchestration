@@ -35,6 +35,7 @@ import { Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { IActionCommonDetails, ActionCommonDetails } from '@/models/ActionCommonDetails'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { IActionKind, KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION } from '@/models/ActionKind'
 
 export interface IDeviceCalibrationAction extends IActionCommonDetails {
   currentCalibrationDate: DateTime | null
@@ -44,7 +45,7 @@ export interface IDeviceCalibrationAction extends IActionCommonDetails {
   measuredQuantities: DeviceProperty[]
 }
 
-export class DeviceCalibrationAction extends ActionCommonDetails implements IDeviceCalibrationAction, IDateCompareable {
+export class DeviceCalibrationAction extends ActionCommonDetails implements IDeviceCalibrationAction, IDateCompareable, IActionKind {
   private _currentCalibrationDate: DateTime | null = null
   private _nextCalibrationDate: DateTime | null = null
   private _formula: string = ''
@@ -115,5 +116,17 @@ export class DeviceCalibrationAction extends ActionCommonDetails implements IDev
 
   get date (): DateTime | null {
     return this.currentCalibrationDate
+  }
+
+  get icon (): string {
+    return 'mdi-compass'
+  }
+
+  get color (): string {
+    return 'teal'
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
   }
 }

@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
           :items="platformActionTypeItems"
           :item-text="(x) => x.name"
           clearable
-          label="Action Type"
+          label="Action type"
           :hint="!chosenKindOfAction ? 'Please select an action type' : ''"
           persistent-hint
           return-object
@@ -59,6 +59,17 @@ permissions and limitations under the Licence.
         </v-select>
       </v-card-text>
     </v-card>
+    <v-card-actions v-if="!chosenKindOfAction">
+      <v-spacer />
+      <v-btn
+        small
+        text
+        nuxt
+        :to="'/platforms/' + platformId + '/actions'"
+      >
+        cancel
+      </v-btn>
+    </v-card-actions>
     <NuxtChild />
     <action-type-dialog
       v-model="showNewActionTypeDialog"
@@ -79,17 +90,13 @@ import { ActionType } from '@/models/ActionType'
 
 import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 
-import { PlatformActionTypeItemsGetter, LoadPlatformGenericActionTypesAction } from '@/store/vocabulary'
+import { LoadPlatformGenericActionTypesAction, PlatformActionTypeItemsGetter } from '@/store/vocabulary'
+import { LoadPlatformAttachmentsAction, LoadPlatformParametersAction, PlatformsState, SetChosenKindOfPlatformActionAction } from '@/store/platforms'
 import {
-  PlatformsState,
-  LoadPlatformAttachmentsAction,
-  LoadPlatformParametersAction,
-  SetChosenKindOfPlatformActionAction
-} from '@/store/platforms'
-
-const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
-const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
-const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
+  KIND_OF_ACTION_TYPE_GENERIC_ACTION,
+  KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION,
+  KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+} from '@/models/ActionKind'
 
 @Component({
   components: { ActionTypeDialog },
@@ -168,7 +175,7 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
 
   setChosenKindOfPlatformActionAndUpdateRoute (newVal: ActionType) {
     this.setChosenKindOfPlatformAction({
-      kind: KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION,
+      kind: KIND_OF_ACTION_TYPE_GENERIC_ACTION,
       id: newVal.id,
       name: newVal.name,
       uri: newVal.uri
@@ -181,7 +188,7 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
   }
 
   get genericActionChosen (): boolean {
-    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION
+    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_ACTION
   }
 
   get softwareUpdateChosen () {
@@ -203,6 +210,10 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
     }
     if (this.parameterChangeActionChosen) {
       this.$router.push(`/platforms/${this.platformId}/actions/new/parameter-change-actions`)
+      return
+    }
+    if (!this.chosenKindOfAction) {
+      this.$router.push(`/platforms/${this.platformId}/actions/new`)
     }
   }
 }

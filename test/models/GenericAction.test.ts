@@ -57,7 +57,9 @@ describe('GenericAction', () => {
       beginDate: date1,
       endDate: date2,
       contact,
-      attachments: [attachment]
+      attachments: [attachment],
+      icon: '',
+      color: ''
     })
 
     expect(typeof action).toBe('object')

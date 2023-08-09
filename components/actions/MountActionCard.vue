@@ -2,10 +2,9 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020-2022
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tim Eder (UFZ, tim.eder@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -30,103 +29,114 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <base-expandable-list-item expandable-color="grey lighten-5">
+  <base-expandable-list-item :expandable-color="'grey lighten-5'">
     <template #header>
       <v-card-subtitle class="pb-0">
-        <span>{{ actionDate }}</span>
+        <span>{{ value.basicData.beginDate | toUtcDate }}</span>
         <span class="text-caption text--secondary">(UTC)</span>
-        by {{ value.contact.toString() }}
+        by {{ value.beginContact.toString() }}
       </v-card-subtitle>
     </template>
     <template #default="{show}">
       <v-row no-gutters>
         <v-col cols="12">
           <v-card-title class="text--primary pt-0 pb-0">
-            {{ value.actionTypeName }}
+            Mounted on {{ value.configuration.label }}
           </v-card-title>
         </v-col>
       </v-row>
-      <v-row v-show="!show && value.description" no-gutters>
+      <v-row v-show="!show && value.basicData.beginDescription" no-gutters>
         <v-col>
           <v-card-subtitle class="text--primary pt-0 description-preview">
-            {{ value.description }}
+            {{ value.basicData.beginDescription }}
           </v-card-subtitle>
         </v-col>
       </v-row>
     </template>
     <template #dot-menu-items>
-      <slot name="dot-menu-items" />
+      <slot name="menu" />
     </template>
     <template #actions>
       <slot name="actions" />
+      <v-btn
+        :to="'/configurations/' + value.configuration.id"
+        color="primary"
+        text
+        @click.stop.prevent
+      >
+        View
+      </v-btn>
     </template>
     <template #expandable>
-      <v-card-text
-        class="grey lighten-5 text--primary pt-2"
+      <div
+        class="text--primary pt-0 px-3"
       >
-        <label>Description</label>
-        {{ value.description | orDefault }}
-      </v-card-text>
-      <attachments-block :value="value.attachments" :is-public="isPublic" @open-attachment="openAttachment" />
+        <v-row v-if="value.parentPlatform !== null" dense>
+          <v-col>
+            <label>Parent platform</label>{{ value.parentPlatform.shortName }}
+          </v-col>
+        </v-row>
+        <v-row dense>
+          <v-col cols="12" md="4">
+            <label>Offset x</label>{{ value.basicData.offsetX }} m
+          </v-col>
+          <v-col cols="12" md="4">
+            <label>Offset y</label>{{ value.basicData.offsetY }} m
+          </v-col>
+          <v-col cols="12" md="4">
+            <label>Offset z</label>{{ value.basicData.offsetZ }} m
+          </v-col>
+        </v-row>
+        <v-row dense>
+          <v-col>
+            <label>Description</label>
+            {{ value.basicData.beginDescription | orDefault }}
+          </v-col>
+        </v-row>
+      </div>
     </template>
   </base-expandable-list-item>
 </template>
 
 <script lang="ts">
 /**
- * @file provides a component for a Generic Device Actions card
- * @author <marc.hanisch@gfz-potsdam.de>
+ * @file provides a component for a Mount Action Action card
+ * @author <tobias.kuhnert@ufz.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
-import { GenericAction } from '@/models/GenericAction'
-
-import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
-import { Attachment } from '@/models/Attachment'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
+import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 
 /**
- * A class component for Generic Device Action card
+ * A class component for Mount Action card
  * @extends Vue
  */
 @Component({
-  components: { AttachmentsBlock, BaseExpandableListItem }
+  components: { BaseExpandableListItem },
+  filters: {
+    toUtcDate: dateToDateTimeString
+  }
 })
 // @ts-ignore
-export default class GenericActionCard extends Vue {
+export default class PlatformMountActionCard extends Vue {
+  private show: boolean = false
+
   /**
-   * a GenericAction
+   * a PlatformMountAction
    */
   @Prop({
-    default: () => new GenericAction(),
     required: true,
     type: Object
   })
   // @ts-ignore
-  readonly value!: GenericAction
-
-  @Prop({
-    type: Boolean,
-    default: false
-  })
-  readonly isPublic!: Boolean
-
-  get actionDate (): string {
-    let actionDate = dateToDateTimeString(this.value.beginDate)
-    if (this.value.endDate) {
-      actionDate += ' - ' + dateToDateTimeString(this.value.endDate)
-    }
-    return actionDate
-  }
-
-  openAttachment (attachment: Attachment) {
-    this.$emit('open-attachment', attachment)
-  }
+  readonly value!: PlatformMountAction | DeviceMountAction
 }
 </script>
 <style scoped>
-.description-preview{
+.description-preview {
   vertical-align: middle !important;
   white-space: nowrap !important;
   overflow: hidden !important;
