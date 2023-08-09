@@ -44,7 +44,7 @@ permissions and limitations under the Licence.
           :items="configurationActionTypeItems"
           :item-text="(x) => x.name"
           clearable
-          label="Action Type"
+          label="Action type"
           :hint="!chosenKindOfAction ? 'Please select an action type' : ''"
           persistent-hint
           return-object
@@ -60,6 +60,17 @@ permissions and limitations under the Licence.
         </v-select>
       </v-card-text>
     </v-card>
+    <v-card-actions v-if="!chosenKindOfAction">
+      <v-spacer />
+      <v-btn
+        small
+        text
+        nuxt
+        :to="'/configurations/' + configurationId + '/actions'"
+      >
+        cancel
+      </v-btn>
+    </v-card-actions>
     <NuxtChild />
     <action-type-dialog
       v-model="showNewActionTypeDialog"
@@ -70,7 +81,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Watch, mixins } from 'nuxt-property-decorator'
+import { Component, mixins, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import ActionTypeDialog from '@/components/shared/ActionTypeDialog.vue'
@@ -84,15 +95,13 @@ import {
 } from '@/store/vocabulary'
 import {
   ConfigurationsState,
-  SetChosenKindOfConfigurationActionAction,
-  LoadConfigurationAttachmentsAction,
-  KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION,
-  KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION,
-  LoadConfigurationParametersAction
+  LoadConfigurationAttachmentsAction, LoadConfigurationParametersAction,
+  SetChosenKindOfConfigurationActionAction
 } from '@/store/configurations'
 
 import { SetLoadingAction } from '@/store/progressindicator'
 import { ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeApi'
+import { KIND_OF_ACTION_TYPE_GENERIC_ACTION, KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION } from '@/models/ActionKind'
 
 @Component({
   components: { ActionTypeDialog },
@@ -176,7 +185,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
 
   setChosenKindOfConfigurationActionAndUpdateRoute (newVal: ActionType) {
     this.setChosenKindOfConfigurationAction({
-      kind: KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION,
+      kind: KIND_OF_ACTION_TYPE_GENERIC_ACTION,
       id: newVal.id,
       name: newVal.name,
       uri: newVal.uri
@@ -185,7 +194,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
   }
 
   get genericActionChosen () {
-    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_CONFIGURATION_ACTION
+    return this.chosenKindOfAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_ACTION
   }
 
   get parameterChangeActionChosen () {
@@ -199,6 +208,10 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     }
     if (this.parameterChangeActionChosen) {
       this.$router.push(`/configurations/${this.configurationId}/actions/new/parameter-change-actions`)
+      return
+    }
+    if (!this.chosenKindOfAction) {
+      this.$router.push(`/configurations/${this.configurationId}/actions/new`)
     }
   }
 

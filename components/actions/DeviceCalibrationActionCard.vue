@@ -29,92 +29,77 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card>
-    <v-card-subtitle class="pb-0">
+  <base-expandable-list-item expandable-color="grey lighten-5">
+    <template #header>
+      <v-card-subtitle class="pb-0">
+        <span> {{ value.currentCalibrationDate | toUtcDate }}</span>
+        <span class="text-caption text--secondary">(UTC)</span>
+        by {{ value.contact.toString() }}
+      </v-card-subtitle>
+    </template>
+    <template #default="{show}">
       <v-row no-gutters>
-        <v-col>
-          {{ value.currentCalibrationDate | toUtcDate }}
-          <span class="text-caption text--secondary">(UTC)</span>
-        </v-col>
-        <v-col
-          align-self="end"
-          class="text-right"
-        >
-          <DotMenu>
-            <template #actions>
-              <slot name="dot-menu-items" />
-            </template>
-          </DotMenu>
+        <v-col cols="12">
+          <v-card-title class="text--primary pt-0 pb-0">
+            Device calibration
+          </v-card-title>
         </v-col>
       </v-row>
-    </v-card-subtitle>
-    <v-card-title class="pt-0">
-      Device calibration
-    </v-card-title>
-    <v-card-subtitle class="pb-1">
-      <v-row
-        no-gutters
+      <v-row v-show="!show && value.description" no-gutters>
+        <v-col>
+          <v-card-subtitle class="text--primary pt-0 description-preview">
+            {{ value.description }}
+          </v-card-subtitle>
+        </v-col>
+      </v-row>
+    </template>
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <slot name="actions" />
+    </template>
+    <template #expandable>
+      <v-card-text
+        class="grey lighten-5 text--primary pt-2"
       >
-        <v-col>
-          {{ value.contact.toString() }}
-        </v-col>
-        <v-col
-          align-self="end"
-          class="text-right"
-        >
-          <slot name="actions" />
-          <v-btn
-            icon
-            @click.stop.prevent="show = !show"
-          >
-            <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card-subtitle>
-    <v-expand-transition>
-      <div v-show="show">
-        <v-card-text
-          class="grey lighten-5 text--primary pt-2"
-        >
-          <v-row dense>
-            <v-col cols="12" md="4">
-              <label>
-                Formula
-              </label>
-              {{ value.formula | orDefault }}
-            </v-col>
-            <v-col cols="12" md="4">
-              <label>
-                Value
-              </label>
-              {{ value.value | orDefault }}
-            </v-col>
-            <v-col v-if="value.nextCalibrationDate != null" cols="12" md="4">
-              <label>
-                Next calibration date
-              </label>
-              {{ value.nextCalibrationDate | toUtcDate }}
-              <span class="text-caption text--secondary">(UTC)</span>
-            </v-col>
-          </v-row>
-          <div v-if="value.measuredQuantities && value.measuredQuantities.length > 0">
-            <label>Measured quantities</label>
-            <ul>
-              <li v-for="measuredQuantity in value.measuredQuantities" :key="measuredQuantity.id">
-                {{ measuredQuantity.label }}
-              </li>
-            </ul>
-          </div>
-          <div v-if="value.description">
-            <label>Description</label>
-            {{ value.description | orDefault }}
-          </div>
-        </v-card-text>
-        <attachments-block :value="value.attachments" :is-public="isPublic" @open-attachment="openAttachment" />
-      </div>
-    </v-expand-transition>
-  </v-card>
+        <v-row dense>
+          <v-col cols="12" md="4">
+            <label>
+              Formula
+            </label>
+            {{ value.formula | orDefault }}
+          </v-col>
+          <v-col cols="12" md="4">
+            <label>
+              Value
+            </label>
+            {{ value.value | orDefault }}
+          </v-col>
+          <v-col v-if="value.nextCalibrationDate != null" cols="12" md="4">
+            <label>
+              Next calibration date
+            </label>
+            {{ value.nextCalibrationDate | toUtcDate }}
+            <span class="text-caption text--secondary">(UTC)</span>
+          </v-col>
+        </v-row>
+        <div v-if="value.measuredQuantities && value.measuredQuantities.length > 0">
+          <label>Measured quantities</label>
+          <ul>
+            <li v-for="measuredQuantity in value.measuredQuantities" :key="measuredQuantity.id">
+              {{ generateMeasuredQuantityLabel(measuredQuantity) }}
+            </li>
+          </ul>
+        </div>
+        <div v-if="value.description">
+          <label>Description</label>
+          {{ value.description | orDefault }}
+        </div>
+      </v-card-text>
+      <attachments-block :value="value.attachments" :is-public="isPublic" @open-attachment="openAttachment" />
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
@@ -127,17 +112,18 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { DeviceCalibrationAction } from '@/models/DeviceCalibrationAction'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 
-import DotMenu from '@/components/DotMenu.vue'
 import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
 import { Attachment } from '@/models/Attachment'
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import { DeviceProperty } from '@/models/DeviceProperty'
 
 @Component({
   filters: {
     toUtcDate: dateToDateTimeString
   },
   components: {
-    AttachmentsBlock,
-    DotMenu
+    BaseExpandableListItem,
+    AttachmentsBlock
   }
 })
 export default class DeviceCalibrationActionCard extends Vue {
@@ -159,5 +145,23 @@ export default class DeviceCalibrationActionCard extends Vue {
   openAttachment (attachment: Attachment) {
     this.$emit('open-attachment', attachment)
   }
+
+  generateMeasuredQuantityLabel (measuredQuantity: DeviceProperty) {
+    if (measuredQuantity) {
+      const propertyName = measuredQuantity.propertyName ?? ''
+      const label = measuredQuantity.label ?? ''
+      const unit = measuredQuantity.unitName ?? ''
+      return `${propertyName} ${label ? `- ${label}` : ''} ${unit ? `(${unit})` : ''}`
+    }
+    return ''
+  }
 }
 </script>
+<style scoped>
+.description-preview {
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+</style>

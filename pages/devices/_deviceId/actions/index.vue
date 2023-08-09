@@ -32,6 +32,11 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-card-actions>
+      <v-container v-if="!(actions.length === 0 && !isFilterUsed)">
+        <DeviceActionsFilter
+          v-model="filter"
+        />
+      </v-container>
       <v-spacer />
       <v-btn
         v-if="editable"
@@ -42,11 +47,14 @@ permissions and limitations under the Licence.
         Add Action
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="actions.length === 0">
+    <hint-card v-if="actions.length === 0 && !isFilterUsed">
       There are no actions for this device.
     </hint-card>
+    <hint-card v-if="actions.length === 0 && isFilterUsed">
+      There are no actions that match the filter criteria.
+    </hint-card>
     <DeviceActionTimeline
-      v-else
+      v-if="actions.length > 0"
       :value="actions"
     >
       <template #generic-action="{action}">
@@ -149,16 +157,27 @@ permissions and limitations under the Licence.
         </ParameterChangeActionCard>
       </template>
       <template #device-mount-action="{action}">
-        <DeviceMountActionCard
-          :value="action"
-        />
+        <MountActionCard :value="action" />
       </template>
       <template #device-unmount-action="{action}">
-        <DeviceUnmountActionCard
-          :value="action"
-        />
+        <UnmountActionCard :value="action" />
       </template>
     </DeviceActionTimeline>
+
+    <v-card-actions
+      v-if="actions.length>3"
+    >
+      <v-spacer />
+      <v-btn
+        v-if="editable"
+        color="primary"
+        small
+        :to="'/devices/' + deviceId + '/actions/new'"
+      >
+        Add Action
+      </v-btn>
+    </v-card-actions>
+
     <DeleteDialog
       v-if="actionToDelete"
       v-model="showDeleteDialog"
@@ -183,14 +202,15 @@ import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
-  ActionsGetter,
   DeleteDeviceSoftwareUpdateAction,
   DeleteDeviceGenericAction,
   DeleteDeviceCalibrationAction,
   DeleteDeviceParameterChangeActionAction,
   LoadAllDeviceActionsAction,
   DevicesState,
-  DownloadAttachmentAction
+  DownloadAttachmentAction,
+  FilteredActionsGetter,
+  DeviceFilter
 } from '@/store/devices'
 
 import { Attachment } from '@/models/Attachment'
@@ -205,8 +225,6 @@ import { getLastPathElement } from '@/utils/urlHelpers'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DeviceActionTimeline from '@/components/actions/DeviceActionTimeline.vue'
 import DeviceCalibrationActionCard from '@/components/actions/DeviceCalibrationActionCard.vue'
-import DeviceMountActionCard from '@/components/actions/DeviceMountActionCard.vue'
-import DeviceUnmountActionCard from '@/components/actions/DeviceUnmountActionCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import GenericActionCard from '@/components/actions/GenericActionCard.vue'
@@ -214,27 +232,33 @@ import HintCard from '@/components/HintCard.vue'
 import ParameterChangeActionCard from '@/components/actions/ParameterChangeActionCard.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
+import MountActionCard from '@/components/actions/MountActionCard.vue'
+import UnmountActionCard from '@/components/actions/UnmountActionCard.vue'
+import { LoadDeviceGenericActionTypesAction } from '@/store/vocabulary'
+import DeviceActionsFilter from '@/components/devices/DeviceActionsFilter.vue'
 
 @Component({
   components: {
+    DeviceActionsFilter,
+    UnmountActionCard,
+    MountActionCard,
+    SoftwareUpdateActionCard,
     DeleteDialog,
     DeviceActionTimeline,
     DeviceCalibrationActionCard,
-    DeviceMountActionCard,
-    DeviceUnmountActionCard,
     DotMenuActionDelete,
     DownloadDialog,
     GenericActionCard,
     HintCard,
-    ParameterChangeActionCard,
-    SoftwareUpdateActionCard
+    ParameterChangeActionCard
   },
   computed: {
-    ...mapGetters('devices', ['actions']),
+    ...mapGetters('devices', ['filteredActions']),
     ...mapState('devices', ['device']),
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
+    ...mapActions('vocabulary', ['loadDeviceGenericActionTypes']),
     ...mapActions('devices', [
       'deleteDeviceSoftwareUpdateAction',
       'deleteDeviceGenericAction',
@@ -248,7 +272,7 @@ import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionC
 })
 export default class DeviceActionsShowPage extends Vue {
   @InjectReactive()
-    editable!: boolean
+  private editable!: boolean
 
   private genericActionToDelete: GenericAction | null = null
   private softwareUpdateActionToDelete: SoftwareUpdateAction | null = null
@@ -259,8 +283,14 @@ export default class DeviceActionsShowPage extends Vue {
   private showDownloadDialog: boolean = false
   private attachmentToDownload: Attachment | null = null
 
+  private filter: DeviceFilter = {
+    selectedActionTypes: [],
+    selectedYears: [],
+    selectedContacts: []
+  }
+
   // vuex definition for typescript check
-  actions!: ActionsGetter
+  filteredActions!: FilteredActionsGetter
   device!: DevicesState['device']
   deleteDeviceGenericAction!: DeleteDeviceGenericAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
@@ -268,6 +298,7 @@ export default class DeviceActionsShowPage extends Vue {
   deleteDeviceCalibrationAction!: DeleteDeviceCalibrationAction
   deleteDeviceParameterChangeAction!: DeleteDeviceParameterChangeActionAction
   downloadAttachment!: DownloadAttachmentAction
+  loadDeviceGenericActionTypes!: LoadDeviceGenericActionTypesAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
 
@@ -289,6 +320,18 @@ export default class DeviceActionsShowPage extends Vue {
       return this.parameterChangeActionToDelete
     }
     return null
+  }
+
+  get actions () {
+    return this.filteredActions(this.filter)
+  }
+
+  get isFilterUsed () {
+    return this.filter.selectedActionTypes.length > 0 || this.filter.selectedYears.length > 0 || this.filter.selectedContacts.length > 0
+  }
+
+  async created () {
+    await this.loadDeviceGenericActionTypes()
   }
 
   initDeleteDialogGenericAction (action: GenericAction) {

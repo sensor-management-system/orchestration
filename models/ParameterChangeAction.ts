@@ -35,13 +35,13 @@ import { DateTime } from 'luxon'
 import { Parameter } from '@/models/Parameter'
 import { IContact, Contact } from '@/models/Contact'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { IActionKind, KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION } from '@/models/ActionKind'
+import { IActionCommonDetails } from '@/models/ActionCommonDetails'
+import { Attachment } from '@/models/Attachment'
 
-export interface IParameterChangeAction {
-  id: string | null
+export interface IParameterChangeAction extends IActionCommonDetails{
   date: DateTime | null
   value: string
-  description: string
-  contact: Contact | null
   parameter: Parameter | null
 
   createdAt: DateTime | null
@@ -53,13 +53,15 @@ export interface IParameterChangeAction {
 
 export type IParameterChangeActionLike = Partial<IParameterChangeAction>
 
-export class ParameterChangeAction implements IParameterChangeAction, IDateCompareable {
+export class ParameterChangeAction implements IParameterChangeAction, IDateCompareable, IActionKind {
   private _id: string | null = null
   private _date: DateTime | null = null
   private _value: string = ''
   private _description: string = ''
   private _contact: Contact | null = null
   private _parameter: Parameter | null = null
+
+  private _attachments: Attachment[] = []
 
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -149,6 +151,26 @@ export class ParameterChangeAction implements IParameterChangeAction, IDateCompa
 
   get isParameterChangeAction (): boolean {
     return true
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+  }
+
+  get attachments (): Attachment[] {
+    return this._attachments
+  }
+
+  set attachments (attachments: Attachment[]) {
+    this._attachments = attachments
+  }
+
+  get icon (): string {
+    return 'mdi-tune-variant'
+  }
+
+  get color (): string {
+    return 'purple'
   }
 
   /**

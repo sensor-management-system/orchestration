@@ -29,80 +29,73 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card>
-    <v-card-subtitle class="pb-0">
+  <base-expandable-list-item :expandable-color="'grey lighten-5'">
+    <template #header>
+      <v-card-subtitle class="pb-0">
+        <span>{{ value.basicData.endDate | toUtcDate }}</span>
+        <span class="text-caption text--secondary">(UTC)</span>
+        by {{ contact }}
+      </v-card-subtitle>
+    </template>
+    <template #default="{show}">
       <v-row no-gutters>
-        <v-col>
-          {{ value.basicData.endDate | toUtcDate }}
-          <span class="text-caption text--secondary">(UTC)</span>
-        </v-col>
-        <v-col
-          align-self="end"
-          class="text-right"
-        >
-          <slot name="menu" />
+        <v-col cols="12">
+          <v-card-title class="text--primary pt-0 pb-0">
+            Unmounted on {{ value.configuration.label }}
+          </v-card-title>
         </v-col>
       </v-row>
-    </v-card-subtitle>
-    <v-card-title class="pt-0">
-      Unmounted on {{ value.configuration.label }}
-    </v-card-title>
-    <v-card-subtitle class="pb-1">
-      <v-row
-        no-gutters
+      <v-row v-show="!show && value.basicData.endDescription" no-gutters>
+        <v-col>
+          <v-card-subtitle class="text--primary pt-0 description-preview">
+            {{ value.basicData.endDescription }}
+          </v-card-subtitle>
+        </v-col>
+      </v-row>
+    </template>
+    <template #dot-menu-items>
+      <slot name="menu" />
+    </template>
+    <template #actions>
+      <slot name="actions" />
+      <v-btn
+        :to="'/configurations/' + value.configuration.id"
+        color="primary"
+        text
+        @click.stop.prevent
       >
-        <v-col>
-          {{ contact }}
-        </v-col>
-        <v-col
-          align-self="end"
-          class="text-right"
-        >
-          <slot name="actions" />
-          <v-btn
-            :to="'/configurations/' + value.configuration.id"
-            color="primary"
-            text
-            @click.stop.prevent
-          >
-            View
-          </v-btn>
-          <v-btn
-            icon
-            @click.stop.prevent="show =!show"
-          >
-            <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card-subtitle>
-    <v-expand-transition>
+        View
+      </v-btn>
+    </template>
+    <template #expandable>
       <div
-        v-show="show"
+        class="text--primary pt-0 px-3"
       >
-        <v-card-text
-          class="grey lighten-5 text--primary pt-2"
-        >
-          <div v-if="value.parentPlatform !== null">
+        <v-row v-if="value.parentPlatform !== null" dense>
+          <v-col>
             <label>Parent platform</label>{{ value.parentPlatform.shortName }}
-          </div>
-          <v-row dense>
-            <v-col cols="12" md="4">
-              <label>Offset x</label>{{ value.basicData.offsetX }} m
-            </v-col>
-            <v-col cols="12" md="4">
-              <label>Offset y</label>{{ value.basicData.offsetY }} m
-            </v-col>
-            <v-col cols="12" md="4">
-              <label>Offset z</label>{{ value.basicData.offsetZ }} m
-            </v-col>
-          </v-row>
-          <label>Description</label>
-          {{ value.basicData.endDescription }}
-        </v-card-text>
+          </v-col>
+        </v-row>
+        <v-row dense>
+          <v-col cols="12" md="4">
+            <label>Offset x</label>{{ value.basicData.offsetX }} m
+          </v-col>
+          <v-col cols="12" md="4">
+            <label>Offset y</label>{{ value.basicData.offsetY }} m
+          </v-col>
+          <v-col cols="12" md="4">
+            <label>Offset z</label>{{ value.basicData.offsetZ }} m
+          </v-col>
+        </v-row>
+        <v-row dense>
+          <v-col>
+            <label>Description</label>
+            {{ value.basicData.endDescription | orDefault }}
+          </v-col>
+        </v-row>
       </div>
-    </v-expand-transition>
-  </v-card>
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
@@ -112,9 +105,12 @@ permissions and limitations under the Licence.
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
 import { ContactBasicData } from '@/models/basic/ContactBasicData'
+import { PlatformMountAction } from '@/models/views/platforms/actions/PlatformMountAction'
 
 /**
  * A class component for Device Unmount Action card
@@ -123,12 +119,13 @@ import { ContactBasicData } from '@/models/basic/ContactBasicData'
 @Component({
   filters: {
     toUtcDate: dateToDateTimeString
+  },
+  components: {
+    BaseExpandableListItem
   }
 })
 // @ts-ignore
 export default class DeviceUnmountActionCard extends Vue {
-  private showDetails: boolean = false
-
   /**
    * a DeviceMountAction
    */
@@ -137,9 +134,7 @@ export default class DeviceUnmountActionCard extends Vue {
     type: Object
   })
   // @ts-ignore
-  readonly value!: DeviceMountAction
-
-  private show: boolean = false
+  readonly value!: DeviceMountAction | PlatformMountAction
 
   get contact (): ContactBasicData {
     if (this.value.endContact !== null) {
@@ -149,3 +144,11 @@ export default class DeviceUnmountActionCard extends Vue {
   }
 }
 </script>
+<style scoped>
+.description-preview {
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+</style>

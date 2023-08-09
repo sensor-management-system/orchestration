@@ -57,25 +57,18 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
 import { DeviceMountActionWrapper } from '@/viewmodels/DeviceMountActionWrapper'
 import { DeviceUnmountActionWrapper } from '@/viewmodels/DeviceUnmountActionWrapper'
-import { IDateCompareable } from '@/modelUtils/Compareables'
 
 import { getLastPathElement } from '@/utils/urlHelpers'
-
-const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
-const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
-const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
-const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
-const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
-
-type KindOfActionType =
-  typeof KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
-  | typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
-  | typeof KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
-  | typeof KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-  | typeof KIND_OF_ACTION_TYPE_UNKNOWN
+import { KindOfDeviceActionType } from '@/models/ActionKind'
+import {
+  filterActions,
+  getDistinctContactsOfActions,
+  getDistinctYearsOfActions,
+  sortActions
+} from '@/utils/actionHelper'
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
-  kind: KindOfActionType
+  kind: KindOfDeviceActionType
 }
 
 const PAGE_SIZES = [
@@ -143,12 +136,27 @@ const state = (): DevicesState => ({
 })
 
 export type PossibleDeviceActions = GenericAction | SoftwareUpdateAction | DeviceMountActionWrapper | DeviceUnmountActionWrapper | DeviceCalibrationAction | ParameterChangeAction
-export type ActionsGetter = (PossibleDeviceActions)[]
 export type PageSizesGetter = number[]
+export type DeviceActions = (PossibleDeviceActions)[]
+export type DeviceFilter = {selectedActionTypes: IOptionsForActionType[], selectedYears: number[], selectedContacts: string[]}
+export type FilteredActionsGetter = (filter: DeviceFilter) => DeviceActions
 
 const getters: GetterTree<DevicesState, RootState> = {
-  actions: (state: DevicesState): (PossibleDeviceActions)[] => {
-    let actions: (PossibleDeviceActions)[] = [
+  availableContactsOfActions: (_state: DevicesState, getters): string[] => {
+    return getDistinctContactsOfActions(getters.actions)
+  },
+  availableYearsOfActions: (_state: DevicesState, getters): number[] => {
+    return getDistinctYearsOfActions(getters.actions)
+  },
+  filteredActions: (_state: DevicesState, getters) => (filter: DeviceFilter): DeviceActions => {
+    const filteredActions = filterActions(getters.actions, filter)
+
+    const sortedFilteredActions = sortActions(filteredActions) as DeviceActions
+
+    return sortedFilteredActions
+  },
+  actions: (state: DevicesState): DeviceActions => {
+    const actions: DeviceActions = [
       ...state.deviceGenericActions,
       ...state.deviceSoftwareUpdateActions,
       ...state.deviceCalibrationActions,
@@ -160,27 +168,6 @@ const getters: GetterTree<DevicesState, RootState> = {
         actions.push(new DeviceUnmountActionWrapper(deviceMountAction))
       }
     }
-    // sort the actions
-    actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
-      if (a.date === null || b.date === null) { return 0 }
-      if (a.date < b.date) {
-        return 1
-      }
-      if (a.date > b.date) {
-        return -1
-      }
-      // In case we have mount & unmount at the very same point in time,
-      // the mount needs to be the earlier one (you need a mount to unmount later).
-      // So in case we sort the latest (newest/freshed) actions to be on top, we also need
-      // to ensure that the ummounts are earilier in the list then the mounts.
-      if (a instanceof DeviceUnmountActionWrapper && b instanceof DeviceMountActionWrapper) {
-        return -1
-      }
-      if (a instanceof DeviceMountActionWrapper && b instanceof DeviceUnmountActionWrapper) {
-        return 1
-      }
-      return 0
-    })
     return actions
   },
   pageSizes: (): number[] => {
@@ -571,8 +558,8 @@ const actions: ActionTree<DevicesState, RootState> = {
         if (attachment.isUpload) {
           const blob = await dispatch('downloadAttachment', attachment.url)
           const filename = getLastPathElement(attachment.url)
-          const uplaodResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
-          const newUrl = uplaodResult.url
+          const uploadResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
+          const newUrl = uploadResult.url
           attachment.url = newUrl
         }
         related.push(dispatch('addDeviceAttachment', { deviceId: savedDeviceId, attachment }))

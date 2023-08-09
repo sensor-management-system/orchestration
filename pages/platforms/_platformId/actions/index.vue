@@ -32,6 +32,11 @@ permissions and limitations under the Licence.
 <template>
   <div>
     <v-card-actions>
+      <v-container v-if="!(actions.length === 0 && !isFilterUsed)">
+        <PlatformActionsFilter
+          v-model="filter"
+        />
+      </v-container>
       <v-spacer />
       <v-btn
         v-if="editable"
@@ -42,11 +47,14 @@ permissions and limitations under the Licence.
         Add Action
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="actions.length === 0">
+    <hint-card v-if="actions.length === 0 && !isFilterUsed">
       There are no actions for this platform.
     </hint-card>
+    <hint-card v-if="actions.length === 0 && isFilterUsed">
+      There are no actions that match the filter criteria.
+    </hint-card>
     <PlatformActionTimeline
-      v-else
+      v-if="actions.length > 0"
       :value="actions"
     >
       <template #generic-action="{action}">
@@ -126,17 +134,28 @@ permissions and limitations under the Licence.
       </template>
 
       <template #platform-mount-action="{action}">
-        <PlatformMountActionCard
-          :value="action"
-        />
+        <MountActionCard :value="action" />
       </template>
 
       <template #platform-unmount-action="{action}">
-        <PlatformUnmountActionCard
-          :value="action"
-        />
+        <UnmountActionCard :value="action" />
       </template>
     </PlatformActionTimeline>
+
+    <v-card-actions
+      v-if="actions.length>3"
+    >
+      <v-spacer />
+      <v-btn
+        v-if="editable"
+        color="primary"
+        small
+        :to="'/platforms/' + platformId + '/actions/new'"
+      >
+        Add Action
+      </v-btn>
+    </v-card-actions>
+
     <DeleteDialog
       v-if="actionToDelete"
       v-model="showDeleteDialog"
@@ -160,12 +179,13 @@ import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
-  ActionsGetter,
   LoadAllPlatformActionsAction,
   DeletePlatformSoftwareUpdateActionAction,
   DeletePlatformGenericActionAction,
   DownloadAttachmentAction,
   PlatformsState,
+  PlatformFilter,
+  FilteredActionsGetter,
   DeletePlatformParameterChangeActionAction
 } from '@/store/platforms'
 
@@ -184,29 +204,35 @@ import GenericActionCard from '@/components/actions/GenericActionCard.vue'
 import HintCard from '@/components/HintCard.vue'
 import ParameterChangeActionCard from '@/components/actions/ParameterChangeActionCard.vue'
 import PlatformActionTimeline from '@/components/actions/PlatformActionTimeline.vue'
-import PlatformMountActionCard from '@/components/actions/PlatformMountActionCard.vue'
-import PlatformUnmountActionCard from '@/components/actions/PlatformUnmountActionCard.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import SoftwareUpdateActionCard from '@/components/actions/SoftwareUpdateActionCard.vue'
+import MountActionCard from '@/components/actions/MountActionCard.vue'
+import UnmountActionCard from '@/components/actions/UnmountActionCard.vue'
+import DeviceActionsFilter from '@/components/devices/DeviceActionsFilter.vue'
+import PlatformActionsFilter from '@/components/platforms/PlatformActionsFilter.vue'
+import { LoadPlatformGenericActionTypesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
+    PlatformActionsFilter,
+    DeviceActionsFilter,
+    UnmountActionCard,
+    MountActionCard,
+    SoftwareUpdateActionCard,
     DeleteDialog,
     DotMenuActionDelete,
     DownloadDialog,
     GenericActionCard,
     HintCard,
     ParameterChangeActionCard,
-    PlatformActionTimeline,
-    PlatformMountActionCard,
-    PlatformUnmountActionCard,
-    SoftwareUpdateActionCard
+    PlatformActionTimeline
   },
   computed: {
-    ...mapGetters('platforms', ['actions']),
+    ...mapGetters('platforms', ['filteredActions']),
     ...mapState('platforms', ['platform'])
   },
   methods: {
+    ...mapActions('vocabulary', ['loadPlatformGenericActionTypes']),
     ...mapActions('platforms', [
       'loadAllPlatformActions',
       'deletePlatformSoftwareUpdateAction',
@@ -229,14 +255,21 @@ export default class PlatformActionsShowPage extends Vue {
   private showDownloadDialog: boolean = false
   private attachmentToDownload: Attachment | null = null
 
+  private filter: PlatformFilter = {
+    selectedActionTypes: [],
+    selectedYears: [],
+    selectedContacts: []
+  }
+
   // vuex definition for typescript check
-  actions!: ActionsGetter
+  filteredActions!: FilteredActionsGetter
   platform!: PlatformsState['platform']
   loadAllPlatformActions!: LoadAllPlatformActionsAction
   deletePlatformGenericAction!: DeletePlatformGenericActionAction
   deletePlatformSoftwareUpdateAction!: DeletePlatformSoftwareUpdateActionAction
   deletePlatformParameterChangeAction!: DeletePlatformParameterChangeActionAction
   downloadAttachment!: DownloadAttachmentAction
+  loadPlatformGenericActionTypes!: LoadPlatformGenericActionTypesAction
   setLoading!: SetLoadingAction
 
   get platformId (): string {
@@ -254,6 +287,18 @@ export default class PlatformActionsShowPage extends Vue {
       return this.parameterChangeActionToDelete
     }
     return null
+  }
+
+  get actions () {
+    return this.filteredActions(this.filter)
+  }
+
+  get isFilterUsed () {
+    return this.filter.selectedActionTypes.length > 0 || this.filter.selectedYears.length > 0 || this.filter.selectedContacts.length > 0
+  }
+
+  async created () {
+    await this.loadPlatformGenericActionTypes()
   }
 
   initDeleteDialogGenericAction (action: GenericAction) {

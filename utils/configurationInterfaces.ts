@@ -44,6 +44,17 @@ import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 import { GenericAction } from '@/models/GenericAction'
 import { ParameterChangeAction } from '@/models/ParameterChangeAction'
+import {
+  KIND_OF_ACTION_TYPE_DEVICE_MOUNT,
+  KIND_OF_ACTION_TYPE_DEVICE_UNMOUNT,
+  KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_BEGIN,
+  KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_END,
+  KIND_OF_ACTION_TYPE_GENERIC_ACTION, KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION,
+  KIND_OF_ACTION_TYPE_PLATFORM_MOUNT,
+  KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT,
+  KIND_OF_ACTION_TYPE_STATIC_LOCATION_BEGIN,
+  KIND_OF_ACTION_TYPE_STATIC_LOCATION_END
+} from '@/models/ActionKind'
 
 export interface IActionDateWithText {
   date: DateTime
@@ -63,6 +74,7 @@ export interface IMountInfo {
 }
 
 export interface IStaticLocationInfo {
+  id: string
   x: number | null
   y: number | null
   z: number | null
@@ -71,6 +83,7 @@ export interface IStaticLocationInfo {
 }
 
 export interface IDynamicLocationInfo {
+  id: string
   x: string | null
   y: string | null
   z: string | null
@@ -95,6 +108,7 @@ export interface IMountTimelineAction <T> {
   // Logic order defines the ordering in the overview
   // of actions in case they have the same point in time.
   logicOrder: number
+  kind: string
 }
 
 export interface IStaticLocationTimelineAction {
@@ -106,6 +120,7 @@ export interface IStaticLocationTimelineAction {
   contact: Contact
   description: string | null
   staticLocationInfo: IStaticLocationInfo | null
+  kind: string
 }
 
 export interface IDynamicLocationTimelineAction {
@@ -117,6 +132,7 @@ export interface IDynamicLocationTimelineAction {
   contact: Contact
   description: string | null
   dynamicLocationInfo: IDynamicLocationInfo | null
+  kind: string
 }
 
 export interface IGenericTimelineAction {
@@ -129,6 +145,9 @@ export interface IGenericTimelineAction {
   contact: Contact
   description: string | null
   type: string
+  kind: string
+  actionTypeUrl: string
+
 }
 
 export type ITimelineAction = IMountTimelineAction<PlatformMountAction> | IMountTimelineAction<DeviceMountAction>| IStaticLocationTimelineAction | IDynamicLocationTimelineAction | IGenericTimelineAction
@@ -183,6 +202,10 @@ export class PlatformMountTimelineAction implements IMountTimelineAction<Platfor
 
   get mountAction (): PlatformMountAction {
     return this._mountAction
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_PLATFORM_MOUNT
   }
 
   get logicOrder (): number {
@@ -242,6 +265,10 @@ export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMou
     return this._mountAction
   }
 
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_DEVICE_MOUNT
+  }
+
   get logicOrder (): number {
     return 200
   }
@@ -297,6 +324,10 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction<Platf
 
   get mountAction (): PlatformMountAction {
     return this._mountAction
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT
   }
 
   get logicOrder (): number {
@@ -356,6 +387,10 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceM
     return this._mountAction
   }
 
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_DEVICE_UNMOUNT
+  }
+
   get logicOrder (): number {
     return 300
   }
@@ -402,12 +437,17 @@ export class StaticLocationBeginTimelineAction implements IStaticLocationTimelin
 
   get staticLocationInfo (): IStaticLocationInfo {
     return {
+      id: this.staticLocationBeginAction.id,
       x: this.staticLocationBeginAction.x,
       y: this.staticLocationBeginAction.y,
       z: this.staticLocationBeginAction.z,
       epsgCode: this.staticLocationBeginAction.epsgCode,
       elevationDatumName: this.staticLocationBeginAction.elevationDatumName
     }
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_STATIC_LOCATION_BEGIN
   }
 }
 
@@ -450,8 +490,19 @@ export class StaticLocationEndTimelineAction implements IStaticLocationTimelineA
     return this.staticLocationEndAction.endDate!
   }
 
-  get staticLocationInfo (): null {
-    return null
+  get staticLocationInfo (): IStaticLocationInfo {
+    return {
+      id: this.staticLocationEndAction.id,
+      x: this.staticLocationEndAction.x,
+      y: this.staticLocationEndAction.y,
+      z: this.staticLocationEndAction.z,
+      epsgCode: this.staticLocationEndAction.epsgCode,
+      elevationDatumName: this.staticLocationEndAction.elevationDatumName
+    }
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_STATIC_LOCATION_END
   }
 }
 
@@ -498,6 +549,7 @@ export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimel
 
   get dynamicLocationInfo (): IDynamicLocationInfo {
     return {
+      id: this.dynamicLocationBeginAction.id,
       x: this.propertyText(this.dynamicLocationBeginAction.x),
       y: this.propertyText(this.dynamicLocationBeginAction.y),
       z: this.propertyText(this.dynamicLocationBeginAction.z),
@@ -536,13 +588,19 @@ export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimel
     }
     return device.shortName
   }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_BEGIN
+  }
 }
 
 export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelineAction {
   private dynamicLocationEndAction: DynamicLocationAction
+  private devices: Device[]
 
-  constructor (dynamicLocationEndAction: DynamicLocationAction) {
+  constructor (dynamicLocationEndAction: DynamicLocationAction, devices: Device[]) {
     this.dynamicLocationEndAction = dynamicLocationEndAction
+    this.devices = devices
   }
 
   get key (): string {
@@ -577,8 +635,50 @@ export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelin
     return this.dynamicLocationEndAction.endDate!
   }
 
-  get dynamicLocationInfo (): null {
+  get dynamicLocationInfo (): IDynamicLocationInfo {
+    return {
+      id: this.dynamicLocationEndAction.id,
+      x: this.propertyText(this.dynamicLocationEndAction.x),
+      y: this.propertyText(this.dynamicLocationEndAction.y),
+      z: this.propertyText(this.dynamicLocationEndAction.z),
+      deviceX: this.deviceText(this.findDevice(this.dynamicLocationEndAction.x)),
+      deviceY: this.deviceText(this.findDevice(this.dynamicLocationEndAction.y)),
+      deviceZ: this.deviceText(this.findDevice(this.dynamicLocationEndAction.z)),
+      epsgCode: this.dynamicLocationEndAction.epsgCode,
+      elevationDatumName: this.dynamicLocationEndAction.elevationDatumName
+    }
+  }
+
+  deviceText (device: Device | null): string {
+    if (!device || !device.shortName) {
+      return ''
+    }
+    return device.shortName
+  }
+
+  propertyText (deviceProperty: DeviceProperty | null): string | null {
+    if (!deviceProperty) {
+      return null
+    }
+    return deviceProperty.propertyName
+  }
+
+  findDevice (deviceProperty: DeviceProperty | null): Device | null {
+    if (!deviceProperty) {
+      return null
+    }
+    for (const device of this.devices) {
+      for (const someDeviceProperty of device.properties) {
+        if (someDeviceProperty.id === deviceProperty.id) {
+          return device
+        }
+      }
+    }
     return null
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_END
   }
 }
 
@@ -594,7 +694,7 @@ export class GenericTimelineAction implements IGenericTimelineAction {
   }
 
   get color (): string {
-    return 'blue'
+    return 'grey'
   }
 
   get title (): string {
@@ -619,6 +719,18 @@ export class GenericTimelineAction implements IGenericTimelineAction {
 
   get type (): string {
     return 'generic_configuration_action'
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_GENERIC_ACTION
+  }
+
+  get actionTypeUrl (): string {
+    return this.genericAction.actionTypeUrl
+  }
+
+  get icon (): string {
+    return this.genericAction.icon
   }
 }
 
@@ -667,6 +779,18 @@ export class ParameterChangeTimelineAction implements IGenericTimelineAction {
 
   get parameterChangeAction (): ParameterChangeAction {
     return this._parameterChangeAction
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+  }
+
+  get actionTypeUrl (): string {
+    return ''
+  }
+
+  get icon (): string {
+    return this._parameterChangeAction.icon
   }
 }
 

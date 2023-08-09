@@ -62,7 +62,9 @@ describe('DeviceCalibrationAction', () => {
       nextCalibrationDate: date2,
       measuredQuantities: [measuredQuantity1],
       contact,
-      attachments: [attachment]
+      attachments: [attachment],
+      icon: '',
+      color: ''
     })
 
     expect(typeof action).toBe('object')

@@ -37,6 +37,8 @@ export interface IActionCommonDetails {
   description: string
   contact: Contact | null
   attachments: Attachment[]
+  icon: string
+  color: string
 }
 
 export type IActionCommonDetailsLike = Partial<IActionCommonDetails>
@@ -53,6 +55,8 @@ export class ActionCommonDetails implements IActionCommonDetails {
   private _description: string = ''
   private _contact: Contact | null = null
   private _attachments: Attachment[] = []
+  private _color: string = ''
+  private _icon: string = ''
 
   get id (): string | null {
     return this._id
@@ -93,5 +97,13 @@ export class ActionCommonDetails implements IActionCommonDetails {
     action.contact = value.contact ? Contact.createFromObject(value.contact) : null
     action.attachments = value.attachments ? value.attachments.map(a => Attachment.createFromObject(a)) : []
     return action
+  }
+
+  get color (): string {
+    return this._color
+  }
+
+  get icon (): string {
+    return this._icon
   }
 }

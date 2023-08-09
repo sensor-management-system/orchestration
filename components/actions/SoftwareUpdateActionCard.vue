@@ -29,78 +29,61 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-card>
-    <v-card-subtitle class="pb-0">
+  <base-expandable-list-item expandable-color="grey lighten-5">
+    <template #header>
+      <v-card-subtitle class="pb-0">
+        <span> {{ value.updateDate | toUtcDate }}</span>
+        <span class="text-caption text--secondary">(UTC)</span>
+        by {{ value.contact.toString() }}
+      </v-card-subtitle>
+    </template>
+    <template #default="{show}">
       <v-row no-gutters>
-        <v-col>
-          {{ value.updateDate | toUtcDate }}
-          <span class="text-caption text--secondary">(UTC)</span>
-        </v-col>
-        <v-col
-          align-self="end"
-          class="text-right"
-        >
-          <DotMenu>
-            <template #actions>
-              <slot name="dot-menu-items" />
-            </template>
-          </DotMenu>
+        <v-col cols="12">
+          <v-card-title class="text--primary pt-0 pb-0">
+            {{ updateName }}
+          </v-card-title>
         </v-col>
       </v-row>
-    </v-card-subtitle>
-    <v-card-title class="pt-0">
-      {{ updateName }}
-    </v-card-title>
-    <v-card-subtitle class="pb-1">
-      <v-row
-        no-gutters
-      >
+      <v-row v-show="!show && value.description" no-gutters>
         <v-col>
-          {{ value.contact.toString() }}
-        </v-col>
-        <v-col
-          align-self="end"
-          class="text-right"
-        >
-          <slot name="actions" />
-          <v-btn
-            icon
-            @click.stop.prevent="show=!show"
-          >
-            <v-icon>{{ show ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          </v-btn>
+          <v-card-subtitle class="text--primary pt-0 description-preview">
+            {{ value.description }}
+          </v-card-subtitle>
         </v-col>
       </v-row>
-    </v-card-subtitle>
-    <v-expand-transition>
-      <div
-        v-show="show"
+    </template>
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <slot name="actions" />
+    </template>
+    <template #expandable>
+      <v-card-text
+        class="grey lighten-5 text--primary pt-2"
       >
-        <v-card-text
-          class="grey lighten-5 text--primary pt-2"
-        >
-          <v-row dense>
-            <v-col cols="12" md="4">
-              <label>
-                Version
-              </label>
-              {{ value.version | orDefault }}
-            </v-col>
-            <v-col cols="12" md="4">
-              <label>
-                Repository
-              </label>
-              <!-- eslint-disable-next-line vue/no-v-html -->
-              <span v-html="repositoryLink" />
-            </v-col>
-          </v-row>
-          <label>Description</label>
-          {{ value.description | orDefault }}
-        </v-card-text>
-        <attachments-block :value="value.attachments" :is-public="isPublic" @open-attachment="openAttachment" />
-      </div>
-    </v-expand-transition>
-  </v-card>
+        <v-row dense>
+          <v-col cols="12" md="4">
+            <label>
+              Version
+            </label>
+            {{ value.version | orDefault }}
+          </v-col>
+          <v-col cols="12" md="4">
+            <label>
+              Repository
+            </label>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <span v-html="repositoryLink" />
+          </v-col>
+        </v-row>
+        <label>Description</label>
+        {{ value.description | orDefault }}
+      </v-card-text>
+      <attachments-block :value="value.attachments" :is-public="isPublic" @open-attachment="openAttachment" />
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">
@@ -114,9 +97,9 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import { protocolsInUrl } from '@/utils/urlHelpers'
 import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 
-import DotMenu from '@/components/DotMenu.vue'
 import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
 import { Attachment } from '@/models/Attachment'
+import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 
 /**
  * A class component for Software Update Action card
@@ -127,8 +110,8 @@ import { Attachment } from '@/models/Attachment'
     toUtcDate: dateToDateTimeString
   },
   components: {
-    AttachmentsBlock,
-    DotMenu
+    BaseExpandableListItem,
+    AttachmentsBlock
   }
 })
 // @ts-ignore
@@ -205,3 +188,11 @@ export default class SoftwareUpdateActionCard extends Vue {
 }
 
 </script>
+<style scoped>
+.description-preview {
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+</style>

@@ -57,23 +57,19 @@ import { Status } from '@/models/Status'
 import { PlatformMountActionWrapper } from '@/viewmodels/PlatformMountActionWrapper'
 import { PlatformUnmountActionWrapper } from '@/viewmodels/PlatformUnmountActionWrapper'
 
-import { IDateCompareable } from '@/modelUtils/Compareables'
 import { IPlatformSearchParams } from '@/modelUtils/PlatformSearchParams'
 
 import { getLastPathElement } from '@/utils/urlHelpers'
-
-const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
-const KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION = 'generic_platform_action'
-const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
-const KIND_OF_ACTION_TYPE_UNKNOWN = 'unknown'
-type KindOfActionType =
-  typeof KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
-  | typeof KIND_OF_ACTION_TYPE_GENERIC_PLATFORM_ACTION
-  | typeof KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-  | typeof KIND_OF_ACTION_TYPE_UNKNOWN
+import { KindOfPlatformAction } from '@/models/ActionKind'
+import {
+  filterActions,
+  getDistinctContactsOfActions,
+  getDistinctYearsOfActions,
+  sortActions
+} from '@/utils/actionHelper'
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
-  kind: KindOfActionType
+  kind: KindOfPlatformAction
 }
 
 const PAGE_SIZES = [
@@ -89,18 +85,18 @@ export interface PlatformsState {
   pageNumber: number
   pageSize: number
   platform: Platform | null
-  platformAttachment: Attachment|null
+  platformAttachment: Attachment | null
   platformAttachments: Attachment[]
   platformAvailabilities: Availability[]
   platformContactRoles: ContactRole[]
-  platformGenericAction: GenericAction|null
+  platformGenericAction: GenericAction | null
   platformGenericActions: GenericAction[]
   platformMountActions: PlatformMountAction[]
   platformParameter: Parameter | null
   platformParameterChangeAction: ParameterChangeAction | null
   platformParameterChangeActions: ParameterChangeAction[]
   platformParameters: Parameter[]
-  platformSoftwareUpdateAction: SoftwareUpdateAction|null
+  platformSoftwareUpdateAction: SoftwareUpdateAction | null
   platformSoftwareUpdateActions: SoftwareUpdateAction[]
   platforms: Platform[]
   searchText: string | null
@@ -143,8 +139,19 @@ const state = (): PlatformsState => ({
 })
 
 export type SearchParamsGetter = (isLoggedIn: boolean) => IPlatformSearchParams
-export type PossiblePlatformActions = (GenericAction | SoftwareUpdateAction | PlatformMountActionWrapper | PlatformUnmountActionWrapper | ParameterChangeAction)
-export type ActionsGetter = (PossiblePlatformActions)[]
+export type PossiblePlatformActions =
+  GenericAction
+  | SoftwareUpdateAction
+  | PlatformMountActionWrapper
+  | PlatformUnmountActionWrapper
+  | ParameterChangeAction
+export type PlatformActions = (PossiblePlatformActions)[]
+export type PlatformFilter = {
+  selectedActionTypes: IOptionsForActionType[],
+  selectedYears: number[],
+  selectedContacts: string[]
+}
+export type FilteredActionsGetter = (filter: PlatformFilter) => PlatformActions
 export type PageSizesGetter = number[]
 
 const getters: GetterTree<PlatformsState, RootState> = {
@@ -159,8 +166,21 @@ const getters: GetterTree<PlatformsState, RootState> = {
       includeArchivedPlatforms: state.includeArchivedPlatforms
     }
   },
-  actions: (state: PlatformsState): ActionsGetter => {
-    let actions: (PossiblePlatformActions)[] = [
+  availableContactsOfActions: (_state: PlatformsState, getters): string[] => {
+    return getDistinctContactsOfActions(getters.actions)
+  },
+  availableYearsOfActions: (_state: PlatformsState, getters): number[] => {
+    return getDistinctYearsOfActions(getters.actions)
+  },
+  filteredActions: (_state: PlatformsState, getters) => (filter: PlatformFilter): PlatformActions => {
+    const filteredActions = filterActions(getters.actions, filter)
+
+    const sortedFilteredActions = sortActions(filteredActions) as PlatformActions
+
+    return sortedFilteredActions
+  },
+  actions: (state: PlatformsState): PlatformActions => {
+    const actions: PlatformActions = [
       ...state.platformGenericActions,
       ...state.platformSoftwareUpdateActions,
       ...state.platformParameterChangeActions
@@ -171,27 +191,6 @@ const getters: GetterTree<PlatformsState, RootState> = {
         actions.push(new PlatformUnmountActionWrapper(platformMountAction))
       }
     }
-    // sort the actions
-    actions = actions.sort((a: IDateCompareable, b: IDateCompareable): number => {
-      if (a.date === null || b.date === null) { return 0 }
-      if (a.date < b.date) {
-        return 1
-      }
-      if (a.date > b.date) {
-        return -1
-      }
-      // In case we have mount & unmount at the very same point in time,
-      // the mount needs to be the earlier one (you need a mount to unmount later).
-      // So in case we sort the latest (newest/freshed) actions to be on top, we also need
-      // to ensure that the ummounts are earilier in the list then the mounts.
-      if (a instanceof PlatformUnmountActionWrapper && b instanceof PlatformMountActionWrapper) {
-        return -1
-      }
-      if (a instanceof PlatformMountActionWrapper && b instanceof PlatformUnmountActionWrapper) {
-        return 1
-      }
-      return 0
-    })
     return actions
   },
   pageSizes: (): number[] => {
@@ -199,15 +198,33 @@ const getters: GetterTree<PlatformsState, RootState> = {
   }
 }
 
-export type AddPlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
-export type AddPlatformContactRoleAction = (params: {platformId: string, contactRole: ContactRole}) => Promise<void>
-export type AddPlatformGenericActionAction = (params: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
+export type AddPlatformAttachmentAction = (params: {
+  platformId: string,
+  attachment: Attachment
+}) => Promise<Attachment>
+export type AddPlatformContactRoleAction = (params: { platformId: string, contactRole: ContactRole }) => Promise<void>
+export type AddPlatformGenericActionAction = (params: {
+  platformId: string,
+  genericPlatformAction: GenericAction
+}) => Promise<GenericAction>
 export type AddPlatformParameterAction = (params: { platformId: string, parameter: Parameter }) => Promise<Parameter>
-export type AddPlatformParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>
-export type AddPlatformSoftwareUpdateActionAction = (params: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
+export type AddPlatformParameterChangeActionAction = (params: {
+  parameterId: string,
+  action: ParameterChangeAction
+}) => Promise<ParameterChangeAction>
+export type AddPlatformSoftwareUpdateActionAction = (params: {
+  platformId: string,
+  softwareUpdateAction: SoftwareUpdateAction
+}) => Promise<SoftwareUpdateAction>
 export type ArchivePlatformAction = (id: string) => Promise<void>
 export type ClearPlatformAvailabilitiesAction = () => void
-export type CopyPlatformAction = (params: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, copyParameters: boolean, originalPlatformId: string}) => Promise<string>
+export type CopyPlatformAction = (params: {
+  platform: Platform,
+  copyContacts: boolean,
+  copyAttachments: boolean,
+  copyParameters: boolean,
+  originalPlatformId: string
+}) => Promise<string>
 export type CreatePidAction = (id: string | null) => Promise<string>
 export type DeletePlatformAction = (id: string) => Promise<void>
 export type DeletePlatformAttachmentAction = (attachmentId: string) => Promise<void>
@@ -223,7 +240,11 @@ export type LoadAllPlatformActionsAction = (id: string) => Promise<void>
 export type LoadPlatformAction = (params: { platformId: string } & IncludedRelationships) => Promise<void>
 export type LoadPlatformAttachmentAction = (id: string) => Promise<void>
 export type LoadPlatformAttachmentsAction = (id: string) => Promise<void>
-export type LoadPlatformAvailabilitiesAction = (params: {ids: (string | null)[], from: DateTime, until: DateTime | null}) => Promise<void>
+export type LoadPlatformAvailabilitiesAction = (params: {
+  ids: (string | null)[],
+  from: DateTime,
+  until: DateTime | null
+}) => Promise<void>
 export type LoadPlatformContactRolesAction = (id: string) => Promise<void>
 export type LoadPlatformGenericActionAction = (actionId: string) => Promise<void>
 export type LoadPlatformGenericActionsAction = (id: string) => Promise<void>
@@ -234,7 +255,7 @@ export type LoadPlatformParameterChangeActionsAction = (id: string) => Promise<v
 export type LoadPlatformParametersAction = (id: string) => Promise<void>
 export type LoadPlatformSoftwareUpdateActionAction = (actionId: string) => Promise<void>
 export type LoadPlatformSoftwareUpdateActionsAction = (id: string) => Promise<void>
-export type RemovePlatformContactRoleAction = (params: {platformContactRoleId: string }) => Promise<void>
+export type RemovePlatformContactRoleAction = (params: { platformContactRoleId: string }) => Promise<void>
 export type ReplacePlatformInPlatformsAction = (newPlatform: Platform) => void
 export type RestorePlatformAction = (id: string) => Promise<void>
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
@@ -250,11 +271,23 @@ export type SetSelectedSearchPermissionGroupsAction = (selectedSearchPermissionG
 export type SetSelectedSearchPlatformTypesAction = (selectedSearchPlatformTypes: PlatformType[]) => void
 export type SetSelectedSearchStatesAction = (selectedSearchStates: Status[]) => void
 export type UpdatePlatformAction = (platform: Platform) => void
-export type UpdatePlatformAttachmentAction = (params: {platformId: string, attachment: Attachment}) => Promise<Attachment>
-export type UpdatePlatformGenericActionAction = (params: {platformId: string, genericPlatformAction: GenericAction}) => Promise<GenericAction>
+export type UpdatePlatformAttachmentAction = (params: {
+  platformId: string,
+  attachment: Attachment
+}) => Promise<Attachment>
+export type UpdatePlatformGenericActionAction = (params: {
+  platformId: string,
+  genericPlatformAction: GenericAction
+}) => Promise<GenericAction>
 export type UpdatePlatformParameterAction = (params: { platformId: string, parameter: Parameter }) => Promise<Parameter>
-export type UpdatePlatformParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>
-export type UpdatePlatformSoftwareUpdateActionAction = (params: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}) => Promise<SoftwareUpdateAction>
+export type UpdatePlatformParameterChangeActionAction = (params: {
+  parameterId: string,
+  action: ParameterChangeAction
+}) => Promise<ParameterChangeAction>
+export type UpdatePlatformSoftwareUpdateActionAction = (params: {
+  platformId: string,
+  softwareUpdateAction: SoftwareUpdateAction
+}) => Promise<SoftwareUpdateAction>
 
 const actions: ActionTree<PlatformsState, RootState> = {
   async searchPlatformsPaginated ({
@@ -268,7 +301,10 @@ const actions: ActionTree<PlatformsState, RootState> = {
       userId = this.getters['permissions/userId']
     }
 
-    const { elements, totalCount } = await this.$api.platforms
+    const {
+      elements,
+      totalCount
+    } = await this.$api.platforms
       .setSearchText(searchParams.searchText)
       .setSearchedManufacturers(searchParams.manufacturer)
       .setSearchedStates(searchParams.states)
@@ -320,7 +356,7 @@ const actions: ActionTree<PlatformsState, RootState> = {
     const platformAttachment = await this.$api.platformAttachments.findById(id)
     commit('setPlatformAttachment', platformAttachment)
   },
-  async loadAllPlatformActions ({ dispatch }: {dispatch: Dispatch}, id: string): Promise<void> {
+  async loadAllPlatformActions ({ dispatch }: { dispatch: Dispatch }, id: string): Promise<void> {
     await Promise.all([
       dispatch('loadPlatformGenericActions', id),
       dispatch('loadPlatformSoftwareUpdateActions', id),
@@ -356,12 +392,12 @@ const actions: ActionTree<PlatformsState, RootState> = {
     const action = await this.$api.platformParameterChangeActions.findById(actionId)
     commit('setPlatformParameterChangeAction', action)
   },
-  async loadPlatformAvailabilities ({ commit }: {commit: Commit}, {
+  async loadPlatformAvailabilities ({ commit }: { commit: Commit }, {
     ids,
     from,
     until
   }: {
-    ids: (string|null)[];
+    ids: (string | null)[];
     from: DateTime;
     until: DateTime | null
   }): Promise<void> {
@@ -391,34 +427,55 @@ const actions: ActionTree<PlatformsState, RootState> = {
   }: { platformId: string, parameter: Parameter }): Promise<Parameter> {
     return this.$api.platformParameters.update(platformId, parameter)
   },
-  addPlatformContactRole (_: {}, { platformId, contactRole }: {platformId: string, contactRole: ContactRole}): Promise<string> {
+  addPlatformContactRole (_: {}, {
+    platformId,
+    contactRole
+  }: { platformId: string, contactRole: ContactRole }): Promise<string> {
     return this.$api.platforms.addContact(platformId, contactRole)
   },
-  removePlatformContactRole (_: {}, { platformContactRoleId }: {platformContactRoleId: string}): Promise<void> {
+  removePlatformContactRole (_: {}, { platformContactRoleId }: { platformContactRoleId: string }): Promise<void> {
     return this.$api.platforms.removeContact(platformContactRoleId)
   },
-  addPlatformAttachment (_: {}, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
+  addPlatformAttachment (_: {}, {
+    platformId,
+    attachment
+  }: { platformId: string, attachment: Attachment }): Promise<Attachment> {
     return this.$api.platformAttachments.add(platformId, attachment)
   },
-  updatePlatformAttachment (_: {}, { platformId, attachment }: {platformId: string, attachment: Attachment}): Promise<Attachment> {
+  updatePlatformAttachment (_: {}, {
+    platformId,
+    attachment
+  }: { platformId: string, attachment: Attachment }): Promise<Attachment> {
     return this.$api.platformAttachments.update(platformId, attachment)
   },
   deletePlatformAttachment (_: {}, attachmentId: string): Promise<void> {
     return this.$api.platformAttachments.deleteById(attachmentId)
   },
-  addPlatformGenericAction (_: {}, { platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}): Promise<GenericAction> {
+  addPlatformGenericAction (_: {}, {
+    platformId,
+    genericPlatformAction
+  }: { platformId: string, genericPlatformAction: GenericAction }): Promise<GenericAction> {
     return this.$api.genericPlatformActions.add(platformId, genericPlatformAction)
   },
-  updatePlatformGenericAction (_: {}, { platformId, genericPlatformAction }: {platformId: string, genericPlatformAction: GenericAction}): Promise<GenericAction> {
+  updatePlatformGenericAction (_: {}, {
+    platformId,
+    genericPlatformAction
+  }: { platformId: string, genericPlatformAction: GenericAction }): Promise<GenericAction> {
     return this.$api.genericPlatformActions.update(platformId, genericPlatformAction)
   },
   deletePlatformGenericAction (_: {}, genericPlatformActionId: string): Promise<void> {
     return this.$api.genericPlatformActions.deleteById(genericPlatformActionId)
   },
-  addPlatformSoftwareUpdateAction (_: {}, { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
+  addPlatformSoftwareUpdateAction (_: {}, {
+    platformId,
+    softwareUpdateAction
+  }: { platformId: string, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
     return this.$api.platformSoftwareUpdateActions.add(platformId, softwareUpdateAction)
   },
-  updatePlatformSoftwareUpdateAction (_: {}, { platformId, softwareUpdateAction }: {platformId: string, softwareUpdateAction: SoftwareUpdateAction}): Promise<SoftwareUpdateAction> {
+  updatePlatformSoftwareUpdateAction (_: {}, {
+    platformId,
+    softwareUpdateAction
+  }: { platformId: string, softwareUpdateAction: SoftwareUpdateAction }): Promise<SoftwareUpdateAction> {
     return this.$api.platformSoftwareUpdateActions.update(platformId, softwareUpdateAction)
   },
   deletePlatformSoftwareUpdateAction (_: {}, softwareUpdateActionId: string): Promise<void> {
@@ -448,7 +505,19 @@ const actions: ActionTree<PlatformsState, RootState> = {
   createPid (_, id: string | null): Promise<string> {
     return this.$api.pids.create(id, 'platform')
   },
-  async copyPlatform ({ dispatch }: { dispatch: Dispatch }, { platform, copyContacts, copyAttachments, copyParameters, originalPlatformId }: {platform: Platform, copyContacts: boolean, copyAttachments: boolean, copyParameters: boolean, originalPlatformId: string}): Promise<string> {
+  async copyPlatform ({ dispatch }: { dispatch: Dispatch }, {
+    platform,
+    copyContacts,
+    copyAttachments,
+    copyParameters,
+    originalPlatformId
+  }: {
+    platform: Platform,
+    copyContacts: boolean,
+    copyAttachments: boolean,
+    copyParameters: boolean,
+    originalPlatformId: string
+  }): Promise<string> {
     // Todo, prüfen ob man eventuell etwas vereinfachen kann
     const savedPlatform = await dispatch('savePlatform', platform)
     const savedPlatformId = savedPlatform.id!
@@ -457,7 +526,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
       const sourceContactRoles = await this.$api.platforms.findRelatedContactRoles(originalPlatformId)
       // The system creates the owner automatically when we create the device
       const freshCreatedContactRoles = await this.$api.platforms.findRelatedContactRoles(savedPlatformId)
-      const contactRolesToSave = sourceContactRoles.filter(c => freshCreatedContactRoles.findIndex((ec: ContactRole) => { return ec.contact!.id === c.contact!.id && ec.roleName === c.roleName }) === -1)
+      const contactRolesToSave = sourceContactRoles.filter(c => freshCreatedContactRoles.findIndex((ec: ContactRole) => {
+        return ec.contact!.id === c.contact!.id && ec.roleName === c.roleName
+      }) === -1)
 
       for (const contactRole of contactRolesToSave) {
         const contactRoleToSave = ContactRole.createFromObject(contactRole)
@@ -476,18 +547,27 @@ const actions: ActionTree<PlatformsState, RootState> = {
         if (attachment.isUpload) {
           const blob = await dispatch('downloadAttachment', attachment.url)
           const filename = getLastPathElement(attachment.url)
-          const uplaodResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
-          const newUrl = uplaodResult.url
+          const uploadResult = await dispatch('files/uploadBlob', {
+            blob,
+            filename
+          }, { root: true })
+          const newUrl = uploadResult.url
           attachment.url = newUrl
         }
-        related.push(dispatch('addPlatformAttachment', { platformId: savedPlatformId, attachment }))
+        related.push(dispatch('addPlatformAttachment', {
+          platformId: savedPlatformId,
+          attachment
+        }))
       }
     }
     if (copyParameters) {
       const parameters = platform.parameters.map(Parameter.createFromObject)
       for (const parameter of parameters) {
         parameter.id = null
-        related.push(dispatch('addPlatformParameter', { platformId: savedPlatformId, parameter }))
+        related.push(dispatch('addPlatformParameter', {
+          platformId: savedPlatformId,
+          parameter
+        }))
       }
     }
     await Promise.all(related)
@@ -546,7 +626,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
   setSelectedSearchPlatformTypes ({ commit }: { commit: Commit }, selectedSearchPlatformTypes: PlatformType[]) {
     commit('setSelectedSearchPlatformTypes', selectedSearchPlatformTypes)
   },
-  setSelectedSearchPermissionGroups ({ commit }: { commit: Commit }, selectedSearchPermissionGroups: PermissionGroup[]) {
+  setSelectedSearchPermissionGroups ({ commit }: {
+    commit: Commit
+  }, selectedSearchPermissionGroups: PermissionGroup[]) {
     commit('setSelectedSearchPermissionGroups', selectedSearchPermissionGroups)
   },
   setOnlyOwnPlatforms ({ commit }: { commit: Commit }, onlyOwnPlatforms: boolean) {
@@ -555,10 +637,13 @@ const actions: ActionTree<PlatformsState, RootState> = {
   setIncludeArchivedPlatforms ({ commit }: { commit: Commit }, includeArchivedPlatforms: boolean) {
     commit('setIncludeArchivedPlatforms', includeArchivedPlatforms)
   },
-  setSearchText ({ commit }: { commit: Commit }, searchText: string|null) {
+  setSearchText ({ commit }: { commit: Commit }, searchText: string | null) {
     commit('setSearchText', searchText)
   },
-  replacePlatformInPlatforms ({ commit, state }: {commit: Commit, state: PlatformsState}, newPlatform: Platform) {
+  replacePlatformInPlatforms ({
+    commit,
+    state
+  }: { commit: Commit, state: PlatformsState }, newPlatform: Platform) {
     const result = []
     for (const oldPlatform of state.platforms) {
       if (oldPlatform.id !== newPlatform.id) {
@@ -639,7 +724,7 @@ const mutations = {
   setIncludeArchivedPlatforms (state: PlatformsState, includeArchivedPlatforms: boolean) {
     state.includeArchivedPlatforms = includeArchivedPlatforms
   },
-  setSearchText (state: PlatformsState, searchText: string|null) {
+  setSearchText (state: PlatformsState, searchText: string | null) {
     state.searchText = searchText
   },
   setPlatformAvailabilities (state: PlatformsState, platformAvailabilities: Availability[]) {
@@ -657,6 +742,7 @@ const mutations = {
   setPlatformParameterChangeAction (state: PlatformsState, platformParameterChangeAction: ParameterChangeAction) {
     state.platformParameterChangeAction = platformParameterChangeAction
   }
+
 }
 
 export default {

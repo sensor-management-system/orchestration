@@ -39,7 +39,7 @@ permissions and limitations under the Licence.
           :items="deviceActionTypeItems"
           :item-text="(x) => x.name"
           clearable
-          label="Action Type"
+          label="Action type"
           :hint="!chosenKindOfAction ? 'Please select an action type' : ''"
           persistent-hint
           return-object
@@ -55,6 +55,17 @@ permissions and limitations under the Licence.
         </v-select>
       </v-card-text>
     </v-card>
+    <v-card-actions v-if="!chosenKindOfAction">
+      <v-spacer />
+      <v-btn
+        small
+        text
+        nuxt
+        :to="'/devices/' + deviceId + '/actions'"
+      >
+        cancel
+      </v-btn>
+    </v-card-actions>
     <NuxtChild />
     <action-type-dialog
       v-model="showNewActionTypeDialog"
@@ -81,17 +92,15 @@ import {
   DevicesState
 } from '@/store/devices'
 
-import {
-  DeviceActionTypeItemsGetter,
-  LoadDeviceGenericActionTypesAction
-} from '@/store/vocabulary'
+import { DeviceActionTypeItemsGetter, LoadDeviceGenericActionTypesAction } from '@/store/vocabulary'
 
 import { ACTION_TYPE_API_FILTER_DEVICE } from '@/services/cv/ActionTypeApi'
-
-const KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION = 'device_calibration'
-const KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE = 'software_update'
-const KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION = 'generic_device_action'
-const KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION = 'parameter_change_action'
+import {
+  KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION,
+  KIND_OF_ACTION_TYPE_GENERIC_ACTION,
+  KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION,
+  KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
+} from '@/models/ActionKind'
 
 @Component({
   components: { ActionTypeDialog },
@@ -172,7 +181,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
 
   setChosenKindOfDeviceActionAndUpdateRoute (newVal: ActionType) {
     this.setChosenKindOfDeviceAction({
-      kind: KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION,
+      kind: KIND_OF_ACTION_TYPE_GENERIC_ACTION,
       id: newVal.id,
       name: newVal.name,
       uri: newVal.uri
@@ -193,7 +202,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
   }
 
   get genericActionChosen () {
-    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_DEVICE_ACTION
+    return this.chosenKindOfDeviceAction?.kind === KIND_OF_ACTION_TYPE_GENERIC_ACTION
   }
 
   get parameterChangeActionChosen () {
@@ -215,6 +224,10 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     }
     if (this.parameterChangeActionChosen) {
       this.$router.push(`/devices/${this.deviceId}/actions/new/parameter-change-actions`)
+      return
+    }
+    if (!this.chosenKindOfAction) {
+      this.$router.push(`/devices/${this.deviceId}/actions/new`)
     }
   }
 }

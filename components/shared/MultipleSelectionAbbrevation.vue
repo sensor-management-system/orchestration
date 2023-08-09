@@ -6,9 +6,9 @@ Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Erik Pongratz (UFZ, erik.pongratz@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
+
 - Helmholtz Centre for Environmental Research GmbH - UFZ
   (UFZ, https://www.ufz.de)
 
@@ -33,44 +33,55 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-timeline dense>
-    <v-timeline-item
-      v-for="(action, index) in value"
-      :key="index"
-      :color="action.color"
-      :icon="action.icon"
-      class="mb-4"
-    >
-      <slot v-if="action.isGenericAction" name="generic-action" :action="action" :index="index" />
-      <slot v-if="action.isSoftwareUpdateAction" name="software-update-action" :action="action" :index="index" />
-      <slot v-if="action.isDeviceCalibrationAction" name="calibration-action" :action="action" :index="index" />
-      <slot v-if="action.isDeviceMountAction" name="device-mount-action" :action="action.inner" :index="index" />
-      <slot v-if="action.isDeviceUnmountAction" name="device-unmount-action" :action="action.inner" :index="index" />
-      <slot v-if="action.isParameterChangeAction" name="parameter-change-action" :action="action" :index="index" />
-    </v-timeline-item>
-  </v-timeline>
+  <div>
+    <span v-if="index < maxEntriesShown && needComma">{{ itemText }},&nbsp;</span>
+    <span v-if="index < maxEntriesShown && !needComma">{{ itemText }}</span>
+    <span
+      v-if="index === maxEntriesShown"
+      class="grey--text text-caption"
+    >&nbsp;(+{{ selection.length - maxEntriesShown }} {{ pluralize(selection.length-maxEntriesShown,'other') }})</span>
+  </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
-import { IActionCommonDetails } from '@/models/ActionCommonDetails'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { pluralize } from '@/utils/stringHelpers'
 
-/**
- * A component to display Device related actions in a timeline
- *
- * The component offers the following properties:
- *
- * * value - an Array of actions
- *
- * @augments Vue
- */
-@Component({})
-export default class DeviceActionTimeline extends Vue {
+@Component({
+  methods: { pluralize }
+})
+export default class MultipleSelectionAbbrevation extends Vue {
   @Prop({
-    default: () => [],
-    required: false,
+    required: true,
+    type: Number
+  })
+  readonly index!: number
+
+  @Prop({
+    required: true,
+    type: String
+  })
+  readonly itemText!: string
+
+  @Prop({
+    required: true,
     type: Array
   })
-  readonly value!: IActionCommonDetails[]
+  readonly selection!: Array<Object>
+
+  @Prop({
+    required: false,
+    default: 3,
+    type: Number
+  })
+  readonly maxEntriesShown!: number
+
+  get needComma (): boolean {
+    return this.index !== (Math.min(this.maxEntriesShown, this.selection.length) - 1)
+  }
 }
 </script>
+
+<style scoped>
+
+</style>

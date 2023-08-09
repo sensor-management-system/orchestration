@@ -36,8 +36,9 @@ import { Contact } from '@/models/Contact'
 import { Attachment } from '@/models/Attachment'
 import { IActionCommonDetails } from '@/models/ActionCommonDetails'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { IActionKind, KIND_OF_ACTION_TYPE_DEVICE_MOUNT } from '@/models/ActionKind'
 
-export class DeviceMountActionWrapper implements IActionCommonDetails, IDateCompareable {
+export class DeviceMountActionWrapper implements IActionCommonDetails, IDateCompareable, IActionKind {
   inner: DeviceMountAction
 
   constructor (inner: DeviceMountAction) {
@@ -66,5 +67,21 @@ export class DeviceMountActionWrapper implements IActionCommonDetails, IDateComp
 
   get date (): DateTime | null {
     return this.inner.basicData.beginDate
+  }
+
+  get icon (): string {
+    return 'mdi-network'
+  }
+
+  get color (): string {
+    return 'blue'
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_DEVICE_MOUNT
+  }
+
+  get logicOrder (): number {
+    return 200
   }
 }

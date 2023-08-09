@@ -34,6 +34,7 @@ import { Attachment } from '@/models/Attachment'
 import { Contact } from '@/models/Contact'
 import { IActionCommonDetails, ActionCommonDetails } from '@/models/ActionCommonDetails'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { IActionKind, KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE } from '@/models/ActionKind'
 
 export interface ISoftwareUpdateAction extends IActionCommonDetails {
   softwareTypeName: string
@@ -43,7 +44,7 @@ export interface ISoftwareUpdateAction extends IActionCommonDetails {
   repositoryUrl: string
 }
 
-export class SoftwareUpdateAction extends ActionCommonDetails implements ISoftwareUpdateAction, IDateCompareable {
+export class SoftwareUpdateAction extends ActionCommonDetails implements ISoftwareUpdateAction, IDateCompareable, IActionKind {
   private _softwareTypeName: string = ''
   private _softwareTypeUrl: string = ''
   private _updateDate: DateTime | null = null
@@ -127,5 +128,17 @@ export class SoftwareUpdateAction extends ActionCommonDetails implements ISoftwa
 
   get date (): DateTime | null {
     return this.updateDate
+  }
+
+  get icon (): string {
+    return 'mdi-floppy'
+  }
+
+  get color (): string {
+    return 'orange'
+  }
+
+  get kind (): string {
+    return KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
   }
 }
