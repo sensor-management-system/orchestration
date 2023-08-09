@@ -30,7 +30,13 @@ from .api.helpers.health_checks import (
 from .api.models.base_model import db
 from .api.permissions.permission_manager import permission_manager
 from .config import env
-from .extensions.instances import auth, idl, pidinst, well_known_url_config_loader
+from .extensions.instances import (
+    auth,
+    idl,
+    pidinst,
+    remove_slash_redirect_middlware,
+    well_known_url_config_loader,
+)
 from .urls import api
 from .views import (
     additional_configuration_routes,
@@ -90,6 +96,7 @@ def create_app():
     auth.init_app(app)
     idl.init_app(app)
     pidinst.init_app(app)
+    remove_slash_redirect_middlware.init_app(app)
 
     # shell context for flask cli
     @app.shell_context_processor

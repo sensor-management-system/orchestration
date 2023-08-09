@@ -17,6 +17,7 @@ from .idl import Idl
 from .openidconnect import WellKnownUrlConfigLoader
 from .pid import Pid
 from .pidinst import Pidinst
+from .redirect import RemoveSlashRedirectMiddlware
 
 well_known_url_config_loader = WellKnownUrlConfigLoader()
 session_auth_mechanism = SessionAuthMechanism()
@@ -31,3 +32,4 @@ auth = Auth(
 )
 idl = Idl()
 pidinst = Pidinst(pid=Pid(), b2inst=B2Inst())
+remove_slash_redirect_middlware = RemoveSlashRedirectMiddlware()
