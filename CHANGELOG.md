@@ -16,9 +16,12 @@ Added:
 - FZJ logo
 - sensorML for sites
 - pagination for device & platform search in mount wizzard
+- filter for action pages
 
 Changed:
 - map to display sites: Only polygon instead of map markers
+- changed layout of action cards
+- store for loading spinner
 
 Fixes:
 - improved file upload for mimetypes with encodings
@@ -30,6 +33,7 @@ Fixes:
 - fixed filter for contact names in mount wizzard
 - form to edit site assignment of configurations
 - increased page sizes for some list queries
+- resolved warnings for SQLAlchemy Backrefs
 
 
 
