@@ -1,7 +1,7 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 #
-# Copyright (C) 2020-2021
+# Copyright (C) 2020-2023
 # - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -113,83 +113,6 @@ test-frontend-unit-tests:
     - echo $CV_BACKEND_URL
   tags:
     - docker
-
-build-deploy-static-files-gfz:
-  stage: build
-  extends: .docker_build
-  variables:
-    SMS_BACKEND_URL: ${GFZ_STAGING_DEVELOP_BACKEND_URL}
-    CV_BACKEND_URL: ${GFZ_STAGING_DEVELOP_SMS_CV_URL}
-    CLIENT_ID: ${GFZ_STAGING_HIFIS_DEV_CLIENT_ID}
-    PID_BASE_URL: ""
-    OIDC_REFRESH_TOKEN: "refresh_token"
-    OIDC_REFRESH_EXPIRE: 28800
-    OIDC_RESPONSE_TYPE: "code"
-    OIDC_GRANT_TYPE: "authorization_code"
-    OIDC_CHALLANGE: "S256"
-    OIDC_SCHEME: "true"
-    OIDC_WELL_KNOWN: "https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration"
-    OIDC_SCOPES: "profile openid email eduperson_principal_name"
-    OIDC_REFRESH_INTERVAL_TIME: 1800000
-  before_script:
-    - apk add --update curl jq && rm -rf /var/cache/apk/*
-  script:
-    - TARGET_PACKAGE_VERSION=$(if [ -z "${CI_JOB_MANUAL}" ]; then echo "latest"; else echo "manual"; fi)
-    - echo "Build gfz statics ${TARGET_PACKAGE_VERSION}"
-    - docker build --tag "$CI_REGISTRY_IMAGE-static:gfz-${TARGET_PACKAGE_VERSION}" -f docker/deployment/gfz/Dockerfile .
-    - |
-        docker run --name "static-gfz-${TARGET_PACKAGE_VERSION}-container-$CI_JOB_ID" \
-          --env BASE_URL="/${TARGET_PACKAGE_VERSION}" \
-          --env SMS_BACKEND_URL \
-          --env CV_BACKEND_URL \
-          --env INSTITUTE="gfz" \
-          --env NUXT_ENV_PID_BASE_URL=$PID_BASE_URL \
-          --env NUXT_ENV_CLIENT_ID=$CLIENT_ID \
-          --env NUXT_ENV_OIDC_SCHEME=$OIDC_SCHEME \
-          --env NUXT_ENV_OIDC_WELL_KNOWN=$OIDC_WELL_KNOWN \
-          --env NUXT_ENV_OIDC_REFRESH_TOKEN=$OIDC_REFRESH_TOKEN \
-          --env NUXT_ENV_OIDC_REFRESH_EXPIRE=$OIDC_REFRESH_EXPIRE \
-          --env NUXT_ENV_OIDC_RESPONSE_TYPE=$OIDC_RESPONSE_TYPE \
-          --env NUXT_ENV_OIDC_GRANT_TYPE=$OIDC_GRANT_TYPE \
-          --env NUXT_ENV_OIDC_CHALLANGE=$OIDC_CHALLANGE \
-          --env NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME=$OIDC_REFRESH_INTERVAL_TIME \
-          --env NUXT_ENV_ALLOWED_MIMETYPES=$ALLOWED_MIME_TYPES \
-          --env NUXT_ENV_SCOPE="$OIDC_SCOPES" \
-          ${CI_REGISTRY_IMAGE}-static:gfz-${TARGET_PACKAGE_VERSION}
-    # Use cp to avoid user missmatch with docker volumes
-    - docker cp "static-gfz-${TARGET_PACKAGE_VERSION}-container-$CI_JOB_ID":/smsfrontend/dist .
-    # Sign the tar and tar the tar with the signing txt file to enable checksum test for orch repository
-    - tar zcvf dist.tar.gz dist
-    - sha256sum dist.tar.gz > dist-sha256sum.txt
-    - cat dist-sha256sum.txt
-    - tar -cvf signed-dist.tar dist.tar.gz dist-sha256sum.txt
-    # Upload static package and save response package-data
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file signed-dist.tar "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/gfz-statics/${TARGET_PACKAGE_VERSION}/signed-dist.tar?select=package_file"  -o package_data.json'
-    # Filter the sha256sum and store it in a file
-    - cat package_data.json | jq -r '.file_sha256' -j > signed-dist-sha256sum.txt
-    # Add source-file-name to match sha256sum checksum file format
-    - echo "  signed-dist.tar" >> signed-dist-sha256sum.txt
-    # Compare checksum
-    - sha256sum -c signed-dist-sha256sum.txt
-  after_script:
-    - docker rm "static-gfz-${TARGET_PACKAGE_VERSION}-container-$CI_JOB_ID"
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    # We want to be able to trigger the manual deployment from every branch
-    - if: $CI_PIPELINE_SOURCE == "push"
-      when: manual
-
-trigger-build-on-orchestration-gfz:
-  stage: deploy-staging
-  needs: ["build-deploy-static-files-gfz"]
-  trigger:
-    project: hub-terra/sms/orchestration
-    branch: main
-    strategy: depend
 
 release-ufz-tag-image-stage:
   stage: build
