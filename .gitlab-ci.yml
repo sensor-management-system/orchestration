@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
@@ -188,15 +188,3 @@ release-ufz-tag-image-prod:
         --build-arg VCS_REF=$CI_COMMIT_SHA \
       .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
-
-trigger-deploy-on-orchestration-gfz-image-develop:
-  stage: deploy
-  variables:
-    UPSTREAM_DEPLOYMENT_ONLY: "true"
-  trigger:
-    project: hub-terra/sms/orchestration
-    branch: main
-    strategy: depend
-  needs: ["build-gfz-image"]
-  rules:
-    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
