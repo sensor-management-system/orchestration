@@ -186,7 +186,7 @@ permissions and limitations under the Licence.
       <v-card-text>
         <p>
           There are three visibility states for
-          devices/platforms/configurations.
+          devices, platforms, configurations and sites/labs.
         </p>
         <v-row>
           <v-col>
