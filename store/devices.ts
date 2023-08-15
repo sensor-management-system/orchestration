@@ -140,6 +140,8 @@ export type PageSizesGetter = number[]
 export type DeviceActions = (PossibleDeviceActions)[]
 export type DeviceFilter = {selectedActionTypes: IOptionsForActionType[], selectedYears: number[], selectedContacts: string[]}
 export type FilteredActionsGetter = (filter: DeviceFilter) => DeviceActions
+export type AvailableContactsOfActionsGetter = string[]
+export type AvailableYearsOfActionsGetter = number[]
 
 const getters: GetterTree<DevicesState, RootState> = {
   availableContactsOfActions: (_state: DevicesState, getters): string[] => {
