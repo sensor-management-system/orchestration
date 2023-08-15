@@ -129,7 +129,7 @@ export class GenericAction extends ActionCommonDetails implements IGenericAction
       maintenance: 'mdi-wrench',
       rental: 'mdi-hand-heart',
       visit: 'mdi-castle',
-      'platform application': 'mdi-rocket-launch',
+      'platform application': 'mdi-crane',
       'manual data retrieval': 'mdi-human-dolly'
     }
 
