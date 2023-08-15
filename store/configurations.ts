@@ -184,6 +184,8 @@ const state = (): ConfigurationsState => ({
 })
 
 export type TimelineActionsGetter = ITimelineAction[]
+export type AvailableContactsOfActionsGetter = string[]
+export type AvailableYearsOfActionsGetter = number[]
 
 export type ConfigurationFilter = {selectedActionTypes: IOptionsForActionType[], selectedYears: number[], selectedContacts: string[]}
 

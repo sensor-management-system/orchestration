@@ -45,7 +45,6 @@ permissions and limitations under the Licence.
           :item-text="(x) => x.name"
           return-object
           clearable
-          @input="update"
         >
           <template #selection="{ item, index }">
             <MultipleSelectionAbbrevation :index="index" :item-text="item.name" :selection="selectedActionTypes" />
@@ -58,9 +57,8 @@ permissions and limitations under the Licence.
           multiple
           label="Year filter"
           hint="Please select a year"
-          :items="availableYearsOfActions"
+          :items="availableYearsOfActionsAndAlreadySelectedValues"
           clearable
-          @input="update"
         >
           <template #selection="{ item, index }">
             <MultipleSelectionAbbrevation :index="index" :item-text="item.toString()" :selection="selectedYears" />
@@ -73,9 +71,8 @@ permissions and limitations under the Licence.
           multiple
           label="Contact filter"
           hint="Please select a contact"
-          :items="availableContactsOfActions"
+          :items="availableContactsOfActionsAndAlreadySelectedValues"
           clearable
-          @input="update"
         >
           <template #selection="{ item, index }">
             <MultipleSelectionAbbrevation :index="index" :item-text="item" :selection="selectedContacts" />
@@ -90,7 +87,7 @@ permissions and limitations under the Licence.
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { mapGetters } from 'vuex'
 import { IOptionsForActionType } from '@/store/devices'
-import { ConfigurationFilter } from '@/store/configurations'
+import { AvailableContactsOfActionsGetter, AvailableYearsOfActionsGetter, ConfigurationFilter } from '@/store/configurations'
 import MultipleSelectionAbbrevation from '@/components/shared/MultipleSelectionAbbrevation.vue'
 
 @Component({
@@ -101,26 +98,64 @@ import MultipleSelectionAbbrevation from '@/components/shared/MultipleSelectionA
   }
 })
 export default class ConfigurationActionsFilter extends Vue {
-  private selectedActionTypes: IOptionsForActionType[] = []
-  private selectedYears: number[] = []
-  private selectedContacts: string [] = []
-
   @Prop({
     required: true,
     type: Object
   })
   readonly value!: ConfigurationFilter
 
-  get filter () {
-    return {
-      selectedActionTypes: this.selectedActionTypes,
+  availableContactsOfActions!: AvailableContactsOfActionsGetter
+  availableYearsOfActions!: AvailableYearsOfActionsGetter
+
+  get selectedActionTypes (): IOptionsForActionType[] {
+    return this.value.selectedActionTypes
+  }
+
+  set selectedActionTypes (newSelectedActionTypes: IOptionsForActionType[]) {
+    const newFilter = {
+      selectedActionTypes: newSelectedActionTypes,
       selectedYears: this.selectedYears,
       selectedContacts: this.selectedContacts
     }
+    this.$emit('input', newFilter)
   }
 
-  update () {
-    this.$emit('input', this.filter)
+  get selectedYears (): number[] {
+    return this.value.selectedYears
+  }
+
+  set selectedYears (newSelectedYears: number[]) {
+    const newFilter = {
+      selectedActionTypes: this.selectedActionTypes,
+      selectedYears: newSelectedYears,
+      selectedContacts: this.selectedContacts
+    }
+    this.$emit('input', newFilter)
+  }
+
+  get selectedContacts (): string[] {
+    return this.value.selectedContacts
+  }
+
+  set selectedContacts (newSelectedContacts: string[]) {
+    const newFilter = {
+      selectedActionTypes: this.selectedActionTypes,
+      selectedYears: this.selectedYears,
+      selectedContacts: newSelectedContacts
+    }
+    this.$emit('input', newFilter)
+  }
+
+  get availableYearsOfActionsAndAlreadySelectedValues (): number[] {
+    const choicesBasedOnActions = this.availableYearsOfActions
+    const alreadySelectedElementsThatAreNotPartOfActionChoices = this.selectedYears.filter(y => !choicesBasedOnActions.includes(y))
+    return [...alreadySelectedElementsThatAreNotPartOfActionChoices, ...choicesBasedOnActions].sort((a, b) => (b - a))
+  }
+
+  get availableContactsOfActionsAndAlreadySelectedValues (): string[] {
+    const choicesBasedOnActions = this.availableContactsOfActions
+    const alreadySelectedElementsThatAreNotPartOfActionChoices = this.selectedContacts.filter(c => !choicesBasedOnActions.includes(c))
+    return [...alreadySelectedElementsThatAreNotPartOfActionChoices, ...choicesBasedOnActions].sort()
   }
 }
 </script>

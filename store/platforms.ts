@@ -153,6 +153,8 @@ export type PlatformFilter = {
 }
 export type FilteredActionsGetter = (filter: PlatformFilter) => PlatformActions
 export type PageSizesGetter = number[]
+export type AvailableContactsOfActionsGetter = string[]
+export type AvailableYearsOfActionsGetter = number[]
 
 const getters: GetterTree<PlatformsState, RootState> = {
   searchParams: (state: PlatformsState): SearchParamsGetter => (isLoggedIn: boolean): IPlatformSearchParams => {
