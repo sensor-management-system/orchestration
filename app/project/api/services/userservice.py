@@ -6,85 +6,53 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-from ..models import Device, Platform, Configuration
-from ..models.contact import device_contacts, platform_contacts, configuration_contacts
+"""Functions to run the actions on user objects."""
+
 from ... import db
+from ...extensions.instances import pidinst
+from ..models import (
+    ConfigurationContactRole,
+    DeviceContactRole,
+    PlatformContactRole,
+    SiteContactRole,
+)
 
 
 def user_deactivation(src_user, src_contact, dest_contact):
     """
-    Deactivate a user in this steps:
+    Deactivate a user.
+
+    This includes the following steps:
      - Set the active attribute to False
      - Replace contact entities with a deactivation message.
+     - update external metadata (pidinst).
 
     :param src_user: user object Intended to be deactivated.
     :param src_contact: substituted user object.
     :param dest_contact: contact-object for the substituted user.
     """
-
-    # deactivate the user account
+    # Deactivate the user account
     src_user.active = False
-    # deactivate the it contact account
+    # Deactivate its contact
     src_contact.active = False
-    # replace the user data with a message contains only
-    # user id.
-    remove_contact_data(src_contact, src_user)
+    # Replace the user data with a message contains only user id.
+    overwrite_contact_data(src_contact, src_user)
 
     # Search for all dependencies connected to a contact.
-    # At the main time we don't replace anything but we could.
-    search_and_replace_referencing_foreign_keys(src_contact, dest_contact, src_user)
+    # Replace it with the dest_contact in case we got one.
+    associated_objects = search_and_replace_referencing_foreign_keys(
+        src_contact, dest_contact, src_user
+    )
 
     db.session.commit()
 
-
-def add_substituted_user(table, object_, object_id, dest_contact):
-    """
-    Add an Other user to the associated table.
-
-    :param table: associated table.
-    :param object_: Object class.
-    :param object_id: object id field name
-    :param dest_contact: destination contact-object
-
-    """
-    for object_in_table in table:
-        # Converting a query result to dict
-        object_as_dict = object_in_table._asdict()
-        o = db.session.query(object_).filter_by(id=object_as_dict[object_id]).first()
-        o.contacts.append(dest_contact)
-
-
-def search_database_tables_and_add_substituted_user(dest_contact, src_user):
-    """
-    Add substituted user whenever the source user was listed in the associated tables.
-
-    :param dest_contact: destination contact-object
-    :param src_user: source user_object
-    :return:
-    """
-
-    device_contact_table = (
-        db.session.query(device_contacts)
-        .filter_by(contact_id=src_user.contact_id)
-        .all()
-    )
-    add_substituted_user(device_contact_table, Device, "device_id", dest_contact)
-
-    platform_contact_table = (
-        db.session.query(platform_contacts)
-        .filter_by(contact_id=src_user.contact_id)
-        .all()
-    )
-    add_substituted_user(platform_contact_table, Platform, "platform_id", dest_contact)
-
-    configuration_contact_table = (
-        db.session.query(configuration_contacts)
-        .filter_by(contact_id=src_user.contact_id)
-        .all()
-    )
-    add_substituted_user(
-        configuration_contact_table, Configuration, "configuration_id", dest_contact
-    )
+    # And update external metadata that are handled on the device, platform
+    # or configuration level.
+    for entry in associated_objects:
+        if pidinst.has_external_metadata(entry):
+            # We don't run async in order to make sure that we run all the requests
+            # and don't stop the cli script before the other threads run.
+            pidinst.update_external_metadata(entry, run_async=False)
 
 
 def search_and_replace_referencing_foreign_keys(src_contact, dest_contact, src_user):
@@ -94,27 +62,119 @@ def search_and_replace_referencing_foreign_keys(src_contact, dest_contact, src_u
     :param src_contact: source contact-object
     :param dest_contact: destination contact-object
     :param src_user: source user_object
-    :return:
+    :return: set of associated objects
     """
+    associated_objects = set()
 
-    # search the Many-to-Many tables as they have no Classes
+    device_contact_roles = (
+        db.session.query(DeviceContactRole)
+        .filter_by(contact_id=src_user.contact_id)
+        .all()
+    )
+    platform_contact_roles = (
+        db.session.query(PlatformContactRole)
+        .filter_by(contact_id=src_user.contact_id)
+        .all()
+    )
+    configuration_contact_roles = (
+        db.session.query(ConfigurationContactRole)
+        .filter_by(contact_id=src_user.contact_id)
+        .all()
+    )
+    site_contact_roles = (
+        db.session.query(SiteContactRole)
+        .filter_by(contact_id=src_user.contact_id)
+        .all()
+    )
+
+    for role in device_contact_roles:
+        associated_objects.add(role.device)
+    for role in platform_contact_roles:
+        associated_objects.add(role.platform)
+    for role in configuration_contact_roles:
+        associated_objects.add(role.configuration)
+    for role in site_contact_roles:
+        associated_objects.add(role.site)
+
     if dest_contact is not None:
-        search_database_tables_and_add_substituted_user(dest_contact, src_user)
+        for role in device_contact_roles:
+            if (
+                db.session.query(DeviceContactRole)
+                .filter_by(
+                    contact_id=dest_contact.id,
+                    device_id=role.device_id,
+                    role_name=role.role_name,
+                    role_uri=role.role_uri,
+                )
+                .first()
+            ):
+                db.session.delete(role)
+            else:
+                role.contact = dest_contact
+                db.session.add(role)
+
+        for role in platform_contact_roles:
+            if (
+                db.session.query(PlatformContactRole)
+                .filter_by(
+                    contact_id=dest_contact.id,
+                    platform_id=role.platform_id,
+                    role_name=role.role_name,
+                    role_uri=role.role_uri,
+                )
+                .first()
+            ):
+                db.session.delete(role)
+            else:
+                role.contact = dest_contact
+                db.session.add(role)
+
+        for role in configuration_contact_roles:
+            if (
+                db.session.query(ConfigurationContactRole)
+                .filter_by(
+                    contact_id=dest_contact.id,
+                    configuration_id=role.configuration_id,
+                    role_name=role.role_name,
+                    role_uri=role.role_uri,
+                )
+                .first()
+            ):
+                db.session.delete(role)
+            else:
+                role.contact = dest_contact
+                db.session.add(role)
+
+        for role in site_contact_roles:
+            if (
+                db.session.query(SiteContactRole)
+                .filter_by(
+                    contact_id=dest_contact.id,
+                    site_id=role.site_id,
+                    role_name=role.role_name,
+                    role_uri=role.role_uri,
+                )
+                .first()
+            ):
+                db.session.delete(role)
+            else:
+                role.contact = dest_contact
+                db.session.add(role)
+
+    return associated_objects
 
 
-def remove_contact_data(src_contact, src_user):
+def overwrite_contact_data(src_contact, src_user):
     """
-    Replace the user data with a message contains only
-    user id.
+    Replace the user data with a message contains only the user id.
 
     :param src_contact: contact object.
     :param src_user: user object.
-
     """
     message = f"User {src_user.id} is deactivated"
     src_contact.given_name = message
     src_contact.family_name = message
     src_contact.email = message
-    src_contact.website = message
+    src_contact.website = ""
     src_contact.orcid = None
-    src_contact.organization = message
+    src_contact.organization = ""
