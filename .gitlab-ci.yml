@@ -59,41 +59,6 @@ build-deploy-image-nginx-gfz-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
-build-deploy-image-nginx-gfz-staging-develop:
-  stage: build
-  extends: .docker_build
-  variables:
-    NGINX_IMAGE_TAG: "gfz-latest-develop"
-  before_script:
-    - *docker_login_gitlab_registry
-    - apk add --update wget && rm -rf /var/cache/apk/*
-  script:
-    # Frontend project is passed via CICD var and should be configured with the gitlab repository setup
-    - 'wget --header="JOB-TOKEN: $CI_JOB_TOKEN" ${CI_API_V4_URL}/projects/${PROJECT_ID_FRONTEND}/packages/generic/gfz-statics/manual/signed-dist.tar'
-    # Use dist folder for multiple distributions
-    - mkdir -p dist/manual/
-    - tar -xvf signed-dist.tar
-    - sha256sum -c dist-sha256sum.txt
-    - tar -zxvf dist.tar.gz -C dist/manual --strip-components=1
-    # Remove dist tar files of manual version
-    - rm signed-dist.tar dist.tar.gz
-    # Frontend project is passed via CICD var and should be configured with the gitlab repository setup
-    - 'wget --header="JOB-TOKEN: $CI_JOB_TOKEN" ${CI_API_V4_URL}/projects/${PROJECT_ID_FRONTEND}/packages/generic/gfz-statics/latest/signed-dist.tar'
-    # Use dist folder for multiple distributions
-    - mkdir -p dist/latest/
-    - tar -xvf signed-dist.tar
-    - sha256sum -c dist-sha256sum.txt
-    - tar -zxvf dist.tar.gz -C dist/latest --strip-components=1
-    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest-develop" -f docker/build/nginx/gfz/staging-dev/Dockerfile .
-    - docker push "$CI_REGISTRY_IMAGE/nginx:$NGINX_IMAGE_TAG"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    # Exclude pipeline source, to prohibit triggering from different repo default branch
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "pipeline"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "pipeline" && $UPSTREAM_DEPLOYMENT_ONLY != "true"'
-      when: always
 
 build-deploy-image-nginx-gfz-prod:
   stage: build
@@ -418,6 +383,7 @@ deploy-gfz-staging:
     VOCABULARY_IMAGE: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-latest
     VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+    B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
     SMS_CV_GITLAB_TOKEN: ${SMS_CV_GITLAB_TOKEN}
   before_script:
     - *docker_login_gitlab_registry
@@ -450,76 +416,6 @@ deploy-gfz-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
-deploy-gfz-staging-develop:
-  stage: deploy
-  environment:
-    name: gfz-staging
-    url: https://rz-vm64.gfz-potsdam.de
-  tags:
-    - deploy
-    - staging
-    - gfz
-    - shell
-  variables:
-    COMPOSE_PROJECT_NAME: sms-staging-develop
-    VOCABULARY_IMAGE: $CI_REGISTRY/hub-terra/sms/sms-cv:gfz-latest
-    VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
-    VOCABULARY_DB_USER: ${GFZ_STAGING_VOCABULARY_POSTGRES_USER}
-    VOCABULARY_DB_PASSWORD: ${GFZ_STAGING_VOCABULARY_POSTGRES_PASSWORD}
-    IDL_DB_USER: ${GFZ_STAGING_IDL_POSTGRES_USER}
-    IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
-    IDL_TOKEN: ${GFZ_STAGING_IDL_TOKEN}
-    CORS_ORIGIN_WHITELIST: "https://rz-vm64.gfz-potsdam.de localhost"
-    MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
-    MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
-    BACKEND_IMAGE: $CI_REGISTRY/hub-terra/sms/backend:gfz-latest
-    BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
-    BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
-    BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
-    # We can't reuse the HTTP_ORIGINS name, as it was
-    # defined in the backend repo.
-    # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
-    # So we use a different name.
-    STAGING_DEV_HTTP_ORIGINS: ${GFZ_STAGING_HTTP_ORIGINS}
-    HTTP_ORIGINS_VOCABULARY: ${GFZ_STAGING_HTTP_ORIGINS_VOCABULARY}
-    # App-settings need to be development to enable multiple client IDs
-    APP_SETTINGS: "project.config.DevelopmentConfig"
-    NGINX_IMAGE_TAG: gfz-latest-develop
-    APPLICATION_PORTS: 3000-3001
-    MINIO_PORT: 3002
-    PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
-    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
-    SMS_CV_GITLAB_TOKEN: ${SMS_CV_GITLAB_TOKEN}
-  before_script:
-    - *docker_login_gitlab_registry
-  script:
-    - ./scripts/ensure_vm_max_map_count.sh
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml down --remove-orphans
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml rm -f
-    # Delete the volume for the static files of the backend.
-    # The volume is used so that the nginx can deliver those files.
-    # But we need it fresh so that we can put new files in.
-    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml pull
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml up -d
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py migrate
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend python3 manage.py db upgrade
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend sh -c "echo '$TSM_ENDPOINTS' > /tmp/tsm_endpoint_fixture.json"
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend python3 manage.py loaddata /tmp/tsm_endpoint_fixture.json
-    - sleep 1m
-    - docker compose -f docker/deployment/gfz/staging-dev/docker-compose.yml exec -T backend python3 manage.py es reindex
-    - docker rmi $(docker images -q -f dangling=true) || true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    # Exclude pipeline source, to prohibit triggering the job twice
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "pipeline"'
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-
 deploy-gfz-prod:
   stage: deploy
   environment:
@@ -545,6 +441,7 @@ deploy-gfz-prod:
     VOCABULARY_DB_USER: ${GFZ_PROD_VOCABULARY_POSTGRES_USER}
     VOCABULARY_SECRET_KEY: ${GFZ_PROD_VOCABULARY_SECRET}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+    B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
     SMS_CV_GITLAB_TOKEN: ${SMS_CV_GITLAB_TOKEN}
   before_script:
     - *docker_login_gitlab_registry
