@@ -62,10 +62,10 @@ class Pidinst:
         else:
             return False
 
-    def update_external_metadata(self, instrument):
+    def update_external_metadata(self, instrument, run_async=True):
         """Update the external metadata."""
         if self.b2inst.token:
-            self.b2inst.update_external_metadata(instrument)
+            self.b2inst.update_external_metadata(instrument, run_async=run_async)
         else:
             pass
 

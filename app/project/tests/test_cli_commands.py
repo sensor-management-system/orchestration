@@ -11,12 +11,26 @@ import os
 import sys
 import tempfile
 from contextlib import contextmanager
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
 from manage import deactivate_a_user, loaddata, reactivate_a_user
 from project import db
-from project.api.models import Contact, Device, TsmEndpoint, User
+from project.api.models import (
+    Configuration,
+    ConfigurationContactRole,
+    Contact,
+    Device,
+    DeviceContactRole,
+    Platform,
+    PlatformContactRole,
+    Site,
+    SiteContactRole,
+    TsmEndpoint,
+    User,
+)
+from project.extensions.instances import pidinst
 from project.tests.base import BaseTestCase, fake
 
 # import manage packages onto the path
@@ -40,6 +54,43 @@ def no_expire():
 class TestCliCommands(BaseTestCase):
     """Test class for some of the CLI commands."""
 
+    def test_deactivate_a_user_but_not_found(self):
+        """Ensure we stop if we don't find a user that we should deactivate."""
+        runner = CliRunner()
+        result = runner.invoke(
+            deactivate_a_user, ["testuser1@ufz.test"], env={"FLASK_APP": "manage"}
+        )
+        assert result.exit_code != 0
+        assert result.exception is not None
+        assert "Can't find" in result.stdout
+        assert "testuser1@ufz.test" in result.stdout
+
+    def test_deactivate_a_user_but_not_destination_user_found(self):
+        """Ensure we stop if we don't find a user for substitution while we are asked for that."""
+        with no_expire():
+            contact = Contact(
+                given_name="Test",
+                family_name="User1",
+                email="test.user1@ufz.test",
+                organization="UFZ Test",
+                website="https://ufz.de/test",
+                orcid="0000-1111-2222-3333-4444",
+            )
+            user = User(subject="testuser1@ufz.test", contact=contact)
+            db.session.add_all([contact, user])
+            db.session.commit()
+
+            runner = CliRunner()
+            result = runner.invoke(
+                deactivate_a_user,
+                ["testuser1@ufz.test", "--dest-user-subject=testuser2@ufz.test"],
+                env={"FLASK_APP": "manage"},
+            )
+            assert result.exit_code != 0
+            assert result.exception is not None
+            assert "Can't find" in result.stdout
+            assert "testuser2@ufz.test" in result.stdout
+
     def test_deactivate_a_user_with_no_substituted_user(self):
         """Ensure that a user can be deactivated and all it data are changed to deactivation message."""
         with no_expire():
@@ -47,20 +98,58 @@ class TestCliCommands(BaseTestCase):
                 given_name="Test",
                 family_name="User1",
                 email="test.user1@ufz.test",
+                organization="UFZ Test",
+                website="https://ufz.de/test",
+                orcid="0000-1111-2222-3333-4444",
             )
             user = User(subject="testuser1@ufz.test", contact=contact)
 
-            db.session.add_all([contact, user])
+            device = Device(
+                short_name="device_short_name test",
+                created_by_id=user.id,
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+
+            device_contact_role = DeviceContactRole(
+                device=device,
+                contact=contact,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            db.session.add_all([contact, user, device, device_contact_role])
             db.session.commit()
 
             runner = CliRunner()
-            result = runner.invoke(
-                deactivate_a_user, ["testuser1@ufz.test"], env={"FLASK_APP": "manage"}
-            )
+            with patch.object(
+                pidinst, "has_external_metadata"
+            ) as has_external_metadata:
+                has_external_metadata.return_value = True
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    result = runner.invoke(
+                        deactivate_a_user,
+                        ["testuser1@ufz.test"],
+                        env={"FLASK_APP": "manage"},
+                    )
+                    update_external_metadata.assert_called_once()
+                has_external_metadata.assert_called_once()
+
             assert not result.exception
             assert result.exit_code == 0
             assert user.active is False
-            assert contact.email == f"User {user.id} is deactivated"
+            msg = f"User {user.id} is deactivated"
+            assert contact.email == msg
+            assert contact.given_name == msg
+            assert contact.family_name == msg
+            assert contact.website == ""
+            assert contact.organization == ""
+            assert contact.orcid is None
 
     def test_deactivate_a_user_with_substituted_user(self):
         """Ensure that a user can be deactivated and provide a substituted user."""
@@ -86,22 +175,323 @@ class TestCliCommands(BaseTestCase):
                 is_internal=True,
             )
 
-            db.session.add_all([contact1, contact2, user1, user2, device])
-            device.contacts.append(contact1)
+            device_contact_role = DeviceContactRole(
+                device=device,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            platform = Platform(
+                short_name="dummy platform",
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+            platform_contact_role = PlatformContactRole(
+                platform=platform,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            configuration = Configuration(
+                label="dummy configuration",
+                is_internal=True,
+                is_public=False,
+            )
+
+            configuration_contact_role = ConfigurationContactRole(
+                configuration=configuration,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            site = Site(
+                label="dummy site",
+                is_internal=True,
+                is_public=False,
+            )
+
+            site_contact_role = SiteContactRole(
+                site=site,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            db.session.add_all(
+                [
+                    contact1,
+                    contact2,
+                    user1,
+                    user2,
+                    device,
+                    device_contact_role,
+                    platform,
+                    platform_contact_role,
+                    configuration,
+                    configuration_contact_role,
+                    site,
+                    site_contact_role,
+                ]
+            )
             db.session.commit()
 
             runner = CliRunner()
-            result = runner.invoke(
-                deactivate_a_user,
-                ["testuser1@ufz.test", "--dest-user-subject=testuser2@ufz.test"],
-                env={"FLASK_APP": "manage"},
-            )
+            with patch.object(
+                pidinst, "has_external_metadata"
+            ) as has_external_metadata:
+                has_external_metadata.return_value = True
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    result = runner.invoke(
+                        deactivate_a_user,
+                        [
+                            "testuser1@ufz.test",
+                            "--dest-user-subject=testuser2@ufz.test",
+                        ],
+                        env={"FLASK_APP": "manage"},
+                    )
+                    update_called = set(
+                        [
+                            (x[0][0].id, type(x[0][0]))
+                            for x in update_external_metadata.call_args_list
+                        ]
+                    )
+                has_external_called = set(
+                    [
+                        (x[0][0].id, type(x[0][0]))
+                        for x in has_external_metadata.call_args_list
+                    ]
+                )
 
             assert not result.exception
             assert result.exit_code == 0
             assert user1.active is False
             assert user2.active is True
-            assert len(device.contacts) == 2
+
+            device_contact_roles = (
+                db.session.query(DeviceContactRole).filter_by(device_id=device.id).all()
+            )
+            assert len(device_contact_roles) == 1
+            assert device_contact_roles[0].contact.id == contact2.id
+
+            platform_contact_roles = (
+                db.session.query(PlatformContactRole)
+                .filter_by(platform_id=platform.id)
+                .all()
+            )
+            assert len(platform_contact_roles) == 1
+            assert platform_contact_roles[0].contact.id == contact2.id
+
+            configuration_contact_roles = (
+                db.session.query(ConfigurationContactRole)
+                .filter_by(configuration_id=configuration.id)
+                .all()
+            )
+            assert len(configuration_contact_roles) == 1
+            assert configuration_contact_roles[0].contact.id == contact2.id
+
+            site_contact_roles = (
+                db.session.query(SiteContactRole).filter_by(site_id=site.id).all()
+            )
+            assert len(site_contact_roles) == 1
+            assert site_contact_roles[0].contact.id == contact2.id
+
+            assert (site.id, Site) in update_called
+            assert (device.id, Device) in update_called
+            assert (platform.id, Platform) in update_called
+            assert (configuration.id, Configuration) in update_called
+            assert update_called == has_external_called
+
+    def test_deactivate_a_user_with_substituted_user_and_existing_roles(self):
+        """Ensure that we don't overwrite contacts if the target contact is already there with the very same role."""
+        with no_expire():
+            contact1 = Contact(
+                given_name="Test",
+                family_name="User1",
+                email="test.user1@ufz.test",
+            )
+            contact2 = Contact(
+                given_name="Test",
+                family_name="User2",
+                email="test.user2@ufz.test",
+            )
+            user1 = User(subject="testuser1@ufz.test", contact=contact1)
+            user2 = User(subject="testuser2@ufz.test", contact=contact2)
+            device = Device(
+                short_name="device_short_name test",
+                created_by_id=user1.id,
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+
+            device_contact_role1 = DeviceContactRole(
+                device=device,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+            device_contact_role2 = DeviceContactRole(
+                device=device,
+                contact=contact2,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            platform = Platform(
+                short_name="dummy platform",
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+            platform_contact_role1 = PlatformContactRole(
+                platform=platform,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+            platform_contact_role2 = PlatformContactRole(
+                platform=platform,
+                contact=contact2,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            configuration = Configuration(
+                label="dummy configuration",
+                is_internal=True,
+                is_public=False,
+            )
+
+            configuration_contact_role1 = ConfigurationContactRole(
+                configuration=configuration,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+            configuration_contact_role2 = ConfigurationContactRole(
+                configuration=configuration,
+                contact=contact2,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            site = Site(
+                label="dummy site",
+                is_internal=True,
+                is_public=False,
+            )
+
+            site_contact_role1 = SiteContactRole(
+                site=site,
+                contact=contact1,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+            site_contact_role2 = SiteContactRole(
+                site=site,
+                contact=contact2,
+                role_name="Owner",
+                role_uri="https://cv/roles/4",
+            )
+
+            db.session.add_all(
+                [
+                    contact1,
+                    contact2,
+                    user1,
+                    user2,
+                    device,
+                    device_contact_role1,
+                    device_contact_role2,
+                    platform,
+                    platform_contact_role1,
+                    platform_contact_role2,
+                    configuration,
+                    configuration_contact_role1,
+                    configuration_contact_role2,
+                    site,
+                    site_contact_role1,
+                    site_contact_role2,
+                ]
+            )
+            db.session.commit()
+
+            runner = CliRunner()
+            with patch.object(
+                pidinst, "has_external_metadata"
+            ) as has_external_metadata:
+                has_external_metadata.return_value = True
+                with patch.object(
+                    pidinst, "update_external_metadata"
+                ) as update_external_metadata:
+                    update_external_metadata.return_value = None
+                    result = runner.invoke(
+                        deactivate_a_user,
+                        [
+                            "testuser1@ufz.test",
+                            "--dest-user-subject=testuser2@ufz.test",
+                        ],
+                        env={"FLASK_APP": "manage"},
+                    )
+                    update_called = set(
+                        [
+                            (x[0][0].id, type(x[0][0]))
+                            for x in update_external_metadata.call_args_list
+                        ]
+                    )
+                has_external_called = set(
+                    [
+                        (x[0][0].id, type(x[0][0]))
+                        for x in has_external_metadata.call_args_list
+                    ]
+                )
+
+            assert not result.exception
+            assert result.exit_code == 0
+            assert user1.active is False
+            assert user2.active is True
+
+            device_contact_roles = (
+                db.session.query(DeviceContactRole).filter_by(device_id=device.id).all()
+            )
+            assert len(device_contact_roles) == 1
+            assert device_contact_roles[0].contact.id == contact2.id
+
+            platform_contact_roles = (
+                db.session.query(PlatformContactRole)
+                .filter_by(platform_id=platform.id)
+                .all()
+            )
+            assert len(platform_contact_roles) == 1
+            assert platform_contact_roles[0].contact.id == contact2.id
+
+            configuration_contact_roles = (
+                db.session.query(ConfigurationContactRole)
+                .filter_by(configuration_id=configuration.id)
+                .all()
+            )
+            assert len(configuration_contact_roles) == 1
+            assert configuration_contact_roles[0].contact.id == contact2.id
+
+            site_contact_roles = (
+                db.session.query(SiteContactRole).filter_by(site_id=site.id).all()
+            )
+            assert len(site_contact_roles) == 1
+            assert site_contact_roles[0].contact.id == contact2.id
+
+            assert (site.id, Site) in update_called
+            assert (device.id, Device) in update_called
+            assert (platform.id, Platform) in update_called
+            assert (configuration.id, Configuration) in update_called
+            assert update_called == has_external_called
 
     def test_reactivate_a_user(self):
         """Ensure that a user can be reactivated."""

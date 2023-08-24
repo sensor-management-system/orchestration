@@ -151,11 +151,19 @@ def deactivate_a_user(src_user_subject, dest_user_subject):
     :param dest_user_subject: Subject attribute for the substituted user.
     """
     src_user = db.session.query(User).filter_by(subject=src_user_subject).first()
-    src_contact = db.session.query(Contact).filter_by(id=src_user.contact_id).first()
+    if not src_user:
+        raise click.BadParameter(
+            f"Can't find a user with subject {src_user_subject} to deactivate"
+        )
+    src_contact = src_user.contact
 
     dest_contact = None
     if dest_user_subject is not None:
         dest_user = db.session.query(User).filter_by(subject=dest_user_subject).first()
+        if not dest_user:
+            raise click.BadParameter(
+                f"Can't find a user with subject {dest_user_subject} for substituion"
+            )
         dest_contact = (
             db.session.query(Contact).filter_by(id=dest_user.contact_id).first()
         )

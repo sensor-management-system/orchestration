@@ -321,6 +321,80 @@ class TestB2InstDeviceMapper(BaseTestCase):
 
         self.assertEqual(result, expected)
 
+    def test_to_draft_inactive_contact(self):
+        """Ensure we list only active contacts."""
+        device = Device(
+            short_name="SMT100",
+            description="The SMT 100",
+            manufacturer_name="TRUEBENER GmbH",
+            device_type_name="Soil moisture sensor",
+            model="SMT 100",
+        )
+        contact = Contact(
+            given_name="A",
+            family_name="B",
+            email="ab@localhost",
+            active=False,
+        )
+        device_contact_role = DeviceContactRole(
+            device=device,
+            contact=contact,
+            role_name="Owner",
+            role_uri="https://cv/api/v1/roles/1/",
+        )
+        device_property = DeviceProperty(
+            device=device,
+            property_name="Soil moisture",
+        )
+        db.session.add_all([device, contact, device_contact_role, device_property])
+        db.session.commit()
+
+        mapper = mappers.B2InstDeviceMapper()
+        result = mapper.to_draft_post(
+            device,
+            community="A",
+            open_access=True,
+            base_landing_page=self.landing_page,
+            schema_version="1.0.0",
+        )
+
+        expected = schemas.B2InstDraftPost(
+            community="A",
+            open_access=True,
+            name="SMT100 - TRUEBENER GmbH - SMT 100",
+            Name="SMT100 - TRUEBENER GmbH - SMT 100",
+            Description="The SMT 100",
+            Owner=[],
+            InstrumentTypes=[
+                schemas.B2InstInstrumentType(
+                    instrumentTypeName="Soil moisture sensor",
+                    instrumentTypeIdentifier=None,
+                    instrumentTypeIdentifierType=None,
+                )
+            ],
+            LandingPage=f"{self.landing_page}/devices/{device.id}",
+            Manufacturers=[
+                schemas.B2InstManufacturer(
+                    manufacturerName="TRUEBENER GmbH",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            ],
+            Models=[schemas.B2InstModel(modelName="SMT 100")],
+            MeasuredVariables=["Soil moisture"],
+            Dates=[],
+            AlternateIdentifiers=[
+                schemas.B2InstAlternateIdentifier(
+                    AlternateIdentifier=f"{self.landing_page}/devices/{device.id}",
+                    alternateIdentifierType="Other",
+                    alternateIdentifierName="URL",
+                ),
+            ],
+            schemaVersion="1.0.0",
+        )
+
+        self.assertEqual(result, expected)
+
 
 class TestB2InstPlatformMapper(BaseTestCase):
     """Test class for the B2InstPlatformMapper class."""
@@ -603,6 +677,76 @@ class TestB2InstPlatformMapper(BaseTestCase):
 
         self.assertEqual(result, expected)
 
+    def test_to_draft_inactive_contact(self):
+        """Ensure we list only active contacts."""
+        platform = Platform(
+            short_name="CR1000",
+            description="The CR 1000",
+            manufacturer_name="Campbell Scientific",
+            platform_type_name="Logger",
+            model="CR 1000",
+        )
+        contact = Contact(
+            given_name="A",
+            family_name="B",
+            email="ab@localhost",
+            active=False,
+        )
+        platform_contact_role = PlatformContactRole(
+            platform=platform,
+            contact=contact,
+            role_name="Owner",
+            role_uri="https://cv/api/v1/roles/1/",
+        )
+        db.session.add_all([platform, contact, platform_contact_role])
+        db.session.commit()
+
+        mapper = mappers.B2InstPlatformMapper()
+        result = mapper.to_draft_post(
+            platform,
+            community="A",
+            open_access=True,
+            base_landing_page=self.landing_page,
+            schema_version="1.0.0",
+        )
+
+        expected = schemas.B2InstDraftPost(
+            community="A",
+            open_access=True,
+            name="CR1000 - Campbell Scientific - CR 1000",
+            Name="CR1000 - Campbell Scientific - CR 1000",
+            Description="The CR 1000",
+            Owner=[],
+            InstrumentTypes=[
+                schemas.B2InstInstrumentType(
+                    instrumentTypeName="Logger",
+                    instrumentTypeIdentifier=None,
+                    instrumentTypeIdentifierType=None,
+                )
+            ],
+            LandingPage=f"{self.landing_page}/platforms/{platform.id}",
+            Manufacturers=[
+                schemas.B2InstManufacturer(
+                    manufacturerName="Campbell Scientific",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            ],
+            Models=[schemas.B2InstModel(modelName="CR 1000")],
+            MeasuredVariables=[],
+            Dates=[],
+            AlternateIdentifiers=[
+                schemas.B2InstAlternateIdentifier(
+                    AlternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
+                    alternateIdentifierType="Other",
+                    alternateIdentifierName="URL",
+                ),
+            ],
+            schemaVersion="1.0.0",
+        )
+
+        self.assertEqual(result, expected)
+
 
 class TestB2InstConfigurationMapper(BaseTestCase):
     """Test class for the B2InstConfigurationMapper class."""
@@ -828,6 +972,63 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             contact=contact,
             role_name="PI",
             role_uri="https://cv/api/v1/roles/3/",
+        )
+        db.session.add_all(
+            [
+                configuration,
+                contact,
+                configuration_contact_role,
+            ]
+        )
+        mapper = mappers.B2InstConfigurationMapper()
+        result = mapper.to_draft_post(
+            configuration,
+            community="A",
+            open_access=True,
+            base_landing_page=self.landing_page,
+            schema_version="1.0.0",
+        )
+
+        expected = schemas.B2InstDraftPost(
+            community="A",
+            open_access=True,
+            name="",
+            Name="",
+            Description="",
+            Owner=[],
+            InstrumentTypes=[],
+            LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
+            Manufacturers=[],
+            Models=[],
+            MeasuredVariables=[],
+            Dates=[],
+            AlternateIdentifiers=[
+                schemas.B2InstAlternateIdentifier(
+                    AlternateIdentifier=f"{self.landing_page}/configurations/{configuration.id}",
+                    alternateIdentifierType="Other",
+                    alternateIdentifierName="URL",
+                )
+            ],
+            schemaVersion="1.0.0",
+        )
+
+        self.assertEqual(result, expected)
+
+    def test_to_draft_inactive_contact(self):
+        """Ensure we list only active contacts."""
+        configuration = Configuration(label="", description="")
+        contact = Contact(
+            given_name="A",
+            family_name="B",
+            email="ab@localhost",
+            orcid="1234-5678-9012-3456",
+            active=False,
+        )
+        configuration_contact_role = ConfigurationContactRole(
+            configuration=configuration,
+            contact=contact,
+            role_name="Owner",
+            role_uri="https://cv/api/v1/roles/1/",
         )
         db.session.add_all(
             [

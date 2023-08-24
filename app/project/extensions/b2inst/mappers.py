@@ -12,6 +12,7 @@ from sqlalchemy import and_
 
 from ...api.models import (
     ConfigurationContactRole,
+    Contact,
     DeviceContactRole,
     DeviceMountAction,
     PlatformContactRole,
@@ -57,10 +58,15 @@ class B2InstDeviceMapper:
 
     def _device_owners(self, device):
         owners = []
-        for contact_role in db.session.query(DeviceContactRole).filter(
-            and_(
-                DeviceContactRole.device_id == device.id,
-                DeviceContactRole.role_name == "Owner",
+        for contact_role in (
+            db.session.query(DeviceContactRole)
+            .join(Contact)
+            .filter(
+                and_(
+                    DeviceContactRole.device_id == device.id,
+                    DeviceContactRole.role_name == "Owner",
+                    Contact.active.is_(True),
+                )
             )
         ):
             contact = contact_role.contact
@@ -198,10 +204,15 @@ class B2InstPlatformMapper:
 
     def _platform_owners(self, platform):
         owners = []
-        for contact_role in db.session.query(PlatformContactRole).filter(
-            and_(
-                PlatformContactRole.platform_id == platform.id,
-                PlatformContactRole.role_name == "Owner",
+        for contact_role in (
+            db.session.query(PlatformContactRole)
+            .join(Contact)
+            .filter(
+                and_(
+                    PlatformContactRole.platform_id == platform.id,
+                    PlatformContactRole.role_name == "Owner",
+                    Contact.active.is_(True),
+                )
             )
         ):
             contact = contact_role.contact
@@ -393,10 +404,15 @@ class B2InstConfigurationMapper:
 
     def _configuration_owners(self, configuration):
         owners = []
-        for contact_role in db.session.query(ConfigurationContactRole).filter(
-            and_(
-                ConfigurationContactRole.configuration_id == configuration.id,
-                ConfigurationContactRole.role_name == "Owner",
+        for contact_role in (
+            db.session.query(ConfigurationContactRole)
+            .join(Contact)
+            .filter(
+                and_(
+                    ConfigurationContactRole.configuration_id == configuration.id,
+                    ConfigurationContactRole.role_name == "Owner",
+                    Contact.active.is_(True),
+                )
             )
         ):
             contact = contact_role.contact
