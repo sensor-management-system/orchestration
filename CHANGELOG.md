@@ -9,7 +9,7 @@ SPDX-License-Identifier: HEESIL-1.0
 
 ## 1.5.0 (Unreleased)
 
-## 1.4.0 2023-08-24
+## 1.4.0 - 2023-08-24
 
 Added:
 - parameters for devices, platforms & configurations
