@@ -7,13 +7,15 @@ SPDX-FileCopyrightText: 2023
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-## 1.4.0 (Unreleased)
+## 1.5.0 (Unreleased)
+
+## 1.4.0 2023-08-24
 
 Added:
 - parameters for devices, platforms & configurations
 - attachments for sites
 - b2inst support for PIDs
-- FZJ logo
+- FZJ logo and group page
 - sensorML for sites
 - pagination for device & platform search in mount wizzard
 - filter for action pages
@@ -34,6 +36,7 @@ Fixes:
 - form to edit site assignment of configurations
 - increased page sizes for some list queries
 - resolved warnings for SQLAlchemy Backrefs
+- better handling for delete dialogs on long running requests
 
 
 
