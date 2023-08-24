@@ -383,6 +383,7 @@ deploy-gfz-staging:
     VOCABULARY_IMAGE: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-latest
     VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+    B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
     SMS_CV_GITLAB_TOKEN: ${SMS_CV_GITLAB_TOKEN}
   before_script:
     - *docker_login_gitlab_registry
@@ -440,6 +441,7 @@ deploy-gfz-prod:
     VOCABULARY_DB_USER: ${GFZ_PROD_VOCABULARY_POSTGRES_USER}
     VOCABULARY_SECRET_KEY: ${GFZ_PROD_VOCABULARY_SECRET}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+    B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
     SMS_CV_GITLAB_TOKEN: ${SMS_CV_GITLAB_TOKEN}
   before_script:
     - *docker_login_gitlab_registry

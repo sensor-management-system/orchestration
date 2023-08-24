@@ -9,6 +9,14 @@ SPDX-License-Identifier: HEESIL-1.0
 
 ## 1.5.0 (Unreleased)
 
+Added:
+- Activated B2INST support on GFZ instance
+
+Changed:
+- updated privacy policy for B2INST usage on GFZ
+- extended user deprovising script to remove user data from B2INST
+
+
 ## 1.4.0 - 2023-08-24
 
 Added:

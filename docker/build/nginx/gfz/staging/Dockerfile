@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -60,6 +60,8 @@ ENV NUXT_ENV_OIDC_RESPONSE_TYPE code
 ENV NUXT_ENV_OIDC_GRANT_TYPE authorization_code
 ENV NUXT_ENV_OIDC_CHALLANGE S256
 ENV NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME 1800000
+
+ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
 
 
 RUN mkdir /smsfrontend
