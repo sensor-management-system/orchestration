@@ -188,6 +188,9 @@ services:
       PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: gfz
       SMS_FRONTEND_URL: https://rz-vm64.gfz-potsdam.de
+      B2INST_TOKEN: ${B2INST_TOKEN}
+      B2INST_URL: https://b2inst-test.gwdg.de
+      B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
     depends_on:
       - backend-db
     volumes:

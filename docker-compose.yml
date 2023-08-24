@@ -103,6 +103,9 @@ services:
       IDENTIFIER_TYPE: ${IDENTIFIER_TYPE:-Handler}
       PID_SUFFIX: ${PID_SUFFIX:-SMS}
       TSM_ENDPOINTS: ${TSM_ENDPOINTS:-[]}
+      B2INST_URL: https://b2inst-test.gwdg.de
+      B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
+      B2INST_TOKEN: ${B2INST_TOKEN}
     depends_on:
       - db
     command: >
