@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -50,7 +50,9 @@ permissions and limitations under the Licence.
       <ul class="mt-2">
         <li>Given name, surname</li>
         <li>E-mail address</li>
+        <li>Organization</li>
         <li>Website (if available)</li>
+        <li>ORCID (if available)</li>
       </ul>
     </p>
     <p>
@@ -60,9 +62,22 @@ permissions and limitations under the Licence.
         <li>Devices</li>
         <li>Platforms</li>
         <li>Configurations</li>
+        <li>Sites</li>
       </ul>
     </p>
     <p>Persons are still assigned to the devices as contacts for the purpose of mapping responsibilities and facilitating consultations in the event of questions about the devices.</p>
+
+    <p>
+      To register persistent identifiers for the instruments we provide <a href="https://doi.org/10.15497/RDA00070" target="_blank">PIDINST metadata</a>
+      to the <a href="https://b2inst.gwdg.de/" target="_blank">B2INST portal</a>.
+      The PIDINST data contain the following personal information of the associated contacts:
+    </p>
+    <ul class="mt-2 mb-4">
+      <li>Given name, surname</li>
+      <li>E-mail address</li>
+      <li>ORCID (if available)</li>
+    </ul>
+
     <p>The application cannot be used to analyse user behaviour.</p>
   </section>
 </template>
