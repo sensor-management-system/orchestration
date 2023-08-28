@@ -44,7 +44,7 @@ cache:
 
 build-backend-test-image:
   stage: buildtest
-  extends: .docker-in-docker
+  extends: .docker_build
   variables:
     DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
     WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
@@ -119,7 +119,7 @@ check-lint-backend:
 
 extract-openapi:
   stage: extract
-  extends: .docker-in-docker
+  extends: .docker_build
   variables:
     DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
     WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
