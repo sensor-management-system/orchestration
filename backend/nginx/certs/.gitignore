@@ -4,8 +4,5 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-/.idea/
-/docker/env.dev
-/docker/backend.dev
-/docker/cv.dev
-/sql/preset-development-and-test-data.sql
+server.key
+server.pem

@@ -1,0 +1,5814 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sensor Management System SMS",
+    "description": "REST API for managing sensor metadata. This API is based on {json:api} specification see: https://jsonapi.org/",
+    "version": "0.01",
+    "contact": {
+      "email": "gitlab-incoming+hub-terra-sms-service-desk-4415-issue-@hzdr.de",
+      "name": "sms-service-desk",
+      "url": "https://codebase.helmholtz.cloud/hub-terra/sms/service-desk"
+    },
+    "license": {
+      "url": "https://git.gfz-potsdam.de/rse/heesil",
+      "name": "HEESIL-license"
+    },
+    "termsOfService": "{{ term_of_use_url }}"
+  },
+  "paths": {
+    "/controller/configurations/{configuration_id}/mounting-action-timepoints": {
+      "get": {
+        "tags": [
+          "Controller"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/configuration_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/mountingActionTimepoints_coll"
+          }
+        }
+      }
+    },
+    "/controller/configurations/{configuration_id}/mounting-actions": {
+      "get": {
+        "tags": [
+          "Controller"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/timepoint"
+          },
+          {
+            "$ref": "#/components/parameters/configuration_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/mountingActions_coll"
+          }
+        }
+      }
+    },
+    "/devices": {
+      "get": {
+        "tags": [
+          "Device"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/created_at"
+          },
+          {
+            "$ref": "#/components/parameters/updated_at"
+          },
+          {
+            "$ref": "#/components/parameters/created_by_id"
+          },
+          {
+            "$ref": "#/components/parameters/updated_by_id"
+          },
+          {
+            "$ref": "#/components/parameters/description"
+          },
+          {
+            "$ref": "#/components/parameters/short_name"
+          },
+          {
+            "$ref": "#/components/parameters/long_name"
+          },
+          {
+            "$ref": "#/components/parameters/serial_number"
+          },
+          {
+            "$ref": "#/components/parameters/manufacturer_uri"
+          },
+          {
+            "$ref": "#/components/parameters/manufacturer_name"
+          },
+          {
+            "$ref": "#/components/parameters/dual_use"
+          },
+          {
+            "$ref": "#/components/parameters/model"
+          },
+          {
+            "$ref": "#/components/parameters/inventory_number"
+          },
+          {
+            "$ref": "#/components/parameters/persistent_identifier"
+          },
+          {
+            "$ref": "#/components/parameters/website"
+          },
+          {
+            "$ref": "#/components/parameters/device_type_uri"
+          },
+          {
+            "$ref": "#/components/parameters/device_type_name"
+          },
+          {
+            "$ref": "#/components/parameters/status_uri"
+          },
+          {
+            "$ref": "#/components/parameters/status_name"
+          },
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/filter"
+          },
+          {
+            "$ref": "#/components/parameters/hide_archived"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Device_coll"
+          }
+        },
+        "description": "Retrieve Device from device",
+        "operationId": "RetrieveacollectionofDeviceobjects_0"
+      },
+      "post": {
+        "tags": [
+          "Device"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Device_inst"
+        },
+        "responses": {
+          "201": {
+              "$ref": "#/components/responses/Device_coll"
+          }
+        },
+        "operationId": "CreateDevice_0",
+        "parameters": []
+      }
+    },
+    "/devices/{device_id}": {
+      "get": {
+        "tags": [
+          "Device"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/device_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Device_coll"
+          }
+        },
+        "description": "Retrieve Device from device",
+        "operationId": "RetrieveDeviceinstance_0"
+      },
+      "patch": {
+        "tags": [
+          "Device"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Device"
+              }
+            }
+          },
+          "description": "Device attributes",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Device_coll"
+          }
+        },
+        "description": "Update Device attributes",
+        "operationId": "UpdateDevice_0"
+      },
+      "delete": {
+        "tags": [
+          "Device"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        },
+        "operationId": "DeleteDevicefromdevice_3"
+      }
+    },
+    "/device-calibration-actions": {
+      "get": {
+        "tags": [
+          "Device calibration actions"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceCalibrationActions_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Device calibration actions"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/DeviceCalibrationActions_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceCalibrationActions_coll"
+          }
+        }
+      }
+    },
+    "/device-calibration-actions/{device_calibration_action_id}": {
+      "get": {
+        "tags": [
+          "Device calibration actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/device_calibration_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceCalibrationActions_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Device calibration actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_calibration_action_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceCalibrationActions"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceCalibrationActions_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Device calibration actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_calibration_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/device-calibration-attachments": {
+      "get": {
+        "tags": [
+          "Device calibration attachments"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceCalibrationActionAttachments_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Device calibration attachments"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/DeviceCalibrationActionAttachments_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceCalibrationActionAttachments_coll"
+          }
+        }
+      }
+    },
+    "/device-calibration-attachments/{device_calibration_attachment_id}": {
+      "get": {
+        "tags": [
+          "Device calibration attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/device_calibration_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceCalibrationActionAttachments_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Device calibration attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_calibration_attachment_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceCalibrationActionAttachments"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceCalibrationActionAttachments_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Device calibration attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_calibration_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/device-software-update-actions": {
+      "get": {
+        "tags": [
+          "Device software update actions"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateActions_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Device software update actions"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/DeviceSoftwareUpdateActions_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateActions_coll"
+          }
+        }
+      }
+    },
+    "/device-software-update-actions/{device_software_update_action_id}": {
+      "get": {
+        "tags": [
+          "Device software update actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/device_software_update_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateActions_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Device software update actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_software_update_action_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceSoftwareUpdateActions"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateActions_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Device software update actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_software_update_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/device-software-update-action-attachments": {
+      "get": {
+        "tags": [
+          "Device software update attachments"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateAttachments_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Device software update attachments"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/DeviceSoftwareUpdateAttachments_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateAttachments_coll"
+          }
+        }
+      }
+    },
+    "/device-software-update-action-attachments/{device_software_update_action_attachment_id}": {
+      "get": {
+        "tags": [
+          "Device software update attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/device_software_update_action_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateAttachments_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Device software update attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_software_update_action_attachment_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceSoftwareUpdateAttachments"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DeviceSoftwareUpdateAttachments_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Device software update attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_software_update_action_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/device-property-calibrations": {
+      "get": {
+        "tags": [
+          "Device property calibrations"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DevicePropertyCalibrations_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Device property calibrations"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/DevicePropertyCalibrations_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DevicePropertyCalibrations_coll"
+          }
+        }
+      }
+    },
+    "/device-property-calibrations/{device_device_property_calibrations_id}": {
+      "get": {
+        "tags": [
+          "Device property calibrations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/device_device_property_calibrations_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DevicePropertyCalibrations_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Device property calibrations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_device_property_calibrations_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevicePropertyCalibrations"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/DevicePropertyCalibrations_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Device property calibrations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/device_device_property_calibrations_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/generic-configuration-actions": {
+      "get": {
+        "tags": [
+          "Generic configuration action"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericConfigurationAction_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Generic configuration action"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GenericConfigurationAction_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericConfigurationAction_coll"
+          }
+        }
+      }
+    },
+    "/generic-configuration-actions/{generic_configuration_action_id}": {
+      "get": {
+        "tags": [
+          "Generic configuration action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/generic_configuration_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericConfigurationAction_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Generic configuration action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_configuration_action_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericConfigurationAction"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericConfigurationAction_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Generic configuration action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_configuration_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/generic-device-actions": {
+      "get": {
+        "tags": [
+          "Generic device action"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericDeviceAction_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Generic device action"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GenericDeviceAction_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericDeviceAction_coll"
+          }
+        }
+      }
+    },
+    "/generic-device-actions/{generic_device_action_id}": {
+      "get": {
+        "tags": [
+          "Generic device action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/generic_device_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericDeviceAction_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Generic device action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_device_action_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericDeviceAction"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericDeviceAction_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Generic device action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_device_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/generic-device-action-attachments": {
+      "get": {
+        "tags": [
+          "Generic device action attachments"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericDeviceActionAttachment_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Generic device action attachments"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GenericDeviceActionAttachment_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericDeviceActionAttachment_coll"
+          }
+        }
+      }
+    },
+    "/generic-device-action-attachments/{generic_device_action_attachment_id}": {
+      "get": {
+        "tags": [
+          "Generic device action attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/generic_device_action_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericDeviceActionAttachment_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Generic device action attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_device_action_attachment_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericDeviceActionAttachment"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericDeviceActionAttachment_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Generic device action attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_device_action_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/generic-platform-actions": {
+      "get": {
+        "tags": [
+          "Generic platform action"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericPlatformAction_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Generic platform action"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/GenericPlatformAction_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericPlatformAction_coll"
+          }
+        }
+      }
+    },
+    "/generic-platform-actions/{generic_platform_action_id}": {
+      "get": {
+        "tags": [
+          "Generic platform action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/generic_platform_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/GenericPlatformAction_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Generic platform action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_platform_action_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenericPlatformAction"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/GenericPlatformAction_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Generic platform action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/generic_platform_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/platforms": {
+      "get": {
+        "tags": [
+          "Platform"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/sort"
+          },
+          {
+            "$ref": "#/components/parameters/created_at"
+          },
+          {
+            "$ref": "#/components/parameters/updated_at"
+          },
+          {
+            "$ref": "#/components/parameters/created_by_id"
+          },
+          {
+            "$ref": "#/components/parameters/updated_by_id"
+          },
+          {
+            "$ref": "#/components/parameters/description"
+          },
+          {
+            "$ref": "#/components/parameters/short_name"
+          },
+          {
+            "$ref": "#/components/parameters/long_name"
+          },
+          {
+            "$ref": "#/components/parameters/manufacturer_uri"
+          },
+          {
+            "$ref": "#/components/parameters/manufacturer_name"
+          },
+          {
+            "$ref": "#/components/parameters/model"
+          },
+          {
+            "$ref": "#/components/parameters/status_uri"
+          },
+          {
+            "$ref": "#/components/parameters/status_name"
+          },
+          {
+            "$ref": "#/components/parameters/website"
+          },
+          {
+            "$ref": "#/components/parameters/inventory_number"
+          },
+          {
+            "$ref": "#/components/parameters/serial_number"
+          },
+          {
+            "$ref": "#/components/parameters/persistent_identifier"
+          },
+          {
+            "$ref": "#/components/parameters/platform_type_uri"
+          },
+          {
+            "$ref": "#/components/parameters/platform_type_name"
+          },
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/filter"
+          },
+          {
+            "$ref": "#/components/parameters/hide_archived"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Platform_coll"
+          },
+          "400": {
+              "content": {
+                  "application/vnd.api+json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/invalid_filters"
+                      }
+                  }
+              },
+              "description": "Invalid filter parameter."
+          }
+        },
+        "description": "Retrieve Platform",
+        "operationId": "RetrieveacollectionofPlatformobjects_0"
+      },
+      "post": {
+        "tags": [
+          "Platform"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/Platform_inst"
+        },
+        "responses": {
+            "201": {
+                "$ref": "#/components/responses/Platform_single"
+            },
+            "401": {
+                "description": "Authentification required.",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/authentification_required"
+                        }
+                    }
+                }
+            },
+            "409": {
+                "description": "Conflict on performing the operation",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/conflict"
+                        }
+                    }
+                }
+            }
+        },
+        "operationId": "CreatePlatform_0",
+        "parameters": []
+      }
+    },
+    "/platforms/{platform_id}": {
+      "get": {
+        "tags": [
+          "Platform"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/platform_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Platform_single"
+          },
+          "404": {"$ref": "#/components/responses/jsonapi_error_404"}
+        },
+        "description": "Retrieve Platform from platform",
+        "operationId": "RetrievePlatforminstance_0"
+      },
+      "patch": {
+        "tags": [
+          "Platform"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platform_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Platform"
+              }
+            }
+          },
+          "description": "Platform attributes",
+          "required": true
+        },
+        "responses": {
+            "200": {
+                "$ref": "#/components/responses/Platform_single"
+            },
+            "401": {
+                "description": "Authentification required.",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/authentification_required"
+                        }
+                    }
+                }
+            },
+            "404": {"$ref": "#/components/responses/jsonapi_error_404"}
+        },
+        "description": "Update Platform attributes",
+        "operationId": "UpdatePlatform_0"
+      },
+      "delete": {
+        "tags": [
+          "Platform"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platform_id"
+          }
+        ],
+        "responses": {
+            "200": {
+                "$ref": "#/components/responses/object_deleted"
+            },
+            "401": {
+                "description": "Authentification required.",
+                "content": {
+                    "application/vnd.api+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/authentification_required"
+                        }
+                    }
+                }
+            },
+            "404": {"$ref": "#/components/responses/jsonapi_error_404"}
+        },
+        "operationId": "DeletePlatformfromplatform_3"
+      }
+    },
+    "/platform-software-update-actions": {
+      "get": {
+        "tags": [
+          "Platform software update actions"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateActions_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Platform software update actions"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlatformSoftwareUpdateActions_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateActions_coll"
+          }
+        }
+      }
+    },
+    "/platform-software-update-actions/{platform_software_update_action_id}": {
+      "get": {
+        "tags": [
+          "Platform software update actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/platform_software_update_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateActions_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Platform software update actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platform_software_update_action_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformSoftwareUpdateActions"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateActions_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Platform software update actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platform_software_update_action_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/platform-software-update-action-attachments": {
+      "get": {
+        "tags": [
+          "Platform software update attachments"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateAttachments_coll"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Platform software update attachments"
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/PlatformSoftwareUpdateAttachments_inst"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateAttachments_coll"
+          }
+        }
+      }
+    },
+    "/platform-software-update-action-attachments/{platform_software_update_action_attachment_id}": {
+      "get": {
+        "tags": [
+          "Platform software update attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/platform_software_update_action_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateAttachments_coll"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Platform software update attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platform_software_update_action_attachment_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformSoftwareUpdateAttachments"
+              }
+            }
+          },
+          "description": "",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/PlatformSoftwareUpdateAttachments_coll"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Platform software update attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platform_software_update_action_attachment_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/object_deleted"
+          }
+        }
+      }
+    },
+    "/upload": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "description": "The file to upload.",
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/Upload_inst1"
+          }
+        },
+        "operationId": "UploadAttachment_0",
+        "parameters": []
+      }
+    },
+    {% for path in paths %}
+    "{{ path }}": {{ paths[path]}} {% if not loop.last %},{%endif %}
+    {% endfor %}
+  },
+  "security": [
+    {
+      "oauth2": [
+      ],
+      "ApiKeyAuth": []
+    }
+  ],
+  "servers": [{% for server in servers %}
+    {
+      "url": "{{server.url}}",
+      "description": "{{server.description}}"
+    }{% if not loop.last %},{% endif %}{% endfor %}
+  ],
+  "components": {
+    "requestBodies": {
+      "DevicePropertyCalibrations_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "device_property_calibration"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                      }
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "properties": {
+                        "device_property": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device_property"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "calibration_action": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device_calibration_action"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeviceSoftwareUpdateAttachments_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "device_software_update_action_attachment"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device_software_update_action"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "attachment": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device_attachment"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PlatformSoftwareUpdateAttachments_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "platform_software_update_action_attachment"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "platform_software_update_action"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "attachment": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "platform_attachment"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeviceSoftwareUpdateActions_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "default": "device_software_update_action"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "required": [
+                            "update_date",
+                            "software_type_name"
+                          ],
+                          "properties": {
+                            "description": {
+                              "type": "string"
+                            },
+                            "version": {
+                              "type": "string"
+                            },
+                            "software_type_name": {
+                              "type": "string"
+                            },
+                            "software_type_uri": {
+                              "type": "string",
+                              "format": "uri"
+                            },
+                            "repository_url": {
+                              "type": "string",
+                              "format": "url"
+                            },
+                            "update_date": {
+                              "type": "string",
+                              "format": "datetime"
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "required": [
+                            "device",
+                            "contact"
+                          ],
+                          "properties": {
+                            "device": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "default": "device"
+                                    },
+                                    "id": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "contact": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "default": "contact"
+                                    },
+                                    "id": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PlatformSoftwareUpdateActions_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "platform_software_update_action"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "update_date",
+                        "software_type_name"
+                      ],
+                      "properties": {
+                        "description": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        },
+                        "software_type_name": {
+                          "type": "string"
+                        },
+                        "software_type_uri": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "repository_url": {
+                          "type": "string",
+                          "format": "url"
+                        },
+                        "update_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "required": [
+                        "platform",
+                        "contact"
+                      ],
+                      "properties": {
+                        "platform": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "platform"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "contact": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "contact"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeviceCalibrationActionAttachments_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "device_calibration_action_attachment"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device_calibration_attachments"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "attachment": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device_attachment"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeviceCalibrationActions_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "device_calibration_action"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "next_calibration_date",
+                        "current_calibration_date"
+                      ],
+                      "properties": {
+                        "description": {
+                          "type": "string"
+                        },
+                        "current_calibration_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        },
+                        "next_calibration_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        },
+                        "formula": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number",
+                          "format": "float"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "required": [
+                        "device",
+                        "contact"
+                      ],
+                      "properties": {
+                        "device": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "contact": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "conatct"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GenericDeviceActionAttachment_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "default": "generic_device_action_attachment"
+                        },
+                        "attributes": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "relationships": {
+                          "type": "object",
+                          "required": [
+                            "action",
+                            "attachment"
+                          ],
+                          "properties": {
+                            "action": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "default": "generic_device_action"
+                                    },
+                                    "id": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "attachment": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "default": "device_attachment"
+                                    },
+                                    "id": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GenericPlatformAction_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "generic_platform_action"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "action_type_name",
+                        "begin_date"
+                      ],
+                      "properties": {
+                        "description": {
+                          "type": "string"
+                        },
+                        "action_type_name": {
+                          "type": "string"
+                        },
+                        "action_type_uri": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "begin_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        },
+                        "end_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "required": [
+                        "contact"
+                      ],
+                      "properties": {
+                        "contact": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "contact"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "platform": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "platform"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GenericDeviceAction_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "generic_device_action"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "action_type_name",
+                        "begin_date"
+                      ],
+                      "properties": {
+                        "description": {
+                          "type": "string"
+                        },
+                        "action_type_name": {
+                          "type": "string"
+                        },
+                        "action_type_uri": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "begin_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        },
+                        "end_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "required": [
+                        "contact"
+                      ],
+                      "properties": {
+                        "contact": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "contact"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "device": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "device"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GenericConfigurationAction_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "default": "generic_configuration_action"
+                    },
+                    "attributes": {
+                      "type": "object",
+                      "required": [
+                        "action_type_name",
+                        "begin_date"
+                      ],
+                      "properties": {
+                        "description": {
+                          "type": "string"
+                        },
+                        "action_type_name": {
+                          "type": "string"
+                        },
+                        "action_type_uri": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "begin_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        },
+                        "end_date": {
+                          "type": "string",
+                          "format": "datetime"
+                        }
+                      }
+                    },
+                    "relationships": {
+                      "type": "object",
+                      "required": [
+                        "contact"
+                      ],
+                      "properties": {
+                        "contact": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "contact"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "configuration": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "default": "configuration"
+                                },
+                                "id": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Platform_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "short_name": {
+                          "type": "string"
+                        },
+                        "long_name": {
+                          "type": "string"
+                        },
+                        "manufacturer_uri": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "manufacturer_name": {
+                          "type": "string"
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "platform_type_name": {
+                          "type": "string"
+                        },
+                        "platform_type_uri": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "status_uri": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "status_name": {
+                          "type": "string"
+                        },
+                        "website": {
+                          "type": "string",
+                          "format": "url"
+                        },
+                        "inventory_number": {
+                          "type": "string"
+                        },
+                        "serial_number": {
+                          "type": "string"
+                        },
+                        "persistent_identifier": {
+                          "type": "string"
+                        },
+                        "is_private": {
+                          "type": "boolean"
+                        },
+                        "is_internal": {
+                          "type": "boolean"
+                        },
+                        "is_public": {
+                          "type": "boolean"
+                        },
+                        "group_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "attributes": {
+                      "description": "",
+                      "short_name": "",
+                      "long_name": "",
+                      "manufacturer_uri": "",
+                      "manufacturer_name": "",
+                      "model": "",
+                      "platform_type_uri": "",
+                      "platform_type_name": "",
+                      "status_uri": "",
+                      "status_name": "",
+                      "website": "",
+                      "inventory_number": "",
+                      "serial_number": "",
+                      "persistent_identifier": null,
+                      "is_internal": true,
+                      "is_public": false,
+                      "is_private": false,
+                      "group_ids": [
+                        "1",
+                        "2"
+                      ]
+                    },
+                    "type": "platform"
+                  }
+                }
+              },
+              "description": "Platform patch"
+            }
+          }
+        }
+      },
+      "Device_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "is_private": {
+                      "type": "boolean"
+                    },
+                    "website": {
+                      "type": "string"
+                    },
+                    "is_internal": {
+                      "type": "boolean"
+                    },
+                    "device_type_name": {
+                      "type": "string"
+                    },
+                    "status_name": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "serial_number": {
+                      "type": "string"
+                    },
+                    "inventory_number": {
+                      "type": "string"
+                    },
+                    "manufacturer_name": {
+                      "type": "string"
+                    },
+                    "device_type_uri": {
+                      "type": "string"
+                    },
+                    "long_name": {
+                      "type": "string"
+                    },
+                    "persistent_identifier": {
+                      "type": "string"
+                    },
+                    "status_uri": {
+                      "type": "string"
+                    },
+                    "dual_use": {
+                      "type": "boolean"
+                    },
+                    "is_public": {
+                      "type": "boolean"
+                    },
+                    "group_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "short_name": {
+                      "type": "string"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "manufacturer_uri": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "data": {
+                  "attributes": {
+                    "description": "",
+                    "short_name": "",
+                    "long_name": "",
+                    "serial_number": "",
+                    "manufacturer_uri": "",
+                    "manufacturer_name": "",
+                    "dual_use": false,
+                    "model": "",
+                    "inventory_number": "",
+                    "persistent_identifier": "",
+                    "website": "",
+                    "device_type_uri": "",
+                    "device_type_name": "",
+                    "status_uri": "",
+                    "status_name": "",
+                    "is_public": false,
+                    "is_internal": true,
+                    "is_private": false,
+                    "group_ids": [
+                      "0",
+                      "1"
+                    ]
+                  },
+                  "type": "device"
+                }
+              },
+              "description": "Device post;"
+            }
+          }
+        }
+      },
+      "Contact_inst": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "attributes": {
+                      "type": "object",
+                      "properties": {
+                        "given_name": {
+                          "type": "string"
+                        },
+                        "family_name": {
+                          "type": "string"
+                        },
+                        "website": {
+                          "type": "string",
+                          "format": "url"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "attributes": {
+                      "given_name": "",
+                      "family_name": "",
+                      "website": "",
+                      "email": ""
+                    },
+                    "type": "Contact",
+                    "id": "0"
+                  }
+                }
+              },
+              "description": "Contact patch;Contact post;Contact delete;Contact patch;Contact post;Contact delete;"
+            }
+          }
+        }
+      },
+      {% for component in request_body_components %}
+      "{{ component }}": {{ request_body_components[component]}} {% if not loop.last %},{%endif %}
+      {% endfor %}
+    },
+    "securitySchemes": {
+      {% if token_endpoint and authorization_endpoint %}
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "{{ authorization_endpoint }}",
+            "tokenUrl": "{{ token_endpoint }}",
+            "refreshUrl": "",
+            "scopes": {
+            }
+          }
+        }
+      },
+      {% endif %}
+      "ApiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "X-APIKEY"
+      }
+    },
+    "schemas": {
+      "DevicePropertyCalibrations": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "device_property_calibration"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {}
+              },
+              "relationships": {
+                "type": "object",
+                "properties": {
+                  "device_property": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device_property"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "calibration_action": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device_calibration_action"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Device Property Calibrations Schema;"
+      },
+      "DeviceSoftwareUpdateAttachments": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "device_software_update_action_attachment"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {}
+              },
+              "relationships": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device_software_update_action"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "attachment": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device_attachment"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Device SoftwareUpdate Attachments Schema;"
+      },
+      "PlatformSoftwareUpdateAttachments": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "platform_software_update_action_attachment"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {}
+              },
+              "relationships": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "platform_software_update_action"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "attachment": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "platform_attachment"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Platform SoftwareUpdate Attachments Schema;"
+      },
+      "DeviceSoftwareUpdateActions": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "device_software_update_action"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "required": [
+                  "update_date",
+                  "software_type_name"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "software_type_name": {
+                    "type": "string"
+                  },
+                  "software_type_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "repository_url": {
+                    "type": "string",
+                    "format": "url"
+                  },
+                  "update_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  }
+                }
+              },
+              "relationships": {
+                "type": "object",
+                "required": [
+                  "device",
+                  "contact"
+                ],
+                "properties": {
+                  "device": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "contact"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Device Software Update Actions Schema;"
+      },
+      "PlatformSoftwareUpdateActions": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "platform_software_update_action"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "required": [
+                  "update_date",
+                  "software_type_name"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  },
+                  "software_type_name": {
+                    "type": "string"
+                  },
+                  "software_type_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "repository_url": {
+                    "type": "string",
+                    "format": "url"
+                  },
+                  "update_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  }
+                }
+              },
+              "relationships": {
+                "type": "object",
+                "required": [
+                  "platform",
+                  "contact"
+                ],
+                "properties": {
+                  "platform": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "platform"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "contact": {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "id"
+                    ],
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "contact"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Platform Software Update Actions Schema;"
+      },
+      "DeviceCalibrationActionAttachments": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "device_calibration_action_attachment"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {}
+              },
+              "relationships": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device_calibration_attachments"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "attachment": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device_attachment"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Device Calibration Action Attachments Schema;"
+      },
+      "DeviceCalibrationActions": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "device_calibration_action"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "required": [
+                  "current_calibration_date",
+                  "next_calibration_date"
+                ],
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "current_calibration_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  },
+                  "next_calibration_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  },
+                  "formula": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                }
+              },
+              "relationships": {
+                "type": "object",
+                "required": [
+                  "device",
+                  "contact"
+                ],
+                "properties": {
+                  "device": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "conatct"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Device Calibration Actions Schema;"
+      },
+      "GenericDeviceActionAttachment": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "generic_device_action_attachment"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {}
+              },
+              "relationships": {
+                "type": "object",
+                "required": [
+                  "action",
+                  "attachment"
+                ],
+                "properties": {
+                  "action": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "generic_device_action"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "attachment": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device_attachment"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Generic Device Action Attachment Schema;"
+      },
+      "GenericPlatformAction": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "action_type_name",
+              "begin_date"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "generic_platform_action"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "action_type_name": {
+                    "type": "string"
+                  },
+                  "action_type_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "begin_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  }
+                }
+              },
+              "relationships": {
+                "type": "object",
+                "required": [
+                  "contact"
+                ],
+                "properties": {
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "contact"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "platform": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "platform"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Generic Platform Action Schema;"
+      },
+      "GenericDeviceAction": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "action_type_name",
+              "begin_date"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "generic_device_action"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "action_type_name": {
+                    "type": "string"
+                  },
+                  "action_type_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "begin_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  }
+                }
+              },
+              "relationships": {
+                "type": "object",
+                "required": [
+                  "contact"
+                ],
+                "properties": {
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "contact"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "device": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "device"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Generic Device ActionSchema;"
+      },
+      "GenericConfigurationAction": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "begin_date"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "default": "generic_configuration_action"
+              },
+              "id": {
+                "type": "string"
+              },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "type": "string"
+                  },
+                  "action_type_name": {
+                    "type": "string"
+                  },
+                  "action_type_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "begin_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "datetime"
+                  }
+                }
+              },
+              "relationships": {
+                "type": "object",
+                "required": [
+                  "contact",
+                  "configuration"
+                ],
+                "properties": {
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "contact"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "configuration": {
+                    "type": "object",
+                    "properties": {
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "default": "configuration"
+                          },
+                          "id": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Generic Configuration Action Schema;"
+      },
+      "Device": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "is_private": {
+                    "type": "boolean"
+                  },
+                  "website": {
+                    "type": "string"
+                  },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
+                  "device_type_name": {
+                    "type": "string"
+                  },
+                  "status_name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "serial_number": {
+                    "type": "string"
+                  },
+                  "inventory_number": {
+                    "type": "string"
+                  },
+                  "manufacturer_name": {
+                    "type": "string"
+                  },
+                  "device_type_uri": {
+                    "type": "string"
+                  },
+                  "long_name": {
+                    "type": "string"
+                  },
+                  "persistent_identifier": {
+                    "type": "string"
+                  },
+                  "status_uri": {
+                    "type": "string"
+                  },
+                  "dual_use": {
+                    "type": "boolean"
+                  },
+                  "is_public": {
+                    "type": "boolean"
+                  },
+                  "group_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "short_name": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "manufacturer_uri": {
+                    "type": "string"
+                  }
+                }
+              },
+              "type": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "id": "0",
+              "attributes": {
+                "description": "",
+                "short_name": "",
+                "long_name": "",
+                "serial_number": "",
+                "manufacturer_uri": "",
+                "manufacturer_name": "",
+                "dual_use": false,
+                "model": "",
+                "inventory_number": "",
+                "persistent_identifier": "",
+                "website": "",
+                "device_type_uri": "",
+                "device_type_name": "",
+                "status_uri": "",
+                "status_name": "",
+                "is_public": false,
+                "is_internal": true,
+                "is_private": false,
+                "group_ids": [
+                  "0",
+                  "1"
+                ]
+              },
+              "type": "device"
+            }
+          }
+        }
+      },
+      "Platform": {
+        "properties": {
+          "data": {
+            "properties": {
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "short_name": {
+                    "type": "string"
+                  },
+                  "long_name": {
+                    "type": "string"
+                  },
+                  "manufacturer_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "manufacturer_name": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "platform_type_name": {
+                    "type": "string"
+                  },
+                  "platform_type_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "status_uri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "status_name": {
+                    "type": "string"
+                  },
+                  "website": {
+                    "type": "string",
+                    "format": "url"
+                  },
+                  "inventory_number": {
+                    "type": "string"
+                  },
+                  "serial_number": {
+                    "type": "string"
+                  },
+                  "persistent_identifier": {
+                    "type": "string"
+                  },
+                  "is_private": {
+                    "type": "boolean"
+                  },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
+                  "is_public": {
+                    "type": "boolean"
+                  },
+                  "group_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "archived": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "type": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "attributes": {
+                "description": "",
+                "short_name": "",
+                "long_name": "",
+                "manufacturer_uri": "",
+                "manufacturer_name": "",
+                "model": "",
+                "platform_type_uri": "",
+                "platform_type_name": "",
+                "status_uri": "",
+                "status_name": "",
+                "website": "",
+                "inventory_number": "",
+                "serial_number": "",
+                "persistent_identifier": null,
+                "is_internal": true,
+                "is_public": false,
+                "is_private": false,
+                "archived": false,
+                "group_ids": [
+                  "1",
+                  "2"
+                ]
+              },
+              "type": "platform",
+              "id": "0"
+            },
+            "type": "object"
+          }
+        },
+        "description": "Platform Schema;"
+      },
+      {% for schema in schema_components %}
+      "{{ schema }}": {{ schema_components[schema]}} {% if not loop.last %},{%endif %}
+      {% endfor %}
+    },
+    "responses": {
+      "Upload_inst1": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "example": {
+                    "message": "object stored in sms-attachments",
+                    "url": ""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Upload successful."
+      },
+      "mountingActions_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": [
+                    {
+                      "action": {
+                        "data": {
+                          "type": "platform_mount_action",
+                          "relationships": {
+                            "parent_platform": {
+                              "data": null
+                            },
+                            "configuration": {
+                              "links": {
+                                "related": "/backend/api/v1/configurations/1"
+                              },
+                              "data": {
+                                "type": "configuration",
+                                "id": "1"
+                              }
+                            },
+                            "platform": {
+                              "links": {
+                                "related": "/backend/api/v1/platforms/1"
+                              },
+                              "data": {
+                                "type": "platform",
+                                "id": "1"
+                              }
+                            },
+                            "begin_contact": {
+                              "links": {
+                                "related": "/backend/api/v1/contacts/1"
+                              },
+                              "data": {
+                                "type": "contact",
+                                "id": "1"
+                              }
+                            },
+                            "created_by": {
+                              "links": {
+                                "related": "/backend/api/v1/users/1"
+                              },
+                              "data": {
+                                "type": "user",
+                                "id": "1"
+                              }
+                            },
+                            "updated_by": {
+                              "links": {
+                                "related": "/backend/api/v1/users/1"
+                              },
+                              "data": {
+                                "type": "user",
+                                "id": "1"
+                              }
+                            },
+                            "end_contact": {
+                              "data": null
+                            }
+                          },
+                          "attributes": {
+                            "created_at": "2022-07-14T10:50:53",
+                            "end_date": null,
+                            "begin_description": null,
+                            "begin_date": "2022-07-14T10:51:04",
+                            "offset_x": null,
+                            "offset_y": null,
+                            "end_description": null,
+                            "updated_at": "2022-07-14T10:50:55",
+                            "offset_z": null
+                          },
+                          "id": "1",
+                          "links": {
+                            "self": "/backend/api/v1/platform-mount-actions/1"
+                          }
+                        },
+                        "links": {
+                          "self": "/backend/api/v1/platform-mount-actions/1"
+                        }
+                      },
+                      "entity": {
+                        "data": {
+                          "type": "platform",
+                          "attributes": {
+                            "description": "",
+                            "inventory_number": "",
+                            "status_name": "In Use",
+                            "model": "",
+                            "short_name": "TIP1",
+                            "website": "",
+                            "created_at": "2022-07-14T08:37:59.375554",
+                            "is_internal": true,
+                            "persistent_identifier": null,
+                            "updated_at": null,
+                            "manufacturer_name": "Agilent Technologies",
+                            "is_private": false,
+                            "platform_type_uri": "https://localhost.localdomain/cv/api/v1/platformtypes/2/",
+                            "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/2/",
+                            "is_public": false,
+                            "archived": false,
+                            "long_name": "",
+                            "serial_number": "",
+                            "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/23/",
+                            "group_ids": [
+                              "dpvm-9"
+                            ],
+                            "platform_type_name": "Drone"
+                          },
+                          "relationships": {
+                            "updated_by": {
+                              "data": null
+                            },
+                            "platform_attachments": {
+                              "links": {
+                                "related": "/backend/api/v1/platform-attachments?id=1"
+                              },
+                              "data": []
+                            },
+                            "contacts": {
+                              "links": {
+                                "related": "/backend/api/v1/contacts?id=1"
+                              },
+                              "data": [
+                                {
+                                  "type": "contact",
+                                  "id": "1"
+                                }
+                              ]
+                            },
+                            "generic_platform_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/generic-platform-actions?id=1"
+                              },
+                              "data": [
+                                {
+                                  "type": "generic_platform_action",
+                                  "id": "1"
+                                },
+                                {
+                                  "type": "generic_platform_action",
+                                  "id": "2"
+                                }
+                              ]
+                            },
+                            "platform_mount_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/platform-mount-actions?id=1"
+                              },
+                              "data": [
+                                {
+                                  "type": "platform_mount_actions",
+                                  "id": "1"
+                                }
+                              ]
+                            },
+                            "outer_platform_mount_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/platform-mount-actions?id=1"
+                              },
+                              "data": []
+                            },
+                            "outer_device_mount_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/device-mount-actions?id=1"
+                              },
+                              "data": [
+                                {
+                                  "type": "device_mount_action",
+                                  "id": "1"
+                                }
+                              ]
+                            },
+                            "platform_software_update_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/platform-software-update-actions?id=1"
+                              },
+                              "data": []
+                            },
+                            "created_by": {
+                              "links": {
+                                "related": "/backend/api/v1/users/1"
+                              },
+                              "data": {
+                                "type": "user",
+                                "id": "1"
+                              }
+                            }
+                          },
+                          "id": "1",
+                          "links": {
+                            "self": "/backend/api/v1/platforms/1"
+                          }
+                        },
+                        "links": {
+                          "self": "/backend/api/v1/platforms/1"
+                        }
+                      },
+                      "children": [
+                        {
+                          "action": {
+                            "data": {
+                              "type": "device_mount_action",
+                              "relationships": {
+                                "parent_platform": {
+                                  "links": {
+                                    "related": "/backend/api/v1/platforms/1"
+                                  },
+                                  "data": {
+                                    "type": "platform",
+                                    "id": "1"
+                                  }
+                                },
+                                "configuration": {
+                                  "links": {
+                                    "related": "/backend/api/v1/configurations/1"
+                                  },
+                                  "data": {
+                                    "type": "configuration",
+                                    "id": "1"
+                                  }
+                                },
+                                "device": {
+                                  "links": {
+                                    "related": "/backend/api/v1/devices/1"
+                                  },
+                                  "data": {
+                                    "type": "device",
+                                    "id": "1"
+                                  }
+                                },
+                                "begin_contact": {
+                                  "links": {
+                                    "related": "/backend/api/v1/contacts/1"
+                                  },
+                                  "data": {
+                                    "type": "contact",
+                                    "id": "1"
+                                  }
+                                },
+                                "updated_by": {
+                                  "links": {
+                                    "related": "/backend/api/v1/users/1"
+                                  },
+                                  "data": {
+                                    "type": "user",
+                                    "id": "1"
+                                  }
+                                },
+                                "created_by": {
+                                  "links": {
+                                    "related": "/backend/api/v1/users/1"
+                                  },
+                                  "data": {
+                                    "type": "user",
+                                    "id": "1"
+                                  }
+                                },
+                                "end_contact": {
+                                  "data": null
+                                }
+                              },
+                              "attributes": {
+                                "created_at": "2022-07-14T10:49:36",
+                                "end_date": null,
+                                "begin_description": null,
+                                "begin_date": "2022-07-14T11:49:50",
+                                "offset_x": null,
+                                "offset_y": null,
+                                "end_description": null,
+                                "updated_at": "2022-07-14T10:49:44",
+                                "offset_z": null
+                              },
+                              "id": "1",
+                              "links": {
+                                "self": "/backend/api/v1/device-mount-actions/1"
+                              }
+                            },
+                            "links": {
+                              "self": "/backend/api/v1/device-mount-actions/1"
+                            }
+                          },
+                          "entity": {
+                            "data": {
+                              "type": "device",
+                              "attributes": {
+                                "description": "This is just a test device",
+                                "inventory_number": "1236540",
+                                "status_name": "In Warehouse",
+                                "model": "air122",
+                                "short_name": "TID1",
+                                "website": "http://test-device.de",
+                                "created_at": "2022-07-14T08:06:48.510577",
+                                "is_internal": true,
+                                "dual_use": false,
+                                "persistent_identifier": null,
+                                "device_type_name": "Air quality sensor",
+                                "updated_at": null,
+                                "manufacturer_name": "AquaCheck",
+                                "is_private": false,
+                                "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
+                                "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
+                                "is_public": false,
+                                "archived": false,
+                                "long_name": "",
+                                "serial_number": "55se321de",
+                                "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
+                                "group_ids": [
+                                  "dpvm-9"
+                                ]
+                              },
+                              "relationships": {
+                                "device_properties": {
+                                  "links": {
+                                    "related": "/backend/api/v1/device-properties?id=1"
+                                  },
+                                  "data": [
+                                    {
+                                      "type": "device_property",
+                                      "id": "1"
+                                    },
+                                    {
+                                      "type": "device_property",
+                                      "id": "2"
+                                    }
+                                  ]
+                                },
+                                "updated_by": {
+                                  "data": null
+                                },
+                                "contacts": {
+                                  "links": {
+                                    "related": "/backend/api/v1/contacts?id=1"
+                                  },
+                                  "data": [
+                                    {
+                                      "type": "contact",
+                                      "id": "1"
+                                    }
+                                  ]
+                                },
+                                "device_software_update_actions": {
+                                  "links": {
+                                    "related": "/backend/api/v1/device-software-update-actions?id=1"
+                                  },
+                                  "data": []
+                                },
+                                "device_calibration_actions": {
+                                  "links": {
+                                    "related": "/backend/api/v1/device-calibration-actions?id=1"
+                                  },
+                                  "data": []
+                                },
+                                "customfields": {
+                                  "links": {
+                                    "related": "/backend/api/v1/customfields?id=1"
+                                  },
+                                  "data": [
+                                    {
+                                      "type": "customfield",
+                                      "id": "1"
+                                    }
+                                  ]
+                                },
+                                "device_mount_actions": {
+                                  "links": {
+                                    "related": "/backend/api/v1/device-mount-actions?id=1"
+                                  },
+                                  "data": [
+                                    {
+                                      "type": "device_mount_action",
+                                      "id": "1"
+                                    }
+                                  ]
+                                },
+                                "generic_device_actions": {
+                                  "links": {
+                                    "related": "/backend/api/v1/generic-device-actions?id=1"
+                                  },
+                                  "data": []
+                                },
+                                "created_by": {
+                                  "links": {
+                                    "related": "/backend/api/v1/users/1"
+                                  },
+                                  "data": {
+                                    "type": "user",
+                                    "id": "1"
+                                  }
+                                },
+                                "device_attachments": {
+                                  "links": {
+                                    "related": "/backend/api/v1/device-attachments?id=1"
+                                  },
+                                  "data": [
+                                    {
+                                      "type": "device_attachment",
+                                      "id": "1"
+                                    }
+                                  ]
+                                }
+                              },
+                              "id": "1",
+                              "links": {
+                                "self": "/backend/api/v1/devices/1"
+                              }
+                            },
+                            "links": {
+                              "self": "/backend/api/v1/devices/1"
+                            }
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "action": {
+                        "data": {
+                          "type": "device_mount_action",
+                          "relationships": {
+                            "parent_platform": {
+                              "data": null
+                            },
+                            "configuration": {
+                              "links": {
+                                "related": "/backend/api/v1/configurations/1"
+                              },
+                              "data": {
+                                "type": "configuration",
+                                "id": "1"
+                              }
+                            },
+                            "device": {
+                              "links": {
+                                "related": "/backend/api/v1/devices/2"
+                              },
+                              "data": {
+                                "type": "device",
+                                "id": "2"
+                              }
+                            },
+                            "begin_contact": {
+                              "links": {
+                                "related": "/backend/api/v1/contacts/1"
+                              },
+                              "data": {
+                                "type": "contact",
+                                "id": "1"
+                              }
+                            },
+                            "updated_by": {
+                              "links": {
+                                "related": "/backend/api/v1/users/1"
+                              },
+                              "data": {
+                                "type": "user",
+                                "id": "1"
+                              }
+                            },
+                            "created_by": {
+                              "links": {
+                                "related": "/backend/api/v1/users/1"
+                              },
+                              "data": {
+                                "type": "user",
+                                "id": "1"
+                              }
+                            },
+                            "end_contact": {
+                              "data": null
+                            }
+                          },
+                          "attributes": {
+                            "created_at": "2022-07-14T10:49:36",
+                            "end_date": null,
+                            "begin_description": null,
+                            "begin_date": "2022-07-14T11:49:50",
+                            "offset_x": null,
+                            "offset_y": null,
+                            "end_description": null,
+                            "updated_at": "2022-07-14T10:49:44",
+                            "offset_z": null
+                          },
+                          "id": "2",
+                          "links": {
+                            "self": "/backend/api/v1/device-mount-actions/2"
+                          }
+                        },
+                        "links": {
+                          "self": "/backend/api/v1/device-mount-actions/2"
+                        }
+                      },
+                      "entity": {
+                        "data": {
+                          "type": "device",
+                          "attributes": {
+                            "description": "This is just a test device",
+                            "inventory_number": "",
+                            "status_name": "In Warehouse",
+                            "model": "air122",
+                            "short_name": "TID2",
+                            "website": "http://test-device.de",
+                            "created_at": "2022-07-14T11:12:20.679483",
+                            "is_internal": true,
+                            "dual_use": false,
+                            "persistent_identifier": null,
+                            "device_type_name": "Air quality sensor",
+                            "updated_at": null,
+                            "manufacturer_name": "AquaCheck",
+                            "is_private": false,
+                            "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
+                            "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
+                            "is_public": false,
+                            "archived": false,
+                            "long_name": "",
+                            "serial_number": "",
+                            "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
+                            "group_ids": [
+                              "dpvm-1"
+                            ]
+                          },
+                          "relationships": {
+                            "device_properties": {
+                              "links": {
+                                "related": "/backend/api/v1/device-properties?id=2"
+                              },
+                              "data": [
+                                {
+                                  "type": "device_property",
+                                  "id": "3"
+                                },
+                                {
+                                  "type": "device_property",
+                                  "id": "4"
+                                }
+                              ]
+                            },
+                            "updated_by": {
+                              "data": null
+                            },
+                            "contacts": {
+                              "links": {
+                                "related": "/backend/api/v1/contacts?id=2"
+                              },
+                              "data": []
+                            },
+                            "device_software_update_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/device-software-update-actions?id=2"
+                              },
+                              "data": []
+                            },
+                            "device_calibration_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/device-calibration-actions?id=2"
+                              },
+                              "data": []
+                            },
+                            "customfields": {
+                              "links": {
+                                "related": "/backend/api/v1/customfields?id=2"
+                              },
+                              "data": []
+                            },
+                            "device_mount_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/device-mount-actions?id=2"
+                              },
+                              "data": [
+                                {
+                                  "type": "device_mount_action",
+                                  "id": "2"
+                                }
+                              ]
+                            },
+                            "generic_device_actions": {
+                              "links": {
+                                "related": "/backend/api/v1/generic-device-actions?id=2"
+                              },
+                              "data": []
+                            },
+                            "created_by": {
+                              "links": {
+                                "related": "/backend/api/v1/users/1"
+                              },
+                              "data": {
+                                "type": "user",
+                                "id": "1"
+                              }
+                            },
+                            "device_attachments": {
+                              "links": {
+                                "related": "/backend/api/v1/device-attachments?id=2"
+                              },
+                              "data": []
+                            }
+                          },
+                          "id": "2",
+                          "links": {
+                            "self": "/backend/api/v1/devices/2"
+                          }
+                        },
+                        "links": {
+                          "self": "/backend/api/v1/devices/2"
+                        }
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "description": ""
+      },
+      "mountingActionTimepoints_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": [
+                    {
+                      "timepoint": "2022-07-14T10:51:04",
+                      "type": "platform_mount",
+                      "attributes": {
+                        "description": "",
+                        "inventory_number": "",
+                        "status_name": "In Use",
+                        "model": "",
+                        "short_name": "TIP1",
+                        "website": "",
+                        "created_at": "2022-07-14T08:37:59.375554",
+                        "is_internal": true,
+                        "persistent_identifier": null,
+                        "updated_at": null,
+                        "manufacturer_name": "Agilent Technologies",
+                        "is_private": false,
+                        "platform_type_uri": "https://localhost.localdomain/cv/api/v1/platformtypes/2/",
+                        "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/2/",
+                        "is_public": false,
+                        "archived": false,
+                        "long_name": "",
+                        "serial_number": "",
+                        "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/23/",
+                        "group_ids": [
+                          "dpvm-9"
+                        ],
+                        "platform_type_name": "Drone"
+                      }
+                    },
+                    {
+                      "timepoint": "2022-07-14T11:49:50",
+                      "type": "device_mount",
+                      "attributes": {
+                        "description": "This is just a test device",
+                        "inventory_number": "1236540",
+                        "status_name": "In Warehouse",
+                        "model": "air122",
+                        "short_name": "TID1",
+                        "website": "http://test-device.de",
+                        "created_at": "2022-07-14T08:06:48.510577",
+                        "is_internal": true,
+                        "dual_use": false,
+                        "persistent_identifier": null,
+                        "device_type_name": "Air quality sensor",
+                        "updated_at": null,
+                        "manufacturer_name": "AquaCheck",
+                        "is_private": false,
+                        "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
+                        "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
+                        "is_public": false,
+                        "archived": false,
+                        "long_name": "",
+                        "serial_number": "55se321de",
+                        "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
+                        "group_ids": [
+                          "dpvm-9"
+                        ]
+                      }
+                    },
+                    {
+                      "timepoint": "2022-07-14T11:49:50",
+                      "type": "device_mount",
+                      "attributes": {
+                        "description": "This is just a test device",
+                        "inventory_number": "",
+                        "status_name": "In Warehouse",
+                        "model": "air122",
+                        "short_name": "TID2",
+                        "website": "http://test-device.de",
+                        "created_at": "2022-07-14T11:12:20.679483",
+                        "is_internal": true,
+                        "dual_use": false,
+                        "persistent_identifier": null,
+                        "device_type_name": "Air quality sensor",
+                        "updated_at": null,
+                        "manufacturer_name": "AquaCheck",
+                        "is_private": false,
+                        "status_uri": "https://localhost.localdomain/cv/api/v1/equipmentstatus/1/",
+                        "device_type_uri": "https://localhost.localdomain/cv/api/v1/equipmenttypes/51/",
+                        "is_public": false,
+                        "archived": false,
+                        "long_name": "",
+                        "serial_number": "",
+                        "manufacturer_uri": "https://localhost.localdomain/cv/api/v1/manufacturers/25/",
+                        "group_ids": [
+                          "dpvm-1"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "description": ""
+      },
+      "DevicePropertyCalibrations_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "attributes": {},
+                    "relationships": {
+                      "device_property": {
+                        "type": "device_property",
+                        "id": "00"
+                      },
+                      "calibration_action": {
+                        "type": "calibration_action",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "DevicePropertyCalibrations"
+      },
+      "DeviceSoftwareUpdateAttachments_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "attributes": {},
+                    "relationships": {
+                      "action": {
+                        "type": "device_software_update_action",
+                        "id": "00"
+                      },
+                      "attachment": {
+                        "type": "device_attachment",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "DeviceSoftwareUpdateAttachments"
+      },
+      "PlatformSoftwareUpdateAttachments_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "attributes": {},
+                    "relationships": {
+                      "action": {
+                        "type": "platform_software_update_action",
+                        "id": "00"
+                      },
+                      "attachment": {
+                        "type": "platform_attachment",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "PlatformSoftwareUpdateAttachments"
+      },
+      "DeviceSoftwareUpdateActions_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "attributes": {
+                      "description": "",
+                      "version": "",
+                      "software_type_name": "",
+                      "software_type_uri": "",
+                      "repository_url": "",
+                      "update_date": ""
+                    },
+                    "relationships": {
+                      "device": {
+                        "type": "device",
+                        "id": "00"
+                      },
+                      "contact": {
+                        "type": "contact",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "DeviceSoftwareUpdateActions"
+      },
+      "PlatformSoftwareUpdateActions_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "type": "platform_software_update_action",
+                    "attributes": {
+                      "description": "",
+                      "version": "",
+                      "software_type_name": "",
+                      "software_type_uri": "",
+                      "repository_url": "",
+                      "update_date": ""
+                    },
+                    "relationships": {
+                      "platform": {
+                        "type": "platform",
+                        "id": "00"
+                      },
+                      "contact": {
+                        "type": "contact",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "PlatformSoftwareUpdateActions_coll"
+      },
+      "DeviceCalibrationActionAttachments_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "type": "device_calibration_action_attachment",
+                    "attributes": {},
+                    "relationships": {
+                      "action": {
+                        "type": "device_calibration_attachments",
+                        "id": "00"
+                      },
+                      "attachment": {
+                        "type": "device_attachment",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "DeviceCalibrationActionAttachments"
+      },
+      "DeviceCalibrationActions_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "type": "device_calibration_action",
+                    "attributes": {
+                      "description": "",
+                      "current_calibration_date": "",
+                      "next_calibration_date": "",
+                      "formula": "",
+                      "value": ""
+                    },
+                    "relationships": {
+                      "device": {
+                        "type": "device",
+                        "id": "00"
+                      },
+                      "contact": {
+                        "type": "contact",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "DeviceCalibrationActions"
+      },
+      "GenericDeviceActionAttachment_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "type": "generic_device_action_attachment",
+                    "attributes": {},
+                    "relationships": {
+                      "action": {
+                        "type": "generic_device_action",
+                        "id": "00"
+                      },
+                      "attachment": {
+                        "type": "device_attachment",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": ""
+      },
+      "GenericPlatformAction_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "type": "generic_platform_action",
+                    "attributes": {
+                      "description": "",
+                      "begin_date": "",
+                      "end_date": "",
+                      "action_type_name": "",
+                      "action_type_uri": ""
+                    },
+                    "relationships": {
+                      "platform": {
+                        "type": "platform",
+                        "id": "00"
+                      },
+                      "contact": {
+                        "type": "contact",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": ""
+      },
+      "GenericDeviceAction_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "type": "generic_device_action",
+                    "attributes": {
+                      "description": "",
+                      "begin_date": "",
+                      "end_date": "",
+                      "action_type_name": "",
+                      "action_type_uri": ""
+                    },
+                    "relationships": {
+                      "device": {
+                        "type": "device",
+                        "id": "00"
+                      },
+                      "contact": {
+                        "type": "contact",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": ""
+      },
+      "GenericConfigurationAction_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "id": "0",
+                    "type": "generic_configuration_action",
+                    "attributes": {
+                      "description": "",
+                      "begin_date": "",
+                      "end_date": "",
+                      "action_type_name": "",
+                      "action_type_uri": ""
+                    },
+                    "relationships": {
+                      "configuration": {
+                        "type": "configuration",
+                        "id": "00"
+                      },
+                      "contact": {
+                        "type": "contact",
+                        "id": "000"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": ""
+      },
+      "object_deleted": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meta": {
+                  "example": {
+                    "message": "Object successfully deleted"
+                  },
+                  "type": "string"
+                },
+                "jsonapi": {
+                  "example": {
+                    "version": "1.0"
+                  },
+                  "type": "object"
+                }
+              },
+              "description": "delete an object;"
+            }
+          }
+        },
+        "description": "Delete an Object"
+      },
+      "jsonapi_error_406": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "errors": {
+                  "example": {
+                    "title": "Not Acceptable",
+                    "detail": "",
+                    "code": "406"
+                  },
+                  "type": "string"
+                }
+              },
+              "description": ""
+            }
+          }
+        },
+        "description": "406 Error"
+      },
+      "jsonapi_error_403": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "errors": {
+                  "example": {
+                    "title": "Request forbidden -- authorization will not help",
+                    "detail": "",
+                    "code": "403"
+                  },
+                  "type": "string"
+                }
+              },
+              "description": ""
+            }
+          }
+        },
+        "description": "403 Error"
+      },
+      "jsonapi_error_404": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "errors": {
+                  "example": {
+                    "title": "Nothing matches the given URI",
+                    "detail": "",
+                    "code": "404"
+                  },
+                  "type": "string"
+                }
+              },
+              "description": ""
+            }
+          }
+        },
+        "description": ""
+      },
+      "jsonapi_error_405": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "errors": {
+                  "example": {
+                    "title": "Specified method is invalid for this resource",
+                    "detail": "",
+                    "code": "405"
+                  },
+                  "type": "string"
+                }
+              },
+              "description": ""
+            }
+          }
+        },
+        "description": ""
+      },
+      "jsonapi_error_400": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "errors": {
+                  "example": {
+                    "title": "Bad request syntax or unsupported method",
+                    "detail": "",
+                    "code": "400"
+                  },
+                  "type": "string"
+                }
+              },
+              "description": ""
+            }
+          }
+        },
+        "description": ""
+      },
+      "jsonapi_error_500": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "errors": {
+                  "example": {
+                    "title": "Server got itself in trouble",
+                    "detail": "",
+                    "code": "500"
+                  },
+                  "type": "string"
+                }
+              },
+              "description": ""
+            }
+          }
+        },
+        "description": ""
+      },
+      "jsonapi_error_409": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "errors": {
+                  "example": {
+                    "title": "Request conflict",
+                    "detail": "",
+                    "code": "409"
+                  },
+                  "type": "string"
+                }
+              },
+              "description": ""
+            }
+          }
+        },
+        "description": ""
+      },
+      "Device_coll": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "attributes": {
+                      "created_at": "2022-08-31T12:00:00",
+                      "updated_at": "2022-08-31T12:00:00",
+                      "description": "",
+                      "short_name": "",
+                      "long_name": "",
+                      "serial_number": "",
+                      "manufacturer_uri": "",
+                      "manufacturer_name": "",
+                      "dual_use": false,
+                      "model": "",
+                      "inventory_number": "",
+                      "persistent_identifier": null,
+                      "website": "",
+                      "device_type_uri": "",
+                      "device_type_name": "",
+                      "status_uri": "",
+                      "status_name": "",
+                      "group_ids": [
+                        "1",
+                        "2"
+                      ],
+                      "is_public": false,
+                      "is_internal": true,
+                      "is_private": false,
+                      "archived": false
+                    },
+                    "type": "device",
+                    "id": "0",
+                    "relationships": {
+                      "customfields": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "device_properties": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "events": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "device_attachments": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "device_calibration_actions": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "contact_role": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "generic_device_actions": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "device_mount_actions": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "device_software_update_actions": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      },
+                      "device_unmount_actions": {
+                        "data": [],
+                        "links": {
+                          "self": null
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "description": "Device get;"
+            }
+          }
+        },
+        "description": "Device"
+      },
+      "Platform_coll": {
+          "content": {
+              "application/vnd.api+json": {
+                  "schema": {
+                      "properties": {
+                          "data": {
+                              "type": "array",
+                              "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "attributes": {
+                                        "type": "object"
+                                    },
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "relationships": {
+                                        "type": "object"
+                                    }
+                                  }
+                              },
+                              "example": [{
+                                  "attributes": {
+                                      "created_at": "2022-08-31T12:00:00",
+                                      "updated_at": "2022-08-31T12:00:00",
+                                      "description": "",
+                                      "short_name": "",
+                                      "long_name": "",
+                                      "manufacturer_uri": "",
+                                      "manufacturer_name": "",
+                                      "model": "",
+                                      "platform_type_uri": "",
+                                      "platform_type_name": "",
+                                      "status_uri": "",
+                                      "status_name": "",
+                                      "website": "",
+                                      "inventory_number": "",
+                                      "serial_number": "",
+                                      "persistent_identifier": "",
+                                      "group_ids": [
+                                          "1",
+                                          "2"
+                                      ],
+                                      "is_public": false,
+                                      "is_internal": true,
+                                      "is_private": false,
+                                      "archived": false
+                                  },
+                                  "type": "platform",
+                                  "id": "0",
+                                  "relationships": {
+                                      "created_by": {
+                                          "links": {
+                                              "related": null
+                                          },
+                                          "data": {
+                                              "type": "user",
+                                              "id": "0"
+                                          }
+                                      },
+                                      "platform_attachments": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "generic_platform_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "platform_mount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "outer_platform_mount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "outer_device_mount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "platform_software_update_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "platform_unmount_actions": {
+                                          "data": [],
+                                          "links": {
+                                              "related": null
+                                          }
+                                      },
+                                      "updated_by": {
+                                          "links": {
+                                              "related": null
+                                          },
+                                          "data": {
+                                              "type": "user",
+                                              "id": "0"
+                                          }
+                                      }
+                                  }
+                              }]
+                          }
+                      },
+                      "description": "Platform get;"
+                  }
+              }
+          },
+          "description": "Platform"
+      },
+      "Platform_single": {
+        "content": {
+          "application/vnd.api+json": {
+            "schema": {
+              "properties": {
+                "data": {
+                  "example": {
+                    "attributes": {
+                      "created_at": "2022-08-31T12:00:00",
+                      "updated_at": "2022-08-31T12:00:00",
+                      "description": "",
+                      "short_name": "",
+                      "long_name": "",
+                      "manufacturer_uri": "",
+                      "manufacturer_name": "",
+                      "model": "",
+                      "platform_type_uri": "",
+                      "platform_type_name": "",
+                      "status_uri": "",
+                      "status_name": "",
+                      "website": "",
+                      "inventory_number": "",
+                      "serial_number": "",
+                      "persistent_identifier": "",
+                      "group_ids": [
+                        "1",
+                        "2"
+                      ],
+                      "is_public": false,
+                      "is_internal": true,
+                      "is_private": false,
+                      "archived": false
+                    },
+                    "type": "platform",
+                    "id": "0",
+                    "relationships": {
+                      "created_by": {
+                        "links": {
+                          "related": null
+                        },
+                        "data": {
+                          "type": "user",
+                          "id": "0"
+                        }
+                      },
+                      "platform_attachments": {
+                        "data": [],
+                        "links": {
+                          "related": null
+                        }
+                      },
+                      "generic_platform_actions": {
+                        "data": [],
+                        "links": {
+                          "related": null
+                        }
+                      },
+                      "platform_mount_actions": {
+                        "data": [],
+                        "links": {
+                          "related": null
+                        }
+                      },
+                      "outer_platform_mount_actions": {
+                        "data": [],
+                        "links": {
+                          "related": null
+                        }
+                      },
+                      "outer_device_mount_actions": {
+                        "data": [],
+                        "links": {
+                          "related": null
+                        }
+                      },
+                      "platform_software_update_actions": {
+                        "data": [],
+                        "links": {
+                          "related": null
+                        }
+                      },
+                      "platform_unmount_actions": {
+                        "data": [],
+                        "links": {
+                          "related": null
+                        }
+                      },
+                      "updated_by": {
+                        "links": {
+                          "related": null
+                        },
+                        "data": {
+                          "type": "user",
+                          "id": "0"
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "description": "Platform get;"
+            }
+          }
+        },
+        "description": "Platform"
+      },
+      {% for component in response_components %}
+      "{{ component }}": {{ response_components[component]}} {% if not loop.last %},{%endif %}
+      {% endfor %}
+    },
+    "parameters": {
+      "from": {
+        "name": "from",
+        "in": "query",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "string",
+          "format": "datetime",
+          "default": ""
+        }
+      },
+      "to": {
+        "name": "to",
+        "in": "query",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "string",
+          "format": "datetime",
+          "default": ""
+        }
+      },
+      "ids": {
+        "name": "ids",
+        "in": "query",
+        "required": true,
+        "description": "",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "default": []
+        }
+      },
+      "timepoint": {
+        "name": "timepoint",
+        "in": "query",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "datetime"
+        }
+      },
+      "include": {
+        "name": "include",
+        "in": "query",
+        "required": false,
+        "description": "Relationships to include.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "page_size": {
+        "name": "page[size]",
+        "in": "query",
+        "required": false,
+        "description": "Max number of items",
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "default": 30
+        }
+      },
+      "created_at": {
+        "name": "filter[created_at]",
+        "in": "query",
+        "required": false,
+        "description": "created_at attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "updated_at": {
+        "name": "filter[updated_at]",
+        "in": "query",
+        "required": false,
+        "description": "updated_at attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "filter": {
+        "name": "filter",
+        "in": "query",
+        "required": false,
+        "description": "Custom filter",
+        "schema": {
+          "type": "string",
+          "format": "string"
+        }
+      },
+      "sort": {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "description": "Sort order",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "id": {
+        "name": "filter[id]",
+        "in": "query",
+        "required": false,
+        "description": "id attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "updated_by_id": {
+        "name": "filter[updated_by_id]",
+        "in": "query",
+        "required": false,
+        "description": "updated_by_id attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "created_by_id": {
+        "name": "filter[created_by_id]",
+        "in": "query",
+        "required": false,
+        "description": "created_by_id attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "status": {
+        "name": "filter[status]",
+        "in": "query",
+        "required": false,
+        "description": "status attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "start_date": {
+        "name": "filter[start_date]",
+        "in": "query",
+        "required": false,
+        "description": "start_date attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "end_date": {
+        "name": "filter[end_date]",
+        "in": "query",
+        "required": false,
+        "description": "end_date attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "label": {
+        "name": "filter[label]",
+        "in": "query",
+        "required": false,
+        "description": "label attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "url": {
+        "name": "filter[url]",
+        "in": "query",
+        "required": false,
+        "description": "url attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "description": {
+        "name": "filter[description]",
+        "in": "query",
+        "required": false,
+        "description": "description attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "short_name": {
+        "name": "filter[short_name]",
+        "in": "query",
+        "required": false,
+        "description": "short_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "long_name": {
+        "name": "filter[long_name]",
+        "in": "query",
+        "required": false,
+        "description": "long_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "serial_number": {
+        "name": "filter[serial_number]",
+        "in": "query",
+        "required": false,
+        "description": "serial_number attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "manufacturer_uri": {
+        "name": "filter[manufacturer_uri]",
+        "in": "query",
+        "required": false,
+        "description": "manufacturer_uri attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "manufacturer_name": {
+        "name": "filter[manufacturer_name]",
+        "in": "query",
+        "required": false,
+        "description": "manufacturer_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "dual_use": {
+        "name": "filter[dual_use]",
+        "in": "query",
+        "required": false,
+        "description": "dual_use attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "model": {
+        "name": "filter[model]",
+        "in": "query",
+        "required": false,
+        "description": "model attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "inventory_number": {
+        "name": "filter[inventory_number]",
+        "in": "query",
+        "required": false,
+        "description": "inventory_number attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "persistent_identifier": {
+        "name": "filter[persistent_identifier]",
+        "in": "query",
+        "required": false,
+        "description": "persistent_identifier attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "website": {
+        "name": "filter[website]",
+        "in": "query",
+        "required": false,
+        "description": "website attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "device_type_uri": {
+        "name": "filter[device_type_uri]",
+        "in": "query",
+        "required": false,
+        "description": "device_type_uri attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "device_type_name": {
+        "name": "filter[device_type_name]",
+        "in": "query",
+        "required": false,
+        "description": "device_type_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "status_uri": {
+        "name": "filter[status_uri]",
+        "in": "query",
+        "required": false,
+        "description": "status_uri attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "status_name": {
+        "name": "filter[status_name]",
+        "in": "query",
+        "required": false,
+        "description": "status_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "device_id": {
+        "name": "device_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "default": "0"
+        }
+      },
+      "platform_type_uri": {
+        "name": "filter[platform_type_uri]",
+        "in": "query",
+        "required": false,
+        "description": "platform_type_uri attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "platform_type_name": {
+        "name": "filter[platform_type_name]",
+        "in": "query",
+        "required": false,
+        "description": "platform_type_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "platform_id": {
+        "name": "platform_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "given_name": {
+        "name": "filter[given_name]",
+        "in": "query",
+        "required": false,
+        "description": "given_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "family_name": {
+        "name": "filter[family_name]",
+        "in": "query",
+        "required": false,
+        "description": "family_name attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "email": {
+        "name": "filter[email]",
+        "in": "query",
+        "required": false,
+        "description": "email attribute filter.",
+        "schema": {
+          "type": "string",
+          "format": "string",
+          "default": ""
+        }
+      },
+      "generic_configuration_action_id": {
+        "name": "generic_configuration_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "device_mount_action_id": {
+        "name": "device_mount_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "platform_mount_action_id": {
+        "name": "platform_mount_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "generic_device_action_id": {
+        "name": "generic_device_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "generic_platform_action_id": {
+        "name": "generic_platform_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "device_calibration_action_id": {
+        "name": "device_calibration_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "device_calibration_attachment_id": {
+        "name": "device_calibration_attachment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "generic_device_action_attachment_id": {
+        "name": "generic_device_action_attachment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "device_software_update_action_id": {
+        "name": "device_software_update_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "platform_software_update_action_id": {
+        "name": "platform_software_update_action_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "device_software_update_action_attachment_id": {
+        "name": "device_software_update_action_attachment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "platform_software_update_action_attachment_id": {
+        "name": "platform_software_update_action_attachment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "device_device_property_calibrations_id": {
+        "name": "device_device_property_calibrations_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "hide_archived": {
+        "name": "hide_archived",
+        "description": "In general we hide archived objects. With this parameter those can be shown in the list search together with the non archived ones.",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+          "default": "true"
+        }
+      },
+      {% for component in parameter_components %}
+      "{{ component }}": {{ parameter_components[component]}} {% if not loop.last %},{%endif %}
+      {% endfor %}
+    },
+    "links": {
+    },
+    "callbacks": {
+    }
+  },
+  "externalDocs": {
+    "url": "https://codebase.helmholtz.cloud/hub-terra/sms/backend",
+    "description": "https://codebase.helmholtz.cloud/hub-terra/sms/backend/-/blob/master/README.md"
+  }
+}

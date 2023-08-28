@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2021
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+# .coveragerc to control coverage.py
+[run]
+branch = True
+omit =
+    */tests*
+    */migrations/*
+    */settings/*
+    *wsgi.py*
+parallel = True
+
+[report]
+exclude_lines =
+    # Ignore imports
+    from
+    import
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    raise AssertionError
+    raise NotImplementedError
+    (.*)except Exception as e:(.*)
+    if 0:
+    if __name__ == .__main__.:
+    @(abc\.)?abstractmethod
+
+show_missing = True
+
+[html]
+directory = coveragereport
