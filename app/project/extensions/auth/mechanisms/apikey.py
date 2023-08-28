@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -13,7 +13,7 @@ from ....api.models.base_model import db
 
 
 class ApikeyAuthMechanism:
-    """Implementation to check the X-APIKEY header."""
+    """Implementation to check the X-APIKEY header or the apikey query parameter."""
 
     def __init__(self, app=None):
         """Init the object."""
@@ -30,19 +30,29 @@ class ApikeyAuthMechanism:
 
     @staticmethod
     def can_be_applied():
-        """Return true if we have an X-APIKEY header."""
+        """Return true if we have an X-APIKEY header or the query parameter."""
         apikey_header = request.headers.get("X-APIKEY")
-        if not apikey_header:
-            return False
-        return True
+        if apikey_header:
+            return True
+
+        apikey_query_parameter = request.values.get("apikey")
+        if apikey_query_parameter:
+            return True
+
+        return False
 
     def authenticate(self):
         """Return the user for the apikey."""
         apikey_header = request.headers.get("X-APIKEY")
         if apikey_header:
-            return (
-                db.session.query(User)
-                .filter(User.apikey == apikey_header)
-                .one_or_none()
-            )
+
+            return self.find_user_by_apikey(apikey_header)
+        apikey_query_parameter = request.values.get("apikey")
+        if apikey_query_parameter:
+            return self.find_user_by_apikey(apikey_query_parameter)
+
         return None
+
+    def find_user_by_apikey(self, apikey):
+        """Return a user or none for the given apikey."""
+        return db.session.query(User).filter(User.apikey == apikey).one_or_none()
