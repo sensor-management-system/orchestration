@@ -28,8 +28,6 @@
 # implied. See the Licence for the specific language governing
 # permissions and limitations under the Licence.
 stages:
-  - check
-  - test
   - build
   - release
   - deploy-staging
@@ -45,60 +43,6 @@ variables:
   UFZ_RELEASE_TAG_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
 
-check-lint:
-  stage: check
-  image: node:16.0.0-buster
-  before_script:
-    - node -v
-    - npm ci
-  script:
-    - npm run lint
-  allow_failure: true
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-
-check-build:
-  stage: check
-  image: node:16.0.0-buster
-  before_script:
-    - node -v
-    - npm ci
-  script:
-    - npm run build
-  allow_failure: false
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-
-check-license:
-  stage: check
-  image: node:16.0.0-buster
-  before_script:
-    - node -v
-    - npm ci
-  script:
-    - npm run licenseCheck
-  allow_failure: true
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
-
-test-frontend-unit-tests:
-  stage: test
-  image: node:16.0.0-buster
-  before_script:
-    - node -v
-    - npm ci
-  script:
-    - npm test
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules
 
 .docker_login_gitlab_registry: &docker_login_gitlab_registry
   - echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY

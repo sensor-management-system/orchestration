@@ -9,6 +9,8 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 stages:
+  - check
+  - test
   - build
   - backup
   - deploy
@@ -16,6 +18,8 @@ stages:
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
+  UFZ_LATEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
+  UFZ_RELEASE_TAG_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 cache:
   paths:
@@ -34,6 +38,65 @@ cache:
     - docker
     - dind
     - hifis
+
+check-lint-frontend:
+  stage: check
+  image: node:16.0.0-buster
+  before_script:
+    - cd frontend
+    - node -v
+    - npm ci
+  script:
+    - npm run lint
+  allow_failure: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+
+check-build-frontend:
+  stage: check
+  image: node:16.0.0-buster
+  before_script:
+    - cd frontend
+    - node -v
+    - npm ci
+  script:
+    - npm run build
+  allow_failure: false
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+
+check-license-frontend:
+  stage: check
+  image: node:16.0.0-buster
+  before_script:
+    - cd frontend
+    - node -v
+    - npm ci
+  script:
+    - npm run licenseCheck
+  allow_failure: true
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+
+test-frontend-unit-tests:
+  stage: test
+  image: node:16.0.0-buster
+  before_script:
+    - cd frontend
+    - node -v
+    - npm ci
+  script:
+    - npm test
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
 
 build-deploy-image-nginx-gfz-staging:
   stage: build
