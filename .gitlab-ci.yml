@@ -9,7 +9,9 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 stages:
+  - buildtest
   - check
+  - extract
   - test
   - build
   - backup
@@ -20,6 +22,7 @@ variables:
   ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
   UFZ_LATEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
   UFZ_RELEASE_TAG_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  BACKEND_TEST_IMAGE: $CI_REGISTRY_IMAGE:backend-test-$CI_COMMIT_REF_SLUG
 
 cache:
   paths:
@@ -38,6 +41,22 @@ cache:
     - docker
     - dind
     - hifis
+
+build-backend-test-image:
+  stage: buildtest
+  extends: .docker-in-docker
+  variables:
+    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+    OIDC_USERNAME_CLAIM: "sub"
+  script:
+    - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+    - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+    - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+    - echo "ENV CV_URL https://webapp-stage.intranet.ufz.de/sms/cv/api/v1" >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+    - docker build --tag $BACKEND_TEST_IMAGE backend
+    - docker push $BACKEND_TEST_IMAGE
 
 check-lint-frontend:
   stage: check
@@ -84,6 +103,37 @@ check-license-frontend:
     paths:
       - frontend/node_modules
 
+check-lint-backend:
+  stage: check
+  image: $BACKEND_TEST_IMAGE
+  variables:
+    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+    OIDC_USERNAME_CLAIM: "sub"
+  before_script:
+    - apt-get update
+    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo g++
+  script:
+    - cd $CI_PROJECT_DIR/backend/app/ && tox
+
+extract-openapi:
+  stage: extract
+  extends: .docker-in-docker
+  variables:
+    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+    OIDC_USERNAME_CLAIM: "sub"
+  script:
+    - docker pull $BACKEND_TEST_IMAGE
+    - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $BACKEND_TEST_IMAGE python manage.py openapi > openapi.json
+  artifacts:
+    expire_in: 1 day
+    public: false
+    paths:
+      - openapi.json
+
 test-frontend-unit-tests:
   stage: test
   image: node:16.0.0-buster
@@ -97,6 +147,39 @@ test-frontend-unit-tests:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules
+
+test-backend-image:
+  services:
+    - name: postgis/postgis:12-3.3-alpine
+      alias: postgres
+  variables:
+    POSTGRES_DB: db_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_HOST_AUTH_METHOD: trust
+    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+    OIDC_USERNAME_CLAIM: "sub"
+  stage: test
+  image: $BACKEND_TEST_IMAGE
+  before_script:
+    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
+    - export APP_SETTINGS=project.config.TestingConfig
+  script:
+    - cd $CI_PROJECT_DIR/backend/app/ && python manage.py cov
+
+test-openapi:
+  stage: test
+  image: openapitools/openapi-generator-cli
+  script:
+    - docker-entrypoint.sh generate -i openapi.json -g python -o ./generated_clients/python
+  artifacts:
+    expire_in: 1 day
+    public: false
+    paths:
+      - generated_clients/python
+
 
 build-deploy-image-nginx-gfz-staging:
   stage: build

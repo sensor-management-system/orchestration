@@ -51,27 +51,6 @@ build-image:
     - docker build --tag $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
 
-build-gfz-image:
-  stage: build
-  extends: .docker-in-docker
-  environment:
-    name: gfzstaging
-    url: https://$GFZ_STAGING_HOST
-  script:
-    - >
-      if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --tag "$CI_REGISTRY_IMAGE:gfz-latest" -f Dockerfile .
-        docker push "$CI_REGISTRY_IMAGE:gfz-latest"
-      else
-        docker build --tag "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE:gfz-latest" -f Dockerfile .
-        docker push "$CI_REGISTRY_IMAGE:gfz-latest"
-        docker push "$CI_REGISTRY_IMAGE:gfz-$CI_COMMIT_TAG"
-      fi
-  rules:
-    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
-      when: manual
-      allow_failure: true
-
 build-image-nginx-ufz:
   stage: build
   extends: .docker-in-docker
@@ -89,55 +68,6 @@ build-image-nginx-ufz:
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-.*/'
-
-extract-openapi:
-  stage: extract
-  extends: .docker-in-docker
-  script:
-    - docker pull $CONTAINER_TEST_IMAGE
-    - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $CONTAINER_TEST_IMAGE python manage.py openapi > openapi.json
-  artifacts:
-    expire_in: 1 day
-    public: false
-    paths:
-      - openapi.json
-
-unittest-lint:
-  stage: test
-  image: $CONTAINER_TEST_IMAGE
-  before_script:
-    - apt-get update
-    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo g++
-  script:
-    - cd $CI_PROJECT_DIR/app/ && tox
-
-test-image:
-  services:
-    - name: postgis/postgis:12-3.3-alpine
-      alias: postgres
-  variables:
-    POSTGRES_DB: db_test
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_HOST_AUTH_METHOD: trust
-  stage: test
-  image: $CONTAINER_TEST_IMAGE
-  before_script:
-    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
-    - export APP_SETTINGS=project.config.TestingConfig
-  script:
-    - cd $CI_PROJECT_DIR/app/ && python manage.py cov
-
-test-openapi:
-  stage: test
-  image: openapitools/openapi-generator-cli
-  script:
-    - docker-entrypoint.sh generate -i openapi.json -g python -o ./generated_clients/python
-  artifacts:
-    expire_in: 1 day
-    public: false
-    paths:
-      - generated_clients/python
 
 release-image:
   stage: release
