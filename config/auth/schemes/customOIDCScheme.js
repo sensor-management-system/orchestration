@@ -38,6 +38,11 @@
 import { OpenIDConnectScheme } from '~auth/runtime'
 
 export default class CustomOIDCScheme extends OpenIDConnectScheme {
+  constructor ($auth, options, ...defaults) {
+    super($auth, options, ...defaults)
+    this.options.scope = options.scope
+  }
+
   // Fetch the userInfo from the user-info endpoint
   async fetchUser () {
     const checkExpiration = this.check(true)
