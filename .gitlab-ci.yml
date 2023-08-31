@@ -669,7 +669,7 @@ release-ufz-frontend-tag-image-stage:
     - if: $CI_COMMIT_TAG =~ /^ufz-stage-\d+\.\d+\.\d+$/
   script:
     - |
-      docker build --tag "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG" -f docker/deployment/ufz/Dockerfile_Stage \
+      docker build --tag "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
         --build-arg CLIENT_ID_ARG=$CLIENT_ID \
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
@@ -685,7 +685,7 @@ release-ufz-frontend-tag-image-prod:
     - if: $CI_COMMIT_TAG =~ /^ufz-prod-\d+\.\d+\.\d+$/
   script:
     - |
-      docker build --tag "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG" -f docker/deployment/ufz/Dockerfile_Prod \
+      docker build --tag "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Prod \
         --build-arg CLIENT_ID_ARG=$CLIENT_ID \
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
@@ -699,7 +699,7 @@ build-image-nginx-ufz:
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f docker/build/nginx/ufz/Dockerfile .
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
       else
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f docker/build/nginx/ufz/Dockerfile .
