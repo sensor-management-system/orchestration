@@ -622,7 +622,7 @@ deploy-gfz-prod:
 
 release-ufz-backend-tag-image-staging:
   stage: release
-  extends: .docker-in-docker
+  extends: .docker_build
   variables:
     OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
     PID_CERT_FILE: ${UFZ_STAGE_PID_CERT_FILE}
@@ -642,7 +642,7 @@ release-ufz-backend-tag-image-staging:
 
 release-ufz-backend-tag-image-prod:
   stage: release
-  extends: .docker-in-docker
+  extends: .docker_build
   variables:
     OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
     PID_CERT_FILE: ${UFZ_PROD_PID_CERT_FILE}
@@ -694,7 +694,7 @@ release-ufz-frontend-tag-image-prod:
 
 build-image-nginx-ufz:
   stage: build
-  extends: .docker-in-docker
+  extends: .docker_build
   allow_failure: true
   script:
     - >
