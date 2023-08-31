@@ -103,7 +103,7 @@ release-ufz-tag-image-prod:
   stage: release
   extends: .docker-in-docker
   variables:
-    OIDC_CLIENT_ID: ${UFZ_SMS_IDL_TOKEN}
+    OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
     PID_CERT_FILE: ${UFZ_PROD_PID_CERT_FILE}
     PID_CERT_KEY: ${UFZ_PROD_PID_CERT_KEY}
   rules:
