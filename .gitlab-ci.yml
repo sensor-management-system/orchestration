@@ -621,7 +621,7 @@ deploy-gfz-prod:
       when: always
 
 release-ufz-backend-tag-image-staging:
-  stage: release
+  stage: build
   extends: .docker_build
   variables:
     OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
@@ -660,8 +660,8 @@ release-ufz-backend-tag-image-prod:
       .
     - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
 
-release-ufz-frontend-tag-image-stage:
-  stage: release
+release-ufz-frontend-tag-image-staging:
+  stage: build
   extends: .docker_build
   variables:
     CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
