@@ -110,7 +110,7 @@ RUN mkdir /install
 WORKDIR /install
 
 # add requirements
-COPY app/requirements.txt /tmp/requirements.txt
+COPY ./backend/app/requirements.txt /tmp/requirements.txt
 
 RUN apt-get update && apt-get install -y  --no-install-recommends \
         gcc \
@@ -131,7 +131,7 @@ COPY --from=builder /install /usr/local
 COPY app /usr/src/app
 
 # add script
-ADD ./scripts/run.sh /usr/src/scripts/run.sh
+ADD ./backend/scripts/run.sh /usr/src/scripts/run.sh
 
 RUN chmod +x /usr/src/scripts/run.sh
 
