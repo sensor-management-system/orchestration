@@ -638,7 +638,7 @@ release-ufz-backend-tag-image-staging:
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
       .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG"
 
 release-ufz-backend-tag-image-prod:
   stage: release
@@ -658,7 +658,7 @@ release-ufz-backend-tag-image-prod:
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
       .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG"
 
 release-ufz-frontend-tag-image-staging:
   stage: build
@@ -674,7 +674,7 @@ release-ufz-frontend-tag-image-staging:
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
       .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG"
 
 release-ufz-frontend-tag-image-prod:
   stage: release
@@ -690,7 +690,7 @@ release-ufz-frontend-tag-image-prod:
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
       .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG"
 
 build-image-nginx-ufz:
   stage: build
