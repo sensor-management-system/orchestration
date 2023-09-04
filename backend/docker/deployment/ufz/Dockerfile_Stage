@@ -137,7 +137,7 @@ FROM base
 COPY --from=builder /install /usr/local
 
 # add app
-COPY app /usr/src/app
+COPY ./backend/app /usr/src/app
 
 # add script
 ADD ./backend/scripts/run.sh /usr/src/scripts/run.sh
