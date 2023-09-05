@@ -641,7 +641,7 @@ release-ufz-backend-tag-image-staging:
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG"
 
 release-ufz-backend-tag-image-prod:
-  stage: release
+  stage: build
   extends: .docker_build
   variables:
     OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
@@ -677,7 +677,7 @@ release-ufz-frontend-tag-image-staging:
     - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG"
 
 release-ufz-frontend-tag-image-prod:
-  stage: release
+  stage: build
   extends: .docker_build
   variables:
     CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
