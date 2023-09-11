@@ -620,7 +620,7 @@ deploy-gfz-prod:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
       when: always
 
-release-ufz-backend-tag-image-staging:
+build-ufz-backend-image-staging:
   stage: build
   extends: .docker_build
   variables:
@@ -628,8 +628,28 @@ release-ufz-backend-tag-image-staging:
     PID_CERT_FILE: ${UFZ_STAGE_PID_CERT_FILE}
     PID_CERT_KEY: ${UFZ_STAGE_PID_CERT_KEY}
   rules:
-    - if: $CI_COMMIT_TAG =~ /^ufz-stage-\d+\.\d+\.\d+$/
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
   script:
+    - >
+      if [ -z "$CI_COMMIT_TAG" ]; then        
+        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest" -f backend/docker/deployment/ufz/Dockerfile_Stage \
+                        --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
+                        --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
+                        --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
+                        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+                        --build-arg VCS_REF=$CI_COMMIT_SHA \
+                      .
+        docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest"
+      else
+        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Stage \
+                --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
+                --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
+                --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
+                --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+                --build-arg VCS_REF=$CI_COMMIT_SHA \
+              .
+        docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG"
     - |
       docker build --tag "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Stage \
         --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
@@ -640,7 +660,7 @@ release-ufz-backend-tag-image-staging:
       .
     - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG"
 
-release-ufz-backend-tag-image-prod:
+build-ufz-backend-image-prod:
   stage: build
   extends: .docker_build
   variables:
@@ -648,64 +668,97 @@ release-ufz-backend-tag-image-prod:
     PID_CERT_FILE: ${UFZ_PROD_PID_CERT_FILE}
     PID_CERT_KEY: ${UFZ_PROD_PID_CERT_KEY}
   rules:
-    - if: $CI_COMMIT_TAG =~ /^ufz-prod-\d+\.\d+\.\d+$/
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
   script:
     - |
-      docker build --tag "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Prod \
+      docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Prod \
         --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
         --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
         --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
       .
-    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG"
 
-release-ufz-frontend-tag-image-staging:
+build-ufz-frontend-image-staging:
   stage: build
   extends: .docker_build
   variables:
     CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
   rules:
-    - if: $CI_COMMIT_TAG =~ /^ufz-stage-\d+\.\d+\.\d+$/
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
   script:
-    - |
-      docker build --tag "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
-        --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-        --build-arg VCS_REF=$CI_COMMIT_SHA \
-      .
-    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG"
+    - >
+      if [ -z "$CI_COMMIT_TAG" ]; then        
+        docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-staging-latest" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
+              --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+              --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+              --build-arg VCS_REF=$CI_COMMIT_SHA \
+            .
+        docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-latest"
+      else
+        docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
+                --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+                --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+                --build-arg VCS_REF=$CI_COMMIT_SHA \
+              .
+        docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG"    
 
-release-ufz-frontend-tag-image-prod:
+build-ufz-frontend-image-prod:
   stage: build
   extends: .docker_build
   variables:
     CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
   rules:
-    - if: $CI_COMMIT_TAG =~ /^ufz-prod-\d+\.\d+\.\d+$/
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
   script:
     - |
-      docker build --tag "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Prod \
+      docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-prod-$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Prod \
         --build-arg CLIENT_ID_ARG=$CLIENT_ID \
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
       .
-    - docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_TAG"
+    - docker push "$CI_REGISTRY_IMAGE/frontend:ufz-prod-$CI_COMMIT_TAG"
 
-build-image-nginx-ufz:
+build-ufz-backend-nginx-image:
   stage: build
   extends: .docker_build
   allow_failure: true
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
       else
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
-        docker push "$CI_REGISTRY_IMAGE/nginx:$CI_COMMIT_TAG"
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
+        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
+        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG"
       fi
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^ufz-.*/'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+
+build-ufz-orchestration-nginx-image:
+  stage: build
+  extends: .docker_build
+  script:
+    - >
+      if [ -z "$CI_COMMIT_TAG" ]; then
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
+      else
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
+        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG"
+      fi
+  allow_failure: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+      when: always
