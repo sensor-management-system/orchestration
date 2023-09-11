@@ -629,7 +629,7 @@ build-ufz-backend-image-staging:
     PID_CERT_KEY: ${UFZ_STAGE_PID_CERT_KEY}
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_TAG'
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then        
@@ -678,7 +678,7 @@ build-ufz-frontend-image-staging:
     CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_TAG'
   script:
     - >
       if [ -z "$CI_COMMIT_TAG" ]; then        
@@ -728,7 +728,7 @@ build-ufz-backend-nginx-image:
       fi
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_TAG'
 
 build-ufz-orchestration-nginx-image:
   stage: build
@@ -751,5 +751,5 @@ build-ufz-orchestration-nginx-image:
       when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_TAG'
       when: always
