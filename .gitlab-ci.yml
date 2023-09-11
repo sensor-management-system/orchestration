@@ -650,15 +650,6 @@ build-ufz-backend-image-staging:
                 --build-arg VCS_REF=$CI_COMMIT_SHA \
               .
         docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG"
-    - |
-      docker build --tag "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Stage \
-        --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
-        --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
-        --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
-        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-        --build-arg VCS_REF=$CI_COMMIT_SHA \
-      .
-    - docker push "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_TAG"
 
 build-ufz-backend-image-prod:
   stage: build
