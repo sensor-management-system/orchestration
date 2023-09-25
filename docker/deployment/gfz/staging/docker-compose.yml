@@ -35,7 +35,7 @@ services:
       STATIC_ROOT: /static/cv/
       DEBUG: 0
       SECRET_KEY: $VOCABULARY_SECRET_KEY
-      SQL_ENGINE: django.db.backends.postgresql_psycopg2
+      SQL_ENGINE: django.db.backends.postgresql
       SQL_DATABASE: vocabulary
       SQL_USER: $VOCABULARY_DB_USER
       SQL_PASSWORD: $VOCABULARY_DB_PASSWORD
