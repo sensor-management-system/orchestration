@@ -15,6 +15,7 @@ Added:
 Changed:
 - updated privacy policy for B2INST usage on GFZ
 - extended user deprovising script to remove user data from B2INST
+- Update to psycopg3 for the CV. Please check all SQL_ENGINE env variables.
 
 
 ## 1.4.0 - 2023-08-24
