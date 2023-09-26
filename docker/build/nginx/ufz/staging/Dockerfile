@@ -32,7 +32,7 @@
 # implied. See the Licence for the specific language governing 
 # permissions and limitations under the Licence.
 
-FROM nginx:1.21.6-alpine
+FROM nginx:1.24-alpine
 
 COPY default.conf /etc/nginx/conf.d/default.conf
 

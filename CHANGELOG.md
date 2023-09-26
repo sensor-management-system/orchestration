@@ -11,11 +11,18 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Added:
 - Activated B2INST support on GFZ instance
+- description on landing page for sites & labs
+- sites and labs added to latest activity log
 
 Changed:
 - updated privacy policy for B2INST usage on GFZ
 - extended user deprovising script to remove user data from B2INST
-- Update to psycopg3 for the CV. Please check all SQL_ENGINE env variables.
+- updated schema used for b2inst
+- Update to psycopg3 for the CV. Please check all `SQL_ENGINE` env variables.
+
+Fixes:
+- problem resolved that mask for device creation stays open when creating a PID failed
+- improved wording for hint if a platform can't be unmounted due to still mounted child devices/platforms
 
 
 ## 1.4.0 - 2023-08-24

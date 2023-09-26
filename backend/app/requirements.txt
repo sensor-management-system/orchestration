@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Dirk Ecker <d.ecker@fz-juelich.de>
+# - Forschungszentrum Jülich GmbH (FZJ, https://fz-juelich.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+alembic==1.12.0
+cachetools==5.3.1
+certifi==2023.7.22
+chardet==5.2.0
+cherrypicker==0.4.0
+click==8.1.7
+coverage==7.3.0
+cryptography==41.0.3
+elasticsearch==8.9.0
+entrypoints==0.4
+environs==9.5.0
+Faker==19.3.1
+Flask-Cors==4.0.0
+Flask-Executor==1.0.0
+Flask-Migrate==4.0.4
+Flask-REST-JSONAPI==0.31.2
+Flask-SQLAlchemy==2.5.1
+Flask-Testing==0.8.1
+Flask==2.1.3
+flask_jwt_extended==4.5.2
+future==0.18.3
+GeoAlchemy2==0.14.1
+gunicorn==21.2.0
+idna==3.4
+itsdangerous==2.1.2
+Jinja2==3.1.2
+Mako==1.2.4
+MarkupSafe==2.1.3
+marshmallow-jsonapi==0.24.0
+marshmallow==3.20.1
+mccabe==0.7.0
+minio==7.1.16
+pandas==2.1.0
+psycopg2-binary==2.9.7
+py-healthcheck==1.10.1
+pycodestyle==2.11.0
+pycparser==2.21
+pycryptodomex==3.18.0
+python-dateutil==2.8.2
+python-editor==1.0.4
+requests==2.31.0
+shapely==2.0.1
+six==1.16.0
+SQLAlchemy-Utils==0.41.1
+SQLAlchemy==1.4.49
+stringcase==1.2.0
+tox==4.11.1
+Werkzeug==2.3.7
+xmlschema==1.1.1
+owslib==0.29.2
