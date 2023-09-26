@@ -1,0 +1,141 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+# - Norman Ziegner <norman.ziegner@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+FROM python:3.11-slim-buster as base
+
+ARG URL_PREFIX_ARG=/sms/backend/api/v1/
+ENV URL_PREFIX $URL_PREFIX_ARG
+
+ARG APP_SETTINGS_ARG=project.config.ProductionConfig
+ENV APP_SETTINGS $APP_SETTINGS_ARG
+
+ARG STATIC_URL_ARG=/sms/backend/static/
+ENV STATIC_URL $STATIC_URL_ARG
+
+ARG FLASK_DEBUG_ARG=0
+ENV FLASK_DEBUG $FLASK_DEBUG_ARG
+
+ARG ELASTICSEARCH_URL_ARG=https://webapp.ufz.de:443/sms/elasticsearch/
+ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL_ARG
+
+ARG WELL_KNOWN_URL_ARG=https://login.helmholtz.de/oauth2/.well-known/openid-configuration
+ENV WELL_KNOWN_URL $WELL_KNOWN_URL_ARG
+
+ARG OIDC_CLIENT_ID_ARG
+ENV OIDC_CLIENT_ID $OIDC_CLIENT_ID_ARG
+
+ARG OIDC_USERNAME_CLAIM_ARG=eduperson_principal_name
+ENV OIDC_USERNAME_CLAIM $OIDC_USERNAME_CLAIM_ARG
+
+ARG HTTP_ORIGINS_ARG=https://webapp.ufz.de
+ENV HTTP_ORIGINS $HTTP_ORIGINS_ARG
+
+ARG MINIO_ACCESS_KEY_ARG=sms
+ENV MINIO_ACCESS_KEY $MINIO_ACCESS_KEY_ARG
+
+ARG MINIO_SECURE_ARG=True
+ENV MINIO_SECURE $MINIO_SECURE_ARG
+
+ARG MINIO_ENDPOINT_ARG=minio.ufz.de
+ENV MINIO_ENDPOINT $MINIO_ENDPOINT_ARG
+
+ARG MINIO_BUCKET_NAME_ARG=sms-prod
+ENV MINIO_BUCKET_NAME $MINIO_BUCKET_NAME_ARG
+
+ARG DOWNLOAD_ENDPOINT_ARG=https://minio.ufz.de
+ENV DOWNLOAD_ENDPOINT $DOWNLOAD_ENDPOINT_ARG
+
+ARG ALLOWED_MIME_TYPES_ARG=application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed
+ENV ALLOWED_MIME_TYPES $ALLOWED_MIME_TYPES_ARG
+
+ARG CV_URL_ARG=https://webapp.ufz.de/sms/cv/api/v1
+ENV CV_URL $CV_URL_ARG
+
+ARG IDL_URL_ARG=https://webapp.ufz.de/idl
+ENV IDL_URL $IDL_URL_ARG
+
+ARG SMS_FRONTEND_URL_ARG=https://webapp.ufz.de/sms
+ENV SMS_FRONTEND_URL $SMS_FRONTEND_URL_ARG
+
+ARG SMS_BACKEND_URL_ARG=https://webapp.ufz.de/sms/backend/api/v1
+ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
+
+ARG PID_SERVICE_URL_ARG=https://vm02.pid.gwdg.de:8000/api/handles/
+ENV PID_SERVICE_URL $PID_SERVICE_URL_ARG
+
+ARG PID_SERVICE_USER_ARG=ufz-epic-USER01
+ENV PID_SERVICE_USER $PID_SERVICE_USER_ARG
+
+ARG PID_PREFIX_ARG=21.11154
+ENV PID_PREFIX $PID_PREFIX_ARG
+
+ARG PID_SUFFIX_ARG=SMS
+ENV PID_SUFFIX $PID_SUFFIX_ARG
+
+ARG PID_CERT_FILE_ARG
+ENV PID_CERT_FILE $PID_CERT_FILE_ARG
+
+ARG PID_CERT_KEY_ARG
+ENV PID_CERT_KEY $PID_CERT_KEY_ARG
+
+ARG TSM_ENDPOINTS_ARG='[{"fields": {"name": "UFZ", "url": "https://tsm.intranet.ufz.de/tsmdl"}, "model": "TsmEndpoint", "pk": 2}]'
+ENV TSM_ENDPOINTS $TSM_ENDPOINTS_ARG
+
+ARG BUILD_DATE
+ARG VCS_REF
+
+LABEL maintainer="Tobias kuhnert <tobias.kuhnert@ufz.de>" \
+    org.opencontainers.image.title="SMS Image" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.version="0.1.2" \
+    org.opencontainers.image.url="registry.hzdr.de/hub-terra/sms/backend:$BUILD_DATE" \
+    org.opencontainers.image.revision=$VCS_REF \
+    org.opencontainers.image.created=$BUILD_DATE
+
+# set working directory
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+FROM base as builder
+
+RUN mkdir /install
+WORKDIR /install
+
+# add requirements
+COPY ./backend/app/requirements.txt /tmp/requirements.txt
+
+RUN apt-get update && apt-get install -y  --no-install-recommends \
+        gcc \
+        libssl-dev \
+        libffi-dev \
+        musl-dev \
+        cargo \
+        g++ \
+    && apt-get clean\
+    && pip install --upgrade pip \
+    && pip install --prefix /install --no-cache-dir -r /tmp/requirements.txt
+
+FROM base
+
+COPY --from=builder /install /usr/local
+
+# add app
+COPY ./backend/app /usr/src/app
+
+# add script
+ADD ./backend/scripts/run.sh /usr/src/scripts/run.sh
+
+RUN chmod +x /usr/src/scripts/run.sh
+
+#run server
+ENTRYPOINT ["sh", "/usr/src/scripts/run.sh"]
+
+EXPOSE 5000

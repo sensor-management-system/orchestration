@@ -1,0 +1,91 @@
+# Web client of the Sensor Management System software developed within
+# the Helmholtz DataHub Initiative by GFZ and UFZ.
+#
+# Copyright (C) 2020-2023
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
+# - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+# - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for
+#   Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# Parts of this program were developed within the context of the
+# following publicly funded projects or measures:
+# - Helmholtz Earth and Environment DataHub
+#   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+#
+# Licensed under the HEESIL, Version 1.0 or - as soon they will be
+# approved by the "Community" - subsequent versions of the HEESIL
+# (the "Licence").
+#
+# You may not use this work except in compliance with the Licence.
+#
+# You may obtain a copy of the Licence at:
+# https://gitext.gfz-potsdam.de/software/heesil
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Licence is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+stages:
+  - build
+  - release
+  - deploy-staging
+  - deploy-prod
+  - after-deployment-tests
+
+cache:
+  paths:
+    - dist
+
+variables:
+  UFZ_LATEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
+  UFZ_RELEASE_TAG_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
+
+
+.docker_login_gitlab_registry: &docker_login_gitlab_registry
+  - echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+.docker_build:
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  before_script:
+    - *docker_login_gitlab_registry
+    - echo $SMS_BACKEND_URL
+    - echo $CV_BACKEND_URL
+  tags:
+    - docker
+
+release-ufz-tag-image-stage:
+  stage: build
+  extends: .docker_build
+  variables:
+    CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^ufz-stage-\d+\.\d+\.\d+$/
+  script:
+    - |
+      docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" -f docker/deployment/ufz/Dockerfile_Stage \
+        --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+        --build-arg VCS_REF=$CI_COMMIT_SHA \
+      .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+
+release-ufz-tag-image-prod:
+  stage: build
+  extends: .docker_build
+  variables:
+    CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^ufz-prod-\d+\.\d+\.\d+$/
+  script:
+    - |
+      docker build --tag "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" -f docker/deployment/ufz/Dockerfile_Prod \
+        --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+        --build-arg VCS_REF=$CI_COMMIT_SHA \
+      .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
