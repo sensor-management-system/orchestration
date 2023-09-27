@@ -158,7 +158,7 @@ services:
       STATIC_ROOT: '/static/cv/'
       DEBUG: ${DEBUG:-1}
       SECRET_KEY: ${SECRET_KEY:-TopSecret}
-      SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql_psycopg2}
+      SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql}
       SQL_DATABASE: ${SQL_DATABASE:-postgres}
       SQL_USER: ${SQL_USER:-postgres}
       SQL_PASSWORD: ${SQL_PASSWORD:-postgres}

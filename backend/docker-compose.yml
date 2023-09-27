@@ -1,0 +1,142 @@
+# SPDX-FileCopyrightText: 2020 - 2023
+# - Martin Abbrent <martin.abbrent@ufz.de>
+# - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Florian Gransee <florian.gransee@ufz.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+version: '3.9'
+services:
+  elastic-search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  backend:
+    image: python:3.11-slim-buster
+    working_dir: /usr/src/app
+    volumes:
+      - './app:/usr/src/app'
+      - './scripts:/usr/src/app/scripts'
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      FLASK_DEBUG: ${FLASK_DEBUG:-1}
+      URL_PREFIX: ${URL_PREFIX:-/backend/rdm/svm-api/v1}
+      STATIC_URL: ${STATIC_URL:-/static/backend}
+      APP_SETTINGS: ${APP_SETTINGS:-project.config.DevelopmentConfig}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elastic-search:9200}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev}
+      DATABASE_TEST_URL: ${DATABASE_TEST_URL:-postgresql://postgres:postgres@db:5433/db_test}
+      OIDC_USERNAME_CLAIM: ${OIDC_USERNAME_CLAIM:-sub}
+      HTTP_ORIGINS: ${HTTP_ORIGINS:-https://localhost.localdomain}
+      WELL_KNOWN_URL: ${WELL_KNOWN_URL:-https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minio123}
+      MINIO_SECURE: ${MINIO_SECURE:-False}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-sms-attachments}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+      DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
+      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
+      SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
+      IDL_URL: ${IDL_URL}
+      CV_URL: ${CV_URL}
+      INSTITUTE: ${INSTITUTE:-ufz}
+      PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile email}
+      SMS_BACKEND_URL: ${SMS_BACKEND_URL:-https://localhost.localdomain/backend/api/v1}
+      PKCE_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-rdmsvm-implicit-flow}
+      SMS_FRONTEND_URL: ${SMS_FRONTEND_URL:-https://localhost.localdomain}
+      PID_SERVICE_URL: ${PID_SERVICE_URL:-http://vm04.pid.gwdg.de:8081/handles/21.T11998/}
+      PID_SERVICE_USER: ${PID_SERVICE_USER}
+      PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
+      SCHEMA_VERSION: ${SCHEMA_VERSION:-0.1}
+      IDENTIFIER_TYPE: ${IDENTIFIER_TYPE:-Handler}
+      PID_SUFFIX: ${PID_SUFFIX:-SMS}
+      PID_PREFIX: ${PID_PREFIX}
+      PID_CERT_FILE: ${PID_CERT_FILE}
+      PID_CERT_KEY: ${PID_CERT_KEY}
+    depends_on:
+      - db
+    command: >
+      sh -c "
+      scripts/install.sh
+      && scripts/run.sh ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev} ${BACKEND_PORT:-5000}"
+
+  db:
+    image: postgis/postgis:12-3.3-alpine
+    ports:
+      - "127.0.0.1:5433:5433"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - ./app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql
+    command: -p 5433
+
+  minio:
+    image: minio/minio:RELEASE.2021-07-12T02-44-53Z
+    container_name: minio
+    volumes:
+      - data:/data/minio
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-admin}
+      MINIO_ROOT_PASSWORD: ${minio_user_password:-minio123}
+    #       To deactivate the console
+    #      MINIO_BROWSER: "off"
+    command: server /data/minio --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    # Make a Bucket using minio client mc
+    # https://docs.min.io/docs/minio-client-complete-guid
+    entrypoint: >
+      /bin/sh -c "
+      until curl -f http://minio:9000/minio/health/live; do sleep 5; done;
+      /usr/bin/mc  alias set minio http://minio:9000 ${MINIO_ACCESS_KEY:-admin} ${MINIO_SECRET_KEY:-minio123} --api S3v4;
+      /usr/bin/mc mb --quiet minio/${MINIO_BUCKET_NAME:-sms-attachments};
+      /usr/bin/mc policy set download minio/${MINIO_BUCKET_NAME:-sms-attachments};
+      exit 0;
+      "
+
+  nginx:
+    image: nginx:1.20.1-alpine
+    ports:
+      - 443:443
+      - 8443:8443
+    volumes:
+      - ./nginx/index.html:/usr/share/nginx/html/index.html
+      - ./nginx/certs:/etc/nginx/ssl
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./app/project/static:/usr/share/nginx/html/static/backend:ro
+
+volumes:
+  esdata01:
+    driver: local
+  data:
+
+

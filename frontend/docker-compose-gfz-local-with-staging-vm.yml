@@ -1,0 +1,67 @@
+# Web client of the Sensor Management System software developed within
+# the Helmholtz DataHub Initiative by GFZ and UFZ.
+#
+# Copyright (C) 2020-2021
+# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
+# - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
+# - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for
+#   Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# Parts of this program were developed within the context of the
+# following publicly funded projects or measures:
+# - Helmholtz Earth and Environment DataHub
+#   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
+#
+# Licensed under the HEESIL, Version 1.0 or - as soon they will be
+# approved by the "Community" - subsequent versions of the HEESIL
+# (the "Licence").
+#
+# You may not use this work except in compliance with the Licence.
+#
+# You may obtain a copy of the Licence at:
+# https://gitext.gfz-potsdam.de/software/heesil
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Licence is distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+version: '3.3'
+services:
+
+  node:
+    build:
+      context: '.'
+      dockerfile: 'docker/local-dev/Dockerfile-local-dev'
+    user: "node"
+    working_dir: /home/node/
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./gfz-staging-oidc.env
+    environment:
+      BASE_URL: "/"
+      SMS_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:3001/backend/api/v1"
+      CV_BACKEND_URL: "http://rz-vm64.gfz-potsdam.de:3001/cv/api/v1"
+      IDL_SYNC_URL: "http://rz-vm64.gfz-potsdam.de:3001/idl/api/hifis/sync-groups"
+      NUXT_ENV_PID_BASE_URL: "https://hdl.handle.net"
+      STAY_WITH_HTTP: "true"
+      INSTITUTE: "gfz"
+      NUXT_ENV_SCOPE: "profile openid email eduperson_principal_name"
+      NUXT_ENV_ALLOWED_MIMETYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
+      NUXT_ENV_OIDC_SCHEME: "true"
+      NUXT_ENV_OIDC_REFRESH_TOKEN: "refresh_token"
+      NUXT_ENV_OIDC_REFRESH_EXPIRE: 28800 # 60 * 60 * 8
+      NUXT_ENV_OIDC_WELL_KNOWN: "https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration"
+      NUXT_ENV_OIDC_RESPONSE_TYPE: "code"
+      NUXT_ENV_OIDC_GRANT_TYPE: "authorization_code"
+      NUXT_ENV_OIDC_CHALLANGE: "S256"
+      # this comes from the gfz-staging-oidc.env
+      # Ask nils@gfz-potsdam.de or mhanisch@gfz-potsdam.de
+      # to get it
+    volumes:
+      - .:/home/node/
+    command: >
+      bash -c "npm install
+      && npm run dev -- -H 0.0.0.0"
