@@ -650,6 +650,7 @@ build-ufz-backend-image-staging:
                 --build-arg VCS_REF=$CI_COMMIT_SHA \
               .
         docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG"
+      fi
 
 build-ufz-backend-image-prod:
   stage: build
@@ -695,6 +696,7 @@ build-ufz-frontend-image-staging:
                 --build-arg VCS_REF=$CI_COMMIT_SHA \
               .
         docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG"    
+      fi
 
 build-ufz-frontend-image-prod:
   stage: build
