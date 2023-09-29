@@ -13,6 +13,7 @@ Added:
 - Activated B2INST support on GFZ instance
 - description on landing page for sites & labs
 - sites and labs added to latest activity log
+- preview of the resulting configuration tree in the submit stage of the mount wizzard
 
 Changed:
 - updated privacy policy for B2INST usage on GFZ

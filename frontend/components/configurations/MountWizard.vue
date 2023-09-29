@@ -190,6 +190,11 @@ permissions and limitations under the Licence.
       </v-stepper-step>
       <v-stepper-content step="5">
         <v-container>
+          <v-subheader>Preview</v-subheader>
+          <configurations-tree-view
+            :tree="treePreview"
+            :value="null"
+          />
           <mount-wizard-submit-overview
             :devices-to-mount.sync="devicesToMount"
             :platforms-to-mount.sync="platformsToMount"
@@ -252,11 +257,14 @@ import MountWizardNodeSelect from '@/components/configurations/MountWizardNodeSe
 import MountWizardEntitySelect from '@/components/configurations/MountWizardEntitySelect.vue'
 import MountWizardMountForm from '@/components/configurations/MountWizardMountForm.vue'
 import MountWizardSubmitOverview from '@/components/configurations/MountWizardSubmitOverview.vue'
+import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
+import { DeviceNode } from '@/viewmodels/DeviceNode'
 
 @Component({
   components: {
+    ConfigurationsTreeView,
     MountActionDetailsForm,
     MountActionDateForm,
     MountWizardNodeSelect,
@@ -508,6 +516,61 @@ export default class MountWizard extends Vue {
       validateMountingDates: this.validateMountingDates.bind(this),
       validateMountingTimeRange: this.validateMountingTimeRange.bind(this)
     }
+  }
+
+  get treePreview (): ConfigurationsTree {
+    const copyOfTheTree = ConfigurationsTree.createFromObject(this.tree)
+    if (!this.selectedNode) {
+      return copyOfTheTree
+    }
+    const currentParent = copyOfTheTree.getById(this.selectedNode!.id!)
+
+    let children: ConfigurationsTreeNode[] = []
+    let parentPlatform: Platform | null = null
+    if (currentParent instanceof PlatformNode) {
+      children = currentParent.children
+      parentPlatform = currentParent.unpack().platform
+    } else if (currentParent instanceof ConfigurationNode) {
+      children = currentParent.children
+    }
+    for (const entry of this.platformsToMount) {
+      const entity = entry.entity
+      const mountInfo = entry.mountInfo
+      children.push(new PlatformNode(PlatformMountAction.createFromObject({
+        id: '',
+        platform: entity,
+        parentPlatform,
+        offsetX: mountInfo.offsetX,
+        offsetY: mountInfo.offsetY,
+        offsetZ: mountInfo.offsetZ,
+        beginDate: mountInfo.beginDate!,
+        beginContact: mountInfo.beginContact!,
+        endDate: mountInfo.endDate,
+        endContact: mountInfo.endContact,
+        beginDescription: mountInfo.beginDescription,
+        endDescription: mountInfo.endDescription
+      })))
+    }
+    for (const entry of this.devicesToMount) {
+      const entity = entry.entity
+      const mountInfo = entry.mountInfo
+      children.push(new DeviceNode(DeviceMountAction.createFromObject({
+        id: '',
+        device: entity,
+        parentPlatform,
+        offsetX: mountInfo.offsetX,
+        offsetY: mountInfo.offsetY,
+        offsetZ: mountInfo.offsetZ,
+        beginDate: mountInfo.beginDate!,
+        beginContact: mountInfo.beginContact!,
+        endDate: mountInfo.endDate,
+        endContact: mountInfo.endContact,
+        beginDescription: mountInfo.beginDescription,
+        endDescription: mountInfo.endDescription
+      })))
+    }
+
+    return copyOfTheTree
   }
 
   validateAllForms (): boolean {
