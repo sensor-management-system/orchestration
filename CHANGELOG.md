@@ -7,7 +7,11 @@ SPDX-FileCopyrightText: 2023
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-## 1.5.1 (Unreleased)
+## 1.5.2 (Unreleased)
+## 1.5.1 - 2023-10-04
+
+Fixed:
+- default count for sites on landing page
 
 ## 1.5.0 - 2023-10-04
 
