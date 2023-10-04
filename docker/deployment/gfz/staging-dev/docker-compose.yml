@@ -5,35 +5,6 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-# Web client of the Sensor Management System software developed within
-# the Helmholtz DataHub Initiative by GFZ and UFZ.
-# 
-# Copyright (C) 2020-2021
-# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
-# - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-# - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-# - Helmholtz Centre Potsdam - GFZ German Research Centre for
-#   Geosciences (GFZ, https://www.gfz-potsdam.de)
-# 
-# Parts of this program were developed within the context of the
-# following publicly funded projects or measures:
-# - Helmholtz Earth and Environment DataHub
-#   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-# 
-# Licensed under the HEESIL, Version 1.0 or - as soon they will be 
-# approved by the "Community" - subsequent versions of the HEESIL 
-# (the "Licence").
-# 
-# You may not use this work except in compliance with the Licence.
-# 
-# You may obtain a copy of the Licence at: 
-# https://gitext.gfz-potsdam.de/software/heesil
-# 
-# Unless required by applicable law or agreed to in writing, software 
-# distributed under the Licence is distributed on an "AS IS" basis, 
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-# implied. See the Licence for the specific language governing 
-# permissions and limitations under the Licence.
 version : '3.3'
 
 services:
@@ -48,47 +19,10 @@ services:
       - /etc/ssl/private/gfz_hosts_default.key:/etc/ssl/private/default.key:ro
       - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
       - /etc/ssl/dfn-ca-global-g2-chain.pem:/etc/ssl/chain.pem:ro
-      - vocabulary-static-files:/usr/share/nginx/html/static/cv:ro
       - backend-static-files:/usr/share/nginx/html/static/backend:ro
       - idl-static-files:/usr/share/nginx/html/static/idl:ro
     networks:
       - nginx
-
-  vocabulary:
-    image: $VOCABULARY_IMAGE
-    restart: unless-stopped
-    environment:
-      CV_BASE_URL: cv/
-      STATIC_URL: /static/cv/
-      STATIC_ROOT: /static/cv/
-      DEBUG: 0
-      SECRET_KEY: $VOCABULARY_SECRET_KEY
-      SQL_ENGINE: django.db.backends.postgresql
-      SQL_DATABASE: vocabulary
-      SQL_USER: $VOCABULARY_DB_USER
-      SQL_PASSWORD: $VOCABULARY_DB_PASSWORD
-      SQL_HOST: vocabulary-db
-      SQL_PORT: 5432
-      CORS_ORIGIN_WHITELIST: ${HTTP_ORIGINS_VOCABULARY:-'https://rz-vm64.gfz-potsdam.de'}
-      GITLAB_TOKEN: $SMS_CV_GITLAB_TOKEN
-    volumes:
-      - vocabulary-static-files:/static/cv
-    networks:
-      - nginx
-      - vocabulary-db
-
-  vocabulary-db:
-    image: postgres:12-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: $VOCABULARY_DB_PASSWORD
-      POSTGRES_USER: $VOCABULARY_DB_USER
-      POSTGRES_DB: vocabulary
-    volumes:
-      - "vocabulary-db-data:/var/lib/postgresql/data"
-    shm_size: 128M
-    networks:
-      - vocabulary-db
 
   idl:
     image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest
@@ -210,7 +144,7 @@ services:
       HTTP_ORIGINS: ${STAGING_DEV_HTTP_ORIGINS}
       SMS_IDL_TOKEN: $IDL_TOKEN
       IDL_URL: http://idl:8000/idl/api/idl
-      CV_URL: https://rz-vm64.gfz-potsdam.de:3000/cv/api/v1
+      CV_URL: https://sms-cv.helmholtz.cloud/sms/cv/api/v1
       SMS_BACKEND_URL: /backend/api/v1
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
       PKCE_SCOPES: profile openid email eduperson_principal_name
@@ -227,8 +161,6 @@ services:
       - nginx
 
 volumes:
-  vocabulary-db-data:
-  vocabulary-static-files:
   idl-db-data:
   idl-static-files:
   elasticsearch-data:
@@ -236,7 +168,6 @@ volumes:
   backend-db-data:
   backend-static-files:
 networks:
-  vocabulary-db:
   nginx:
   backend:
   idl-db:

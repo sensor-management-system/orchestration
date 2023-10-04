@@ -40,7 +40,7 @@ class SMSDeviceImporter:
         self.cv_base_urls = {
             "local": "http://localhost:8000/cv/api/v1/",
             "stage": "https://webapp-stage.intranet.ufz.de/sms/cv/api/v1/",
-            "prod": "https://webapp.ufz.de/sms/cv/api/v1/",
+            "prod": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
         }
         self.cv_base_url = self.cv_base_urls[self.run_type]
         self.cv_mapping = {

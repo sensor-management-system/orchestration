@@ -48,47 +48,10 @@ services:
       - /etc/ssl/private/gfz_hosts_default.key:/etc/ssl/private/default.key:ro
       - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
       - /etc/ssl/dfn-ca-global-g2-chain.pem:/etc/ssl/chain.pem:ro
-      - vocabulary-static-files:/usr/share/nginx/html/static/cv:ro
       - backend-static-files:/usr/share/nginx/html/static/backend:ro
       - idl-static-files:/usr/share/nginx/html/static/idl:ro
     networks:
       - nginx
-
-  vocabulary:
-    image: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-${CI_COMMIT_TAG:-prod-latest}
-    restart: unless-stopped
-    environment:
-      CV_BASE_URL: cv/
-      STATIC_URL: /static/cv/
-      STATIC_ROOT: /static/cv/
-      DEBUG: 0
-      SECRET_KEY: $VOCABULARY_SECRET_KEY
-      SQL_ENGINE: django.db.backends.postgresql
-      SQL_DATABASE: vocabulary
-      SQL_USER: $VOCABULARY_DB_USER
-      SQL_PASSWORD: $VOCABULARY_DB_PASSWORD
-      SQL_HOST: vocabulary-db
-      SQL_PORT: 5432
-      CORS_ORIGIN_WHITELIST: 'https://sensors.gfz-potsdam.de'
-      GITLAB_TOKEN: $SMS_CV_GITLAB_TOKEN
-    volumes:
-      - vocabulary-static-files:/static/cv
-    networks:
-      - nginx
-      - vocabulary-db
-
-  vocabulary-db:
-    image: postgres:12-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: $VOCABULARY_DB_PASSWORD
-      POSTGRES_USER: $VOCABULARY_DB_USER
-      POSTGRES_DB: vocabulary
-    volumes:
-      - "vocabulary-db-data:/var/lib/postgresql/data"
-    shm_size: 128M
-    networks:
-      - vocabulary-db
 
   idl:
     image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.3
@@ -210,7 +173,7 @@ services:
       HTTP_ORIGINS: ${HTTP_ORIGINS}
       SMS_IDL_TOKEN: $IDL_TOKEN
       IDL_URL: http://idl:8000/idl/api/idl
-      CV_URL: https://sensors.gfz-potsdam.de/cv/api/v1
+      CV_URL: https://sms-cv.helmholtz.cloud/sms/cv/api/v1
       SMS_BACKEND_URL: /backend/api/v1
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
       PKCE_SCOPES: profile openid email eduperson_principal_name
@@ -229,8 +192,6 @@ services:
       - nginx
 
 volumes:
-  vocabulary-db-data:
-  vocabulary-static-files:
   idl-db-data:
   idl-static-files:
   elasticsearch-data:
@@ -238,7 +199,6 @@ volumes:
   backend-db-data:
   backend-static-files:
 networks:
-  vocabulary-db:
   nginx:
   backend:
   idl-db:
