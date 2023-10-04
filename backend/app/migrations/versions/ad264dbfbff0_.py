@@ -57,7 +57,7 @@ def upgrade():
     to_id_air = 9
 
     update_query_samping_medium_air = f"""
-    update device_proeprty
+    update device_property
     set samping_media_uri = '{kit_cv_base_url}/samplingmedia/{from_id_air}/'
     where samping_media_uri = '{kit_cv_base_url}/samplingmedia/{to_id_air}/'
     """
