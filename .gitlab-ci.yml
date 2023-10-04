@@ -58,6 +58,16 @@ build-backend-test-image:
     - echo "ENV CV_URL https://webapp-stage.intranet.ufz.de/sms/cv/api/v1" >> $CI_PROJECT_DIR/backend/Dockerfile.ci
     - docker build --tag $BACKEND_TEST_IMAGE backend
     - docker push $BACKEND_TEST_IMAGE
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
 
 check-lint-frontend:
   stage: check
@@ -73,6 +83,16 @@ check-lint-frontend:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
 
 check-build-frontend:
   stage: check
@@ -88,6 +108,16 @@ check-build-frontend:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
 
 check-license-frontend:
   stage: check
@@ -103,6 +133,16 @@ check-license-frontend:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
 
 check-lint-backend:
   stage: check
@@ -117,6 +157,16 @@ check-lint-backend:
     - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo g++
   script:
     - cd $CI_PROJECT_DIR/backend/app/ && tox
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
 
 extract-openapi:
   stage: extract
@@ -134,6 +184,16 @@ extract-openapi:
     public: false
     paths:
       - openapi.json
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
 
 test-frontend-unit-tests:
   stage: test
@@ -148,6 +208,16 @@ test-frontend-unit-tests:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
 
 test-backend-image:
   services:
@@ -169,6 +239,16 @@ test-backend-image:
     - export APP_SETTINGS=project.config.TestingConfig
   script:
     - cd $CI_PROJECT_DIR/backend/app/ && python manage.py cov
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
 
 test-openapi:
   stage: test
@@ -180,6 +260,16 @@ test-openapi:
     public: false
     paths:
       - generated_clients/python
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
 
 
 build-deploy-image-nginx-gfz-staging:
@@ -228,7 +318,7 @@ build-deploy-image-nginx-gfz-prod:
       when: never
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
 build-deploy-image-nginx-ufz-staging:
@@ -275,7 +365,7 @@ build-deploy-image-vocabulary-gfz-prod:
       when: never
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
 build-deploy-image-backend-gfz-staging:
@@ -307,7 +397,7 @@ build-deploy-image-backend-gfz-prod:
       when: never
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
 build-deploy-image-mc-gfz-staging:
@@ -341,7 +431,7 @@ build-deploy-image-mc-gfz-prod:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
 backup-gfz-staging:
@@ -500,7 +590,7 @@ backup-gfz-prod:
       when: always
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
 deploy-gfz-staging:
@@ -617,7 +707,7 @@ deploy-gfz-prod:
       when: never
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
 build-ufz-backend-image-staging:
@@ -628,6 +718,8 @@ build-ufz-backend-image-staging:
     PID_CERT_FILE: ${UFZ_STAGE_PID_CERT_FILE}
     PID_CERT_KEY: ${UFZ_STAGE_PID_CERT_KEY}
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
     - if: '$CI_COMMIT_TAG'
   script:
@@ -659,6 +751,8 @@ build-ufz-backend-image-prod:
     PID_CERT_FILE: ${UFZ_PROD_PID_CERT_FILE}
     PID_CERT_KEY: ${UFZ_PROD_PID_CERT_KEY}
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
   script:
     - |
@@ -677,6 +771,8 @@ build-ufz-frontend-image-staging:
   variables:
     CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
     - if: '$CI_COMMIT_TAG'
   script:
@@ -702,6 +798,8 @@ build-ufz-frontend-image-prod:
   variables:
     CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
   script:
     - |
@@ -727,6 +825,8 @@ build-ufz-backend-nginx-image:
         docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG"
       fi
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
     - if: '$CI_COMMIT_TAG'
 
