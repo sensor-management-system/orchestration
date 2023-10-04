@@ -7,18 +7,22 @@ SPDX-FileCopyrightText: 2023
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-## 1.5.0 (Unreleased)
+## 1.5.1 (Unreleased)
+
+## 1.5.0 - 2023-10-04
 
 Added:
 - Activated B2INST support on GFZ instance
 - description on landing page for sites & labs
 - sites and labs added to latest activity log
+- preview of the resulting configuration tree in the submit stage of the mount wizzard
 
 Changed:
 - updated privacy policy for B2INST usage on GFZ
 - extended user deprovising script to remove user data from B2INST
 - updated schema used for b2inst
 - Update to psycopg3 for the CV. Please check all `SQL_ENGINE` env variables.
+- switch to a central CV instance (https://sms-cv.helmholtz.cloud)
 
 Fixes:
 - problem resolved that mask for device creation stays open when creating a PID failed

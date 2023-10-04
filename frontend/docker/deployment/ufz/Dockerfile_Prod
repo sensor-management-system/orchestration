@@ -32,7 +32,7 @@ FROM node:16.17.1-buster as js-builder
 ARG SMS_BACKEND_URL_ARG=https://web.app.ufz.de/sms/backend/api/v1
 ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
 
-ARG CV_BACKEND_URL_ARG=https://web.app.ufz.de/sms/cv/api/v1
+ARG CV_BACKEND_URL_ARG=https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV CV_BACKEND_URL $CV_BACKEND_URL_ARG
 
 ENV INSTITUTE ufz
