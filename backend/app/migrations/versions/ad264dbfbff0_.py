@@ -58,8 +58,8 @@ def upgrade():
 
     update_query_samping_medium_air = f"""
     update device_property
-    set samping_media_uri = '{kit_cv_base_url}/samplingmedia/{from_id_air}/'
-    where samping_media_uri = '{kit_cv_base_url}/samplingmedia/{to_id_air}/'
+    set sampling_media_uri = '{kit_cv_base_url}/samplingmedia/{from_id_air}/'
+    where sampling_media_uri = '{kit_cv_base_url}/samplingmedia/{to_id_air}/'
     """
 
     conn.execute(text(update_query_samping_medium_air))
