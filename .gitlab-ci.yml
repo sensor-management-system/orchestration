@@ -336,38 +336,6 @@ build-deploy-image-nginx-ufz-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
-build-deploy-image-vocabulary-gfz-staging:
-  stage: build
-  extends: .docker_build
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/vocabulary:gfz-latest" -f sms-cv/docker/gfz/deployment/Dockerfile \
-          sms-cv
-    - docker push "$CI_REGISTRY_IMAGE/vocabulary:gfz-latest"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-
-build-deploy-image-vocabulary-gfz-prod:
-  stage: build
-  extends: .docker_build
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/vocabulary:gfz-${CI_COMMIT_TAG:-prod-latest}" -f sms-cv/docker/gfz/deployment/Dockerfile \
-          sms-cv
-    - docker push "$CI_REGISTRY_IMAGE/vocabulary:gfz-${CI_COMMIT_TAG:-prod-latest}"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
-
 build-deploy-image-backend-gfz-staging:
   stage: build
   extends: .docker_build
@@ -455,10 +423,6 @@ backup-gfz-staging:
     IDL_TOKEN: ${GFZ_STAGING_IDL_TOKEN}
     MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
-    VOCABULARY_DB_PASSWORD: ${GFZ_STAGING_VOCABULARY_POSTGRES_PASSWORD}
-    VOCABULARY_DB_USER: ${GFZ_STAGING_VOCABULARY_POSTGRES_USER}
-    VOCABULARY_IMAGE: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-latest
-    VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
     DAYS_TO_CLEANUP: 30
     # We want to make sure that we still have 1 GB left to do the backup
     # comparision value is in kb
@@ -469,8 +433,6 @@ backup-gfz-staging:
     # clean up & remove files older than x days
     - mkdir -p /srv/docker/service/backend-db/backups
     - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - mkdir -p /srv/docker/service/vocabulary-db/backups
-    - find /srv/docker/service/vocabulary-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - mkdir -p /srv/docker/service/idl-db/backups
     - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - mkdir -p /srv/docker/service/minio/backups
@@ -482,7 +444,6 @@ backup-gfz-staging:
           exit 1
       fi
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull mc
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T idl-db pg_dump -U $IDL_DB_USER -d idl -Fc > /srv/docker/service/idl-db/backups/idl_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     # Most of the minio stuff is handled in the backup.sh script.
@@ -528,9 +489,6 @@ backup-gfz-prod:
     IDL_TOKEN: ${GFZ_PROD_IDL_TOKEN}
     MINIO_ROOT_PASSWORD: ${GFZ_PROD_MINIO_ROOT_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_PROD_MINIO_ROOT_USER}
-    VOCABULARY_DB_PASSWORD: ${GFZ_PROD_VOCABULARY_POSTGRES_PASSWORD}
-    VOCABULARY_DB_USER: ${GFZ_PROD_VOCABULARY_POSTGRES_USER}
-    VOCABULARY_SECRET_KEY: ${GFZ_PROD_VOCABULARY_SECRET}
     DAYS_TO_CLEANUP: 30
     DAYS_TO_CLEANUP_PROJECTSHARE: 180
     # We want to make sure that we still have 1 GB left to do the backup
@@ -545,8 +503,6 @@ backup-gfz-prod:
     # we keep them for longer.
     - mkdir -p /srv/docker/service/backend-db/backups
     - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - mkdir -p /srv/docker/service/vocabulary-db/backups
-    - find /srv/docker/service/vocabulary-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - mkdir -p /srv/docker/service/idl-db/backups
     - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
     - mkdir -p /srv/docker/service/minio/backups
@@ -558,7 +514,6 @@ backup-gfz-prod:
           exit 1
       fi
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull mc
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary-db pg_dump -U $VOCABULARY_DB_USER -d vocabulary -Fc > /srv/docker/service/vocabulary-db/backups/vocabulary_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
     - |-
       if [ ! "$(docker ps -q -f name=idl-db)" ]
       then
@@ -615,13 +570,8 @@ deploy-gfz-staging:
     MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
     PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
-    VOCABULARY_DB_PASSWORD: ${GFZ_STAGING_VOCABULARY_POSTGRES_PASSWORD}
-    VOCABULARY_DB_USER: ${GFZ_STAGING_VOCABULARY_POSTGRES_USER}
-    VOCABULARY_IMAGE: ${CI_REGISTRY_IMAGE}/vocabulary:gfz-latest
-    VOCABULARY_SECRET_KEY: ${GFZ_STAGING_VOCABULARY_SECRET}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
-    SMS_CV_GITLAB_TOKEN: ${SMS_CV_GITLAB_TOKEN}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -633,11 +583,6 @@ deploy-gfz-staging:
     - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py migrate
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py db upgrade
     # We need to write from the env variable of the runner here into the container.
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend sh -c "echo '$TSM_ENDPOINTS' > /tmp/tsm_endpoint_fixture.json"
@@ -674,12 +619,8 @@ deploy-gfz-prod:
     MINIO_ROOT_PASSWORD: ${GFZ_PROD_MINIO_ROOT_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_PROD_MINIO_ROOT_USER}
     PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
-    VOCABULARY_DB_PASSWORD: ${GFZ_PROD_VOCABULARY_POSTGRES_PASSWORD}
-    VOCABULARY_DB_USER: ${GFZ_PROD_VOCABULARY_POSTGRES_USER}
-    VOCABULARY_SECRET_KEY: ${GFZ_PROD_VOCABULARY_SECRET}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
-    SMS_CV_GITLAB_TOKEN: ${SMS_CV_GITLAB_TOKEN}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -691,11 +632,6 @@ deploy-gfz-prod:
     - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py migrate
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py loaddata initial_data.json
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py loaddata default_community_data.json
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py loaddata hydro_community_data.json
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T vocabulary python3 manage.py collectstatic --no-input
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend python3 manage.py db upgrade
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend sh -c "echo '$TSM_ENDPOINTS' > /tmp/tsm_endpoint_fixture.json"
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend python3 manage.py loaddata /tmp/tsm_endpoint_fixture.json
