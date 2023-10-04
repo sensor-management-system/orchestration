@@ -8,7 +8,7 @@ FROM node:16.17.1-buster as js-builder
 
 # First the urls for sms backend and cv backend
 ENV SMS_BACKEND_URL /backend/api/v1
-ENV CV_BACKEND_URL https://sms-cv.helmholz.cloud/sms/cv/api/v1
+ENV CV_BACKEND_URL https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV IDL_SYNC_URL /idl/api/hifis/sync-groups
 
 ENV INSTITUTE gfz
