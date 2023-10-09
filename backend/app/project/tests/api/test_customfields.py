@@ -55,6 +55,7 @@ class TestCustomFieldServices(BaseTestCase):
                 "attributes": {
                     "value": "https://www.gfz-potsdam.de",
                     "key": "GFZ Homepage",
+                    "description": "The GFZ homepage",
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device.id)}}
@@ -86,6 +87,7 @@ class TestCustomFieldServices(BaseTestCase):
         customfield = customfields[0]
         self.assertEqual(customfield.value, "https://www.gfz-potsdam.de")
         self.assertEqual(customfield.key, "GFZ Homepage")
+        self.assertEqual(customfield.description, "The GFZ homepage")
         self.assertEqual(customfield.device_id, device.id)
         self.assertEqual(str(customfield.device_id), response.get_json()["data"]["id"])
 
@@ -187,6 +189,7 @@ class TestCustomFieldServices(BaseTestCase):
         customfield1 = CustomField(
             key="GFZ",
             value="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
             device=device1,
         )
         customfield2 = CustomField(
@@ -234,6 +237,9 @@ class TestCustomFieldServices(BaseTestCase):
                     self.assertEqual(customfield["attributes"]["key"], customfield1.key)
                     self.assertEqual(
                         customfield["attributes"]["value"], customfield1.value
+                    )
+                    self.assertEqual(
+                        customfield["attributes"]["description"], "The GFZ homepage"
                     )
                     # and we want to check the link for the device as well
                     device_link = customfield["relationships"]["device"]["links"][

@@ -328,7 +328,8 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '53',
           attributes: {
             label: 'GFZ',
-            url: 'https://www.gfz-potsdam.de'
+            url: 'https://www.gfz-potsdam.de',
+            description: 'The GFZ homepage'
           },
           relationships: {
             device: {
@@ -380,7 +381,8 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '52',
           attributes: {
             label: 'Bar.baz',
-            url: 'https://bar.baz'
+            url: 'https://bar.baz',
+            description: 'The bar'
           },
           relationships: {
             device: {
@@ -432,7 +434,8 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '51',
           attributes: {
             label: 'Foo.de',
-            url: 'https://foo.de'
+            url: 'https://foo.de',
+            description: 'The foo'
           },
           relationships: {
             device: {
@@ -812,7 +815,8 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '53',
           attributes: {
             label: 'GFZ',
-            url: 'https://www.gfz-potsdam.de'
+            url: 'https://www.gfz-potsdam.de',
+            description: 'The GFZ homepage'
           },
           relationships: {
             device: {
@@ -864,7 +868,8 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '52',
           attributes: {
             label: 'Bar.baz',
-            url: 'https://bar.baz'
+            url: 'https://bar.baz',
+            description: 'The bar'
           },
           relationships: {
             device: {
@@ -916,7 +921,8 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '51',
           attributes: {
             label: 'Foo.de',
-            url: 'https://foo.de'
+            url: 'https://foo.de',
+            description: 'The foo'
           },
           relationships: {
             device: {
@@ -1085,6 +1091,7 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '51',
           label: 'Foo.de',
           url: 'https://foo.de',
+          description: 'The foo',
           isUpload: false,
           createdAt: null
         })
@@ -1092,6 +1099,7 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '52',
           label: 'Bar.baz',
           url: 'https://bar.baz',
+          description: 'The bar',
           isUpload: false,
           createdAt: null
         })
@@ -1099,6 +1107,7 @@ describe('SoftwareUpdateActionSerializer', () => {
           id: '53',
           label: 'GFZ',
           url: 'https://www.gfz-potsdam.de',
+          description: 'The GFZ homepage',
           isUpload: false,
           createdAt: null
         })

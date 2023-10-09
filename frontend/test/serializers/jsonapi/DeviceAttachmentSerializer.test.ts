@@ -128,6 +128,7 @@ describe('DeviceAttachmetnSerializer', () => {
         id: '123',
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
+        description: 'The UFZ homepage',
         isUpload: false,
         createdAt: null
       })
@@ -145,6 +146,8 @@ describe('DeviceAttachmetnSerializer', () => {
       expect(jsonApiPayload.attributes.url).toEqual('https://www.ufz.de')
       expect(jsonApiPayload.attributes).toHaveProperty('label')
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('The UFZ homepage')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
       expect(jsonApiPayload.relationships?.device).toHaveProperty('data')
@@ -160,6 +163,7 @@ describe('DeviceAttachmetnSerializer', () => {
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
         isUpload: true,
+        description: 'ufz',
         createdAt: null
       })
       const serializer = new DeviceAttachmentSerializer()
@@ -175,6 +179,8 @@ describe('DeviceAttachmetnSerializer', () => {
       expect(jsonApiPayload.attributes.url).toEqual('https://www.ufz.de')
       expect(jsonApiPayload.attributes).toHaveProperty('label')
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('ufz')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
       expect(jsonApiPayload.relationships?.device).toHaveProperty('data')

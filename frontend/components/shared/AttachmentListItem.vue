@@ -33,60 +33,61 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <v-hover
-    v-slot="{ hover }"
+  <base-expandable-list-item
+    expandable-color="grey lighten-5"
   >
-    <v-card
-      :elevation="hover ? 6 : 2"
-      class="ma-2"
+    <template #dot-menu-items>
+      <slot name="dot-menu-items" />
+    </template>
+    <template #actions>
+      <slot name="edit-action" />
+    </template>
+    <template
+      v-if="attachment.description"
+      #expandable
     >
       <v-card-text
-        class="py-2 px-3"
+        v-if="attachment.description"
+        class="py-2"
       >
-        <div class="d-flex align-center">
-          <span class="text-caption">
-            <ExpandableText v-model="attachment.url" :shorten-at="60" more-icon="mdi-unfold-more-vertical" less-icon="mdi-unfold-less-vertical" />
-            <span v-if="attachment.createdAt && attachment.isUpload">
-              uploaded at {{ attachment.createdAt | toUtcDateTimeString }}
-            </span>
-          </span>
-          <v-spacer />
-          <DotMenu>
-            <template #actions>
-              <slot name="dot-menu-items" />
-            </template>
-          </DotMenu>
-        </div>
-        <v-row
-          no-gutters
-        >
-          <v-col cols="8" class="text-subtitle-1">
-            <v-icon>
-              {{ filetypeIcon(attachment) }}
-            </v-icon>
-            <span class="text-caption">
-              <template v-if="isPublic || !attachment.isUpload">
-                <a :href="attachment.url" target="_blank">
-                  {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
-                </a>
-              </template>
-              <template v-else>
-                <span>
-                  {{ attachment.label }}&nbsp;<v-icon small @click="openAttachment">mdi-link-lock</v-icon>
-                </span>
-              </template>
-            </span>
-          </v-col>
-          <v-col
-            align-self="end"
-            class="text-right"
-          >
-            <slot name="edit-action" />
-          </v-col>
-        </v-row>
+        {{ attachment.description }}
       </v-card-text>
-    </v-card>
-  </v-hover>
+    </template>
+    <template #default>
+      <div class="d-flex align-center">
+        <span class="text-caption">
+          <span @click.stop>
+            <ExpandableText v-model="attachment.url" :shorten-at="60" more-icon="mdi-unfold-more-vertical" less-icon="mdi-unfold-less-vertical" />
+          </span>
+          <span v-if="attachment.createdAt && attachment.isUpload">
+            uploaded at {{ attachment.createdAt | toUtcDateTimeString }}
+          </span>
+        </span>
+        <v-spacer />
+      </div>
+      <v-row
+        no-gutters
+      >
+        <v-col cols="12" class="text-subtitle-1">
+          <v-icon>
+            {{ filetypeIcon(attachment) }}
+          </v-icon>
+          <span class="text-caption">
+            <template v-if="isPublic || !attachment.isUpload">
+              <a :href="attachment.url" target="_blank" @click.stop>
+                {{ attachment.label }}&nbsp;<v-icon small>mdi-open-in-new</v-icon>
+              </a>
+            </template>
+            <template v-else>
+              <span>
+                {{ attachment.label }}&nbsp;<v-icon small @click.stop="openAttachment">mdi-link-lock</v-icon>
+              </span>
+            </template>
+          </span>
+        </v-col>
+      </v-row>
+    </template>
+  </base-expandable-list-item>
 </template>
 
 <script lang="ts">

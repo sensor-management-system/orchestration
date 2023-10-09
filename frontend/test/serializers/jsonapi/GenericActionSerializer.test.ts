@@ -315,7 +315,8 @@ describe('GenericActionSerializer', () => {
           },
           attributes: {
             url: 'https://foo.de',
-            label: 'Foo.de'
+            label: 'Foo.de',
+            description: 'The foo'
           },
           id: '51',
           links: {
@@ -363,7 +364,8 @@ describe('GenericActionSerializer', () => {
           },
           attributes: {
             url: 'https://bar.baz',
-            label: 'Bar.baz'
+            label: 'Bar.baz',
+            description: 'The bar'
           },
           id: '52',
           links: {
@@ -680,7 +682,8 @@ describe('GenericActionSerializer', () => {
           },
           attributes: {
             url: 'https://foo.de',
-            label: 'Foo.de'
+            label: 'Foo.de',
+            description: 'The foo'
           },
           id: '51',
           links: {
@@ -822,6 +825,7 @@ describe('GenericActionSerializer', () => {
           id: '51',
           label: 'Foo.de',
           url: 'https://foo.de',
+          description: 'The foo',
           isUpload: false,
           createdAt: null
         })
@@ -829,6 +833,7 @@ describe('GenericActionSerializer', () => {
           id: '52',
           label: 'Bar.baz',
           url: 'https://bar.baz',
+          description: 'The bar',
           isUpload: false,
           createdAt: null
         })

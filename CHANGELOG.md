@@ -13,6 +13,9 @@ SPDX-License-Identifier: HEESIL-1.0
 Fixed:
 - default count for sites on landing page
 
+Added:
+- description fields for device properties, attachments & custom fields
+
 ## 1.5.0 - 2023-10-04
 
 Added:

@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
@@ -51,6 +52,7 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
                 "attributes": {
                     "value": "https://www.gfz-potsdam.de",
                     "key": "GFZ Homepage",
+                    "description": "The GFZ homepage",
                 },
                 "relationships": {
                     "configuration": {
@@ -84,6 +86,7 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
         customfield = customfields[0]
         self.assertEqual(customfield.value, "https://www.gfz-potsdam.de")
         self.assertEqual(customfield.key, "GFZ Homepage")
+        self.assertEqual(customfield.description, "The GFZ homepage")
         self.assertEqual(customfield.configuration_id, configuration.id)
         self.assertEqual(
             str(customfield.configuration_id), response.get_json()["data"]["id"]
@@ -190,6 +193,7 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
         customfield1 = ConfigurationCustomField(
             key="GFZ",
             value="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
             configuration=configuration1,
         )
         customfield2 = ConfigurationCustomField(
@@ -237,6 +241,9 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
                     self.assertEqual(customfield["attributes"]["key"], customfield1.key)
                     self.assertEqual(
                         customfield["attributes"]["value"], customfield1.value
+                    )
+                    self.assertEqual(
+                        customfield["attributes"]["description"], "The GFZ homepage"
                     )
                     # and we want to check the link for the configuration as well
                     configuration_link = customfield["relationships"]["configuration"][

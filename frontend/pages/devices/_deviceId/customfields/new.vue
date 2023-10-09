@@ -34,6 +34,15 @@ permissions and limitations under the Licence.
     <v-card
       flat
     >
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          v-if="editable"
+          save-btn-text="Add"
+          :to="'/devices/' + deviceId + '/customfields'"
+          @save="save"
+        />
+      </v-card-actions>
       <v-card-text>
         <CustomFieldForm
           ref="customFieldForm"
@@ -41,17 +50,17 @@ permissions and limitations under the Licence.
           :readonly="false"
           :key-endpoint="'device-custom-field-keys'"
           :value-endpoint="'device-custom-field-values'"
-        >
-          <template #actions>
-            <SaveAndCancelButtons
-              v-if="editable"
-              save-btn-text="Add"
-              :to="'/devices/' + deviceId + '/customfields'"
-              @save="save"
-            />
-          </template>
-        </CustomFieldForm>
+        />
       </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          v-if="editable"
+          save-btn-text="Add"
+          :to="'/devices/' + deviceId + '/customfields'"
+          @save="save"
+        />
+      </v-card-actions>
     </v-card>
     <template
       v-if="deviceCustomFields.length"

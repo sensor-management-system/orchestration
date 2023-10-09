@@ -82,6 +82,7 @@ export class CustomTextFieldSerializer {
     result.id = customfield.id.toString()
     result.key = customfield.key || ''
     result.value = customfield.value || ''
+    result.description = customfield.description || ''
 
     return result
   }
@@ -101,6 +102,7 @@ export class CustomTextFieldSerializer {
 
       customFieldToSave.key = customField.key
       customFieldToSave.value = customField.value
+      customFieldToSave.description = customField.description
 
       result.push(customFieldToSave)
     }
@@ -122,6 +124,7 @@ export class CustomTextFieldSerializer {
     if (attributes) {
       newEntry.key = attributes.key || ''
       newEntry.value = attributes.value || ''
+      newEntry.description = attributes.description || ''
     }
 
     return newEntry
@@ -202,7 +205,8 @@ export class CustomTextFieldSerializer {
       type: this.entityType,
       attributes: {
         key: customField.key,
-        value: customField.value
+        value: customField.value,
+        description: customField.description
       },
       relationships: {
         [relation.entityType]: {

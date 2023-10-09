@@ -77,6 +77,7 @@ class TestDevicePropertyServices(BaseTestCase):
                     "sampling_media_name": "air",
                     "aggregation_type_name": "Average",
                     "aggregation_type_uri": "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
+                    "description": "a test device property",
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device.id)}}
@@ -114,6 +115,7 @@ class TestDevicePropertyServices(BaseTestCase):
             device_property.aggregation_type_uri,
             "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
         )
+        self.assertEqual(device_property.description, "a test device property")
         self.assertEqual(device_property.device_id, device.id)
         self.assertEqual(
             str(device_property.device_id), response.get_json()["data"]["id"]
@@ -172,6 +174,7 @@ class TestDevicePropertyServices(BaseTestCase):
         device_property1 = DeviceProperty(
             label="device property1",
             property_name="device_property1",
+            description="Device property 1",
             device=device1,
         )
         device_property2 = DeviceProperty(
@@ -217,6 +220,10 @@ class TestDevicePropertyServices(BaseTestCase):
                     device_property1_data = property
                     self.assertEqual(
                         property["attributes"]["label"], device_property1.label
+                    )
+                    self.assertEqual(
+                        property["attributes"]["description"],
+                        device_property1.description,
                     )
                     # and we want to check the link for the device as well
                     device_link = property["relationships"]["device"]["links"][

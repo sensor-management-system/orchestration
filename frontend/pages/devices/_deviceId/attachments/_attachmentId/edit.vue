@@ -74,6 +74,11 @@ permissions and limitations under the Licence.
                 class="required"
                 :rules="[rules.required]"
               />
+              <v-textarea
+                v-model="valueCopy.description"
+                label="Description"
+                rows="3"
+              />
             </v-form>
           </v-col>
         </v-row>

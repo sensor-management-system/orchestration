@@ -504,6 +504,18 @@ permissions and limitations under the Licence.
           </combobox>
         </v-col>
       </v-row>
+      <v-row>
+        <v-col cols="12" md="9">
+          <v-textarea
+            :value="value.description"
+            :readonly="readonly"
+            :disabled="readonly"
+            label="Description"
+            rows="3"
+            @input="update('description', $event)"
+          />
+        </v-col>
+      </v-row>
     </v-form>
     <compartment-dialog
       v-model="showNewCompartmentDialog"
@@ -1022,6 +1034,9 @@ export default class DevicePropertyForm extends mixins(Rules) {
         break
       case 'resolution':
         newObj.resolution = parseFloatOrNull(value)
+        break
+      case 'description':
+        newObj.description = value
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')
