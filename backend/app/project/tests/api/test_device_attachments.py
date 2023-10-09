@@ -59,6 +59,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
                 "attributes": {
                     "url": "https://www.gfz-potsdam.de",
                     "label": "GFZ Homepage",
+                    "description": "The GFZ homepage",
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": str(device.id)}}
@@ -90,6 +91,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
         device_attachment = device_attachments[0]
         self.assertEqual(device_attachment.url, "https://www.gfz-potsdam.de")
         self.assertEqual(device_attachment.label, "GFZ Homepage")
+        self.assertEqual(device_attachment.description, "The GFZ homepage")
         self.assertEqual(device_attachment.device_id, device.id)
         self.assertEqual(
             str(device_attachment.device_id), response.get_json()["data"]["id"]
@@ -194,6 +196,7 @@ class TestDeviceAttachmentServices(BaseTestCase):
         device_attachment1 = DeviceAttachment(
             label="GFZ",
             url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
             device=device1,
         )
         device_attachment2 = DeviceAttachment(
@@ -245,6 +248,9 @@ class TestDeviceAttachmentServices(BaseTestCase):
                     )
                     self.assertEqual(
                         attachment["attributes"]["label"], device_attachment1.label
+                    )
+                    self.assertEqual(
+                        attachment["attributes"]["description"], "The GFZ homepage"
                     )
                     # and we want to check the link for the device as well
                     device_link = attachment["relationships"]["device"]["links"][

@@ -319,6 +319,7 @@ describe('DeviceCalibrationActionSerializer', () => {
         id: '11',
         label: 'UFZ',
         url: 'https://www.ufz.de',
+        description: 'The UFZ homepage',
         isUpload: false,
         createdAt: null
       })
@@ -326,6 +327,7 @@ describe('DeviceCalibrationActionSerializer', () => {
         id: '22',
         label: 'GFZ',
         url: 'https://www.gfz-potsdam.de',
+        description: 'The GFZ homepage',
         isUpload: false,
         createdAt: null
       })
@@ -396,7 +398,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         id: '11',
         attributes: {
           label: 'UFZ',
-          url: 'https://www.ufz.de'
+          url: 'https://www.ufz.de',
+          description: 'The UFZ homepage'
         },
         relationships: {
           device: {
@@ -412,7 +415,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         id: '22',
         attributes: {
           label: 'GFZ',
-          url: 'https://www.gfz-potsdam.de'
+          url: 'https://www.gfz-potsdam.de',
+          description: 'The GFZ homepage'
         },
         relationships: {
           device: {
@@ -462,7 +466,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         resolutionUnitName: 'RU1',
         resolutionUnitUri: 'RU/1',
         aggregationTypeUri: 'http://foo/aggregationtypes/1',
-        aggregationTypeName: 'Average'
+        aggregationTypeName: 'Average',
+        description: 'MQ one'
       })
       const measuredQuantity2 = DeviceProperty.createFromObject({
         id: '222',
@@ -485,7 +490,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         resolutionUnitName: 'RU2',
         resolutionUnitUri: 'RU/2',
         aggregationTypeUri: '',
-        aggregationTypeName: ''
+        aggregationTypeName: '',
+        description: 'MQ two'
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'
@@ -570,7 +576,8 @@ describe('DeviceCalibrationActionSerializer', () => {
           resolution_unit_name: 'RU1',
           resolution_unit_uri: 'RU/1',
           aggregation_type_uri: 'http://foo/aggregationtypes/1',
-          aggregation_type_name: 'Average'
+          aggregation_type_name: 'Average',
+          description: 'MQ one'
         },
         relationships: {
           device: {
@@ -600,7 +607,8 @@ describe('DeviceCalibrationActionSerializer', () => {
           measuring_range_max: 5,
           resolution: 0.05,
           resolution_unit_name: 'RU2',
-          resolution_unit_uri: 'RU/2'
+          resolution_unit_uri: 'RU/2',
+          description: 'MQ two'
         },
         relationships: {
           device: {

@@ -90,6 +90,15 @@ permissions and limitations under the Licence.
             />
           </v-col>
         </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-textarea
+              v-model="attachment.description"
+              label="Description"
+              rows="3"
+            />
+          </v-col>
+        </v-row>
       </v-card-text>
       <v-card-actions>
         <v-spacer />

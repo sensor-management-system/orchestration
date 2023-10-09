@@ -33,20 +33,28 @@ permissions and limitations under the Licence.
     <v-card
       flat
     >
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          save-btn-text="Apply"
+          :to="'/devices/' + deviceId + '/customfields'"
+          @save="save"
+        />
+      </v-card-actions>
       <v-card-text>
         <CustomFieldForm
           ref="customFieldCardForm"
           v-model="valueCopy"
-        >
-          <template #actions>
-            <SaveAndCancelButtons
-              save-btn-text="Apply"
-              :to="'/devices/' + deviceId + '/customfields'"
-              @save="save"
-            />
-          </template>
-        </CustomFieldForm>
+        />
       </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <SaveAndCancelButtons
+          save-btn-text="Apply"
+          :to="'/devices/' + deviceId + '/customfields'"
+          @save="save"
+        />
+      </v-card-actions>
     </v-card>
     <template
       v-if="deviceCustomFieldsExceptCurrent.length"

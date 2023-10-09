@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -33,12 +33,14 @@ export interface ICustomTextField {
   id: string | null,
   key: string,
   value: string
+  description: string
 }
 
 export class CustomTextField implements ICustomTextField {
   private _id: string | null = null
   private _key: string = ''
   private _value: string = ''
+  private _description: string = ''
 
   /**
    * creates an instance from another object
@@ -54,6 +56,7 @@ export class CustomTextField implements ICustomTextField {
 
     newObject.key = someObject.key
     newObject.value = someObject.value
+    newObject.description = someObject.description
 
     return newObject
   }
@@ -80,5 +83,13 @@ export class CustomTextField implements ICustomTextField {
 
   set value (value: string) {
     this._value = value
+  }
+
+  get description (): string {
+    return this._description
+  }
+
+  set description (newDescription: string) {
+    this._description = newDescription
   }
 }

@@ -86,6 +86,7 @@ export class DevicePropertySerializer {
       propertyToSave.sampling_media_name = property.samplingMediaName
       propertyToSave.resolution_unit_uri = property.resolutionUnitUri
       propertyToSave.resolution_unit_name = property.resolutionUnitName
+      propertyToSave.description = property.description
 
       result.push(propertyToSave)
     }
@@ -135,6 +136,7 @@ export class DevicePropertySerializer {
       newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
       newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
       newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
+      newEntry.description = jsonApiData.attributes.description || ''
     }
 
     return newEntry
@@ -218,7 +220,8 @@ export class DevicePropertySerializer {
         sampling_media_uri: deviceProperty.samplingMediaUri,
         sampling_media_name: deviceProperty.samplingMediaName,
         resolution_unit_uri: deviceProperty.resolutionUnitUri,
-        resolution_unit_name: deviceProperty.resolutionUnitName
+        resolution_unit_name: deviceProperty.resolutionUnitName,
+        description: deviceProperty.description
       },
       relationships: {
         device: {

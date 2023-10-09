@@ -44,6 +44,7 @@ describe('SiteAttachmentSerializer', () => {
           attributes: {
             url: 'https://www.gfz-potsdam.de',
             label: 'GFZ Homepage',
+            description: 'The GFZ homepage',
             is_upload: false,
             created_at: null
           },
@@ -68,12 +69,14 @@ describe('SiteAttachmentSerializer', () => {
       expect(models[0].id).toEqual('123')
       expect(models[0].url).toEqual('https://www.gfz-potsdam.de')
       expect(models[0].label).toEqual('GFZ Homepage')
+      expect(models[0].description).toEqual('The GFZ homepage')
       expect(models[0].isUpload).not.toBeTruthy()
       expect(models[0].createdAt).toBeNull()
 
       expect(models[1].id).toEqual('456')
       expect(models[1].url).toEqual('https://www.ufz.de')
       expect(models[1].label).toEqual('UFZ Homepage')
+      expect(models[1].description).toEqual('')
       expect(models[1].isUpload).toBeTruthy()
       expect(models[1].createdAt).toEqual(DateTime.utc(2024, 2, 28, 23, 59, 59))
     })
@@ -87,6 +90,7 @@ describe('SiteAttachmentSerializer', () => {
           attributes: {
             url: 'https://www.gfz-potsdam.de',
             label: 'GFZ Homepage',
+            description: 'gfz',
             is_upload: true
           },
           relationships: {}
@@ -100,6 +104,7 @@ describe('SiteAttachmentSerializer', () => {
       expect(model.id).toEqual('123')
       expect(model.url).toEqual('https://www.gfz-potsdam.de')
       expect(model.label).toEqual('GFZ Homepage')
+      expect(model.description).toEqual('gfz')
       expect(model.isUpload).toBeTruthy()
     })
     it('should also fill the attributes with empty strings if missing', () => {
@@ -119,6 +124,7 @@ describe('SiteAttachmentSerializer', () => {
       expect(model.id).toEqual('123')
       expect(model.url).toEqual('')
       expect(model.label).toEqual('')
+      expect(model.description).toEqual('')
       expect(model.isUpload).not.toBeTruthy()
     })
   })
@@ -128,6 +134,7 @@ describe('SiteAttachmentSerializer', () => {
         id: '123',
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
+        description: 'The UFZ homepage',
         isUpload: false,
         createdAt: null
       })
@@ -145,6 +152,8 @@ describe('SiteAttachmentSerializer', () => {
       expect(jsonApiPayload.attributes.url).toEqual('https://www.ufz.de')
       expect(jsonApiPayload.attributes).toHaveProperty('label')
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('The UFZ homepage')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('site')
       expect(jsonApiPayload.relationships?.site).toHaveProperty('data')
@@ -159,6 +168,7 @@ describe('SiteAttachmentSerializer', () => {
         id: null,
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
+        description: 'ufz',
         isUpload: true,
         createdAt: null
       })
@@ -175,6 +185,8 @@ describe('SiteAttachmentSerializer', () => {
       expect(jsonApiPayload.attributes.url).toEqual('https://www.ufz.de')
       expect(jsonApiPayload.attributes).toHaveProperty('label')
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('ufz')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('site')
       expect(jsonApiPayload.relationships?.site).toHaveProperty('data')

@@ -5,6 +5,13 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """External openapi spec file for configuration attachments."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(ConfigurationAttachmentSchema)
+
+"""External openapi spec file for configuration attachments."""
 paths = {
     "/configuration-attachments": {
         "get": {
@@ -19,7 +26,12 @@ paths = {
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/ConfigurationAttachment_coll"}
+                "200": {
+                    "description": "List of configuration attachments",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                },
             },
             "description": "Retrieve ConfigurationAttachment from configuration_attachment",
             "operationId": "RetrieveacollectionofConfigurationAttachmentobjects_0",
@@ -27,10 +39,16 @@ paths = {
         "post": {
             "tags": ["Configuration attachments"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/ConfigurationAttachment_inst"
+                "content": {"application/vnd.api+json": schema_mapper.post()},
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/ConfigurationAttachment_coll"}
+                "201": {
+                    "description": "Payload of the created configuration attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
             "operationId": "CreateConfigurationAttachment_0",
         },
@@ -43,7 +61,12 @@ paths = {
                 {"$ref": "#/components/parameters/configuration_attachment_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/ConfigurationAttachment_coll"}
+                "200": {
+                    "description": "Instance of a configuration attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Retrieve ConfigurationAttachment from configuration_attachment",
             "operationId": "RetrieveConfigurationAttachmentinstance_0",
@@ -55,17 +78,16 @@ paths = {
             ],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/ConfigurationAttachment"
-                        }
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
                 "description": "ConfigurationAttachment attributes",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/ConfigurationAttachment_coll"}
+                "200": {
+                    "description": "Payload of the updated configuration attachment",
+                    "content": {"application/vnd.api+json": schema_mapper.get_one()},
+                },
             },
             "description": "Update ConfigurationAttachment attributes",
             "operationId": "UpdateConfigurationAttachment_0",
@@ -121,196 +143,6 @@ paths = {
     },
 }
 components = {
-    "requestBodies": {
-        "ConfigurationAttachment_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "required": ["label", "url"],
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["configuration"],
-                                        "properties": {
-                                            "configuration": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": (
-                                                                    "configuration"
-                                                                ),
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            }
-                                        },
-                                    },
-                                },
-                            }
-                        },
-                        "description": "ConfigurationAttachment post;",
-                    }
-                }
-            }
-        },
-    },
-    "schemas": {
-        "ConfigurationAttachment": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "label": {"type": "string"},
-                                "url": {"type": "string", "format": "url"},
-                                "is_upload": {"type": "boolean"},
-                            },
-                        },
-                        "type": {"type": "string"},
-                        "id": {"type": "string"},
-                    },
-                    "example": {
-                        "attributes": {"label": "", "url": ""},
-                        "type": "configuration_attachment",
-                        "id": "0",
-                    },
-                }
-            },
-            "description": "ConfigurationAttachment Schema;",
-        },
-    },
-    "responses": {
-        "ConfigurationAttachment_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                            "is_upload": {
-                                                "type": "boolean",
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                        },
-                                    },
-                                    "type": {"type": "string"},
-                                    "id": {"type": "string"},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "configuration": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "created_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "label": "",
-                                        "url": "",
-                                        "is_upload": False,
-                                        "created_at": "2023-03-14T12:00:00+00:00",
-                                        "updated_at": "2023-03-14T13:00:00+00:00",
-                                    },
-                                    "relationships": {
-                                        "configuration": {
-                                            "data": {"type": "configuration", "id": "0"}
-                                        },
-                                        "created_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "123",
-                                            }
-                                        },
-                                        "updated_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "124",
-                                            }
-                                        },
-                                    },
-                                    "type": "configuration_attachment",
-                                    "id": "0",
-                                },
-                            }
-                        },
-                        "description": "ConfigurationAttachment get;",
-                    }
-                }
-            },
-            "description": "ConfigurationAttachment",
-        },
-    },
     "parameters": {
         "configuration_attachment_id": {
             "name": "configuration_attachment_id",

@@ -50,6 +50,7 @@ export interface IDeviceProperty {
   resolution: number | null
   resolutionUnitUri: string
   resolutionUnitName: string
+  description: string
 }
 
 export class DeviceProperty implements IDeviceProperty {
@@ -71,6 +72,7 @@ export class DeviceProperty implements IDeviceProperty {
   private _resolution: number | null = null
   private _resolutionUnitUri: string = ''
   private _resolutionUnitName: string = ''
+  private _description: string = ''
 
   /**
    * creates an instance from another object
@@ -100,6 +102,7 @@ export class DeviceProperty implements IDeviceProperty {
     newObject.resolution = someObject.resolution
     newObject.resolutionUnitUri = someObject.resolutionUnitUri
     newObject.resolutionUnitName = someObject.resolutionUnitName
+    newObject.description = someObject.description
 
     return newObject
   }
@@ -246,6 +249,14 @@ export class DeviceProperty implements IDeviceProperty {
 
   set resolutionUnitName (resolutionUnitName: string) {
     this._resolutionUnitName = resolutionUnitName
+  }
+
+  get description (): string {
+    return this._description
+  }
+
+  set description (newDescription: string) {
+    this._description = newDescription
   }
 
   toString (): string {

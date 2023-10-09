@@ -21,6 +21,7 @@ class PlatformAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     label = db.Column(db.String(256), nullable=False)
     url = db.Column(db.String(1024), nullable=False)
     internal_url = db.Column(db.String(1024), nullable=True)
+    description = db.Column(db.Text, nullable=True)
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
     platform = db.relationship(
         "Platform",
@@ -37,7 +38,7 @@ class PlatformAttachment(db.Model, IndirectSearchableMixin, AuditMixin):
     def to_search_entry(self):
         """Transform to en entry for the search index."""
         # to be included in the platform
-        return {"label": self.label, "url": self.url}
+        return {"label": self.label, "url": self.url, "description": self.description}
 
     def get_parent_search_entities(self):
         """Return the platform as parent."""

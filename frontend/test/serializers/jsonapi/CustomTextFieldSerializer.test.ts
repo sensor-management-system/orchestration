@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2022
+ * Copyright (C) 2020 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -47,21 +47,25 @@ describe('CustomTextFieldSerializer', () => {
       const jsonApiElements = [{
         id: '44',
         key: 'a',
-        value: 'b'
+        value: 'b',
+        description: 'a key'
       }, {
         id: '45',
         key: 'c',
-        value: 'd'
+        value: 'd',
+        description: 'c key'
       }]
       const expectedCustomField1 = CustomTextField.createFromObject({
         id: '44',
         key: 'a',
-        value: 'b'
+        value: 'b',
+        description: 'a key'
       })
       const expectedCustomField2 = CustomTextField.createFromObject({
         id: '45',
         key: 'c',
-        value: 'd'
+        value: 'd',
+        description: 'c key'
       })
 
       const serializer = new CustomTextFieldSerializer()
@@ -79,12 +83,14 @@ describe('CustomTextFieldSerializer', () => {
       const jsonApiElement = {
         id: '44',
         key: 'a',
-        value: 'b'
+        value: 'b',
+        description: 'c'
       }
       const expectedCustomField = CustomTextField.createFromObject({
         id: '44',
         key: 'a',
-        value: 'b'
+        value: 'b',
+        description: 'c'
       })
 
       const serializer = new CustomTextFieldSerializer()
@@ -100,12 +106,14 @@ describe('CustomTextFieldSerializer', () => {
         CustomTextField.createFromObject({
           id: '1',
           key: 'First custom field',
-          value: 'First custom value'
+          value: 'First custom value',
+          description: 'First description'
         }),
         CustomTextField.createFromObject({
           id: null,
           key: 'Second custom field',
-          value: ''
+          value: '',
+          description: ''
         })
       ]
 
@@ -118,11 +126,13 @@ describe('CustomTextFieldSerializer', () => {
       expect(elements[0]).toEqual({
         id: '1',
         key: 'First custom field',
-        value: 'First custom value'
+        value: 'First custom value',
+        description: 'First description'
       })
       expect(elements[1]).toEqual({
         key: 'Second custom field',
-        value: ''
+        value: '',
+        description: ''
       })
     })
   })
@@ -131,7 +141,8 @@ describe('CustomTextFieldSerializer', () => {
       const customfield = CustomTextField.createFromObject({
         id: '123',
         key: 'some key',
-        value: 'test test test'
+        value: 'test test test',
+        description: 'some description'
       })
       const serializer = new CustomTextFieldSerializer(CustomTextFieldEntityType.DEVICE)
       const deviceId = '456'
@@ -153,6 +164,8 @@ describe('CustomTextFieldSerializer', () => {
       expect(jsonApiPayload.attributes.key).toEqual('some key')
       expect(jsonApiPayload.attributes).toHaveProperty('value')
       expect(jsonApiPayload.attributes.value).toEqual('test test test')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('some description')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
       expect(jsonApiPayload.relationships!.device).toHaveProperty('data')
@@ -166,7 +179,8 @@ describe('CustomTextFieldSerializer', () => {
       const customfield = CustomTextField.createFromObject({
         id: '123',
         key: 'some key',
-        value: 'test test test'
+        value: 'test test test',
+        description: 'some description'
       })
       const serializer = new CustomTextFieldSerializer(CustomTextFieldEntityType.CONFIGURATION)
       const configurationId = '456'
@@ -188,6 +202,8 @@ describe('CustomTextFieldSerializer', () => {
       expect(jsonApiPayload.attributes.key).toEqual('some key')
       expect(jsonApiPayload.attributes).toHaveProperty('value')
       expect(jsonApiPayload.attributes.value).toEqual('test test test')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('some description')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('configuration')
       expect(jsonApiPayload.relationships!.configuration).toHaveProperty('data')
@@ -201,7 +217,8 @@ describe('CustomTextFieldSerializer', () => {
       const customfield = CustomTextField.createFromObject({
         id: null,
         key: 'some key',
-        value: 'test test test'
+        value: 'test test test',
+        description: 'some description'
       })
       const serializer = new CustomTextFieldSerializer(CustomTextFieldEntityType.DEVICE)
       const deviceId = '456'
@@ -222,6 +239,8 @@ describe('CustomTextFieldSerializer', () => {
       expect(jsonApiPayload.attributes.key).toEqual('some key')
       expect(jsonApiPayload.attributes).toHaveProperty('value')
       expect(jsonApiPayload.attributes.value).toEqual('test test test')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('some description')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
       expect(jsonApiPayload.relationships!.device).toHaveProperty('data')
