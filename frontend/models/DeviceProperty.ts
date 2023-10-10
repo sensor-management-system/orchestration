@@ -260,6 +260,9 @@ export class DeviceProperty implements IDeviceProperty {
   }
 
   toString (): string {
-    return this.label || this.propertyName
+    const propertyName = this.propertyName ?? ''
+    const label = this.label ?? ''
+    const unit = this.unitName ?? ''
+    return `${propertyName}${label ? ` - ${label}` : ''}${unit ? ` (${unit})` : ''}`
   }
 }
