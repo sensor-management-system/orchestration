@@ -63,6 +63,10 @@ paths = {
     url_list_endpoint: {
         "get": {
             "tags": ["Static location actions"],
+            "parameters": [
+                {"$ref": "#/components/parameters/page_number"},
+                {"$ref": "#/components/parameters/page_size"},
+            ],
             "responses": {
                 "200": {"$ref": "#/components/responses/StaticLocationAction_coll"}
             },

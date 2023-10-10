@@ -744,3 +744,23 @@ class TestDeviceService(BaseTestCase):
                         update_external_metadata.call_args.args[0].id, configuration.id
                     )
         self.assertEqual(resp.status_code, 200)
+
+    def test_zero_page_size_query_parameter(self):
+        """Ensure we handle zero page sizes as successful."""
+        resp = self.client.get(f"{self.device_url}?page[size]=0")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_negative_page_size_query_parameter(self):
+        """Ensure we handle negative page sizes as 4xx errors."""
+        resp = self.client.get(f"{self.device_url}?page[size]=-1")
+        self.assertEqual(resp.status_code, 400)
+
+    def test_zero_page_number_query_parameter(self):
+        """Ensure we handle zero page numbers as 4xx errors."""
+        resp = self.client.get(f"{self.device_url}?page[number]=0")
+        self.assertEqual(resp.status_code, 400)
+
+    def test_negative_page_number_query_parameter(self):
+        """Ensure we handle negative page numbers as 4xx errors."""
+        resp = self.client.get(f"{self.device_url}?page[number]=-1")
+        self.assertEqual(resp.status_code, 400)

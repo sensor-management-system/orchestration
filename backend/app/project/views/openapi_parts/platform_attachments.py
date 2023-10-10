@@ -17,6 +17,7 @@ paths = {
             "tags": ["Platform attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {
@@ -33,9 +34,7 @@ paths = {
             "responses": {
                 "200": {
                     "description": "List of platform attachments",
-                    "content": {
-                        "application/vnd.api+json": schema_mapper.get_list()
-                    }
+                    "content": {"application/vnd.api+json": schema_mapper.get_list()},
                 }
             },
             "description": "Retrieve PlatformAttachment from platform_attachment",
@@ -55,7 +54,7 @@ paths = {
                     "description": "Payload of the created platform attachment",
                     "content": {
                         "application/vnd.api+json": schema_mapper.get_one(),
-                    }
+                    },
                 },
                 "401": {
                     "description": "Authentification required.",
@@ -83,7 +82,7 @@ paths = {
                     "description": "Instance of a platform attachment",
                     "content": {
                         "application/vnd.api+json": schema_mapper.get_one(),
-                    }
+                    },
                 }
             },
             "description": "Retrieve PlatformAttachment from platform_attachment",
@@ -96,14 +95,14 @@ paths = {
                 "description": "Payload to update a platform attachment",
                 "content": {
                     "application/vnd.api+json": schema_mapper.patch(),
-                }
+                },
             },
             "responses": {
                 "200": {
                     "description": "Updated platform attachment",
                     "content": {
                         "application/vnd.api+json": schema_mapper.get_one(),
-                    }
+                    },
                 },
                 "401": {
                     "description": "Authentification required.",
@@ -191,12 +190,9 @@ paths = {
 }
 
 components = {
-    "requestBodies": {
-    },
-    "schemas": {
-    },
-    "responses": {
-    },
+    "requestBodies": {},
+    "schemas": {},
+    "responses": {},
     "parameters": {
         "platform_attachment_id": {
             "name": "platform_attachment_id",
