@@ -79,11 +79,12 @@ permissions and limitations under the Licence.
         </v-row>
         <v-row>
           <v-col cols="12">
-            <v-text-field
+            <autocomplete-text-input
               v-model="attachment.label"
               label="Label"
               required
               class="required"
+              endpoint="attachment-labels"
               :rules="[rules.required]"
             />
           </v-col>
@@ -138,13 +139,14 @@ import { IUploadResult } from '@/services/sms/UploadApi'
 
 import { Attachment } from '@/models/Attachment'
 
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
 @Component({
-  components: { SaveAndCancelButtons },
+  components: { AutocompleteTextInput, SaveAndCancelButtons },
   middleware: ['auth'],
   methods: {
     ...mapActions('devices', ['addDeviceAttachment', 'loadDeviceAttachments']),

@@ -67,11 +67,12 @@ permissions and limitations under the Licence.
                 :rules="valueCopy.isUpload ? [] : [rules.required, rules.validUrl]"
                 :disabled="valueCopy.isUpload"
               />
-              <v-text-field
+              <autocomplete-text-input
                 v-model="valueCopy.label"
                 label="Label"
                 required
                 class="required"
+                endpoint="attachment-labels"
                 :rules="[rules.required]"
               />
               <v-textarea
@@ -105,6 +106,7 @@ import { Attachment } from '@/models/Attachment'
 import { Rules } from '@/mixins/Rules'
 
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
@@ -115,6 +117,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
  */
 @Component({
   components: {
+    AutocompleteTextInput,
     SaveAndCancelButtons
   },
   middleware: ['auth'],

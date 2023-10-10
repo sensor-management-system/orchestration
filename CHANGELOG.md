@@ -11,6 +11,7 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Added:
 - description fields for device properties, attachments & custom fields
+- autocompletion for attachment labels
 - automatic selection of measured quantities and parameters for action data if there is only one
   element to select
 
