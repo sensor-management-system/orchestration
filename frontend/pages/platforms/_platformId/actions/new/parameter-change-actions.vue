@@ -122,6 +122,10 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
   created () {
     if (this.chosenKindOfPlatformAction === null) {
       this.$router.push('/platforms/' + this.platformId + '/actions')
+      return
+    }
+    if (this.platformParameters.length === 1) {
+      this.parameterChangeAction.parameter = this.platformParameters[0]
     }
   }
 
