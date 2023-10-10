@@ -88,7 +88,7 @@ permissions and limitations under the Licence.
           <label>Measured quantities</label>
           <ul>
             <li v-for="measuredQuantity in value.measuredQuantities" :key="measuredQuantity.id">
-              {{ generateMeasuredQuantityLabel(measuredQuantity) }}
+              {{ measuredQuantity }}
             </li>
           </ul>
         </div>
@@ -115,7 +115,6 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
 import { Attachment } from '@/models/Attachment'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
-import { DeviceProperty } from '@/models/DeviceProperty'
 
 @Component({
   filters: {
@@ -144,16 +143,6 @@ export default class DeviceCalibrationActionCard extends Vue {
 
   openAttachment (attachment: Attachment) {
     this.$emit('open-attachment', attachment)
-  }
-
-  generateMeasuredQuantityLabel (measuredQuantity: DeviceProperty) {
-    if (measuredQuantity) {
-      const propertyName = measuredQuantity.propertyName ?? ''
-      const label = measuredQuantity.label ?? ''
-      const unit = measuredQuantity.unitName ?? ''
-      return `${propertyName} ${label ? `- ${label}` : ''} ${unit ? `(${unit})` : ''}`
-    }
-    return ''
   }
 }
 </script>
