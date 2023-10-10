@@ -11,6 +11,10 @@ paths = {
     "/dynamic-location-actions": {
         "get": {
             "tags": ["Dynamic location actions"],
+            "parameters": [
+                {"$ref": "#/components/parameters/page_number"},
+                {"$ref": "#/components/parameters/page_size"},
+            ],
             "responses": {
                 "200": {"$ref": "#/components/responses/DynamicLocationAction_coll"}
             },
