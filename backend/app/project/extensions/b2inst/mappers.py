@@ -33,7 +33,6 @@ class B2InstDeviceMapper:
         return schemas.B2InstDraftPost(
             community=community,
             open_access=open_access,
-            name=self._device_name(device),
             Name=self._device_name(device),
             Description=device.description,
             Owner=self._device_owners(device),
@@ -178,7 +177,6 @@ class B2InstPlatformMapper:
         return schemas.B2InstDraftPost(
             community=community,
             open_access=open_access,
-            name=self._platform_name(platform),
             Name=self._platform_name(platform),
             Description=platform.description,
             Owner=self._platform_owners(platform),
@@ -373,7 +371,6 @@ class B2InstConfigurationMapper:
         return schemas.B2InstDraftPost(
             community=community,
             open_access=open_access,
-            name=configuration.label,
             Name=configuration.label,
             Description=configuration.description,
             Owner=self._configuration_owners(configuration),
@@ -434,11 +431,6 @@ class B2InstDraftMapper:
     def to_json_patch(self, draft, existing):
         """Transform to a json patch request setting all the field that may changed."""
         result = [
-            {
-                "op": "replace",
-                "path": "/name",
-                "value": draft.name,
-            },
             {
                 "op": "replace",
                 "path": "/Name",

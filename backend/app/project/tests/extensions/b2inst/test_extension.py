@@ -134,7 +134,7 @@ class TestB2Inst(BaseTestCase):
 
             find_community.assert_called_once()
             create_draft.assert_called_once()
-            self.assertEqual(create_draft.call_args.args[0].name, "Test device")
+            self.assertEqual(create_draft.call_args.args[0].Name, "Test device")
             publish_draft.assert_called_with("42")
             get_record_data.assert_called_with("42")
 
@@ -170,7 +170,7 @@ class TestB2Inst(BaseTestCase):
 
             find_community.assert_called_once()
             create_draft.assert_called_once()
-            self.assertEqual(create_draft.call_args.args[0].name, "Test platform")
+            self.assertEqual(create_draft.call_args.args[0].Name, "Test platform")
             publish_draft.assert_called_with("42")
             get_record_data.assert_called_with("42")
 
@@ -206,7 +206,7 @@ class TestB2Inst(BaseTestCase):
 
             find_community.assert_called_once()
             create_draft.assert_called_once()
-            self.assertEqual(create_draft.call_args.args[0].name, "Test configuration")
+            self.assertEqual(create_draft.call_args.args[0].Name, "Test configuration")
             publish_draft.assert_called_with("42")
             get_record_data.assert_called_with("42")
 
@@ -237,7 +237,7 @@ class TestB2Inst(BaseTestCase):
                     self.assertTrue("api/records/42" in url)
                     kwargs = requests_patch.call_args.kwargs
                     data = json.loads(kwargs["data"])
-                    name_change = [x for x in data if x["path"] == "/name"][0]
+                    name_change = [x for x in data if x["path"] == "/Name"][0]
                     self.assertEqual(name_change["value"], "Test device")
 
     def test_update_external_metadata_platform(self):
@@ -261,7 +261,7 @@ class TestB2Inst(BaseTestCase):
                     self.assertTrue("api/records/42" in url)
                     kwargs = requests_patch.call_args.kwargs
                     data = json.loads(kwargs["data"])
-                    name_change = [x for x in data if x["path"] == "/name"][0]
+                    name_change = [x for x in data if x["path"] == "/Name"][0]
                     self.assertEqual(name_change["value"], "Test platform")
 
     def test_update_external_metadata_configuration(self):
@@ -285,7 +285,7 @@ class TestB2Inst(BaseTestCase):
                     self.assertTrue("api/records/42" in url)
                     kwargs = requests_patch.call_args.kwargs
                     data = json.loads(kwargs["data"])
-                    name_change = [x for x in data if x["path"] == "/name"][0]
+                    name_change = [x for x in data if x["path"] == "/Name"][0]
                     self.assertEqual(name_change["value"], "Test configuration")
 
     def test_get_communities(self):
@@ -339,7 +339,6 @@ class TestB2Inst(BaseTestCase):
         draft = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="test name",
             Name="test Name",
             Description="test description",
             Owner=[],
@@ -364,7 +363,6 @@ class TestB2Inst(BaseTestCase):
             expected_data = {
                 "community": "A",
                 "open_access": True,
-                "name": "test name",
                 "Name": "test Name",
                 "Description": "test description",
                 "Owner": [],

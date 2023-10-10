@@ -136,7 +136,6 @@ class B2InstDraftPost:
 
     community: str
     open_access: bool
-    name: str
     Name: str
     Description: str
     Owner: typing.List[B2InstOwner]
@@ -154,7 +153,6 @@ class B2InstDraftPost:
         result = {
             "community": self.community,
             "open_access": self.open_access,
-            "name": self.name,
             "Name": self.Name,
             "Description": self.Description,
             "Owner": [o.dict() for o in self.Owner],
