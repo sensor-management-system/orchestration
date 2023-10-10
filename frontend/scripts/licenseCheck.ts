@@ -63,12 +63,12 @@ const FILE_PATTERN = [
  * see https://github.com/isaacs/node-glob#glob-primer
  */
 const IGNORE_PATTERN = [
-  './coverage/**/*',
-  './dist/**/*',
-  './doc/**/*',
-  './docker/**/*',
-  './static/**/*',
-  './node_modules/**/*'
+  'coverage/**/*',
+  'dist/**/*',
+  'doc/**/*',
+  'docker/**/*',
+  'static/**/*',
+  'node_modules/**/*'
 ]
 /**
  * The options for glob, per default only ignore is used
@@ -96,15 +96,10 @@ async function main () {
   // get all files that match the file pattern
   const filenameResults: string[][] = await Promise.all(
     FILE_PATTERN.map((pattern: string): Promise<string[]> => {
-      // we have to wrap the callback function for glob in a promise to have it
-      // under controll when it is called
-      return new Promise((resolve, reject) => {
-        glob(
-          pattern,
-          GLOB_OPTIONS,
-          (error: Error | null, filenames: string[]) => error === null ? resolve(filenames) : reject(error)
-        )
-      })
+      return glob(
+        pattern,
+        GLOB_OPTIONS
+      )
     })
   )
 

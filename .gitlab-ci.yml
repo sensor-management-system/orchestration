@@ -71,7 +71,7 @@ build-backend-test-image:
 
 check-lint-frontend:
   stage: check
-  image: node:16.0.0-buster
+  image: node:18.18.0-buster
   before_script:
     - cd frontend
     - node -v
@@ -96,7 +96,7 @@ check-lint-frontend:
 
 check-build-frontend:
   stage: check
-  image: node:16.0.0-buster
+  image: node:18.18.0-buster
   before_script:
     - cd frontend
     - node -v
@@ -121,7 +121,7 @@ check-build-frontend:
 
 check-license-frontend:
   stage: check
-  image: node:16.0.0-buster
+  image: node:18.18.0-buster
   before_script:
     - cd frontend
     - node -v
@@ -197,7 +197,7 @@ extract-openapi:
 
 test-frontend-unit-tests:
   stage: test
-  image: node:16.0.0-buster
+  image: node:18.18.0-buster
   before_script:
     - cd frontend
     - node -v

@@ -30,7 +30,6 @@
  * permissions and limitations under the Licence.
  */
 
-// eslint-disable-next-line
 import { AxiosInstance, Method } from 'axios'
 
 import { DateTime } from 'luxon'
@@ -418,7 +417,6 @@ export class ConfigurationApi {
     })
   }
 
-  // eslint-disable-next-line
   deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }
