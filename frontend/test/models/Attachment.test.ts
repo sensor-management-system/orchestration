@@ -38,6 +38,7 @@ describe('Attachment Models', () => {
       id: '1',
       url: 'https://foo/test.png',
       label: 'Testpicture',
+      description: 'An example attachment',
       isUpload: true,
       createdAt: DateTime.utc(2023, 2, 28, 12, 0, 0)
     })
@@ -45,6 +46,7 @@ describe('Attachment Models', () => {
     expect(attachment).toHaveProperty('id', '1')
     expect(attachment).toHaveProperty('url', 'https://foo/test.png')
     expect(attachment).toHaveProperty('label', 'Testpicture')
+    expect(attachment).toHaveProperty('description', 'An example attachment')
     expect(attachment).toHaveProperty('isUpload', true)
     expect(attachment).toHaveProperty('createdAt', DateTime.utc(2023, 2, 28, 12, 0, 0))
   })

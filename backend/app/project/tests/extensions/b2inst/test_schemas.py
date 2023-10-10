@@ -202,7 +202,6 @@ class TestB2InstDraftPost(TestCase):
         draft_post = schemas.B2InstDraftPost(
             community="0000-0001",
             open_access=True,
-            name="Name1",
             Name="Name2",
             Description="Some text",
             Owner=[
@@ -251,7 +250,6 @@ class TestB2InstDraftPost(TestCase):
         expected = {
             "community": "0000-0001",
             "open_access": True,
-            "name": "Name1",
             "Name": "Name2",
             "Description": "Some text",
             "Owner": [
@@ -284,7 +282,6 @@ class TestB2InstDraftPost(TestCase):
         draft_post = schemas.B2InstDraftPost(
             community="0000-0001",
             open_access=True,
-            name="Name1",
             Name="Name2",
             Description="Some text",
             Owner=[
@@ -327,7 +324,6 @@ class TestB2InstDraftPost(TestCase):
         expected = {
             "community": "0000-0001",
             "open_access": True,
-            "name": "Name1",
             "Name": "Name2",
             "Description": "Some text",
             "Owner": [

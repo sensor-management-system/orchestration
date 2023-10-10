@@ -5,12 +5,19 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """External openapi spec file for site attachments."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.site_attachment_schema import SiteAttachmentSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(SiteAttachmentSchema)
+
 paths = {
     "/site-attachments": {
         "get": {
             "tags": ["Site attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {"$ref": "#/components/parameters/label"},
@@ -19,16 +26,31 @@ paths = {
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/SiteAttachment_coll"}
+                "200": {
+                    "description": "List of site attachments",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
             },
             "description": "Retrieve SiteAttachment from site_attachment",
             "operationId": "RetrieveacollectionofSiteAttachmentobjects_0",
         },
         "post": {
             "tags": ["Site attachments"],
-            "requestBody": {"$ref": "#/components/requestBodies/SiteAttachment_inst"},
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
+            },
             "responses": {
-                "201": {"$ref": "#/components/responses/SiteAttachment_coll"}
+                "201": {
+                    "description": "Payload of the created site attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
             "operationId": "CreateSiteAttachment_0",
         },
@@ -41,7 +63,12 @@ paths = {
                 {"$ref": "#/components/parameters/site_attachment_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/SiteAttachment_coll"}
+                "200": {
+                    "description": "Instance of a site attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Retrieve SiteAttachment from site_attachment",
             "operationId": "RetrieveSiteAttachmentinstance_0",
@@ -51,15 +78,18 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/site_attachment_id"}],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/SiteAttachment"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
                 "description": "SiteAttachment attributes",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/SiteAttachment_coll"}
+                "200": {
+                    "description": "Payload of the updated site attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
             "description": "Update SiteAttachment attributes",
             "operationId": "UpdateSiteAttachment_0",
@@ -113,196 +143,6 @@ paths = {
     },
 }
 components = {
-    "requestBodies": {
-        "SiteAttachment_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "site_attachment",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "required": ["label", "url"],
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["site"],
-                                        "properties": {
-                                            "site": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": ("site"),
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            }
-                                        },
-                                    },
-                                },
-                            }
-                        },
-                        "description": "SiteAttachment post;",
-                    }
-                }
-            }
-        },
-    },
-    "schemas": {
-        "SiteAttachment": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "label": {"type": "string"},
-                                "url": {"type": "string", "format": "url"},
-                                "is_upload": {"type": "boolean"},
-                            },
-                        },
-                        "type": {"type": "string"},
-                        "id": {"type": "string"},
-                    },
-                    "example": {
-                        "attributes": {"label": "", "url": ""},
-                        "type": "site_attachment",
-                        "id": "0",
-                    },
-                }
-            },
-            "description": "SiteAttachment Schema;",
-        },
-    },
-    "responses": {
-        "SiteAttachment_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                            "is_upload": {
-                                                "type": "boolean",
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                        },
-                                    },
-                                    "type": {"type": "string"},
-                                    "id": {"type": "string"},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "site": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "created_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "label": "",
-                                        "url": "",
-                                        "is_upload": False,
-                                        "created_at": "2023-03-14T12:00:00+00:00",
-                                        "updated_at": "2023-03-14T13:00:00+00:00",
-                                    },
-                                    "relationships": {
-                                        "site": {"data": {"type": "site", "id": "0"}},
-                                        "created_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "123",
-                                            }
-                                        },
-                                        "updated_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "124",
-                                            }
-                                        },
-                                    },
-                                    "type": "site_attachment",
-                                    "id": "0",
-                                },
-                            }
-                        },
-                        "description": "SiteAttachment get;",
-                    }
-                }
-            },
-            "description": "SiteAttachment",
-        },
-    },
     "parameters": {
         "site_attachment_id": {
             "name": "site_attachment_id",

@@ -30,6 +30,7 @@ class DeviceAttachmentSchema(Schema):
     id = fields.Integer(as_string=True)
     label = fields.Str(required=True)
     url = fields.Str(required=True)
+    description = fields.Str(allow_none=True)
     is_upload = fields.Bool(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)

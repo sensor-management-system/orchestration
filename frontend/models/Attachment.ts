@@ -36,6 +36,7 @@ export interface IAttachment {
   id: string | null
   url: string
   label: string
+  description: string
   isUpload: boolean
   createdAt: DateTime | null
 }
@@ -55,6 +56,7 @@ export class Attachment implements IAttachment {
   private _id: string | null = null
   private _url: string = ''
   private _label: string = ''
+  private _description: string = ''
   private _isUpload: boolean = false
   private _createdAt: DateTime | null = null
 
@@ -75,6 +77,7 @@ export class Attachment implements IAttachment {
     attachment.id = someObject.id || null
     attachment.url = someObject.url || ''
     attachment.label = someObject.label || ''
+    attachment.description = someObject.description || ''
     attachment.isUpload = someObject.isUpload
     attachment.createdAt = someObject.createdAt
     return attachment
@@ -102,6 +105,14 @@ export class Attachment implements IAttachment {
 
   set label (label: string) {
     this._label = label
+  }
+
+  get description (): string {
+    return this._description
+  }
+
+  set description (newDescription: string) {
+    this._description = newDescription
   }
 
   get isUpload (): boolean {

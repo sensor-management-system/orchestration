@@ -57,6 +57,7 @@ class TestConfigurationAttachmentServices(BaseTestCase):
                 "attributes": {
                     "url": "https://www.gfz-potsdam.de",
                     "label": "GFZ Homepage",
+                    "description": "The GFZ homepage",
                 },
                 "relationships": {
                     "configuration": {
@@ -90,6 +91,7 @@ class TestConfigurationAttachmentServices(BaseTestCase):
         configuration_attachment = configuration_attachments[0]
         self.assertEqual(configuration_attachment.url, "https://www.gfz-potsdam.de")
         self.assertEqual(configuration_attachment.label, "GFZ Homepage")
+        self.assertEqual(configuration_attachment.description, "The GFZ homepage")
         self.assertEqual(configuration_attachment.configuration_id, configuration.id)
         self.assertEqual(
             str(configuration_attachment.configuration_id),
@@ -198,6 +200,7 @@ class TestConfigurationAttachmentServices(BaseTestCase):
         configuration_attachment1 = ConfigurationAttachment(
             label="GFZ",
             url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
             configuration=configuration1,
         )
         configuration_attachment2 = ConfigurationAttachment(
@@ -250,6 +253,10 @@ class TestConfigurationAttachmentServices(BaseTestCase):
                     self.assertEqual(
                         attachment["attributes"]["label"],
                         configuration_attachment1.label,
+                    )
+                    self.assertEqual(
+                        attachment["attributes"]["description"],
+                        "The GFZ homepage",
                     )
                     # and we want to check the link for the configuration as well
                     configuration_link = attachment["relationships"]["configuration"][

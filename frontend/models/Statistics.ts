@@ -34,6 +34,7 @@ export interface IStatisticsCount {
   configurations: number,
   devices: number,
   platforms: number,
+  sites: number,
   users: number
 }
 
@@ -41,6 +42,7 @@ export class StatisticsCount implements IStatisticsCount {
   private readonly _configurations: number = 0
   private readonly _devices: number = 0
   private readonly _platforms: number = 0
+  private readonly _sites: number = 0
   private readonly _users: number = 0
 
   get configurations (): number {
@@ -53,6 +55,10 @@ export class StatisticsCount implements IStatisticsCount {
 
   get platforms (): number {
     return this._platforms
+  }
+
+  get sites (): number {
+    return this._sites
   }
 
   get users (): number {

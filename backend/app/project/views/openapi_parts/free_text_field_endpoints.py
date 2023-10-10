@@ -284,6 +284,12 @@ paths = {
         response_description="List of distinct manufacturer names for platforms.",
     ),
     **template(
+        endpoint="/controller/device-attachment-labels",
+        description="Get the list of distinct labels of all device attachments.",
+        operation_id="controller_device_attachment_labels",
+        response_description="List of distinct device attachment labels.",
+    ),
+    **template(
         endpoint="/controller/device-custom-field-keys",
         description="Get the list of distinct custom field keys of all devices.",
         operation_id="controller_device_custom_field_keys",
@@ -332,6 +338,12 @@ paths = {
         response_description="List of distinct projects for configurations.",
     ),
     **template(
+        endpoint="/controller/configuration-attachment-labels",
+        description="Get the list of distinct labels of all configuration attachments.",
+        operation_id="controller_configuration_attachment_labels",
+        response_description="List of distinct configuration attachment labels.",
+    ),
+    **template(
         endpoint="/controller/configuration-parameter-labels",
         description="Get the list of distinct labels of all configuration parameters.",
         operation_id="controller_configuration_parameter_labels",
@@ -378,6 +390,12 @@ paths = {
         ),
         operation_id="controller_platform_software_update_action_descriptions",
         response_description="List of distinct software update action descriptions for platforms.",
+    ),
+    **template(
+        endpoint="/controller/platform-attachment-labels",
+        description="Get the list of distinct labels of all platform attachments.",
+        operation_id="controller_platform_attachment_labels",
+        response_description="List of distinct platform attachment labels.",
     ),
     **template(
         endpoint="/controller/platform-parameter-labels",
@@ -443,6 +461,12 @@ paths = {
         response_description="List of distinct zip codes for sites.",
     ),
     **template(
+        endpoint="/controller/site-attachment-labels",
+        description="Get the list of distinct labels of all site attachments.",
+        operation_id="controller_site_attachment_labels",
+        response_description="List of distinct site attachment labels.",
+    ),
+    **template(
         endpoint="/controller/configuration-custom-field-keys",
         description="Get the list of distinct configuration custom field keys of all devices.",
         operation_id="controller_configuration_custom_field_keys",
@@ -459,5 +483,11 @@ paths = {
         description="Get the list of distinct organization field values of all contacts.",
         operation_id="controller_contact_organizations",
         response_description="List of distinct organizations.",
+    ),
+    **template(
+        endpoint="/controller/attachment-labels",
+        description="Get the list of distinct labels of all attachments.",
+        operation_id="controller_attachment_labels",
+        response_description="List of distinct attachment labels.",
     ),
 }

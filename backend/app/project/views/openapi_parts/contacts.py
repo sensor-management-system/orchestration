@@ -11,6 +11,7 @@ paths = {
         "get": {
             "tags": ["Contacts"],
             "parameters": [
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {"$ref": "#/components/parameters/website"},

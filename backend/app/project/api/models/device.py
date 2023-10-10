@@ -175,6 +175,7 @@ class Device(
                     "label": type_keyword_and_full_searchable,
                     # But for the url we will not search by keyword.
                     "url": type_text_full_searchable,
+                    "description": type_text_full_searchable,
                 },
             },
             "device_contact_roles": {
@@ -193,6 +194,7 @@ class Device(
                     "key": type_keyword_and_full_searchable,
                     # The same for the value.
                     "value": type_keyword_and_full_searchable,
+                    "description": type_keyword_and_full_searchable,
                 },
             },
             "properties": {
@@ -212,6 +214,7 @@ class Device(
                     "resolution_unit_uri": type_keyword,
                     "aggregation_type_name": type_keyword_and_full_searchable,
                     "aggregation_type_uri": type_keyword,
+                    "description": type_text_full_searchable,
                 },
             },
             "device_parameters": {

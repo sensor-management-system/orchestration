@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col
         cols="12"
-        md="7"
+        md="6"
       >
         <v-textarea
           v-if="!valueEndpoint"
@@ -96,6 +96,18 @@ permissions and limitations under the Licence.
         class="text-right"
       >
         <slot name="actions" />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <v-textarea
+          :value="value.description"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Description"
+          rows="3"
+          @input="update('description', $event)"
+        />
       </v-col>
     </v-row>
   </v-form>
@@ -183,6 +195,9 @@ export default class CustomFieldForm extends mixins(Rules) {
         break
       case 'value':
         newObj.value = value
+        break
+      case 'description':
+        newObj.description = value
         break
       default:
         throw new TypeError('key ' + key + ' is not valid')

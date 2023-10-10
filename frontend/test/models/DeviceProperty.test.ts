@@ -55,7 +55,8 @@ describe('DeviceProperty Models', () => {
       resolutionUnitUri: 'http://foo/unit/1',
       resolutionUnitName: 'mm',
       aggregationTypeUri: 'http://foo/aggregationtypes/1',
-      aggregationTypeName: 'Average'
+      aggregationTypeName: 'Average',
+      description: 'test description'
     })
     expect(typeof prop).toBe('object')
     expect(prop).toHaveProperty('id', null)
@@ -75,6 +76,23 @@ describe('DeviceProperty Models', () => {
     expect(prop).toHaveProperty('resolutionUnitName', 'mm')
     expect(prop).toHaveProperty('aggregationTypeUri', 'http://foo/aggregationtypes/1')
     expect(prop).toHaveProperty('aggregationTypeName', 'Average')
+    expect(prop).toHaveProperty('description', 'test description')
     expect(prop.measuringRange instanceof MeasuringRange).toBe(true)
+  })
+  it('should return a useful string with some information', () => {
+    const dp1 = new DeviceProperty()
+    dp1.propertyName = 'abc'
+    expect(dp1.toString()).toEqual('abc')
+
+    const dp2 = new DeviceProperty()
+    dp2.propertyName = 'abc'
+    dp2.label = 'def'
+    expect(dp2.toString()).toEqual('abc - def')
+
+    const dp3 = new DeviceProperty()
+    dp3.propertyName = 'abc'
+    dp3.label = 'def'
+    dp3.unitName = 'm'
+    expect(dp3.toString()).toEqual('abc - def (m)')
   })
 })

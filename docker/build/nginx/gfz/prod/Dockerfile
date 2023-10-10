@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-FROM node:16.17.1-buster as js-builder
+FROM node:18.18.0-buster as js-builder
 
 # First the urls for sms backend and cv backend
 ENV SMS_BACKEND_URL /backend/api/v1
@@ -33,7 +33,7 @@ ENV NUXT_ENV_OIDC_GRANT_TYPE authorization_code
 ENV NUXT_ENV_OIDC_CHALLANGE S256
 ENV NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME 1800000
 
-# TODO Reactivate to make PID system active
+# TODO: Uncomment to reactivate the pid service in frontend
 #ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
 
 ENV NUXT_ENV_MATOMO_URL https://webstats.gfz-potsdam.de/

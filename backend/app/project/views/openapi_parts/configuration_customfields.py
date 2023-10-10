@@ -1,10 +1,18 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Openapi parts for configuration custom fields."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.configuration_customfield_schema import (
+    ConfigurationCustomFieldSchema,
+)
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(ConfigurationCustomFieldSchema)
 
 paths = {
     "/configuration-customfields": {
@@ -12,6 +20,7 @@ paths = {
             "tags": ["Configuration custom fields"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {
@@ -39,7 +48,12 @@ paths = {
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/ConfigurationCustomField_coll"}
+                "200": {
+                    "description": "List of configuration custom fields",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
             },
             "description": "Retrieve a list of configuration custom fields",
             "operationId": "RetrieveacollectionofConfigurationCustomFieldobjects_0",
@@ -47,10 +61,17 @@ paths = {
         "post": {
             "tags": ["Configuration custom fields"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/ConfigurationCustomField_inst"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                }
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/ConfigurationCustomField_coll"}
+                "201": {
+                    "description": "Payload of the created configuration custom field",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "operationId": "CreateConfigurationCustomField_0",
             "parameters": [],
@@ -67,11 +88,7 @@ paths = {
                 "200": {
                     "description": "Request fulfilled, document follows",
                     "content": {
-                        "application/vnd.api+json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ConfigurationCustomField"
-                            }
-                        }
+                        "application/vnd.api+json": schema_mapper.get_one(),
                     },
                 }
             },
@@ -85,17 +102,18 @@ paths = {
             ],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/ConfigurationCustomField"
-                        }
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
                 "description": "ConfigurationCustomField update payload",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/ConfigurationCustomField_coll"}
+                "200": {
+                    "description": "Payload of the updated configuration custom field",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Update ConfigurationCustomField attributes",
             "operationId": "UpdateConfigurationCustomField_0",
@@ -112,111 +130,12 @@ paths = {
 }
 
 components = {
-    "responses": {
-        "ConfigurationCustomField_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "attributes": {"key": "", "value": ""},
-                                    "type": "configuration_customfield",
-                                    "id": "0",
-                                    "relationships": {
-                                        "configuration": {
-                                            "data": None,
-                                            "links": {
-                                                "self": None,
-                                            },
-                                        }
-                                    },
-                                },
-                                "type": "string",
-                            }
-                        },
-                        "description": "ConfigurationCustomField get;",
-                    }
-                }
-            },
-            "description": "ConfigurationCustomField",
-        },
-    },
-    "requestBodies": {
-        "ConfigurationCustomField_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "key": {"type": "string"},
-                                            "value": {"type": "string"},
-                                        },
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "default": "configuration_customfield",
-                                    },
-                                },
-                                "example": {
-                                    "attributes": {"key": "", "value": ""},
-                                    "relationships": {
-                                        "configuration": {
-                                            "data": {"type": "configuration", "id": "0"}
-                                        }
-                                    },
-                                    "type": "configuration_customfield",
-                                },
-                            }
-                        },
-                        "description": "ConfigurationCustomField post;",
-                    }
-                }
-            }
-        },
-    },
     "parameters": {
         "configuration_custom_field_id": {
             "name": "configuration_custom_field_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
-    "schemas": {
-        "ConfigurationCustomField": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "key": {"type": "string"},
-                                "value": {"type": "string"},
-                            },
-                        },
-                        "id": {"type": "string"},
-                        "type": {"type": "string"},
-                    },
-                    "example": {
-                        "attributes": {"key": "", "value": ""},
-                        "relationships": {
-                            "configuration": {
-                                "data": {"type": "configuration", "id": "0"}
-                            }
-                        },
-                        "type": "configuration_customfield",
-                        "id": "0",
-                    },
-                }
-            },
-            "description": "ConfigurationCustomField Schema;",
         },
     },
 }

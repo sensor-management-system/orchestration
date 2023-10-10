@@ -55,6 +55,7 @@ class TestSiteAttachmentServices(BaseTestCase):
                 "attributes": {
                     "url": "https://www.gfz-potsdam.de",
                     "label": "GFZ Homepage",
+                    "description": "The GFZ homepage",
                 },
                 "relationships": {
                     "site": {"data": {"type": "site", "id": str(site.id)}}
@@ -86,6 +87,7 @@ class TestSiteAttachmentServices(BaseTestCase):
         site_attachment = site_attachments[0]
         self.assertEqual(site_attachment.url, "https://www.gfz-potsdam.de")
         self.assertEqual(site_attachment.label, "GFZ Homepage")
+        self.assertEqual(site_attachment.description, "The GFZ homepage")
         self.assertEqual(site_attachment.site_id, site.id)
         self.assertEqual(
             str(site_attachment.site_id),
@@ -186,6 +188,7 @@ class TestSiteAttachmentServices(BaseTestCase):
         site_attachment1 = SiteAttachment(
             label="GFZ",
             url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
             site=site1,
         )
         site_attachment2 = SiteAttachment(
@@ -238,6 +241,9 @@ class TestSiteAttachmentServices(BaseTestCase):
                     self.assertEqual(
                         attachment["attributes"]["label"],
                         site_attachment1.label,
+                    )
+                    self.assertEqual(
+                        attachment["attributes"]["description"], "The GFZ homepage"
                     )
                     # and we want to check the link for the site as well
                     site_link = attachment["relationships"]["site"]["links"]["related"]

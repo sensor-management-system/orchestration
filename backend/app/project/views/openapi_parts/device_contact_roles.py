@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -16,6 +16,10 @@ paths = {
     "/device-contact-roles": {
         "get": {
             "tags": ["Device contact roles"],
+            "parameters": [
+                {"$ref": "#/components/parameters/page_number"},
+                {"$ref": "#/components/parameters/page_size"},
+            ],
             "responses": {
                 "200": {"$ref": "#/components/responses/DeviceContactRole_coll"}
             },

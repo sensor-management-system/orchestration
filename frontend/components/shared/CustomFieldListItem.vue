@@ -30,7 +30,9 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <base-expandable-list-item>
+  <base-expandable-list-item
+    expandable-color="grey lighten-5"
+  >
     <template #dot-menu-items>
       <slot name="dot-menu-items" />
     </template>
@@ -49,21 +51,39 @@ permissions and limitations under the Licence.
         Edit
       </v-btn>
     </template>
+    <template
+      v-if="value.description"
+      #expandable
+    >
+      <v-card-text
+        class="py-2"
+      >
+        {{ value.description }}
+      </v-card-text>
+    </template>
     <template #default>
       <v-row
         no-gutters
       >
         <v-col>
           <label>Key:</label>
-          <expandable-text
-            :value="value.key"
-          />
+          <span @click.stop>
+            <expandable-text
+              :value="value.key"
+              more-icon="mdi-unfold-more-vertical"
+              less-icon="mdi-unfold-less-vertical"
+            />
+          </span>
         </v-col>
         <v-col>
           <label>Value:</label>
-          <expandable-text
-            :value="value.value"
-          />
+          <span @click.stop>
+            <expandable-text
+              :value="value.value"
+              more-icon="mdi-unfold-more-vertical"
+              less-icon="mdi-unfold-less-vertical"
+            />
+          </span>
         </v-col>
       </v-row>
     </template>

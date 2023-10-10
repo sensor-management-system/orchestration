@@ -15,6 +15,7 @@ from .auth.mechanisms.session import SessionAuthMechanism
 from .b2inst.extension import B2Inst
 from .idl import Idl
 from .openidconnect import WellKnownUrlConfigLoader
+from .page_parameter_middleware import PageParameterMiddleware
 from .pid import Pid
 from .pidinst import Pidinst
 from .redirect import RemoveSlashRedirectMiddlware
@@ -33,3 +34,4 @@ auth = Auth(
 idl = Idl()
 pidinst = Pidinst(pid=Pid(), b2inst=B2Inst())
 remove_slash_redirect_middlware = RemoveSlashRedirectMiddlware()
+page_parameter_middleware = PageParameterMiddleware()

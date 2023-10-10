@@ -182,6 +182,7 @@ class Site(
                             "label": type_keyword_and_full_searchable,
                             # But don't allow search for the very same url (unlikely to be needed).
                             "url": type_text_full_searchable,
+                            "description": type_text_full_searchable,
                         },
                     },
                     # As mentioned we don't include the data for the

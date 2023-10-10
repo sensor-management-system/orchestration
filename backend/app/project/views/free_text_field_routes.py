@@ -23,11 +23,13 @@ from sqlalchemy import or_
 from ..api.helpers.errors import ErrorResponse, UnauthorizedError
 from ..api.models import (
     Configuration,
+    ConfigurationAttachment,
     ConfigurationCustomField,
     ConfigurationParameter,
     Contact,
     CustomField,
     Device,
+    DeviceAttachment,
     DeviceCalibrationAction,
     DeviceParameter,
     DeviceProperty,
@@ -36,9 +38,11 @@ from ..api.models import (
     GenericDeviceAction,
     GenericPlatformAction,
     Platform,
+    PlatformAttachment,
     PlatformParameter,
     PlatformSoftwareUpdateAction,
     Site,
+    SiteAttachment,
 )
 from ..api.models.base_model import db
 from ..api.permissions.rules import filter_visible
@@ -128,6 +132,16 @@ class AbstractFreeTextFieldEndpoint(ABC):
             return e.respond()
 
 
+@free_text_field_routes.route(
+    "/controller/configuration-attachment-labels", methods=["GET"]
+)
+@class_based_view
+class ConfigurationAttachmentLabelEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct configuration attachment labels."""
+
+    field = ConfigurationAttachment.label
+
+
 @free_text_field_routes.route("/controller/configuration-labels", methods=["GET"])
 @class_based_view
 class ConfigurationLabelEndPoint(AbstractFreeTextFieldEndpoint):
@@ -195,6 +209,17 @@ class ConfigurationParameterEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct configuration parameter labels."""
 
     field = ConfigurationParameter.label
+
+
+@free_text_field_routes.route("/controller/device-attachment-labels", methods=["GET"])
+@class_based_view
+class DeviceAttachmentLabelEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct device attachment labels."""
+
+    field = DeviceAttachment.label
+    join_field = DeviceAttachment.device
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
 
 
 @free_text_field_routes.route(
@@ -377,6 +402,17 @@ class GenericPlatformActionDescriptionEndPoint(AbstractFreeTextFieldEndpoint):
     created_by_id_field = Platform.created_by_id
 
 
+@free_text_field_routes.route("/controller/platform-attachment-labels", methods=["GET"])
+@class_based_view
+class PlatformAttachmentLabelEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct platform attachment labels."""
+
+    field = PlatformAttachment.label
+    join_field = PlatformAttachment.platform
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
+
+
 @free_text_field_routes.route("/controller/platform-long-names", methods=["GET"])
 @class_based_view
 class PlatformLongNameEndpoint(AbstractFreeTextFieldEndpoint):
@@ -464,6 +500,14 @@ class PlatformSoftwareUpdateActionRepositoryUrlEndPoint(AbstractFreeTextFieldEnd
     created_by_id_field = Platform.created_by_id
 
 
+@free_text_field_routes.route("/controller/site-attachment-labels", methods=["GET"])
+@class_based_view
+class SiteAttachmentLabelEndPoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct site attachment labels."""
+
+    field = SiteAttachment.label
+
+
 @free_text_field_routes.route("/controller/site-buildings", methods=["GET"])
 @class_based_view
 class SiteBuildingEndPoint(AbstractFreeTextFieldEndpoint):
@@ -534,3 +578,48 @@ class ContactOrganizationEndPoint(AbstractFreeTextFieldEndpoint):
     """Endpoint for distinct contact organizations."""
 
     field = Contact.organization
+
+
+@free_text_field_routes.route("/controller/attachment-labels", methods=["GET"])
+@class_based_view
+class AttachmentLabelEndPoiint:
+    """
+    Endpoint for the distinct attachment labels.
+
+    This is a combination of the lists for device attachment labels,
+    as well as the labels of attachments for platforms, sites and
+    configurations.
+    """
+
+    def __call__(self):
+        """Return the list of attachment labels."""
+        try:
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            labels = set()
+
+            visible_device_attachments = filter_visible(
+                db.session.query(DeviceAttachment)
+            )
+            visible_platform_attachments = filter_visible(
+                db.session.query(PlatformAttachment)
+            )
+            visible_configuration_attachments = filter_visible(
+                db.session.query(ConfigurationAttachment)
+            )
+            visible_site_attachments = filter_visible(db.session.query(SiteAttachment))
+
+            for query in [
+                visible_device_attachments.distinct(DeviceAttachment.label),
+                visible_platform_attachments.distinct(PlatformAttachment.label),
+                visible_configuration_attachments.distinct(
+                    ConfigurationAttachment.label
+                ),
+                visible_site_attachments.distinct(SiteAttachment.label),
+            ]:
+                for x in query:
+                    labels.add(x.label)
+
+            return {"data": sorted(labels)}
+        except ErrorResponse as e:
+            return e.respond()

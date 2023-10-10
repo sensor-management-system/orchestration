@@ -58,7 +58,8 @@ describe('CustomFieldForm', () => {
         value: CustomTextField.createFromObject({
           id: '2',
           key: 'foo',
-          value: 'bar'
+          value: 'bar',
+          description: 'The foo'
         })
       }
     })

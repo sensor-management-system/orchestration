@@ -19,6 +19,7 @@ class CustomField(db.Model, IndirectSearchableMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     key = db.Column(db.String(256), nullable=False)
     value = db.Column(db.String(1024), nullable=True)
+    description = db.Column(db.Text, nullable=True)
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
     device = db.relationship(
         "Device",
@@ -32,6 +33,7 @@ class CustomField(db.Model, IndirectSearchableMixin):
         return {
             "key": self.key,
             "value": self.value,
+            "description": self.description,
         }
 
     def get_parent_search_entities(self):

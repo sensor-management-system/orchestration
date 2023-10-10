@@ -59,7 +59,8 @@ describe('DevicePropertySerializer', () => {
           resolutionUnitUri: 'http://foo/unit/1',
           resolutionUnitName: 'mm',
           aggregationTypeUri: 'http://foo/aggregationtypes/1',
-          aggregationTypeName: 'Average'
+          aggregationTypeName: 'Average',
+          description: 'first property'
         }),
         DeviceProperty.createFromObject({
           id: null,
@@ -82,7 +83,8 @@ describe('DevicePropertySerializer', () => {
           resolutionUnitUri: 'http://foo/unit/1',
           resolutionUnitName: 'mm',
           aggregationTypeUri: 'http://foo/aggregationtypes/2',
-          aggregationTypeName: 'Mean'
+          aggregationTypeName: 'Mean',
+          description: 'second property'
         })
       ]
 
@@ -110,7 +112,8 @@ describe('DevicePropertySerializer', () => {
         resolution_unit_uri: 'http://foo/unit/1',
         resolution_unit_name: 'mm',
         aggregation_type_uri: 'http://foo/aggregationtypes/1',
-        aggregation_type_name: 'Average'
+        aggregation_type_name: 'Average',
+        description: 'first property'
       })
       expect(elements[1]).toEqual({
         label: 'Prop 2',
@@ -130,7 +133,8 @@ describe('DevicePropertySerializer', () => {
         resolution_unit_uri: 'http://foo/unit/1',
         resolution_unit_name: 'mm',
         aggregation_type_uri: 'http://foo/aggregationtypes/2',
-        aggregation_type_name: 'Mean'
+        aggregation_type_name: 'Mean',
+        description: 'second property'
       })
     })
   })
@@ -182,7 +186,8 @@ describe('DevicePropertySerializer', () => {
             resolution_unit_uri: 'http://foo/unit/100',
             resolution_unit_name: '°C',
             aggregation_type_uri: 'http://foo/aggregationtypes/2',
-            aggregation_type_name: 'Mean'
+            aggregation_type_name: 'Mean',
+            description: 'abc description'
           },
           relationships: {}
         }],
@@ -212,6 +217,7 @@ describe('DevicePropertySerializer', () => {
       expect(models[0].resolutionUnitName).toEqual('mm')
       expect(models[0].aggregationTypeUri).toEqual('http://foo/aggregationtypes/1')
       expect(models[0].aggregationTypeName).toEqual('Average')
+      expect(models[0].description).toEqual('')
 
       expect(models[1].id).toEqual('456')
       expect(models[1].compartmentName).toEqual('Resources')
@@ -232,6 +238,7 @@ describe('DevicePropertySerializer', () => {
       expect(models[1].resolutionUnitName).toEqual('°C')
       expect(models[1].aggregationTypeUri).toEqual('http://foo/aggregationtypes/2')
       expect(models[1].aggregationTypeName).toEqual('Mean')
+      expect(models[1].description).toEqual('abc description')
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -258,7 +265,8 @@ describe('DevicePropertySerializer', () => {
             resolution_unit_uri: 'http://foo/unit/1',
             resolution_unit_name: 'mm',
             aggregation_type_uri: 'http://foo/aggregationtypes/3',
-            aggregation_type_name: 'Mode'
+            aggregation_type_name: 'Mode',
+            description: 'desc'
           },
           relationships: {}
         },
@@ -286,6 +294,7 @@ describe('DevicePropertySerializer', () => {
       expect(model.resolutionUnitName).toEqual('mm')
       expect(model.aggregationTypeUri).toEqual('http://foo/aggregationtypes/3')
       expect(model.aggregationTypeName).toEqual('Mode')
+      expect(model.description).toEqual('desc')
     })
     it('should also fill the attributes with empty strings if missing', () => {
       const data = {
@@ -319,6 +328,7 @@ describe('DevicePropertySerializer', () => {
       expect(model.resolutionUnitName).toEqual('')
       expect(model.aggregationTypeUri).toEqual('')
       expect(model.aggregationTypeName).toEqual('')
+      expect(model.description).toEqual('')
     })
     it('should handle non-numeric values as null', () => {
       const data = {
@@ -416,7 +426,8 @@ describe('DevicePropertySerializer', () => {
         resolutionUnitUri: 'http://foo/unit/1',
         resolutionUnitName: 'mm',
         aggregationTypeUri: 'http://foo/aggregationtypes/1',
-        aggregationTypeName: 'Average'
+        aggregationTypeName: 'Average',
+        description: 'desc'
       })
       const serializer = new DevicePropertySerializer()
       const deviceId = '456'
@@ -464,6 +475,8 @@ describe('DevicePropertySerializer', () => {
       expect(jsonApiPayload.attributes.aggregation_type_uri).toEqual('http://foo/aggregationtypes/1')
       expect(jsonApiPayload.attributes).toHaveProperty('aggregation_type_name')
       expect(jsonApiPayload.attributes.aggregation_type_name).toEqual('Average')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('desc')
 
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')
@@ -496,7 +509,8 @@ describe('DevicePropertySerializer', () => {
         resolutionUnitUri: 'http://foo/unit/1',
         resolutionUnitName: 'mm',
         aggregationTypeUri: 'http://foo/aggregationtypes/4',
-        aggregationTypeName: 'Sum'
+        aggregationTypeName: 'Sum',
+        description: 'desc'
       })
       const serializer = new DevicePropertySerializer()
       const deviceId = '456'
@@ -543,6 +557,8 @@ describe('DevicePropertySerializer', () => {
       expect(jsonApiPayload.attributes.aggregation_type_uri).toEqual('http://foo/aggregationtypes/4')
       expect(jsonApiPayload.attributes).toHaveProperty('aggregation_type_name')
       expect(jsonApiPayload.attributes.aggregation_type_name).toEqual('Sum')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('desc')
 
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('device')

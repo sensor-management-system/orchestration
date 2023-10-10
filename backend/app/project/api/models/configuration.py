@@ -175,6 +175,7 @@ class Configuration(
                             "label": type_keyword_and_full_searchable,
                             # But don't allow search for the very same url (unlikely to be needed).
                             "url": type_text_full_searchable,
+                            "description": type_text_full_searchable,
                         },
                     },
                     "configuration_parameters": {
@@ -237,6 +238,7 @@ class Configuration(
                             "key": type_keyword_and_full_searchable,
                             # The same for the value.
                             "value": type_keyword_and_full_searchable,
+                            "description": type_keyword_and_full_searchable,
                         },
                     },
                     "site_id": {

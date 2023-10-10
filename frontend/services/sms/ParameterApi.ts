@@ -29,7 +29,7 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
-import { AxiosInstance } from 'axios'
+import axios, { AxiosInstance } from 'axios'
 
 import { HTTP409ConflictError } from '@/services/HTTPErrors'
 import { Parameter } from '@/models/Parameter'
@@ -56,8 +56,10 @@ export class ParameterApi {
     try {
       await this.axiosApi.delete<string, void>(this.basePath + '/' + id)
     } catch (error) {
-      if (error.response.status === 409) {
-        throw new HTTP409ConflictError(error.message)
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          throw new HTTP409ConflictError(error.message)
+        }
       }
       throw error
     }

@@ -144,7 +144,8 @@ describe('SoftwareUpdateActionAttachmentSerializer', () => {
             },
             attributes: {
               url: 'https://foo.de',
-              label: 'Foo.de'
+              label: 'Foo.de',
+              description: 'The foo'
             },
             id: '51',
             links: {
@@ -192,7 +193,8 @@ describe('SoftwareUpdateActionAttachmentSerializer', () => {
             },
             attributes: {
               url: 'https://bar.baz',
-              label: 'Bar.baz'
+              label: 'Bar.baz',
+              description: 'The bar'
             },
             id: '52',
             links: {
@@ -234,6 +236,7 @@ describe('SoftwareUpdateActionAttachmentSerializer', () => {
           id: '1',
           label: 'Foo',
           url: 'https://bar.baz',
+          description: 'The foo',
           isUpload: false,
           createdAt: null
         })
@@ -270,6 +273,7 @@ describe('SoftwareUpdateActionAttachmentSerializer', () => {
           id: '51',
           label: 'Foo.de',
           url: 'https://foo.de',
+          description: 'The foo',
           isUpload: false,
           createdAt: null
         })
@@ -277,6 +281,7 @@ describe('SoftwareUpdateActionAttachmentSerializer', () => {
           id: '52',
           label: 'Bar.baz',
           url: 'https://bar.baz',
+          description: 'The bar',
           isUpload: false,
           createdAt: null
         })
