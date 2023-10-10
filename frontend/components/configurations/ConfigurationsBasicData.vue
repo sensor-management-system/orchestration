@@ -88,7 +88,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Start date</label>
         <span v-if="value.startDate">
-          {{ value.startDate | dateToDateTimeString | orDefault }}
+          {{ value.startDate | toUtcDateTimeStringHHMM | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
         <span v-else>
@@ -98,7 +98,7 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>End date</label>
         <span v-if="value.endDate">
-          {{ value.endDate | dateToDateTimeString | orDefault }}
+          {{ value.endDate | toUtcDateTimeStringHHMM | orDefault }}
           <span class="text-caption text--secondary">(UTC)</span>
         </span>
         <span v-else>
@@ -134,8 +134,6 @@ import { mapActions, mapState } from 'vuex'
 
 import { Configuration } from '@/models/Configuration'
 
-import { dateToDateTimeString } from '@/utils/dateHelper'
-
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
@@ -147,9 +145,6 @@ import { Site } from '@/models/Site'
     PermissionGroupChips,
     VisibilityChip,
     DateTimePicker
-  },
-  filters: {
-    dateToDateTimeString
   },
   computed: mapState('sites', ['sites']),
   methods: mapActions('sites', ['searchSites'])

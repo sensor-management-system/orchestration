@@ -51,7 +51,6 @@ class TestB2InstDeviceMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="",
             Name="",
             Description="",
             Owner=[],
@@ -117,7 +116,6 @@ class TestB2InstDeviceMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="SMT100 - TRUEBENER GmbH - SMT 100 - 123",
             Name="SMT100 - TRUEBENER GmbH - SMT 100 - 123",
             Description="The SMT 100",
             Owner=[
@@ -207,7 +205,6 @@ class TestB2InstDeviceMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="SMT100 - TRUEBENER GmbH - SMT 100",
             Name="SMT100 - TRUEBENER GmbH - SMT 100",
             Description="The SMT 100",
             Owner=[
@@ -287,7 +284,6 @@ class TestB2InstDeviceMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="SMT100 - TRUEBENER GmbH - SMT 100",
             Name="SMT100 - TRUEBENER GmbH - SMT 100",
             Description="The SMT 100",
             Owner=[],
@@ -361,7 +357,6 @@ class TestB2InstDeviceMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="SMT100 - TRUEBENER GmbH - SMT 100",
             Name="SMT100 - TRUEBENER GmbH - SMT 100",
             Description="The SMT 100",
             Owner=[],
@@ -419,7 +414,6 @@ class TestB2InstPlatformMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="",
             Name="",
             Description="",
             Owner=[],
@@ -481,7 +475,6 @@ class TestB2InstPlatformMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="CR1000 - Campbell Scientific - CR 1000 - 123",
             Name="CR1000 - Campbell Scientific - CR 1000 - 123",
             Description="The CR 1000",
             Owner=[
@@ -567,7 +560,6 @@ class TestB2InstPlatformMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="CR1000 - Campbell Scientific - CR 1000",
             Name="CR1000 - Campbell Scientific - CR 1000",
             Description="The CR 1000",
             Owner=[
@@ -643,7 +635,6 @@ class TestB2InstPlatformMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="CR1000 - Campbell Scientific - CR 1000",
             Name="CR1000 - Campbell Scientific - CR 1000",
             Description="The CR 1000",
             Owner=[],
@@ -713,7 +704,6 @@ class TestB2InstPlatformMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="CR1000 - Campbell Scientific - CR 1000",
             Name="CR1000 - Campbell Scientific - CR 1000",
             Description="The CR 1000",
             Owner=[],
@@ -771,7 +761,6 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="",
             Name="",
             Description="",
             Owner=[],
@@ -895,7 +884,6 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="Example configuration",
             Name="Example configuration",
             Description="example description",
             Owner=[
@@ -989,7 +977,6 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="",
             Name="",
             Description="",
             Owner=[],
@@ -1046,7 +1033,6 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="",
             Name="",
             Description="",
             Owner=[],
@@ -1077,7 +1063,6 @@ class TestB2InstDraftMapper(TestCase):
         draft = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="Example configuration display name",
             Name="Example configuration",
             Description="example description",
             Owner=[
@@ -1135,11 +1120,6 @@ class TestB2InstDraftMapper(TestCase):
             SchemaVersion="1.0.0",
         )
         expected = [
-            {
-                "op": "replace",
-                "path": "/name",
-                "value": "Example configuration display name",
-            },
             {"op": "replace", "path": "/Name", "value": "Example configuration"},
             {
                 "op": "replace",
@@ -1259,7 +1239,6 @@ class TestB2InstDraftMapper(TestCase):
         draft = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="Example configuration display name",
             Name="Example configuration",
             Description="example description",
             Owner=[
@@ -1317,11 +1296,6 @@ class TestB2InstDraftMapper(TestCase):
             SchemaVersion="1.0.0",
         )
         expected = [
-            {
-                "op": "replace",
-                "path": "/name",
-                "value": "Example configuration display name",
-            },
             {"op": "replace", "path": "/Name", "value": "Example configuration"},
             {
                 "op": "replace",
@@ -1437,7 +1411,6 @@ class TestB2InstDraftMapper(TestCase):
         draft = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            name="Example configuration display name",
             Name="Example configuration",
             Description="example description",
             Owner=[
@@ -1484,11 +1457,6 @@ class TestB2InstDraftMapper(TestCase):
             SchemaVersion="1.0.0",
         )
         expected = [
-            {
-                "op": "replace",
-                "path": "/name",
-                "value": "Example configuration display name",
-            },
             {"op": "replace", "path": "/Name", "value": "Example configuration"},
             {
                 "op": "replace",

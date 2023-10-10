@@ -12,6 +12,7 @@ paths = {
             "tags": ["Tsm endpoints"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {"$ref": "#/components/parameters/filter"},
@@ -66,7 +67,7 @@ components = {
                         }
                     }
                 }
-            }
+            },
         },
         "TsmEndpoint_inst": {
             "description": "Data of an instance of a TSM endpoint",
@@ -96,7 +97,7 @@ components = {
                         }
                     }
                 }
-            }
+            },
         },
     },
     "parameters": {

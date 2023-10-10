@@ -59,6 +59,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
                 "attributes": {
                     "url": "https://www.gfz-potsdam.de",
                     "label": "GFZ Homepage",
+                    "description": "The GFZ homepage",
                 },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": str(platform.id)}}
@@ -90,6 +91,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         platform_attachment = platform_attachments[0]
         self.assertEqual(platform_attachment.url, "https://www.gfz-potsdam.de")
         self.assertEqual(platform_attachment.label, "GFZ Homepage")
+        self.assertEqual(platform_attachment.description, "The GFZ homepage")
         self.assertEqual(platform_attachment.platform_id, platform.id)
         self.assertEqual(
             str(platform_attachment.platform_id), response.get_json()["data"]["id"]
@@ -196,6 +198,7 @@ class TestPlatformAttachmentServices(BaseTestCase):
         platform_attachment1 = PlatformAttachment(
             label="GFZ",
             url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
             platform=platform1,
         )
         platform_attachment2 = PlatformAttachment(
@@ -247,6 +250,9 @@ class TestPlatformAttachmentServices(BaseTestCase):
                     )
                     self.assertEqual(
                         attachment["attributes"]["label"], platform_attachment1.label
+                    )
+                    self.assertEqual(
+                        attachment["attributes"]["description"], "The GFZ homepage"
                     )
                     # and we want to check the link for the platform as well
                     platform_link = attachment["relationships"]["platform"]["links"][

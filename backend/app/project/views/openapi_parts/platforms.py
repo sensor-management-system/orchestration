@@ -32,7 +32,7 @@ paths = {
     },
     "/platforms/{platform_id}/archive": {
         "post": {
-            "tags": ["Platform"],
+            "tags": ["Platforms"],
             "parameters": [
                 {"$ref": "#/components/parameters/platform_id"},
             ],
@@ -65,7 +65,7 @@ paths = {
     },
     "/platforms/{platform_id}/restore": {
         "post": {
-            "tags": ["Platform"],
+            "tags": ["Platforms"],
             "parameters": [
                 {"$ref": "#/components/parameters/platform_id"},
             ],

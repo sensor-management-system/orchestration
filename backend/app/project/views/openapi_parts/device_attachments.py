@@ -6,12 +6,18 @@
 
 """External openapi spec file for device attachments."""
 
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.device_attachment_schema import DeviceAttachmentSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(DeviceAttachmentSchema)
+
 paths = {
     "/device-attachments": {
         "get": {
             "tags": ["Device attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {
@@ -33,16 +39,31 @@ paths = {
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "200": {
+                    "description": "List of device attachments",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
             },
             "description": "Retrieve DeviceAttachment from device_attachment",
             "operationId": "RetrieveacollectionofDeviceAttachmentobjects_0",
         },
         "post": {
             "tags": ["Device attachments"],
-            "requestBody": {"$ref": "#/components/requestBodies/DeviceAttachment_inst"},
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
+            },
             "responses": {
-                "201": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "201": {
+                    "description": "Payload of the created device attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "operationId": "CreateDeviceAttachment_0",
         },
@@ -55,7 +76,12 @@ paths = {
                 {"$ref": "#/components/parameters/device_attachment_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "200": {
+                    "description": "instance of a device attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Retrieve DeviceAttachment from device_attachment",
             "operationId": "RetrieveDeviceAttachmentinstance_0",
@@ -65,15 +91,18 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/device_attachment_id"}],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/DeviceAttachment"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
                 "description": "DeviceAttachment attributes",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceAttachment_coll"}
+                "200": {
+                    "description": "Payload of the updated device attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
             "description": "Update DeviceAttachment attributes",
             "operationId": "UpdateDeviceAttachment_0",
@@ -128,203 +157,6 @@ paths = {
 }
 
 components = {
-    "requestBodies": {
-        "DeviceAttachment_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["device"],
-                                        "properties": {
-                                            "device": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            }
-                                        },
-                                    },
-                                    "type": {"type": "string", "default": "device_attachment"},
-                                },
-                            }
-                        },
-                        "description": "DeviceAttachment post",
-                    }
-                }
-            }
-        },
-    },
-    "schemas": {
-        "DeviceAttachment": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "label": {"type": "string"},
-                                "url": {"type": "string", "format": "url"},
-                                "is_upload": {
-                                    "type": "boolean",
-                                },
-                            },
-                        },
-                        "type": {"type": "string"},
-                        "id": {"type": "string"},
-                    },
-                    "example": {
-                        "attributes": {
-                            "label": "",
-                            "url": "",
-                            "is_upload": False,
-                        },
-                        "relationships": {
-                            "device": {"data": {"type": "device", "id": "0"}}
-                        },
-                        "type": "device_attachment",
-                        "id": "0",
-                    },
-                }
-            },
-            "description": "DeviceAttachment post;",
-        },
-    },
-    "responses": {
-        "DeviceAttachment_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "url": {"type": "string", "format": "url"},
-                                            "is_upload": {
-                                                "type": "boolean",
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                        },
-                                    },
-                                    "type": {"type": "string"},
-                                    "id": {"type": "string"},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "device": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "created_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "label": "",
-                                        "url": "",
-                                        "is_upload": False,
-                                        "created_at": "2023-03-14T12:00:00+00:00",
-                                        "updated_at": "2023-03-14T13:00:00+00:00",
-                                    },
-                                    "relationships": {
-                                        "device": {
-                                            "data": {"type": "device", "id": "0"}
-                                        },
-                                        "created_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "123",
-                                            }
-                                        },
-                                        "updated_by": {
-                                            "data": {
-                                                "type": "user",
-                                                "id": "124",
-                                            }
-                                        },
-                                    },
-                                    "type": "device_attachment",
-                                    "id": "0",
-                                },
-                            }
-                        },
-                        "description": "DeviceAttachment get;",
-                    }
-                }
-            },
-            "description": "DeviceAttachment",
-        },
-    },
     "parameters": {
         "device_attachment_id": {
             "name": "device_attachment_id",

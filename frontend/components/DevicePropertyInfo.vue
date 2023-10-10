@@ -88,6 +88,12 @@ permissions and limitations under the Licence.
         {{ resolutionUnitValue | orDefault }}
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12" md="9">
+        <label>Description</label>
+        {{ value.description | orDefault }}
+      </v-col>
+    </v-row>
   </div>
 </template>
 

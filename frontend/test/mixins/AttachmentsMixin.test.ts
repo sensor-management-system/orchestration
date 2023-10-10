@@ -57,6 +57,7 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: 'https://foo.pdf',
         label: 'Manual',
+        description: 'The manual',
         isUpload: false,
         createdAt: null
       })
@@ -69,6 +70,7 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: '',
         label: 'Manual',
+        description: 'One manual',
         isUpload: false,
         createdAt: null
       })
@@ -81,6 +83,7 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: 'https://server/very/fancy/images/abc.jpeg',
         label: 'Manual',
+        description: 'Some manual',
         isUpload: false,
         createdAt: null
       })
@@ -93,6 +96,7 @@ describe('AttachmentsMixin', () => {
         id: '1',
         url: 'https://server/very/fancy/images/abc.jpeg/',
         label: 'Manual',
+        description: '',
         isUpload: false,
         createdAt: null
       })

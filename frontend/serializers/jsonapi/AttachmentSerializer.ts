@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020
+ * Copyright (C) 2020 - 2023
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -88,6 +88,7 @@ export class AttachmentSerializer implements IAttachmentSerializer {
     if (attributes) {
       newEntry.url = attributes.url || ''
       newEntry.label = attributes.label || ''
+      newEntry.description = attributes.description || ''
       newEntry.isUpload = attributes.is_upload || false
       newEntry.createdAt = attributes.created_at != null ? DateTime.fromISO(attributes.created_at, { zone: 'UTC' }) : null
     }
@@ -104,7 +105,8 @@ export class AttachmentSerializer implements IAttachmentSerializer {
       type: this._type,
       attributes: {
         url: attachment.url,
-        label: attachment.label
+        label: attachment.label,
+        description: attachment.description
         // no need to set 'is_upload' - it is a read only field
         // Also the field for the created_at entry is set automatically
       },

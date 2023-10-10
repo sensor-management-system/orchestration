@@ -67,6 +67,7 @@ const createTestPlatform = () => {
       id: '2',
       label: 'GFZ',
       url: 'http://www.gfz-potsdam.de',
+      description: 'The GFZ homepage',
       isUpload: false,
       createdAt: null
     }),
@@ -74,6 +75,7 @@ const createTestPlatform = () => {
       id: null,
       label: 'UFZ',
       url: 'http://www.ufz.de',
+      description: 'The UFZ homepage',
       isUpload: false,
       createdAt: null
     })
@@ -314,7 +316,8 @@ describe('PlatformSerializer', () => {
             type: 'platform_attachment',
             attributes: {
               url: 'http://test.test',
-              label: 'test label'
+              label: 'test label',
+              description: 'test'
             },
             relationships: {
               platform: {
@@ -401,6 +404,7 @@ describe('PlatformSerializer', () => {
         id: '12',
         label: 'test label',
         url: 'http://test.test',
+        description: 'test',
         isUpload: false,
         createdAt: null
       })]
@@ -608,7 +612,8 @@ describe('PlatformSerializer', () => {
             type: 'platform_attachment',
             attributes: {
               url: 'http://www.gfz-potsdam.de',
-              label: 'GFZ'
+              label: 'GFZ',
+              description: 'The GFZ homepage'
             },
             relationships: {
               platform: {
@@ -670,6 +675,7 @@ describe('PlatformSerializer', () => {
         id: '12',
         label: 'GFZ',
         url: 'http://www.gfz-potsdam.de',
+        description: 'The GFZ homepage',
         isUpload: false,
         createdAt: null
       })]
@@ -856,7 +862,8 @@ describe('PlatformSerializer', () => {
           },
           attributes: {
             url: 'http://www.gfz-potsdam.de',
-            label: 'GFZ'
+            label: 'GFZ',
+            description: 'The GFZ homepage'
           },
           id: '12',
           links: {
@@ -899,6 +906,7 @@ describe('PlatformSerializer', () => {
         id: '12',
         label: 'GFZ',
         url: 'http://www.gfz-potsdam.de',
+        description: 'The GFZ homepage',
         isUpload: false,
         createdAt: null
       })]
@@ -1089,6 +1097,7 @@ describe('PlatformSerializer', () => {
         id: '1',
         label: 'GFZ',
         url: 'https://www.gfz-potsdam.de',
+        description: 'The GFZ homepage',
         isUpload: false,
         createdAt: null
       })
@@ -1114,6 +1123,7 @@ describe('PlatformSerializer', () => {
         id: '1',
         label: 'GFZ',
         url: 'https://www.gfz-potsdam.de',
+        description: 'The GFZ homepage',
         isUpload: false,
         createdAt: null
       })

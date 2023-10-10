@@ -43,6 +43,7 @@ describe('PlatformAttachmentSerializer', () => {
           attributes: {
             url: 'https://www.gfz-potsdam.de',
             label: 'GFZ Homepage',
+            description: 'The GFZ homepage',
             is_upload: false,
             created_at: null
           },
@@ -67,11 +68,13 @@ describe('PlatformAttachmentSerializer', () => {
       expect(models[0].id).toEqual('123')
       expect(models[0].url).toEqual('https://www.gfz-potsdam.de')
       expect(models[0].label).toEqual('GFZ Homepage')
+      expect(models[0].description).toEqual('The GFZ homepage')
       expect(models[0].isUpload).not.toBeTruthy()
       expect(models[0].createdAt).toBeNull()
       expect(models[1].id).toEqual('456')
       expect(models[1].url).toEqual('https://www.ufz.de')
       expect(models[1].label).toEqual('UFZ Homepage')
+      expect(models[1].description).toEqual('') // not set in the payload => empty string
       expect(models[1].isUpload).toBeTruthy()
       expect(models[1].createdAt).toEqual(DateTime.utc(2022, 8, 16, 12, 0, 0))
     })
@@ -85,6 +88,7 @@ describe('PlatformAttachmentSerializer', () => {
           attributes: {
             url: 'https://www.gfz-potsdam.de',
             label: 'GFZ Homepage',
+            description: 'The GFZ homepage',
             is_upload: true
           },
           relationships: {}
@@ -98,6 +102,7 @@ describe('PlatformAttachmentSerializer', () => {
       expect(model.id).toEqual('123')
       expect(model.url).toEqual('https://www.gfz-potsdam.de')
       expect(model.label).toEqual('GFZ Homepage')
+      expect(model.description).toEqual('The GFZ homepage')
       expect(model.isUpload).toBeTruthy()
     })
     it('should also fill the attributes with empty strings if missing', () => {
@@ -117,6 +122,7 @@ describe('PlatformAttachmentSerializer', () => {
       expect(model.id).toEqual('123')
       expect(model.url).toEqual('')
       expect(model.label).toEqual('')
+      expect(model.description).toEqual('')
       expect(model.isUpload).not.toBeTruthy()
     })
   })
@@ -126,6 +132,7 @@ describe('PlatformAttachmentSerializer', () => {
         id: '123',
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
+        description: 'The UFZ homepage',
         isUpload: false,
         createdAt: null
       })
@@ -143,6 +150,8 @@ describe('PlatformAttachmentSerializer', () => {
       expect(jsonApiPayload.attributes.url).toEqual('https://www.ufz.de')
       expect(jsonApiPayload.attributes).toHaveProperty('label')
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('The UFZ homepage')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('platform')
       expect(jsonApiPayload.relationships?.platform).toHaveProperty('data')
@@ -157,6 +166,7 @@ describe('PlatformAttachmentSerializer', () => {
         id: null,
         url: 'https://www.ufz.de',
         label: 'UFZ Homepage',
+        description: 'ufz',
         isUpload: true,
         createdAt: DateTime.utc(2022, 8, 16, 12, 0, 0)
       })
@@ -173,6 +183,8 @@ describe('PlatformAttachmentSerializer', () => {
       expect(jsonApiPayload.attributes.url).toEqual('https://www.ufz.de')
       expect(jsonApiPayload.attributes).toHaveProperty('label')
       expect(jsonApiPayload.attributes.label).toEqual('UFZ Homepage')
+      expect(jsonApiPayload.attributes).toHaveProperty('description')
+      expect(jsonApiPayload.attributes.description).toEqual('ufz')
       expect(jsonApiPayload).toHaveProperty('relationships')
       expect(jsonApiPayload.relationships).toHaveProperty('platform')
       expect(jsonApiPayload.relationships?.platform).toHaveProperty('data')

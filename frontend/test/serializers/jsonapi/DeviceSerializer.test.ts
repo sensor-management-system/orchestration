@@ -74,12 +74,14 @@ const createTestDevice = () => {
     CustomTextField.createFromObject({
       id: '1',
       key: 'First custom field',
-      value: 'First custom value'
+      value: 'First custom value',
+      description: 'The very first custom field'
     }),
     CustomTextField.createFromObject({
       id: '2',
       key: 'Second custom field',
-      value: ''
+      value: '',
+      description: ''
     })
   ]
 
@@ -88,6 +90,7 @@ const createTestDevice = () => {
       id: '2',
       label: 'GFZ',
       url: 'http://www.gfz-potsdam.de',
+      description: 'The GFZ homepage',
       isUpload: false,
       createdAt: null
     }),
@@ -95,6 +98,7 @@ const createTestDevice = () => {
       id: '1',
       label: 'UFZ',
       url: 'http://www.ufz.de',
+      description: 'The UFZ homepage',
       isUpload: false,
       createdAt: null
     })
@@ -122,7 +126,8 @@ const createTestDevice = () => {
       resolutionUnitUri: 'http://foo/unit/1',
       resolutionUnitName: 'mm',
       aggregationTypeUri: 'http://foo/aggregationtypes/1',
-      aggregationTypeName: 'Average'
+      aggregationTypeName: 'Average',
+      description: 'first property'
     }),
     DeviceProperty.createFromObject({
       id: '4',
@@ -145,7 +150,8 @@ const createTestDevice = () => {
       resolutionUnitUri: 'http://foo/unit/1',
       resolutionUnitName: 'mm',
       aggregationTypeUri: 'http://foo/aggregationtypes/1',
-      aggregationTypeName: 'Average'
+      aggregationTypeName: 'Average',
+      description: 'second property'
     })
   ]
 
@@ -683,7 +689,8 @@ describe('DeviceSerializer', () => {
             id: '44',
             attributes: {
               key: 'a',
-              value: 'b'
+              value: 'b',
+              description: 'a description'
             },
             links: {
               self: '/rdm/svm-api/v1/customfields/44'
@@ -693,7 +700,8 @@ describe('DeviceSerializer', () => {
             type: 'device_attachment',
             attributes: {
               url: 'http://test.test',
-              label: 'test label'
+              label: 'test label',
+              description: 'test description'
             },
             relationships: {
               device: {
@@ -769,7 +777,8 @@ describe('DeviceSerializer', () => {
               unit_uri: 'b',
               failure_value: 4,
               aggregation_type_uri: 'http://foo/aggregationtypes/1',
-              aggregation_type_name: 'Average'
+              aggregation_type_name: 'Average',
+              description: 'f description'
             },
             id: '40',
             relationships: {
@@ -870,7 +879,8 @@ describe('DeviceSerializer', () => {
           resolutionUnitName: 'mm',
           // Not included in the paylod
           aggregationTypeUri: '',
-          aggregationTypeName: ''
+          aggregationTypeName: '',
+          description: ''
         }),
         DeviceProperty.createFromObject({
           compartmentName: 'a',
@@ -893,7 +903,8 @@ describe('DeviceSerializer', () => {
           resolutionUnitUri: 'http://foo/unit/1',
           resolutionUnitName: 'mm',
           aggregationTypeUri: 'http://foo/aggregationtypes/1',
-          aggregationTypeName: 'Average'
+          aggregationTypeName: 'Average',
+          description: 'f description'
         })
       ]
       expectedDevice.deviceTypeName = ''
@@ -903,6 +914,7 @@ describe('DeviceSerializer', () => {
         label: 'test label',
         url: 'http://test.test',
         id: '1',
+        description: 'test description',
         isUpload: false,
         createdAt: null
       })]
@@ -918,7 +930,8 @@ describe('DeviceSerializer', () => {
         CustomTextField.createFromObject({
           key: 'a',
           value: 'b',
-          id: '44'
+          id: '44',
+          description: 'a description'
         })
       ]
       expectedDevice.shortName = 'Device short name'
@@ -1070,6 +1083,7 @@ describe('DeviceSerializer', () => {
           attachments: [{
             label: 'test label',
             url: 'http://test.test',
+            description: 'test description',
             id: '1'
           }],
           status_uri: null,
@@ -1328,7 +1342,8 @@ describe('DeviceSerializer', () => {
       const customTextField = CustomTextField.createFromObject({
         id: '1',
         key: 'foo',
-        value: 'bla'
+        value: 'bla',
+        description: 'The foo'
       })
       device.customFields = [customTextField]
 
@@ -1350,7 +1365,8 @@ describe('DeviceSerializer', () => {
       const customTextField = CustomTextField.createFromObject({
         id: '1',
         key: 'foo',
-        value: 'bla'
+        value: 'bla',
+        description: 'The foo'
       })
       device.customFields = [customTextField]
 

@@ -41,6 +41,7 @@ describe('DeviceCalibrationActionAttachmentSerializer', () => {
         id: '1',
         label: 'foo',
         url: 'https://bar.baz',
+        description: 'The foo',
         isUpload: false,
         createdAt: null
       })

@@ -157,10 +157,7 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
 
   get computedTitle () {
     if (this.measuredQuantity) {
-      const propertyName = this.measuredQuantity.propertyName ?? ''
-      const label = this.measuredQuantity.label ?? ''
-      const unit = this.measuredQuantity.unitName ?? ''
-      return `#${this.index + 1} - ${propertyName} ${label ? `- ${label}` : ''} ${unit ? `(${unit})` : ''}`
+      return `#${this.index + 1} - ${this.measuredQuantity}`
     }
     return ''
   }

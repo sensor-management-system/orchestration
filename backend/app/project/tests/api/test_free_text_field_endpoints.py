@@ -16,11 +16,13 @@ from flask import url_for
 from project import base_url
 from project.api.models import (
     Configuration,
+    ConfigurationAttachment,
     ConfigurationCustomField,
     ConfigurationParameter,
     Contact,
     CustomField,
     Device,
+    DeviceAttachment,
     DeviceCalibrationAction,
     DeviceParameter,
     DeviceProperty,
@@ -29,9 +31,11 @@ from project.api.models import (
     GenericDeviceAction,
     GenericPlatformAction,
     Platform,
+    PlatformAttachment,
     PlatformParameter,
     PlatformSoftwareUpdateAction,
     Site,
+    SiteAttachment,
     User,
 )
 from project.api.models.base_model import db
@@ -5338,7 +5342,7 @@ class TestDeviceParameterLabelEndpoint(BaseTestCase):
         data = resp.json["data"]
         self.assertEqual(data, [])
 
-    def test_get_for_three_device_properties(self):
+    def test_get_for_three_device_parameters(self):
         """Ensure we get a list of labels."""
         device = Device(
             short_name="dummy", is_public=True, is_internal=False, is_private=False
@@ -5504,8 +5508,8 @@ class TestConfigurationParameterLabels(BaseTestCase):
         data = resp.json["data"]
         self.assertEqual(data, [])
 
-    def test_get_for_three_custom_fields(self):
-        """Ensure we get a list of keys."""
+    def test_get_for_three_configuration_parameters(self):
+        """Ensure we get a list of labels."""
         configuration = Configuration(
             label="dummy",
             is_public=True,
@@ -5586,7 +5590,7 @@ class TestPlatformParameterLabelEndpoint(BaseTestCase):
         data = resp.json["data"]
         self.assertEqual(data, [])
 
-    def test_get_for_three_platform_properties(self):
+    def test_get_for_three_platform_parameters(self):
         """Ensure we get a list of labels."""
         platform = Platform(
             short_name="dummy", is_public=True, is_internal=False, is_private=False
@@ -5725,6 +5729,877 @@ class TestPlatformParameterLabelEndpoint(BaseTestCase):
                 platform_parameter1,
                 platform_parameter2,
                 platform_parameter3,
+            ]
+        )
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+
+class TestDeviceAttachmentLabelEndpoint(BaseTestCase):
+    """Tests for the label endpoint for device attachment labels."""
+
+    url = f"{base_url}/controller/device-attachment-labels"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_three_device_attachments(self):
+        """Ensure we get a list of labels."""
+        device = Device(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        device_attachment1 = DeviceAttachment(
+            label="label1", device=device, url="https://somewhere.net"
+        )
+        device_attachment2 = DeviceAttachment(
+            label="label2", device=device, url="https://somewhere.net"
+        )
+        device_attachment3 = DeviceAttachment(
+            label="label2", device=device, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [device, device_attachment1, device_attachment2, device_attachment3]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        device_attachment1 = DeviceAttachment(
+            label="label1", device=device1, url="https://somewhere.net"
+        )
+        device_attachment2 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+        device_attachment3 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                device_attachment1,
+                device_attachment2,
+                device_attachment3,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        device_attachment1 = DeviceAttachment(
+            label="label1", device=device1, url="https://somewhere.net"
+        )
+        device_attachment2 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+        device_attachment3 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                device_attachment1,
+                device_attachment2,
+                device_attachment3,
+            ]
+        )
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+
+class TestPlatformAttachmentLabelEndpoint(BaseTestCase):
+    """Tests for the label endpoint for platform attachment labels."""
+
+    url = f"{base_url}/controller/platform-attachment-labels"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_three_platform_attachments(self):
+        """Ensure we get a list of labels."""
+        platform = Platform(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        platform_attachment1 = PlatformAttachment(
+            label="label1", platform=platform, url="https://somewhere.net"
+        )
+        platform_attachment2 = PlatformAttachment(
+            label="label2", platform=platform, url="https://somewhere.net"
+        )
+        platform_attachment3 = PlatformAttachment(
+            label="label2", platform=platform, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [platform, platform_attachment1, platform_attachment2, platform_attachment3]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        platform_attachment1 = PlatformAttachment(
+            label="label1", platform=platform1, url="https://somewhere.net"
+        )
+        platform_attachment2 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+        platform_attachment3 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                platform_attachment1,
+                platform_attachment2,
+                platform_attachment3,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1"])
+
+    def test_entry_of_private_platform_is_included_for_owner(self):
+        """Ensure we give out private platform data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        platform_attachment1 = PlatformAttachment(
+            label="label1", platform=platform1, url="https://somewhere.net"
+        )
+        platform_attachment2 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+        platform_attachment3 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                platform_attachment1,
+                platform_attachment2,
+                platform_attachment3,
+            ]
+        )
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+
+class TestConfigurationAttachmentLabelEndpoint(BaseTestCase):
+    """Tests for the label endpoint for configuration attachment labels."""
+
+    url = f"{base_url}/controller/configuration-attachment-labels"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_three_configuration_attachments(self):
+        """Ensure we get a list of labels."""
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        configuration_attachment1 = ConfigurationAttachment(
+            label="label1", configuration=configuration, url="https://somewhere.net"
+        )
+        configuration_attachment2 = ConfigurationAttachment(
+            label="label2", configuration=configuration, url="https://somewhere.net"
+        )
+        configuration_attachment3 = ConfigurationAttachment(
+            label="label2", configuration=configuration, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                configuration,
+                configuration_attachment1,
+                configuration_attachment2,
+                configuration_attachment3,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestSiteAttachmentLabelEndpoint(BaseTestCase):
+    """Tests for the label endpoint for site attachment labels."""
+
+    url = f"{base_url}/controller/site-attachment-labels"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_three_site_attachments(self):
+        """Ensure we get a list of labels."""
+        site = Site(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        site_attachment1 = SiteAttachment(
+            label="label1", site=site, url="https://somewhere.net"
+        )
+        site_attachment2 = SiteAttachment(
+            label="label2", site=site, url="https://somewhere.net"
+        )
+        site_attachment3 = SiteAttachment(
+            label="label2", site=site, url="https://somewhere.net"
+        )
+
+        db.session.add_all([site, site_attachment1, site_attachment2, site_attachment3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+
+class TestAttachmentLabelEndpoint(BaseTestCase):
+    """Tests for the label endpoint for all attachment labels."""
+
+    url = f"{base_url}/controller/attachment-labels"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_all_attachment_models(self):
+        """Ensure we get a list of labels."""
+        device = Device(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        platform = Platform(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        site = Site(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        attachment1 = DeviceAttachment(
+            label="label1", device=device, url="https://somewhere.net"
+        )
+        attachment2 = PlatformAttachment(
+            label="label2", platform=platform, url="https://somewhere.net"
+        )
+        attachment3 = ConfigurationAttachment(
+            label="label3", configuration=configuration, url="https://somewhere.net"
+        )
+        attachment4 = SiteAttachment(
+            label="label4", site=site, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                device,
+                platform,
+                configuration,
+                site,
+                attachment1,
+                attachment2,
+                attachment3,
+                attachment4,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2", "label3", "label4"])
+
+    def test_get_distinct_all_attachment_models(self):
+        """Ensure we get a list of labels."""
+        device = Device(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        platform = Platform(
+            short_name="dummy", is_public=True, is_internal=False, is_private=False
+        )
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        site = Site(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        attachment1 = DeviceAttachment(
+            label="label1", device=device, url="https://somewhere.net"
+        )
+        attachment2 = PlatformAttachment(
+            label="label1", platform=platform, url="https://somewhere.net"
+        )
+        attachment3 = ConfigurationAttachment(
+            label="label1", configuration=configuration, url="https://somewhere.net"
+        )
+        attachment4 = SiteAttachment(
+            label="label1", site=site, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                device,
+                platform,
+                configuration,
+                site,
+                attachment1,
+                attachment2,
+                attachment3,
+                attachment4,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        device_attachment1 = DeviceAttachment(
+            label="label1", device=device1, url="https://somewhere.net"
+        )
+        device_attachment2 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+        device_attachment3 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                device_attachment1,
+                device_attachment2,
+                device_attachment3,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        device_attachment1 = DeviceAttachment(
+            label="label1", device=device1, url="https://somewhere.net"
+        )
+        device_attachment2 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+        device_attachment3 = DeviceAttachment(
+            label="label2", device=device2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+                device_attachment1,
+                device_attachment2,
+                device_attachment3,
+            ]
+        )
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1", "label2"])
+
+    def test_entry_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+        )
+        platform_attachment1 = PlatformAttachment(
+            label="label1", platform=platform1, url="https://somewhere.net"
+        )
+        platform_attachment2 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+        platform_attachment3 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                platform_attachment1,
+                platform_attachment2,
+                platform_attachment3,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["label1"])
+
+    def test_entry_of_private_platform_is_included_for_owner(self):
+        """Ensure we give out private platform data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1", is_public=True, is_internal=False, is_private=False
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+        )
+        platform_attachment1 = PlatformAttachment(
+            label="label1", platform=platform1, url="https://somewhere.net"
+        )
+        platform_attachment2 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+        platform_attachment3 = PlatformAttachment(
+            label="label2", platform=platform2, url="https://somewhere.net"
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+                platform_attachment1,
+                platform_attachment2,
+                platform_attachment3,
             ]
         )
         with self.run_requests_as(other_user):

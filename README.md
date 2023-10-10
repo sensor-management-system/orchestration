@@ -16,6 +16,13 @@ SPDX-License-Identifier: HEESIL-1.0
 
 ## Usage
 
+### Set up Controlled Vocabulary
+The sms-cv (controlled vocabulary) is included as a git submodule.
+
+Run the following commands to set up the submodule:
+  - `git submodule init`  
+  - `git submodule update` 
+
 ### Self-signed certificate creation
 At first, generate a self-signed certificate. You can use the python
 script `icessl/ice-ca-certs.py`, which requires the python library *zeroc-icecertutils*

@@ -101,7 +101,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ configuration.startDate | dateToDateTimeString | orDefault }}
+          {{ configuration.startDate | toUtcDateTimeStringHHMM | orDefault }}
           <span
             v-if="configuration.startDate"
             class="text-caption text--secondary"
@@ -129,7 +129,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ configuration.endDate | dateToDateTimeString | orDefault }}
+          {{ configuration.endDate | toUtcDateTimeStringHHMM | orDefault }}
           <span
             v-if="configuration.endDate"
             class="text-caption text--secondary"
@@ -173,15 +173,12 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { Configuration } from '@/models/Configuration'
 
-import { dateToDateTimeString } from '@/utils/dateHelper'
-
 import StatusChip from '@/components/shared/StatusChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 @Component({
-  filters: { dateToDateTimeString },
   components: {
     StatusChip,
     VisibilityChip,

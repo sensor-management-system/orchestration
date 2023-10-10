@@ -6,12 +6,18 @@
 
 """External openapi spec file for device properties."""
 
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.device_property_schema import DevicePropertySchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(DevicePropertySchema)
+
 paths = {
     "/device-properties": {
         "get": {
             "tags": ["Device properties"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
                 {
@@ -137,16 +143,29 @@ paths = {
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceProperty_coll1"}
+                "200": {
+                    "description": "List of device properties",
+                    "content": {"application/vnd.api+json": schema_mapper.get_list()},
+                }
             },
             "description": "Retrieve DeviceProperty from device_property",
             "operationId": "RetrieveacollectionofDevicePropertyobjects_0",
         },
         "post": {
             "tags": ["Device properties"],
-            "requestBody": {"$ref": "#/components/requestBodies/DeviceProperty_inst"},
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
+            },
             "responses": {
-                "201": {"$ref": "#/components/responses/DeviceProperty_coll1"}
+                "201": {
+                    "description": "Payload of the created device property",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "operationId": "CreateDeviceProperty_0",
         },
@@ -159,7 +178,12 @@ paths = {
                 {"$ref": "#/components/parameters/device_property_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceProperty_coll1"},
+                "200": {
+                    "description": "Instance of device property",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
                 "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "description": "Retrieve DeviceProperty from device_property",
@@ -170,15 +194,18 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/device_property_id"}],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/DeviceProperty"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
                 "description": "DeviceProperty attributes",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceProperty_coll1"}
+                "200": {
+                    "description": "Payload of the updated device property",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Update DeviceProperty attributes",
             "operationId": "UpdateDeviceProperty_0",
@@ -195,373 +222,6 @@ paths = {
 }
 
 components = {
-    "requestBodies": {
-        "DeviceProperty_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "measuring_range_min": {
-                                                "type": "number",
-                                            },
-                                            "measuring_range_max": {
-                                                "type": "number",
-                                            },
-                                            "failure_value": {
-                                                "type": "number",
-                                            },
-                                            "accuracy": {
-                                                "type": "number",
-                                            },
-                                            "resolution": {
-                                                "type": "number",
-                                            },
-                                            "label": {"type": "string"},
-                                            "unit_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "unit_name": {"type": "string"},
-                                            "compartment_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "compartment_name": {"type": "string"},
-                                            "property_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "property_name": {"type": "string"},
-                                            "sampling_media_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "sampling_media_name": {"type": "string"},
-                                            "resolution_unit_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "resolution_unit_name": {"type": "string"},
-                                            "aggregation_type_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "aggregation_type_name": {"type": "string"},
-                                        },
-                                    },
-                                    "type": {"type": "string"},
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "measuring_range_min": 0,
-                                        "measuring_range_max": 0,
-                                        "failure_value": 0,
-                                        "accuracy": 0,
-                                        "label": "",
-                                        "unit_uri": "",
-                                        "unit_name": "",
-                                        "compartment_uri": "",
-                                        "compartment_name": "",
-                                        "property_uri": "",
-                                        "property_name": "",
-                                        "sampling_media_uri": "",
-                                        "sampling_media_name": "",
-                                        "resolution": 0,
-                                        "resolution_unit_uri": "",
-                                        "resolution_unit_name": "",
-                                        "aggregation_type_uri": "",
-                                        "aggregation_type_name": "",
-                                    },
-                                    "type": "device_property",
-                                    "relationships": {
-                                        "device": {
-                                            "data": {"type": "device", "id": "0"}
-                                        }
-                                    },
-                                },
-                            }
-                        },
-                        "description": "DeviceProperty post;",
-                    }
-                }
-            }
-        },
-    },
-    "responses": {
-        "DeviceProperty_coll1": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {
-                                        "type": "string",
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "measuring_range_min": {
-                                                "type": "number",
-                                            },
-                                            "measuring_range_max": {
-                                                "type": "number",
-                                            },
-                                            "failure_value": {
-                                                "type": "number",
-                                            },
-                                            "accuracy": {
-                                                "type": "number",
-                                            },
-                                            "resolution": {
-                                                "type": "number",
-                                            },
-                                            "label": {"type": "string"},
-                                            "unit_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "unit_name": {"type": "string"},
-                                            "compartment_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "compartment_name": {"type": "string"},
-                                            "property_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "property_name": {"type": "string"},
-                                            "sampling_media_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "sampling_media_name": {"type": "string"},
-                                            "resolution_unit_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "resolution_unit_name": {"type": "string"},
-                                            "aggregation_type_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "aggregation_type_name": {"type": "string"},
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "device": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "created_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "user",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "user",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "measuring_range_min": 0,
-                                        "measuring_range_max": 0,
-                                        "failure_value": 0,
-                                        "accuracy": 0,
-                                        "label": "",
-                                        "unit_uri": "",
-                                        "unit_name": "",
-                                        "compartment_uri": "",
-                                        "compartment_name": "",
-                                        "property_uri": "",
-                                        "property_name": "",
-                                        "sampling_media_uri": "",
-                                        "sampling_media_name": "",
-                                        "resolution": 0,
-                                        "resolution_unit_uri": "",
-                                        "resolution_unit_name": "",
-                                        "aggregation_type_uri": "",
-                                        "aggregation_type_name": "",
-                                        "created_at": "2023-01-01T00:00:00+00:00",
-                                        "updated_at": "2023-01-01T00:00:00+00:00",
-                                    },
-                                    "type": "device_property",
-                                    "id": "0",
-                                    "relationships": {
-                                        "device": {
-                                            "data": {
-                                                "id": "0",
-                                                "type": "device",
-                                            }
-                                        },
-                                        "created_by": {
-                                            "data": {
-                                                "id": "0",
-                                                "type": "user",
-                                            }
-                                        },
-                                        "updated_by": {
-                                            "data": {
-                                                "id": "0",
-                                                "type": "user",
-                                            }
-                                        },
-                                    },
-                                },
-                            }
-                        },
-                        "description": "DeviceProperty get;",
-                    }
-                }
-            },
-            "description": "Device Property",
-        },
-    },
-    "schemas": {
-        "DeviceProperty": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "measuring_range_min": {
-                                    "type": "number",
-                                },
-                                "measuring_range_max": {
-                                    "type": "number",
-                                },
-                                "failure_value": {
-                                    "type": "number",
-                                },
-                                "accuracy": {
-                                    "type": "number",
-                                },
-                                "resolution": {
-                                    "type": "number",
-                                },
-                                "label": {"type": "string"},
-                                "unit_uri": {"type": "string", "format": "uri"},
-                                "unit_name": {"type": "string"},
-                                "compartment_uri": {"type": "string", "format": "uri"},
-                                "compartment_name": {"type": "string"},
-                                "property_uri": {"type": "string", "format": "uri"},
-                                "property_name": {"type": "string"},
-                                "sampling_media_uri": {
-                                    "type": "string",
-                                    "format": "uri",
-                                },
-                                "sampling_media_name": {"type": "string"},
-                                "resolution_unit_uri": {
-                                    "type": "string",
-                                    "format": "uri",
-                                },
-                                "resolution_unit_name": {"type": "string"},
-                                "aggregation_type_uri": {
-                                    "type": "string",
-                                    "format": "uri",
-                                },
-                                "aggregation_type_name": {"type": "string"},
-                            },
-                        },
-                        "type": {"type": "string"},
-                        "id": {"type": "string"},
-                    },
-                    "example": {
-                        "attributes": {
-                            "measuring_range_min": 0,
-                            "measuring_range_max": 0,
-                            "failure_value": 0,
-                            "accuracy": 0,
-                            "label": "",
-                            "unit_uri": "",
-                            "unit_name": "",
-                            "compartment_uri": "",
-                            "compartment_name": "",
-                            "property_uri": "",
-                            "property_name": "",
-                            "sampling_media_uri": "",
-                            "sampling_media_name": "",
-                            "resolution": 0,
-                            "resolution_unit_uri": "",
-                            "resolution_unit_name": "",
-                            "aggregation_type_uri": "",
-                            "aggregation_type_name": "",
-                        },
-                        "type": "device_property",
-                        "id": "0",
-                        "relationships": {
-                            "device": {"data": {"type": "device", "id": "0"}}
-                        },
-                    },
-                }
-            },
-            "description": "DeviceProperty post;",
-        },
-    },
     "parameters": {
         "device_property_id": {
             "name": "device_property_id",

@@ -121,6 +121,10 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
   created () {
     if (this.chosenKindOfConfigurationAction === null) {
       this.$router.push('/configurations/' + this.configurationId + '/actions')
+      return
+    }
+    if (this.configurationParameters.length === 1) {
+      this.parameterChangeAction.parameter = this.configurationParameters[0]
     }
   }
 

@@ -1,7 +1,7 @@
 # Web client of the Sensor Management System software developed within
 # the Helmholtz DataHub Initiative by GFZ and UFZ.
 #
-# Copyright (C) 2020
+# Copyright (C) 2020 - 2023
 # - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
 # - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 # - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -28,7 +28,7 @@
 # implied. See the Licence for the specific language governing
 # permissions and limitations under the Licence.
 
-FROM node:16.17.1-buster as js-builder
+FROM node:18.18.0-buster as js-builder
 
 RUN mkdir /smsfrontend
 COPY . /smsfrontend

@@ -32,7 +32,7 @@ paths = {
     },
     "/devices/{device_id}/archive": {
         "post": {
-            "tags": ["Device"],
+            "tags": ["Devices"],
             "parameters": [
                 {"$ref": "#/components/parameters/device_id"},
             ],
@@ -65,7 +65,7 @@ paths = {
     },
     "/devices/{device_id}/restore": {
         "post": {
-            "tags": ["Device"],
+            "tags": ["Devices"],
             "parameters": [
                 {"$ref": "#/components/parameters/device_id"},
             ],

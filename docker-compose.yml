@@ -108,23 +108,7 @@ services:
       B2INST_TOKEN: ${B2INST_TOKEN}
     depends_on:
       - db
-    command: >
-      sh -c "
-      apt-get update && apt-get install -y  --no-install-recommends \
-        gcc \
-        libssl-dev \
-        libffi-dev \
-        musl-dev \
-        cargo \
-        g++ \
-      && apt-get clean
-      && pip install --no-cache-dir --upgrade pip
-      && pip install --no-cache-dir -r requirements.txt
-      && python manage.py db upgrade
-      && python -c 'import os; print(os.getenv(\"TSM_ENDPOINTS\"))' > /tmp/tsm_endpoint_fixture.json
-      && python manage.py loaddata /tmp/tsm_endpoint_fixture.json --skip-empty-file
-      && gunicorn -b 0.0.0.0:5000 manage:app --reload --log-level debug --timeout 50
-      "
+    entrypoint: /usr/src/app/entrypoint-dev.sh
     networks:
       - sms
 
@@ -149,6 +133,7 @@ services:
     working_dir: /usr/cv/app
     volumes:
       - './sms-cv/src:/usr/cv/app'
+      - './sms-cv-entrypoint-dev.sh:/entrypoint.sh'
       - static-files:/static/cv
     ports:
       - 8000:8000
@@ -166,22 +151,7 @@ services:
       SQL_PORT: ${SQL_PORT:-5433}
       CORS_ORIGIN_WHITELIST: ${CORS_ORIGIN_WHITELIST:-https://localhost.localdomain}
       EMAIL_HOST: ${EMAIL_HOST}
-    command: >
-      sh -c "
-      apk add --no-cache --virtual .build-deps \
-          gcc \
-          python3-dev \
-          musl-dev \
-          postgresql-dev \
-      && pip install --upgrade pip
-      && pip install -r requirements.txt
-      && python manage.py migrate
-      && python manage.py loaddata initial_data.json
-      && python manage.py loaddata default_community_data.json
-      && python manage.py loaddata hydro_community_data.json
-      && python manage.py collectstatic --noinput
-      && gunicorn cv.wsgi:application --bind 0:8000 --reload --log-level debug --timeout 50
-            "
+    entrypoint: /entrypoint.sh
     networks:
       - sms
     depends_on:

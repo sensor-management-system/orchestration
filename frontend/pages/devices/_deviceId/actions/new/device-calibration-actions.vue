@@ -94,7 +94,7 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
 
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
-  deviceMeasuredQuantites!: DevicesState['deviceMeasuredQuantities']
+  deviceMeasuredQuantities!: DevicesState['deviceMeasuredQuantities']
   chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
   addDeviceCalibrationAction!: AddDeviceCalibrationAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
@@ -125,6 +125,11 @@ export default class NewDeviceCalibrationAction extends mixins(CheckEditAccess) 
   created () {
     if (this.chosenKindOfDeviceAction === null) {
       this.$router.push('/devices/' + this.deviceId + '/actions')
+      return
+    }
+    if (this.deviceMeasuredQuantities.length === 1) {
+      // In case we have only that we could select, we take that as default.
+      this.deviceCalibrationAction.measuredQuantities = [...this.deviceMeasuredQuantities]
     }
   }
 

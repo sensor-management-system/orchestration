@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-FROM node:16.17.1-buster as js-builder
+FROM node:18.18.0-buster as js-builder
 
 # First the urls for sms backend and cv backend
 ENV SMS_BACKEND_URL /backend/api/v1

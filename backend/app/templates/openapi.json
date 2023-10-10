@@ -56,11 +56,14 @@
     "/devices": {
       "get": {
         "tags": [
-          "Device"
+          "Devices"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/page_number"
           },
           {
             "$ref": "#/components/parameters/page_size"
@@ -145,7 +148,7 @@
       },
       "post": {
         "tags": [
-          "Device"
+          "Devices"
         ],
         "requestBody": {
           "$ref": "#/components/requestBodies/Device_inst"
@@ -162,7 +165,7 @@
     "/devices/{device_id}": {
       "get": {
         "tags": [
-          "Device"
+          "Devices"
         ],
         "parameters": [
           {
@@ -182,7 +185,7 @@
       },
       "patch": {
         "tags": [
-          "Device"
+          "Devices"
         ],
         "parameters": [
           {
@@ -210,7 +213,7 @@
       },
       "delete": {
         "tags": [
-          "Device"
+          "Devices"
         ],
         "parameters": [
           {
@@ -229,6 +232,10 @@
       "get": {
         "tags": [
           "Device calibration actions"
+        ],
+        "parameters": [
+          {"$ref": "#/components/parameters/page_number"},
+          {"$ref": "#/components/parameters/page_size"}
         ],
         "responses": {
           "200": {
@@ -316,6 +323,10 @@
         "tags": [
           "Device calibration attachments"
         ],
+        "parameters": [
+          {"$ref": "#/components/parameters/page_number"},
+          {"$ref": "#/components/parameters/page_size"}
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/DeviceCalibrationActionAttachments_coll"
@@ -401,6 +412,10 @@
       "get": {
         "tags": [
           "Device software update actions"
+        ],
+        "parameters": [
+            {"$ref": "#/components/parameters/page_number"},
+            {"$ref": "#/components/parameters/page_size"}
         ],
         "responses": {
           "200": {
@@ -488,6 +503,10 @@
         "tags": [
           "Device software update attachments"
         ],
+        "parameters": [
+            {"$ref": "#/components/parameters/page_number"},
+            {"$ref": "#/components/parameters/page_size"}
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/DeviceSoftwareUpdateAttachments_coll"
@@ -573,6 +592,14 @@
       "get": {
         "tags": [
           "Device property calibrations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_number"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          }
         ],
         "responses": {
           "200": {
@@ -660,6 +687,14 @@
         "tags": [
           "Generic configuration action"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_number"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/GenericConfigurationAction_coll"
@@ -745,6 +780,14 @@
       "get": {
         "tags": [
           "Generic device action"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_number"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          }
         ],
         "responses": {
           "200": {
@@ -832,6 +875,14 @@
         "tags": [
           "Generic device action attachments"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_number"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/GenericDeviceActionAttachment_coll"
@@ -918,6 +969,14 @@
         "tags": [
           "Generic platform action"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_number"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          }
+        ],
         "responses": {
           "200": {
             "$ref": "#/components/responses/GenericPlatformAction_coll"
@@ -1002,11 +1061,14 @@
     "/platforms": {
       "get": {
         "tags": [
-          "Platform"
+          "Platforms"
         ],
         "parameters": [
           {
             "$ref": "#/components/parameters/include"
+          },
+          {
+            "$ref": "#/components/parameters/page_number"
           },
           {
             "$ref": "#/components/parameters/page_size"
@@ -1098,7 +1160,7 @@
       },
       "post": {
         "tags": [
-          "Platform"
+          "Platforms"
         ],
         "requestBody": {
           "$ref": "#/components/requestBodies/Platform_inst"
@@ -1135,7 +1197,7 @@
     "/platforms/{platform_id}": {
       "get": {
         "tags": [
-          "Platform"
+          "Platforms"
         ],
         "parameters": [
           {
@@ -1156,7 +1218,7 @@
       },
       "patch": {
         "tags": [
-          "Platform"
+          "Platforms"
         ],
         "parameters": [
           {
@@ -1195,7 +1257,7 @@
       },
       "delete": {
         "tags": [
-          "Platform"
+          "Platforms"
         ],
         "parameters": [
           {
@@ -1225,6 +1287,14 @@
       "get": {
         "tags": [
           "Platform software update actions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_number"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          }
         ],
         "responses": {
           "200": {
@@ -1311,6 +1381,14 @@
       "get": {
         "tags": [
           "Platform software update attachments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_number"
+          },
+          {
+            "$ref": "#/components/parameters/page_size"
+          }
         ],
         "responses": {
           "200": {
@@ -5314,6 +5392,17 @@
           "type": "integer",
           "format": "int64",
           "default": 30
+        }
+      },
+      "page_number": {
+        "name": "page[number]",
+        "in": "query",
+        "required": false,
+        "description": "Page number to query",
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "default": 1
         }
       },
       "created_at": {
