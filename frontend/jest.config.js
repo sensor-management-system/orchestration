@@ -45,10 +45,11 @@ module.exports = {
     '^.+\\.js$': 'babel-jest',
     '.*\\.(vue)$': 'vue-jest'
   },
-  collectCoverage: true,
+  // coverage is now off by default but can be collected by using:
+  // --collectCoverage
+  collectCoverage: false,
   collectCoverageFrom: [
     '<rootDir>/components/**/*.vue',
-    '<rootDir>/pages/**/*.vue',
     '<rootDir>/mixins/**/*.vue',
     '<rootDir>/models/**/*.ts',
     '<rootDir>/modelUtils/**/*.ts',
@@ -58,5 +59,15 @@ module.exports = {
     '<rootDir>/viewmodels/**/*.ts'
   ],
   testEnvironment: 'jsdom',
+  // from the documentation:
+  //
+  // "After the worker has executed a test the memory usage of it is checked. If
+  // it exceeds the value specified the worker is killed and restarted."
+  // so we restrict the memory usage of a worker to maximum 20% of system RAM
+  //
+  // before it is restarted:
+  workerIdleMemoryLimit: 0.2,
+  // just use one worker to avoid memory problems
+  maxWorkers: 1,
   verbose: true
 }
