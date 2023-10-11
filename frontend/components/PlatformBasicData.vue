@@ -69,16 +69,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ pidTooltipText }}</span>
         </v-tooltip>
-        <a
-          v-if="value.persistentIdentifier"
-          :href="persistentIdentifierUrl"
-          target="_blank"
-          class="text-decoration-none"
-        >
-          <v-icon small>
-            mdi-open-in-new
+        <v-btn v-if="value.persistentIdentifier" icon @click="showPidQrCode = true">
+          <v-icon>
+            mdi-qrcode
           </v-icon>
-        </a>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -140,6 +135,7 @@ permissions and limitations under the Licence.
         {{ value.inventoryNumber | orDefault }}
       </v-col>
     </v-row>
+    <qr-code-dialog v-model="showPidQrCode" :text="persistentIdentifierUrl" />
   </div>
 </template>
 
@@ -165,11 +161,13 @@ import { Manufacturer } from '@/models/Manufacturer'
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import QrCodeDialog from '@/components/QrCodeDialog.vue'
 
 @Component({
   components: {
     PermissionGroupChips,
-    VisibilityChip
+    VisibilityChip,
+    QrCodeDialog
   },
   computed: {
     ...mapState('vocabulary', ['platformtypes']),
@@ -181,6 +179,7 @@ export default class PlatformBasicData extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
   private pidTooltipText = 'Click to copy PID-URL'
   private pidTooltipColor = 'default'
+  private showPidQrCode: boolean = false
 
   @Prop({
     default: () => new Platform(),

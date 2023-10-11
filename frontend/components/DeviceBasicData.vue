@@ -67,16 +67,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ pidTooltipText }}</span>
         </v-tooltip>
-        <a
-          v-if="value.persistentIdentifier"
-          :href="persistentIdentifierUrl"
-          target="_blank"
-          class="text-decoration-none"
-        >
-          <v-icon small>
-            mdi-open-in-new
+        <v-btn v-if="value.persistentIdentifier" icon @click="showPidQrCode = true">
+          <v-icon>
+            mdi-qrcode
           </v-icon>
-        </a>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -144,6 +139,7 @@ permissions and limitations under the Licence.
         {{ value.dualUse ? 'yes' : 'no' }}
       </v-col>
     </v-row>
+    <qr-code-dialog v-model="showPidQrCode" :text="persistentIdentifierUrl" />
   </div>
 </template>
 
@@ -157,13 +153,15 @@ import { Manufacturer } from '@/models/Manufacturer'
 
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import QrCodeDialog from '@/components/QrCodeDialog.vue'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 @Component({
   components: {
     VisibilityChip,
-    PermissionGroupChips
+    PermissionGroupChips,
+    QrCodeDialog
   }
 })
 export default class DeviceBasicData extends Vue {
@@ -172,6 +170,7 @@ export default class DeviceBasicData extends Vue {
   private deviceTypes: DeviceType[] = []
   private pidTooltipText: string = 'Copy PID-URL'
   private pidTooltipColor: string = 'default'
+  private showPidQrCode: boolean = false
 
   @Prop({
     default: () => new Device(),

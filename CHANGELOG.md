@@ -7,13 +7,14 @@ SPDX-FileCopyrightText: 2023
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-## 1.5.2 (Unreleased)
+## 1.6.0 (Unreleased)
 
 Added:
 - description fields for device properties, attachments & custom fields
 - autocompletion for attachment labels
 - automatic selection of measured quantities and parameters for action data if there is only one
   element to select
+- QR Code functionality
 
 ## 1.5.1 - 2023-10-04
 

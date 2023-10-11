@@ -43,6 +43,8 @@ permissions and limitations under the Licence.
       :value="(!infoPage) && needToAcceptTermsOfUse"
       @logout="logout"
     />
+    <qr-code-dialog v-model="showQrCode" :text="currentUrl" title="Create QR code for page" />
+    <qr-code-reader-dialog v-model="showQrCodeReader" />
     <v-navigation-drawer
       v-model="drawer"
       :mini-variant="miniVariant"
@@ -307,7 +309,7 @@ permissions and limitations under the Licence.
       >
         <v-col
           cols="12"
-          md="8"
+          md="7"
           offset-md="2"
           align-self="center"
           class="text-center caption text--secondary"
@@ -343,10 +345,42 @@ permissions and limitations under the Licence.
         </v-col>
         <v-col
           cols="12"
-          md="2"
+          md="3"
           align-self="center"
           :class="iconLinksClass"
         >
+          <v-speed-dial
+            class="d-inline-block"
+            direction="top"
+            open-on-hover
+          >
+            <template #activator>
+              <v-btn
+                title="QR codes"
+                icon
+              >
+                <v-icon>
+                  mdi-qrcode
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-btn
+              title="Create QR code"
+              fab
+              x-small
+              @click="showQrCode = true"
+            >
+              <v-icon>mdi-qrcode-plus</v-icon>
+            </v-btn>
+            <v-btn
+              title="Scan QR code"
+              fab
+              x-small
+              @click="showQrCodeReader = true"
+            >
+              <v-icon>mdi-qrcode-scan</v-icon>
+            </v-btn>
+          </v-speed-dial>
           <v-btn
             href="https://codebase.helmholtz.cloud/hub-terra/sms/"
             target="_blank"
@@ -388,6 +422,8 @@ import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import LogoFooter from '@/components/LogoFooter'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
 import TermsOfUseAcceptanceDialog from '@/components/TermsOfUseAcceptanceDialog.vue'
+import QrCodeDialog from '@/components/QrCodeDialog.vue'
+import QrCodeReaderDialog from '@/components/QrCodeReaderDialog.vue'
 
 import { saveCurrentRoute } from '@/utils/loginHelpers'
 
@@ -398,7 +434,9 @@ export default {
     CookieLaw,
     LogoFooter,
     ProgressIndicator,
-    TermsOfUseAcceptanceDialog
+    TermsOfUseAcceptanceDialog,
+    QrCodeDialog,
+    QrCodeReaderDialog
   },
   data () {
     return {
@@ -408,7 +446,9 @@ export default {
       miniVariant: false,
       title: 'Sensor Management System',
       appBarContent: null,
-      appBarExtension: null
+      appBarExtension: null,
+      showQrCode: false,
+      showQrCodeReader: false
     }
   },
   head () {
@@ -537,6 +577,9 @@ export default {
     },
     infoPage () {
       return this.$route.path.startsWith('/info/')
+    },
+    currentUrl () {
+      return new URL(this.$route.fullPath, window.location.origin).href
     }
   },
   watch: {

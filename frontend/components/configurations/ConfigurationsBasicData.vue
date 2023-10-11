@@ -72,16 +72,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ pidTooltipText }}</span>
         </v-tooltip>
-        <a
-          v-if="value.persistentIdentifier"
-          :href="persistentIdentifierUrl"
-          target="_blank"
-          class="text-decoration-none"
-        >
-          <v-icon small>
-            mdi-open-in-new
+        <v-btn v-if="value.persistentIdentifier" icon @click="showPidQrCode = true">
+          <v-icon>
+            mdi-qrcode
           </v-icon>
-        </a>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -125,6 +120,7 @@ permissions and limitations under the Licence.
         {{ value.description | orDefault }}
       </v-col>
     </v-row>
+    <qr-code-dialog v-model="showPidQrCode" :text="persistentIdentifierUrl" disabled />
   </div>
 </template>
 
@@ -137,6 +133,7 @@ import { Configuration } from '@/models/Configuration'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import { SearchSitesAction, SitesState } from '@/store/sites'
 import { Site } from '@/models/Site'
 
@@ -144,7 +141,8 @@ import { Site } from '@/models/Site'
   components: {
     PermissionGroupChips,
     VisibilityChip,
-    DateTimePicker
+    DateTimePicker,
+    QrCodeDialog
   },
   computed: mapState('sites', ['sites']),
   methods: mapActions('sites', ['searchSites'])
@@ -152,6 +150,7 @@ import { Site } from '@/models/Site'
 export default class ConfigurationsBasicDataForm extends Vue {
   private pidTooltipColor: string = 'default'
   private pidTooltipText: string = 'Copy PID-URL'
+  private showPidQrCode: boolean = false
 
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
   @Prop({
