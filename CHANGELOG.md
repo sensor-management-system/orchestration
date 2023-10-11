@@ -7,7 +7,7 @@ SPDX-FileCopyrightText: 2023
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-## 1.5.2 (Unreleased)
+## 1.6.0 (Unreleased)
 
 Added:
 - description fields for device properties, attachments & custom fields
