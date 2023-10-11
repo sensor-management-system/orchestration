@@ -14,6 +14,7 @@ Added:
 - autocompletion for attachment labels
 - automatic selection of measured quantities and parameters for action data if there is only one
   element to select
+- QR Code functionality
 
 ## 1.5.1 - 2023-10-04
 
