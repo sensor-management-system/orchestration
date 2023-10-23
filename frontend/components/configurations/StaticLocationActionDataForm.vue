@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -127,7 +127,15 @@ permissions and limitations under the Licence.
               dense
               type="info"
             >
-              You can select a point on the map to set the coordinates.
+              <p class="mb-0">
+                You can select a point on the map to set the coordinates or use the button to take your current location.
+              </p>
+              <p class="mb-0">
+                <em>
+                  Please note that the accuracy of the automatic localization is limited by the device you currently use.
+                  Consider using differential GPS if you need high accuracy.
+                </em>
+              </p>
             </v-alert>
             <location-map
               :value="location"
