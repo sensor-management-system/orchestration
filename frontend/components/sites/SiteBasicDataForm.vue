@@ -79,7 +79,7 @@ permissions and limitations under the Licence.
           <combobox
             label="Usage"
             clearable
-            :items="siteUsageItems"
+            :items="siteUsages"
             item-text="name"
             :value="valueSiteUsageItem"
             :readonly="readonly"
@@ -143,7 +143,7 @@ permissions and limitations under the Licence.
           <combobox
             label="Type"
             clearable
-            :items="siteTypeItems"
+            :items="siteTypes"
             item-text="name"
             :value="valueSiteTypeItem"
             :readonly="readonly"
@@ -527,10 +527,6 @@ export default class SiteBasicDataForm extends mixins(Rules) {
       newObj.siteUsageName = ''
       newObj.siteUsageUri = ''
     }
-    if (this.value.siteUsageUri !== newObj.siteUsageUri) {
-      newObj.siteTypeName = ''
-      newObj.siteTypeUri = ''
-    }
 
     this.$emit('input', newObj)
   }
@@ -555,23 +551,6 @@ export default class SiteBasicDataForm extends mixins(Rules) {
     } else {
       newObj.siteTypeName = ''
       newObj.siteTypeUri = ''
-    }
-    if (this.value.siteTypeUri !== newObj.siteTypeUri) {
-    // ok, we also want to update the site usage here
-      const siteTypeIndex = this.siteTypes.findIndex(s => s.uri === newObj.siteTypeUri)
-
-      if (siteTypeIndex > -1) {
-        const siteTypeItem = this.siteTypes[siteTypeIndex]
-        const siteUsageId = siteTypeItem.siteUsageId
-        const siteUsageIndex = this.siteUsageItems.findIndex(c => c.id === siteUsageId)
-        if (siteUsageIndex > -1) {
-          const siteUsageItem = this.siteUsageItems[siteUsageIndex]
-          if (siteUsageItem.uri !== newObj.siteUsageUri || siteUsageItem.name !== newObj.siteUsageName) {
-            newObj.siteUsageUri = siteUsageItem.uri
-            newObj.siteUsageName = siteUsageItem.name
-          }
-        }
-      }
     }
 
     this.$emit('input', newObj)
@@ -646,27 +625,6 @@ export default class SiteBasicDataForm extends mixins(Rules) {
         throw new TypeError('key ' + key + ' is not valid')
     }
     this.$emit('input', newObj)
-  }
-
-  get siteUsageItems (): SiteUsage[] {
-    return this.siteUsages
-  }
-
-  /**
-   * returns a list of site types
-   *
-   * When the site usage exists, restricts the list of site types to
-   * those that have a relation to the selected site usage
-   *
-   * @returns {SiteType[]}
-   */
-  get siteTypeItems (): SiteType[] {
-    let siteTypes = this.siteTypes
-    // if a site usage is choosen, restrict the list of site types
-    if (this.value.siteUsageUri !== '') {
-      siteTypes = siteTypes.filter(type => type.siteUsageId === '' || this.checkUriEndsWithId(this.value.siteUsageUri, type.siteUsageId || ''))
-    }
-    return siteTypes
   }
 
   /**
