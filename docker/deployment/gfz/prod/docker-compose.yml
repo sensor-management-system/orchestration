@@ -180,7 +180,7 @@ services:
       INSTITUTE: gfz
       SMS_FRONTEND_URL: https://sensors.gfz-potsdam.de
       # TODO: Readd this line to activate b2inst again
-      #B2INST_TOKEN: ${B2INST_TOKEN}
+      B2INST_TOKEN: ${B2INST_TOKEN}
       B2INST_URL: https://b2inst.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
     depends_on:
@@ -202,3 +202,4 @@ networks:
   nginx:
   backend:
   idl-db:
+    

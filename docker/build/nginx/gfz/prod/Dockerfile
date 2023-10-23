@@ -33,8 +33,7 @@ ENV NUXT_ENV_OIDC_GRANT_TYPE authorization_code
 ENV NUXT_ENV_OIDC_CHALLANGE S256
 ENV NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME 1800000
 
-# TODO: Uncomment to reactivate the pid service in frontend
-#ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
+ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
 
 ENV NUXT_ENV_MATOMO_URL https://webstats.gfz-potsdam.de/
 ENV NUXT_ENV_MATOMO_TRACKER_URL https://webstats.gfz-potsdam.de/matomo.php
