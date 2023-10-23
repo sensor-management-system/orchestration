@@ -16,6 +16,7 @@ Added:
   element to select
 - QR Code functionality
 - button to use the set the current location for static locations of configurations
+- Activated B2INST support on GFZ instance (production)
 
 Changed:
 - removed the strong linkage of site usage and site type so that we can
@@ -29,7 +30,7 @@ Fixed:
 ## 1.5.0 - 2023-10-04
 
 Added:
-- Activated B2INST support on GFZ instance
+- Activated B2INST support on GFZ instance (staging)
 - description on landing page for sites & labs
 - sites and labs added to latest activity log
 - preview of the resulting configuration tree in the submit stage of the mount wizzard
