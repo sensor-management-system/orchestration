@@ -15,6 +15,7 @@ Added:
 - automatic selection of measured quantities and parameters for action data if there is only one
   element to select
 - QR Code functionality
+- button to use the set the current location for static locations of configurations
 
 Changed:
 - removed the strong linkage of site usage and site type so that we can
