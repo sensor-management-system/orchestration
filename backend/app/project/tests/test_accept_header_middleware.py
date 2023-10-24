@@ -48,5 +48,5 @@ class TestSetAcceptMiddleware(BaseTestCase):
         response = self.client.get(url)
         self.assertTrue(response.status_code, 200)
         data = response.json["data"]
-        self.assertEquals(len(data), 1)
-        self.assertEquals(data[0]["attributes"]["short_name"], self.device.short_name)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["attributes"]["short_name"], self.device.short_name)
