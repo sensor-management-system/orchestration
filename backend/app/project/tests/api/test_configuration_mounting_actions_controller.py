@@ -421,3 +421,186 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
             }
         ]
         self.assertEqual(response.json, expected)
+
+    def test_hierarchy_ordering(self):
+        """
+        Ensure we have a meaningful ordering of the elements.
+
+        They should follow the same style of ordering as file explorers
+        do - having the folders (platforms) first in alphabetical ordering
+        and then having the leafs (devices).
+        """
+        platform2 = Platform(
+            short_name="X Platform",
+            is_internal=True,
+            manufacturer_name="OTT HydroMet",
+            model="OTT CTD Sensor",
+            serial_number="345146",
+            platform_type_name="Sensor",
+        )
+        platform1 = Platform(
+            short_name="A Platform",
+            is_internal=True,
+            manufacturer_name="OTT HydroMet",
+            model="OTT CTD Sensor",
+            serial_number="345146",
+            platform_type_name="Sensor",
+        )
+        platform3 = Platform(
+            short_name="C Platform",
+            is_internal=True,
+            manufacturer_name="OTT HydroMet",
+            model="OTT CTD Sensor",
+            serial_number="345146",
+            platform_type_name="Sensor",
+        )
+        platform_mount_action2 = PlatformMountAction(
+            configuration=self.configuration,
+            platform=platform2,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            parent_platform=None,
+            begin_description="Mount of X Platform",
+            begin_contact=self.u.contact,
+            begin_date=datetime.datetime(2021, 5, 18, 12, 5, 0),
+            end_date=datetime.datetime(2022, 5, 19, 4, 55, 0),
+        )
+        platform_mount_action1 = PlatformMountAction(
+            configuration=self.configuration,
+            platform=platform1,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            begin_description="Mount of A Platform",
+            begin_contact=self.u.contact,
+            begin_date=datetime.datetime(2022, 5, 18, 12, 0, 0),
+            end_date=datetime.datetime(2022, 5, 19, 5, 0, 0),
+        )
+        platform_mount_action3 = PlatformMountAction(
+            configuration=self.configuration,
+            platform=platform3,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            begin_description="Mount of C Platform",
+            begin_contact=self.u.contact,
+            begin_date=datetime.datetime(2022, 5, 18, 12, 0, 0),
+            end_date=datetime.datetime(2022, 5, 19, 5, 0, 0),
+        )
+        device2 = Device(
+            short_name="X device",
+            is_internal=True,
+            manufacturer_name="OTT HydroMet",
+            model="OTT CTD Sensor",
+            serial_number="345147",
+            device_type_name="Sensor",
+        )
+        device1 = Device(
+            short_name="A device",
+            is_internal=True,
+            manufacturer_name="OTT HydroMet",
+            model="OTT CTD Sensor",
+            serial_number="345146",
+            device_type_name="Sensor",
+        )
+        device3 = Device(
+            short_name="C device",
+            is_internal=True,
+            manufacturer_name="OTT HydroMet",
+            model="OTT CTD Sensor",
+            serial_number="345146",
+            device_type_name="Sensor",
+        )
+        device_mount_action2 = DeviceMountAction(
+            configuration=self.configuration,
+            device=device2,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            begin_description="Mount of X device",
+            begin_contact=self.u.contact,
+            parent_platform=platform2,
+            begin_date=datetime.datetime(2022, 3, 18, 12, 10, 0),
+            end_date=datetime.datetime(2022, 5, 19, 4, 0, 0),
+        )
+        device_mount_action1 = DeviceMountAction(
+            configuration=self.configuration,
+            device=device1,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            begin_description="Mount of A device",
+            begin_contact=self.u.contact,
+            parent_platform=platform2,
+            begin_date=datetime.datetime(2022, 5, 18, 12, 10, 0),
+            end_date=datetime.datetime(2022, 5, 19, 4, 0, 0),
+        )
+        device_mount_action3 = DeviceMountAction(
+            configuration=self.configuration,
+            device=device3,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            begin_description="Mount of C device",
+            begin_contact=self.u.contact,
+            parent_platform=platform2,
+            begin_date=datetime.datetime(2022, 5, 18, 12, 10, 0),
+            end_date=datetime.datetime(2022, 5, 19, 4, 0, 0),
+        )
+        db.session.add_all(
+            [
+                device2,
+                device1,
+                device3,
+                device_mount_action2,
+                device_mount_action1,
+                device_mount_action3,
+                platform2,
+                platform1,
+                platform3,
+                platform_mount_action2,
+                platform_mount_action1,
+                platform_mount_action3,
+            ]
+        )
+        url = f"{base_url}/controller/configurations/{self.configuration.id}/mounting-actions"
+        with self.run_requests_as(self.u):
+            response = self.client.get(
+                url, query_string={"timepoint": datetime.datetime(2022, 5, 19, 0, 0, 0)}
+            )
+        self.assertEqual(response.status_code, 200)
+        expected = [
+            {
+                "action": PlatformMountActionSchema().dump(platform_mount_action1),
+                "entity": PlatformSchema().dump(platform1),
+                "children": [],
+            },
+            {
+                "action": PlatformMountActionSchema().dump(platform_mount_action3),
+                "entity": PlatformSchema().dump(platform3),
+                "children": [],
+            },
+            {
+                "action": PlatformMountActionSchema().dump(platform_mount_action2),
+                "entity": PlatformSchema().dump(platform2),
+                "children": [
+                    {
+                        "action": DeviceMountActionSchema().dump(device_mount_action1),
+                        "entity": DeviceSchema().dump(device1),
+                        "children": [],
+                    },
+                    {
+                        "action": DeviceMountActionSchema().dump(device_mount_action3),
+                        "entity": DeviceSchema().dump(device3),
+                        "children": [],
+                    },
+                    {
+                        "action": DeviceMountActionSchema().dump(device_mount_action2),
+                        "entity": DeviceSchema().dump(device2),
+                        "children": [],
+                    },
+                ],
+            },
+        ]
+        self.assertEqual(response.json, expected)

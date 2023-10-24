@@ -18,7 +18,13 @@ from ..helpers.errors import (
     MethodNotAllowed,
     NotFoundError,
 )
-from ..models import Configuration, DeviceMountAction, PlatformMountAction
+from ..models import (
+    Configuration,
+    Device,
+    DeviceMountAction,
+    Platform,
+    PlatformMountAction,
+)
 from ..models.base_model import db
 from ..permissions.rules import can_see
 from ..schemas.device_schema import DeviceSchema
@@ -142,27 +148,37 @@ class ControllerConfigurationMountingActions(ResourceList):
         except dateutil.parser.ParserError:
             raise BadRequestError("timepoint must be ISO 8601")
 
-        active_device_mounts = db.session.query(DeviceMountAction).filter(
-            and_(
-                DeviceMountAction.configuration_id == configuration_id,
-                DeviceMountAction.begin_date <= timepoint,
-                or_(
-                    # an is None check doesn't work for this filter.
-                    DeviceMountAction.end_date == None,  # noqa: E711
-                    DeviceMountAction.end_date >= timepoint,
-                ),
+        active_device_mounts = (
+            db.session.query(DeviceMountAction)
+            .join(DeviceMountAction.device)
+            .filter(
+                and_(
+                    DeviceMountAction.configuration_id == configuration_id,
+                    DeviceMountAction.begin_date <= timepoint,
+                    or_(
+                        # an is None check doesn't work for this filter.
+                        DeviceMountAction.end_date == None,  # noqa: E711
+                        DeviceMountAction.end_date >= timepoint,
+                    ),
+                )
             )
+            .order_by(Device.short_name)
         )
-        active_platform_mounts = db.session.query(PlatformMountAction).filter(
-            and_(
-                PlatformMountAction.configuration_id == configuration_id,
-                PlatformMountAction.begin_date <= timepoint,
-                or_(
-                    # an is None check doesn't work for this filter.
-                    PlatformMountAction.end_date == None,  # noqa: E711
-                    PlatformMountAction.end_date >= timepoint,
-                ),
+        active_platform_mounts = (
+            db.session.query(PlatformMountAction)
+            .join(PlatformMountAction.platform)
+            .filter(
+                and_(
+                    PlatformMountAction.configuration_id == configuration_id,
+                    PlatformMountAction.begin_date <= timepoint,
+                    or_(
+                        # an is None check doesn't work for this filter.
+                        PlatformMountAction.end_date == None,  # noqa: E711
+                        PlatformMountAction.end_date >= timepoint,
+                    ),
+                )
             )
+            .order_by(Platform.short_name)
         )
 
         # It should not be possible to mount the very same platform

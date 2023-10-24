@@ -7,7 +7,10 @@ SPDX-FileCopyrightText: 2023
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-## 1.6.1 (Unreleased)
+## 1.7.0 (Unreleased)
+
+Changed:
+- the ordering of the platforms & devices on the mounting-actions endpoint is now by short name
 
 ## 1.6.0 - 2023-10-24
 

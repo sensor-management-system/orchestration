@@ -38,6 +38,7 @@
         "tags": [
           "Controller"
         ],
+        "description": "Returns information of the platforms & devices that are mounted on the configuration to the given timepoint. Platforms and devices are sorted by short name.",
         "parameters": [
           {
             "$ref": "#/components/parameters/timepoint"
