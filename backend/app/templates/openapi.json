@@ -5,9 +5,9 @@
     "description": "REST API for managing sensor metadata. This API is based on {json:api} specification see: https://jsonapi.org/",
     "version": "0.01",
     "contact": {
-      "email": "gitlab-incoming+hub-terra-sms-service-desk-4415-issue-@hzdr.de",
-      "name": "sms-service-desk",
-      "url": "https://codebase.helmholtz.cloud/hub-terra/sms/service-desk"
+      "email": "gitlab-incoming+hub-terra-sms-orchestration-3268-issue-@hzdr.de",
+      "name": "SMS Service-Desk",
+      "url": "https://codebase.helmholtz.cloud/hub-terra/sms/orchestration"
     },
     "license": {
       "url": "https://git.gfz-potsdam.de/rse/heesil",
@@ -5897,7 +5897,7 @@
     }
   },
   "externalDocs": {
-    "url": "https://codebase.helmholtz.cloud/hub-terra/sms/backend",
-    "description": "https://codebase.helmholtz.cloud/hub-terra/sms/backend/-/blob/master/README.md"
+    "url": "https://codebase.helmholtz.cloud/hub-terra/sms/orchestration",
+    "description": "https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/blob/master/README.md"
   }
 }

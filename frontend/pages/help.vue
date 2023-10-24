@@ -43,7 +43,7 @@ permissions and limitations under the Licence.
         <v-card-title>Support</v-card-title>
         <v-card-text>
           <p>
-            If you require technical support or have any questions or suggestions, please send an e-mail to our <a href="mailto:gitlab-incoming+hub-terra-sms-service-desk-4415-issue-@hzdr.de" style="text-decoration: none">
+            If you require technical support or have any questions or suggestions, please send an e-mail to our <a href="mailto:gitlab-incoming+hub-terra-sms-orchestration-3268-issue-@hzdr.de" style="text-decoration: none">
               <strong>Help Desk <v-icon>mdi-message-question-outline</v-icon></strong>
             </a>
           </p>

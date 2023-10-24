@@ -382,7 +382,7 @@ permissions and limitations under the Licence.
             </v-btn>
           </v-speed-dial>
           <v-btn
-            href="https://codebase.helmholtz.cloud/hub-terra/sms/"
+            href="https://codebase.helmholtz.cloud/hub-terra/sms/orchestration"
             target="_blank"
             title="Sensor Management System Repository"
             icon
@@ -399,8 +399,16 @@ permissions and limitations under the Licence.
             <v-icon>mdi-api</v-icon>
           </v-btn>
           <v-btn
-            href="mailto:gitlab-incoming+hub-terra-sms-service-desk-4415-issue-@hzdr.de"
+            href="mailto:gitlab-incoming+hub-terra-sms-orchestration-3268-issue-@hzdr.de"
             title="Request Support"
+            icon
+          >
+            <v-icon>mdi-face-agent</v-icon>
+          </v-btn>
+          <v-btn
+            href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home"
+            target="_blank"
+            title="Wiki"
             icon
           >
             <v-icon>mdi-message-question-outline</v-icon>
