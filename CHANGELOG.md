@@ -22,6 +22,7 @@ Changed:
 - removed the strong linkage of site usage and site type so that we can
   set any combination of both
 - ufz changed cv url for frontend stage image 
+- use service desk of the orchestration repo instead of the separate service desk repo
 
 ## 1.5.1 - 2023-10-04
 
