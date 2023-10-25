@@ -9,6 +9,10 @@ SPDX-License-Identifier: HEESIL-1.0
 
 ## 1.7.0 (Unreleased)
 
+Added:
+- extended display of definitions from the CV for contact roles,
+  device types, manufacturers and platform types
+
 Changed:
 - the ordering of the platforms & devices on the mounting-actions endpoint is now by short name
 - Combine entries for different roles of the same person when showing the contacts of

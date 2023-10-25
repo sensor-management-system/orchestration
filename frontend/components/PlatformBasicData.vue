@@ -90,14 +90,53 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Status</label>
         {{ platformStatusName | orDefault }}
+        <v-tooltip v-if="platformStatusDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ platformStatusDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Platform type</label>
         {{ platformTypeName | orDefault }}
+        <v-tooltip v-if="platformTypeDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ platformTypeDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Manufacturer</label>
         {{ platformManufacturerName | orDefault }}
+        <v-tooltip v-if="platformManufacturerDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ platformManufacturerDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Model</label>
@@ -226,6 +265,14 @@ export default class PlatformBasicData extends Vue {
     return ''
   }
 
+  get platformManufacturerDefinition (): string {
+    if (this.getManufacturerByUri(this.value.manufacturerUri)) {
+      const manufacturer: Manufacturer|undefined = this.getManufacturerByUri(this.value.manufacturerUri)
+      return manufacturer!.definition
+    }
+    return ''
+  }
+
   get platformTypeName (): string {
     if (this.value.platformTypeName) {
       return this.value.platformTypeName
@@ -238,6 +285,14 @@ export default class PlatformBasicData extends Vue {
     return this.NO_TYPE
   }
 
+  get platformTypeDefinition (): string {
+    if (this.getPlatformTypeByUri(this.value.platformTypeUri)) {
+      const platformType: PlatformType|undefined = this.getPlatformTypeByUri(this.value.platformTypeUri)
+      return platformType!.definition
+    }
+    return ''
+  }
+
   get platformStatusName (): string {
     if (this.value.statusName) {
       return this.value.statusName
@@ -245,6 +300,14 @@ export default class PlatformBasicData extends Vue {
     if (this.getEquipmentstatusByUri(this.value.statusUri)) {
       const platformStatus: Status|undefined = this.getEquipmentstatusByUri(this.value.statusUri)
       return platformStatus!.name
+    }
+    return ''
+  }
+
+  get platformStatusDefinition (): string {
+    if (this.getEquipmentstatusByUri(this.value.statusUri)) {
+      const platformStatus: Status|undefined = this.getEquipmentstatusByUri(this.value.statusUri)
+      return platformStatus!.definition
     }
     return ''
   }
