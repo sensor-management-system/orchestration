@@ -179,37 +179,127 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="3">
         <combobox
-          :value="deviceTypeName"
-          :items="deviceTypeNames"
+          :value="valueDeviceTypeItem"
+          item-text="name"
+          :items="devicetypes"
           :readonly="readonly"
           :disabled="readonly"
           label="Device type"
-          @input="update('deviceTypeName', $event)"
+          @input="updateDeviceType($event)"
         >
           <template #append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueDeviceTypeItem)"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueDeviceTypeItem.definition }}</span>
+            </v-tooltip>
             <v-btn icon @click="showNewDeviceTypeDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline
               </v-icon>
             </v-btn>
           </template>
+          <template #item="data">
+            <template v-if="(typeof data.item) !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
         </combobox>
       </v-col>
       <v-col cols="12" md="3">
         <combobox
-          :value="deviceManufacturerName"
-          :items="manufacturerNames"
+          :value="valueManufacturerItem"
+          item-text="name"
+          :items="manufacturers"
           :readonly="readonly"
           :disabled="readonly"
           label="Manufacturer"
-          @input="update('manufacturerName', $event)"
+          @input="updateManufacturer($event)"
         >
           <template #append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueManufacturerItem)"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueManufacturerItem.definition }}</span>
+            </v-tooltip>
             <v-btn icon @click="showNewManufacturerDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline
               </v-icon>
             </v-btn>
+          </template>
+          <template #item="data">
+            <template v-if="(typeof data.item) !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
           </template>
         </combobox>
       </v-col>
@@ -308,18 +398,18 @@ permissions and limitations under the Licence.
     </v-row>
     <device-type-dialog
       v-model="showNewDeviceTypeDialog"
-      :initial-term="deviceTypeName"
-      @aftersubmit="setDeviceType"
+      :initial-term="valueDeviceTypeItem?.name"
+      @aftersubmit="updateDeviceType"
     />
     <status-dialog
       v-model="showNewStatusDialog"
-      :initial-term="deviceStatusName"
+      :initial-term="valueStatusItem?.name"
       @aftersubmit="updateStatus"
     />
     <manufacturer-dialog
       v-model="showNewManufacturerDialog"
-      :initial-term="deviceManufacturerName"
-      @aftersubmit="setManufacturer"
+      :initial-term="valueManufacturerItem?.name"
+      @aftersubmit="updateManufacturer"
     />
   </v-form>
 </template>
@@ -351,7 +441,9 @@ import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 import Validator from '@/utils/validator'
 import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersAction, VocabularyState } from '@/store/vocabulary'
 
-type StatusSelectValue = Status | string | undefined;
+type StatusSelectValue = Status | string | undefined
+type DeviceTypeSelectValue = DeviceType | string | undefined
+type ManufacturerSelectValue = Manufacturer | string | undefined
 
 @Component({
   computed: {
@@ -469,14 +561,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     }
   }
 
-  setDeviceType (deviceType: DeviceType) {
-    this.update('deviceTypeName', deviceType.name)
-  }
-
-  setManufacturer (manufacturer: Manufacturer) {
-    this.update('manufacturerName', manufacturer.name)
-  }
-
   update (key: string, value: any) {
     const newObj = Device.createFromObject(this.value)
     // We use a check for already inserted serial numbers.
@@ -494,29 +578,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         break
       case 'longName':
         newObj.longName = value as string
-        break
-      case 'deviceTypeName':
-        newObj.deviceTypeName = value || ''
-        {
-          const deviceTypeIndex = this.devicetypes.findIndex(t => t.name === value)
-          if (deviceTypeIndex > -1) {
-            newObj.deviceTypeUri = this.devicetypes[deviceTypeIndex].uri
-          } else {
-            newObj.deviceTypeUri = ''
-          }
-        }
-        break
-      case 'manufacturerName':
-        newObj.manufacturerName = value || ''
-        {
-          const manufacturerIndex = this.manufacturers.findIndex(m => m.name === value)
-          if (manufacturerIndex > -1) {
-            newObj.manufacturerUri = this.manufacturers[manufacturerIndex].uri
-          } else {
-            newObj.manufacturerUri = ''
-          }
-        }
-        updateSerialNumberCheck = true
         break
       case 'model':
         newObj.model = value as string
@@ -600,40 +661,44 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     this.$emit('input', newObj)
   }
 
-  get manufacturerNames (): string[] {
-    return this.manufacturers.map(m => m.name)
-  }
-
-  get statusNames (): string[] {
-    return this.equipmentstatus.map(s => s.name)
-  }
-
-  get deviceTypeNames (): string[] {
-    return this.devicetypes.map(t => t.name)
-  }
-
-  get deviceManufacturerName (): string {
-    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-    if (manufacturerIndex > -1) {
-      return this.manufacturers[manufacturerIndex].name
+  updateDeviceType (value: DeviceTypeSelectValue): void {
+    const newObj = Device.createFromObject(this.value)
+    newObj.deviceTypeName = ''
+    newObj.deviceTypeUri = ''
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.deviceTypeName = value
+        newObj.deviceTypeUri = ''
+        const deviceType = this.devicetypes.find(d => d.name === value)
+        if (deviceType) {
+          newObj.deviceTypeUri = deviceType.uri
+        }
+      } else {
+        newObj.deviceTypeName = value.name
+        newObj.deviceTypeUri = value.uri
+      }
+      this.$emit('input', newObj)
     }
-    return this.value.manufacturerName
   }
 
-  get deviceStatusName () {
-    const statusIndex = this.equipmentstatus.findIndex(s => s.uri === this.value.statusUri)
-    if (statusIndex > -1) {
-      return this.equipmentstatus[statusIndex].name
+  updateManufacturer (value: ManufacturerSelectValue): void {
+    const newObj = Device.createFromObject(this.value)
+    newObj.manufacturerName = ''
+    newObj.manufacturerUri = ''
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.manufacturerName = value
+        newObj.manufacturerUri = ''
+        const manufacturer = this.manufacturers.find(m => m.name === value)
+        if (manufacturer) {
+          newObj.manufacturerUri = manufacturer.uri
+        }
+      } else {
+        newObj.manufacturerName = value.name
+        newObj.manufacturerUri = value.uri
+      }
+      this.$emit('input', newObj)
     }
-    return this.value.statusName
-  }
-
-  get deviceTypeName () {
-    const deviceTypeIndex = this.devicetypes.findIndex(t => t.uri === this.value.deviceTypeUri)
-    if (deviceTypeIndex > -1) {
-      return this.devicetypes[deviceTypeIndex].name
-    }
-    return this.value.deviceTypeName
   }
 
   /**
@@ -657,6 +722,38 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
     return {
       name: this.value.statusName,
       uri: this.value.statusUri,
+      definition: '',
+      id: null
+    }
+  }
+
+  get valueDeviceTypeItem (): ICvSelectItem | null {
+    if (!this.value.deviceTypeName && !this.value.deviceTypeUri) {
+      return null
+    }
+    const deviceType = this.devicetypes.find(d => d.uri === this.value.deviceTypeUri)
+    if (deviceType) {
+      return deviceType
+    }
+    return {
+      name: this.value.deviceTypeName,
+      uri: this.value.deviceTypeUri,
+      definition: '',
+      id: null
+    }
+  }
+
+  get valueManufacturerItem (): ICvSelectItem | null {
+    if (!this.value.manufacturerName && !this.value.manufacturerUri) {
+      return null
+    }
+    const manufacturer = this.manufacturers.find(m => m.uri === this.value.manufacturerUri)
+    if (manufacturer) {
+      return manufacturer
+    }
+    return {
+      name: this.value.manufacturerName,
+      uri: this.value.manufacturerUri,
       definition: '',
       id: null
     }

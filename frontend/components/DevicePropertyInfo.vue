@@ -40,24 +40,89 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Compartment</label>
         {{ compartmentValue | orDefault }}
+        <v-tooltip v-if="compartmentDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ compartmentDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Sampling Media</label>
         {{ samplingMediaValue | orDefault }}
+        <v-tooltip v-if="samplingMediaDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ samplingMediaDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Measured Quantity</label>
         {{ measuredQuantityValue | orDefault }}
+        <v-tooltip v-if="measuredQuantityDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ measuredQuantityDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Aggregation Type</label>
         {{ aggregationTypeValue | orDefault }}
+        <v-tooltip v-if="aggregationTypeDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ aggregationTypeDefinition }}</span>
+        </v-tooltip>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
         <label>Unit</label>
         {{ unitValue | orDefault }}
+        <v-tooltip v-if="unitDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ unitDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Measuring range min</label>
@@ -86,6 +151,19 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Unit of Resolution</label>
         {{ resolutionUnitValue | orDefault }}
+        <v-tooltip v-if="resolutionUnitDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ resolutionUnitDefinition }}</span>
+        </v-tooltip>
       </v-col>
     </v-row>
     <v-row>
@@ -201,6 +279,17 @@ export default class DevicePropertyInfo extends Vue {
     return this.value.compartmentName
   }
 
+  get compartmentDefinition (): string {
+    if (!this.value.compartmentName && !this.value.compartmentUri) {
+      return ''
+    }
+    const compartment = this.compartments.find(c => c.uri === this.value.compartmentUri)
+    if (compartment) {
+      return compartment.definition
+    }
+    return ''
+  }
+
   get samplingMediaValue (): string {
     if (!this.value.samplingMediaName && !this.value.samplingMediaUri) {
       return ''
@@ -212,6 +301,17 @@ export default class DevicePropertyInfo extends Vue {
     return this.value.samplingMediaName
   }
 
+  get samplingMediaDefinition (): string {
+    if (!this.value.samplingMediaName && !this.value.samplingMediaUri) {
+      return ''
+    }
+    const samplingMedia = this.samplingMedias.find(c => c.uri === this.value.samplingMediaUri)
+    if (samplingMedia) {
+      return samplingMedia.definition
+    }
+    return ''
+  }
+
   get measuredQuantityValue (): string {
     if (!this.value.propertyName && !this.value.propertyUri) {
       return ''
@@ -221,6 +321,17 @@ export default class DevicePropertyInfo extends Vue {
       return property.name
     }
     return this.value.propertyName
+  }
+
+  get measuredQuantityDefinition (): string {
+    if (!this.value.propertyName && !this.value.propertyUri) {
+      return ''
+    }
+    const property = this.properties.find(c => c.uri === this.value.propertyUri)
+    if (property) {
+      return property.definition
+    }
+    return ''
   }
 
   get aggregationTypeValue (): string {
@@ -238,6 +349,17 @@ export default class DevicePropertyInfo extends Vue {
     return this.value.aggregationTypeName
   }
 
+  get aggregationTypeDefinition (): string {
+    if (!this.value.aggregationTypeName && !this.value.aggregationTypeUri) {
+      return ''
+    }
+    const aggregationType = this.aggregationTypes.find(c => c.uri === this.value.aggregationTypeUri)
+    if (aggregationType) {
+      return aggregationType.definition
+    }
+    return ''
+  }
+
   get unitValue (): string {
     if (!this.value.unitName && !this.value.unitUri) {
       return ''
@@ -249,6 +371,17 @@ export default class DevicePropertyInfo extends Vue {
     return this.value.unitName
   }
 
+  get unitDefinition (): string {
+    if (!this.value.unitName && !this.value.unitUri) {
+      return ''
+    }
+    const unit = this.units.find(c => c.uri === this.value.unitUri)
+    if (unit) {
+      return unit.definition
+    }
+    return ''
+  }
+
   get resolutionUnitValue (): string {
     if (!this.value.resolutionUnitName && !this.value.resolutionUnitUri) {
       return ''
@@ -258,6 +391,17 @@ export default class DevicePropertyInfo extends Vue {
       return unit.name
     }
     return this.value.resolutionUnitName
+  }
+
+  get resolutionUnitDefinition (): string {
+    if (!this.value.resolutionUnitName && !this.value.resolutionUnitUri) {
+      return ''
+    }
+    const unit = this.units.find(c => c.uri === this.value.resolutionUnitUri)
+    if (unit) {
+      return unit.definition
+    }
+    return ''
   }
 }
 </script>

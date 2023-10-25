@@ -179,37 +179,127 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="3">
         <combobox
-          :value="platformTypeName"
-          :items="platformTypeNames"
+          :value="valuePlatformTypeItem"
+          item-text="name"
+          :items="platformtypes"
           :readonly="readonly"
           :disabled="readonly"
           label="Platform type"
-          @input="update('platformTypeName', $event)"
+          @input="updatePlatformType($event)"
         >
           <template #append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valuePlatformTypeItem)"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valuePlatformTypeItem.definition }}</span>
+            </v-tooltip>
             <v-btn icon @click="showNewPlatformTypeDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline
               </v-icon>
             </v-btn>
           </template>
+          <template #item="data">
+            <template v-if="(typeof data.item) !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
         </combobox>
       </v-col>
       <v-col cols="12" md="3">
         <combobox
-          :value="platformManufacturerName"
-          :items="manufacturerNames"
+          :value="valueManufacturerItem"
+          item-text="name"
+          :items="manufacturers"
           :readonly="readonly"
           :disabled="readonly"
           label="Manufacturer"
-          @input="update('manufacturerName', $event)"
+          @input="updateManufacturer( $event)"
         >
           <template #append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueManufacturerItem)"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueManufacturerItem.definition }}</span>
+            </v-tooltip>
             <v-btn icon @click="showNewManufacturerDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline
               </v-icon>
             </v-btn>
+          </template>
+          <template #item="data">
+            <template v-if="(typeof data.item) !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
           </template>
         </combobox>
       </v-col>
@@ -290,18 +380,18 @@ permissions and limitations under the Licence.
     </v-row>
     <platform-type-dialog
       v-model="showNewPlatformTypeDialog"
-      :initial-term="platformTypeName"
-      @aftersubmit="setPlatformType"
+      :initial-term="valuePlatformTypeItem?.name"
+      @aftersubmit="updatePlatformType"
     />
     <status-dialog
       v-model="showNewStatusDialog"
-      :initial-term="platformStatusName"
+      :initial-term="valueStatusItem?.name"
       @aftersubmit="updateStatus"
     />
     <manufacturer-dialog
       v-model="showNewManufacturerDialog"
-      :initial-term="platformManufacturerName"
-      @aftersubmit="setManufacturer"
+      :initial-term="valueManufacturerItem?.name"
+      @aftersubmit="updateManufacturer"
     />
   </v-form>
 </template>
@@ -334,6 +424,8 @@ import Validator from '@/utils/validator'
 import { LoadEquipmentstatusAction, LoadManufacturersAction, LoadPlatformtypesAction, VocabularyState } from '@/store/vocabulary'
 
 type StatusSelectValue = Status | string | undefined
+type PlatformTypeSelectValue = PlatformType | string | undefined
+type ManufacturerSelectValue = Manufacturer | string | undefined
 
 @Component({
   components: {
@@ -453,14 +545,6 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     }
   }
 
-  setPlatformType (platformType: PlatformType) {
-    this.update('platformTypeName', platformType.name)
-  }
-
-  setManufacturer (manufacturer: Manufacturer) {
-    this.update('manufacturerName', manufacturer.name)
-  }
-
   update (key: string, value: any) {
     const newObj = Platform.createFromObject(this.value)
     // We use a check for already inserted serial numbers.
@@ -478,29 +562,6 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
         break
       case 'longName':
         newObj.longName = value
-        break
-      case 'platformTypeName':
-        newObj.platformTypeName = value
-        {
-          const platformTypeIndex = this.platformtypes.findIndex(t => t.name === value)
-          if (platformTypeIndex > -1) {
-            newObj.platformTypeUri = this.platformtypes[platformTypeIndex].uri
-          } else {
-            newObj.platformTypeUri = ''
-          }
-        }
-        break
-      case 'manufacturerName':
-        newObj.manufacturerName = value || ''
-        {
-          const manufacturerIndex = this.manufacturers.findIndex(m => m.name === value)
-          if (manufacturerIndex > -1) {
-            newObj.manufacturerUri = this.manufacturers[manufacturerIndex].uri
-          } else {
-            newObj.manufacturerUri = ''
-          }
-        }
-        updateSerialNumberCheck = true
         break
       case 'model':
         newObj.model = value
@@ -547,7 +608,7 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
    * updates the status
    *
    * @param {StatusSelectValue} value - an object as provided by the combobox
-   * @fires DeviceBasicDataForm#input
+   * @fires PlatformBasicDataForm#input
    */
   updateStatus (value: StatusSelectValue): void {
     const newObj = Platform.createFromObject(this.value)
@@ -569,46 +630,50 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     }
     /**
      * input event
-     * @event DeviceBasicDataForm#input
-     * @type {DeviceProperty}
+     * @event PlatformBasicDataForm#input
+     * @type {Platform}
      */
     this.$emit('input', newObj)
   }
 
-  get manufacturerNames (): string[] {
-    return this.manufacturers.map(m => m.name)
-  }
-
-  get statusNames (): string[] {
-    return this.equipmentstatus.map(s => s.name)
-  }
-
-  get platformTypeNames (): string[] {
-    return this.platformtypes.map(t => t.name)
-  }
-
-  get platformManufacturerName (): string {
-    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
-    if (manufacturerIndex > -1) {
-      return this.manufacturers[manufacturerIndex].name
+  updatePlatformType (value: PlatformTypeSelectValue): void {
+    const newObj = Platform.createFromObject(this.value)
+    newObj.platformTypeName = ''
+    newObj.platformTypeUri = ''
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.platformTypeName = value
+        newObj.platformTypeUri = ''
+        const platformType = this.platformtypes.find(p => p.name === value)
+        if (platformType) {
+          newObj.platformTypeUri = platformType.uri
+        }
+      } else {
+        newObj.platformTypeName = value.name
+        newObj.platformTypeUri = value.uri
+      }
+      this.$emit('input', newObj)
     }
-    return this.value.manufacturerName
   }
 
-  get platformStatusName () {
-    const statusIndex = this.equipmentstatus.findIndex(s => s.uri === this.value.statusUri)
-    if (statusIndex > -1) {
-      return this.equipmentstatus[statusIndex].name
+  updateManufacturer (value: ManufacturerSelectValue): void {
+    const newObj = Platform.createFromObject(this.value)
+    newObj.manufacturerName = ''
+    newObj.manufacturerUri = ''
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.manufacturerName = value
+        newObj.manufacturerUri = ''
+        const manufacturer = this.manufacturers.find(m => m.name === value)
+        if (manufacturer) {
+          newObj.manufacturerUri = manufacturer.uri
+        }
+      } else {
+        newObj.manufacturerName = value.name
+        newObj.manufacturerUri = value.uri
+      }
+      this.$emit('input', newObj)
     }
-    return this.value.statusName
-  }
-
-  get platformTypeName () {
-    const platformTypeIndex = this.platformtypes.findIndex(t => t.uri === this.value.platformTypeUri)
-    if (platformTypeIndex > -1) {
-      return this.platformtypes[platformTypeIndex].name
-    }
-    return this.value.platformTypeName
   }
 
   /**
@@ -632,6 +697,38 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
     return {
       name: this.value.statusName,
       uri: this.value.statusUri,
+      definition: '',
+      id: null
+    }
+  }
+
+  get valuePlatformTypeItem (): ICvSelectItem | null {
+    if (!this.value.platformTypeName && !this.value.platformTypeUri) {
+      return null
+    }
+    const platformType = this.platformtypes.find(p => p.uri === this.value.platformTypeUri)
+    if (platformType) {
+      return platformType
+    }
+    return {
+      name: this.value.platformTypeName,
+      uri: this.value.platformTypeUri,
+      definition: '',
+      id: null
+    }
+  }
+
+  get valueManufacturerItem (): ICvSelectItem | null {
+    if (!this.value.manufacturerName && !this.value.manufacturerUri) {
+      return null
+    }
+    const manufacturer = this.manufacturers.find(m => m.uri === this.value.manufacturerUri)
+    if (manufacturer) {
+      return manufacturer
+    }
+    return {
+      name: this.value.manufacturerName,
+      uri: this.value.manufacturerUri,
       definition: '',
       id: null
     }

@@ -61,11 +61,55 @@ permissions and limitations under the Licence.
           :rules="[roleAndContactNotDuplicated]"
         >
           <template #append-outer>
+            <v-tooltip
+              v-if="selectedRole?.definition"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ selectedRole.definition }}</span>
+            </v-tooltip>
             <v-btn icon @click="showNewContactRoleDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline
               </v-icon>
             </v-btn>
+          </template>
+          <template #item="data">
+            <template v-if="(typeof data.item) !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
           </template>
         </v-autocomplete>
       </v-col>

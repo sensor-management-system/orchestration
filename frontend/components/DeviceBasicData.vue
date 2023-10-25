@@ -88,14 +88,53 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Status</label>
         {{ deviceStatusName | orDefault }}
+        <v-tooltip v-if="deviceStatusDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ deviceStatusDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Device type</label>
         {{ deviceTypeName | orDefault }}
+        <v-tooltip v-if="deviceTypeDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ deviceTypeDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Manufacturer</label>
         {{ deviceManufacturerName | orDefault }}
+        <v-tooltip v-if="deviceManufacturerDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ deviceManufacturerDefinition }}</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
         <label>Model</label>
@@ -217,7 +256,15 @@ export default class DeviceBasicData extends Vue {
     return this.value.manufacturerName
   }
 
-  get deviceStatusName () {
+  get deviceManufacturerDefinition (): string {
+    const manufacturerIndex = this.manufacturers.findIndex(m => m.uri === this.value.manufacturerUri)
+    if (manufacturerIndex > -1) {
+      return this.manufacturers[manufacturerIndex].definition
+    }
+    return ''
+  }
+
+  get deviceStatusName (): string {
     const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
     if (statusIndex > -1) {
       return this.states[statusIndex].name
@@ -225,12 +272,28 @@ export default class DeviceBasicData extends Vue {
     return this.value.statusName
   }
 
-  get deviceTypeName () {
+  get deviceStatusDefinition (): string {
+    const statusIndex = this.states.findIndex(s => s.uri === this.value.statusUri)
+    if (statusIndex > -1) {
+      return this.states[statusIndex].definition
+    }
+    return ''
+  }
+
+  get deviceTypeName (): string {
     const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.value.deviceTypeUri)
     if (deviceTypeIndex > -1) {
       return this.deviceTypes[deviceTypeIndex].name
     }
     return this.value.deviceTypeName
+  }
+
+  get deviceTypeDefinition (): string {
+    const deviceTypeIndex = this.deviceTypes.findIndex(t => t.uri === this.value.deviceTypeUri)
+    if (deviceTypeIndex > -1) {
+      return this.deviceTypes[deviceTypeIndex].definition
+    }
+    return ''
   }
 
   get deviceURN () {
