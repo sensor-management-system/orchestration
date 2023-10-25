@@ -82,6 +82,7 @@ import {
   getDistinctYearsOfActions,
   sortActions
 } from '@/utils/actionHelper'
+import { ContactWithRoles } from '@/models/ContactWithRoles'
 
 export enum LocationTypes {
   staticStart = 'configuration_static_location_begin',
@@ -380,6 +381,22 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
   },
   pageSizes: () => {
     return PAGE_SIZES
+  },
+  contactsWithRoles: (state: ConfigurationsState): ContactWithRoles[] => {
+    const result: ContactWithRoles[] = []
+    for (const contactRole of state.configurationContactRoles) {
+      const contact = contactRole.contact
+      const contactId = contact?.id
+      if (contact && contactId) {
+        const foundIndex = result.findIndex(c => c.contact?.id === contact.id)
+        if (foundIndex > -1) {
+          result[foundIndex].roles.push(contactRole)
+        } else {
+          result.push(new ContactWithRoles(contact, [contactRole]))
+        }
+      }
+    }
+    return result
   }
 }
 

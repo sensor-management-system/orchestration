@@ -43,28 +43,31 @@ permissions and limitations under the Licence.
         Assign contact
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="siteContactRoles.length === 0">
+    <hint-card v-if="contactsWithRoles.length === 0">
       There are no contacts for this site / lab.
     </hint-card>
     <BaseList
-      :list-items="siteContactRoles"
+      :list-items="contactsWithRoles"
     >
       <template #list-item="{item}">
-        <contact-role-list-item
-          :key="item.id"
+        <contact-with-roles-list-item
+          :key="item.contact.id"
           :value="item"
           :cv-contact-roles="cvContactRoles"
         >
           <template v-if="editable" #dot-menu-items>
             <DotMenuActionDelete
-              @click="removeContactRole(item.id)"
+              v-for="role in item.roles"
+              :key="role.id"
+              :text="`Remove '${roleName(role, cvContactRoles)}' role`"
+              @click="removeContactRole(role.id)"
             />
           </template>
-        </contact-role-list-item>
+        </contact-with-roles-list-item>
       </template>
     </BaseList>
     <v-card-actions
-      v-if="siteContactRoles.length>3"
+      v-if="contactsWithRoles.length>3"
     >
       <v-spacer />
       <v-btn
@@ -81,26 +84,28 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, InjectReactive, mixins } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { LoadSiteContactRolesAction, RemoveSiteContactRoleAction } from '@/store/sites'
 
 import HintCard from '@/components/HintCard.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import BaseList from '@/components/shared/BaseList.vue'
-import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
+import ContactWithRolesListItem from '@/components/contacts/ContactWithRolesListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
+import { RoleNameMixin } from '@/mixins/RoleNameMixin'
 
 @Component({
   components: {
     DotMenuActionDelete,
-    ContactRoleListItem,
+    ContactWithRolesListItem,
     BaseList,
     HintCard
   },
   computed: {
     ...mapState('sites', ['siteContactRoles']),
+    ...mapGetters('sites', ['contactsWithRoles']),
     ...mapState('vocabulary', ['cvContactRoles'])
   },
   methods: {
@@ -108,7 +113,7 @@ import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
-export default class SiteShowContactPage extends Vue {
+export default class SiteShowContactPage extends mixins(RoleNameMixin) {
   @InjectReactive()
     editable!: boolean
 
@@ -127,10 +132,10 @@ export default class SiteShowContactPage extends Vue {
       await this.removeSiteContactRole({
         siteContactRoleId: contactRoleId
       })
-      this.$store.commit('snackbar/setSuccess', 'Contact removed')
+      this.$store.commit('snackbar/setSuccess', 'Role removed')
       this.loadSiteContactRoles(this.siteId)
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Removing contact failed')
+      this.$store.commit('snackbar/setError', 'Removing role failed')
     } finally {
       this.setLoading(false)
     }
