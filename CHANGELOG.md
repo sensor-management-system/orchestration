@@ -11,6 +11,8 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Changed:
 - the ordering of the platforms & devices on the mounting-actions endpoint is now by short name
+- Combine entries for different roles of the same person when showing the contacts of
+  devices/platforms/configurations/sites.
 
 ## 1.6.0 - 2023-10-24
 

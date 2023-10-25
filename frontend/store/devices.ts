@@ -66,6 +66,7 @@ import {
   getDistinctYearsOfActions,
   sortActions
 } from '@/utils/actionHelper'
+import { ContactWithRoles } from '@/models/ContactWithRoles'
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfDeviceActionType
@@ -174,6 +175,22 @@ const getters: GetterTree<DevicesState, RootState> = {
   },
   pageSizes: (): number[] => {
     return PAGE_SIZES
+  },
+  contactsWithRoles: (state: DevicesState): ContactWithRoles[] => {
+    const result: ContactWithRoles[] = []
+    for (const contactRole of state.deviceContactRoles) {
+      const contact = contactRole.contact
+      const contactId = contact?.id
+      if (contact && contactId) {
+        const foundIndex = result.findIndex(c => c.contact?.id === contact.id)
+        if (foundIndex > -1) {
+          result[foundIndex].roles.push(contactRole)
+        } else {
+          result.push(new ContactWithRoles(contact, [contactRole]))
+        }
+      }
+    }
+    return result
   }
 }
 

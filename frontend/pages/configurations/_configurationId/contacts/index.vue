@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -43,28 +43,31 @@ permissions and limitations under the Licence.
         Assign contact
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="configurationContactRoles.length === 0">
+    <hint-card v-if="contactsWithRoles.length === 0">
       There are no contacts for this configuration.
     </hint-card>
     <BaseList
-      :list-items="configurationContactRoles"
+      :list-items="contactsWithRoles"
     >
       <template #list-item="{item}">
-        <contact-role-list-item
-          :key="item.id"
+        <contact-with-roles-list-item
+          :key="item.contact.id"
           :value="item"
           :cv-contact-roles="cvContactRoles"
         >
           <template v-if="editable" #dot-menu-items>
             <DotMenuActionDelete
-              @click="removeContactRole(item.id)"
+              v-for="role in item.roles"
+              :key="role.id"
+              :text="`Remove '${roleName(role, cvContactRoles)}' role`"
+              @click="removeContactRole(role.id)"
             />
           </template>
-        </contact-role-list-item>
+        </contact-with-roles-list-item>
       </template>
     </BaseList>
     <v-card-actions
-      v-if="configurationContactRoles.length>3"
+      v-if="contactsWithRoles.length>3"
     >
       <v-spacer />
       <v-btn
@@ -81,26 +84,28 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, InjectReactive, mixins } from 'nuxt-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { LoadConfigurationContactRolesAction, RemoveConfigurationContactRoleAction } from '@/store/configurations'
 
 import BaseList from '@/components/shared/BaseList.vue'
-import ContactRoleListItem from '@/components/contacts/ContactRoleListItem.vue'
+import ContactWithRolesListItem from '@/components/contacts/ContactWithRolesListItem.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import HintCard from '@/components/HintCard.vue'
+import { RoleNameMixin } from '@/mixins/RoleNameMixin'
 
 @Component({
   components: {
     HintCard,
     DotMenuActionDelete,
-    ContactRoleListItem,
+    ContactWithRolesListItem,
     BaseList
   },
   computed: {
     ...mapState('configurations', ['configurationContactRoles']),
+    ...mapGetters('configurations', ['contactsWithRoles']),
     ...mapState('vocabulary', ['cvContactRoles'])
   },
   methods: {
@@ -108,7 +113,7 @@ import HintCard from '@/components/HintCard.vue'
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
-export default class ConfigurationShowContactPage extends Vue {
+export default class ConfigurationShowContactPage extends mixins(RoleNameMixin) {
   @InjectReactive()
     editable!: boolean
 
@@ -127,10 +132,10 @@ export default class ConfigurationShowContactPage extends Vue {
       await this.removeConfigurationContactRole({
         configurationContactRoleId: contactRoleId
       })
-      this.$store.commit('snackbar/setSuccess', 'Contact removed')
+      this.$store.commit('snackbar/setSuccess', 'Role removed')
       this.loadConfigurationContactRoles(this.configurationId)
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Removing contact failed')
+      this.$store.commit('snackbar/setError', 'Removing role failed')
     } finally {
       this.setLoading(false)
     }

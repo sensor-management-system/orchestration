@@ -46,6 +46,7 @@ import { IncludedRelationships } from '@/services/sms/SiteApi'
 import { Configuration } from '@/models/Configuration'
 import { ContactRole } from '@/models/ContactRole'
 import { getLastPathElement } from '@/utils/urlHelpers'
+import { ContactWithRoles } from '@/models/ContactWithRoles'
 
 const PAGE_SIZES = [
   25,
@@ -84,6 +85,22 @@ export type PageSizesGetter = number[]
 const getters: GetterTree<SitesState, RootState> = {
   pageSizes: (): number[] => {
     return PAGE_SIZES
+  },
+  contactsWithRoles: (state: SitesState): ContactWithRoles[] => {
+    const result: ContactWithRoles[] = []
+    for (const contactRole of state.siteContactRoles) {
+      const contact = contactRole.contact
+      const contactId = contact?.id
+      if (contact && contactId) {
+        const foundIndex = result.findIndex(c => c.contact?.id === contact.id)
+        if (foundIndex > -1) {
+          result[foundIndex].roles.push(contactRole)
+        } else {
+          result.push(new ContactWithRoles(contact, [contactRole]))
+        }
+      }
+    }
+    return result
   }
 }
 
