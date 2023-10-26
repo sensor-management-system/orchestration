@@ -652,8 +652,8 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
         newObj.platformTypeName = value.name
         newObj.platformTypeUri = value.uri
       }
-      this.$emit('input', newObj)
     }
+    this.$emit('input', newObj)
   }
 
   updateManufacturer (value: ManufacturerSelectValue): void {
@@ -672,8 +672,9 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
         newObj.manufacturerName = value.name
         newObj.manufacturerUri = value.uri
       }
-      this.$emit('input', newObj)
     }
+    this.$emit('input', newObj)
+    this.loadSerialNumbers(newObj)
   }
 
   /**
