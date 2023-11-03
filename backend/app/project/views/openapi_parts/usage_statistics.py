@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -15,7 +15,15 @@ paths = {
     "/usage-statistics": {
         "get": {
             "tags": ["Usage statistics"],
-            "parameters": [],
+            "parameters": [
+                {
+                    "name": "extended",
+                    "description": "Show some more information (pids, uploads, organizations, ...)",
+                    "in": "query",
+                    "required": False,
+                    "schema": {"type": "boolean", "default": "false"},
+                }
+            ],
             "responses": {"200": {"$ref": "#/components/responses/UsageStatistics"}},
             "description": "User info about the current usage of the sms instance.",
             "operationId": "get_usage_statistics",
