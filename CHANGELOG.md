@@ -13,11 +13,13 @@ Added:
 - extended display of definitions from the CV for contact roles,
   device types, manufacturers and platform types
 - more usage statistic values (pids, uploads, ...)
+- Activated B2INST support on UFZ instance (stage/production)
 
 Changed:
 - the ordering of the platforms & devices on the mounting-actions endpoint is now by short name
 - Combine entries for different roles of the same person when showing the contacts of
   devices/platforms/configurations/sites.
+- updated privacy policy for B2INST usage on UFZ
 
 ## 1.6.0 - 2023-10-24
 
