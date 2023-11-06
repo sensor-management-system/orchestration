@@ -6,8 +6,9 @@ SPDX-FileCopyrightText: 2023
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
+## 1.7.1 (Unreleased)
 
-## 1.7.0 (Unreleased)
+## 1.7.0 - 2023-11-06
 
 Added:
 - extended display of definitions from the CV for contact roles,
