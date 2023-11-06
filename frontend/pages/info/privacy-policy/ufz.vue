@@ -72,6 +72,18 @@ permissions and limitations under the Licence.
       </ul>
     </p>
     <p>Furthermore, persons are assigned to the devices as contact persons for the purpose of mapping responsibilities and facilitating consultations in the event of questions about the devices.</p>
+
+    <p>
+      To register persistent identifiers for the instruments we provide <a href="https://doi.org/10.15497/RDA00070" target="_blank">PIDINST metadata</a>
+      to the <a href="https://b2inst.gwdg.de/" target="_blank">B2INST portal</a>.
+      The PIDINST data contain the following personal information of the associated contacts:
+    </p>
+    <ul class="mt-2 mb-4">
+      <li>Given name, surname</li>
+      <li>E-mail address</li>
+      <li>ORCID (if available)</li>
+    </ul>
+
     <p>The application cannot be used to analyse user behaviour.</p>
     <h4 class="mb-2">
       2. Legal basis for the data processing
