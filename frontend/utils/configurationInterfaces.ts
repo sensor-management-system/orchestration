@@ -36,7 +36,7 @@
 import { DateTime } from 'luxon'
 import { IPlatform } from '@/models/Platform'
 import { IContact, Contact } from '@/models/Contact'
-import { Device } from '@/models/Device'
+import { IDevice, Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
@@ -68,6 +68,7 @@ export interface IActionDateWithTextItem extends IActionDateWithText {
 
 export interface IMountInfo {
   parentPlatform: IPlatform | null
+  parentDevice: IDevice | null
   offsetX: number
   offsetY: number
   offsetZ: number
@@ -186,6 +187,7 @@ export class PlatformMountTimelineAction implements IMountTimelineAction<Platfor
   get mountInfo (): IMountInfo {
     return {
       parentPlatform: this._mountAction.parentPlatform,
+      parentDevice: null,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
       offsetZ: this._mountAction.offsetZ
@@ -247,6 +249,7 @@ export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMou
   get mountInfo (): IMountInfo {
     return {
       parentPlatform: this._mountAction.parentPlatform,
+      parentDevice: this._mountAction.parentDevice,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
       offsetZ: this._mountAction.offsetZ
@@ -308,6 +311,7 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction<Platf
   get mountInfo (): IMountInfo {
     return {
       parentPlatform: this._mountAction.parentPlatform,
+      parentDevice: null,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
       offsetZ: this._mountAction.offsetZ
@@ -369,6 +373,7 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceM
   get mountInfo (): IMountInfo {
     return {
       parentPlatform: this._mountAction.parentPlatform,
+      parentDevice: this._mountAction.parentDevice,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
       offsetZ: this._mountAction.offsetZ

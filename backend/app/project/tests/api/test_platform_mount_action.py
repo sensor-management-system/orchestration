@@ -882,7 +882,7 @@ class TestPlatformMountAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 409)
 
-        # This Should Work as we will deliver a valid time-interval
+        # This should work as we will deliver a valid time-interval
         mount_platform_action_with_no_conflicts = {
             "data": {
                 "type": self.object_type,

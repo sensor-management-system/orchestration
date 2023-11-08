@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -6,18 +6,23 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""Schemas for the mount action classes."""
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
 
 
 class PlatformMountActionSchema(Schema):
     """
-    This class create a schema for a platform_mount_action.
+    This class creates a schema for a platform_mount_action.
+
     It uses library called marshmallow-jsonapi that fit
     the JSONAPI 1.0 specification and provides Flask integration.
     """
 
     class Meta:
+        """Meta class for the PlatformMountActionSchema."""
+
         type_ = "platform_mount_action"
         self_view = "api.platform_mount_action_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -101,12 +106,15 @@ class PlatformMountActionSchema(Schema):
 
 class DeviceMountActionSchema(Schema):
     """
-    This class create a schema for a device_mount_action.
+    This class creates a schema for a device_mount_action.
+
     It uses library called marshmallow-jsonapi that fit
     the JSONAPI 1.0 specification and provides Flask integration.
     """
 
     class Meta:
+        """Meta class for the DeviceMountActionSchema."""
+
         type_ = "device_mount_action"
         self_view = "api.device_mount_action_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -138,6 +146,15 @@ class DeviceMountActionSchema(Schema):
         include_resource_linkage=True,
         schema="PlatformSchema",
         type_="platform",
+        id_field="id",
+    )
+    parent_device = Relationship(
+        attribute="parent_device",
+        related_view="api.device_detail",
+        related_view_kwargs={"id": "<parent_device_id>"},
+        include_resource_linkage=True,
+        schema="DeviceSchema",
+        type_="device",
         id_field="id",
     )
     configuration = Relationship(

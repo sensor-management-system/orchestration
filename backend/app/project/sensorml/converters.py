@@ -10,6 +10,7 @@ from typing import List, Optional
 
 from geoalchemy2.shape import to_shape
 
+from ..api.helpers.configuration_helpers import build_tree
 from ..api.models import Configuration
 from ..api.models.base_model import db
 from ..api.permissions.rules import filter_visible
@@ -565,55 +566,27 @@ class ConfigurationConverter:
             return None
         return SmlParameters(sml_parameter_list=sml_parameter_list)
 
-    def _build_tree(self):
-        """Help to build a tree with the platforms & devices as children."""
-        children = {}
-        top_level_mounts = []
-
-        for active_platform_mount in self.configuration.platform_mount_actions:
-            children.setdefault(active_platform_mount.platform_id, [])
-
-            element_payload = {
-                "action_type": "platform_mount",
-                "entity": active_platform_mount.platform,
-                "children": children[active_platform_mount.platform_id],
-            }
-            if active_platform_mount.parent_platform_id:
-                children.setdefault(active_platform_mount.parent_platform_id, [])
-                if (
-                    element_payload
-                    not in children[active_platform_mount.parent_platform_id]
-                ):
-                    children[active_platform_mount.parent_platform_id].append(
-                        element_payload
-                    )
-            else:
-                if element_payload not in top_level_mounts:
-                    top_level_mounts.append(element_payload)
-
-        for active_device_mount in self.configuration.device_mount_actions:
-            element_payload = {
-                "action_type": "device_mount",
-                "entity": active_device_mount.device,
-                "children": [],
-            }
-            if active_device_mount.parent_platform_id:
-                children.setdefault(active_device_mount.parent_platform_id, [])
-                if (
-                    element_payload
-                    not in children[active_device_mount.parent_platform_id]
-                ):
-                    children[active_device_mount.parent_platform_id].append(
-                        element_payload
-                    )
-            else:
-                if element_payload not in top_level_mounts:
-                    top_level_mounts.append(element_payload)
-        return top_level_mounts
-
     def sml_components(self) -> Optional[SmlComponents]:
         """Return the sml components."""
-        tree = self._build_tree()
+
+        def platform_to_payload(platform_mount):
+            return {
+                "action_type": "platform_mount",
+                "entity": platform_mount.platform,
+            }
+
+        def device_to_payload(device_mount):
+            return {
+                "action_type": "device_mount",
+                "entity": device_mount.device,
+            }
+
+        tree = build_tree(
+            platform_mounts=self.configuration.platform_mount_actions,
+            device_mounts=self.configuration.device_mount_actions,
+            f_platform_mount=platform_to_payload,
+            f_device_mount=device_to_payload,
+        )
         sml_component_list = []
 
         def insert_into_components(element, sml_component_list) -> None:
@@ -657,6 +630,16 @@ class ConfigurationConverter:
                     xlink_title=f"Link to Device {element['entity'].id}",
                 )
                 sml_component_list.append(sml_component)
+                sub_components_list = []
+                for child in element["children"]:
+                    # Call recursively to add all childs of the child to
+                    # the sub list.
+                    insert_into_components(child, sub_components_list)
+
+                if sub_components_list:
+                    sub_system.sml_components = SmlComponents(
+                        sml_component_list=sub_components_list
+                    )
 
         for element in tree:
             insert_into_components(element, sml_component_list)
@@ -1429,6 +1412,7 @@ class SiteConverter:
         return GmlDescription(text=self.site.description)
 
     def gml_location(self) -> Optional[GmlLocation]:
+        """Return the gml:location."""
         if not self.site.geometry:
             return None
         shape = to_shape(self.site.geometry)

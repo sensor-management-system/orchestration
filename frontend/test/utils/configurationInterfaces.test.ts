@@ -50,7 +50,7 @@ describe('logicOrder', () => {
     const device = new Device()
 
     const platformMount = new PlatformMountAction('1', platform, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
-    const deviceMountAction = new DeviceMountAction('2', device, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
+    const deviceMountAction = new DeviceMountAction('2', device, null, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
 
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)
@@ -68,7 +68,7 @@ describe('logicOrder', () => {
     const device = new Device()
 
     const platformMount = new PlatformMountAction('1', platform, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
-    const deviceMountAction = new DeviceMountAction('2', device, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
+    const deviceMountAction = new DeviceMountAction('2', device, null, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
 
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
 
@@ -82,7 +82,7 @@ describe('logicOrder', () => {
     const device = new Device()
 
     const platformMount = new PlatformMountAction('1', platform, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
-    const deviceMountAction = new DeviceMountAction('2', device, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
+    const deviceMountAction = new DeviceMountAction('2', device, null, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
 
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)
 

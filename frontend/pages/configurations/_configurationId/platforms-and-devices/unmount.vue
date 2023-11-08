@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2022, 2023
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -274,6 +274,11 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
       }
     }
     if (node.isDevice()) {
+      if (node.canHaveChildren() && node.children.length > 0) {
+        this.errorMessage = 'The selected device still has mounted sub devices. Please unmount them first.'
+        this.nodeCanBeUnmounted = false
+        return false
+      }
       if (node.unpack().device.archived) {
         this.errorMessage = 'The selected device is archived. Please restore it first.'
         this.nodeCanBeUnmounted = false
@@ -281,6 +286,11 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
       }
       if (node.unpack().parentPlatform && node.unpack().parentPlatform?.archived) {
         this.errorMessage = 'The parent platform is archived. Please restore it first.'
+        this.nodeCanBeUnmounted = false
+        return false
+      }
+      if (node.unpack().parentDevice && node.unpack().parentDevice?.archived) {
+        this.errorMessage = 'The parent device is archived. Please restore it first.'
         this.nodeCanBeUnmounted = false
         return false
       }
@@ -355,6 +365,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
       id: mountAction.id,
       device: mountAction.device,
       parentPlatform: mountAction.parentPlatform,
+      parentDevice: mountAction.parentDevice,
       offsetX: mountAction.offsetX,
       offsetY: mountAction.offsetX,
       offsetZ: mountAction.offsetX,

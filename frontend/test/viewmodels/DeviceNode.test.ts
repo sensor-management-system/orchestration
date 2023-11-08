@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -47,6 +47,7 @@ describe('DeviceNode', () => {
       id: '',
       device,
       parentPlatform: null,
+      parentDevice: null,
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
@@ -69,6 +70,7 @@ describe('DeviceNode', () => {
       id: '',
       device: firstDevice,
       parentPlatform: null,
+      parentDevice: null,
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
@@ -85,7 +87,7 @@ describe('DeviceNode', () => {
     expect(Object.is(secondNode, firstNode)).toBeFalsy()
     expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeTruthy()
   })
-  it('should not be allowed to have children', () => {
+  it('should be allowed to have children', () => {
     const device = new Device()
     device.id = '1'
 
@@ -93,6 +95,7 @@ describe('DeviceNode', () => {
       id: '',
       device,
       parentPlatform: null,
+      parentDevice: null,
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
@@ -104,7 +107,95 @@ describe('DeviceNode', () => {
       endDescription: ''
     })
     const node = new DeviceNode(deviceMountAction)
-    expect(node.canHaveChildren()).toBeFalsy()
+    expect(node.canHaveChildren()).toBeTruthy()
+  })
+  it('should return an Array for children', () => {
+    const firstDevice = new Device()
+    firstDevice.id = '1'
+
+    const firstDeviceMountAction = DeviceMountAction.createFromObject({
+      id: '',
+      device: firstDevice,
+      parentPlatform: null,
+      parentDevice: null,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a device mount action',
+      endDescription: ''
+    })
+    const firstNode = new DeviceNode(firstDeviceMountAction)
+
+    const secondDevice = new Device()
+    const secondDeviceMountAction = DeviceMountAction.createFromObject({
+      id: '',
+      device: secondDevice,
+      parentPlatform: null,
+      parentDevice: firstDevice,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'a second device mount action',
+      endDescription: ''
+    })
+    const secondNode = new DeviceNode(secondDeviceMountAction)
+
+    firstNode.getTree().push(secondNode)
+
+    expect(firstNode.children).toBeInstanceOf(Array)
+    expect(firstNode.children).toHaveLength(1)
+    expect(Object.is(firstNode.children[0], secondNode)).toBeTruthy()
+  })
+  it('should set the tree from an array of children', () => {
+    const firstDevice = new Device()
+    firstDevice.id = '1'
+
+    const firstDeviceMountAction = DeviceMountAction.createFromObject({
+      id: '',
+      device: firstDevice,
+      parentPlatform: null,
+      parentDevice: null,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'just a device mount action',
+      endDescription: ''
+    })
+    const firstNode = new DeviceNode(firstDeviceMountAction)
+
+    const secondDevice = new Device()
+    const secondDeviceMountAction = DeviceMountAction.createFromObject({
+      id: '',
+      device: secondDevice,
+      parentPlatform: null,
+      parentDevice: firstDevice,
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      beginContact: contact,
+      endContact: null,
+      beginDate: date,
+      endDate: null,
+      beginDescription: 'a second device mount action',
+      endDescription: ''
+    })
+    const secondNode = new DeviceNode(secondDeviceMountAction)
+
+    firstNode.children = [secondNode]
+    expect(firstNode.getTree()).toHaveLength(1)
+    expect(Object.is(firstNode.children[0], secondNode)).toBeTruthy()
   })
   it('should return a simple name of no offsets are given', () => {
     const device = new Device()
@@ -115,6 +206,7 @@ describe('DeviceNode', () => {
       id: '',
       device,
       parentPlatform: null,
+      parentDevice: null,
       offsetX: 0,
       offsetY: 0,
       offsetZ: 0,
@@ -140,6 +232,7 @@ describe('DeviceNode', () => {
       id: '',
       device,
       parentPlatform: null,
+      parentDevice: null,
       offsetX: 1,
       offsetY: 2,
       offsetZ: 3,

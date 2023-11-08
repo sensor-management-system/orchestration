@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -39,15 +39,18 @@ import { Device } from '@/models/Device'
 
 export interface IDeviceMountAction extends IMountAction {
   device: Device
+  parentDevice: Device | null
 }
 
 export class DeviceMountAction extends MountAction implements IDeviceMountAction {
   private _device: Device
+  private _parentDevice: Device | null
 
   constructor (
     id: string,
     device: Device,
     parentPlatform: Platform | null,
+    parentDevice: Device | null,
     beginDate: DateTime,
     endDate: DateTime | null,
     offsetX: number,
@@ -72,6 +75,7 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
       endDescription
     )
     this._device = device
+    this._parentDevice = parentDevice
   }
 
   get TYPE (): string {
@@ -80,6 +84,10 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
 
   get device (): Device {
     return this._device
+  }
+
+  get parentDevice (): Device | null {
+    return this._parentDevice
   }
 
   isDeviceMountAction (): this is IDeviceMountAction {
@@ -91,6 +99,7 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
       otherAction.id,
       Device.createFromObject(otherAction.device),
       otherAction.parentPlatform === null ? null : Platform.createFromObject(otherAction.parentPlatform),
+      otherAction.parentDevice === null ? null : Device.createFromObject(otherAction.parentDevice),
       otherAction.beginDate,
       otherAction.endDate === null ? null : otherAction.endDate,
       otherAction.offsetX,

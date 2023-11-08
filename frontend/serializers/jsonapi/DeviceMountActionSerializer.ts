@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021 - 2022
+ * Copyright (C) 2021 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -119,6 +119,15 @@ export class DeviceMountActionSerializer {
       }
     }
 
+    if (deviceMountAction.parentDevice) {
+      data.relationships.parent_device = {
+        data: {
+          type: 'device',
+          id: deviceMountAction.parentDevice.id
+        }
+      }
+    }
+
     if (deviceMountAction.id) {
       data.id = deviceMountAction.id
     }
@@ -168,6 +177,7 @@ export class DeviceMountActionSerializer {
 
     const device = this.getDevice(relationships, deviceLookup)
     const parentPlatform = this.getPlatform(relationships, platformLookup)
+    const parentDevice = this.getParentDevice(relationships, deviceLookup)
     const beginContact = this.getBeginContact(relationships, contactLookup)
     const endContact = this.getEndContact(relationships, contactLookup)
 
@@ -175,6 +185,7 @@ export class DeviceMountActionSerializer {
       jsonApiData.id.toString() || '',
       device,
       parentPlatform,
+      parentDevice,
       DateTime.fromISO(attributes?.begin_date, { zone: 'UTC' }),
       attributes?.end_date ? DateTime.fromISO(attributes?.end_date, { zone: 'UTC' }) : null,
       attributes?.offset_x || 0,
@@ -215,6 +226,22 @@ export class DeviceMountActionSerializer {
     const deviceId = deviceData.id
     const device = lookup[deviceId]
     return device
+  }
+
+  private getParentDevice (relationships: IJsonApiRelationships, lookup: { [p: string]: Device }) {
+    let parentDeviceId = null
+    let parentDevice = null
+
+    if (relationships.parent_device && relationships.parent_device.data) {
+      const parentDeviceData = relationships.parent_device.data as IJsonApiEntityWithoutDetails
+      parentDeviceId = parentDeviceData.id
+    }
+
+    if (parentDeviceId !== null && lookup[parentDeviceId]) {
+      parentDevice = lookup[parentDeviceId]
+    }
+
+    return parentDevice
   }
 
   private getPlatform (relationships: IJsonApiRelationships, lookup: { [p: string]: Platform }) {

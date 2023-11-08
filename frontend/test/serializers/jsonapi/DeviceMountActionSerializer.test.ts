@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -65,6 +65,7 @@ describe('DeviceMountActionSerializer', () => {
         id: '',
         device: device1,
         parentPlatform: null,
+        parentDevice: null,
         beginDate: DateTime.utc(2020, 1, 1),
         endDate: null,
         offsetX: 0,
@@ -124,6 +125,7 @@ describe('DeviceMountActionSerializer', () => {
         id: '',
         device,
         parentPlatform,
+        parentDevice: null,
         beginDate: DateTime.utc(2020, 1, 1),
         endDate: null,
         offsetX: 0,
@@ -172,6 +174,70 @@ describe('DeviceMountActionSerializer', () => {
           parent_platform: {
             data: {
               type: 'platform',
+              id: '4'
+            }
+          }
+        }
+      }
+      expect(output).toEqual(expectedOutput)
+    })
+    it('should work if the deviceMountAction has no id and a parent device', () => {
+      const parentDevice = new Device()
+      parentDevice.id = '4'
+
+      const deviceMountAction = DeviceMountAction.createFromObject({
+        id: '',
+        device,
+        parentPlatform: null,
+        parentDevice,
+        beginDate: DateTime.utc(2020, 1, 1),
+        endDate: null,
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0,
+        beginContact: contact,
+        endContact: null,
+        beginDescription: 'Device mount',
+        endDescription: ''
+      })
+
+      const serializer = new DeviceMountActionSerializer()
+
+      const output = serializer.convertModelToJsonApiData(configurationId, deviceMountAction)
+
+      const expectedOutput = {
+        type: 'device_mount_action',
+        attributes: {
+          offset_x: 0,
+          offset_y: 0,
+          offset_z: 0,
+          begin_description: 'Device mount',
+          end_description: '',
+          begin_date: '2020-01-01T00:00:00.000Z',
+          end_date: null
+        },
+        relationships: {
+          device: {
+            data: {
+              type: 'device',
+              id: '2'
+            }
+          },
+          begin_contact: {
+            data: {
+              type: 'contact',
+              id: '1'
+            }
+          },
+          configuration: {
+            data: {
+              type: 'configuration',
+              id: '3'
+            }
+          },
+          parent_device: {
+            data: {
+              type: 'device',
               id: '4'
             }
           }
@@ -325,6 +391,53 @@ describe('DeviceMountActionSerializer', () => {
             links: {
               self: '/backend/api/v1/device-mount-actions/2'
             }
+          },
+          {
+            type: 'device_mount_action',
+            attributes: {
+              begin_date: '2022-08-03T06:18:52.768000',
+              offset_y: 5.0,
+              end_date: null,
+              created_at: '2022-08-03T06:20:28.479636',
+              updated_at: null,
+              end_description: null,
+              offset_x: 4.0,
+              offset_z: 6.0,
+              begin_description: 'begin of another mount'
+            },
+            relationships: {
+              parent_device: {
+                links: {
+                  related: '/backend/api/v1/devices/4'
+                },
+                data: {
+                  type: 'device',
+                  id: '4'
+                }
+              },
+              begin_contact: {
+                links: {
+                  related: '/backend/api/v1/contacts/1'
+                },
+                data: {
+                  type: 'contact',
+                  id: '1'
+                }
+              },
+              device: {
+                links: {
+                  related: '/backend/api/v1/devices/2'
+                },
+                data: {
+                  type: 'device',
+                  id: '2'
+                }
+              }
+            },
+            id: '3',
+            links: {
+              self: '/backend/api/v1/device-mount-actions/2'
+            }
           }
         ],
         included: [
@@ -447,6 +560,40 @@ describe('DeviceMountActionSerializer', () => {
             links: {
               self: '/backend/api/v1/devices/2'
             }
+          },
+          {
+            type: 'device',
+            relationships: {},
+            attributes: {
+              updated_at: '2022-07-13T09:38:27.713539',
+              website: '',
+              manufacturer_name: '',
+              serial_number: '',
+              device_type_name: '',
+              manufacturer_uri: '',
+              dual_use: false,
+              status_name: '',
+              is_internal: true,
+              short_name: 'New test!',
+              created_at: '2022-05-11T15:17:32.759436',
+              inventory_number: '',
+              description: '',
+              model: '',
+              persistent_identifier: null,
+              is_public: false,
+              long_name: 'new Test device',
+              status_uri: '',
+              device_type_uri: '',
+              group_ids: [
+                '1317',
+                '1318'
+              ],
+              is_private: false
+            },
+            id: '4',
+            links: {
+              self: '/backend/api/v1/devices/2'
+            }
           }
         ],
         links: {
@@ -474,9 +621,13 @@ describe('DeviceMountActionSerializer', () => {
       const platform = new Platform()
       platform.id = '1'
 
+      const parentDevice = new Device()
+      parentDevice.id = '4'
+
       const deviceMountAction1 = new DeviceMountAction(
         '1',
         device1,
+        null,
         null,
         DateTime.fromISO('2022-08-02T14:02:28.289000', { zone: 'UTC' }),
         DateTime.fromISO('2022-08-03T14:02:00', { zone: 'UTC' }),
@@ -493,6 +644,23 @@ describe('DeviceMountActionSerializer', () => {
         '2',
         device2,
         platform,
+        null,
+        DateTime.fromISO('2022-08-03T06:18:52.768000', { zone: 'UTC' }),
+        null,
+        4.0,
+        5.0,
+        6.0,
+        contact,
+        null,
+        'begin of another mount',
+        null
+      )
+
+      const deviceMountAction3 = new DeviceMountAction(
+        '3',
+        device2,
+        null,
+        parentDevice,
         DateTime.fromISO('2022-08-03T06:18:52.768000', { zone: 'UTC' }),
         null,
         4.0,
@@ -507,11 +675,12 @@ describe('DeviceMountActionSerializer', () => {
       const serializer = new DeviceMountActionSerializer()
       const mountActions = serializer.convertJsonApiObjectListToModelList(response)
 
-      expect(mountActions.length).toBe(2)
+      expect(mountActions.length).toBe(3)
       // mount action 1
       expect(mountActions[0].id).toBe(deviceMountAction1.id)
       expect(mountActions[0].device.id).toBe(deviceMountAction1.device.id)
       expect(mountActions[0].parentPlatform).toBeNull()
+      expect(mountActions[0].parentDevice).toBeNull()
       expect(mountActions[0].beginDate).toStrictEqual(deviceMountAction1.beginDate)
       expect(mountActions[0].endDate).not.toBeNull()
       expect(mountActions[0].endDate).toStrictEqual(deviceMountAction1.endDate)
@@ -529,6 +698,7 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[1].device.id).toBe(deviceMountAction2.device.id)
       expect(mountActions[1].parentPlatform).not.toBeNull()
       expect(mountActions[1].parentPlatform?.id).toBe(platform.id)
+      expect(mountActions[1].parentDevice).toBeNull()
       expect(mountActions[1].beginDate).toStrictEqual(deviceMountAction2.beginDate)
       expect(mountActions[1].endDate).toBeNull()
       expect(mountActions[1].offsetX).toBe(deviceMountAction2.offsetX)
@@ -538,6 +708,22 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[1].endContact).toBeNull()
       expect(mountActions[1].beginDescription).toBe(deviceMountAction2.beginDescription)
       expect(mountActions[1].endDescription).toBe('')
+
+      // mount action 3
+      expect(mountActions[2].id).toBe(deviceMountAction3.id)
+      expect(mountActions[2].device.id).toBe(deviceMountAction3.device.id)
+      expect(mountActions[2].parentPlatform).toBeNull()
+      expect(mountActions[2].parentDevice).not.toBeNull()
+      expect(mountActions[2].parentDevice?.id).toBe(parentDevice.id)
+      expect(mountActions[2].beginDate).toStrictEqual(deviceMountAction3.beginDate)
+      expect(mountActions[2].endDate).toBeNull()
+      expect(mountActions[2].offsetX).toBe(deviceMountAction3.offsetX)
+      expect(mountActions[2].offsetY).toBe(deviceMountAction3.offsetY)
+      expect(mountActions[2].offsetZ).toBe(deviceMountAction3.offsetZ)
+      expect(mountActions[2].beginContact.id).toBe(deviceMountAction3.beginContact.id)
+      expect(mountActions[2].endContact).toBeNull()
+      expect(mountActions[2].beginDescription).toBe(deviceMountAction3.beginDescription)
+      expect(mountActions[2].endDescription).toBe('')
     })
   })
 })

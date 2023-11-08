@@ -41,7 +41,9 @@ permissions and limitations under the Licence.
               slider-color="primary"
             >
               <v-tab>Devices</v-tab>
-              <v-tab>Platforms</v-tab>
+              <v-tab :disabled="syncedPlatformSelectionDisabled">
+                Platforms
+              </v-tab>
             </v-tabs>
 
             <v-tabs-items v-model="tab">
@@ -129,7 +131,10 @@ permissions and limitations under the Licence.
                 </v-card>
               </v-tab-item>
               <v-tab-item>
-                <v-card>
+                <v-card v-if="syncedPlatformSelectionDisabled">
+                  <v-card-text>Platform search disabled</v-card-text>
+                </v-card>
+                <v-card v-else>
                   <v-container>
                     <v-row>
                       <v-col cols="12">
@@ -319,6 +324,13 @@ export default class MountWizardEntitySelect extends Vue {
     type: Array
   })
     syncedPlatformsToMount!: { entity: Platform, mountInfo: PlatformMountAction }[]
+
+  @PropSync('platformSelectionDisabled', {
+    required: false,
+    type: Boolean,
+    default: false
+  })
+    syncedPlatformSelectionDisabled!: boolean
 
   @InjectReactive() selectedDate!: DateTime
   @InjectReactive() selectedEndDate!: DateTime | null

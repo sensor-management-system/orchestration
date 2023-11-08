@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -35,14 +35,17 @@
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 
-import { IConfigurationsTreeNode } from '@/viewmodels/IConfigurationsTreeNode'
+import { IConfigurationsTreeNode, IConfigurationsTreeNodeWithChildren } from '@/viewmodels/IConfigurationsTreeNode'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { ConfigurationsTree } from '@/viewmodels//ConfigurationsTree'
+import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 
 /**
  * a class that wraps a Device instance for the usage in a ConfigurationsTree
  */
 export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
   private node: DeviceMountAction
+  private tree: ConfigurationsTree = new ConfigurationsTree()
   private _disabled: boolean = false
   private _id: string | null = ''
 
@@ -94,8 +97,8 @@ export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
     this._disabled = isDisabled
   }
 
-  canHaveChildren (): boolean {
-    return false
+  canHaveChildren (): this is IConfigurationsTreeNodeWithChildren<DeviceMountAction> {
+    return true
   }
 
   isPlatform (): boolean {
@@ -114,8 +117,25 @@ export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
     return this.node
   }
 
+  setTree (tree: ConfigurationsTree) {
+    this.tree = tree
+  }
+
+  getTree (): ConfigurationsTree {
+    return this.tree
+  }
+
+  set children (children: ConfigurationsTreeNode[]) {
+    this.tree = ConfigurationsTree.fromArray(children)
+  }
+
+  get children (): ConfigurationsTreeNode[] {
+    return this.tree.toArray()
+  }
+
   static createFromObject (someObject: DeviceNode): DeviceNode {
     const newObject = new DeviceNode(someObject.unpack())
+    newObject.setTree(ConfigurationsTree.createFromObject(someObject.getTree()))
     return newObject
   }
 }

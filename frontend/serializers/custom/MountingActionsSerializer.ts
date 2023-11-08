@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022
+ * Copyright (C) 2022 - 2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -62,7 +62,7 @@ export class MountingActionsSerializer {
       }
     }
 
-    const convertElementToTreeNode = (apiElement: any, parentPlatform: Platform | null): ConfigurationsTreeNode => {
+    const convertElementToTreeNode = (apiElement: any, parentPlatform: Platform | null, parentDevice: Device | null): ConfigurationsTreeNode => {
       const entity = apiElement.entity
       const action = apiElement.action
       let endContact = null
@@ -72,6 +72,7 @@ export class MountingActionsSerializer {
       }
       if (entity.data.type === 'device') {
         const device = this.deviceSerializer.convertJsonApiDataToModel(entity.data, []).device
+        const children = apiElement.children.map((c: any) => convertElementToTreeNode(c, null, device))
         // const deviceMountActionBasicData = this.deviceMountActionBasicDataSerializer.convertJsonApiDataToModel(action.data)
         const mountAction = DeviceMountAction.createFromObject({
           id: action.data.id,
@@ -84,14 +85,17 @@ export class MountingActionsSerializer {
           endDate: action.data.attributes.end_date ? stringToDate(action.data.attributes.end_date) : null,
           device,
           parentPlatform,
+          parentDevice,
           beginContact: contactsLookup[action.data.relationships.begin_contact.data.id],
           endContact: endContact ?? null
 
         })
-        return new DeviceNode(mountAction)
+        const node = new DeviceNode(mountAction)
+        node.children = children
+        return node
       } else if (entity.data.type === 'platform') {
         const platform = this.platformSerializer.convertJsonApiDataToModel(entity.data, []).platform
-        const children = apiElement.children.map((c: any) => convertElementToTreeNode(c, platform))
+        const children = apiElement.children.map((c: any) => convertElementToTreeNode(c, platform, null))
         // const platformMountActionBasicData = this.platformMountActionBasicDataSerializer.convertJsonApiDataToModel(action.data)
         const mountAction = PlatformMountAction.createFromObject({
           id: action.data.id,
@@ -114,7 +118,7 @@ export class MountingActionsSerializer {
         throw new Error('Can only handle devices or platforms')
       }
     }
-    const nodes = apiResponse.map((x: any) => convertElementToTreeNode(x, null))
+    const nodes = apiResponse.map((x: any) => convertElementToTreeNode(x, null, null))
     return ConfigurationsTree.fromArray(nodes)
   }
 

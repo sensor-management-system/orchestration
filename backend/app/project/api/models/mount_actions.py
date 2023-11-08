@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -6,11 +6,15 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-from .base_model import db
+"""Sqlalchemy model classes for mount actions."""
+
 from ..models.mixin import AuditMixin, IndirectSearchableMixin
+from .base_model import db
 
 
 class PlatformMountAction(db.Model, AuditMixin):
+    """Mount of a platform on a configuration."""
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -88,6 +92,8 @@ class PlatformMountAction(db.Model, AuditMixin):
 
 
 class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
+    """Mount of a device on a configuration."""
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
@@ -122,6 +128,20 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         foreign_keys=[parent_platform_id],
         backref=db.backref(
             "outer_device_mount_actions",
+            cascade="save-update, merge, delete, delete-orphan",
+        ),
+    )
+    parent_device_id = db.Column(
+        db.Integer,
+        db.ForeignKey("device.id"),
+        nullable=True,
+    )
+    parent_device = db.relationship(
+        "Device",
+        uselist=False,
+        foreign_keys=[parent_device_id],
+        backref=db.backref(
+            "outer_device_mount_actions_for_devices",
             cascade="save-update, merge, delete, delete-orphan",
         ),
     )

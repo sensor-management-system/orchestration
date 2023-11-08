@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2023
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -35,6 +35,7 @@ import { ConfigurationBasicData } from '@/models/basic/ConfigurationBasicData'
 import { ContactBasicData } from '@/models/basic/ContactBasicData'
 import { PlatformBasicData } from '@/models/basic/PlatformBasicData'
 import { IDateCompareable } from '@/modelUtils/Compareables'
+import { DeviceBasicData } from '@/models/basic/DeviceBasicData'
 
 export interface IDeviceMountAction {
   basicData: DeviceMountActionBasicData
@@ -42,6 +43,7 @@ export interface IDeviceMountAction {
   beginContact: ContactBasicData
   endContact: ContactBasicData | null
   parentPlatform: PlatformBasicData | null
+  parentDevice: DeviceBasicData | null
 }
 
 export class DeviceMountAction implements IDeviceMountAction, IDateCompareable {
@@ -50,18 +52,21 @@ export class DeviceMountAction implements IDeviceMountAction, IDateCompareable {
   private _beginContact: ContactBasicData
   private _endContact: ContactBasicData | null
   private _parentPlatform: PlatformBasicData | null
+  private _parentDevice: DeviceBasicData | null
 
   constructor (basicData: DeviceMountActionBasicData,
     configuration: ConfigurationBasicData,
     beginContact: ContactBasicData,
     endContact: ContactBasicData | null,
-    parentPlatform: PlatformBasicData | null
+    parentPlatform: PlatformBasicData | null,
+    parentDevice: DeviceBasicData | null
   ) {
     this._basicData = basicData
     this._configuration = configuration
     this._beginContact = beginContact
     this._endContact = endContact
     this._parentPlatform = parentPlatform
+    this._parentDevice = parentDevice
   }
 
   get basicData (): DeviceMountActionBasicData {
@@ -84,6 +89,10 @@ export class DeviceMountAction implements IDeviceMountAction, IDateCompareable {
     return this._parentPlatform
   }
 
+  get parentDevice (): DeviceBasicData | null {
+    return this._parentDevice
+  }
+
   get date () {
     return this._basicData.beginDate
   }
@@ -94,7 +103,8 @@ export class DeviceMountAction implements IDeviceMountAction, IDateCompareable {
       ConfigurationBasicData.createFromObject(otherAction.configuration),
       ContactBasicData.createFromObject(otherAction.beginContact),
       otherAction.endContact == null ? null : ContactBasicData.createFromObject(otherAction.endContact),
-      otherAction.parentPlatform === null ? null : PlatformBasicData.createFromObject(otherAction.parentPlatform)
+      otherAction.parentPlatform === null ? null : PlatformBasicData.createFromObject(otherAction.parentPlatform),
+      otherAction.parentDevice === null ? null : DeviceBasicData.createFromObject(otherAction.parentDevice)
     )
   }
 }

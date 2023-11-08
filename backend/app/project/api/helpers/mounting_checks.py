@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -79,6 +79,7 @@ class AbstractMountActionValidator(abc.ABC):
         Current checks:
         - device/platform not already in use for the date time range.
         - parent platform provided for the date time range (if parent platform needed)
+        - parent device provided for the date time range (if parent device needed)
         """
         object_id = self._extract_object_id_to_mount(payload_dict)
         object_ = self._query_existing_object(object_id)
@@ -101,6 +102,17 @@ class AbstractMountActionValidator(abc.ABC):
                 raise NotFoundError("Parent platform not found")
             if parent_platform.archived:
                 raise ConflictError("Parent platform is already archived")
+        parent_device_id = self._extract_parent_device_id(payload_dict)
+        if parent_device_id:
+            parent_device = self._query_existing_device(parent_device_id)
+            if not parent_device:
+                raise NotFoundError("Parent device not found")
+            if parent_device.archived:
+                raise ConflictError("Parent device is already archived")
+        if parent_platform_id and parent_device_id:
+            raise ConflictError(
+                "Parent platform and parent device is not possible at the same time"
+            )
         # Then we check if we have the an existing mount action for the
         # object that we want to mount.
         overlapping_mount = self._get_overlapping_mount(
@@ -116,6 +128,12 @@ class AbstractMountActionValidator(abc.ABC):
         ):
             raise ConflictError(
                 self._build_error_message_no_platform_mount(expected_date_time_range)
+            )
+        if parent_device_id is not None and not self._get_parent_device_mount(
+            parent_device_id, configuration_id, expected_date_time_range
+        ):
+            raise ConflictError(
+                self._build_error_message_no_device_mount(expected_date_time_range)
             )
 
     def validate_update(self, payload_dict, existing_mount_id):
@@ -162,6 +180,19 @@ class AbstractMountActionValidator(abc.ABC):
         )
         if updated_parent_platform and updated_parent_platform.archived:
             raise ConflictError("Parent platform is archived")
+
+        updated_parent_device_id = self._extract_updated_parent_device_id(
+            payload_dict, existing_mount
+        )
+        updated_parent_device = self._query_existing_device(updated_parent_device_id)
+        if updated_parent_device and updated_parent_device.archived:
+            raise ConflictError("Parent device is archived")
+
+        if updated_parent_device and updated_parent_platform:
+            raise ConflictError(
+                "Parent platform and parent device are not possible at the same time"
+            )
+
         expected_date_time_range = self._extract_updated_begin_and_end_dates(
             payload_dict, existing_mount
         )
@@ -185,6 +216,14 @@ class AbstractMountActionValidator(abc.ABC):
         ):
             raise ConflictError(
                 self._build_error_message_no_platform_mount(expected_date_time_range)
+            )
+        if updated_parent_device_id is not None and not self._get_parent_device_mount(
+            updated_parent_device_id,
+            updated_configuration_id,
+            expected_date_time_range,
+        ):
+            raise ConflictError(
+                self._build_error_message_no_device_mount(expected_date_time_range)
             )
         # Ok, we still have a valid parent platform mount.
         # Now the last task is to check for orphanized child mounts.
@@ -227,6 +266,11 @@ class AbstractMountActionValidator(abc.ABC):
             raise ConflictError(
                 "Deleting a mount for an archived parent platform is not allowed"
             )
+        parent_device = getattr(existing_mount, "parent_device", None)
+        if parent_device and parent_device.archived:
+            raise ConflictError(
+                "Deleting a mount for an archived parent device is not allowed"
+            )
         configuration = existing_mount.configuration
         if configuration.archived:
             raise ConflictError(
@@ -255,6 +299,21 @@ class AbstractMountActionValidator(abc.ABC):
             parent_platform_id, configuration_id
         )
         for mount_action in parent_platform_mounts:
+            existing_date_time_range = DateTimeRange(
+                mount_action.begin_date, mount_action.end_date
+            )
+            if existing_date_time_range.covers(expected_date_time_range):
+                return mount_action
+        return None
+
+    def _get_parent_device_mount(
+        self, parent_device_id, configuration_id, expected_date_time_range
+    ):
+        """Search for a device mount action. May return None."""
+        parent_device_mounts = self._query_parent_device_mounts(
+            parent_device_id, configuration_id
+        )
+        for mount_action in parent_device_mounts:
             existing_date_time_range = DateTimeRange(
                 mount_action.begin_date, mount_action.end_date
             )
@@ -322,6 +381,16 @@ class AbstractMountActionValidator(abc.ABC):
         )
 
     @staticmethod
+    def _extract_parent_device_id(payload_dict):
+        """Extract the parent device id from the payload. May be None."""
+        return (
+            payload_dict["relationships"]
+            .get("parent_device", {})
+            .get("data", {})
+            .get("id", None)
+        )
+
+    @staticmethod
     def _extract_updated_configuration_id(payload_dict, existing_mount):
         """
         Extract the configuration id for the update validation case.
@@ -362,6 +431,25 @@ class AbstractMountActionValidator(abc.ABC):
                         ]
         return existing_mount.parent_platform_id
 
+    @staticmethod
+    def _extract_updated_parent_device_id(payload_dict, existing_mount):
+        """
+        Extract the parent device id for the update case.
+
+        Again: This can be set in the payload or in the current object.
+        """
+        if "relationships" in payload_dict.keys():
+            if "parent_device" in payload_dict["relationships"].keys():
+                if "data" in payload_dict["relationships"]["parent_device"].keys():
+                    if (
+                        "id"
+                        in payload_dict["relationships"]["parent_device"]["data"].keys()
+                    ):
+                        return payload_dict["relationships"]["parent_device"]["data"][
+                            "id"
+                        ]
+        return getattr(existing_mount, "parent_device_id", None)
+
     def _extract_updated_begin_and_end_dates(self, payload_dict, existing_mount):
         """Extract the begin and end dates for the update case."""
         if "begin_date" in payload_dict["attributes"].keys():
@@ -390,10 +478,31 @@ class AbstractMountActionValidator(abc.ABC):
         )
 
     @staticmethod
+    def _query_parent_device_mounts(parent_device_id, configuration_id):
+        """Find mount action for the parent device."""
+        return db.session.query(DeviceMountAction).filter(
+            and_(
+                DeviceMountAction.device_id == parent_device_id,
+                DeviceMountAction.configuration_id == configuration_id,
+            ),
+        )
+
+    @staticmethod
     def _build_error_message_no_platform_mount(expected_date_time_range):
         """Create an error message if there is no parent platform mount for the whole time span."""
         parts = [
             "Parent platform is not mounted for the whole time",
+            f"from {expected_date_time_range.begin_date}",
+        ]
+        if expected_date_time_range.end_date:
+            parts.append(f"to {expected_date_time_range.end_date}")
+        return " ".join(parts)
+
+    @staticmethod
+    def _build_error_message_no_device_mount(expected_date_time_range):
+        """Create an error message if there is no parent device mount for the whole time span."""
+        parts = [
+            "Parent device is not mounted for the whole time",
             f"from {expected_date_time_range.begin_date}",
         ]
         if expected_date_time_range.end_date:
@@ -463,6 +572,11 @@ class AbstractMountActionValidator(abc.ABC):
         """Return the platform with the id."""
         return db.session.query(Platform).filter_by(id=platform_id).first()
 
+    @staticmethod
+    def _query_existing_device(device_id):
+        """Return the device with the id."""
+        return db.session.query(Device).filter_by(id=device_id).first()
+
 
 class DeviceMountActionValidator(AbstractMountActionValidator):
     """Validator subclass for the device mount actions."""
@@ -526,6 +640,33 @@ class DeviceMountActionValidator(AbstractMountActionValidator):
 
                     return dynamic_location_action
 
+        child_device_mount_actions = db.session.query(DeviceMountAction).filter(
+            and_(
+                DeviceMountAction.parent_device_id == existing_mount.device_id,
+                DeviceMountAction.configuration_id == existing_mount.configuration_id,
+            )
+        )
+        for mount_action in child_device_mount_actions:
+            check_date_time_range = DateTimeRange(
+                mount_action.begin_date, mount_action.end_date
+            )
+            if existing_date_time_range.covers(check_date_time_range):
+                if (
+                    # Did we changed the platform of our current mount?
+                    # In that case the child mounts would point to the
+                    # wrong parent_device_id
+                    not_str_equal(mount_action.parent_device_id, object_id)
+                    # Or did we changed the configuration?
+                    # If so, we will have all entries with that
+                    # parent_device_id be orphanized
+                    or not_str_equal(
+                        mount_action.configuration_id, updated_configuration_id
+                    )
+                    # Or is just the time range of the child mount
+                    # no longer covered?
+                    or not expected_date_time_range.covers(existing_date_time_range)
+                ):
+                    return mount_action
         return None
 
     @staticmethod
@@ -580,7 +721,7 @@ class DeviceMountActionValidator(AbstractMountActionValidator):
     def _build_error_message_orphan():
         return (
             "There is still a ConfigurationDynamicLocationBeginAction "
-            + "that is not covered by the updated data."
+            + "or a child mount that is not covered by the updated data."
         )
 
 

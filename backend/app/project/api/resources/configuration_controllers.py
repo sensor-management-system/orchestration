@@ -12,6 +12,7 @@ from flask import request
 from flask_rest_jsonapi import ResourceList
 from sqlalchemy import and_, or_
 
+from ..helpers.configuration_helpers import build_tree
 from ..helpers.errors import (
     BadRequestError,
     ForbiddenError,
@@ -184,37 +185,26 @@ class ControllerConfigurationMountingActions(ResourceList):
         # It should not be possible to mount the very same platform
         # for the very same time. So we can use the platform_id as
         # key to put the children in.
-        children = {}
-        top_level_mounts = []
-
-        for active_platform_mount in active_platform_mounts:
-            children.setdefault(active_platform_mount.platform_id, [])
-
-            element_payload = {
-                "action": self.platform_mount_action_schema.dump(active_platform_mount),
-                "entity": self.platform_schema.dump(active_platform_mount.platform),
-                "children": children[active_platform_mount.platform_id],
+        def platform_to_payload(platform_mount):
+            """Set the fields we want to print out for a platform mount."""
+            return {
+                "action": self.platform_mount_action_schema.dump(platform_mount),
+                "entity": self.platform_schema.dump(platform_mount.platform),
             }
-            if active_platform_mount.parent_platform_id:
-                children.setdefault(active_platform_mount.parent_platform_id, [])
-                children[active_platform_mount.parent_platform_id].append(
-                    element_payload
-                )
-            else:
-                top_level_mounts.append(element_payload)
 
-        for active_device_mount in active_device_mounts:
-            element_payload = {
-                "action": self.device_mount_action_schema.dump(active_device_mount),
-                "entity": self.device_schema.dump(active_device_mount.device),
-                "children": [],
+        def device_to_payload(device_mount):
+            """Set the fields we want to print out for a device mount."""
+            return {
+                "action": self.device_mount_action_schema.dump(device_mount),
+                "entity": self.device_schema.dump(device_mount.device),
             }
-            if active_device_mount.parent_platform_id:
-                children.setdefault(active_device_mount.parent_platform_id, [])
-                children[active_device_mount.parent_platform_id].append(element_payload)
-            else:
-                top_level_mounts.append(element_payload)
 
+        top_level_mounts = build_tree(
+            platform_mounts=active_platform_mounts,
+            device_mounts=active_device_mounts,
+            f_platform_mount=platform_to_payload,
+            f_device_mount=device_to_payload,
+        )
         return top_level_mounts
 
     def post(self):
