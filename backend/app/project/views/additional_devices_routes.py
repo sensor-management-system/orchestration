@@ -19,7 +19,10 @@ from ..api.models import Device
 from ..api.models.base_model import db
 from ..api.permissions.rules import can_archive, can_restore, can_see
 from ..config import env
-from ..restframework.preconditions.devices import AllMountsOfDeviceAreFinishedInThePast
+from ..restframework.preconditions.devices import (
+    AllMountsOfDeviceAreFinishedInThePast,
+    AllUsagesAsParentDeviceInDeviceMountsFinishedInThePast,
+)
 from ..restframework.shortcuts import get_object_or_404
 from ..restframework.views.classbased import BaseView, class_based_view
 
@@ -36,7 +39,10 @@ class ArchiveDeviceView(BaseView):
     """View to archive devices with a post request."""
 
     model = Device
-    preconditions = AllMountsOfDeviceAreFinishedInThePast()
+    preconditions = (
+        AllMountsOfDeviceAreFinishedInThePast()
+        & AllUsagesAsParentDeviceInDeviceMountsFinishedInThePast()
+    )
 
     def __init__(self, id):
         """Init the environment for the single request."""

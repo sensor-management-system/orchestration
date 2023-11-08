@@ -160,6 +160,101 @@ class TestDeviceMountAction(BaseTestCase):
             msg, result_device_mount_action.configuration.update_description
         )
 
+    def test_post_device_mount_action_with_parent_device(self):
+        """Create DeviceMountAction with a parent device."""
+        userinfo = generate_userinfo_data()
+        device = Device(
+            short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        parent_device = Device(
+            short_name="device parent device",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        begin_contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        end_contact = Contact(
+            given_name="C. " + userinfo["given_name"],
+            family_name="C. " + userinfo["family_name"],
+            email="c." + userinfo["email"],
+        )
+        configuration = generate_configuration_model()
+        begin_date = fake.future_datetime()
+        end_date = begin_date + datetime.timedelta(days=2)
+
+        # And to make sure that we already have a parent device mount
+        parent_device_mount = DeviceMountAction(
+            begin_date=begin_date,
+            end_date=end_date,
+            configuration=configuration,
+            begin_contact=begin_contact,
+            device=parent_device,
+        )
+        db.session.add_all(
+            [
+                device,
+                parent_device,
+                begin_contact,
+                end_contact,
+                configuration,
+                parent_device_mount,
+            ]
+        )
+        db.session.commit()
+
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "begin_description": "Test DeviceMountAction",
+                    "begin_date": str(begin_date),
+                    "offset_x": str(fake.coordinate()),
+                    "offset_y": str(fake.coordinate()),
+                    "offset_z": str(fake.coordinate()),
+                    "end_description": "Test DeviceUnMountAction",
+                    "end_date": str(end_date),
+                },
+                "relationships": {
+                    "device": {"data": {"type": "device", "id": device.id}},
+                    "begin_contact": {
+                        "data": {"type": "contact", "id": begin_contact.id}
+                    },
+                    "end_contact": {"data": {"type": "contact", "id": end_contact.id}},
+                    "parent_device": {
+                        "data": {"type": "device", "id": parent_device.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": configuration.id}
+                    },
+                },
+            }
+        }
+        response = super().add_object(
+            url=f"{self.url}?include="
+            + "device,begin_contact,end_contact,parent_device,configuration",
+            data_object=data,
+            object_type=self.object_type,
+        )
+        result_id = response["data"]["id"]
+        result_device_mount_action = (
+            db.session.query(DeviceMountAction).filter_by(id=result_id).first()
+        )
+
+        msg = "create;device mount action"
+        self.assertEqual(
+            msg, result_device_mount_action.configuration.update_description
+        )
+
     def test_update_device_mount_action(self):
         """Update DeviceMountAction."""
         mount_device_action = add_mount_device_action_model()
@@ -694,6 +789,36 @@ class TestDeviceMountAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 409)
 
+    def test_update_device_mount_action_change_parent_device_id(self):
+        """Make sure parent device id can not be changed without extra device mount."""
+        mount_device_action = add_mount_device_action_model()
+        mount_device_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_device_action.id,
+                "attributes": {"begin_description": "updated"},
+                "relationships": {
+                    "parent_device": {
+                        "data": {
+                            "type": "device",
+                            # We don't have a platform mount action for this
+                            # parent platform for the whole time.
+                            "id": 999,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{mount_device_action.id}",
+                data=json.dumps(mount_device_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 409)
+
     def test_update_device_mount_action_add_parent_platform_id_if_there_is_no_parent(
         self,
     ):
@@ -757,6 +882,84 @@ class TestDeviceMountAction(BaseTestCase):
                         "data": {
                             "type": "platform",
                             "id": p_p.id,
+                        }
+                    },
+                },
+            }
+        }
+        access_headers = create_token()
+        with self.client:
+            response = self.client.patch(
+                f"{self.url}/{device_mount_action.id}",
+                data=json.dumps(mount_device_action_updated),
+                content_type="application/vnd.api+json",
+                headers=access_headers,
+            )
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_device_mount_action_add_parent_device_id_if_there_is_no_parent(
+        self,
+    ):
+        """Make sure parent device id can be add if it is None."""
+        d = Device(
+            short_name=fake.linux_processor(),
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        userinfo = generate_userinfo_data()
+        c1 = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+
+        config = generate_configuration_model()
+        device_mount_action = DeviceMountAction(
+            begin_date=fake.date(),
+            begin_description="test mount device action model",
+            offset_x=fake.coordinate(),
+            offset_y=fake.coordinate(),
+            offset_z=fake.coordinate(),
+            device=d,
+        )
+        device_mount_action.configuration = config
+        device_mount_action.begin_contact = c1
+
+        p_d = Device(
+            short_name="device parent device",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        parent_mount_action = DeviceMountAction(
+            begin_date=device_mount_action.begin_date,
+            begin_description="test mount device action model",
+            offset_x=fake.coordinate(),
+            offset_y=fake.coordinate(),
+            offset_z=fake.coordinate(),
+            device=p_d,
+            begin_contact=c1,
+            configuration=config,
+        )
+        db.session.add_all(
+            [d, c1, p_d, config, device_mount_action, parent_mount_action]
+        )
+        db.session.commit()
+        self.assertEqual(device_mount_action.parent_device, None)
+
+        mount_device_action_updated = {
+            "data": {
+                "type": self.object_type,
+                "id": device_mount_action.id,
+                "attributes": {"begin_description": "updated"},
+                "relationships": {
+                    "parent_device": {
+                        "data": {
+                            "type": "device",
+                            "id": p_d.id,
                         }
                     },
                 },
@@ -925,7 +1128,7 @@ class TestDeviceMountAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 409)
 
-        # This Should Work as we will deliver a valid time-interval
+        # This should work as we will deliver a valid time-interval
         mount_device_action_with_no_conflicts = {
             "data": {
                 "type": self.object_type,
@@ -955,7 +1158,9 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         # And also if we try to change the time-intervall with a conflict in
-        # end_date should not work
+        # end_date should not work.
+        # Reason here is that the time intervals for the both mount actions
+        # for the very same device are overlapping.
         mount_device_action_with_conflict_on_end_date = {
             "data": {
                 "type": self.object_type,

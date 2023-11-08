@@ -361,7 +361,15 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
             begin_date=datetime.datetime(2022, 5, 18, 12, 5, 0),
             end_date=datetime.datetime(2022, 5, 19, 4, 55, 0),
         )
-        device = Device(
+        device1 = Device(
+            short_name="CRX",
+            is_internal=True,
+            manufacturer_name="Campell",
+            model="CRX",
+            serial_number="1",
+            device_type_name="Logger",
+        )
+        device2 = Device(
             short_name="Some device",
             is_internal=True,
             manufacturer_name="OTT HydroMet",
@@ -369,9 +377,9 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
             serial_number="345146",
             device_type_name="Sensor",
         )
-        device_mount_action = DeviceMountAction(
+        device_mount_action1 = DeviceMountAction(
             configuration=self.configuration,
-            device=device,
+            device=device1,
             offset_x=1,
             offset_y=2,
             offset_z=3,
@@ -381,10 +389,24 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
             begin_date=datetime.datetime(2022, 5, 18, 12, 10, 0),
             end_date=datetime.datetime(2022, 5, 19, 4, 0, 0),
         )
+        device_mount_action2 = DeviceMountAction(
+            configuration=self.configuration,
+            device=device2,
+            offset_x=1,
+            offset_y=2,
+            offset_z=3,
+            begin_description="Some data",
+            begin_contact=self.u.contact,
+            parent_device=device1,
+            begin_date=datetime.datetime(2022, 5, 18, 12, 10, 0),
+            end_date=datetime.datetime(2022, 5, 19, 4, 0, 0),
+        )
         db.session.add_all(
             [
-                device,
-                device_mount_action,
+                device1,
+                device2,
+                device_mount_action1,
+                device_mount_action2,
                 platform1,
                 platform2,
                 platform_mount_action1,
@@ -410,10 +432,18 @@ class TestControllerConfigurationsMountingActions(BaseTestCase):
                         "children": [
                             {
                                 "action": DeviceMountActionSchema().dump(
-                                    device_mount_action
+                                    device_mount_action1
                                 ),
-                                "entity": DeviceSchema().dump(device),
-                                "children": [],
+                                "entity": DeviceSchema().dump(device1),
+                                "children": [
+                                    {
+                                        "action": DeviceMountActionSchema().dump(
+                                            device_mount_action2
+                                        ),
+                                        "entity": DeviceSchema().dump(device2),
+                                        "children": [],
+                                    }
+                                ],
                             }
                         ],
                     }

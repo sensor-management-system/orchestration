@@ -5782,22 +5782,6 @@
           "type": "string"
         }
       },
-      "device_mount_action_id": {
-        "name": "device_mount_action_id",
-        "in": "path",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      },
-      "platform_mount_action_id": {
-        "name": "platform_mount_action_id",
-        "in": "path",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
-      },
       "generic_device_action_id": {
         "name": "generic_device_action_id",
         "in": "path",

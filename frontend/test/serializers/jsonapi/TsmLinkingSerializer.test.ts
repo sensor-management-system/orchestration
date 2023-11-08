@@ -191,6 +191,7 @@ describe('TsmLinkingSerializer', () => {
         '4',
         device,
         null,
+        null,
         DateTime.utc(2020, 1, 1, 0, 0, 0, 0),
         DateTime.utc(2021, 1, 1, 0, 0, 0, 0),
         0,
@@ -279,6 +280,7 @@ describe('TsmLinkingSerializer', () => {
       const deviceMountAction = new DeviceMountAction(
         '4',
         device,
+        null,
         null,
         DateTime.utc(2020, 1, 1, 0, 0, 0, 0),
         DateTime.utc(2021, 1, 1, 0, 0, 0, 0),

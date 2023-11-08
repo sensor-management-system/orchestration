@@ -2514,6 +2514,442 @@ class TestSensorMLConfiguration(BaseTestCase):
             "2022-12-25T00:00:00+00:00",
         )
 
+    def test_get_public_configuration_with_device_and_device_sub_mount(self):
+        """Check that we give out the device that is mounted on another device."""
+        contact = Contact(given_name="Given", family_name="Fam", email="given@family")
+        device = Device(short_name="test device", is_public=True)
+        parent_device = Device(short_name="test parent device", is_public=True)
+        parent_mount_action = DeviceMountAction(
+            configuration=self.configuration,
+            device=parent_device,
+            begin_date=datetime.datetime(year=2022, month=12, day=23, tzinfo=pytz.utc),
+            end_date=datetime.datetime(year=2022, month=12, day=26, tzinfo=pytz.utc),
+            begin_contact=contact,
+            begin_description="Some parent desc",
+        )
+        device_mount_action = DeviceMountAction(
+            configuration=self.configuration,
+            parent_device=parent_device,
+            device=device,
+            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            begin_contact=contact,
+            begin_description="Some device desc",
+        )
+
+        db.session.add_all(
+            [contact, parent_device, device, parent_mount_action, device_mount_action]
+        )
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+
+        sml_history = root.find("{http://www.opengis.net/sensorml/2.0}history")
+        sml_event_list = sml_history.find(
+            "{http://www.opengis.net/sensorml/2.0}EventList"
+        )
+        sml_events = sml_event_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}event"
+        )
+        self.assertEqual(len(sml_events), 2)
+
+        sml_mount_event_parent = sml_events[0]
+        sml_mount_event_device = sml_events[1]
+
+        self.assertEqual(
+            sml_mount_event_parent.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}begin")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-23T00:00:00+00:00",
+        )
+        self.assertEqual(
+            sml_mount_event_parent.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-26T00:00:00+00:00",
+        )
+
+        self.assertEqual(
+            sml_mount_event_parent.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .attrib.get("definition"),
+            "DeviceMountAction",
+        )
+        self.assertEqual(
+            sml_mount_event_parent.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "DeviceMountAction",
+        )
+        self.assertEqual(
+            sml_mount_event_parent.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            "DeviceMountAction",
+        )
+        self.assertEqual(
+            sml_mount_event_parent.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .attrib.get("{http://www.opengis.net/gml/3.2}id"),
+            f"TimePeriodForDeviceMountAction_{parent_mount_action.id}_of_configuration_{self.configuration.id}",
+        )
+
+        self.assertEqual(
+            sml_mount_event_parent.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}description")
+            .text,
+            parent_mount_action.begin_description,
+        )
+
+        self.assertEqual(
+            sml_mount_event_device.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}begin")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-24T00:00:00+00:00",
+        )
+        self.assertEqual(
+            sml_mount_event_device.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-25T00:00:00+00:00",
+        )
+
+        self.assertEqual(
+            sml_mount_event_device.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .attrib.get("definition"),
+            "DeviceMountAction",
+        )
+        self.assertEqual(
+            sml_mount_event_device.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "DeviceMountAction",
+        )
+        self.assertEqual(
+            sml_mount_event_device.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            "DeviceMountAction",
+        )
+        self.assertEqual(
+            sml_mount_event_device.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .attrib.get("{http://www.opengis.net/gml/3.2}id"),
+            f"TimePeriodForDeviceMountAction_{device_mount_action.id}_of_configuration_{self.configuration.id}",
+        )
+
+        self.assertEqual(
+            sml_mount_event_device.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}description")
+            .text,
+            device_mount_action.begin_description,
+        )
+
+        sml_components = root.find("{http://www.opengis.net/sensorml/2.0}components")
+        sml_component_list = sml_components.find(
+            "{http://www.opengis.net/sensorml/2.0}ComponentList"
+        )
+        sml_component_entries = sml_component_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}component"
+        )
+
+        # It is nested, so we have here only the parent first.
+        # Then we have the device included there.
+        self.assertEqual(len(sml_component_entries), 1)
+
+        sml_physical_system = sml_component_entries[0].find(
+            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
+        )
+
+        gml_id = sml_physical_system.attrib.get("{http://www.opengis.net/gml/3.2}id")
+        self.assertEqual(gml_id, f"device_{parent_device.id}")
+
+        sml_identification = sml_physical_system.find(
+            "{http://www.opengis.net/sensorml/2.0}identification"
+        )
+        sml_identifier_list = sml_identification.find(
+            "{http://www.opengis.net/sensorml/2.0}IdentifierList"
+        )
+        sml_identifiers = sml_identifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}identifier"
+        )
+        self.assertEqual(len(sml_identifiers), 1)
+        sml_identifier_short_name = sml_identifiers[0]
+
+        self.assertEqual(
+            sml_identifier_short_name.find(
+                "{http://www.opengis.net/sensorml/2.0}Term"
+            ).attrib.get("definition"),
+            "http://sensorml.com/ont/swe/property/ShortName",
+        )
+        self.assertEqual(
+            sml_identifier_short_name.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "Short Name",
+        )
+        self.assertEqual(
+            sml_identifier_short_name.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            parent_device.short_name,
+        )
+        sml_history_pa = sml_physical_system.find(
+            "{http://www.opengis.net/sensorml/2.0}history"
+        )
+        sml_event_list_pa = sml_history_pa.find(
+            "{http://www.opengis.net/sensorml/2.0}EventList"
+        )
+        sml_events_pa = sml_event_list_pa.findall(
+            "{http://www.opengis.net/sensorml/2.0}event"
+        )
+        self.assertEqual(len(sml_events_pa), 1)
+
+        sml_mount_event_pa = sml_events_pa[0]
+
+        self.assertEqual(
+            sml_mount_event_pa.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .attrib.get("definition"),
+            "Mount",
+        )
+        self.assertEqual(
+            sml_mount_event_pa.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            f"Mounted to {self.configuration.label}",
+        )
+        self.assertEqual(
+            sml_mount_event_pa.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            "Mount",
+        )
+        self.assertEqual(
+            sml_mount_event_pa.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .attrib.get("{http://www.opengis.net/gml/3.2}id"),
+            f"TimePeriodForDeviceMountAction_{parent_mount_action.id}_of_device_{parent_device.id}",
+        )
+        self.assertEqual(
+            sml_mount_event_pa.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}description")
+            .text,
+            parent_mount_action.begin_description,
+        )
+        self.assertEqual(
+            sml_mount_event_pa.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}begin")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-23T00:00:00+00:00",
+        )
+        self.assertEqual(
+            sml_mount_event_pa.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-26T00:00:00+00:00",
+        )
+
+        # And test for the device data that is nested.
+        sml_components = sml_physical_system.find(
+            "{http://www.opengis.net/sensorml/2.0}components"
+        )
+        sml_component_list = sml_components.find(
+            "{http://www.opengis.net/sensorml/2.0}ComponentList"
+        )
+        sml_component_entries = sml_component_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}component"
+        )
+
+        self.assertEqual(len(sml_component_entries), 1)
+
+        sml_physical_system = sml_component_entries[0].find(
+            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
+        )
+
+        gml_id = sml_physical_system.attrib.get("{http://www.opengis.net/gml/3.2}id")
+        self.assertEqual(gml_id, f"device_{device.id}")
+
+        sml_identification = sml_physical_system.find(
+            "{http://www.opengis.net/sensorml/2.0}identification"
+        )
+        sml_identifier_list = sml_identification.find(
+            "{http://www.opengis.net/sensorml/2.0}IdentifierList"
+        )
+        sml_identifiers = sml_identifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}identifier"
+        )
+        self.assertEqual(len(sml_identifiers), 1)
+        sml_identifier_short_name = sml_identifiers[0]
+
+        self.assertEqual(
+            sml_identifier_short_name.find(
+                "{http://www.opengis.net/sensorml/2.0}Term"
+            ).attrib.get("definition"),
+            "http://sensorml.com/ont/swe/property/ShortName",
+        )
+        self.assertEqual(
+            sml_identifier_short_name.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "Short Name",
+        )
+        self.assertEqual(
+            sml_identifier_short_name.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            device.short_name,
+        )
+        sml_history_dv = sml_physical_system.find(
+            "{http://www.opengis.net/sensorml/2.0}history"
+        )
+        sml_event_list_dv = sml_history_dv.find(
+            "{http://www.opengis.net/sensorml/2.0}EventList"
+        )
+        sml_events_dv = sml_event_list_dv.findall(
+            "{http://www.opengis.net/sensorml/2.0}event"
+        )
+        self.assertEqual(len(sml_events_dv), 1)
+
+        sml_mount_event_dv = sml_events_dv[0]
+
+        self.assertEqual(
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .attrib.get("definition"),
+            "Mount",
+        )
+        self.assertEqual(
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            f"Mounted to {self.configuration.label}",
+        )
+        self.assertEqual(
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            "Mount",
+        )
+        self.assertEqual(
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .attrib.get("{http://www.opengis.net/gml/3.2}id"),
+            f"TimePeriodForDeviceMountAction_{device_mount_action.id}_of_device_{device.id}",
+        )
+        self.assertEqual(
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}description")
+            .text,
+            device_mount_action.begin_description,
+        )
+        self.assertEqual(
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}begin")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-24T00:00:00+00:00",
+        )
+        self.assertEqual(
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text,
+            "2022-12-25T00:00:00+00:00",
+        )
+
     def test_multiple_device_mount_on_same_platform(self):
         """Ensure that the device is only listed once below the platform."""
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")

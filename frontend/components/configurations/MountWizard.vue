@@ -104,6 +104,16 @@ permissions and limitations under the Licence.
                 <span>The selected parent platform is already archived.</span>
               </v-tooltip>
             </div>
+            <div v-if="isTryingToMountPlatformdUnderDevices()">
+              <v-tooltip right>
+                <template #activator="{ on, attrs }">
+                  <v-icon v-bind="attrs" v-on="on">
+                    mdi-alert
+                  </v-icon>
+                </template>
+                <span>Platforms can't be mounted under devices.</span>
+              </v-tooltip>
+            </div>
           </v-row>
         </v-container>
       </v-stepper-content>
@@ -125,16 +135,27 @@ permissions and limitations under the Licence.
             :selected-platforms.sync="selectedPlatforms"
             :devices-to-mount.sync="devicesToMount"
             :platforms-to-mount.sync="platformsToMount"
+            :platform-selection-disabled="selectedNode?.isDevice()"
           />
           <v-row>
             <v-col>
               <v-btn
                 color="primary"
-                :disabled="selectedEntities.length === 0"
+                :disabled="selectedEntities.length === 0 || isTryingToMountPlatformdUnderDevices()"
                 @click="confirmSelection(); step++"
               >
                 Confirm selection
               </v-btn>
+              <span v-if="isTryingToMountPlatformdUnderDevices()">
+              <v-tooltip right>
+                <template #activator="{ on, attrs }">
+                  <v-icon v-bind="attrs" v-on="on">
+                    mdi-alert
+                  </v-icon>
+                </template>
+                <span>Platforms can't be mounted under devices.</span>
+              </v-tooltip>
+            </span>
               <v-btn text @click="clearSelection()">
                 Clear selection
               </v-btn>
@@ -332,10 +353,6 @@ export default class MountWizard extends Vue {
   async createTree () {
     await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
     this.createTreeWithConfigAsRootNode()
-    // disable all devices nodes
-    this.tree.getAllDeviceNodesAsList().forEach((i) => {
-      i.disabled = true
-    })
   }
 
   get mountActionDateDTO (): MountActionDateDTO {
@@ -434,14 +451,20 @@ export default class MountWizard extends Vue {
       this.setLoading(true)
 
       let parentPlatform = null
+      let parentDevice = null
       if (this.selectedNode && this.selectedNode.canHaveChildren() && !this.selectedNode.isConfiguration()) {
-        parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
+        if (this.selectedNode.isPlatform()) {
+          parentPlatform = (this.selectedNode as PlatformNode).unpack().platform
+        } else if (this.selectedNode.isDevice()) {
+          parentDevice = (this.selectedNode as DeviceNode).unpack().device
+        }
       }
 
       const newDeviceMountAction = DeviceMountAction.createFromObject({
         id: '',
         device,
         parentPlatform,
+        parentDevice,
         beginDate: mountInfo.beginDate!,
         endDate: mountInfo.endDate,
         offsetX: mountInfo.offsetX,
@@ -527,9 +550,13 @@ export default class MountWizard extends Vue {
 
     let children: ConfigurationsTreeNode[] = []
     let parentPlatform: Platform | null = null
+    let parentDevice: Device | null = null
     if (currentParent instanceof PlatformNode) {
       children = currentParent.children
       parentPlatform = currentParent.unpack().platform
+    } else if (currentParent instanceof DeviceNode) {
+      children = currentParent.children
+      parentDevice = currentParent.unpack().device
     } else if (currentParent instanceof ConfigurationNode) {
       children = currentParent.children
     }
@@ -558,6 +585,7 @@ export default class MountWizard extends Vue {
         id: '',
         device: entity,
         parentPlatform,
+        parentDevice,
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
         offsetZ: mountInfo.offsetZ,
@@ -702,7 +730,19 @@ export default class MountWizard extends Vue {
   }
 
   isStep2Complete (): boolean {
-    return this.selectedNode !== null && this.rules.validateMountingTimeRange() === true && this.rules.validateMountingDates() === true
+    return this.selectedNode !== null && this.rules.validateMountingTimeRange() === true && this.rules.validateMountingDates() === true && (!this.isTryingToMountPlatformdUnderDevices())
+  }
+
+  isTryingToMountPlatformdUnderDevices (): boolean {
+    if (this.selectedNode && this.selectedNode.isDevice()) {
+      if (this.platformsToMount.length > 0) {
+        return true
+      }
+      if (this.selectedPlatforms.length > 0) {
+        return true
+      }
+    }
+    return false
   }
 
   isSelectedNodeAlreadyArchived (): boolean {

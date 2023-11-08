@@ -18,6 +18,7 @@ from project.extensions.idl.models.user_account import UserAccount
 from project.extensions.instances import idl
 from project.restframework.preconditions.devices import (
     AllMountsOfDeviceAreFinishedInThePast,
+    AllUsagesAsParentDeviceInDeviceMountsFinishedInThePast,
 )
 from project.tests.base import BaseTestCase
 
@@ -37,6 +38,14 @@ class TestArchiveDevice(BaseTestCase):
             is_public=True,
             is_private=False,
             is_internal=False,
+            update_description="create;basic data",
+        )
+        self.internal_device = Device(
+            short_name="also device",
+            archived=False,
+            is_public=False,
+            is_private=False,
+            is_internal=True,
             update_description="create;basic data",
         )
         self.private_device = Device(
@@ -63,6 +72,7 @@ class TestArchiveDevice(BaseTestCase):
         db.session.add_all(
             [
                 self.public_device,
+                self.internal_device,
                 self.private_device,
                 contact1,
                 contact2,
@@ -277,6 +287,52 @@ class TestArchiveDevice(BaseTestCase):
         db.session.commit()
         with patch.object(
             AllMountsOfDeviceAreFinishedInThePast, "_get_current_date_time"
+        ) as mock:
+            mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
+            with self.run_requests_as(self.super_user):
+                response = self.client.post(
+                    f"{self.devices_url}/{self.public_device.id}/archive"
+                )
+        self.assertEqual(response.status_code, 409)
+
+    def test_post_device_super_user_conflict_due_to_parent_device_mount_without_end(
+        self,
+    ):
+        """Ensure we can't archive a device if a parent device mount has no end."""
+        parent_mount_action = DeviceMountAction(
+            device=self.internal_device,
+            parent_device=self.public_device,
+            configuration=self.configuration,
+            begin_contact=self.normal_user.contact,
+            begin_description="Mount without end",
+            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+        )
+        db.session.add(parent_mount_action)
+        db.session.commit()
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                f"{self.devices_url}/{self.public_device.id}/archive"
+            )
+        self.assertEqual(response.status_code, 409)
+
+    def test_post_device_super_user_conflict_due_to_parent_device_mount_end_in_the_future(
+        self,
+    ):
+        """Ensure we can't archive devices if a parent device mount ends in the future."""
+        parent_mount_action = DeviceMountAction(
+            device=self.internal_device,
+            parent_device=self.public_device,
+            configuration=self.configuration,
+            begin_contact=self.normal_user.contact,
+            begin_description="Mount without end",
+            begin_date=datetime.datetime(2012, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+        )
+        db.session.add(parent_mount_action)
+        db.session.commit()
+        with patch.object(
+            AllUsagesAsParentDeviceInDeviceMountsFinishedInThePast,
+            "_get_current_date_time",
         ) as mock:
             mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
             with self.run_requests_as(self.super_user):

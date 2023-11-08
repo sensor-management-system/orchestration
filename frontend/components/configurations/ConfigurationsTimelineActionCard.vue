@@ -143,6 +143,15 @@ permissions and limitations under the Licence.
               </v-col>
             </v-row>
             <v-row
+              v-if="action.mountInfo.parentDevice"
+              dense
+            >
+              <v-col cols="12" md="4">
+                <label>Mounted on</label>
+                {{ action.mountInfo.parentDevice.shortName }}
+              </v-col>
+            </v-row>
+            <v-row
               dense
             >
               <v-col cols="12" md="3">

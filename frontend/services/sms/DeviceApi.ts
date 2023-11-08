@@ -587,6 +587,7 @@ export class DeviceApi {
         'begin_contact',
         'end_contact',
         'parent_platform',
+        'parent_device',
         'configuration'
       ].join(',')
     }

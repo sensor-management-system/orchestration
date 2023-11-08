@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2022
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -69,6 +69,7 @@ permissions and limitations under the Licence.
               :begin-date-rules="beginDateRules"
               :end-date-rules="endDateRules"
               :unmount-required="getUnmountRequired()"
+              :parent-offsets="parentOffsets"
               with-unmount
             />
           </v-form>
@@ -97,10 +98,11 @@ import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PlatformNode } from '@/viewmodels/PlatformNode'
 
 import { MountActionValidator, MountActionValidationResultOp } from '@/utils/MountActionValidator'
-import { MountActionInformationDTO } from '@/utils/configurationInterfaces'
+import { IOffsets, MountActionInformationDTO } from '@/utils/configurationInterfaces'
 
 import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
+import { sumOffsets } from '@/utils/configurationsTreeHelper'
 
 @Component({
   components: {
@@ -228,6 +230,7 @@ export default class MountActionEditForm extends Vue {
         this.value.id,
         this.value.device,
         this.value.parentPlatform,
+        this.value.parentDevice,
         mountActionInformationDTO.beginDate,
         mountActionInformationDTO.endDate,
         mountActionInformationDTO.offsetX,
@@ -384,6 +387,18 @@ export default class MountActionEditForm extends Vue {
       return true
     }
     return false
+  }
+
+  get parentOffsets (): IOffsets {
+    if (!this.selectedNode) {
+      return {
+        offsetX: 0,
+        offsetY: 0,
+        offsetZ: 0
+      }
+    }
+    const parents = this.tree.getParents(this.selectedNode)
+    return sumOffsets(parents)
   }
 
   @Watch('value', {

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -51,6 +51,10 @@ class TestDeviceMountActionValidator(BaseTestCase):
             short_name="Device2",
             is_public=True,
         )
+        self.device3 = Device(
+            short_name="Device3",
+            is_public=True,
+        )
         self.configuration1 = Configuration(
             label="Configuration1",
             is_public=True,
@@ -79,6 +83,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
                 self.contact1,
                 self.device1,
                 self.device2,
+                self.device3,
                 self.platform1,
                 self.user1,
             ]
@@ -243,6 +248,34 @@ class TestDeviceMountActionValidator(BaseTestCase):
         for information in expected_information:
             self.assertIn(information, str_exception)
 
+    def test_validate_create_no_parent_device_mount(self):
+        """Ensure we can't create if the parent device is not mounted."""
+        payload_dict = {
+            "relationships": {
+                "configuration": {
+                    "data": {"id": self.configuration2.id},
+                },
+                "device": {
+                    "data": {"id": self.device1.id},
+                },
+                "parent_device": {
+                    "data": {"id": self.device2.id},
+                },
+            },
+            "attributes": {
+                "begin_date": "2023-01-01T00:00:00Z",
+            },
+        }
+        with self.assertRaises(ConflictError) as context:
+            DeviceMountActionValidator().validate_create(payload_dict)
+        str_exception = str(context.exception)
+        expected_information = [
+            "Parent device is not mounted",
+            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+        ]
+        for information in expected_information:
+            self.assertIn(information, str_exception)
+
     def test_validate_create_no_parent_platform_mount_for_config(self):
         """Ensure we can't create if the parent platform is not mounted for this config."""
         existing_platform_mount_action = PlatformMountAction(
@@ -275,6 +308,43 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
+            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+        ]
+        for information in expected_information:
+            self.assertIn(information, str_exception)
+
+    def test_validate_create_no_parent_device_mount_for_config(self):
+        """Ensure we can't create if the parent device is not mounted for this config."""
+        existing_parent_mount_action = DeviceMountAction(
+            # Different configuration
+            configuration=self.configuration1,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add(existing_parent_mount_action)
+        db.session.commit()
+        payload_dict = {
+            "relationships": {
+                "configuration": {
+                    "data": {"id": self.configuration2.id},
+                },
+                "device": {
+                    "data": {"id": self.device1.id},
+                },
+                "parent_device": {
+                    "data": {"id": self.device2.id},
+                },
+            },
+            "attributes": {
+                "begin_date": "2023-01-01T00:00:00Z",
+            },
+        }
+        with self.assertRaises(ConflictError) as context:
+            DeviceMountActionValidator().validate_create(payload_dict)
+        str_exception = str(context.exception)
+        expected_information = [
+            "Parent device is not mounted",
             str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
         ]
         for information in expected_information:
@@ -317,6 +387,43 @@ class TestDeviceMountActionValidator(BaseTestCase):
         for information in expected_information:
             self.assertIn(information, str_exception)
 
+    def test_validate_create_no_full_parent_device_mount_for_config(self):
+        """Ensure we can't create if parent device is not mounted for whole time."""
+        existing_parent_mount_action = DeviceMountAction(
+            configuration=self.configuration2,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add(existing_parent_mount_action)
+        db.session.commit()
+        payload_dict = {
+            "relationships": {
+                "configuration": {
+                    "data": {"id": self.configuration2.id},
+                },
+                "device": {
+                    "data": {"id": self.device1.id},
+                },
+                "parent_device": {
+                    "data": {"id": self.device2.id},
+                },
+            },
+            "attributes": {
+                "begin_date": "2023-01-01T00:00:00Z",
+            },
+        }
+        with self.assertRaises(ConflictError) as context:
+            DeviceMountActionValidator().validate_create(payload_dict)
+        str_exception = str(context.exception)
+        expected_information = [
+            "Parent device is not mounted",
+            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+        ]
+        for information in expected_information:
+            self.assertIn(information, str_exception)
+
     def test_validate_create_full_parent_platform_mount_for_config(self):
         """Ensure we can create if parent platform is mounted for the interval."""
         existing_platform_mount_action = PlatformMountAction(
@@ -344,6 +451,72 @@ class TestDeviceMountActionValidator(BaseTestCase):
             },
         }
         DeviceMountActionValidator().validate_create(payload_dict)
+
+    def test_validate_create_full_parent_device_mount_for_config(self):
+        """Ensure we can create if parent device is mounted for the interval."""
+        existing_parent_mount_action = DeviceMountAction(
+            configuration=self.configuration2,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add(existing_parent_mount_action)
+        db.session.commit()
+        payload_dict = {
+            "relationships": {
+                "configuration": {
+                    "data": {"id": self.configuration2.id},
+                },
+                "device": {
+                    "data": {"id": self.device1.id},
+                },
+                "parent_device": {
+                    "data": {"id": self.device2.id},
+                },
+            },
+            "attributes": {
+                "begin_date": "2023-01-01T00:00:00Z",
+            },
+        }
+        DeviceMountActionValidator().validate_create(payload_dict)
+
+    def test_validate_create_both_parent_platform_and_device(self):
+        """Ensure we don't allow to set both slots for parents at the same time."""
+        existing_device_mount_action = DeviceMountAction(
+            configuration=self.configuration2,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        existing_platform_mount_action = PlatformMountAction(
+            configuration=self.configuration2,
+            platform=self.platform1,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add_all(
+            [existing_device_mount_action, existing_platform_mount_action]
+        )
+        db.session.commit()
+        payload_dict = {
+            "relationships": {
+                "configuration": {
+                    "data": {"id": self.configuration2.id},
+                },
+                "device": {
+                    "data": {"id": self.device1.id},
+                },
+                "parent_device": {
+                    "data": {"id": self.device2.id},
+                },
+                "parent_platform": {"data": {"id": self.platform1.id}},
+            },
+            "attributes": {
+                "begin_date": "2023-01-01T00:00:00Z",
+            },
+        }
+        with self.assertRaises(ConflictError):
+            DeviceMountActionValidator().validate_create(payload_dict)
 
     def test_validate_update_non_existing_id(self):
         """Ensure that we also check that the element with id exists."""
@@ -522,6 +695,181 @@ class TestDeviceMountActionValidator(BaseTestCase):
             payload_dict_no_parent_platform, existing_device_mount_action1.id
         )
 
+    def test_valdiate_update_no_full_parent_device_mount(self):
+        """Ensure we also check for the parent device for updates."""
+        existing_parent_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        existing_device_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device1,
+            parent_device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add_all(
+            [existing_device_mount_action1, existing_parent_mount_action1]
+        )
+        db.session.commit()
+        payload_dict = {
+            "relationships": {},
+            "attributes": {
+                "begin_date": "2022-06-01T00:00:00Z",
+                "end_date": "2024-01-01T00:00:00Z",
+            },
+        }
+        with self.assertRaises(ConflictError) as context:
+            DeviceMountActionValidator().validate_update(
+                payload_dict, existing_device_mount_action1.id
+            )
+        str_exception = str(context.exception)
+        expected_information = [
+            "Parent device is not mounted",
+            str(datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC)),
+        ]
+        for information in expected_information:
+            self.assertIn(information, str_exception)
+
+        # However, it should work if we set the parent_device_id explicitly to None
+        payload_dict_no_parent_platform = {
+            "relationships": {
+                "parent_device": {
+                    "data": {"id": None},
+                }
+            },
+            "attributes": {
+                "begin_date": "2022-06-01T00:00:00Z",
+                "end_date": "2024-01-01T00:00:00Z",
+            },
+        }
+        DeviceMountActionValidator().validate_update(
+            payload_dict_no_parent_platform, existing_device_mount_action1.id
+        )
+
+    def test_validate_update_still_child_mounts(self):
+        """Ensure we check if the child mounts are also covered after the change."""
+        existing_parent_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        existing_device_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device1,
+            parent_device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add_all(
+            [
+                existing_parent_mount_action1,
+                existing_device_mount_action1,
+            ]
+        )
+        db.session.commit()
+        payloads = [
+            # First one that must fail is to change the configuration.
+            # Our child mounts would not be there anymore.
+            {
+                "relationships": {
+                    "configuration": {
+                        "data": {"id": self.configuration2.id},
+                    },
+                    "device": {
+                        "data": {"id": self.device2.id},
+                    },
+                },
+                "attributes": {
+                    "begin_date": "2022-01-01T00:00:00Z",
+                },
+            },
+            # Then we change the device. It fails as well as the
+            # child mounts still refer to the parent device.
+            {
+                "relationships": {
+                    "configuration": {
+                        "data": {"id": self.configuration1.id},
+                    },
+                    "device": {
+                        "data": {"id": self.device3.id},
+                    },
+                },
+                "attributes": {
+                    "begin_date": "2022-01-01T00:00:00Z",
+                },
+            },
+            # Another option is to take the mount out of scope for
+            # the sub mounts.
+            {
+                "relationships": {
+                    "configuration": {
+                        "data": {"id": self.configuration1.id},
+                    },
+                    "device": {
+                        "data": {"id": self.device2.id},
+                    },
+                },
+                "attributes": {
+                    "begin_date": "2022-07-01T00:00:00Z",
+                },
+            },
+        ]
+        for payload_dict in payloads:
+            with self.assertRaises(ConflictError) as context:
+                DeviceMountActionValidator().validate_update(
+                    payload_dict, existing_parent_mount_action1.id
+                )
+
+            str_exception = str(context.exception)
+            expected_information = [
+                "child mount",
+                "not covered",
+            ]
+            for information in expected_information:
+                self.assertIn(information, str_exception)
+
+    def test_validate_update_both_parent_and_device(self):
+        """Ensure we don't allow to patch so that both parents are set at the same time."""
+        existing_device_mount_action = DeviceMountAction(
+            configuration=self.configuration2,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        existing_platform_mount_action = PlatformMountAction(
+            configuration=self.configuration2,
+            platform=self.platform1,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        new_mount = DeviceMountAction(
+            configuration=self.configuration2,
+            device=self.device1,
+            parent_device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add_all(
+            [existing_device_mount_action, existing_platform_mount_action, new_mount]
+        )
+        db.session.commit()
+        paylaod = {
+            "relationships": {
+                "parent_platform": {
+                    "data": {"id": self.platform1.id},
+                },
+            },
+            "attributes": {},
+        }
+        with self.assertRaises(ConflictError):
+            DeviceMountActionValidator().validate_update(paylaod, new_mount.id)
+
     def test_validate_update_still_dynamic_location_reference(self):
         """Ensure we can't remove intervals for that a dynamic location refers to mount."""
         x_coord = DeviceProperty(
@@ -606,7 +954,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
             for information in expected_information:
                 self.assertIn(information, str_exception)
 
-    def test_validate_update_passes_for_valid_timeintercal_changes_with_dyn_location(
+    def test_validate_update_passes_for_valid_timeinterval_changes_with_dyn_location(
         self,
     ):
         """Ensure we can update intervals if dynamic location action is still covered."""
@@ -614,9 +962,16 @@ class TestDeviceMountActionValidator(BaseTestCase):
             property_name="X coordinate",
             device=self.device1,
         )
+        existing_parent_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
+            parent_device=self.device2,
             begin_contact=self.contact1,
             begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
         )
@@ -647,6 +1002,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
         db.session.add_all(
             [
                 x_coord,
+                existing_parent_mount_action1,
                 existing_device_mount_action1,
                 dynamic_location_begin1,
                 dynamic_location_begin2,
@@ -681,6 +1037,41 @@ class TestDeviceMountActionValidator(BaseTestCase):
         """
         with self.assertRaises(NotFoundError):
             DeviceMountActionValidator().validate_delete(100000)
+
+    def test_validate_delete_still_child_mounts(self):
+        """Ensure we can't delete if we still have child mounts."""
+        existing_parent_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        existing_device_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device1,
+            parent_device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add_all(
+            [
+                existing_parent_mount_action1,
+                existing_device_mount_action1,
+            ]
+        )
+        db.session.commit()
+        with self.assertRaises(ConflictError) as context:
+            DeviceMountActionValidator().validate_delete(
+                existing_parent_mount_action1.id
+            )
+
+        str_exception = str(context.exception)
+        expected_information = [
+            "child mount",
+            "not covered",
+        ]
+        for information in expected_information:
+            self.assertIn(information, str_exception)
 
     def test_validate_delete_still_dynamic_location_reference(self):
         """Ensure we can't delete the mount for that a dynamic location refers to mount."""
@@ -1289,8 +1680,8 @@ class TestPlatformMountActionValidator(BaseTestCase):
         db.session.commit()
         payloads = [
             # First one that must fail is to change the configuration.
-            # This way the dynamic location action would miss that device
-            # property.
+            # Our child mounts would point to a platform that is no longer
+            # there.
             {
                 "relationships": {
                     "configuration": {
@@ -1348,79 +1739,6 @@ class TestPlatformMountActionValidator(BaseTestCase):
             ]
             for information in expected_information:
                 self.assertIn(information, str_exception)
-
-    def test_validate_update_pass_example(self):
-        """
-        Test that the validation passes for an example.
-
-        This example was made by Tim.
-        """
-        db.drop_all()
-        db.create_all()
-        db.session.commit()
-
-        contact = Contact(given_name="T", family_name="E", email="t.e@ufz.de")
-        device = Device(short_name="dummy device")
-        platform = Platform(short_name="dummy platform")
-        configuration = Configuration(label="dummy config")
-
-        platform_mount = PlatformMountAction(
-            platform=platform,
-            configuration=configuration,
-            begin_contact=contact,
-            end_contact=None,
-            begin_date=datetime.datetime(
-                year=2022, month=8, day=19, hour=9, minute=8, second=57, tzinfo=pytz.UTC
-            ),
-            begin_description="",
-            offset_x=0,
-            offset_y=0,
-            offset_z=0,
-        )
-        device_mount = DeviceMountAction(
-            parent_platform=platform,
-            configuration=configuration,
-            device=device,
-            begin_contact=contact,
-            end_contact=contact,
-            begin_date=datetime.datetime(
-                year=2022, month=8, day=19, hour=9, minute=9, second=17, tzinfo=pytz.UTC
-            ),
-            end_date=datetime.datetime(
-                year=2022, month=8, day=19, hour=9, minute=9, second=35, tzinfo=pytz.UTC
-            ),
-            begin_description="",
-            end_description="",
-            offset_x=0,
-            offset_y=0,
-            offset_z=0,
-        )
-        db.session.add_all(
-            [contact, device, platform, configuration, platform_mount, device_mount]
-        )
-        db.session.commit()
-
-        payload_dict = {
-            "type": "platform_mount_action",
-            "attributes": {
-                "offset_x": 0,
-                "offset_y": 0,
-                "offset_z": 0,
-                "begin_description": "",
-                "end_description": "",
-                "begin_date": "2022-08-19T09:08:57.658Z",
-                "end_date": "2022-08-19T09:10:20.530Z",
-            },
-            "relationships": {
-                "platform": {"data": {"type": "platform", "id": str(platform.id)}},
-                "begin_contact": {"data": {"type": "contact", "id": str(contact.id)}},
-                "configuration": {
-                    "data": {"type": "configuration", "id": str(configuration.id)}
-                },
-                "end_contact": {"data": {"type": "contact", "id": str(contact.id)}},
-            },
-        }
-        PlatformMountActionValidator().validate_update(payload_dict, platform_mount.id)
 
     def test_validate_delete_non_existing_id(self):
         """
@@ -1515,3 +1833,76 @@ class TestPlatformMountActionValidator(BaseTestCase):
         PlatformMountActionValidator().validate_delete(
             existing_platform_mount_action1.id
         )
+
+
+class TestPlatformMountActionValidator2(BaseTestCase):
+    """Also a test class for PlatformMountActionValidator, but without setup method."""
+
+    def test_validate_update_pass_example(self):
+        """
+        Test that the validation passes for an example.
+
+        This example was made by Tim.
+        """
+        contact = Contact(given_name="T", family_name="E", email="t.e@ufz.de")
+        device = Device(short_name="dummy device")
+        platform = Platform(short_name="dummy platform")
+        configuration = Configuration(label="dummy config")
+
+        platform_mount = PlatformMountAction(
+            platform=platform,
+            configuration=configuration,
+            begin_contact=contact,
+            end_contact=None,
+            begin_date=datetime.datetime(
+                year=2022, month=8, day=19, hour=9, minute=8, second=57, tzinfo=pytz.UTC
+            ),
+            begin_description="",
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+        )
+        device_mount = DeviceMountAction(
+            parent_platform=platform,
+            configuration=configuration,
+            device=device,
+            begin_contact=contact,
+            end_contact=contact,
+            begin_date=datetime.datetime(
+                year=2022, month=8, day=19, hour=9, minute=9, second=17, tzinfo=pytz.UTC
+            ),
+            end_date=datetime.datetime(
+                year=2022, month=8, day=19, hour=9, minute=9, second=35, tzinfo=pytz.UTC
+            ),
+            begin_description="",
+            end_description="",
+            offset_x=0,
+            offset_y=0,
+            offset_z=0,
+        )
+        db.session.add_all(
+            [contact, device, platform, configuration, platform_mount, device_mount]
+        )
+        db.session.commit()
+
+        payload_dict = {
+            "type": "platform_mount_action",
+            "attributes": {
+                "offset_x": 0,
+                "offset_y": 0,
+                "offset_z": 0,
+                "begin_description": "",
+                "end_description": "",
+                "begin_date": "2022-08-19T09:08:57.658Z",
+                "end_date": "2022-08-19T09:10:20.530Z",
+            },
+            "relationships": {
+                "platform": {"data": {"type": "platform", "id": str(platform.id)}},
+                "begin_contact": {"data": {"type": "contact", "id": str(contact.id)}},
+                "configuration": {
+                    "data": {"type": "configuration", "id": str(configuration.id)}
+                },
+                "end_contact": {"data": {"type": "contact", "id": str(contact.id)}},
+            },
+        }
+        PlatformMountActionValidator().validate_update(payload_dict, platform_mount.id)

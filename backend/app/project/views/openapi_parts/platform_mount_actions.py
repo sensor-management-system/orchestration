@@ -7,6 +7,12 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Externalized openapi spec for the platform mount actions."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.mount_actions_schema import PlatformMountActionSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(PlatformMountActionSchema)
+
 paths = {
     "/platform-mount-actions": {
         "get": {
@@ -16,16 +22,25 @@ paths = {
                 {"$ref": "#/components/parameters/page_size"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/PlatformMountActions_coll"}
+                "200": {
+                    "description": "List of platform mounts",
+                    "content": {"application/vnd.api+json": schema_mapper.get_list()},
+                },
             },
         },
         "post": {
             "tags": ["Platform mount actions"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/PlatformMountActions_inst"
+                "content": {"application/vnd.api+json": schema_mapper.post()},
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/PlatformMountActions_coll"}
+                "201": {
+                    "description": "Payload of the created platform mount",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
     },
@@ -37,7 +52,12 @@ paths = {
                 {"$ref": "#/components/parameters/platform_mount_action_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/PlatformMountActions_coll"}
+                "200": {
+                    "description": "Instance of a platform mount",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
         "patch": {
@@ -47,15 +67,18 @@ paths = {
             ],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/PlatformMountActions"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "",
+                "description": "PlatformMountAction attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/PlatformMountActions_coll"}
+                "200": {
+                    "description": "Payload of the updated platform mount",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
         "delete": {
@@ -68,291 +91,12 @@ paths = {
     },
 }
 components = {
-    "requestBodies": {
-        "PlatformMountActions_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "platform_mount_action",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "required": ["begin_date"],
-                                        "properties": {
-                                            "begin_description": {"type": "string"},
-                                            "end_description": {"type": "string"},
-                                            "begin_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                            "end_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                            "offset_x": {
-                                                "type": "number",
-                                                "format": "float",
-                                            },
-                                            "offset_y": {
-                                                "type": "number",
-                                                "format": "float",
-                                            },
-                                            "offset_z": {
-                                                "type": "number",
-                                                "format": "float",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["begin_contact"],
-                                        "properties": {
-                                            "configuration": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "configuration",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "begin_contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "end_contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "platform": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "platform",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "parent_platform": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "platform",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "responses": {
-        "PlatformMountActions_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "id": "0",
-                                    "type": "platform_mount_action",
-                                    "attributes": {
-                                        "begin_description": "",
-                                        "end_description": "",
-                                        "begin_date": "",
-                                        "end_date": "",
-                                        "offset_x": "",
-                                        "offset_y": "",
-                                        "offset_z": "",
-                                    },
-                                    "relationships": {
-                                        "configuration": {
-                                            "data": {
-                                                "type": "configuration",
-                                                "id": "00",
-                                            }
-                                        },
-                                        "platform": {
-                                            "data": {"type": "platform", "id": "00"}
-                                        },
-                                        "parent_platform": {
-                                            "data": {"type": "platform", "id": "00"}
-                                        },
-                                        "begin_contact": {
-                                            "data": {"type": "contact", "id": "000"}
-                                        },
-                                        "end_contact": {
-                                            "data": {"type": "contact", "id": "000"}
-                                        },
-                                    },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        }
-    },
-    "schemas": {
-        "PlatformMountActions": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "required": ["type", "id"],
-                    "properties": {
-                        "type": {"type": "string", "default": "platform_mount_action"},
-                        "id": {"type": "string"},
-                        "attributes": {
-                            "type": "object",
-                            "required": ["begin_date"],
-                            "properties": {
-                                "begin_description": {"type": "string"},
-                                "end_description": {"type": "string"},
-                                "begin_date": {"type": "string", "format": "datetime"},
-                                "end_date": {"type": "string", "format": "datetime"},
-                                "offset_x": {"type": "number", "format": "float"},
-                                "offset_y": {"type": "number", "format": "float"},
-                                "offset_z": {"type": "number", "format": "float"},
-                            },
-                        },
-                        "relationships": {
-                            "type": "object",
-                            "required": ["begin_contact"],
-                            "properties": {
-                                "configuration": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "configuration",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "begin_contact": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "contact",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "end_contact": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "contact",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "platform": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "platform",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "parent_platform": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "platform",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                            },
-                        },
-                    },
-                }
-            },
-            "description": "Platform Mount Actions Schema;",
-        }
+    "parameters": {
+        "platform_mount_action_id": {
+            "name": "platform_mount_action_id",
+            "in": "path",
+            "required": True,
+            "schema": {"type": "string"},
+        },
     },
 }

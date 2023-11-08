@@ -38,6 +38,7 @@ import { DeviceMountActionBasicData } from '@/models/basic/DeviceMountActionBasi
 import { DeviceMountAction } from '@/models/views/devices/actions/DeviceMountAction'
 import { DeviceMountActionSerializer } from '@/serializers/jsonapi/composed/devices/actions/DeviceMountActionSerializer'
 import { IJsonApiEntityListEnvelope } from '@/serializers/jsonapi/JsonApiTypes'
+import { DeviceBasicData } from '@/models/basic/DeviceBasicData'
 
 describe('DeviceMountActionSerializer', () => {
   describe('#convertJsonApiObjectListToModelList', () => {
@@ -107,6 +108,37 @@ describe('DeviceMountActionSerializer', () => {
                 }
               }
             }
+          },
+          {
+            type: 'device_mount_action',
+            id: 'dm3',
+            attributes: {
+              offset_x: 1,
+              offset_y: 2,
+              offset_z: 3,
+              begin_description: 'Device mount',
+              begin_date: '2020-03-01T12:00:00.000Z'
+            },
+            relationships: {
+              begin_contact: {
+                data: {
+                  type: 'contact',
+                  id: 'ct2'
+                }
+              },
+              configuration: {
+                data: {
+                  type: 'configuration',
+                  id: 'cf1'
+                }
+              },
+              parent_device: {
+                data: {
+                  type: 'device',
+                  id: 'dv1'
+                }
+              }
+            }
           }
         ],
         included: [
@@ -169,6 +201,29 @@ describe('DeviceMountActionSerializer', () => {
               manufacturer_uri: 'manufacturer/xyz',
               archived: true
             }
+          },
+          {
+            type: 'device',
+            id: 'dv1',
+            attributes: {
+              serial_number: '000123',
+              model: '0815',
+              description: 'Soil Moisture station Boeken_BF1',
+              device_type_uri: 'type/Station',
+              status_uri: 'status/inuse',
+              website: 'http://www.tereno.net',
+              updated_at: '2020-08-28T13:48:35.740944+00:00',
+              long_name: 'Soil moisture station Boeken BF1, Germany',
+              created_at: '2020-08-28T13:48:35.740944+00:00',
+              inventory_number: '0001234',
+              manufacturer_name: 'XYZ',
+              short_name: 'boeken_BF1',
+              status_name: 'in use',
+              device_type_name: 'Station',
+              persistent_identifier: 'boeken_BF1',
+              manufacturer_uri: 'manufacturer/xyz',
+              archived: true
+            }
           }
         ]
       }
@@ -189,6 +244,28 @@ describe('DeviceMountActionSerializer', () => {
         shortName: 'boeken_BF1',
         statusName: 'in use',
         platformTypeName: 'Station',
+        persistentIdentifier: 'boeken_BF1',
+        manufacturerUri: 'manufacturer/xyz',
+        updatedByUserId: null,
+        createdByUserId: null,
+        archived: true
+      })
+      const expectedDv1 = DeviceBasicData.createFromObject({
+        id: 'dv1',
+        serialNumber: '000123',
+        model: '0815',
+        description: 'Soil Moisture station Boeken_BF1',
+        deviceTypeUri: 'type/Station',
+        statusUri: 'status/inuse',
+        website: 'http://www.tereno.net',
+        updatedAt: DateTime.utc(2020, 8, 28, 13, 48, 35, 740),
+        longName: 'Soil moisture station Boeken BF1, Germany',
+        createdAt: DateTime.utc(2020, 8, 28, 13, 48, 35, 740),
+        inventoryNumber: '0001234',
+        manufacturerName: 'XYZ',
+        shortName: 'boeken_BF1',
+        statusName: 'in use',
+        deviceTypeName: 'Station',
         persistentIdentifier: 'boeken_BF1',
         manufacturerUri: 'manufacturer/xyz',
         updatedByUserId: null,
@@ -253,13 +330,26 @@ describe('DeviceMountActionSerializer', () => {
         endDate: null,
         endDescription: ''
       })
+      const expectedDm3 = DeviceMountActionBasicData.createFromObject({
+        id: 'dm3',
+        offsetX: 1,
+        offsetY: 2,
+        offsetZ: 3,
+        beginDate: DateTime.utc(2020, 3, 1, 12, 0, 0),
+        beginDescription: 'Device mount',
+        endDate: null,
+        endDescription: ''
+      })
 
       const expectedResult = [
         new DeviceMountAction(
-          expectedDm1, expectedCf1, expectedCt1, expectedCt2, null
+          expectedDm1, expectedCf1, expectedCt1, expectedCt2, null, null
         ),
         new DeviceMountAction(
-          expectedDm2, expectedCf1, expectedCt2, null, expectedPt1
+          expectedDm2, expectedCf1, expectedCt2, null, expectedPt1, null
+        ),
+        new DeviceMountAction(
+          expectedDm3, expectedCf1, expectedCt2, null, null, expectedDv1
         )
       ]
 

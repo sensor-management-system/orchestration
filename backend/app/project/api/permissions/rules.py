@@ -517,7 +517,7 @@ def can_delete(entity):
 def filter_visible(query):
     """Filter the query based on the visibility settings."""
     query = filter_visible.delegate(Configuration, query.join(Configuration))
-    query = filter_visible.delegate(Device, query.join(Device))
+    query = filter_visible.delegate(Device, query.join(DeviceMountAction.device))
     return query
 
 
