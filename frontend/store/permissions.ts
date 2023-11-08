@@ -94,6 +94,7 @@ export type MemberedPermissionGroupsGetter = PermissionGroup[]
 export type AdministradedPermissionGroupsGetter = PermissionGroup[]
 export type UserGroupsGetter = PermissionGroup[]
 export type PermissionGroupsGetter = PermissionGroup[]
+export type ContactIdGetter = string | null
 
 const getters: GetterTree<PermissionsState, RootState> = {
   canAccessEntity: (state: PermissionsState) => (entity: PermissionHandable): boolean => {
@@ -274,6 +275,12 @@ const getters: GetterTree<PermissionsState, RootState> = {
   userId: (state: PermissionsState) => {
     if (state.userInfo) {
       return state.userInfo.id
+    }
+    return null
+  },
+  contactId: (state: PermissionsState) => {
+    if (state.userInfo) {
+      return state.userInfo.contactId
     }
     return null
   },
