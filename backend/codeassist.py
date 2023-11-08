@@ -276,5 +276,42 @@ def organization_names():
     )
 
 
+@main.group()
+def update():
+    """Update something."""
+    pass
+
+
+@update.command()
+def requirements():
+    """Update the requirements.txt files for the backend."""
+    requiremets_files = (pathlib.Path(".") / "app").glob("*requirements.txt")
+    for requiremets_file in requiremets_files:
+        with requiremets_file.open() as infile:
+            lines = infile.readlines()
+        result = []
+        for line in lines:
+            if not line.startswith("#") and line.strip():
+                if "==" in line:
+                    splitted = line.split("==")
+                    name = splitted[0]
+                    current_version = splitted[1].strip()
+                    if "# fixed" in current_version:
+                        updated_version = current_version
+                    else:
+                        response = requests.get(f"https://pypi.org/pypi/{name}/json")
+                        response.raise_for_status()
+                        lib_data = response.json()
+                        updated_version = lib_data["info"]["version"]
+                    result.append(f"{name}=={updated_version}\n")
+                else:
+                    result.append(line)
+            else:
+                result.append(line)
+        with requiremets_file.open("w") as outfile:
+            for line in result:
+                outfile.write(line)
+
+
 if __name__ == "__main__":
     main()
