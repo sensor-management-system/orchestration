@@ -177,6 +177,10 @@ export class SiteSerializer {
       }
     }
 
+    if (attributes?.keywords) {
+      result.keywords = [...attributes.keywords]
+    }
+
     if (attributes?.group_ids) {
       // look up the group in the provided permission group array. if it was
       // found, push the found group into the site's permissionGroups property
@@ -234,7 +238,8 @@ export class SiteSerializer {
         site_usage_uri: site.siteUsageUri,
         site_type_name: site.siteTypeName,
         site_type_uri: site.siteTypeUri,
-        website: site.website
+        website: site.website,
+        keywords: site.keywords
 
         // these properties are set by the db, so we wont send anything related here:
         // archived

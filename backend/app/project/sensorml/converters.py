@@ -62,6 +62,8 @@ from .models import (
     SmlHistory,
     SmlIdentification,
     SmlIdentifier,
+    SmlKeyword,
+    SmlKeywords,
     SmlLabel,
     SmlOutput,
     SmlOutputs,
@@ -212,6 +214,7 @@ class ConfigurationConverter:
             gml_id=self.gml_id(),
             gml_name=self.gml_name(),
             gml_description=self.gml_description(),
+            sml_keywords=self.sml_keywords(),
             sml_valid_time=self.sml_valid_time(),
             sml_identification=self.sml_identification(),
             sml_classification=self.sml_classification(),
@@ -236,6 +239,18 @@ class ConfigurationConverter:
         if not self.configuration.description:
             return None
         return GmlDescription(text=self.configuration.description)
+
+    def sml_keywords(self) -> Optional[SmlKeywords]:
+        """Return the sml:keywords."""
+        sml_keyword_list = []
+        if self.configuration.keywords:
+            for kw in self.configuration.keywords:
+                sml_keyword = SmlKeyword(text=kw)
+                sml_keyword_list.append(sml_keyword)
+
+        if sml_keyword_list:
+            return SmlKeywords(sml_keyword_list=sml_keyword_list)
+        return None
 
     def sml_valid_time(self) -> Optional[SmlValidTime]:
         """Return the sml:validTime."""
@@ -662,6 +677,7 @@ class DeviceConverter:
         physical_system = SmlPhysicalSystem(
             gml_id=self.gml_id(),
             gml_description=self.gml_description(),
+            sml_keywords=self.sml_keywords(),
             sml_identification=self.sml_identification(),
             sml_classification=self.sml_classification(),
             sml_outputs=self.sml_outputs(),
@@ -681,6 +697,18 @@ class DeviceConverter:
         if not self.device.description:
             return None
         return GmlDescription(text=self.device.description)
+
+    def sml_keywords(self) -> Optional[SmlKeywords]:
+        """Return the sml:keywords."""
+        sml_keyword_list = []
+        if self.device.keywords:
+            for kw in self.device.keywords:
+                sml_keyword = SmlKeyword(text=kw)
+                sml_keyword_list.append(sml_keyword)
+
+        if sml_keyword_list:
+            return SmlKeywords(sml_keyword_list=sml_keyword_list)
+        return None
 
     def sml_outputs(self) -> Optional[SmlOutputs]:
         """Return the sml:outputs."""
@@ -1058,6 +1086,7 @@ class PlatformConverter:
         physical_system = SmlPhysicalSystem(
             gml_id=self.gml_id(),
             gml_description=self.gml_description(),
+            sml_keywords=self.sml_keywords(),
             sml_identification=self.sml_identification(),
             sml_classification=self.sml_classification(),
             sml_documentation=self.sml_documentation(),
@@ -1076,6 +1105,18 @@ class PlatformConverter:
         if not self.platform.description:
             return None
         return GmlDescription(text=self.platform.description)
+
+    def sml_keywords(self) -> Optional[SmlKeywords]:
+        """Return the sml:keywords."""
+        sml_keyword_list = []
+        if self.platform.keywords:
+            for kw in self.platform.keywords:
+                sml_keyword = SmlKeyword(text=kw)
+                sml_keyword_list.append(sml_keyword)
+
+        if sml_keyword_list:
+            return SmlKeywords(sml_keyword_list=sml_keyword_list)
+        return None
 
     def sml_contacts(self) -> Optional[SmlContacts]:
         """Return the sml:contacts."""
@@ -1389,6 +1430,7 @@ class SiteConverter:
             gml_name=self.gml_name(),
             gml_description=self.gml_description(),
             gml_location=self.gml_location(),
+            sml_keywords=self.sml_keywords(),
             sml_contacts=self.sml_contacts(),
             sml_documentation=self.sml_documentation(),
             sml_classification=self.sml_classification(),
@@ -1437,6 +1479,18 @@ class SiteConverter:
         )
         gml_location = GmlLocation(gml_polygon=gml_polygon)
         return gml_location
+
+    def sml_keywords(self) -> Optional[SmlKeywords]:
+        """Return the sml:keywords."""
+        sml_keyword_list = []
+        if self.site.keywords:
+            for kw in self.site.keywords:
+                sml_keyword = SmlKeyword(text=kw)
+                sml_keyword_list.append(sml_keyword)
+
+        if sml_keyword_list:
+            return SmlKeywords(sml_keyword_list=sml_keyword_list)
+        return None
 
     def sml_contacts(self) -> Optional[SmlContacts]:
         """Return the sml:contacts."""

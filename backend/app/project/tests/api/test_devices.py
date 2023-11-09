@@ -75,6 +75,7 @@ class TestDeviceService(BaseTestCase):
             subject=contact2.email, contact=contact2, is_superuser=True
         )
         db.session.add_all([contact1, contact2, self.normal_user, self.super_user])
+        db.session.commit()
 
     def test_get_devices(self):
         """Ensure the GET /devices route behaves correctly."""
@@ -764,3 +765,32 @@ class TestDeviceService(BaseTestCase):
         """Ensure we handle negative page numbers as 4xx errors."""
         resp = self.client.get(f"{self.device_url}?page[number]=-1")
         self.assertEqual(resp.status_code, 400)
+
+    def test_post_keywords(self):
+        """Ensure we can post keywords."""
+        device_data = {
+            "data": {
+                "type": "device",
+                "attributes": {
+                    "short_name": "A test device",
+                    "keywords": ["word1", "word2"],
+                    "is_public": True,
+                    "is_private": False,
+                    "is_internal": False,
+                },
+            }
+        }
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.device_url,
+                data=json.dumps(device_data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 201)
+        result = response.json
+
+        result_id = result["data"]["id"]
+
+        device = db.session.query(Device).filter_by(id=result_id).first()
+        self.assertEqual(["word1", "word2"], device.keywords)
+        self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])

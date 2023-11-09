@@ -73,7 +73,8 @@ const testConfig1 = Configuration.createFromObject({
   platformMountActions: [],
   deviceMountActions: [],
   parameters: [],
-  permissionGroup: null
+  permissionGroup: null,
+  keywords: []
 })
 
 const factory = (options = {}, presetData: PresetData = {}) => {

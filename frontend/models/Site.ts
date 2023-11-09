@@ -81,6 +81,7 @@ export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo 
   visibility: Visibility
   permissionGroups: IPermissionGroup[]
   website: string
+  keywords: string[]
 }
 
 export class Site implements ISite, IVisible {
@@ -109,6 +110,7 @@ export class Site implements ISite, IVisible {
   private _visibility: Visibility = Visibility.Internal
   private _permissionGroups: PermissionGroup[] = []
   private _website: string = ''
+  private _keywords: string[] = []
 
   get id (): string {
     return this._id
@@ -278,6 +280,14 @@ export class Site implements ISite, IVisible {
     this._website = newWebsite
   }
 
+  get keywords (): string[] {
+    return this._keywords
+  }
+
+  set keywords (newKeywords: string[]) {
+    this._keywords = newKeywords
+  }
+
   // get isPrivate (): boolean {
   //   return this._visibility === Visibility.Private
   // }
@@ -332,6 +342,7 @@ export class Site implements ISite, IVisible {
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
 
     newObject.website = someObject.website
+    newObject.keywords = [...someObject.keywords]
 
     return newObject
   }

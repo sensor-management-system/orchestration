@@ -113,6 +113,10 @@ export class ConfigurationSerializer {
       if (attributes.is_public) {
         configuration.visibility = Visibility.Public
       }
+
+      if (attributes.keywords) {
+        configuration.keywords = [...attributes.keywords]
+      }
     }
 
     let missingDataForContactIds: string[] = []
@@ -197,7 +201,8 @@ export class ConfigurationSerializer {
         is_internal: configuration.isInternal,
         is_public: configuration.isPublic,
         cfg_permission_group: configuration.permissionGroup?.id,
-        persistent_identifier: configuration.persistentIdentifier === '' ? null : configuration.persistentIdentifier
+        persistent_identifier: configuration.persistentIdentifier === '' ? null : configuration.persistentIdentifier,
+        keywords: configuration.keywords
       },
       relationships: {
         ...contacts,

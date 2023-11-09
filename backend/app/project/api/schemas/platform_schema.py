@@ -50,6 +50,7 @@ class PlatformSchema(Schema):
     is_public = fields.Boolean(allow_none=True)
     archived = fields.Boolean(dump_only=True)
     update_description = fields.Str(dump_only=True)
+    keywords = fields.Field(many=True, allow_none=True)
     created_by = Relationship(
         related_view="api.user_detail",
         related_view_kwargs={"id": "<created_by_id>"},

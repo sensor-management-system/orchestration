@@ -10,6 +10,8 @@
 
 """Class and helpers for the configurations."""
 
+from sqlalchemy.ext.mutable import MutableList
+
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from ..helpers.errors import ConflictError
 from .base_model import db
@@ -41,6 +43,7 @@ class Configuration(
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=True)
     site = db.relationship("Site", backref="configurations")
+    keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
 
     def validate(self):
         """
@@ -103,6 +106,7 @@ class Configuration(
             "end_date": self.end_date,
             "site_id": self.site_id,
             "persistent_identifier": self.persistent_identifier,
+            "keywords": self.keywords,
         }
 
     @staticmethod
@@ -154,6 +158,7 @@ class Configuration(
                         "type": "date",
                         "format": "strict_date_optional_time",
                     },
+                    "keywords": type_keyword_and_full_searchable,
                     "platforms": {
                         "properties": Platform.get_search_index_properties(),
                     },

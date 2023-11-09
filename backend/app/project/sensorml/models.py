@@ -1030,6 +1030,35 @@ class SmlPosition:
 
 
 @dataclass
+class SmlKeyword:
+    """Represent a sml:keyword."""
+
+    text: str
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("keyword")
+        element.text = self.text
+        return element
+
+
+@dataclass
+class SmlKeywords:
+    """Represent a sml:keywords."""
+
+    sml_keyword_list: List[SmlKeyword] = field(default_factory=lambda: [])
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = sml.tag("keywords")
+        sub_element = sml.tag("KeywordList")
+        for entry in self.sml_keyword_list:
+            sub_element.append(entry.to_xml())
+        element.append(sub_element)
+        return element
+
+
+@dataclass
 class SmlPhysicalSystem:
     """Represent a sml:PhysicalSystem."""
 
@@ -1037,6 +1066,7 @@ class SmlPhysicalSystem:
     gml_name: Optional[GmlName] = None
     gml_description: Optional[GmlDescription] = None
     gml_location: Optional[GmlLocation] = None
+    sml_keywords: Optional[SmlKeywords] = None
     sml_identification: Optional[SmlIdentification] = None
     sml_classification: Optional[SmlClassification] = None
     sml_documentation: Optional[SmlDocumentation] = None
@@ -1059,6 +1089,8 @@ class SmlPhysicalSystem:
             element.append(self.gml_name.to_xml())
         if self.gml_location:
             element.append(self.gml_location.to_xml())
+        if self.sml_keywords:
+            element.append(self.sml_keywords.to_xml())
         if self.sml_valid_time:
             element.append(self.sml_valid_time.to_xml())
         if self.sml_identification:

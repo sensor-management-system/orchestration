@@ -50,6 +50,7 @@ class Site(
     site_usage_uri = db.Column(db.String(256), nullable=True)
     site_usage_name = db.Column(db.String(256), nullable=True)
     website = db.Column(db.String(1024), nullable=True)
+    keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
 
     # SiteContactRoles & SiteAttachments have a backref to the sites,
     # so there is no need to put it here explicitly.
@@ -102,6 +103,7 @@ class Site(
             "site_attachments": [a.to_search_entry() for a in self.site_attachments],
             "website": self.website,
             "updated_at": self.updated_at,
+            "keywords": self.keywords,
             # For the moment we don't include the configurations as it would
             # require us to keep all the data up to date (not only for
             # every change in the configuration, but also for changes in
@@ -185,6 +187,7 @@ class Site(
                             "description": type_text_full_searchable,
                         },
                     },
+                    "keywords": type_keyword_and_full_searchable,
                     # As mentioned we don't include the data for the
                     # configurations here.
                 }

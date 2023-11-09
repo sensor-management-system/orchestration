@@ -120,6 +120,19 @@ permissions and limitations under the Licence.
         {{ value.description | orDefault }}
       </v-col>
     </v-row>
+    <v-row v-if="value.keywords">
+      <v-col>
+        <label>Keywords</label>
+        <v-chip-group v-if="value.keywords.length">
+          <v-chip v-for="keyword, idx in value.keywords" :key="idx" small>
+            {{ keyword }}
+          </v-chip>
+        </v-chip-group>
+        <span v-else>
+          {{ '' | orDefault }}
+        </span>
+      </v-col>
+    </v-row>
     <qr-code-dialog v-model="showPidQrCode" :text="persistentIdentifierUrl" disabled />
   </div>
 </template>

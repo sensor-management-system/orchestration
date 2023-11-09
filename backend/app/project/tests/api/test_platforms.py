@@ -8,6 +8,7 @@
 
 """Tests for the platforms."""
 import datetime
+import json
 import os
 from unittest.mock import patch
 
@@ -464,3 +465,31 @@ class TestPlatformServices(BaseTestCase):
                         update_external_metadata.call_args.args[0].id, configuration.id
                     )
         self.assertEqual(resp.status_code, 200)
+
+    def test_post_keywords(self):
+        """Ensure we can post keywords."""
+        platform_data = {
+            "data": {
+                "type": "platform",
+                "attributes": {
+                    "short_name": "A test platform",
+                    "keywords": ["word1", "word2"],
+                    "is_public": True,
+                    "is_private": False,
+                    "is_internal": False,
+                },
+            }
+        }
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.platform_url,
+                data=json.dumps(platform_data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 201)
+        result = response.json
+
+        result_id = result["data"]["id"]
+        platform = db.session.query(Platform).filter_by(id=result_id).first()
+        self.assertEqual(["word1", "word2"], platform.keywords)
+        self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])

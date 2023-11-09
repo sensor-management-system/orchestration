@@ -69,6 +69,7 @@ const createTestDevice = () => {
   device.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
   device.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
   device.updateDescription = ''
+  device.keywords = ['key', 'word']
 
   device.customFields = [
     CustomTextField.createFromObject({
@@ -225,7 +226,8 @@ describe('DeviceSerializer', () => {
             dual_use: false,
             persistent_identifier: null,
             manufacturer_uri: null,
-            archived: false
+            archived: false,
+            keywords: ['key', 'word']
           },
           relationships: {
             updated_by: {
@@ -374,6 +376,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.parameters = []
       expectedDevice1.createdByUserId = '123'
       expectedDevice1.archived = false
+      expectedDevice1.keywords = ['key', 'word']
 
       const expectedDevice2 = new Device()
       expectedDevice2.id = '44'
@@ -1218,6 +1221,8 @@ describe('DeviceSerializer', () => {
       expect(attributes.website).toEqual('http://gfz-potsdam.de')
       expect(attributes).toHaveProperty('dual_use')
       expect(attributes.dual_use).toEqual(true)
+      expect(attributes).toHaveProperty('keywords')
+      expect(attributes.keywords).toEqual(['key', 'word'])
       // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times
