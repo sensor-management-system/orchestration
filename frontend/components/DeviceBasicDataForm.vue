@@ -383,6 +383,31 @@ permissions and limitations under the Licence.
       </v-col>
     </v-row>
     <v-row>
+      <v-col>
+        <label>Keywords</label>
+        <v-chip-group>
+          <v-chip v-for="keyword, idx in value.keywords" :key="idx" close small @click:close="removeKeyword(keyword)">
+            {{ keyword }}
+          </v-chip>
+        </v-chip-group>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-text-field
+          v-model="newKeyword"
+          label="New keyword"
+          @keydown.enter="addNewKeyword"
+        >
+          <template #append>
+            <v-btn icon :disabled="!newKeyword" @click="addNewKeyword">
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </template>
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="3">
         <v-checkbox
           :input-value="value.dualUse"
@@ -474,6 +499,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   private equipmentstatus !: VocabularyState['equipmentstatus']
   private serialNumbersInUse: string[] = []
   private initialSerialNumber = ''
+  private newKeyword = ''
 
   loadDevicetypes !: LoadDevicetypesAction
   loadManufacturers !: LoadManufacturersAction
@@ -794,6 +820,22 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
    */
   itemHasDefinition (item: ICvSelectItem): boolean {
     return hasDefinition(item)
+  }
+
+  addNewKeyword () {
+    if (!this.newKeyword) {
+      return
+    }
+    const newObj = Device.createFromObject(this.value)
+    newObj.keywords.push(this.newKeyword)
+    this.newKeyword = ''
+    this.$emit('input', newObj)
+  }
+
+  removeKeyword (keyword: string) {
+    const newObj = Device.createFromObject(this.value)
+    newObj.keywords = newObj.keywords.filter(k => k !== keyword)
+    this.$emit('input', newObj)
   }
 }
 </script>

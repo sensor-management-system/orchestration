@@ -80,6 +80,7 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
   attachments: IAttachment[]
   parameters: IParameter[]
   permissionGroups: IPermissionGroup[]
+  keywords: string[]
 
   createdBy: IContact | null
   updatedBy: IContact | null
@@ -121,6 +122,7 @@ export class Device implements IDevice, IVisible {
   private _attachments: Attachment[] = []
   private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
+  private _keywords: string[] = []
 
   private _createdBy: IContact | null = null
   private _updatedBy: IContact | null = null
@@ -330,6 +332,14 @@ export class Device implements IDevice, IVisible {
     this._permissionGroups = permissionGroups
   }
 
+  get keywords (): string[] {
+    return this._keywords
+  }
+
+  set keywords (newKeywords: string[]) {
+    this._keywords = newKeywords
+  }
+
   get createdBy (): IContact | null {
     return this._createdBy
   }
@@ -420,6 +430,7 @@ export class Device implements IDevice, IVisible {
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
     newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
+    newObject.keywords = [...someObject.keywords]
 
     newObject.createdBy = someObject.createdBy ? Contact.createFromObject(someObject.createdBy) : null
     newObject.updatedBy = someObject.updatedBy ? Contact.createFromObject(someObject.updatedBy) : null

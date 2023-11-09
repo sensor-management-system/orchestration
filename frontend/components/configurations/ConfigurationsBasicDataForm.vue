@@ -157,6 +157,31 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
+    <v-row>
+      <v-col>
+        <label>Keywords</label>
+        <v-chip-group>
+          <v-chip v-for="keyword, idx in value.keywords" :key="idx" close small @click:close="removeKeyword(keyword)">
+            {{ keyword }}
+          </v-chip>
+        </v-chip-group>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-text-field
+          v-model="newKeyword"
+          label="New keyword"
+          @keydown.enter="addNewKeyword"
+        >
+          <template #append>
+            <v-btn icon :disabled="!newKeyword" @click="addNewKeyword">
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </template>
+        </v-text-field>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
@@ -202,6 +227,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   readonly value!: Configuration
 
   private entityName: string = 'configuration'
+  private newKeyword = ''
 
   // vuex definition for typescript check
   loadConfigurationsStates!: () => void
@@ -262,6 +288,22 @@ export default class ConfigurationsBasicDataForm extends Vue {
 
   get visibilityPrivateValue (): Visibility {
     return Visibility.Private
+  }
+
+  addNewKeyword () {
+    if (!this.newKeyword) {
+      return
+    }
+    const newObj = Configuration.createFromObject(this.value)
+    newObj.keywords.push(this.newKeyword)
+    this.newKeyword = ''
+    this.$emit('input', newObj)
+  }
+
+  removeKeyword (keyword: string) {
+    const newObj = Configuration.createFromObject(this.value)
+    newObj.keywords = newObj.keywords.filter(k => k !== keyword)
+    this.$emit('input', newObj)
   }
 }
 </script>

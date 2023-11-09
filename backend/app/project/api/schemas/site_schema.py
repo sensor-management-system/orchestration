@@ -49,6 +49,7 @@ class SiteSchema(Schema):
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)
     website = fields.Str(allow_none=True)
+    keywords = fields.Field(many=True, allow_none=True)
 
     created_by = Relationship(
         attribute="created_by",

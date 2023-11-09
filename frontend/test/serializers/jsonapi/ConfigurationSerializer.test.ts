@@ -60,7 +60,8 @@ describe('ConfigurationSerializer', () => {
             project: 'Tereno NO',
             status: 'draft',
             archived: true,
-            persistent_identifier: '12345/1234567890'
+            persistent_identifier: '12345/1234567890',
+            keywords: ['key', 'word']
           },
           relationships: {
             created_by: {
@@ -269,6 +270,7 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.status = 'draft'
       expectedConfiguration1.createdByUserId = '123456'
       expectedConfiguration1.persistentIdentifier = '12345/1234567890'
+      expectedConfiguration1.keywords = ['key', 'word']
 
       const expectedConfiguration2 = new Configuration()
       expectedConfiguration2.id = '2'
@@ -513,6 +515,7 @@ describe('ConfigurationSerializer', () => {
         })
       ]
       configuration.siteId = '1'
+      configuration.keywords = ['key', 'word']
       const serializer = new ConfigurationSerializer()
 
       const jsonApiData = serializer.convertModelToJsonApiData(configuration)
@@ -536,6 +539,8 @@ describe('ConfigurationSerializer', () => {
       expect(attributes.end_date).toEqual('2021-08-28T13:49:48.015Z')
       expect(attributes).toHaveProperty('persistent_identifier')
       expect(attributes.persistent_identifier).toEqual('12345/1234567890')
+      expect(attributes).toHaveProperty('keywords')
+      expect(attributes.keywords).toEqual(['key', 'word'])
 
       expect(jsonApiData).toHaveProperty('relationships')
       expect(typeof jsonApiData.relationships).toEqual('object')

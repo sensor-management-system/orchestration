@@ -61,6 +61,7 @@ const createTestPlatform = () => {
   platform.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
   platform.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
   platform.updateDescription = ''
+  platform.keywords = ['key', 'word']
 
   platform.attachments = [
     Attachment.createFromObject({
@@ -153,7 +154,8 @@ describe('PlatformSerializer', () => {
             platform_type_name: 'Station',
             persistent_identifier: 'boeken_BF1',
             manufacturer_uri: 'manufacturer/xyz',
-            archived: true
+            archived: true,
+            keywords: ['key', 'word']
           },
           relationships: {
             updated_by: {
@@ -442,6 +444,7 @@ describe('PlatformSerializer', () => {
       })]
       expectedPlatform1.createdByUserId = '42'
       expectedPlatform1.archived = true
+      expectedPlatform1.keywords = ['key', 'word']
 
       const expectedPlatform2 = new Platform()
       expectedPlatform2.id = '52'
@@ -1003,6 +1006,8 @@ describe('PlatformSerializer', () => {
       expect(attributes.persistent_identifier).toEqual('doi:4354545')
       expect(attributes).toHaveProperty('website')
       expect(attributes.website).toEqual('http://gfz-potsdam.de')
+      expect(attributes).toHaveProperty('keywords')
+      expect(attributes.keywords).toEqual(['key', 'word'])
       // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times

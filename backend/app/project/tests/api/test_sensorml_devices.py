@@ -1970,3 +1970,29 @@ class TestSensorMLDevice(BaseTestCase):
             .attrib.get("definition"),
             "SoftwareUpdate",
         )
+
+    def test_keywords(self):
+        """Check that we give out keywords."""
+        self.device.keywords = ["some", "fancy keyword"]
+        db.session.add(self.device)
+        db.session.commit()
+
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+
+        sml_keywords = root.find("{http://www.opengis.net/sensorml/2.0}keywords")
+        sml_keyword_list = sml_keywords.find(
+            "{http://www.opengis.net/sensorml/2.0}KeywordList"
+        )
+        sml_keyword_entries = sml_keyword_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}keyword"
+        )
+        self.assertEqual(len(sml_keyword_entries), 2)
+
+        self.assertEqual(sml_keyword_entries[0].text, "some")
+        self.assertEqual(sml_keyword_entries[1].text, "fancy keyword")

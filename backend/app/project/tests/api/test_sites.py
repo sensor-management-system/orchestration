@@ -6,6 +6,7 @@
 
 """Tests for the api & permissions for the sites."""
 
+import json
 from unittest.mock import patch
 
 from project import base_url
@@ -670,3 +671,30 @@ class TestSiteApi(BaseTestCase):
             data_entry["attributes"]["website"],
             "https://gfz-potsdam.de",
         )
+
+    def test_post_keywords(self):
+        """Ensure we can post keywords."""
+        site_data = {
+            "data": {
+                "type": "site",
+                "attributes": {
+                    "label": "A test site",
+                    "keywords": ["word1", "word2"],
+                    "is_public": True,
+                    "is_internal": False,
+                },
+            }
+        }
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.sites_url,
+                data=json.dumps(site_data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 201)
+        result = response.json
+        result_id = result["data"]["id"]
+
+        site = db.session.query(Site).filter_by(id=result_id).first()
+        self.assertEqual(["word1", "word2"], site.keywords)
+        self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])

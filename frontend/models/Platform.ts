@@ -83,6 +83,7 @@ export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationI
   attachments: IAttachment[]
   parameters: IParameter[]
   permissionGroups: IPermissionGroup[]
+  keywords: string[]
 
   visibility: Visibility
 }
@@ -124,6 +125,7 @@ export class Platform implements IPlatform, IVisible {
   private _attachments: Attachment[] = []
   private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
+  private _keywords: string[] = []
 
   private _visibility: Visibility = Visibility.Internal
 
@@ -319,6 +321,14 @@ export class Platform implements IPlatform, IVisible {
     this._permissionGroups = permissionGroups
   }
 
+  get keywords (): string[] {
+    return this._keywords
+  }
+
+  set keywords (newKeywords: string[]) {
+    this._keywords = newKeywords
+  }
+
   get createdByUserId (): string | null {
     return this._createdByUserId
   }
@@ -399,6 +409,7 @@ export class Platform implements IPlatform, IVisible {
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
     newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
+    newObject.keywords = [...someObject.keywords]
     newObject.createdByUserId = someObject.createdByUserId
 
     newObject.visibility = someObject.visibility

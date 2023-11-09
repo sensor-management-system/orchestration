@@ -42,6 +42,7 @@ class ConfigurationSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
     update_description = fields.Str(dump_only=True)
+    keywords = fields.Field(many=True, allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     contacts = Relationship(
         attribute="contacts",

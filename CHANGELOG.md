@@ -10,6 +10,7 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Added:
 - links from profile page to contact page
+- Keywords
 
 Changed:
 - Devices can now also be mounted on other devices

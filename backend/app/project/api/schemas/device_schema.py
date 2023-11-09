@@ -63,6 +63,7 @@ class DeviceSchema(Schema):
     is_public = fields.Boolean(allow_none=True)
     archived = fields.Boolean(dump_only=True)
     update_description = fields.Str(dump_only=True)
+    keywords = fields.Field(many=True, allow_none=True)
     created_by = Relationship(
         attribute="created_by",
         related_view="api.user_detail",

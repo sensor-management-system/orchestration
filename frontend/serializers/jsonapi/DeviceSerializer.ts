@@ -153,6 +153,10 @@ export class DeviceSerializer {
 
     result.parameters = this.parameterSerializer.convertJsonApiRelationshipsModelList(relationships, included)
 
+    if (attributes?.keywords) {
+      result.keywords = [...attributes.keywords]
+    }
+
     // just pick the contact from the relationships that is referenced by the created_by user
     if (relationships.created_by?.data && 'id' in relationships.created_by?.data) {
       const userId = (relationships.created_by.data as IJsonApiEntityWithoutDetails).id
@@ -251,7 +255,8 @@ export class DeviceSerializer {
         is_private: device.isPrivate,
         is_internal: device.isInternal,
         is_public: device.isPublic,
-        group_ids: device.permissionGroups.filter(i => i.id !== null).map(i => i.id)
+        group_ids: device.permissionGroups.filter(i => i.id !== null).map(i => i.id),
+        keywords: device.keywords
         // these properties are set by the db, so we wont send anything related here:
         // createdAt
         // createdBy

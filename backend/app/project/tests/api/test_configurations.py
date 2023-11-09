@@ -9,6 +9,7 @@
 
 """Tests for the configuration api of our app."""
 import datetime
+import json
 import os
 from unittest.mock import patch
 
@@ -1193,3 +1194,31 @@ class TestConfigurationsService(BaseTestCase):
                         update_external_metadata.call_args.args[0].id, configuration.id
                     )
         self.assertEqual(resp.status_code, 200)
+
+    def test_post_keywords(self):
+        """Ensure we can post keywords."""
+        configuration_data = {
+            "data": {
+                "type": "configuration",
+                "attributes": {
+                    "label": "A test configuration",
+                    "keywords": ["word1", "word2"],
+                    "is_public": True,
+                    "is_internal": False,
+                    "cfg_permission_group": "123"
+                },
+            }
+        }
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.configurations_url,
+                data=json.dumps(configuration_data),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 201)
+        result = response.json
+        result_id = result["data"]["id"]
+
+        configuration = db.session.query(Configuration).filter_by(id=result_id).first()
+        self.assertEqual(["word1", "word2"], configuration.keywords)
+        self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])

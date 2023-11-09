@@ -65,6 +65,7 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   createdByUserId: string | null
   visibility: Visibility
   siteId?: string
+  keywords: string[]
 }
 
 export class Configuration implements IConfiguration, IVisible {
@@ -90,6 +91,7 @@ export class Configuration implements IConfiguration, IVisible {
   private _createdByUserId: string | null = null
   private _visibility: Visibility = Visibility.Internal
   private _siteId: string = ''
+  private _keywords: string[] = []
 
   get id (): string {
     return this._id
@@ -279,6 +281,14 @@ export class Configuration implements IConfiguration, IVisible {
     this._siteId = id
   }
 
+  get keywords (): string[] {
+    return this._keywords
+  }
+
+  set keywords (newKeywords: string[]) {
+    this._keywords = newKeywords
+  }
+
   static createFromObject (someObject: IConfiguration): Configuration {
     const newObject = new Configuration()
 
@@ -311,6 +321,7 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.archived = someObject.archived
 
     newObject.siteId = someObject.siteId ?? ''
+    newObject.keywords = [...someObject.keywords]
 
     return newObject
   }

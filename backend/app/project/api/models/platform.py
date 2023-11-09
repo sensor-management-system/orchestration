@@ -10,6 +10,8 @@
 
 """Model for platforms."""
 
+from sqlalchemy.ext.mutable import MutableList
+
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from ..models.mixin import (
     ArchivableMixin,
@@ -48,6 +50,7 @@ class Platform(
     b2inst_record_id = db.Column(db.String(256), nullable=True)
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     update_description = db.Column(db.String(256), nullable=True)
+    keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
 
     def to_search_entry(self):
         """Convert the model to a dict to store it in a full text search."""
@@ -84,6 +87,7 @@ class Platform(
             "created_by_id": self.created_by_id,
             "group_ids": self.group_ids,
             "updated_at": self.updated_at,
+            "keywords": self.keywords,
         }
 
     def get_parent_search_entities(self):
@@ -151,6 +155,7 @@ class Platform(
                 "type": "integer",
             },
             "group_ids": type_keyword,
+            "keywords": type_keyword_and_full_searchable,
             "updated_at": {
                 "type": "date",
                 "format": "strict_date_optional_time",
