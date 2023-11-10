@@ -7,6 +7,7 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Tests for the platforms."""
+
 import datetime
 import json
 import os
@@ -493,3 +494,39 @@ class TestPlatformServices(BaseTestCase):
         platform = db.session.query(Platform).filter_by(id=result_id).first()
         self.assertEqual(["word1", "word2"], platform.keywords)
         self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])
+
+    def test_countries(self):
+        """Ensure that we can set a country."""
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.platform_url,
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "platform",
+                            "attributes": {
+                                "short_name": "test platform",
+                                "country": "Germany",
+                                "is_internal": False,
+                                "is_private": False,
+                                "is_public": True,
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 201)
+        platform_id = response.json["data"]["id"]
+
+        get_list_response = self.client.get(self.platform_url)
+        self.assertEqual(get_list_response.status_code, 200)
+        self.assertEqual(
+            get_list_response.json["data"][0]["attributes"]["country"], "Germany"
+        )
+
+        get_one_response = self.client.get(f"{self.platform_url}/{platform_id}")
+        self.assertEqual(get_one_response.status_code, 200)
+        self.assertEqual(
+            get_one_response.json["data"]["attributes"]["country"], "Germany"
+        )

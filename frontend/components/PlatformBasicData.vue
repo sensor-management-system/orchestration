@@ -88,23 +88,6 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col cols="12" md="3">
-        <label>Status</label>
-        {{ platformStatusName | orDefault }}
-        <v-tooltip v-if="platformStatusDefinition" right>
-          <template #activator="{ on, attrs }">
-            <v-icon
-              color="primary"
-              small
-              v-bind="attrs"
-              v-on="on"
-            >
-              mdi-help-circle-outline
-            </v-icon>
-          </template>
-          <span>{{ platformStatusDefinition }}</span>
-        </v-tooltip>
-      </v-col>
-      <v-col cols="12" md="3">
         <label>Platform type</label>
         {{ platformTypeName | orDefault }}
         <v-tooltip v-if="platformTypeDefinition" right>
@@ -141,6 +124,29 @@ permissions and limitations under the Licence.
       <v-col cols="12" md="3">
         <label>Model</label>
         {{ value.model | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <label>Country of origin</label>
+        {{ value.country | orDefault }}
+      </v-col>
+      <v-col cols="12" md="3">
+        <label>Status</label>
+        {{ platformStatusName | orDefault }}
+        <v-tooltip v-if="platformStatusDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ platformStatusDefinition }}</span>
+        </v-tooltip>
       </v-col>
     </v-row>
     <v-divider class="my-4" />

@@ -109,6 +109,7 @@ export class PlatformSerializer {
       result.inventoryNumber = attributes.inventory_number || ''
       result.serialNumber = attributes.serial_number || ''
       result.persistentIdentifier = attributes.persistent_identifier || ''
+      result.country = attributes.country || ''
 
       if (attributes.is_private) {
         result.visibility = Visibility.Private
@@ -236,7 +237,8 @@ export class PlatformSerializer {
         is_internal: platform.isInternal,
         is_public: platform.isPublic,
         group_ids: platform.permissionGroups.filter(i => i.id !== null).map(i => i.id),
-        keywords: platform.keywords
+        keywords: platform.keywords,
+        country: platform.country
       }
     }
 

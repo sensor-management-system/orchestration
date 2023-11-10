@@ -794,3 +794,39 @@ class TestDeviceService(BaseTestCase):
         device = db.session.query(Device).filter_by(id=result_id).first()
         self.assertEqual(["word1", "word2"], device.keywords)
         self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])
+
+    def test_countries(self):
+        """Ensure that we can set a country."""
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.device_url,
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "device",
+                            "attributes": {
+                                "short_name": "test device",
+                                "country": "Germany",
+                                "is_internal": False,
+                                "is_private": False,
+                                "is_public": True,
+                            },
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 201)
+        device_id = response.json["data"]["id"]
+
+        get_list_response = self.client.get(self.device_url)
+        self.assertEqual(get_list_response.status_code, 200)
+        self.assertEqual(
+            get_list_response.json["data"][0]["attributes"]["country"], "Germany"
+        )
+
+        get_one_response = self.client.get(f"{self.device_url}/{device_id}")
+        self.assertEqual(get_one_response.status_code, 200)
+        self.assertEqual(
+            get_one_response.json["data"]["attributes"]["country"], "Germany"
+        )

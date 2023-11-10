@@ -51,6 +51,7 @@ class Platform(
     persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     update_description = db.Column(db.String(256), nullable=True)
     keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
+    country = db.Column(db.String(256), nullable=True)
 
     def to_search_entry(self):
         """Convert the model to a dict to store it in a full text search."""
@@ -88,6 +89,7 @@ class Platform(
             "group_ids": self.group_ids,
             "updated_at": self.updated_at,
             "keywords": self.keywords,
+            "country": self.country,
         }
 
     def get_parent_search_entities(self):
@@ -160,6 +162,7 @@ class Platform(
                 "type": "date",
                 "format": "strict_date_optional_time",
             },
+            "country": type_keyword_and_full_searchable,
             "attachments": {
                 "properties": {
                     # Allow search via text & keyword

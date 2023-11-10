@@ -37,6 +37,7 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
 
             created_at = fields.DateTime(dump_only=True)
             updated_at = fields.DateTime(dump_only=True)
+            group_ids = fields.Field(many=True, allow_none=True)
 
             device = Relationship(
                 related_view="api.device_detail",
@@ -112,6 +113,10 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
                                     "updated_at": {
                                         "type": "string",
                                         "format": "date-time",
+                                    },
+                                    "group_ids": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
                                     },
                                 },
                             },
@@ -238,6 +243,10 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
                                             "type": "string",
                                             "format": "date-time",
                                         },
+                                        "group_ids": {
+                                            "type": "array",
+                                            "items": {"type": "string"},
+                                        },
                                     },
                                 },
                                 "relationships": {
@@ -340,6 +349,10 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
                                         "type": "string",
                                     },
                                     "unit_name": {"type": "string"},
+                                    "group_ids": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
                                 },
                                 "required": ["label"],
                             },
@@ -415,6 +428,10 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
                                         "type": "string",
                                     },
                                     "unit_name": {"type": "string"},
+                                    "group_ids": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
                                 },
                             },
                             "relationships": {

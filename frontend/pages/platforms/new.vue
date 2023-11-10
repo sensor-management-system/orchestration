@@ -49,6 +49,7 @@ permissions and limitations under the Licence.
       <PlatformBasicDataForm
         ref="basicForm"
         v-model="platform"
+        :country-names="countryNames"
       />
       <NonModelOptionsForm
         v-model="createOptions"
@@ -69,7 +70,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CreatePidAction, SavePlatformAction } from '@/store/platforms'
@@ -81,6 +82,7 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
 import SerialNumberWarningDialog from '@/components/shared/SerialNumberWarningDialog.vue'
 
 import { Platform } from '@/models/Platform'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -90,10 +92,14 @@ import { Platform } from '@/models/Platform'
     SerialNumberWarningDialog
   },
   middleware: ['auth'],
+  computed: {
+    ...mapGetters('vocabulary', ['countryNames'])
+  },
   methods: {
     ...mapActions('platforms', ['savePlatform', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs']),
-    ...mapActions('progressindicator', ['setLoading'])
+    ...mapActions('progressindicator', ['setLoading']),
+    ...mapActions('vocabulary', ['loadCountries'])
   }
 })
 // @ts-ignore
@@ -112,9 +118,11 @@ export default class PlatformNewPage extends Vue {
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
+  loadCountries!: LoadCountriesAction
 
-  created () {
+  async created () {
     this.initializeAppBar()
+    await this.loadCountries()
   }
 
   saveWithoutSerialNumber () {

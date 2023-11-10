@@ -61,6 +61,10 @@ class MarshmallowJsonApiToOpenApiMapper:
                 },
             }
 
+        if isinstance(
+            field, fields.Field
+        ):  # and getattr(field, "many", False) is True:
+            return {"type": "array", "items": {"type": "string"}}
         raise NotImplementedError(f"fieldtype unknown: {field}")
 
     def get_one(self):

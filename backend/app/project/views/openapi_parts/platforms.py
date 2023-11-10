@@ -5,7 +5,171 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 """External openapi spec file for the platform endpoints."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.platform_schema import PlatformSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(PlatformSchema)
+
 paths = {
+    "/platforms": {
+        "get": {
+            "tags": ["Platforms"],
+            "parameters": [
+                {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
+                {"$ref": "#/components/parameters/page_size"},
+                {"$ref": "#/components/parameters/sort"},
+                {"$ref": "#/components/parameters/created_at"},
+                {"$ref": "#/components/parameters/updated_at"},
+                {"$ref": "#/components/parameters/created_by_id"},
+                {"$ref": "#/components/parameters/updated_by_id"},
+                {"$ref": "#/components/parameters/description"},
+                {"$ref": "#/components/parameters/short_name"},
+                {"$ref": "#/components/parameters/long_name"},
+                {"$ref": "#/components/parameters/manufacturer_uri"},
+                {"$ref": "#/components/parameters/manufacturer_name"},
+                {"$ref": "#/components/parameters/model"},
+                {"$ref": "#/components/parameters/status_uri"},
+                {"$ref": "#/components/parameters/status_name"},
+                {"$ref": "#/components/parameters/website"},
+                {"$ref": "#/components/parameters/inventory_number"},
+                {"$ref": "#/components/parameters/serial_number"},
+                {"$ref": "#/components/parameters/persistent_identifier"},
+                {"$ref": "#/components/parameters/platform_type_uri"},
+                {"$ref": "#/components/parameters/platform_type_name"},
+                {"$ref": "#/components/parameters/id"},
+                {"$ref": "#/components/parameters/filter"},
+                {"$ref": "#/components/parameters/hide_archived"},
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of platforms",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                },
+                "400": {
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {"$ref": "#/components/schemas/invalid_filters"}
+                        }
+                    },
+                    "description": "Invalid filter parameter.",
+                },
+            },
+            "description": "Retrieve Platform",
+            "operationId": "RetrieveacollectionofPlatformobjects_0",
+        },
+        "post": {
+            "tags": ["Platforms"],
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
+            },
+            "responses": {
+                "201": {
+                    "description": "Payload of the created platform",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+                "409": {
+                    "description": "Conflict on performing the operation",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {"$ref": "#/components/schemas/conflict"}
+                        }
+                    },
+                },
+            },
+            "operationId": "CreatePlatform_0",
+            "parameters": [],
+        },
+    },
+    "/platforms/{platform_id}": {
+        "get": {
+            "tags": ["Platforms"],
+            "parameters": [
+                {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/platform_id"},
+            ],
+            "responses": {
+                "200": {
+                    "description": "Instance of a platform",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+            },
+            "description": "Retrieve Platform from platform",
+            "operationId": "RetrievePlatforminstance_0",
+        },
+        "patch": {
+            "tags": ["Platforms"],
+            "parameters": [{"$ref": "#/components/parameters/platform_id"}],
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.patch(),
+                },
+                "description": "Platform attributes",
+                "required": True,
+            },
+            "responses": {
+                "200": {
+                    "description": "Payload of the updated platform",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+            },
+            "description": "Update Platform attributes",
+            "operationId": "UpdatePlatform_0",
+        },
+        "delete": {
+            "tags": ["Platforms"],
+            "parameters": [{"$ref": "#/components/parameters/platform_id"}],
+            "responses": {
+                "200": {"$ref": "#/components/responses/object_deleted"},
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+            },
+            "operationId": "DeletePlatformfromplatform_3",
+        },
+    },
     "/platforms/{platform_id}/sensorml": {
         "get": {
             "tags": ["Platforms"],
@@ -89,4 +253,13 @@ paths = {
         }
     },
 }
-components = {}
+components = {
+    "parameters": {
+        "platform_id": {
+            "name": "platform_id",
+            "in": "path",
+            "required": True,
+            "schema": {"type": "string"},
+        },
+    }
+}

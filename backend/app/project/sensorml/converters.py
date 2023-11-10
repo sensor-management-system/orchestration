@@ -1068,6 +1068,15 @@ class DeviceConverter:
             sml_identifier = SmlIdentifier(sml_term=sml_term)
             sml_identifier_list.append(sml_identifier)
 
+        if self.device.country:
+            sml_term = SmlTerm(
+                definition="http://sensorml.com/ont/misb0601/identifier/Country_of_Manufacture",
+                sml_label=SmlLabel(text="Country of Manufacture"),
+                sml_value=SmlValue(text=self.device.country),
+            )
+            sml_identifier = SmlIdentifier(sml_term=sml_term)
+            sml_identifier_list.append(sml_identifier)
+
         if not sml_identifier_list:
             return None
         return SmlIdentification(sml_identifier_list=sml_identifier_list)
@@ -1405,6 +1414,15 @@ class PlatformConverter:
                 definition="http://sensorml.com/ont/swe/property/Manufacturer",
                 sml_label=SmlLabel(text="Manufacturer"),
                 sml_value=SmlValue(text=self.platform.manufacturer_name),
+            )
+            sml_identifier = SmlIdentifier(sml_term=sml_term)
+            sml_identifier_list.append(sml_identifier)
+
+        if self.platform.country:
+            sml_term = SmlTerm(
+                definition="http://sensorml.com/ont/misb0601/identifier/Country_of_Manufacture",
+                sml_label=SmlLabel(text="Country of Manufacture"),
+                sml_value=SmlValue(text=self.platform.country),
             )
             sml_identifier = SmlIdentifier(sml_term=sml_term)
             sml_identifier_list.append(sml_identifier)

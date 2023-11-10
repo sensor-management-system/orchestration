@@ -47,6 +47,7 @@ permissions and limitations under the Licence.
     <PlatformBasicDataForm
       ref="basicForm"
       v-model="platformCopy"
+      :country-names="countryNames"
     />
     <NonModelOptionsForm
       v-model="editOptions"
@@ -75,7 +76,7 @@ permissions and limitations under the Licence.
 import { Component, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
@@ -88,6 +89,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -97,8 +99,12 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
     NonModelOptionsForm
   },
   middleware: ['auth'],
-  computed: mapState('platforms', ['platform']),
+  computed: {
+    ...mapState('platforms', ['platform']),
+    ...mapGetters('vocabulary', ['countryNames'])
+  },
   methods: {
+    ...mapActions('vocabulary', ['loadCountries']),
     ...mapActions('platforms', ['loadPlatform', 'savePlatform', 'createPid']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -119,6 +125,7 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
   loadPlatform!: LoadPlatformAction
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
+  loadCountries!: LoadCountriesAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -141,10 +148,11 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
     return 'You\'re not allowed to edit this platform.'
   }
 
-  created () {
+  async created () {
     if (this.platform) {
       this.platformCopy = Platform.createFromObject(this.platform)
     }
+    await this.loadCountries()
   }
 
   get platformId () {

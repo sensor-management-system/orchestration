@@ -52,6 +52,7 @@ class Device(
     status_name = db.Column(db.String(256), nullable=True)
     update_description = db.Column(db.String(256), nullable=True)
     keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
+    country = db.Column(db.String(256), nullable=True)
 
     def to_search_entry(self):
         """Convert the model to an dict to store in the full text search."""
@@ -92,6 +93,7 @@ class Device(
             "group_ids": self.group_ids,
             "updated_at": self.updated_at,
             "keywords": self.keywords,
+            "country": self.country,
         }
 
     def get_parent_search_entities(self):
@@ -174,6 +176,7 @@ class Device(
                 "type": "date",
                 "format": "strict_date_optional_time",
             },
+            "country": type_keyword_and_full_searchable,
             "attachments": {
                 "properties": {
                     # The label should be searchable via text & via keyword

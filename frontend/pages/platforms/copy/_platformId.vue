@@ -82,6 +82,7 @@ permissions and limitations under the Licence.
         :persistent-identifier-placeholder="persistentIdentifierPlaceholder"
         :serial-number-placeholder="serialNumberPlaceholder"
         :inventory-number-placeholder="inventoryNumberPlaceholder"
+        :country-names="countryNames"
       />
       <NonModelOptionsForm
         v-model="copyOptions"
@@ -143,6 +144,7 @@ import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -154,12 +156,14 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   computed: {
     ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
     ...mapState('platforms', ['platform']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapGetters('vocabulary', ['countryNames'])
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform', 'copyPlatform', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs']),
-    ...mapActions('progressindicator', ['setLoading'])
+    ...mapActions('progressindicator', ['setLoading']),
+    ...mapActions('vocabulary', ['loadCountries'])
   }
 })
 // @ts-ignore
@@ -189,6 +193,7 @@ export default class PlatformCopyPage extends Vue {
   createPid!: CreatePidAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  loadCountries!: LoadCountriesAction
 
   created () {
     this.initializeAppBar()
@@ -197,12 +202,15 @@ export default class PlatformCopyPage extends Vue {
   async fetch (): Promise<void> {
     try {
       this.setLoading(true)
-      await this.loadPlatform({
-        platformId: this.platformId,
-        includeContacts: true,
-        includePlatformAttachments: true,
-        includePlatformParameters: true
-      })
+      await Promise.all([
+        this.loadPlatform({
+          platformId: this.platformId,
+          includeContacts: true,
+          includePlatformAttachments: true,
+          includePlatformParameters: true
+        }),
+        this.loadCountries()
+      ])
 
       if (!this.platform || !this.canAccessEntity(this.platform)) {
         this.$router.replace('/platforms/')

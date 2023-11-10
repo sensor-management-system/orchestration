@@ -62,6 +62,7 @@ const createTestPlatform = () => {
   platform.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
   platform.updateDescription = ''
   platform.keywords = ['key', 'word']
+  platform.country = 'Germany'
 
   platform.attachments = [
     Attachment.createFromObject({
@@ -155,7 +156,8 @@ describe('PlatformSerializer', () => {
             persistent_identifier: 'boeken_BF1',
             manufacturer_uri: 'manufacturer/xyz',
             archived: true,
-            keywords: ['key', 'word']
+            keywords: ['key', 'word'],
+            country: 'Germany'
           },
           relationships: {
             updated_by: {
@@ -224,7 +226,8 @@ describe('PlatformSerializer', () => {
             platform_type_name: 'Station',
             persistent_identifier: null,
             manufacturer_uri: null,
-            archived: false
+            archived: false,
+            country: null
           },
           relationships: {
             updated_by: {
@@ -430,6 +433,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform1.platformTypeName = 'Station'
       expectedPlatform1.persistentIdentifier = 'boeken_BF1'
       expectedPlatform1.manufacturerUri = 'manufacturer/xyz'
+      expectedPlatform1.country = 'Germany'
       expectedPlatform1.contacts = [Contact.createFromObject({
         id: '1',
         givenName: 'Max',
@@ -474,6 +478,7 @@ describe('PlatformSerializer', () => {
       expectedPlatform2.manufacturerUri = ''
       expectedPlatform2.contacts = []
       expectedPlatform2.archived = false
+      expectedPlatform2.country = ''
 
       const serializer = new PlatformSerializer()
 
@@ -1008,6 +1013,8 @@ describe('PlatformSerializer', () => {
       expect(attributes.website).toEqual('http://gfz-potsdam.de')
       expect(attributes).toHaveProperty('keywords')
       expect(attributes.keywords).toEqual(['key', 'word'])
+      expect(attributes).toHaveProperty('country')
+      expect(attributes.country).toEqual('Germany')
       // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times

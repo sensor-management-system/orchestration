@@ -115,70 +115,6 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <combobox
-          :items="equipmentstatus"
-          item-text="name"
-          :value="valueStatusItem"
-          :readonly="readonly"
-          :disabled="readonly"
-          label="Status"
-          clearable
-          @input="updateStatus($event)"
-        >
-          <template #append-outer>
-            <v-tooltip
-              v-if="itemHasDefinition(valueStatusItem)"
-              right
-            >
-              <template #activator="{ on, attrs }">
-                <v-icon
-                  color="primary"
-                  small
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  mdi-help-circle-outline
-                </v-icon>
-              </template>
-              <span>{{ valueStatusItem.definition }}</span>
-            </v-tooltip>
-            <v-btn icon @click="showNewStatusDialog = true">
-              <v-icon>
-                mdi-tooltip-plus-outline
-              </v-icon>
-            </v-btn>
-          </template>
-          <template #item="data">
-            <template v-if="(typeof data.item) !== 'object'">
-              <v-list-item-content>{{ data.item }}</v-list-item-content>
-            </template>
-            <template v-else>
-              <v-list-item-content>
-                <v-list-item-title>
-                  {{ data.item.name }}
-                  <v-tooltip
-                    v-if="data.item.definition"
-                    bottom
-                  >
-                    <template #activator="{ on, attrs }">
-                      <v-icon
-                        color="primary"
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        mdi-help-circle-outline
-                      </v-icon>
-                    </template>
-                    <span>{{ data.item.definition }}</span>
-                  </v-tooltip>
-                </v-list-item-title>
-              </v-list-item-content>
-            </template>
-          </template>
-        </combobox>
-      </v-col>
-      <v-col cols="12" md="3">
-        <combobox
           :value="valueDeviceTypeItem"
           item-text="name"
           :items="devicetypes"
@@ -311,6 +247,84 @@ permissions and limitations under the Licence.
           label="Model"
           @input="update('model', $event)"
         />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="3">
+        <combobox
+          :value="value.country"
+          :items="countryNames"
+          :readonly="readonly"
+          :disabled="readonly"
+          :clearable="!readonly"
+          label="Country of origin"
+          placeholder="Country"
+          @input="update('country', $event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <combobox
+          :items="equipmentstatus"
+          item-text="name"
+          :value="valueStatusItem"
+          :readonly="readonly"
+          :disabled="readonly"
+          label="Status"
+          clearable
+          @input="updateStatus($event)"
+        >
+          <template #append-outer>
+            <v-tooltip
+              v-if="itemHasDefinition(valueStatusItem)"
+              right
+            >
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ valueStatusItem.definition }}</span>
+            </v-tooltip>
+            <v-btn icon @click="showNewStatusDialog = true">
+              <v-icon>
+                mdi-tooltip-plus-outline
+              </v-icon>
+            </v-btn>
+          </template>
+          <template #item="data">
+            <template v-if="(typeof data.item) !== 'object'">
+              <v-list-item-content>{{ data.item }}</v-list-item-content>
+            </template>
+            <template v-else>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ data.item.name }}
+                  <v-tooltip
+                    v-if="data.item.definition"
+                    bottom
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-icon
+                        color="primary"
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        mdi-help-circle-outline
+                      </v-icon>
+                    </template>
+                    <span>{{ data.item.definition }}</span>
+                  </v-tooltip>
+                </v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </combobox>
       </v-col>
     </v-row>
     <v-divider
@@ -535,6 +549,13 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   })
   readonly persistentIdentifierPlaceholder!: string | null
 
+  @Prop({
+    default: () => [] as string[],
+    required: true,
+    type: Array
+  })
+  readonly countryNames!: string[]
+
   created () {
     this.initialSerialNumber = this.value.serialNumber
   }
@@ -604,6 +625,9 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         break
       case 'longName':
         newObj.longName = value as string
+        break
+      case 'country':
+        newObj.country = value as string || ''
         break
       case 'model':
         newObj.model = value as string
