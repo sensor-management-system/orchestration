@@ -45,6 +45,7 @@ permissions and limitations under the Licence.
     <DeviceBasicDataForm
       ref="basicForm"
       v-model="deviceCopy"
+      :country-names="countryNames"
     />
     <NonModelOptionsForm
       v-model="editOptions"
@@ -74,7 +75,7 @@ import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { RawLocation } from 'vue-router'
 
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
@@ -87,6 +88,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -96,8 +98,12 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
     NonModelOptionsForm
   },
   middleware: ['auth'],
-  computed: mapState('devices', ['device']),
+  computed: {
+    ...mapState('devices', ['device']),
+    ...mapGetters('vocabulary', ['countryNames'])
+  },
   methods: {
+    ...mapActions('vocabulary', ['loadCountries']),
     ...mapActions('devices', ['saveDevice', 'loadDevice', 'createPid']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -118,6 +124,7 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
   loadDevice!: LoadDeviceAction
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
+  loadCountries!: LoadCountriesAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -140,10 +147,11 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
     return 'You\'re not allowed to edit this device.'
   }
 
-  created () {
+  async created () {
     if (this.device) {
       this.deviceCopy = Device.createFromObject(this.device)
     }
+    await this.loadCountries()
   }
 
   get deviceId () {

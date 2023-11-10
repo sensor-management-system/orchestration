@@ -47,6 +47,7 @@ permissions and limitations under the Licence.
       <DeviceBasicDataForm
         ref="basicForm"
         v-model="device"
+        :country-names="countryNames"
       />
       <NonModelOptionsForm
         v-model="createOptions"
@@ -67,7 +68,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 import { SetTitleAction, SetTabsAction } from '@/store/appbar'
 import { CreatePidAction, SaveDeviceAction } from '@/store/devices'
@@ -79,6 +80,7 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SerialNumberWarningDialog from '@/components/shared/SerialNumberWarningDialog.vue'
 
 import { Device } from '@/models/Device'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -88,7 +90,11 @@ import { Device } from '@/models/Device'
     SerialNumberWarningDialog
   },
   middleware: ['auth'],
+  computed: {
+    ...mapGetters('vocabulary', ['countryNames'])
+  },
   methods: {
+    ...mapActions('vocabulary', ['loadCountries']),
     ...mapActions('devices', ['saveDevice', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -110,9 +116,15 @@ export default class DeviceNewPage extends Vue {
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
+  loadCountries!: LoadCountriesAction
 
-  created () {
+  async created () {
     this.initializeAppBar()
+    try {
+      await this.loadCountries()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load countries')
+    }
   }
 
   saveWithoutSerialNumber () {

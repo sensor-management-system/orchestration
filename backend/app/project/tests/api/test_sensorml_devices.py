@@ -768,6 +768,51 @@ class TestSensorMLDevice(BaseTestCase):
             self.device.device_type_name,
         )
 
+    def test_get_public_device_with_country(self):
+        """Check that we give out the country."""
+        self.device.country = "Germany"
+
+        db.session.add(self.device)
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_identification = root.find(
+            "{http://www.opengis.net/sensorml/2.0}identification"
+        )
+        sml_identifier_list = sml_identification.find(
+            "{http://www.opengis.net/sensorml/2.0}IdentifierList"
+        )
+        sml_identifiers = sml_identifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}identifier"
+        )
+        self.assertEqual(len(sml_identifiers), 2)
+        # First one is short name
+        sml_identifier_country = sml_identifiers[1]
+
+        self.assertEqual(
+            sml_identifier_country.find(
+                "{http://www.opengis.net/sensorml/2.0}Term"
+            ).attrib.get("definition"),
+            "http://sensorml.com/ont/misb0601/identifier/Country_of_Manufacture",
+        )
+        self.assertEqual(
+            sml_identifier_country.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "Country of Manufacture",
+        )
+        self.assertEqual(
+            sml_identifier_country.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            self.device.country,
+        )
+
     def test_get_public_device_with_description(self):
         """Check that we give out the description."""
         self.device.description = "Some long description"

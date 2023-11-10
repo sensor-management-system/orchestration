@@ -258,6 +258,7 @@ describe('MountingActionsSerializer', () => {
             permissionGroups: [],
             visibility: Visibility.Internal,
             archived: false,
+            country: '',
             attachments: [],
             parameters: [],
             keywords: []
@@ -309,7 +310,8 @@ describe('MountingActionsSerializer', () => {
             parameters: [],
             dualUse: false,
             archived: false,
-            keywords: []
+            keywords: [],
+            country: ''
           }),
           parentPlatform: null,
           parentDevice: null
@@ -517,6 +519,7 @@ describe('MountingActionsSerializer', () => {
         permissionGroups: [],
         visibility: Visibility.Internal,
         archived: false,
+        country: '',
         attachments: [],
         parameters: [],
         keywords: []
@@ -564,7 +567,8 @@ describe('MountingActionsSerializer', () => {
             properties: [],
             parameters: [],
             dualUse: false,
-            keywords: []
+            keywords: [],
+            country: ''
           }),
           parentPlatform: platform,
           parentDevice: null
@@ -797,7 +801,8 @@ describe('MountingActionsSerializer', () => {
         customFields: [],
         properties: [],
         dualUse: false,
-        keywords: []
+        keywords: [],
+        country: ''
       })
       const deviceMountNode = new DeviceNode(
         DeviceMountAction.createFromObject({
@@ -842,7 +847,8 @@ describe('MountingActionsSerializer', () => {
             properties: [],
             parameters: [],
             dualUse: false,
-            keywords: []
+            keywords: [],
+            country: ''
           }),
           parentDevice,
           parentPlatform: null

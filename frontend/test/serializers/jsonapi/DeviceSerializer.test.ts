@@ -70,6 +70,7 @@ const createTestDevice = () => {
   device.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
   device.updateDescription = ''
   device.keywords = ['key', 'word']
+  device.country = 'Germany'
 
   device.customFields = [
     CustomTextField.createFromObject({
@@ -227,7 +228,8 @@ describe('DeviceSerializer', () => {
             persistent_identifier: null,
             manufacturer_uri: null,
             archived: false,
-            keywords: ['key', 'word']
+            keywords: ['key', 'word'],
+            country: 'Germany'
           },
           relationships: {
             updated_by: {
@@ -305,7 +307,8 @@ describe('DeviceSerializer', () => {
             dual_use: false,
             persistent_identifier: null,
             manufacturer_uri: null,
-            archived: false
+            archived: false,
+            country: null
           },
           relationships: {
             updated_by: {
@@ -377,6 +380,7 @@ describe('DeviceSerializer', () => {
       expectedDevice1.createdByUserId = '123'
       expectedDevice1.archived = false
       expectedDevice1.keywords = ['key', 'word']
+      expectedDevice1.country = 'Germany'
 
       const expectedDevice2 = new Device()
       expectedDevice2.id = '44'
@@ -403,6 +407,7 @@ describe('DeviceSerializer', () => {
       expectedDevice2.contacts = []
       expectedDevice2.parameters = []
       expectedDevice2.archived = false
+      expectedDevice2.country = ''
 
       const serializer = new DeviceSerializer()
       const devicesWithMeta = serializer.convertJsonApiObjectListToModelList(jsonApiObjectList)
@@ -1223,6 +1228,8 @@ describe('DeviceSerializer', () => {
       expect(attributes.dual_use).toEqual(true)
       expect(attributes).toHaveProperty('keywords')
       expect(attributes.keywords).toEqual(['key', 'word'])
+      expect(attributes).toHaveProperty('country')
+      expect(attributes.country).toEqual('Germany')
       // expect(attributes).toHaveProperty('created_at')
       // expect(attributes.created_at).toEqual('2020-08-28T13:49:48.015620+00:00')
       // I wasn't able to find the exact date time format, so we use ISO date times

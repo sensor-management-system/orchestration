@@ -62,6 +62,7 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
   inventoryNumber: string
   dualUse: boolean
   archived: boolean
+  country: string
 
   createdAt: DateTime | null
   updatedAt: DateTime | null
@@ -112,6 +113,7 @@ export class Device implements IDevice, IVisible {
   private _inventoryNumber: string = ''
   private _dualUse: boolean = false
   private _archived: boolean = false
+  private _country: string = ''
 
   private _createdAt: DateTime | null = null
   private _updatedAt: DateTime | null = null
@@ -392,6 +394,14 @@ export class Device implements IDevice, IVisible {
     this._archived = newValue
   }
 
+  get country (): string {
+    return this._country
+  }
+
+  set country (newCountry: string) {
+    this._country = newCountry
+  }
+
   get type (): string {
     return 'device'
   }
@@ -419,6 +429,7 @@ export class Device implements IDevice, IVisible {
     newObject.serialNumber = someObject.serialNumber
     newObject.inventoryNumber = someObject.inventoryNumber
     newObject.dualUse = someObject.dualUse
+    newObject.country = someObject.country
 
     newObject.createdAt = someObject.createdAt
     newObject.updatedAt = someObject.updatedAt

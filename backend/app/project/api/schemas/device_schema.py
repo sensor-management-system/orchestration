@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -64,6 +64,7 @@ class DeviceSchema(Schema):
     archived = fields.Boolean(dump_only=True)
     update_description = fields.Str(dump_only=True)
     keywords = fields.Field(many=True, allow_none=True)
+    country = fields.Str(allow_none=True)
     created_by = Relationship(
         attribute="created_by",
         related_view="api.user_detail",

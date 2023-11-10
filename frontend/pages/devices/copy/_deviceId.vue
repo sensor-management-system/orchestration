@@ -87,6 +87,7 @@ permissions and limitations under the Licence.
         :persistent-identifier-placeholder="persistentIdentifierPlaceholder"
         :serial-number-placeholder="serialNumberPlaceholder"
         :inventory-number-placeholder="inventoryNumberPlaceholder"
+        :country-names="countryNames"
       />
       <NonModelOptionsForm
         v-model="copyOptions"
@@ -154,6 +155,7 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
+import { LoadCountriesAction } from '@/store/vocabulary'
 
 @Component({
   components: {
@@ -164,9 +166,11 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   middleware: ['auth'],
   computed: {
     ...mapGetters('permissions', ['canAccessEntity', 'canModifyEntity', 'userGroups']),
-    ...mapState('devices', ['device'])
+    ...mapState('devices', ['device']),
+    ...mapGetters('vocabulary', ['countryNames'])
   },
   methods: {
+    ...mapActions('vocabulary', ['loadCountries']),
     ...mapActions('devices', ['copyDevice', 'loadDevice', 'createPid']),
     ...mapActions('appbar', ['setTitle', 'setTabs']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -200,19 +204,23 @@ export default class DeviceCopyPage extends Vue {
   setTitle!: SetTitleAction
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
+  loadCountries!: LoadCountriesAction
 
   async created () {
     this.initializeAppBar()
     try {
       this.setLoading(true)
-      await this.loadDevice({
-        deviceId: this.deviceId,
-        includeContacts: true,
-        includeCustomFields: true,
-        includeDeviceProperties: true,
-        includeDeviceAttachments: true,
-        includeDeviceParameters: true
-      })
+      await Promise.all([
+        this.loadDevice({
+          deviceId: this.deviceId,
+          includeContacts: true,
+          includeCustomFields: true,
+          includeDeviceProperties: true,
+          includeDeviceAttachments: true,
+          includeDeviceParameters: true
+        }),
+        this.loadCountries()
+      ])
 
       if (!this.device || !this.canAccessEntity(this.device)) {
         this.$router.replace('/devices/')
