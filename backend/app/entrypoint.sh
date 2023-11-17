@@ -20,5 +20,5 @@ else
 fi
 WORKERS=$(( 2 * $CPUS + 1 ))
 
-exec gunicorn --access-logfile --workers=$WORKERS --bind 0.0.0.0:5000 manage:app
+exec gunicorn --access-logfile - --workers=$WORKERS --bind 0.0.0.0:5000 manage:app
 
