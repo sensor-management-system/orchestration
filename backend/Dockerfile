@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2023
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -52,7 +52,7 @@ COPY --from=builder /install /usr/local
 COPY app /usr/src/app
 
 #run server
-CMD ["sh", "-c","pip install --no-cache-dir -r requirements.txt && gunicorn --access-logfile - -b 0.0.0.0:5000 manage:app"]
 EXPOSE 5000
+CMD ["/usr/src/app/entrypoint.sh"]
 
 # docker run --rm -p 127.0.0.1:5000:5000 -e DATABASE_URL="postgres://postgres:postgres@db:5432/db_dev" -e APP_SETTINGS="project.config.DevelopmentConfig" registry.hzdr.de/hub-terra/sms/backend:latest
