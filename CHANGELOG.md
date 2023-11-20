@@ -12,9 +12,11 @@ Added:
 - links from profile page to contact page
 - Keywords
 - field to set the country of origin for devices & platforms to support export control
+- checks to ensure that no duplicated contact role entries can be added
 
 Changed:
 - Devices can now also be mounted on other devices
+
 
 ## 1.7.0 - 2023-11-06
 

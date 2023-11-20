@@ -14,9 +14,8 @@ from unittest.mock import patch
 from flask import current_app
 
 from project import base_url
-from project.api.models import Contact, Device
+from project.api.models import Contact, Device, DeviceContactRole, User
 from project.api.models.base_model import db
-from project.api.models.contact_role import DeviceContactRole
 from project.extensions.instances import pidinst
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 
@@ -260,3 +259,111 @@ class TestDeviceContactRolesServices(BaseTestCase):
             )
             update_external_metadata.assert_called_once()
             self.assertEqual(update_external_metadata.call_args.args[0].id, device.id)
+
+    def test_ensure_unique_constraint_on_post(self):
+        """Ensure that we have a unique constraint for role, device and contact."""
+        contact = Contact(
+            given_name="A", family_name="Contact", email="a.contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+
+        device = Device(short_name="test device")
+        role_name = "Owner"
+        role_uri = "https://cv/roles/1"
+
+        contact_role = DeviceContactRole(
+            contact=contact,
+            device=device,
+            role_name=role_name,
+            role_uri=role_uri,
+        )
+
+        db.session.add_all([contact, super_user, device, contact_role])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_contact_role",
+                "attributes": {
+                    "role_name": role_name,
+                    "role_uri": role_uri,
+                },
+                "relationships": {
+                    "device": {
+                        "data": {
+                            "id": device.id,
+                            "type": "device",
+                        },
+                    },
+                    "contact": {"data": {"id": contact.id, "type": "contact"}},
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            response = self.client.post(
+                self.url,
+                json=payload,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 409)
+
+    def test_ensure_unique_constraint_on_patch(self):
+        """Ensure that we have a unique constraint for role, device and contact also for changes."""
+        contact = Contact(
+            given_name="A", family_name="Contact", email="a.contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+
+        device = Device(short_name="test device")
+        role_name1 = "Owner"
+        role_uri1 = "https://cv/roles/1"
+
+        contact_role1 = DeviceContactRole(
+            contact=contact,
+            device=device,
+            role_name=role_name1,
+            role_uri=role_uri1,
+        )
+
+        role_name2 = "PI"
+        role_uri2 = "https://cv/roles/2"
+
+        contact_role2 = DeviceContactRole(
+            contact=contact,
+            device=device,
+            role_name=role_name2,
+            role_uri=role_uri2,
+        )
+
+        db.session.add_all([contact, super_user, device, contact_role1, contact_role2])
+        db.session.commit()
+
+        # It is not possible to add this for the very same device, contact & role.
+        payload = {
+            "data": {
+                "type": "device_contact_role",
+                "id": contact_role2.id,
+                "attributes": {
+                    "role_name": role_name1,
+                    "role_uri": role_uri1,
+                },
+                "relationships": {
+                    "device": {
+                        "data": {
+                            "id": device.id,
+                            "type": "device",
+                        },
+                    },
+                    "contact": {"data": {"id": contact.id, "type": "contact"}},
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            response = self.client.patch(
+                f"{self.url}/{contact_role2.id}",
+                json=payload,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 409)
