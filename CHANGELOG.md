@@ -12,11 +12,13 @@ Added:
 - links from profile page to contact page
 - Keywords
 - field to set the country of origin for devices & platforms to support export control
+- checks to ensure that no duplicated contact role entries can be added
 
 Changed:
 - Devices can now also be mounted on other devices
 - Increased number of workers for gunicorn
 - Included material design icons for styleguidist in frontend to avoid calling external ressources 
+
 
 ## 1.7.0 - 2023-11-06
 

@@ -10,6 +10,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
+from ..helpers.errors import ConflictError
 from ..models import Site
 from ..models.base_model import db
 from ..models.contact_role import SiteContactRole
@@ -48,6 +49,21 @@ class SiteRoleList(ResourceList):
             query_ = query_.filter(SiteContactRole.site_id == site_id)
         return query_
 
+    def before_post(self, args, kwargs, data):
+        """Run some checks before accepting the post request."""
+        existing_entry = (
+            db.session.query(SiteContactRole)
+            .filter_by(
+                role_name=data.get("role_name"),
+                role_uri=data.get("role_uri"),
+                contact_id=data.get("contact"),
+                site_id=data.get("site"),
+            )
+            .first()
+        )
+        if existing_entry:
+            raise ConflictError("There is already an entry for this contact role")
+
     def after_post(self, result):
         """Run some hooks after the post."""
         result_id = result[0]["data"]["relationships"]["site"]["data"]["id"]
@@ -81,6 +97,39 @@ class SiteRoleDetail(ResourceDetail):
         Also check if we are allowed to see the entry.
         """
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def before_patch(self, args, kwargs, data):
+        """Run some checks before accepting the update."""
+        contact_role_id = kwargs["id"]
+        existing_contact_role = (
+            db.session.query(SiteContactRole).filter_by(id=contact_role_id).first()
+        )
+        if existing_contact_role:
+            query_contact_id = existing_contact_role.contact_id
+            if "contact" in data.keys():
+                query_contact_id = data["contact"]
+            query_site_id = existing_contact_role.site_id
+            if "site" in data.keys():
+                query_site_id = data["site"]
+            query_role_name = existing_contact_role.role_name
+            if "role_name" in data.keys():
+                query_role_name = data["role_name"]
+            query_role_uri = existing_contact_role.role_uri
+            if "role_uri" in data.keys():
+                query_role_uri = data["role_uri"]
+            conflicting = (
+                db.session.query(SiteContactRole)
+                .filter_by(
+                    contact_id=query_contact_id,
+                    site_id=query_site_id,
+                    role_name=query_role_name,
+                    role_uri=query_role_uri,
+                )
+                .filter(SiteContactRole.id != contact_role_id)
+                .first()
+            )
+            if conflicting:
+                raise ConflictError("There is already an entry for this contact role")
 
     def after_patch(self, result):
         """Rune some hooks after the patch of the contact role."""

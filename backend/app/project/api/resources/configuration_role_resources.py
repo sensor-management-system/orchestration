@@ -12,6 +12,7 @@ from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
+from ..helpers.errors import ConflictError
 from ..models import Configuration
 from ..models.base_model import db
 from ..models.contact_role import ConfigurationContactRole
@@ -52,6 +53,21 @@ class ConfigurationRoleList(ResourceList):
             )
         return query_
 
+    def before_post(self, args, kwargs, data):
+        """Run some checks before accepting the post request."""
+        existing_entry = (
+            db.session.query(ConfigurationContactRole)
+            .filter_by(
+                role_name=data.get("role_name"),
+                role_uri=data.get("role_uri"),
+                contact_id=data.get("contact"),
+                configuration_id=data.get("configuration"),
+            )
+            .first()
+        )
+        if existing_entry:
+            raise ConflictError("There is already an entry for this contact role")
+
     def after_post(self, result):
         """
         Add update description to related platform.
@@ -90,6 +106,41 @@ class ConfigurationRoleDetail(ResourceDetail):
         Also check if we are allowed to see the entry.
         """
         check_if_object_not_found(self._data_layer.model, kwargs)
+
+    def before_patch(self, args, kwargs, data):
+        """Run some checks before accepting the update."""
+        contact_role_id = kwargs["id"]
+        existing_contact_role = (
+            db.session.query(ConfigurationContactRole)
+            .filter_by(id=contact_role_id)
+            .first()
+        )
+        if existing_contact_role:
+            query_contact_id = existing_contact_role.contact_id
+            if "contact" in data.keys():
+                query_contact_id = data["contact"]
+            query_configuration_id = existing_contact_role.configuration_id
+            if "configuration" in data.keys():
+                query_configuration_id = data["configuration"]
+            query_role_name = existing_contact_role.role_name
+            if "role_name" in data.keys():
+                query_role_name = data["role_name"]
+            query_role_uri = existing_contact_role.role_uri
+            if "role_uri" in data.keys():
+                query_role_uri = data["role_uri"]
+            conflicting = (
+                db.session.query(ConfigurationContactRole)
+                .filter_by(
+                    contact_id=query_contact_id,
+                    configuration_id=query_configuration_id,
+                    role_name=query_role_name,
+                    role_uri=query_role_uri,
+                )
+                .filter(ConfigurationContactRole.id != contact_role_id)
+                .first()
+            )
+            if conflicting:
+                raise ConflictError("There is already an entry for this contact role")
 
     def after_patch(self, result):
         """

@@ -811,3 +811,111 @@ class TestSiteContacts(BaseTestCase):
             db.session.query(SiteContactRole).filter_by(id=site_contact_role_id).first()
         )
         self.assertIsNone(reloaded)
+
+    def test_ensure_unique_constraint_on_post(self):
+        """Ensure that we have a unique constraint for role, site and contact."""
+        contact = Contact(
+            given_name="A", family_name="Contact", email="a.contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+
+        site = Site(label="test site", is_internal=True)
+        role_name = "Owner"
+        role_uri = "https://cv/roles/1"
+
+        contact_role = SiteContactRole(
+            contact=contact,
+            site=site,
+            role_name=role_name,
+            role_uri=role_uri,
+        )
+
+        db.session.add_all([contact, super_user, site, contact_role])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "site_contact_role",
+                "attributes": {
+                    "role_name": role_name,
+                    "role_uri": role_uri,
+                },
+                "relationships": {
+                    "site": {
+                        "data": {
+                            "id": site.id,
+                            "type": "site",
+                        },
+                    },
+                    "contact": {"data": {"id": contact.id, "type": "contact"}},
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            response = self.client.post(
+                self.url,
+                json=payload,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 409)
+
+    def test_ensure_unique_constraint_on_patch(self):
+        """Ensure that we have a unique constraint for role, site and contact also for changes."""
+        contact = Contact(
+            given_name="A", family_name="Contact", email="a.contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+
+        site = Site(label="test site", is_internal=True)
+        role_name1 = "Owner"
+        role_uri1 = "https://cv/roles/1"
+
+        contact_role1 = SiteContactRole(
+            contact=contact,
+            site=site,
+            role_name=role_name1,
+            role_uri=role_uri1,
+        )
+
+        role_name2 = "PI"
+        role_uri2 = "https://cv/roles/2"
+
+        contact_role2 = SiteContactRole(
+            contact=contact,
+            site=site,
+            role_name=role_name2,
+            role_uri=role_uri2,
+        )
+
+        db.session.add_all([contact, super_user, site, contact_role1, contact_role2])
+        db.session.commit()
+
+        # It is not possible to add this for the very same site, contact & role.
+        payload = {
+            "data": {
+                "type": "site_contact_role",
+                "id": contact_role2.id,
+                "attributes": {
+                    "role_name": role_name1,
+                    "role_uri": role_uri1,
+                },
+                "relationships": {
+                    "site": {
+                        "data": {
+                            "id": site.id,
+                            "type": "site",
+                        },
+                    },
+                    "contact": {"data": {"id": contact.id, "type": "contact"}},
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            response = self.client.patch(
+                f"{self.url}/{contact_role2.id}",
+                json=payload,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 409)

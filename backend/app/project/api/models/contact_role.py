@@ -49,6 +49,9 @@ class DeviceContactRole(db.Model, Role, IndirectSearchableMixin):
         "Device", backref=db.backref("device_contact_roles", cascade="all,delete")
     )
     device_id = db.Column(db.Integer, db.ForeignKey("device.id"), nullable=False)
+    __table_args__ = (
+        db.UniqueConstraint("contact_id", "device_id", "role_name", "role_uri"),
+    )
 
     def get_parent_search_entities(self):
         """Return the device."""
@@ -71,6 +74,10 @@ class PlatformContactRole(db.Model, Role, IndirectSearchableMixin):
         "Platform", backref=db.backref("platform_contact_roles", cascade="all,delete")
     )
     platform_id = db.Column(db.Integer, db.ForeignKey("platform.id"), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint("contact_id", "platform_id", "role_name", "role_uri"),
+    )
 
     def get_parent_search_entities(self):
         """Return the platform."""
@@ -97,6 +104,9 @@ class ConfigurationContactRole(db.Model, Role, IndirectSearchableMixin):
     configuration_id = db.Column(
         db.Integer, db.ForeignKey("configuration.id"), nullable=False
     )
+    __table_args__ = (
+        db.UniqueConstraint("contact_id", "configuration_id", "role_name", "role_uri"),
+    )
 
     def get_parent_search_entities(self):
         """Return the configuration."""
@@ -119,6 +129,9 @@ class SiteContactRole(db.Model, Role, IndirectSearchableMixin):
         "Site", backref=db.backref("site_contact_roles", cascade="all,delete")
     )
     site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=False)
+    __table_args__ = (
+        db.UniqueConstraint("contact_id", "site_id", "role_name", "role_uri"),
+    )
 
     def get_parent_search_entities(self):
         """Return the site."""
