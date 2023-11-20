@@ -49,6 +49,7 @@ export interface IStaticLocationAction {
   z: number | null
   elevationDatumName: string
   elevationDatumUri: string
+  configurationId: string | null
 
 }
 
@@ -67,6 +68,7 @@ export class StaticLocationAction implements IStaticLocationAction {
   private _epsgCode: string = '4326'
   private _elevationDatumName: string = 'MSL'
   private _elevationDatumUri: string = ''
+  private _configurationId: string | null = null
 
   get id (): string {
     return this._id
@@ -180,6 +182,14 @@ export class StaticLocationAction implements IStaticLocationAction {
     this._elevationDatumUri = newUri
   }
 
+  get configurationId (): string | null {
+    return this._configurationId
+  }
+
+  set configurationId (newConfigurationId: string | null) {
+    this._configurationId = newConfigurationId
+  }
+
   static createFromObject (someObject: IStaticLocationAction): StaticLocationAction {
     const result = new StaticLocationAction()
     result.id = someObject.id
@@ -196,6 +206,7 @@ export class StaticLocationAction implements IStaticLocationAction {
     result.x = someObject.x
     result.y = someObject.y
     result.z = someObject.z
+    result.configurationId = someObject.configurationId
     return result
   }
 }

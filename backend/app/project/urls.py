@@ -446,6 +446,7 @@ api.route(
     "configuration_static_location_begin_action_list",
     "/static-location-actions",
     "/configurations/<int:configuration_id>/static-location-actions",
+    "/sites/<int:site_id>/static-location-actions",
 )
 api.route(
     ConfigurationStaticLocationBeginActionDetail,

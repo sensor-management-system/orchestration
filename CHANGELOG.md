@@ -13,6 +13,7 @@ Added:
 - Keywords
 - field to set the country of origin for devices & platforms to support export control
 - checks to ensure that no duplicated contact role entries can be added
+- Tab to show the locations of all the configurations for a site
 
 Changed:
 - Devices can now also be mounted on other devices

@@ -96,4 +96,19 @@ export class StaticLocationActionApi {
       return this.serializer.convertJsonApiObjectListToModelList(rawData)
     })
   }
+
+  getRelatedActionsForSite (siteId: string): Promise<StaticLocationAction[]> {
+    const url = '/sites/' + siteId + '/static-location-actions'
+    const params = {
+      'page[size]': 10000,
+      include: [
+        'begin_contact',
+        'end_contact'
+      ].join(',')
+    }
+    return this.axiosApi.get(url, { params }).then((rawResponse) => {
+      const rawData = rawResponse.data
+      return this.serializer.convertJsonApiObjectListToModelList(rawData)
+    })
+  }
 }

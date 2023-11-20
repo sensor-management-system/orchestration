@@ -50,6 +50,7 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
         """
         query_ = filter_visible(self.session.query(self.model))
         configuration_id = view_kwargs.get("configuration_id")
+        site_id = view_kwargs.get("site_id")
 
         if configuration_id is not None:
             try:
@@ -66,6 +67,8 @@ class ConfigurationStaticLocationBeginActionList(ResourceList):
                     ConfigurationStaticLocationBeginAction.configuration_id
                     == configuration_id
                 )
+        if site_id is not None:
+            query_ = query_.filter(Configuration.site_id == site_id)
         return query_
 
     def after_post(self, result):

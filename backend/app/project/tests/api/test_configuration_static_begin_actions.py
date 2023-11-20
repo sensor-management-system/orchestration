@@ -12,7 +12,7 @@ import datetime
 import json
 
 from project import base_url, db
-from project.api.models import Configuration, Contact
+from project.api.models import Configuration, Contact, Site
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configuration_static_action_model import (
     add_static_location_begin_action_model,
@@ -34,7 +34,7 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         # no data yet
         self.assertEqual(response.json["data"], [])
 
-    def test_get_device_calibration_action_collection(self):
+    def test_get_device_static_location_action_collection(self):
         """Test retrieve a collection of configuration_static_location_action objects."""
         static_location_begin_action = add_static_location_begin_action_model(
             is_public=True, is_private=False, is_internal=False
@@ -391,6 +391,52 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         with self.client:
             url_get_for_config1 = (
                 base_url + f"/configurations/{config1.id}/static-location-actions"
+            )
+            response = self.client.get(
+                url_get_for_config1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "test static_location_begin_action1",
+        )
+
+    def test_filtered_by_site(self):
+        """Ensure that filter by a specific site works well."""
+        site1 = Site(label="test site 1")
+        data1, config1 = self.prepare_request_data("test static_location_begin_action1")
+        config1.site = site1
+        db.session.add_all([config1, site1])
+        db.session.commit()
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data1,
+            object_type=self.object_type,
+        )
+        site2 = Site(label="test site 2")
+        data2, config2 = self.prepare_request_data("test static_location_begin_action2")
+        config2.site = site2
+        db.session.add_all([config2, site2])
+        db.session.commit()
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data2,
+            object_type=self.object_type,
+        )
+
+        with self.client:
+            response = self.client.get(
+                self.url, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 2)
+        # Test only for the first one
+        with self.client:
+            url_get_for_config1 = (
+                base_url + f"/sites/{site1.id}/static-location-actions"
             )
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
