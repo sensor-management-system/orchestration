@@ -74,23 +74,13 @@ module.exports = async () => {
   return {
     require: [
       path.join(__dirname, 'config/styleguidist/global.requires.js'),
-      path.join(__dirname, 'config/styleguidist/global.styles.scss')
+      path.join(__dirname, 'config/styleguidist/global.styles.scss'),
+      path.join(__dirname, 'config/styleguidist/css/materialdesignicons@5.9.55.min.css')
     ],
     renderRootJsx: resolve(__dirname, 'config/styleguidist/styleguide.root.js'),
     webpackConfig,
     usageMode: 'expand',
     styleguideDir: 'dist',
-    template: {
-      head: {
-        links: [
-          {
-            rel: 'stylesheet',
-            href:
-              'https://cdn.jsdelivr.net/npm/@mdi/font@5.9.55/css/materialdesignicons.min.css'
-          }
-        ]
-      }
-    },
     sections: [
       {
         name: 'Generic Components',
