@@ -820,4 +820,8 @@ export class Api {
   get tsmEndpoints (): TsmEndpointApi {
     return this._tsmEndpointApi
   }
+
+  get staticLocationActions (): StaticLocationActionApi {
+    return this._staticLocationActionApi
+  }
 }

@@ -166,6 +166,10 @@ export default class SiteNewPage extends Vue {
         disabled: true
       },
       {
+        name: 'Locations',
+        disabled: true
+      },
+      {
         name: 'Attachments',
         disabled: true
       }

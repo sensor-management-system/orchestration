@@ -54,6 +54,12 @@ describe('StaticLocationActionSerializer', () => {
                   id: '123',
                   type: 'contact'
                 }
+              },
+              configuration: {
+                data: {
+                  id: '124',
+                  type: 'configuration'
+                }
               }
             }
           }
@@ -98,7 +104,8 @@ describe('StaticLocationActionSerializer', () => {
         elevationDatumName: 'MSL',
         elevationDatumUri: '',
         beginDescription: '',
-        endDescription: ''
+        endDescription: '',
+        configurationId: '124'
       })
       const serializer = new StaticLocationActionSerializer()
 
@@ -135,7 +142,8 @@ describe('StaticLocationActionSerializer', () => {
         elevationDatumName: 'MSL',
         elevationDatumUri: '',
         beginDescription: '',
-        endDescription: ''
+        endDescription: '',
+        configurationId: '124'
       })
       const configurationId = '456'
 

@@ -100,6 +100,12 @@ export class StaticLocationActionSerializer {
 
     action.beginContact = beginContact
     action.endContact = endContact
+
+    if (relationships.configuration && relationships.configuration.data) {
+      const configurationData = relationships.configuration.data as IJsonApiEntityWithoutDetails
+      action.configurationId = configurationData.id || null
+    }
+
     return action
   }
 
