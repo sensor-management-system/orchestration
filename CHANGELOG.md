@@ -16,6 +16,7 @@ Added:
 Changed:
 - Devices can now also be mounted on other devices
 - Increased number of workers for gunicorn
+- Included material design icons for styleguidist in frontend to avoid calling external ressources 
 
 ## 1.7.0 - 2023-11-06
 

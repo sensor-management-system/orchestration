@@ -147,15 +147,15 @@ permissions and limitations under the Licence.
                 Confirm selection
               </v-btn>
               <span v-if="isTryingToMountPlatformdUnderDevices()">
-              <v-tooltip right>
-                <template #activator="{ on, attrs }">
-                  <v-icon v-bind="attrs" v-on="on">
-                    mdi-alert
-                  </v-icon>
-                </template>
-                <span>Platforms can't be mounted under devices.</span>
-              </v-tooltip>
-            </span>
+                <v-tooltip right>
+                  <template #activator="{ on, attrs }">
+                    <v-icon v-bind="attrs" v-on="on">
+                      mdi-alert
+                    </v-icon>
+                  </template>
+                  <span>Platforms can't be mounted under devices.</span>
+                </v-tooltip>
+              </span>
               <v-btn text @click="clearSelection()">
                 Clear selection
               </v-btn>
