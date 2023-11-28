@@ -28,9 +28,9 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <div v-if="staticLocationActions.length === 0">
+  <hint-card v-if="staticLocationActions.length === 0">
     There are no locations for the associated configurations.
-  </div>
+  </hint-card>
   <div v-else>
     <v-alert
       dense
@@ -119,6 +119,8 @@ import { LatLng, LatLngBounds, latLngBounds } from 'leaflet'
 import { Configuration } from '@/models/Configuration'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
 
+import HintCard from '@/components/HintCard.vue'
+
 import { SetLoadingAction } from '@/store/progressindicator'
 import { SitesState, LoadSiteAction, LoadSiteConfigurationsAction } from '@/store/sites'
 
@@ -127,7 +129,10 @@ import { SitesState, LoadSiteAction, LoadSiteConfigurationsAction } from '@/stor
     ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('sites', ['loadSite', 'loadSiteConfigurations'])
   },
-  computed: mapState('sites', ['site', 'siteConfigurations'])
+  computed: mapState('sites', ['site', 'siteConfigurations']),
+  components: {
+    HintCard
+  }
 })
 export default class SiteLocations extends Vue {
   private staticLocationActions: StaticLocationAction[] = []

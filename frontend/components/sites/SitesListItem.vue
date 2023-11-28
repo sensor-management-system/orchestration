@@ -172,6 +172,7 @@ permissions and limitations under the Licence.
           {{ site.address.room | orDefault }}
         </v-col>
       </v-row>
+      <!-- Counting associated configurations doesn't work at the moment this way.
       <v-row
         no-gutters
       >
@@ -198,6 +199,7 @@ permissions and limitations under the Licence.
           {{ site.configurationIds.length }}
         </v-col>
       </v-row>
+      -->
       <v-row
         no-gutters
       >

@@ -51,6 +51,8 @@ class Site(
     site_usage_name = db.Column(db.String(256), nullable=True)
     website = db.Column(db.String(1024), nullable=True)
     keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
+    outer_site_id = db.Column(db.Integer, db.ForeignKey("site.id"), nullable=True)
+    outer_site = db.relationship("Site", remote_side=[id])
 
     # SiteContactRoles & SiteAttachments have a backref to the sites,
     # so there is no need to put it here explicitly.
