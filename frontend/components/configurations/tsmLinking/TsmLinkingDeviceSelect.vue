@@ -58,7 +58,8 @@
       </v-text-field>
     </template>
     <v-card>
-      <template v-for="(item, index) in filteredItems">
+      <v-pagination v-model="pageNumber" :length="totalPages" />
+      <template v-for="(item, index) in paginatedItems">
         <v-row :key="index" no-gutters>
           <v-col cols="12">
             <DevicesListItem
@@ -69,7 +70,7 @@
               class="no-boxshadow"
             >
               <template #additional-actions>
-                <v-checkbox v-if="canModifyEntity(item)" class="d-inline-block ml-2 pa-0 my-0" :value="isSelected(item)" hide-details @click.stop.prevent="toggleItem(item)" />
+                <v-checkbox v-if="canModifyEntity(item)" class="d-inline-block ml-2 pa-0 my-0" :input-value="isSelected(item)" hide-details @click.stop.prevent="toggleItem(item)" />
                 <v-tooltip v-else top>
                   <template #activator="{ on }">
                     <v-btn icon v-on="on" @click.stop>
@@ -85,7 +86,7 @@
           </v-col>
         </v-row>
         <v-divider
-          v-if="index < filteredItems.length - 1"
+          v-if="index < paginatedItems.length - 1"
           :key="`divider-${index}`"
         />
       </template>
@@ -139,6 +140,9 @@ export default class TsmLinkingDeviceSelect extends Vue {
     'inventoryNumber'
   ]
 
+  private pageSize = 10
+  private pageNumber = 1
+
   // vuex definition for typescript check
   canModifyEntity!: CanModifyEntityGetter
 
@@ -152,6 +156,16 @@ export default class TsmLinkingDeviceSelect extends Vue {
         return false
       })
     })
+  }
+
+  get paginatedItems () {
+    const start = (this.pageNumber - 1) * this.pageSize
+    const end = start + this.pageSize
+    return this.filteredItems.slice(start, end)
+  }
+
+  get totalPages () {
+    return Math.ceil(this.filteredItems.length / this.pageSize)
   }
 
   toggleItem (item: Device) {
@@ -175,9 +189,10 @@ export default class TsmLinkingDeviceSelect extends Vue {
   }
 
   isSelected (item: Device) {
-    return this.selectedItems.findIndex((device: Device) => {
+    const isSelected = this.selectedItems.findIndex((device: Device) => {
       return device.id === item.id
     }) !== -1
+    return isSelected
   }
 
   @Watch('search')
