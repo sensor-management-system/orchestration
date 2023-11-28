@@ -8,6 +8,9 @@ SPDX-License-Identifier: HEESIL-1.0
 -->
 ## 1.8.1 (Unreleased)
 
+Fixed:
+- No redirect for location pages of public configurations if the user is not logged in
+
 ## 1.8.0 - 2023-11-28
 
 Added:

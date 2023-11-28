@@ -58,7 +58,6 @@ import DynamicLocationView from '@/components/configurations/dynamicLocation/Dyn
 
 @Component({
   components: { DynamicLocationView },
-  middleware: ['auth'],
   computed: {
     ...mapState('configurations',
       [
