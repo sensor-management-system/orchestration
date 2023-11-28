@@ -93,30 +93,32 @@ permissions and limitations under the Licence.
         </v-card>
       </v-col>
       <v-col cols="12" md="6">
-        <v-slide-x-reverse-transition>
-          <v-card v-if="selectedNode">
-            <configurations-tree-title :selected-node="selectedNode" />
-            <v-card-text>
-              <ConfigurationsTreeNodeDetail
-                v-if="selectedNode"
-                :node="selectedNode"
-                :editable="editable"
-                :deletable="isSelectedNodeDeletable"
-                @delete="isDeleteDialogShown = true"
-              />
-              <delete-dialog
-                v-if="selectedNode"
-                v-model="isDeleteDialogShown"
-                title="Delete the Mount Action?"
-                :disabled="isLoading"
-                @cancel="isDeleteDialogShown = false"
-                @delete="deleteSelectedNode"
-              >
-                <em>Please only delete mounts if you are sure that the {{ selectedNodeType }} is <strong> not being used effectively</strong> and <strong>no other software</strong> is referencing the mounted {{ selectedNodeType }}.</em>
-              </delete-dialog>
-            </v-card-text>
-          </v-card>
-        </v-slide-x-reverse-transition>
+        <div class="sticky">
+          <v-slide-x-reverse-transition>
+            <v-card v-if="selectedNode">
+              <configurations-tree-title :selected-node="selectedNode" />
+              <v-card-text>
+                <ConfigurationsTreeNodeDetail
+                  v-if="selectedNode"
+                  :node="selectedNode"
+                  :editable="editable"
+                  :deletable="isSelectedNodeDeletable"
+                  @delete="isDeleteDialogShown = true"
+                />
+                <delete-dialog
+                  v-if="selectedNode"
+                  v-model="isDeleteDialogShown"
+                  title="Delete the Mount Action?"
+                  :disabled="isLoading"
+                  @cancel="isDeleteDialogShown = false"
+                  @delete="deleteSelectedNode"
+                >
+                  <em>Please only delete mounts if you are sure that the {{ selectedNodeType }} is <strong> not being used effectively</strong> and <strong>no other software</strong> is referencing the mounted {{ selectedNodeType }}.</em>
+                </delete-dialog>
+              </v-card-text>
+            </v-card>
+          </v-slide-x-reverse-transition>
+        </div>
       </v-col>
     </v-row>
   </div>
@@ -360,3 +362,9 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
   }
 }
 </script>
+<style scoped>
+.sticky {
+  position: sticky;
+  top: 112px;
+}
+</style>
