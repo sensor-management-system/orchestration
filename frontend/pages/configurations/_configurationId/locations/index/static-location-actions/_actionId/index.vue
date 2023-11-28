@@ -58,7 +58,6 @@ import StaticLocationView from '@/components/configurations/StaticLocationView.v
 
 @Component({
   components: { StaticLocationView },
-  middleware: ['auth'],
   computed: {
     ...mapState('configurations',
       [
