@@ -6,7 +6,9 @@ SPDX-FileCopyrightText: 2023
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.8.0 (Unreleased)
+## 1.8.1 (Unreleased)
+
+## 1.8.0 - 2023-11-28
 
 Added:
 - links from profile page to contact page
