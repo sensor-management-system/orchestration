@@ -49,16 +49,26 @@ permissions and limitations under the Licence.
         <label>Label</label>
         {{ value.label }}
       </v-col>
+      <v-col cols="12" md="6">
+        <label>Part of</label>
+        <span v-if="value.outerSiteId && site">
+          <nuxt-link :to="'/sites/' + value.outerSiteId" target="_blank">{{ site.label }}</nuxt-link>
+          <v-icon small>mdi-open-in-new</v-icon>
+        </span>
+        <span v-else>
+          {{ null | orDefault }}
+        </span>
+      </v-col>
     </v-row>
     <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="6">
         <label>Usage</label>
-        {{ value.siteUsageName }}
+        {{ value.siteUsageName | orDefault }}
       </v-col>
       <v-col cols="12" md="6">
         <label>Type</label>
-        {{ value.siteTypeName }}
+        {{ value.siteTypeName | orDefault }}
       </v-col>
     </v-row>
     <v-divider class="my-4" />
@@ -129,54 +139,33 @@ permissions and limitations under the Licence.
         </span>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12">
-        <label>Configurations on site / lab</label>
-        <div v-if="siteConfigurations.length>0">
-          <BaseList
-            :list-items="siteConfigurations"
-          >
-            <template #list-item="{item}">
-              <ConfigurationsListItem
-                :configuration="item"
-              />
-            </template>
-          </BaseList>
-        </div>
-        <div v-else>
-          <v-subheader>
-            There are no configurations on this site / lab.
-          </v-subheader>
-        </div>
-      </v-col>
-    </v-row>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import { Site } from '@/models/Site'
 import SiteMap from '@/components/sites/SiteMap.vue'
 
 import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
-import BaseList from '@/components/shared/BaseList.vue'
-import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
 
-import { SitesState } from '@/store/sites'
+import { SearchSitesAction, SitesState } from '@/store/sites'
 
 @Component({
   components: {
     VisibilityChip,
     PermissionGroupChips,
-    SiteMap,
-    BaseList,
-    ConfigurationsListItem
+    SiteMap
   },
-  computed: mapState('sites', ['siteConfigurations'])
-
+  computed: {
+    ...mapState('sites', ['sites'])
+  },
+  methods: {
+    ...mapActions('sites', ['searchSites'])
+  }
 })
 export default class SiteBasicData extends Vue {
   @Prop({
@@ -187,7 +176,29 @@ export default class SiteBasicData extends Vue {
   readonly value!: Site
 
   // vuex definition for typescript check
-  siteConfigurations!: SitesState['siteConfigurations']
+
+  // vuex definition for typescript check
+  sites!: SitesState['sites']
+  searchSites!: SearchSitesAction
+
+  async mounted () {
+    try {
+      await this.searchSites()
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Failed to load sites')
+    }
+  }
+
+  get site (): Site | null {
+    if (!this.value.outerSiteId || !this.sites) {
+      return null
+    }
+    const idx = this.sites.findIndex(s => s.id === this.value.outerSiteId)
+    if (idx > -1) {
+      return this.sites[idx]
+    }
+    return null
+  }
 }
 </script>
 

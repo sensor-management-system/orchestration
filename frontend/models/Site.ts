@@ -82,6 +82,8 @@ export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo 
   permissionGroups: IPermissionGroup[]
   website: string
   keywords: string[]
+
+  outerSiteId: string | null
 }
 
 export class Site implements ISite, IVisible {
@@ -111,6 +113,7 @@ export class Site implements ISite, IVisible {
   private _permissionGroups: PermissionGroup[] = []
   private _website: string = ''
   private _keywords: string[] = []
+  private _outerSiteId: string | null = null
 
   get id (): string {
     return this._id
@@ -308,6 +311,14 @@ export class Site implements ISite, IVisible {
     this._archived = newValue
   }
 
+  get outerSiteId (): string | null {
+    return this._outerSiteId
+  }
+
+  set outerSiteId (newOuterSiteId: string | null) {
+    this._outerSiteId = newOuterSiteId
+  }
+
   get type (): string {
     return 'site'
   }
@@ -343,6 +354,8 @@ export class Site implements ISite, IVisible {
 
     newObject.website = someObject.website
     newObject.keywords = [...someObject.keywords]
+
+    newObject.outerSiteId = someObject.outerSiteId
 
     return newObject
   }

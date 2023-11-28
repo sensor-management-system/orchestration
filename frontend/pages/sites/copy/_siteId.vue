@@ -269,6 +269,10 @@ export default class SiteCopyPage extends Vue {
         disabled: true
       },
       {
+        name: 'Related',
+        disabled: true
+      },
+      {
         name: 'Locations',
         disabled: true
       },

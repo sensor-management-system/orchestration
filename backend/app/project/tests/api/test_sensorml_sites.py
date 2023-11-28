@@ -706,7 +706,6 @@ class TestSensorMLSite(BaseTestCase):
         self.site.keywords = ["some", "fancy keyword"]
         db.session.add(self.site)
         db.session.commit()
-
         with self.client:
             resp = self.client.get(f"{self.url}/{self.site.id}/sensorml")
 
@@ -726,3 +725,99 @@ class TestSensorMLSite(BaseTestCase):
 
         self.assertEqual(sml_keyword_entries[0].text, "some")
         self.assertEqual(sml_keyword_entries[1].text, "fancy keyword")
+
+    def test_public_site_with_public_and_internal_inner_site_without_user(self):
+        """Ensure we put public inner sites into the sensorML."""
+        public_inner_site = Site(
+            label="public inner site1",
+            outer_site=self.site,
+            is_public=True,
+            is_internal=False,
+        )
+        internal_inner_site = Site(
+            label="internal inner site2",
+            outer_site=self.site,
+            is_public=False,
+            is_internal=True,
+        )
+        db.session.add_all([public_inner_site, internal_inner_site])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.site.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_components = root.find("{http://www.opengis.net/sensorml/2.0}components")
+        sml_component_list = sml_components.find(
+            "{http://www.opengis.net/sensorml/2.0}ComponentList"
+        )
+        sml_component_entries = sml_component_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}component"
+        )
+
+        self.assertEqual(len(sml_component_entries), 1)
+
+        sml_physical_system_public_config = sml_component_entries[0].find(
+            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
+        )
+        gml_id_public_config = sml_physical_system_public_config.attrib.get(
+            "{http://www.opengis.net/gml/3.2}id"
+        )
+
+        self.assertEqual(gml_id_public_config, f"site_{public_inner_site.id}")
+
+    def test_public_site_with_public_and_internal_inner_site_with_user(self):
+        """Ensure we put internal inner sites into the sensorML too."""
+        public_inner_site = Site(
+            label="public inner site1",
+            outer_site=self.site,
+            is_public=True,
+            is_internal=False,
+        )
+        internal_inner_site = Site(
+            label="internal inner site2",
+            outer_site=self.site,
+            is_public=False,
+            is_internal=True,
+        )
+        contact = Contact(given_name="Given", family_name="Fam", email="given@family")
+        user = User(subject=contact.email, contact=contact)
+        db.session.add_all([public_inner_site, internal_inner_site, contact, user])
+        db.session.commit()
+        with self.run_requests_as(user):
+            with self.client:
+                resp = self.client.get(f"{self.url}/{self.site.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_components = root.find("{http://www.opengis.net/sensorml/2.0}components")
+        sml_component_list = sml_components.find(
+            "{http://www.opengis.net/sensorml/2.0}ComponentList"
+        )
+        sml_component_entries = sml_component_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}component"
+        )
+
+        self.assertEqual(len(sml_component_entries), 2)
+
+        sml_physical_system_public_config = sml_component_entries[0].find(
+            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
+        )
+        gml_id_public_config = sml_physical_system_public_config.attrib.get(
+            "{http://www.opengis.net/gml/3.2}id"
+        )
+
+        self.assertEqual(gml_id_public_config, f"site_{public_inner_site.id}")
+
+        sml_physical_system_internal_config = sml_component_entries[1].find(
+            "{http://www.opengis.net/sensorml/2.0}PhysicalSystem"
+        )
+        gml_id_internal_config = sml_physical_system_internal_config.attrib.get(
+            "{http://www.opengis.net/gml/3.2}id"
+        )
+
+        self.assertEqual(gml_id_internal_config, f"site_{internal_inner_site.id}")

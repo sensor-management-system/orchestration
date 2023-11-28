@@ -165,6 +165,10 @@ export default class SitePage extends Vue {
         name: 'Contacts'
       },
       {
+        to: '/sites/' + this.siteId + '/related',
+        name: 'Related'
+      },
+      {
         to: '/sites/' + this.siteId + '/locations',
         name: 'Locations'
       },

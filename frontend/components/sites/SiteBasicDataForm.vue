@@ -72,6 +72,20 @@ permissions and limitations under the Licence.
             @input="update('label', $event)"
           />
         </v-col>
+        <v-col cols="12" md="6">
+          <v-autocomplete
+            :value="value.outerSiteId"
+            :item-value="(x) => x.id"
+            :item-text="(x) => x.label"
+            :items="sitesExceptSelf"
+            label="Part of"
+            :readonly="readonly"
+            hint="Select a site to which this site belongs"
+            persistent-hint
+            clearable
+            @input="update('outerSiteId',$event)"
+          />
+        </v-col>
       </v-row>
 
       <v-row>
@@ -390,7 +404,7 @@ permissions and limitations under the Licence.
 </template>
 <script lang="ts">
 import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 
 import { Rules } from '@/mixins/Rules'
 
@@ -410,9 +424,11 @@ import Combobox from '@/components/shared/Combobox.vue'
 
 import Validator from '@/utils/validator'
 import SiteMap from '@/components/sites/SiteMap.vue'
-import { VocabularyState } from '@/store/vocabulary'
 import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
+
+import { SearchSitesAction, SitesState } from '@/store/sites'
+import { VocabularyState } from '@/store/vocabulary'
 
 interface INameAndUri {
   name: string
@@ -433,7 +449,11 @@ type SiteTypeComboboxValue = SiteType | string | undefined
     Combobox
   },
   methods: {
-    ...mapState('vocabulary', ['epsgCodes'])
+    ...mapState('vocabulary', ['epsgCodes']),
+    ...mapActions('sites', ['searchSites'])
+  },
+  computed: {
+    ...mapState('sites', ['sites'])
   }
 })
 export default class SiteBasicDataForm extends mixins(Rules) {
@@ -446,6 +466,8 @@ export default class SiteBasicDataForm extends mixins(Rules) {
 
   // vuex definition for typescript check
   epsgCodes!: VocabularyState['epsgCodes']
+  sites!: SitesState['sites']
+  searchSites!: SearchSitesAction
 
   @Prop({
     required: true,
@@ -479,6 +501,18 @@ export default class SiteBasicDataForm extends mixins(Rules) {
     type: Array
   })
   readonly countryNames!: string[]
+
+  async created () {
+    try {
+      await this.searchSites()
+    } catch (error) {
+      this.$store.commit('snackbar/setError', 'Failed to laod sites')
+    }
+  }
+
+  get sitesExceptSelf (): Site[] {
+    return this.sites.filter(x => x.id !== this.value.id)
+  }
 
   get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
     // For the moment there is no way a site could be private.
@@ -588,6 +622,10 @@ export default class SiteBasicDataForm extends mixins(Rules) {
     switch (key) {
       case 'label':
         newObj.label = value as string
+        break
+
+      case 'outerSiteId':
+        newObj.outerSiteId = value as string
         break
 
       case 'description':

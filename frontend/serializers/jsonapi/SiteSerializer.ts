@@ -196,6 +196,9 @@ export class SiteSerializer {
       })
       result.permissionGroups = permissionGroups
     }
+    if (relationships.outer_site?.data && 'id' in relationships.outer_site?.data) {
+      result.outerSiteId = (relationships.outer_site.data as IJsonApiEntityWithoutDetails).id
+    }
 
     return {
       site: result,
@@ -248,6 +251,18 @@ export class SiteSerializer {
         // modifiedAt
         // modifiedBy
         // updateDescription
+      },
+      relationships: {
+        outer_site: {
+          data: null
+        }
+      }
+    }
+
+    if (site.outerSiteId) {
+      data.relationships!.outer_site.data = {
+        id: site.outerSiteId,
+        type: 'site'
       }
     }
 

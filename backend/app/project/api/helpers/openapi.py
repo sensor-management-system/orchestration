@@ -60,7 +60,6 @@ class MarshmallowJsonApiToOpenApiMapper:
                     }
                 },
             }
-
         if isinstance(
             field, fields.Field
         ):  # and getattr(field, "many", False) is True:

@@ -698,3 +698,56 @@ class TestSiteApi(BaseTestCase):
         site = db.session.query(Site).filter_by(id=result_id).first()
         self.assertEqual(["word1", "word2"], site.keywords)
         self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])
+
+    def test_get_filter_inner_sites(self):
+        """Ensure that we can filter for inner sites."""
+        site1 = Site(label="Outer site1", is_public=True)
+        site2 = Site(label="Outer site2", is_public=True)
+        site3 = Site(label="Inner site 1", is_public=True, outer_site=site1)
+        site4 = Site(label="Inner site 2", is_public=True, outer_site=site2)
+        db.session.add_all([site1, site2, site3, site4])
+        db.session.commit()
+
+        response1 = self.client.get(self.sites_url + f"/{site1.id}/inner-sites")
+        self.assertEqual(response1.status_code, 200)
+        data1 = response1.json["data"]
+        self.assertEqual(len(data1), 1)
+        self.assertEqual(data1[0]["attributes"]["label"], site3.label)
+
+        response2 = self.client.get(self.sites_url + f"/{site2.id}/inner-sites")
+        self.assertEqual(response2.status_code, 200)
+        data2 = response2.json["data"]
+        self.assertEqual(len(data2), 1)
+        self.assertEqual(data2[0]["attributes"]["label"], site4.label)
+
+    def test_post_with_outer_site(self):
+        """Ensure we can create a site with an outer site via the post method."""
+        site1 = Site(label="Outer site1", is_public=True)
+        db.session.add(site1)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "site",
+                "attributes": {
+                    "label": "inner site",
+                    "is_public": True,
+                },
+                "relationships": {
+                    "outer_site": {"data": {"id": site1.id, "type": "site"}}
+                },
+            }
+        }
+        with self.run_requests_as(self.super_user):
+            response = self.client.post(
+                self.sites_url,
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
+
+        self.assertEqual(response.status_code, 201)
+
+        data = response.json["data"]
+        new_site_id = data["id"]
+        new_site = db.session.query(Site).filter_by(id=new_site_id).first()
+        self.assertEqual(new_site.outer_site, site1)

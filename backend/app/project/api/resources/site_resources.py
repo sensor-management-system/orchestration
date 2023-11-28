@@ -9,6 +9,8 @@ import os
 
 from flask import g, request
 from flask_rest_jsonapi import JsonApiException, ResourceDetail, ResourceList
+from flask_rest_jsonapi.exceptions import ObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound
 
 from ..datalayers.esalchemy import (
     AndFilter,
@@ -34,11 +36,24 @@ class SiteList(ResourceList):
         """Return the query with some additional filters."""
         query = filter_visible(self.session.query(self.model))
 
+        outer_site_id = view_kwargs.get("outer_site_id")
+        if outer_site_id is not None:
+            try:
+                self.session.query(Site).filter_by(id=outer_site_id).one()
+            except NoResultFound:
+                raise ObjectNotFound(
+                    {"parameter": "outer_site_id"},
+                    "Site: {} not found".format(outer_site_id),
+                )
+            else:
+                query = query.filter(Site.outer_site_id == outer_site_id)
+
         false_values = ["false"]
         # hide archived must be disabled explicitly
         hide_archived = request.args.get("hide_archived") not in false_values
         if hide_archived:
             query = query.filter_by(archived=False)
+
         return query
 
     def es_query(self, view_kwargs):

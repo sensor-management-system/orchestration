@@ -74,3 +74,13 @@ class SiteSchema(Schema):
     # When the site is public, but one of the configurations is internal,
     # then the 'include' mechanism would also show the data of internal
     # configuration - even if the request was made without a login.
+
+    outer_site = Relationship(
+        related_view="api.site_detail",
+        related_view_kwargs={"id": "<outer_site_id>"},
+        include_resource_linkage=True,
+        type_="site",
+        schema="SiteSchema",
+        id_field="id",
+        allow_none=True,
+    )

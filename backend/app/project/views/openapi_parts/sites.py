@@ -6,6 +6,11 @@
 
 """External openapi spec file for the sites endpoints."""
 
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.site_schema import SiteSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(SiteSchema)
+
 paths = {
     "/sites": {
         "get": {
@@ -27,15 +32,34 @@ paths = {
                 {"$ref": "#/components/parameters/filter"},
                 {"$ref": "#/components/parameters/hide_archived"},
             ],
-            "responses": {"200": {"$ref": "#/components/responses/Site_coll"}},
+            "responses": {
+                "200": {
+                    "description": "List of sites",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                },
+            },
             "description": "Retrieve Site from site",
             "operationId": "RetrieveacollectionofSiteobjects_0",
         },
         "post": {
             "tags": ["Sites"],
             "description": "create a Site",
-            "requestBody": {"$ref": "#/components/requestBodies/Site_inst"},
-            "responses": {"201": {"$ref": "#/components/responses/Site_inst"}},
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
+            },
+            "responses": {
+                "201": {
+                    "description": "Payload of the created site",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+            },
             "operationId": "CreateSite_0",
         },
     },
@@ -46,7 +70,15 @@ paths = {
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/site_id"},
             ],
-            "responses": {"200": {"$ref": "#/components/responses/Site_inst"}},
+            "responses": {
+                "200": {
+                    "description": "Instance of a site",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+            },
             "description": "Retrieve Site from site",
             "operationId": "RetrieveSiteinstance_0",
         },
@@ -55,15 +87,19 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/site_id"}],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/Site"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
                 "description": "Site attributes",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/Site_inst"},
+                "200": {
+                    "description": "Payload of the updated site",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
             "description": "Update Site attributes",
             "operationId": "UpdateSite_0",
@@ -159,366 +195,12 @@ paths = {
     },
 }
 components = {
-    "responses": {
-        "Site_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": [
-                                    {
-                                        "attributes": {
-                                            "created_at": "2022-08-31T12:00:00",
-                                            "updated_at": "2022-08-31T12:00:00",
-                                            "label": "test cfg",
-                                            "geometry": "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))",
-                                            "description": "some description",
-                                            "epsg_code": "4326",
-                                            "street": "Main street",
-                                            "street_number": "123d",
-                                            "city": "Hometown",
-                                            "zip_code": "11111",
-                                            "country": "Far away",
-                                            "building": "A70",
-                                            "room": "left",
-                                            "groups_ids": ["1", "2", "3"],
-                                            "is_public": False,
-                                            "is_internal": True,
-                                            "archived": False,
-                                            "elevation_datum_name": "MSL",
-                                            "elevation_datum_uri": "https://cv/elevation/123",
-                                            "elevation": 42.0,
-                                            "site_type_name": "example site",
-                                            "site_type_uri": "https://cv/sites/345",
-                                            "site_usage_name": "example usage",
-                                            "site_usage_uri": "https://cv/usages/345",
-                                            "website": "https://some.web/site",
-                                        },
-                                        "type": "site",
-                                        "id": "0",
-                                        "relationships": {
-                                            "created_by": {
-                                                "data": {
-                                                    "id": "1",
-                                                    "type": "user",
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "data": {
-                                                    "id": "1",
-                                                    "type": "user",
-                                                },
-                                            },
-                                        },
-                                    }
-                                ],
-                                "type": "string",
-                            }
-                        },
-                        "description": "Site get;",
-                    }
-                }
-            },
-            "description": "Request fulfilled, document follows",
-        },
-        "Site_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "attributes": {
-                                        "created_at": "2022-08-31T12:00:00",
-                                        "updated_at": "2022-08-31T12:00:00",
-                                        "label": "test cfg",
-                                        "geometry": "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))",
-                                        "description": "some description",
-                                        "epsg_code": "4326",
-                                        "street": "Main street",
-                                        "street_number": "123d",
-                                        "city": "Hometown",
-                                        "zip_code": "11111",
-                                        "country": "Far away",
-                                        "building": "A70",
-                                        "room": "left",
-                                        "groups_ids": ["1", "2", "3"],
-                                        "is_public": False,
-                                        "is_internal": True,
-                                        "archived": False,
-                                        "elevation_datum_name": "MSL",
-                                        "elevation_datum_uri": "https://cv/elevation/123",
-                                        "elevation": 42.0,
-                                        "site_type_name": "example site",
-                                        "site_type_uri": "https://cv/sites/345",
-                                        "site_usage_name": "example usage",
-                                        "site_usage_uri": "https://cv/usages/345",
-                                        "website": "https://some.web/site",
-                                    },
-                                    "type": "site",
-                                    "id": "0",
-                                    "relationships": {
-                                        "created_by": {
-                                            "data": {
-                                                "id": "1",
-                                                "type": "user",
-                                            },
-                                        },
-                                        "updated_by": {
-                                            "data": {
-                                                "id": "1",
-                                                "type": "user",
-                                            },
-                                        },
-                                    },
-                                },
-                                "type": "string",
-                            }
-                        },
-                    },
-                }
-            },
-            "description": "Request fulfilled, document follows",
-        },
-    },
-    "requestBodies": {
-        "Site_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {"type": "string"},
-                                            "geometry": {"type": "string"},
-                                            "description": {"type": "string"},
-                                            "epsg_code": {"type": "string"},
-                                            "street": {"type": "string"},
-                                            "street_number": {"type": "string"},
-                                            "city": {"type": "string"},
-                                            "zip_code": {"type": "string"},
-                                            "country": {"type": "string"},
-                                            "building": {"type": "string"},
-                                            "room": {"type": "string"},
-                                            "group_ids": {
-                                                "type": "array",
-                                                "items": {"type": "string"},
-                                            },
-                                            "is_internal": {"type": "boolean"},
-                                            "is_public": {"type": "boolean"},
-                                            "archived": {"type": "boolean"},
-                                            "elevation": {"type": "number"},
-                                            "elevation_datum_uri": {
-                                                "type": "string",
-                                            },
-                                            "elevation_datum_name": {
-                                                "type": "string",
-                                            },
-                                            "site_type_uri": {
-                                                "type": "string",
-                                            },
-                                            "site_type_name": {
-                                                "type": "string",
-                                            },
-                                            "site_usage_uri": {
-                                                "type": "string",
-                                            },
-                                            "site_usage_name": {
-                                                "type": "string",
-                                            },
-                                            "website": {
-                                                "type": "string",
-                                            },
-                                        },
-                                    }
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "label": "test cfg",
-                                        "geometry": "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))",
-                                        "description": "some description",
-                                        "epsg_code": "4326",
-                                        "street": "Main street",
-                                        "street_number": "123d",
-                                        "city": "Hometown",
-                                        "zip_code": "11111",
-                                        "country": "Far away",
-                                        "building": "A70",
-                                        "room": "left",
-                                        "groups_ids": ["1", "2", "3"],
-                                        "is_public": False,
-                                        "is_internal": True,
-                                        "elevation_datum_name": "MSL",
-                                        "elevation_datum_uri": "https://cv/elevation/123",
-                                        "elevation": 42.0,
-                                        "site_type_name": "example site",
-                                        "site_type_uri": "https://cv/sites/345",
-                                        "site_usage_name": "example usage",
-                                        "site_usage_uri": "https://cv/usages/345",
-                                        "website": "https://some.web/site",
-                                    },
-                                    "type": "site",
-                                },
-                            }
-                        },
-                        "description": "Site patch;Site post;Site delete;Site patch;Site post;Site delete;",
-                    }
-                }
-            }
-        },
-    },
     "parameters": {
         "site_id": {
             "name": "site_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
-    "schemas": {
-        "Site": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "id": {"type": "string"},
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "label": {"type": "string"},
-                                "geometry": {"type": "string"},
-                                "description": {"type": "string"},
-                                "epsg_code": {"type": "string"},
-                                "street": {"type": "string"},
-                                "street_number": {"type": "string"},
-                                "city": {"type": "string"},
-                                "zip_code": {"type": "string"},
-                                "country": {"type": "string"},
-                                "building": {"type": "string"},
-                                "room": {"type": "string"},
-                                "group_ids": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                },
-                                "is_internal": {"type": "boolean"},
-                                "is_public": {"type": "boolean"},
-                                "archived": {"type": "boolean"},
-                                "elevation": {"type": "number"},
-                                "elevation_datum_uri": {
-                                    "type": "string",
-                                },
-                                "elevation_datum_name": {
-                                    "type": "string",
-                                },
-                                "site_type_uri": {
-                                    "type": "string",
-                                },
-                                "site_type_name": {
-                                    "type": "string",
-                                },
-                                "site_usage_uri": {
-                                    "type": "string",
-                                },
-                                "site_usage_name": {
-                                    "type": "string",
-                                },
-                                "website": {"type": "string"},
-                            },
-                        },
-                        "relationships": {
-                            "type": "object",
-                            "properties": {
-                                "created_by": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string",
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "user",
-                                                },
-                                            },
-                                        }
-                                    },
-                                },
-                                "updated_by": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string",
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "user",
-                                                },
-                                            },
-                                        }
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    "example": {
-                        "id": "0",
-                        "attributes": {
-                            "created_at": "2022-08-31T12:00:00",
-                            "updated_at": "2022-08-31T12:00:00",
-                            "label": "test cfg",
-                            "geometry": "POLYGON ((10 10, 10 20, 20 20, 20 10, 10 10))",
-                            "description": "some description",
-                            "epsg_code": "4326",
-                            "street": "Main street",
-                            "street_number": "123d",
-                            "city": "Hometown",
-                            "zip_code": "11111",
-                            "country": "Far away",
-                            "building": "A70",
-                            "room": "left",
-                            "groups_ids": ["1", "2", "3"],
-                            "is_public": False,
-                            "is_internal": True,
-                            "archived": False,
-                            "elevation_datum_name": "MSL",
-                            "elevation_datum_uri": "https://cv/elevation/123",
-                            "elevation": 42.0,
-                            "site_type_name": "example site",
-                            "site_type_uri": "https://cv/sites/345",
-                            "site_usage_name": "example usage",
-                            "site_usage_uri": "https://cv/usages/345",
-                            "website": "https://some.web/site",
-                        },
-                        "type": "site",
-                        "relationships": {
-                            "created_by": {
-                                "data": {
-                                    "id": "1",
-                                    "type": "user",
-                                },
-                            },
-                            "updated_by": {
-                                "data": {
-                                    "id": "1",
-                                    "type": "user",
-                                },
-                            },
-                        },
-                    },
-                }
-            },
-            "description": "Site Schema;",
         },
     },
 }

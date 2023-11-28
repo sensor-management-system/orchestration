@@ -561,7 +561,7 @@ api.route(
     "/configurations/<int:configuration_id>/configuration-parameter-value-change-actions"
 )
 # Sites
-api.route(SiteList, "site_list", "/sites")
+api.route(SiteList, "site_list", "/sites", "/sites/<int:outer_site_id>/inner-sites")
 api.route(SiteDetail, "site_detail", "/sites/<int:id>")
 
 # Usage statistics

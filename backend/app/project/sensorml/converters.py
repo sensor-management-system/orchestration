@@ -11,7 +11,7 @@ from typing import List, Optional
 from geoalchemy2.shape import to_shape
 
 from ..api.helpers.configuration_helpers import build_tree
-from ..api.models import Configuration
+from ..api.models import Configuration, Site
 from ..api.models.base_model import db
 from ..api.permissions.rules import filter_visible
 from ..extensions.instances import pidinst
@@ -1629,6 +1629,20 @@ class SiteConverter:
     def sml_components(self) -> Optional[SmlComponents]:
         """Return the sml components."""
         sml_component_list = []
+
+        for inner_site in filter_visible(
+            db.session.query(Site).filter_by(outer_site_id=self.site.id)
+        ):
+            sml_physical_system = SiteConverter(
+                inner_site, self.cv_url, self.url_lookup
+            ).sml_physical_system()
+            sml_component = SmlComponent(
+                sml_physical_system=sml_physical_system,
+                xlink_href=self.url_lookup(inner_site),
+                name=cleanup.identifier(inner_site.label),
+                xlink_title=f"Link to Site {inner_site.id}",
+            )
+            sml_component_list.append(sml_component)
 
         for configuration in filter_visible(
             db.session.query(Configuration).filter_by(site_id=self.site.id)
