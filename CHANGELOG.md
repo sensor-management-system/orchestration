@@ -20,6 +20,8 @@ Changed:
 - Increased number of workers for gunicorn
 - Included material design icons for styleguidist in frontend to avoid calling external ressources 
 
+Fixed:
+- information about selected item in configuration tree sticks while scrolling
 
 ## 1.7.0 - 2023-11-06
 
