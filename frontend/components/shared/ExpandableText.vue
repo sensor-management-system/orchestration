@@ -68,14 +68,14 @@ import { shortenRight } from '@/utils/stringHelpers'
 @Component
 export default class ExpandableText extends Vue {
     @Prop({
-      default: 'mdi-chevron-up',
+      default: 'mdi-unfold-more-vertical',
       required: false,
       type: String
     })
   private moreIcon!: string
 
     @Prop({
-      default: 'mdi-chevron-down',
+      default: 'mdi-unfold-less-vertical',
       required: false,
       type: String
     })

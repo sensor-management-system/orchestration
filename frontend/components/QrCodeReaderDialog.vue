@@ -63,7 +63,7 @@ permissions and limitations under the Licence.
           <v-row>
             <v-col cols="12">
               <label>URL</label>
-              <expandable-text :value="scanResult" :shorten-at="60" more-icon="mdi-unfold-more-vertical" less-icon="mdi-unfold-less-vertical" />
+              <ExpandableText :value="scanResult" :shorten-at="60" />
               <v-btn icon :href="scanResult" target="_blank">
                 <v-icon small title="Open in new tab">
                   mdi-open-in-new

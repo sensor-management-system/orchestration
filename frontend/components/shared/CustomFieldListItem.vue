@@ -68,20 +68,16 @@ permissions and limitations under the Licence.
         <v-col>
           <label>Key:</label>
           <span @click.stop>
-            <expandable-text
+            <ExpandableText
               :value="value.key"
-              more-icon="mdi-unfold-more-vertical"
-              less-icon="mdi-unfold-less-vertical"
             />
           </span>
         </v-col>
         <v-col>
           <label>Value:</label>
           <span @click.stop>
-            <expandable-text
+            <ExpandableText
               :value="value.value"
-              more-icon="mdi-unfold-more-vertical"
-              less-icon="mdi-unfold-less-vertical"
             />
           </span>
         </v-col>

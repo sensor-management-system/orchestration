@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
       <div class="d-flex align-center">
         <span class="text-caption">
           <span @click.stop>
-            <ExpandableText v-model="attachment.url" :shorten-at="60" more-icon="mdi-unfold-more-vertical" less-icon="mdi-unfold-less-vertical" />
+            <ExpandableText v-model="attachment.url" :shorten-at="60" />
           </span>
           <span v-if="attachment.createdAt && attachment.isUpload">
             uploaded at {{ attachment.createdAt | toUtcDateTimeString }}

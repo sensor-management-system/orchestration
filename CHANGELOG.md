@@ -13,6 +13,7 @@ Added:
 
 Changed:
 - change occurrencies of `TSM-Linking(s)` in the UI to `TSM Linking(s)`
+- adjust default icons for expandable text
 
 Fixed:
 - improved display of very long email addresses
