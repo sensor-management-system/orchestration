@@ -16,6 +16,8 @@ Changed:
 
 Fixed:
 - improved display of very long email addresses
+- search for site selection of configurations doesn't use preset filters
+  from the extended site search anymore
 
 
 ## 1.8.1 - 2023-11-28
