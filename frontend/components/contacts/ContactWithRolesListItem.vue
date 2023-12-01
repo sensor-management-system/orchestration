@@ -127,9 +127,13 @@ permissions and limitations under the Licence.
           md="4"
           lg="4"
           xl="5"
-          class="nowrap-truncate"
         >
-          {{ contact.email | orDefault }}
+          <expandable-text
+            :value="contact.email | orDefault"
+            :shorten-at="35"
+            less-icon="mdi-unfold-less-vertical"
+            more-icon="mdi-unfold-more-vertical"
+          />
           <a v-if="contact.email.length > 0" :href="'mailto:' + contact.email">
             <v-icon
               small
@@ -156,9 +160,13 @@ permissions and limitations under the Licence.
           md="4"
           lg="4"
           xl="5"
-          class="nowrap-truncate"
         >
-          {{ contact.website | orDefault }}
+          <expandable-text
+            :value="contact.website | orDefault"
+            :shorten-at="35"
+            less-icon="mdi-unfold-less-vertical"
+            more-icon="mdi-unfold-more-vertical"
+          />
           <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
             <v-icon
               small
@@ -231,13 +239,16 @@ import { Contact } from '@/models/Contact'
 import { ContactWithRoles } from '@/models/ContactWithRoles'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import ExpandableText from '@/components/shared/ExpandableText.vue'
+
 import { CvContactRole } from '@/models/CvContactRole'
 import { RoleNameMixin } from '@/mixins/RoleNameMixin'
 import { ContactRole } from '@/models/ContactRole'
 
 @Component({
   components: {
-    BaseExpandableListItem
+    BaseExpandableListItem,
+    ExpandableText
   }
 })
 export default class ContactWithRolesListItem extends mixins(RoleNameMixin) {
