@@ -11,6 +11,9 @@ SPDX-License-Identifier: HEESIL-1.0
 Added:
 - option to create site hierarchies
 
+Changed:
+- change occurrencies of `TSM-Linking(s)` in the UI to `TSM Linking(s)`
+
 Fixed:
 - improved display of very long email addresses
 

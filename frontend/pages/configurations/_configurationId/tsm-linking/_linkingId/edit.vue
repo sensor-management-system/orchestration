@@ -32,7 +32,7 @@
   <div>
     <v-card-actions>
       <v-card-title class="pl-0">
-        Edit TSM-Linking
+        Edit TSM Linking
       </v-card-title>
       <v-spacer />
       <SaveAndCancelButtons
