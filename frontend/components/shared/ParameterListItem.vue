@@ -78,7 +78,7 @@ permissions and limitations under the Licence.
             <td
               class="py-2"
             >
-              <expandable-text
+              <ExpandableText
                 :value="action.value"
                 :shorten-at="120"
               />

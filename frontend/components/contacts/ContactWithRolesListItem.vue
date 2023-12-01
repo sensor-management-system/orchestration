@@ -128,11 +128,9 @@ permissions and limitations under the Licence.
           lg="4"
           xl="5"
         >
-          <expandable-text
+          <ExpandableText
             :value="contact.email | orDefault"
             :shorten-at="35"
-            less-icon="mdi-unfold-less-vertical"
-            more-icon="mdi-unfold-more-vertical"
           />
           <a v-if="contact.email.length > 0" :href="'mailto:' + contact.email">
             <v-icon
@@ -161,11 +159,9 @@ permissions and limitations under the Licence.
           lg="4"
           xl="5"
         >
-          <expandable-text
+          <ExpandableText
             :value="contact.website | orDefault"
             :shorten-at="35"
-            less-icon="mdi-unfold-less-vertical"
-            more-icon="mdi-unfold-more-vertical"
           />
           <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
             <v-icon

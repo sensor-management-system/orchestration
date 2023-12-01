@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
             </div>
             <div v-else>
               <label>URL</label>
-              <expandable-text :value="editableText" shorten-at="60" more-icon="mdi-unfold-more-vertical" less-icon="mdi-unfold-less-vertical" />
+              <ExpandableText :value="editableText" shorten-at="60" />
             </div>
           </v-col>
           <v-col cols="2" align-self="center">
