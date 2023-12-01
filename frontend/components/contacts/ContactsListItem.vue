@@ -6,6 +6,7 @@ Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -117,9 +118,13 @@ permissions and limitations under the Licence.
           md="4"
           lg="4"
           xl="5"
-          class="nowrap-truncate"
         >
-          {{ contact.email | orDefault }}
+          <expandable-text
+            :value="contact.email | orDefault"
+            :shorten-at="35"
+            less-icon="mdi-unfold-less-vertical"
+            more-icon="mdi-unfold-more-vertical"
+          />
           <a v-if="contact.email.length > 0" :href="'mailto:' + contact.email">
             <v-icon
               small
@@ -146,9 +151,13 @@ permissions and limitations under the Licence.
           md="4"
           lg="4"
           xl="5"
-          class="nowrap-truncate"
         >
-          {{ contact.website | orDefault }}
+          <expandable-text
+            :value="contact.website | orDefault"
+            :shorten-at="35"
+            less-icon="mdi-unfold-less-vertical"
+            more-icon="mdi-unfold-more-vertical"
+          />
           <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
             <v-icon
               small
@@ -221,10 +230,12 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { Contact } from '@/models/Contact'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import ExpandableText from '@/components/shared/ExpandableText.vue'
 
 @Component({
   components: {
-    BaseExpandableListItem
+    BaseExpandableListItem,
+    ExpandableText
   }
 })
 export default class ContactsListItem extends Vue {

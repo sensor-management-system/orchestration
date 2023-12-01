@@ -11,6 +11,9 @@ SPDX-License-Identifier: HEESIL-1.0
 Added:
 - option to create site hierarchies
 
+Fixed:
+- improved display of very long email addresses
+
 
 ## 1.8.1 - 2023-11-28
 
