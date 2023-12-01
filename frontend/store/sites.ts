@@ -164,6 +164,12 @@ const actions: ActionTree<SitesState, RootState> = {
   async searchSites ({ commit }: { commit: Commit }, searchText: string = ''): Promise<void> {
     const sites = await this.$api.sites
       .setSearchText(searchText)
+      // In order to not use pre-assigned filters, we need to remove them.
+      .setSearchedPermissionGroups([])
+      .setSearchedCreatorId(null)
+      .setSearchedSiteUsages([])
+      .setSearchedSiteTypes([])
+      .setSearchIncludeArchivedSites(false)
       .searchAll()
     commit('setSites', sites)
   },
