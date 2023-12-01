@@ -79,7 +79,7 @@
                       </v-icon>
                     </v-btn>
                   </template>
-                  <span>No permission to add TSM-Linking for <em>{{ item.shortName }}</em>.</span>
+                  <span>No permission to add TSM Linking for <em>{{ item.shortName }}</em>.</span>
                 </v-tooltip>
               </template>
             </DevicesListItem>

@@ -45,7 +45,7 @@
           nuxt
           :to="'/configurations/' + configurationId + '/tsm-linking/new'"
         >
-          Add TSM-Linking
+          Add TSM Linking
         </v-btn>
       </v-card-actions>
     </v-card>

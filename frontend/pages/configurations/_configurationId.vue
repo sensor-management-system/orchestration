@@ -175,7 +175,7 @@ export default class ConfigurationsIdPage extends Vue {
       },
       {
         to: '/configurations/' + this.configurationId + '/tsm-linking',
-        name: 'TSM-Linkings',
+        name: 'TSM Linkings',
         disabled: !this.$auth.loggedIn
       }
     ])

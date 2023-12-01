@@ -174,7 +174,7 @@ export default class ConfigurationNewPage extends Vue {
       },
       {
         name:
-        'TSM-Linkings',
+        'TSM Linkings',
         disabled: true
       }
     ])

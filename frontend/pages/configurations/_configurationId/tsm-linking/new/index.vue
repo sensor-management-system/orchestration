@@ -32,7 +32,7 @@
   <div>
     <v-card-actions>
       <v-card-title class="pl-0">
-        New TSM-Linking
+        New TSM Linking
       </v-card-title>
       <v-spacer />
       <v-btn
