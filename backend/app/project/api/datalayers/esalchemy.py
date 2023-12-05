@@ -41,6 +41,23 @@ class MultiFieldMatchFilter:
         return result
 
 
+@dataclass
+class MultiFieldWildcardFilter:
+    """Class to apply a wildcard filter."""
+
+    value: str
+    fields: List[str]
+
+    def to_query(self):
+        """Convert the filter to a query."""
+        or_parts = []
+        for single_field in self.fields:
+            single_search = {"wildcard": {single_field: {"value": self.value}}}
+            or_parts.append(single_search)
+        result = {"bool": {"should": or_parts}}
+        return result
+
+
 class MustNotFilter:
     """Class to represent an inverted filter."""
 
@@ -438,6 +455,12 @@ class EsQueryBuilder:
                                 )
                             )
                         )
+                    elif "*" in part:
+                        and_filters.append(
+                            MultiFieldWildcardFilter(
+                                value=part, fields=text_search_fields
+                            )
+                        )
                     else:
                         and_filters.append(
                             MultiFieldMatchFilter(
@@ -448,7 +471,8 @@ class EsQueryBuilder:
             sub_filters.append(AndFilter(and_filters).simplify())
         if self.filters:
             sub_filters.append(FilterParser.parse(filter_list=self.filters))
-        return AndFilter(sub_filters).simplify()
+        result = AndFilter(sub_filters).simplify()
+        return result
 
 
 class EsSqlalchemyDataLayer(SqlalchemyDataLayer):
