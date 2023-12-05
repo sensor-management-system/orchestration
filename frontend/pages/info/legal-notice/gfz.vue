@@ -41,7 +41,7 @@ permissions and limitations under the Licence.
         Provider
       </h2>
       <p>
-        The provider of the internet presence <a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a> is the <a href="https://www.gfz-potsdam.de/en/home/" target="_blank">Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
+        The provider of the internet presence <a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a> is the <a href="https://www.gfz-potsdam.de/en/" target="_blank">Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
       </p>
     </section>
     <section class="mb-6">
@@ -86,7 +86,7 @@ permissions and limitations under the Licence.
       </p>
       <p>
         Editor, conception, coordination (<a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a>)<br>
-        Nils Brinckmann (<a href="https://www.gfz-potsdam.de/en/centre/escience-centre" target="_blank">eScience-Centre</a>)<br>
+        Nils Brinckmann (<a href="https://www.gfz-potsdam.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
         Tel.: +49 331 6264-28940<br>
         E-Mail: <a href="mailto:nils.brinckmann@gfz-potsdam.de">nils.brinckmann@gfz-potsdam.de</a>
       </p>
@@ -96,7 +96,7 @@ permissions and limitations under the Licence.
         Technical Realization and support
       </h2>
       <p>
-        Responsible for the technical implementation is the <a href="https://www.gfz-potsdam.de/en/centre/escience-centre" target="_blank">eScience-Centre</a><br>
+        Responsible for the technical implementation is the <a href="https://www.gfz-potsdam.de/en/section/escience-centre" target="_blank">eScience-Centre</a><br>
         E-Mail: <a href="mailto:datahub-support@gfz-potsdam.de">datahub-support@gfz-potsdam.de</a>
       </p>
     </section>
