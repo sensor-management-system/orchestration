@@ -53,27 +53,10 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="6">
         <label>Persistent identifier (PID)</label>
-        <v-tooltip
-          :disabled="!value.persistentIdentifier"
-          :color="pidTooltipColor"
-          bottom
-        >
-          <template #activator="{ on, attrs }">
-            <span
-              :class="value.persistentIdentifier ? 'clickable' : ''"
-              v-bind="attrs"
-              v-on="on"
-              @click="copyPidToClipboard"
-              @mouseenter="resetPidTooltip"
-            >{{ value.persistentIdentifier | orDefault }}</span>
-          </template>
-          <span>{{ pidTooltipText }}</span>
-        </v-tooltip>
-        <v-btn v-if="value.persistentIdentifier" icon @click="showPidQrCode = true">
-          <v-icon>
-            mdi-qrcode
-          </v-icon>
-        </v-btn>
+        <pid-tooltip
+          :value="value.persistentIdentifier"
+          show-button
+        />
       </v-col>
     </v-row>
     <v-row>
@@ -193,7 +176,6 @@ permissions and limitations under the Licence.
         </span>
       </v-col>
     </v-row>
-    <qr-code-dialog v-model="showPidQrCode" :text="persistentIdentifierUrl" />
   </div>
 </template>
 
@@ -217,15 +199,18 @@ import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
-import VisibilityChip from '@/components/VisibilityChip.vue'
+
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import PidTooltip from '@/components/shared/PidTooltip.vue'
 import QrCodeDialog from '@/components/QrCodeDialog.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
 
 @Component({
   components: {
     PermissionGroupChips,
-    VisibilityChip,
-    QrCodeDialog
+    PidTooltip,
+    QrCodeDialog,
+    VisibilityChip
   },
   computed: {
     ...mapState('vocabulary', ['platformtypes']),
@@ -235,9 +220,6 @@ import QrCodeDialog from '@/components/QrCodeDialog.vue'
 })
 export default class PlatformBasicData extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
-  private pidTooltipText = 'Click to copy PID-URL'
-  private pidTooltipColor = 'default'
-  private showPidQrCode: boolean = false
 
   @Prop({
     default: () => new Platform(),
@@ -334,46 +316,9 @@ export default class PlatformBasicData extends Vue {
   get platformURN () {
     return createPlatformUrn(this.value, this.platformtypes)
   }
-
-  /**
-   * copies the PID-URL to the clipboard and changes the tooltip's text and color
-   *
-   * @returns {void}
-   */
-  copyPidToClipboard (): void {
-    if (!this.value.persistentIdentifier) { return }
-    navigator.clipboard.writeText(this.persistentIdentifierUrl)
-    this.pidTooltipText = 'Copied!'
-    this.pidTooltipColor = 'green'
-  }
-
-  get persistentIdentifierUrl (): string {
-    if (!this.value.persistentIdentifier) {
-      return ''
-    }
-    const pidBaseUrl = process.env.pidBaseUrl
-    if (!pidBaseUrl) {
-      return ''
-    }
-    return pidBaseUrl + '/' + this.value.persistentIdentifier
-  }
-
-  /**
-   * resets the PID tooltip's color and text
-   *
-   * @returns {void}
-   */
-  resetPidTooltip (): void {
-    this.pidTooltipText = 'Click to copy PID-URL'
-    this.pidTooltipColor = 'default'
-  }
 }
 </script>
 
 <style lang="scss">
 @import "@/assets/styles/_readonly_views.scss";
-
-.clickable {
-    cursor: pointer;
-}
 </style>

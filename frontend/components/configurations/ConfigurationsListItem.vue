@@ -90,6 +90,32 @@ permissions and limitations under the Licence.
           xl="1"
           class="font-weight-medium"
         >
+          Persistent Identifier:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          <pid-tooltip :value="configuration.persistentIdentifier" />
+        </v-col>
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
           Start:
         </v-col>
         <v-col
@@ -173,17 +199,19 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 
 import { Configuration } from '@/models/Configuration'
 
-import StatusChip from '@/components/shared/StatusChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
-import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import PidTooltip from '@/components/shared/PidTooltip.vue'
+import StatusChip from '@/components/shared/StatusChip.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
 
 @Component({
   components: {
-    StatusChip,
-    VisibilityChip,
+    BaseExpandableListItem,
     PermissionGroupChips,
-    BaseExpandableListItem
+    PidTooltip,
+    StatusChip,
+    VisibilityChip
   }
 })
 export default class ConfigurationsListItem extends Vue {
