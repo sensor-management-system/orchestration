@@ -16,6 +16,7 @@ from project.api.datalayers.esalchemy import (
     ExistsFilter,
     FilterParser,
     MultiFieldMatchFilter,
+    MultiFieldWildcardFilter,
     MustNotFilter,
     NestedElementFilterWrapper,
     OrFilter,
@@ -144,6 +145,8 @@ class TestEsQueryBuilder(unittest.TestCase):
             "\"super strange 'quoting": MultiFieldMatchFilter(
                 query="super strange 'quoting", type_="phrase", fields=["*"]
             ),
+            # And we support wildcards
+            "A*B": MultiFieldWildcardFilter(value="A*B", fields=["*"]),
         }
         for q, expected_filter in expected_filters.items():
             builder = EsQueryBuilder()
@@ -275,9 +278,42 @@ class TestEsQueryBuilder(unittest.TestCase):
         self.assertEqual(es_filter, expected)
 
 
-class TestMultiMatchStringFilter(unittest.TestCase):
+class TestMultiFieldWildcardFilter(unittest.TestCase):
+    """Tests for the MultiFieldWildcardFilter."""
+
+    def test_to_query(self):
+        """Test the to_query method."""
+        wildcard_filter = MultiFieldWildcardFilter(
+            value="bla*", fields=["this", "that"]
+        )
+        wildcard_query = wildcard_filter.to_query()
+
+        expected = {
+            "bool": {
+                "should": [
+                    {
+                        "wildcard": {
+                            "this": {
+                                "value": "bla*",
+                            }
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "that": {
+                                "value": "bla*",
+                            }
+                        }
+                    },
+                ]
+            }
+        }
+        self.assertEqual(wildcard_query, expected)
+
+
+class TestMultiFieldMatchFilter(unittest.TestCase):
     """
-    This are the tests for the MultiMatchStringFilter.
+    This are the tests for the MultiFieldMatchFilter.
 
     The filter is used to search for a string (with full es support)
     in all the fields.
