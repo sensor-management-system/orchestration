@@ -51,27 +51,10 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="12" md="6">
         <label>Persistent identifier (PID)</label>
-        <v-tooltip
-          :disabled="!value.persistentIdentifier"
-          :color="pidTooltipColor"
-          bottom
-        >
-          <template #activator="{ on, attrs }">
-            <span
-              :class="value.persistentIdentifier ? 'clickable' : ''"
-              v-bind="attrs"
-              v-on="on"
-              @click="copyPidToClipboard"
-              @mouseenter="resetPidTooltip"
-            >{{ value.persistentIdentifier | orDefault }}</span>
-          </template>
-          <span>{{ pidTooltipText }}</span>
-        </v-tooltip>
-        <v-btn v-if="value.persistentIdentifier" icon @click="showPidQrCode = true">
-          <v-icon>
-            mdi-qrcode
-          </v-icon>
-        </v-btn>
+        <pid-tooltip
+          :value="value.persistentIdentifier"
+          show-button
+        />
       </v-col>
     </v-row>
     <v-row>
@@ -197,7 +180,6 @@ permissions and limitations under the Licence.
         {{ value.dualUse ? 'yes' : 'no' }}
       </v-col>
     </v-row>
-    <qr-code-dialog v-model="showPidQrCode" :text="persistentIdentifierUrl" />
   </div>
 </template>
 
@@ -209,26 +191,25 @@ import { DeviceType } from '@/models/DeviceType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
-import VisibilityChip from '@/components/VisibilityChip.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import PidTooltip from '@/components/shared/PidTooltip.vue'
 import QrCodeDialog from '@/components/QrCodeDialog.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 @Component({
   components: {
-    VisibilityChip,
     PermissionGroupChips,
-    QrCodeDialog
+    PidTooltip,
+    QrCodeDialog,
+    VisibilityChip
   }
 })
 export default class DeviceBasicData extends Vue {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
   private deviceTypes: DeviceType[] = []
-  private pidTooltipText: string = 'Copy PID-URL'
-  private pidTooltipColor: string = 'default'
-  private showPidQrCode: boolean = false
 
   @Prop({
     default: () => new Device(),
@@ -324,33 +305,6 @@ export default class DeviceBasicData extends Vue {
    *
    * @returns {void}
    */
-  copyPidToClipboard (): void {
-    if (!this.value.persistentIdentifier) { return }
-    navigator.clipboard.writeText(this.persistentIdentifierUrl)
-    this.pidTooltipText = 'Copied!'
-    this.pidTooltipColor = 'green'
-  }
-
-  get persistentIdentifierUrl (): string {
-    if (!this.value.persistentIdentifier) {
-      return ''
-    }
-    const pidBaseUrl = process.env.pidBaseUrl
-    if (!pidBaseUrl) {
-      return ''
-    }
-    return pidBaseUrl + '/' + this.value.persistentIdentifier
-  }
-
-  /**
-   * resets the PID tooltip's color and text
-   *
-   * @returns {void}
-   */
-  resetPidTooltip (): void {
-    this.pidTooltipText = 'Click to copy PID-URL'
-    this.pidTooltipColor = 'default'
-  }
 }
 </script>
 

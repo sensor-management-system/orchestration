@@ -104,6 +104,32 @@ permissions and limitations under the Licence.
           xl="1"
           class="font-weight-medium"
         >
+          Persistent Identifier:
+        </v-col>
+        <v-col
+          cols="8"
+          xs="8"
+          sm="9"
+          md="4"
+          lg="4"
+          xl="5"
+          class="nowrap-truncate"
+        >
+          <pid-tooltip :value="platform.persistentIdentifier" />
+        </v-col>
+      </v-row>
+      <v-row
+        no-gutters
+      >
+        <v-col
+          cols="4"
+          xs="4"
+          sm="3"
+          md="2"
+          lg="2"
+          xl="1"
+          class="font-weight-medium"
+        >
           Manufacturer:
         </v-col>
         <v-col
@@ -228,19 +254,21 @@ import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 
-import StatusChip from '@/components/shared/StatusChip.vue'
-import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
-import VisibilityChip from '@/components/VisibilityChip.vue'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
+import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
+import PidTooltip from '@/components/shared/PidTooltip.vue'
+import StatusChip from '@/components/shared/StatusChip.vue'
+import VisibilityChip from '@/components/VisibilityChip.vue'
 
 @Component({
   components: {
-    StatusChip,
-    PermissionGroupChips,
-    VisibilityChip,
     BaseExpandableListItem,
-    ExtendedItemName
+    ExtendedItemName,
+    PermissionGroupChips,
+    PidTooltip,
+    StatusChip,
+    VisibilityChip
   },
   computed: mapGetters('vocabulary', ['getPlatformTypeByUri', 'getEquipmentstatusByUri'])
 })

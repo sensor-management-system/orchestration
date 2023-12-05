@@ -87,10 +87,10 @@ sw.*
 .DS_Store
 
 # Vim swap files
-*.swp
+.*.swp
+.*.swo
 
 # docker runtime environment
 .bash_history
 /.config/configstore/update-notifier-npm.json
-*.swo
 gfz-staging-oidc.env
