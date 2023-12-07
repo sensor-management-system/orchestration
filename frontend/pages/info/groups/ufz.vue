@@ -35,12 +35,23 @@ permissions and limitations under the Licence.
       <v-card-text>
         <p>
           Groups and roles are handled using the <b>Data Projects</b>.
-          You can access them at <a href="https://webapp.ufz.de/dataprojects" target="_blank" style="text-decoration: none">
-            <strong>UFZ DPVM</strong>
+          The project management will be handled in
+          <a href="https://hifis.net/doc/helmholtz-aai/" target="_blank" style="text-decoration: none">
+            <strong>HIFIS VO</strong>
             <v-icon small>
               mdi-open-in-new
             </v-icon>
           </a>.
+          Please open a ticket in
+          our
+          <a href="https://wkdv-support.ufz.de" target="_blank" style="text-decoration: none">
+            <strong>WKDV Ticket system</strong>
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon>
+          </a>
+          if you need a new project or permission in an
+          existing project.
         </p>
       </v-card-text>
     </v-card>
@@ -204,10 +215,12 @@ permissions and limitations under the Licence.
             Only the owner can view, edit or delete the entity.
           </v-col>
           <v-col>
-            The user must be loggin in to see the entity. Edit and delete permissions are handled by the role memberships of the associated groups.
+            The user must be loggin in to see the entity. Edit and delete permissions are handled by the role
+            memberships of the associated groups.
           </v-col>
           <v-col>
-            The entity is visible for everyone. Edit and delete permissions are handled by the role memberships of the associated groups (similar to <code>Internal</code>).
+            The entity is visible for everyone. Edit and delete permissions are handled by the role memberships of the
+            associated groups (similar to <code>Internal</code>).
           </v-col>
         </v-row>
       </v-card-text>
