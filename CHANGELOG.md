@@ -15,6 +15,8 @@ Added:
 
 Changed:
 - change occurrencies of `TSM-Linking(s)` in the UI to `TSM Linking(s)`
+- (UFZ): changed to SMS-IDL to use Hifis VO (and subgroups) and allowed syncing of these groups
+- (UFZ): Switched link for UFZ group management to Hifis VOs
 - adjust default icons for expandable text
 
 Fixed:
