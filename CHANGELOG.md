@@ -11,6 +11,10 @@ SPDX-License-Identifier: HEESIL-1.0
 Added:
 -Updated the content of legal notice, privacy policy and terms of use within the footer pages for a FZJ instance's demo version.
 
+Changed:
+- improved sort logic for mounts and unmounts that have the very same date
+
+
 ## 1.9.0 - 2023-12-07
 
 Added:
