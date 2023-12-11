@@ -160,6 +160,10 @@ export class PlatformMountTimelineAction implements IMountTimelineAction<Platfor
     this._mountAction = mountAction
   }
 
+  get id (): string {
+    return this._mountAction.id
+  }
+
   get key (): string {
     return 'Platform-mount-action-' + this._mountAction.id
   }
@@ -220,6 +224,10 @@ export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMou
 
   constructor (mountAction: DeviceMountAction) {
     this._mountAction = mountAction
+  }
+
+  get id (): string {
+    return this._mountAction.id
   }
 
   get key (): string {
@@ -284,6 +292,10 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction<Platf
     this._mountAction = mountAction
   }
 
+  get id (): string {
+    return this._mountAction.id
+  }
+
   get key (): string {
     return 'Platform-unmount-action-' + this._mountAction.id
   }
@@ -344,6 +356,10 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceM
 
   constructor (mountAction: DeviceMountAction) {
     this._mountAction = mountAction
+  }
+
+  get id (): string {
+    return this._mountAction.id
   }
 
   get key (): string {
