@@ -179,7 +179,7 @@ services:
       PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: gfz
       SMS_FRONTEND_URL: https://sensors.gfz-potsdam.de
-      # TODO: Readd this line to activate b2inst again
+      SMS_VERSION: ${SMS_VERSION}
       B2INST_TOKEN: ${B2INST_TOKEN}
       B2INST_URL: https://b2inst.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE

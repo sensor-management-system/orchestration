@@ -10,6 +10,7 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Added:
 - Updated the content of legal notice, privacy policy and terms of use within the footer pages for a FZJ instance's demo version.
+- show version numbers based on git tags
 - Unit for accuracy
 
 Changed:

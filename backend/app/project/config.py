@@ -77,6 +77,7 @@ class BaseConfig:
     B2INST_URL = env("B2INST_URL", "https://b2inst-test.gwdg.de")
     B2INST_TOKEN = env("B2INST_TOKEN", "")
     B2INST_COMMUNITY = env("B2INST_COMMUNITY", "EUDAT")
+    SMS_VERSION = env("SMS_VERSION", "develop")
 
 
 class DevelopmentConfig(BaseConfig):

@@ -1,6 +1,6 @@
 {
   "name": "sensor_management_frontend",
-  "version": "1.0.0",
+  "version": "0.0.1-develop",
   "description": "An application to help scientists and technicans to manage sensors, measurement setups and campaigns.",
   "license": "SEE LICENSE IN <LICENSE>",
   "homepage": "https://gitlab.hzdr.de/hub-terra/sms",
