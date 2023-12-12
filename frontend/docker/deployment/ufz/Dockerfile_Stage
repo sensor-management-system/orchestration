@@ -35,6 +35,9 @@ ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
 ARG CV_BACKEND_URL_ARG=https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV CV_BACKEND_URL $CV_BACKEND_URL_ARG
 
+ARG SMS_VERSION_ARG=develop
+ENV SMS_VERSION $SMS_VERSION_ARG
+
 ENV INSTITUTE ufz
 
 # Then the client id for open id connect and the authority to contact
@@ -92,6 +95,10 @@ ENV IDL_SYNC_URL $IDL_SYNC_URL_ARG
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend
 WORKDIR /smsfrontend
+
+# set version in package.json
+RUN sed -i 's/"version": ".*"/"version": "'"$SMS_VERSION"'"/' package.json
+
 RUN npm ci
 RUN npm run build
 

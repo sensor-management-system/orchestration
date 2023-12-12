@@ -34,10 +34,13 @@ ENV NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME 1800000
 
 ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
 
+ARG SMS_VERSION_ARG=develop
+ENV SMS_VERSION $SMS_VERSION_ARG
 
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend
 WORKDIR /smsfrontend
+RUN sed -i 's/"version": ".*"/"version": "'"$SMS_VERSION"'"/' package.json
 RUN npm ci
 RUN npm run build
 

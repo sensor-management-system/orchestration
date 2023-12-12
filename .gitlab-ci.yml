@@ -282,6 +282,7 @@ build-deploy-image-nginx-gfz-staging:
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+          --build-arg SMS_VERSION=$CI_COMMIT_SHORT_SHA \
           .
     - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-latest"
   cache:
@@ -307,6 +308,7 @@ build-deploy-image-nginx-gfz-prod:
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/nginx/gfz/prod/Dockerfile \
           --build-arg CLIENT_ID_ARG=$CLIENT_ID \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+          --build-arg SMS_VERSION=$CI_COMMIT_TAG \
           .
     - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}"
   cache:
@@ -325,7 +327,7 @@ build-deploy-image-nginx-ufz-staging:
   stage: build
   extends: .docker_build
   script:
-    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" --build-arg SMS_VERSION=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA} -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
     - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
   allow_failure: true
   rules:
@@ -572,6 +574,7 @@ deploy-gfz-staging:
     PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
+    SMS_VERSION: ${CI_COMMIT_SHORT_SHA}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -621,6 +624,7 @@ deploy-gfz-prod:
     PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
+    SMS_VERSION: ${CI_COMMIT_TAG}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -667,6 +671,7 @@ build-ufz-backend-image-staging:
                         --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
                         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
                         --build-arg VCS_REF=$CI_COMMIT_SHA \
+                        --build-arg SMS_VERSION=$CI_COMMIT_SHORT_SHA \
                       .
         docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest"
       else
@@ -676,6 +681,7 @@ build-ufz-backend-image-staging:
                 --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
                 --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
                 --build-arg VCS_REF=$CI_COMMIT_SHA \
+                --build-arg SMS_VERSION=$CI_COMMIT_TAG \
               .
         docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG"
       fi
@@ -699,6 +705,7 @@ build-ufz-backend-image-prod:
         --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
+        --build-arg SMS_VERSION=$CI_COMMIT_TAG \
       .
     - docker push "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG"
 
@@ -719,6 +726,7 @@ build-ufz-frontend-image-staging:
               --build-arg CLIENT_ID_ARG=$CLIENT_ID \
               --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
               --build-arg VCS_REF=$CI_COMMIT_SHA \
+              --build-arg SMS_VERSION=$CI_COMMIT_SHORT_SHA \
             .
         docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-latest"
       else
@@ -726,6 +734,7 @@ build-ufz-frontend-image-staging:
                 --build-arg CLIENT_ID_ARG=$CLIENT_ID \
                 --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
                 --build-arg VCS_REF=$CI_COMMIT_SHA \
+                --build-arg SMS_VERSION=$CI_COMMIT_TAG \
               .
         docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG"    
       fi
@@ -745,6 +754,7 @@ build-ufz-frontend-image-prod:
         --build-arg CLIENT_ID_ARG=$CLIENT_ID \
         --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
         --build-arg VCS_REF=$CI_COMMIT_SHA \
+        --build-arg SMS_VERSION=$CI_COMMIT_TAG \
       .
     - docker push "$CI_REGISTRY_IMAGE/frontend:ufz-prod-$CI_COMMIT_TAG"
 

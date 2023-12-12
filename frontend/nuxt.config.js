@@ -92,6 +92,7 @@ export default {
   */
   target: 'server',
   env: {
+    version: process.env.npm_package_version,
     basePath: process.env.BASE_URL || '/',
     smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000/rdm/svm-api/v1',
     cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001/api',

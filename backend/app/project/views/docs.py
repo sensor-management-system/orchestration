@@ -10,7 +10,6 @@
 
 import importlib
 import json
-import os
 import pkgutil
 
 from flask import Blueprint, current_app, render_template, url_for
@@ -57,6 +56,7 @@ def openapi_json():
     # to all the other routes as well.
     url = docs_routes.url_prefix
     description = "SMS Instance"
+    backend_version = current_app.config.get("SMS_VERSION")
     servers = [
         {
             "url": url,
@@ -94,6 +94,7 @@ def openapi_json():
 
     result = render_template(
         "openapi.json",
+        backend_version=backend_version,
         servers=servers,
         token_endpoint=token_endpoint,
         authorization_endpoint=authorization_endpoint,

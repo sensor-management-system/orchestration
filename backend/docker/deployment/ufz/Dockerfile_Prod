@@ -11,6 +11,9 @@
 
 FROM python:3.11-slim-buster as base
 
+ARG SMS_VERSION_ARG=develop
+ENV SMS_VERSION $SMS_VERSION_ARG
+
 ARG URL_PREFIX_ARG=/sms/backend/api/v1/
 ENV URL_PREFIX $URL_PREFIX_ARG
 

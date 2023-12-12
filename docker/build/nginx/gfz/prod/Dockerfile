@@ -40,10 +40,13 @@ ENV NUXT_ENV_MATOMO_TRACKER_URL https://webstats.gfz-potsdam.de/matomo.php
 ENV NUXT_ENV_MATOMO_SCRIPT_URL https://webstats.gfz-potsdam.de/matomo.js
 ENV NUXT_ENV_MATOMO_SITE_ID 30
 
+ARG SMS_VERSION_ARG=develop
+ENV SMS_VERSION $SMS_VERSION_ARG
 
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend
 WORKDIR /smsfrontend
+RUN sed -i 's/"version": ".*"/"version": "'"$SMS_VERSION"'"/' package.json
 RUN npm ci
 RUN npm run build
 

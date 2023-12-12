@@ -71,6 +71,7 @@ services:
     ports:
       - "5000:5000"
     environment:
+      SMS_VERSION: develop
       FLASK_DEBUG: ${FLASK_DEBUG:-1}
       URL_PREFIX: ${URL_PREFIX:-/backend/rdm/svm-api/v1}
       STATIC_URL: ${STATIC_URL:-/static/backend}
@@ -169,6 +170,7 @@ services:
     ports:
       - 3000:3000
     environment:
+      SMS_VERSION: develop
       BASE_URL: ${BASE_URL:-/}
       SMS_BACKEND_URL: ${SMS_BACKEND_URL:-https://localhost.localdomain/backend/rdm/svm-api/v1}
       CV_BACKEND_URL: ${CV_BACKEND_URL:-/cv/api/v1}

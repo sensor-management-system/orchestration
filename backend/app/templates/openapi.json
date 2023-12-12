@@ -3,7 +3,7 @@
   "info": {
     "title": "Sensor Management System SMS",
     "description": "REST API for managing sensor metadata. This API is based on {json:api} specification see: https://jsonapi.org/",
-    "version": "0.01",
+    "version": "{{ backend_version }}",
     "contact": {
       "email": "gitlab-incoming+hub-terra-sms-orchestration-3268-issue-@hzdr.de",
       "name": "SMS Service-Desk",

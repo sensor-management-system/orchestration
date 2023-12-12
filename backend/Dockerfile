@@ -21,6 +21,9 @@ LABEL maintainer="Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>" \
     org.opencontainers.image.revision=$VCS_REF \
     org.opencontainers.image.created=$BUILD_DATE
 
+ARG SMS_VERSION_ARG=develop
+ENV SMS_VERSION $SMS_VERSION_ARG
+
 # set working directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app

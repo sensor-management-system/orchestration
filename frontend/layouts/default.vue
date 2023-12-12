@@ -309,8 +309,18 @@ permissions and limitations under the Licence.
       >
         <v-col
           cols="12"
-          md="7"
-          offset-md="2"
+          md="2"
+          align-self="center"
+          class="caption text-center text--secondary"
+        >
+          <span>
+            Version: {{ version }}
+          </span>
+        </v-col>
+        <v-col
+          cols="12"
+          md="6"
+          offset-md="1"
           align-self="center"
           class="text-center caption text--secondary"
         >
@@ -341,7 +351,7 @@ permissions and limitations under the Licence.
           >
             Terms of Use
           </v-btn>
-          |&nbsp;<span class="ma-2 pl-3">&copy;&nbsp;{{ new Date().getFullYear() }}</span>
+          |&nbsp;<span class="ma-2 pl-3">&copy;&nbsp;{{ new Date().getFullYear() }}&nbsp;</span>
         </v-col>
         <v-col
           cols="12"
@@ -588,6 +598,9 @@ export default {
     },
     currentUrl () {
       return new URL(this.$route.fullPath, window.location.origin).href
+    },
+    version () {
+      return process.env.version
     }
   },
   watch: {
