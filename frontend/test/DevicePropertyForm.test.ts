@@ -97,6 +97,8 @@ describe('DevicePropertyForm', () => {
             max: 1000
           },
           accuracy: 0.1,
+          accuracyUnitUri: 'http://foo/unit/2',
+          accuracyUnitName: 'cm',
           failureValue: 0.01,
           resolution: 0.001,
           resolutionUnitUri: 'http://foo/unit/1',

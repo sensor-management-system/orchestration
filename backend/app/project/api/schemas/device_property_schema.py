@@ -92,6 +92,8 @@ class DevicePropertySchema(Schema):
     failure_value = fields.Float(allow_none=True)
     accuracy = fields.Float(allow_none=True)
     label = fields.Str(allow_none=True)
+    accuracy_unit_uri = fields.String(allow_none=True)
+    accuracy_unit_name = fields.String(allow_none=True)
     unit_uri = fields.Str(allow_none=True)
     unit_name = fields.Str(allow_none=True)
     compartment_uri = fields.Str(allow_none=True)

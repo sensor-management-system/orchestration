@@ -23,6 +23,8 @@ class DeviceProperty(db.Model, IndirectSearchableMixin, AuditMixin):
     measuring_range_max = db.Column(db.Float(), nullable=True)
     failure_value = db.Column(db.Float(), nullable=True)
     accuracy = db.Column(db.Float(), nullable=True)
+    accuracy_unit_uri = db.Column(db.String(256), nullable=True)
+    accuracy_unit_name = db.Column(db.String(256), nullable=True)
     label = db.Column(db.String(256), nullable=True)
     unit_uri = db.Column(db.String(256), nullable=True)  # CV
     unit_name = db.Column(db.String(256), nullable=True)  # CV
@@ -61,6 +63,8 @@ class DeviceProperty(db.Model, IndirectSearchableMixin, AuditMixin):
             "property_uri": self.property_uri,
             "sample_medium_name": self.sampling_media_name,
             "sample_medium_uri": self.sampling_media_uri,
+            "accuracy_unit_name": self.accuracy_unit_name,
+            "accuracy_unit_uri": self.accuracy_unit_uri,
             "resolution_unit_name": self.resolution_unit_name,
             "resolution_unit_uri": self.resolution_unit_uri,
             "aggregation_type_name": self.aggregation_type_name,

@@ -77,6 +77,8 @@ class TestDevicePropertyServices(BaseTestCase):
                     "sampling_media_name": "air",
                     "aggregation_type_name": "Average",
                     "aggregation_type_uri": "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
+                    "accuracy_unit_name": "%",
+                    "accuracy_unit_uri": "https://sensors.gfz-potsdam.de/cv/api/v1/units/1",
                     "description": "a test device property",
                 },
                 "relationships": {
@@ -114,6 +116,11 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(
             device_property.aggregation_type_uri,
             "https://sensors.gfz-potsdam.de/cv/api/v1/aggregationtypes/1/",
+        )
+        self.assertEqual(device_property.accuracy_unit_name, "%")
+        self.assertEqual(
+            device_property.accuracy_unit_uri,
+            "https://sensors.gfz-potsdam.de/cv/api/v1/units/1",
         )
         self.assertEqual(device_property.description, "a test device property")
         self.assertEqual(device_property.device_id, device.id)
@@ -175,6 +182,8 @@ class TestDevicePropertyServices(BaseTestCase):
             label="device property1",
             property_name="device_property1",
             description="Device property 1",
+            accuracy_unit_name="%",
+            accuracy_unit_uri="https://sensors.gfz-potsdam.de/cv/api/v1/units/1",
             device=device1,
         )
         device_property2 = DeviceProperty(
@@ -224,6 +233,14 @@ class TestDevicePropertyServices(BaseTestCase):
                     self.assertEqual(
                         property["attributes"]["description"],
                         device_property1.description,
+                    )
+                    self.assertEqual(
+                        property["attributes"]["accuracy_unit_name"],
+                        device_property1.accuracy_unit_name,
+                    )
+                    self.assertEqual(
+                        property["attributes"]["accuracy_unit_uri"],
+                        device_property1.accuracy_unit_uri,
                     )
                     # and we want to check the link for the device as well
                     device_link = property["relationships"]["device"]["links"][

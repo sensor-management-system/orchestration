@@ -432,7 +432,7 @@ describe('DeviceCalibrationActionSerializer', () => {
 
       expect(action).toEqual(expectedAction)
     })
-    it('can also handles associated device properties', () => {
+    it('can also handle associated device properties', () => {
       const contact = Contact.createFromObject({
         id: '3',
         givenName: 'Nils',
@@ -458,6 +458,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         unitUri: 'U/1',
         failureValue: -999,
         accuracy: 0.1,
+        accuracyUnitUri: 'http://foo/unit/2',
+        accuracyUnitName: 'cm',
         measuringRange: {
           min: -1,
           max: 1
@@ -482,6 +484,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         unitUri: 'U/2',
         failureValue: -998,
         accuracy: 0.5,
+        accuracyUnitUri: 'http://foo/unit/2',
+        accuracyUnitName: 'cm',
         measuringRange: {
           min: -5,
           max: 5
@@ -570,6 +574,8 @@ describe('DeviceCalibrationActionSerializer', () => {
           unit_uri: 'U/1',
           failure_value: -999,
           accuracy: 0.1,
+          accuracy_unit_uri: 'http://foo/unit/2',
+          accuracy_unit_name: 'cm',
           measuring_range_min: -1,
           measuring_range_max: 1,
           resolution: 0.5,
@@ -603,6 +609,8 @@ describe('DeviceCalibrationActionSerializer', () => {
           unit_uri: 'U/2',
           failure_value: -998,
           accuracy: 0.5,
+          accuracy_unit_uri: 'http://foo/unit/2',
+          accuracy_unit_name: 'cm',
           measuring_range_min: -5,
           measuring_range_max: 5,
           resolution: 0.05,

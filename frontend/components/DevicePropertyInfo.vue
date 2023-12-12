@@ -125,6 +125,10 @@ permissions and limitations under the Licence.
         </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
+        <label>Failure Value</label>
+        {{ value.failureValue | orDefault }}
+      </v-col>
+      <v-col cols="12" md="3">
         <label>Measuring range min</label>
         {{ value.measuringRange.min | orDefault }}
       </v-col>
@@ -139,11 +143,22 @@ permissions and limitations under the Licence.
         {{ value.accuracy | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
-        <label>Failure Value</label>
-        {{ value.failureValue | orDefault }}
+        <label>Unit of Accuracy</label>
+        {{ accuracyUnitValue | orDefault }}
+        <v-tooltip v-if="accuracyUnitDefinition" right>
+          <template #activator="{ on, attrs }">
+            <v-icon
+              color="primary"
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
+          </template>
+          <span>{{ accuracyUnitDefinition }}</span>
+        </v-tooltip>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="12" md="3">
         <label>Resolution</label>
         {{ value.resolution | orDefault }}
@@ -376,6 +391,28 @@ export default class DevicePropertyInfo extends Vue {
       return ''
     }
     const unit = this.units.find(c => c.uri === this.value.unitUri)
+    if (unit) {
+      return unit.definition
+    }
+    return ''
+  }
+
+  get accuracyUnitValue (): string {
+    if (!this.value.accuracyUnitName && !this.value.accuracyUnitUri) {
+      return ''
+    }
+    const unit = this.units.find(c => c.uri === this.value.accuracyUnitUri)
+    if (unit) {
+      return unit.name
+    }
+    return this.value.accuracyUnitName
+  }
+
+  get accuracyUnitDefinition (): string {
+    if (!this.value.accuracyUnitName && !this.value.accuracyUnitUri) {
+      return ''
+    }
+    const unit = this.units.find(c => c.uri === this.value.accuracyUnitUri)
     if (unit) {
       return unit.definition
     }
