@@ -54,6 +54,8 @@ describe('DevicePropertySerializer', () => {
             max: 7
           }),
           accuracy: 0.5,
+          accuracyUnitUri: 'http://foo/unit/2',
+          accuracyUnitName: 'cm',
           failureValue: -999,
           resolution: 0.001,
           resolutionUnitUri: 'http://foo/unit/1',
@@ -78,6 +80,8 @@ describe('DevicePropertySerializer', () => {
             max: null
           }),
           accuracy: null,
+          accuracyUnitUri: '',
+          accuracyUnitName: '',
           failureValue: null,
           resolution: 0.001,
           resolutionUnitUri: 'http://foo/unit/1',
@@ -107,6 +111,8 @@ describe('DevicePropertySerializer', () => {
         measuring_range_min: -7,
         measuring_range_max: 7,
         accuracy: 0.5,
+        accuracy_unit_uri: 'http://foo/unit/2',
+        accuracy_unit_name: 'cm',
         failure_value: -999,
         resolution: 0.001,
         resolution_unit_uri: 'http://foo/unit/1',
@@ -128,6 +134,8 @@ describe('DevicePropertySerializer', () => {
         measuring_range_min: null,
         measuring_range_max: null,
         accuracy: null,
+        accuracy_unit_uri: '',
+        accuracy_unit_name: '',
         failure_value: null,
         resolution: 0.001,
         resolution_unit_uri: 'http://foo/unit/1',
@@ -151,6 +159,8 @@ describe('DevicePropertySerializer', () => {
             compartment_uri: 'variabletype/Climate',
             property_name: 'Water vapor concentration',
             accuracy: 0.1,
+            accuracy_unit_uri: 'http://foo/unit/2',
+            accuracy_unit_name: 'cm',
             measuring_range_min: 10,
             measuring_range_max: -10,
             label: 'water vapor',
@@ -175,6 +185,8 @@ describe('DevicePropertySerializer', () => {
             compartment_uri: 'variabletype/Resources',
             property_name: 'abc',
             accuracy: -2.9,
+            accuracy_unit_uri: 'http://foo/unit/33',
+            accuracy_unit_name: 'kg',
             measuring_range_min: 100,
             measuring_range_max: -100,
             label: 'abc - prop',
@@ -204,6 +216,8 @@ describe('DevicePropertySerializer', () => {
       expect(models[0].compartmentUri).toEqual('variabletype/Climate')
       expect(models[0].propertyName).toEqual('Water vapor concentration')
       expect(models[0].accuracy).toEqual(0.1)
+      expect(models[0].accuracyUnitUri).toEqual('http://foo/unit/2')
+      expect(models[0].accuracyUnitName).toEqual('cm')
       // I know it is the wrong ordering
       expect(models[0].measuringRange.min).toEqual(10)
       expect(models[0].measuringRange.max).toEqual(-10)
@@ -226,6 +240,8 @@ describe('DevicePropertySerializer', () => {
       expect(models[1].compartmentUri).toEqual('variabletype/Resources')
       expect(models[1].propertyName).toEqual('abc')
       expect(models[1].accuracy).toEqual(-2.9)
+      expect(models[1].accuracyUnitUri).toEqual('http://foo/unit/33')
+      expect(models[1].accuracyUnitName).toEqual('kg')
       expect(models[1].measuringRange.min).toEqual(100)
       expect(models[1].measuringRange.max).toEqual(-100)
       expect(models[1].label).toEqual('abc - prop')
@@ -254,6 +270,8 @@ describe('DevicePropertySerializer', () => {
             compartment_uri: 'variabletype/Climate',
             property_name: 'Water vapor concentration',
             accuracy: 0.1,
+            accuracy_unit_uri: 'http://foo/unit/2',
+            accuracy_unit_name: 'cm',
             measuring_range_min: 10,
             measuring_range_max: -10,
             label: 'water vapor',
@@ -282,6 +300,8 @@ describe('DevicePropertySerializer', () => {
       expect(model.compartmentUri).toEqual('variabletype/Climate')
       expect(model.propertyName).toEqual('Water vapor concentration')
       expect(model.accuracy).toEqual(0.1)
+      expect(model.accuracyUnitUri).toEqual('http://foo/unit/2')
+      expect(model.accuracyUnitName).toEqual('cm')
       expect(model.measuringRange.min).toEqual(10)
       expect(model.measuringRange.max).toEqual(-10)
       expect(model.label).toEqual('water vapor')
@@ -316,6 +336,8 @@ describe('DevicePropertySerializer', () => {
       expect(model.compartmentUri).toEqual('')
       expect(model.propertyName).toEqual('')
       expect(model.accuracy).toEqual(null)
+      expect(model.accuracyUnitUri).toEqual('')
+      expect(model.accuracyUnitName).toEqual('')
       expect(model.measuringRange.min).toEqual(null)
       expect(model.measuringRange.max).toEqual(null)
       expect(model.label).toEqual('')
@@ -413,6 +435,8 @@ describe('DevicePropertySerializer', () => {
         compartmentUri: 'variabletype/Climate',
         propertyName: 'Water vapor concentration',
         accuracy: 0.1,
+        accuracyUnitUri: 'http://foo/unit/2',
+        accuracyUnitName: 'cm',
         measuringRange: MeasuringRange.createFromObject({
           min: 10,
           max: -10
@@ -451,6 +475,10 @@ describe('DevicePropertySerializer', () => {
       expect(jsonApiPayload.attributes.property_name).toEqual('Water vapor concentration')
       expect(jsonApiPayload.attributes).toHaveProperty('accuracy')
       expect(jsonApiPayload.attributes.accuracy).toEqual(0.1)
+      expect(jsonApiPayload.attributes).toHaveProperty('accuracy_unit_uri')
+      expect(jsonApiPayload.attributes.accuracy_unit_uri).toEqual('http://foo/unit/2')
+      expect(jsonApiPayload.attributes).toHaveProperty('accuracy_unit_name')
+      expect(jsonApiPayload.attributes.accuracy_unit_name).toEqual('cm')
       expect(jsonApiPayload.attributes).toHaveProperty('measuring_range_min')
       expect(jsonApiPayload.attributes.measuring_range_min).toEqual(10)
       expect(jsonApiPayload.attributes).toHaveProperty('measuring_range_max')
@@ -496,6 +524,8 @@ describe('DevicePropertySerializer', () => {
         compartmentUri: 'variabletype/Climate',
         propertyName: 'Water vapor concentration',
         accuracy: 0.1,
+        accuracyUnitUri: 'http://foo/unit/2',
+        accuracyUnitName: 'cm',
         measuringRange: MeasuringRange.createFromObject({
           min: 10,
           max: -10
@@ -533,6 +563,10 @@ describe('DevicePropertySerializer', () => {
       expect(jsonApiPayload.attributes.property_name).toEqual('Water vapor concentration')
       expect(jsonApiPayload.attributes).toHaveProperty('accuracy')
       expect(jsonApiPayload.attributes.accuracy).toEqual(0.1)
+      expect(jsonApiPayload.attributes).toHaveProperty('accuracy_unit_uri')
+      expect(jsonApiPayload.attributes.accuracy_unit_uri).toEqual('http://foo/unit/2')
+      expect(jsonApiPayload.attributes).toHaveProperty('accuracy_unit_name')
+      expect(jsonApiPayload.attributes.accuracy_unit_name).toEqual('cm')
       expect(jsonApiPayload.attributes).toHaveProperty('measuring_range_min')
       expect(jsonApiPayload.attributes.measuring_range_min).toEqual(10)
       expect(jsonApiPayload.attributes).toHaveProperty('measuring_range_max')

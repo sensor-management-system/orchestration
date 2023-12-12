@@ -377,6 +377,18 @@ permissions and limitations under the Licence.
         </v-col>
         <v-col cols="12" md="3">
           <v-text-field
+            label="Failure value"
+            :value="value.failureValue"
+            :readonly="readonly"
+            :disabled="readonly"
+            type="number"
+            step="any"
+            @input="update('failureValue', $event)"
+            @wheel.prevent
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
             label="Measuring range min"
             :value="value.measuringRange.min"
             :readonly="readonly"
@@ -414,19 +426,69 @@ permissions and limitations under the Licence.
           />
         </v-col>
         <v-col cols="12" md="3">
-          <v-text-field
-            label="Failure value"
-            :value="value.failureValue"
+          <combobox
+            label="Unit of Accuracy"
+            clearable
+            :items="unitItems"
+            item-text="name"
+            :value="valueAccuracyUnitItem"
             :readonly="readonly"
             :disabled="readonly"
-            type="number"
-            step="any"
-            @input="update('failureValue', $event)"
-            @wheel.prevent
-          />
+            @input="updateAccuracyUnit"
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="itemHasDefinition(valueAccuracyUnitItem)"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ valueAccuracyUnitItem.definition }}</span>
+              </v-tooltip>
+              <v-btn icon @click="showNewUnitDialogForAccuracy = true">
+                <v-icon>
+                  mdi-tooltip-plus-outline
+                </v-icon>
+              </v-btn>
+            </template>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
+              </template>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </template>
+          </combobox>
         </v-col>
-      </v-row>
-      <v-row>
         <v-col cols="12" md="3">
           <v-text-field
             label="Resolution"
@@ -467,7 +529,7 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueResolutionUnitItem.definition }}</span>
               </v-tooltip>
-              <v-btn icon @click="showNewUnitDialog = true">
+              <v-btn icon @click="showNewUnitDialogForResolution = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
                 </v-icon>
@@ -545,7 +607,11 @@ permissions and limitations under the Licence.
       @aftersubmit="updateAggregationType"
     />
     <unit-dialog
-      v-model="showNewUnitDialog"
+      v-model="showNewUnitDialogForAccuracy"
+      @aftersubmit="updateAccuracyUnit"
+    />
+    <unit-dialog
+      v-model="showNewUnitDialogForResolution"
       @aftersubmit="updateResolutionUnit"
     />
   </div>
@@ -609,7 +675,8 @@ export default class DevicePropertyForm extends mixins(Rules) {
   private showNewSamplingMediaDialog = false
   private showNewPropertyDialog = false
   private showNewMeasuredQuantityUnitDialog = false
-  private showNewUnitDialog = false
+  private showNewUnitDialogForAccuracy = false
+  private showNewUnitDialogForResolution = false
   private showNewAggregationTypeDialog = false
 
   // We could filter here for the default aggregation type that the
@@ -978,6 +1045,35 @@ export default class DevicePropertyForm extends mixins(Rules) {
   }
 
   /**
+   * updates the accuracyUnit
+   *
+   * @param {UnitComboboxValue} value - an object as provided by the combobox
+   * @fires DevicePropertyForm#input
+   */
+  updateAccuracyUnit (value: UnitComboboxValue): void {
+    const newObj: DeviceProperty = DeviceProperty.createFromObject(this.value)
+
+    if (value) {
+      if (typeof value === 'string') {
+        newObj.accuracyUnitName = value
+        newObj.accuracyUnitUri = this.getUriByValue('units', value)
+      } else {
+        newObj.accuracyUnitName = value.name
+        newObj.accuracyUnitUri = value.uri
+      }
+    } else {
+      newObj.accuracyUnitName = ''
+      newObj.accuracyUnitUri = ''
+    }
+    /**
+     * input event
+     * @event DevicePropertyForm#input
+     * @type {DeviceProperty}
+     */
+    this.$emit('input', newObj)
+  }
+
+  /**
    * updates the resolutionUnit
    *
    * @param {UnitComboboxValue} value - an object as provided by the combobox
@@ -1255,6 +1351,32 @@ export default class DevicePropertyForm extends mixins(Rules) {
     return {
       name: this.value.unitName,
       uri: this.value.unitUri,
+      definition: '',
+      id: null
+    }
+  }
+
+  /**
+   * returns an item to be used as the value of a combobox
+   *
+   * Checks whether value.accuracyUnitName and value.accuracyUnitUri can be
+   * found in the list of CV units. Returns the found unit, otherwise
+   * constructs one from the name and the uri. Returns null if both fields are
+   * empty.
+   *
+   * @returns {ICvSelectItem|null} the unit, a constructed one or null
+   */
+  get valueAccuracyUnitItem (): ICvSelectItem | null {
+    if (!this.value.accuracyUnitName && !this.value.accuracyUnitUri) {
+      return null
+    }
+    const unit = this.units.find(u => u.uri === this.value.accuracyUnitUri)
+    if (unit) {
+      return unit
+    }
+    return {
+      name: this.value.accuracyUnitName,
+      uri: this.value.accuracyUnitUri,
       definition: '',
       id: null
     }

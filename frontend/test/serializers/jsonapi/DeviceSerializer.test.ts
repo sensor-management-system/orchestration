@@ -123,6 +123,8 @@ const createTestDevice = () => {
         max: 7
       }),
       accuracy: 0.5,
+      accuracyUnitName: '',
+      accuracyUnitUri: '',
       failureValue: -999,
       resolution: 0.001,
       resolutionUnitUri: 'http://foo/unit/1',
@@ -147,6 +149,8 @@ const createTestDevice = () => {
         max: null
       }),
       accuracy: null,
+      accuracyUnitName: '',
+      accuracyUnitUri: '',
       failureValue: null,
       resolution: 0.001,
       resolutionUnitUri: 'http://foo/unit/1',
@@ -872,6 +876,8 @@ describe('DeviceSerializer', () => {
           compartmentUri: 'variabletype/Climate',
           propertyName: 'Water vapor concentration',
           accuracy: null,
+          accuracyUnitName: '',
+          accuracyUnitUri: '',
           measuringRange: MeasuringRange.createFromObject({
             min: null,
             max: null
@@ -897,6 +903,8 @@ describe('DeviceSerializer', () => {
           compartmentUri: 'd',
           propertyName: 'e',
           accuracy: 1,
+          accuracyUnitName: '',
+          accuracyUnitUri: '',
           measuringRange: MeasuringRange.createFromObject({
             min: 2,
             max: 3

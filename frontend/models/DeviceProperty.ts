@@ -46,6 +46,8 @@ export interface IDeviceProperty {
   aggregationTypeName: string
   measuringRange: IMeasuringRange
   accuracy: number | null
+  accuracyUnitUri: string
+  accuracyUnitName: string
   failureValue: number | null
   resolution: number | null
   resolutionUnitUri: string
@@ -68,6 +70,8 @@ export class DeviceProperty implements IDeviceProperty {
   private _aggregationTypeName: string = ''
   private _measuringRange: MeasuringRange = new MeasuringRange()
   private _accuracy: number | null = null
+  private _accuracyUnitUri: string = ''
+  private _accuracyUnitName: string = ''
   private _failureValue: number | null = null
   private _resolution: number | null = null
   private _resolutionUnitUri: string = ''
@@ -98,6 +102,8 @@ export class DeviceProperty implements IDeviceProperty {
     newObject.aggregationTypeName = someObject.aggregationTypeName
     newObject.measuringRange = MeasuringRange.createFromObject(someObject.measuringRange)
     newObject.accuracy = someObject.accuracy
+    newObject.accuracyUnitUri = someObject.accuracyUnitUri
+    newObject.accuracyUnitName = someObject.accuracyUnitName
     newObject.failureValue = someObject.failureValue
     newObject.resolution = someObject.resolution
     newObject.resolutionUnitUri = someObject.resolutionUnitUri
@@ -217,6 +223,22 @@ export class DeviceProperty implements IDeviceProperty {
 
   set accuracy (accuracy: number | null) {
     this._accuracy = accuracy
+  }
+
+  get accuracyUnitUri (): string {
+    return this._accuracyUnitUri
+  }
+
+  set accuracyUnitUri (accuracyUnitUri: string) {
+    this._accuracyUnitUri = accuracyUnitUri
+  }
+
+  get accuracyUnitName (): string {
+    return this._accuracyUnitName
+  }
+
+  set accuracyUnitName (accuracyUnitName: string) {
+    this._accuracyUnitName = accuracyUnitName
   }
 
   get failureValue (): number | null {

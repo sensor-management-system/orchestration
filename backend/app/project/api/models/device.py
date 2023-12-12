@@ -218,6 +218,8 @@ class Device(
                     "property_uri": type_keyword,
                     "sample_medium_name": type_keyword_and_full_searchable,
                     "sample_medium_uri": type_keyword,
+                    "accuracy_unit_name": type_keyword_and_full_searchable,
+                    "accuracy_unit_uri": type_keyword,
                     "resolution_unit_name": type_keyword_and_full_searchable,
                     "resolution_unit_uri": type_keyword,
                     "aggregation_type_name": type_keyword_and_full_searchable,

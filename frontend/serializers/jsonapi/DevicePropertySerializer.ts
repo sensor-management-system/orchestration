@@ -72,6 +72,8 @@ export class DevicePropertySerializer {
       propertyToSave.measuring_range_max = property.measuringRange.max
       propertyToSave.failure_value = property.failureValue
       propertyToSave.accuracy = property.accuracy
+      propertyToSave.accuracy_unit_uri = property.accuracyUnitUri
+      propertyToSave.accuracy_unit_name = property.accuracyUnitName
       propertyToSave.resolution = property.resolution
       propertyToSave.label = property.label
       propertyToSave.unit_uri = property.unitUri
@@ -134,6 +136,8 @@ export class DevicePropertySerializer {
       newEntry.aggregationTypeName = jsonApiData.attributes.aggregation_type_name || ''
       newEntry.samplingMediaUri = jsonApiData.attributes.sampling_media_uri || ''
       newEntry.samplingMediaName = jsonApiData.attributes.sampling_media_name || ''
+      newEntry.accuracyUnitUri = jsonApiData.attributes.accuracy_unit_uri || ''
+      newEntry.accuracyUnitName = jsonApiData.attributes.accuracy_unit_name || ''
       newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
       newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
       newEntry.description = jsonApiData.attributes.description || ''
@@ -219,6 +223,8 @@ export class DevicePropertySerializer {
         aggregation_type_name: deviceProperty.aggregationTypeName,
         sampling_media_uri: deviceProperty.samplingMediaUri,
         sampling_media_name: deviceProperty.samplingMediaName,
+        accuracy_unit_uri: deviceProperty.accuracyUnitUri,
+        accuracy_unit_name: deviceProperty.accuracyUnitName,
         resolution_unit_uri: deviceProperty.resolutionUnitUri,
         resolution_unit_name: deviceProperty.resolutionUnitName,
         description: deviceProperty.description

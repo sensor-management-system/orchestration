@@ -50,6 +50,8 @@ describe('DeviceCalibrationDevicePropertySerializer', () => {
         unitUri: 'U/1',
         failureValue: -999,
         accuracy: 0.1,
+        accuracyUnitUri: 'http://foo/unit/2',
+        accuracyUnitName: 'cm',
         measuringRange: {
           min: -1,
           max: 1

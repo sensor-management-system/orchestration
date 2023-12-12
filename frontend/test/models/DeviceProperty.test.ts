@@ -50,6 +50,8 @@ describe('DeviceProperty Models', () => {
         max: 1000
       },
       accuracy: 0.1,
+      accuracyUnitUri: 'http://foo/unit/2',
+      accuracyUnitName: 'cm',
       failureValue: 0.01,
       resolution: 0.001,
       resolutionUnitUri: 'http://foo/unit/1',
@@ -70,6 +72,8 @@ describe('DeviceProperty Models', () => {
     expect(prop).toHaveProperty('propertyUri', 'http://foo/property/1')
     expect(prop).toHaveProperty('propertyName', 'foo.bar')
     expect(prop).toHaveProperty('accuracy', 0.1)
+    expect(prop).toHaveProperty('accuracyUnitUri', 'http://foo/unit/2')
+    expect(prop).toHaveProperty('accuracyUnitName', 'cm')
     expect(prop).toHaveProperty('failureValue', 0.01)
     expect(prop).toHaveProperty('resolution', 0.001)
     expect(prop).toHaveProperty('resolutionUnitUri', 'http://foo/unit/1')
