@@ -28,8 +28,8 @@ implied. See the Licence for the specific language governing
 permissions and limitations under the Licence.
 -->
 <template>
-  <hint-card v-if="staticLocationActions.length === 0">
-    There are no locations for the associated configurations.
+  <hint-card v-if="staticLocationActions.length === 0 && innerSites.length === 0">
+    There are no locations for the associated configurations or related sites.
   </hint-card>
   <div v-else>
     <v-alert
@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
           :center="currentPosition"
           style="z-index:0"
           :bounds="bounds"
-          @click="selectedLocationAction = null"
+          @click="resetSelection"
         >
           <l-tile-layer layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
           <l-polygon
@@ -68,6 +68,15 @@ permissions and limitations under the Licence.
               :icon-url="locationAction === selectedLocationAction ? require(`~/assets/marker-icon-red.png`) : require(`~/assets/marker-icon.png`)"
             />
           </l-marker>
+          <l-polygon
+            v-for="site in innerSites"
+            :key="site.id"
+            :lat-lngs="polygonOfSite(site)"
+            :color="site === selectedSite ? innerSitePolygonColorSelected : innerSitePolygonColor"
+            :fill-color="site === selectedSite ? innerSitePolygonFillColorSelected : innerSitePolygonFillColor"
+            :fill="true"
+            @click="selectSite(site)"
+          />
         </l-map>
       </no-ssr>
     </v-card>
@@ -107,6 +116,56 @@ permissions and limitations under the Licence.
         </v-btn>
       </v-card-actions>
     </v-card>
+    <v-card v-if="selectedSite">
+      <v-card-text class="text--primary">
+        <v-row>
+          <v-col cols="12" md="6">
+            <label>Site</label>
+            {{ selectedSite.label | orDefault }}
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="6">
+            <label>Usage</label>
+            {{ selectedSite.siteUsageName | orDefault }}
+          </v-col>
+          <v-col cols="12" md="6">
+            <label>Type</label>
+            {{ selectedSite.siteTypeName | orDefault }}
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <label>Street</label>
+            {{ [selectedSite.address.street, selectedSite.address.streetNumber] | sparseJoin(' ') | orDefault }}
+          </v-col>
+          <v-col cols="12" md="3">
+            <label>City</label>
+            {{ [selectedSite.address.zipCode, selectedSite.address.city] | sparseJoin(' ') | orDefault }}
+          </v-col>
+          <v-col cols="12" md="3">
+            <label>Country</label>
+            {{ selectedSite.address.country | orDefault }}
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="3">
+            <label>Building - Room</label>
+            {{ [selectedSite.address.building, selectedSite.address.room] | sparseJoin(' ') | orDefault }}
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn
+          small
+          color="primary"
+          :to="'/sites/' + selectedSite.id + '/locations'"
+        >
+          View
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </div>
 </template>
 
@@ -122,14 +181,15 @@ import { StaticLocationAction } from '@/models/StaticLocationAction'
 import HintCard from '@/components/HintCard.vue'
 
 import { SetLoadingAction } from '@/store/progressindicator'
-import { SitesState, LoadSiteAction, LoadSiteConfigurationsAction } from '@/store/sites'
+import { SitesState, LoadSiteAction, LoadSiteConfigurationsAction, SearchSitesAction } from '@/store/sites'
+import { Site } from '@/models/Site'
 
 @Component({
   methods: {
     ...mapActions('progressindicator', ['setLoading']),
-    ...mapActions('sites', ['loadSite', 'loadSiteConfigurations'])
+    ...mapActions('sites', ['loadSite', 'loadSiteConfigurations', 'searchSites'])
   },
-  computed: mapState('sites', ['site', 'siteConfigurations']),
+  computed: mapState('sites', ['site', 'siteConfigurations', 'sites']),
   components: {
     HintCard
   }
@@ -137,19 +197,27 @@ import { SitesState, LoadSiteAction, LoadSiteConfigurationsAction } from '@/stor
 export default class SiteLocations extends Vue {
   private staticLocationActions: StaticLocationAction[] = []
   private polylineColor: string = 'green'
+  private innerSitePolygonColor: string = 'blue'
+  private innerSitePolygonColorSelected: string = 'red'
+  private innerSitePolygonFillColor: string = '#3388ff'
+  private innerSitePolygonFillColorSelected: string = '#ff8833'
   private zoomLevel = 10
   private showSitePolygon = true
+  private clickedOnPolygon = false
 
-  private currentPosition: LatLng = new LatLng(52, 12)
+  private currentPosition: LatLng = new LatLng(-52, -12)
   private bounds: LatLngBounds = latLngBounds([this.currentPosition])
   private selectedLocationAction: StaticLocationAction | null = null
+  private selectedSite: Site | null = null
 
   // vuex definition for typescript check
   loadSite!: LoadSiteAction
   loadSiteConfigurations!: LoadSiteConfigurationsAction
   site!: SitesState['site']
+  sites!: SitesState['sites']
   siteConfigurations!: SitesState['siteConfigurations']
   setLoading!: SetLoadingAction
+  searchSites!: SearchSitesAction
 
   async fetch () {
     try {
@@ -157,13 +225,27 @@ export default class SiteLocations extends Vue {
       await Promise.all(
         [
           this.loadSite({ siteId: this.siteId }),
-          this.loadSiteConfigurations(this.siteId)
+          this.loadSiteConfigurations(this.siteId),
+          this.searchSites()
         ]
       )
       this.staticLocationActions = await this.$api.staticLocationActions.getRelatedActionsForSite(this.siteId)
       const locations = this.staticLocationActions.map((x: StaticLocationAction) => this.location(x)).filter(x => x !== null) as LatLng[]
+      let boundsSetByData = false
       if (locations) {
         this.bounds = latLngBounds(locations)
+        boundsSetByData = true
+      }
+      for (const innerSite of this.innerSites) {
+        const polygonOfSite = this.polygonOfSite(innerSite)
+        if (polygonOfSite) {
+          if (!boundsSetByData) {
+            this.bounds = latLngBounds(polygonOfSite)
+            boundsSetByData = true
+          } else {
+            this.bounds.extend(latLngBounds(polygonOfSite))
+          }
+        }
       }
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch locations')
@@ -177,10 +259,14 @@ export default class SiteLocations extends Vue {
   }
 
   get polygon () {
-    if (!this.site) {
+    return this.polygonOfSite(this.site)
+  }
+
+  polygonOfSite (site: Site | null) {
+    if (!site) {
       return null
     }
-    return this.site.geometry
+    return site.geometry
   }
 
   get configurationLabel (): string | null {
@@ -207,6 +293,30 @@ export default class SiteLocations extends Vue {
 
   select (locationAction: StaticLocationAction) {
     this.selectedLocationAction = locationAction
+    this.selectedSite = null
+  }
+
+  selectSite (site: Site) {
+    this.selectedSite = site
+    this.selectedLocationAction = null
+    this.clickedOnPolygon = true
+  }
+
+  get innerSites () {
+    return this.sites.filter(x => x.outerSiteId === this.site?.id).filter(s => this.polygonOfSite(s) !== null)
+  }
+
+  resetSelection () {
+    // Here we need to have a workaround in order to not unselect the site.
+    // Background here is that on a click on a polygon we also trigger the
+    // click on the map.
+    // Without this additional handling we would unselect the site all the time
+    // (even directly after a click on a site).
+    if (!this.clickedOnPolygon) {
+      this.selectedSite = null
+    }
+    this.selectedLocationAction = null
+    this.clickedOnPolygon = false
   }
 }
 </script>

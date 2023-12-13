@@ -109,11 +109,11 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <label>Street</label>
-        {{ value.address.street | orDefault }} {{ value.address.streetNumber }}
+        {{ [value.address.street, value.address.streetNumber] | sparseJoin(' ') | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
         <label>City</label>
-        {{ value.address.zipCode }} {{ value.address.city | orDefault }}
+        {{ [value.address.zipCode, value.address.city] | sparseJoin(' ') | orDefault }}
       </v-col>
       <v-col cols="12" md="3">
         <label>Country</label>
@@ -123,7 +123,7 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col cols="12" md="3">
         <label>Building - Room</label>
-        {{ value.address.building }} - {{ value.address.room }}
+        {{ [value.address.building, value.address.room] | sparseJoin(' - ') | orDefault }}
       </v-col>
     </v-row>
     <v-row v-if="value.keywords">

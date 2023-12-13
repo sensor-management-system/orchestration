@@ -12,10 +12,13 @@ Added:
 - Updated the content of legal notice, privacy policy and terms of use within the footer pages for a FZJ instance's demo version.
 - show version numbers based on git tags
 - Unit for accuracy
+- sites locations tab shows sub sites
 
 Changed:
 - improved sort logic for mounts and unmounts that have the very same date
 
+Fixed:
+- Improved handling of missing values for sites
 
 ## 1.9.0 - 2023-12-07
 

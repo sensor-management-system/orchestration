@@ -95,3 +95,14 @@ Vue.filter('shortenLeft', (text: string, length?: number, replacement?: string):
 Vue.filter('shortenMiddle', (text: string, length?: number, replacement?: string): string => {
   return shortenMiddle(text, length, replacement)
 })
+
+/**
+ * joins a list to a single string, but only uses those entries that have content
+ *
+ * @param {string[]} parts - the texts to concat
+ * @param {string} [joinChar] - the text to join the parts together - defaults to ', ' for comma seperated lists
+ * @returns {string} the joined string
+ */
+Vue.filter('sparseJoin', (parts: string[], joinChar: string = ', '): string => {
+  return parts.filter(x => !!x).join(joinChar)
+})
