@@ -33,38 +33,40 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row v-if="innerSites.length>0">
-      <v-col cols="12">
-        <label>Sites & labs included in this site / lab</label>
-        <div>
-          <BaseList
-            :list-items="innerSites"
-          >
-            <template #list-item="{item}">
-              <SitesListItem
-                :site="item"
-              />
-            </template>
-          </BaseList>
-        </div>
-      </v-col>
-    </v-row>
-    <v-row v-if="siteConfigurations.length>0">
-      <v-col cols="12">
-        <label>Configurations on site / lab</label>
-        <div>
-          <BaseList
-            :list-items="siteConfigurations"
-          >
-            <template #list-item="{item}">
-              <ConfigurationsListItem
-                :configuration="item"
-              />
-            </template>
-          </BaseList>
-        </div>
-      </v-col>
-    </v-row>
+    <div v-if="innerSites.length > 0 || siteConfigurations.length > 0">
+      <v-row v-if="innerSites.length>0">
+        <v-col cols="12">
+          <label>Sites & labs included in this site / lab</label>
+          <div>
+            <BaseList
+              :list-items="innerSites"
+            >
+              <template #list-item="{item}">
+                <SitesListItem
+                  :site="item"
+                />
+              </template>
+            </BaseList>
+          </div>
+        </v-col>
+      </v-row>
+      <v-row v-if="siteConfigurations.length>0">
+        <v-col cols="12">
+          <label>Configurations on site / lab</label>
+          <div>
+            <BaseList
+              :list-items="siteConfigurations"
+            >
+              <template #list-item="{item}">
+                <ConfigurationsListItem
+                  :configuration="item"
+                />
+              </template>
+            </BaseList>
+          </div>
+        </v-col>
+      </v-row>
+    </div>
     <hint-card v-else>
       There are no related sites, labs or configurations for this site / lab.
     </hint-card>

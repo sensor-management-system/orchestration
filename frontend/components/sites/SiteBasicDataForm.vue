@@ -276,7 +276,7 @@ permissions and limitations under the Licence.
       <v-row>
         <v-col cols="12" class="mb-4">
           <h4>Draw the site geometry</h4>
-          <SiteMap :value="value.geometry" @updateCoords="update('geometry', $event)" />
+          <SiteMap :value="value.geometry" :outer="outerSiteGeometry" @updateCoords="update('geometry', $event)" />
         </v-col>
       </v-row>
       <h4>Address information</h4>
@@ -429,7 +429,6 @@ import { SiteType } from '@/models/SiteType'
 
 import { SearchSitesAction, SitesState } from '@/store/sites'
 import { VocabularyState } from '@/store/vocabulary'
-
 interface INameAndUri {
   name: string
   uri: string
@@ -797,6 +796,18 @@ export default class SiteBasicDataForm extends mixins(Rules) {
     const newObj = Site.createFromObject(this.value)
     newObj.keywords = newObj.keywords.filter(k => k !== keyword)
     this.$emit('input', newObj)
+  }
+
+  get outerSiteGeometry (): ILatLng[] {
+    if (!this.value.outerSiteId) {
+      return []
+    }
+    const siteIdx = this.sites.findIndex(x => x.id === this.value.outerSiteId)
+    if (siteIdx < 0) {
+      return []
+    }
+    const outerSite = this.sites[siteIdx]
+    return outerSite.geometry
   }
 }
 </script>

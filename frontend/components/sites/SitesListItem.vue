@@ -99,7 +99,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ site.address.zipCode | orDefault }} {{ site.address.city | orDefault }}
+          {{ [site.address.zipCode, site.address.city] | sparseJoin(' ') | orDefault }}
         </v-col>
         <v-col
           cols="4"
@@ -121,7 +121,7 @@ permissions and limitations under the Licence.
           xl="5"
           class="nowrap-truncate"
         >
-          {{ site.address.street | orDefault }} {{ site.address.streetNumber | orDefault }}
+          {{ [site.address.street, site.address.streetNumber] | sparseJoin(' ') | orDefault }}
         </v-col>
       </v-row>
       <v-row

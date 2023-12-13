@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020, 2021
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -62,7 +62,13 @@ permissions and limitations under the Licence.
           :color="polylineColor"
           :fill="true"
         />
-
+        <l-polygon
+          :lat-lngs="outer"
+          color="black"
+          dash-array="10"
+          :fill="false"
+          :stroke="true"
+        />
         <v-geosearch
           :options="
             geosearchOptions"
@@ -137,6 +143,11 @@ export default class SiteMap extends Vue {
     default: () => [],
     type: Array
   }) readonly value!: LatLng[]
+
+  @Prop({
+    default: () => [],
+    type: Array
+  }) readonly outer!: LatLng[]
 
   @Prop({
     default: false,
