@@ -15,7 +15,15 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from manage import deactivate_a_user, loaddata, reactivate_a_user
+from manage import (
+    b2inst_update_all,
+    b2inst_update_configuration,
+    b2inst_update_device,
+    b2inst_update_platform,
+    deactivate_a_user,
+    loaddata,
+    reactivate_a_user,
+)
 from project import db
 from project.api.models import (
     Configuration,
@@ -672,3 +680,279 @@ class TestCliCommands(BaseTestCase):
                     env={"FLASK_APP": "manage"},
                 )
                 self.assertEqual(result.exit_code, 0)
+
+    def test_b2inst_update_device(self):
+        """Ensure we call the b2inst.update_external_metadata function for the selected device."""
+        with no_expire():
+            device = Device(
+                short_name="device_short_name test",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+            db.session.add(device)
+            db.session.commit()
+
+            runner = CliRunner()
+            with patch.object(
+                pidinst.b2inst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                result = runner.invoke(
+                    b2inst_update_device,
+                    [str(device.id)],
+                    env={"FLASK_APP": "manage"},
+                )
+                update_external_metadata.assert_called_once()
+                args, kwargs = update_external_metadata.call_args
+                called_device = args[0]
+                run_async = kwargs["run_async"]
+                self.assertEqual(called_device, device)
+                self.assertFalse(run_async)
+
+            assert not result.exception
+            assert result.exit_code == 0
+
+    def test_b2inst_update_platform(self):
+        """Ensure we call the b2inst.update_external_metadata function for the selected platform."""
+        with no_expire():
+            platform = Platform(
+                short_name="platform_short_name test",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+            db.session.add(platform)
+            db.session.commit()
+
+            runner = CliRunner()
+            with patch.object(
+                pidinst.b2inst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                result = runner.invoke(
+                    b2inst_update_platform,
+                    [str(platform.id)],
+                    env={"FLASK_APP": "manage"},
+                )
+                update_external_metadata.assert_called_once()
+                args, kwargs = update_external_metadata.call_args
+                called_platform = args[0]
+                run_async = kwargs["run_async"]
+                self.assertEqual(called_platform, platform)
+                self.assertFalse(run_async)
+
+            assert not result.exception
+            assert result.exit_code == 0
+
+    def test_b2inst_update_configuration(self):
+        """Ensure we call the b2inst.update_external_metadata function for the selected configuration."""
+        with no_expire():
+            configuration = Configuration(
+                label="configuration_short_name test",
+                is_public=False,
+                is_internal=True,
+            )
+            db.session.add(configuration)
+            db.session.commit()
+
+            runner = CliRunner()
+            with patch.object(
+                pidinst.b2inst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                result = runner.invoke(
+                    b2inst_update_configuration,
+                    [str(configuration.id)],
+                    env={"FLASK_APP": "manage"},
+                )
+                update_external_metadata.assert_called_once()
+                args, kwargs = update_external_metadata.call_args
+                called_configuration = args[0]
+                run_async = kwargs["run_async"]
+                self.assertEqual(called_configuration, configuration)
+                self.assertFalse(run_async)
+
+            assert not result.exception
+            assert result.exit_code == 0
+
+    def test_b2inst_update_all(self):
+        """Ensure we can run the update for all the elements with b2inst record id."""
+        with no_expire():
+            device_without_b2inst = Device(
+                short_name="device_short_name test",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+            device_with_b2inst = Device(
+                short_name="device_short_name test with b2inst",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+                b2inst_record_id="125",
+            )
+            platform_without_b2inst = Platform(
+                short_name="platform_short_name test",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+            )
+            platform_with_b2inst = Platform(
+                short_name="platform_short_name test with b2inst",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+                b2inst_record_id="124",
+            )
+            configuration_without_b2inst = Configuration(
+                label="configuration_short_name test",
+                is_public=False,
+                is_internal=True,
+            )
+            configuration_with_b2inst = Configuration(
+                label="configuration_short_name test with b2inst",
+                is_public=False,
+                is_internal=True,
+                b2inst_record_id="123",
+            )
+            db.session.add_all(
+                [
+                    device_without_b2inst,
+                    device_with_b2inst,
+                    platform_without_b2inst,
+                    platform_with_b2inst,
+                    configuration_without_b2inst,
+                    configuration_with_b2inst,
+                ]
+            )
+            db.session.commit()
+
+            runner = CliRunner()
+            with patch.object(
+                pidinst.b2inst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.return_value = None
+                result = runner.invoke(
+                    b2inst_update_all,
+                    [],
+                    env={"FLASK_APP": "manage"},
+                )
+                self.assertEqual(
+                    update_external_metadata.call_count,
+                    3,
+                )
+
+            assert not result.exception
+            assert result.exit_code == 0
+
+    def test_b2inst_update_all_with_errors(self):
+        """Ensure we stop with updating if we have an error."""
+        with no_expire():
+            device_with_b2inst = Device(
+                short_name="device_short_name test with b2inst",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+                b2inst_record_id="125",
+            )
+            platform_with_b2inst = Platform(
+                short_name="platform_short_name test with b2inst",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+                b2inst_record_id="124",
+            )
+            configuration_with_b2inst = Configuration(
+                label="configuration_short_name test with b2inst",
+                is_public=False,
+                is_internal=True,
+                b2inst_record_id="123",
+            )
+            db.session.add_all(
+                [
+                    device_with_b2inst,
+                    platform_with_b2inst,
+                    configuration_with_b2inst,
+                ]
+            )
+            db.session.commit()
+
+            runner = CliRunner()
+            with patch.object(
+                pidinst.b2inst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.side_effect = Exception("Some problem")
+                result = runner.invoke(
+                    b2inst_update_all,
+                    [],
+                    env={"FLASK_APP": "manage"},
+                )
+                self.assertEqual(
+                    update_external_metadata.call_count,
+                    1,
+                )
+
+            assert result.exception == update_external_metadata.side_effect
+            assert result.exit_code == 1
+
+    def test_b2inst_update_all_skip_errors(self):
+        """Ensure we can skip the errors."""
+        with no_expire():
+            device_with_b2inst = Device(
+                short_name="device_short_name test with b2inst",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+                b2inst_record_id="125",
+            )
+            platform_with_b2inst = Platform(
+                short_name="platform_short_name test with b2inst",
+                manufacturer_name=fake.company(),
+                is_public=False,
+                is_private=False,
+                is_internal=True,
+                b2inst_record_id="124",
+            )
+            configuration_with_b2inst = Configuration(
+                label="configuration_short_name test with b2inst",
+                is_public=False,
+                is_internal=True,
+                b2inst_record_id="123",
+            )
+            db.session.add_all(
+                [
+                    device_with_b2inst,
+                    platform_with_b2inst,
+                    configuration_with_b2inst,
+                ]
+            )
+            db.session.commit()
+
+            runner = CliRunner()
+            with patch.object(
+                pidinst.b2inst, "update_external_metadata"
+            ) as update_external_metadata:
+                update_external_metadata.side_effect = Exception("Some problem")
+                result = runner.invoke(
+                    b2inst_update_all,
+                    ["--skip-problematic"],
+                    env={"FLASK_APP": "manage"},
+                )
+                self.assertEqual(
+                    update_external_metadata.call_count,
+                    3,
+                )
+
+            # We only log the errors, but the overall command goes fine.
+            assert result.exception is None
+            assert result.exit_code == 0

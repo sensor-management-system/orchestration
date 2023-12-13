@@ -14,6 +14,7 @@ Added:
 - Unit for accuracy
 - sites locations tab shows sub sites
 - Add hint for the selected date at `Platforms and Devices` tab of configuration
+- manage.py commands to update b2inst records
 
 Changed:
 - improved sort logic for mounts and unmounts that have the very same date
