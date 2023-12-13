@@ -134,14 +134,12 @@ class B2InstDeviceMapper:
                     alternateIdentifierName=None,
                 )
             )
-        if device.inventory_number:
-            result.append(
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=device.inventory_number,
-                    alternateIdentifierType="InventoryNumber",
-                    alternateIdentifierName=None,
-                )
-            )
+        # For the moment we decide not to publish the inventory number
+        # on the b2inst.
+        # We may re-add them in the future, but only if we add proper
+        # institute information about the owner.
+        # (Would just be the alternateIdentifierType="InventoryNumber")
+
         # You may ask why to include that while we still ahve the landing page
         # as an extra element.
         # The point is a small problem in b2inst, that doesn't allow us to patch
@@ -275,14 +273,6 @@ class B2InstPlatformMapper:
                 schemas.B2InstAlternateIdentifier(
                     alternateIdentifier=platform.serial_number,
                     alternateIdentifierType="SerialNumber",
-                    alternateIdentifierName=None,
-                )
-            )
-        if platform.inventory_number:
-            result.append(
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier=platform.inventory_number,
-                    alternateIdentifierType="InventoryNumber",
                     alternateIdentifierName=None,
                 )
             )

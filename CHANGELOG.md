@@ -17,6 +17,7 @@ Added:
 
 Changed:
 - improved sort logic for mounts and unmounts that have the very same date
+- inventory numbers are removed from B2inst export
 
 Fixed:
 - Improved handling of missing values for sites

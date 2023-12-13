@@ -151,11 +151,6 @@ class TestB2InstDeviceMapper(BaseTestCase):
                     alternateIdentifierName=None,
                 ),
                 schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="345",
-                    alternateIdentifierType="InventoryNumber",
-                    alternateIdentifierName=None,
-                ),
-                schemas.B2InstAlternateIdentifier(
                     alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
                     alternateIdentifierType="Other",
                     alternateIdentifierName="URL",
@@ -507,11 +502,6 @@ class TestB2InstPlatformMapper(BaseTestCase):
                 schemas.B2InstAlternateIdentifier(
                     alternateIdentifier="123",
                     alternateIdentifierType="SerialNumber",
-                    alternateIdentifierName=None,
-                ),
-                schemas.B2InstAlternateIdentifier(
-                    alternateIdentifier="345",
-                    alternateIdentifierType="InventoryNumber",
                     alternateIdentifierName=None,
                 ),
                 schemas.B2InstAlternateIdentifier(
