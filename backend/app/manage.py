@@ -316,5 +316,80 @@ def openapi():
     print(openapi_text)
 
 
+@cli.group()
+def b2inst():
+    """Group for b2inst sub commands."""
+    pass
+
+
+@b2inst.group("update")
+def b2inst_update():
+    """Group to update some of the b2inst records."""
+    pass
+
+
+@b2inst_update.command("device")
+@click.argument("device_id")
+def b2inst_update_device(device_id):
+    """Update the b2inst entry for the device with the device_id."""
+    from project.api.models import Device
+    from project.extensions.instances import pidinst
+
+    entry = db.session.query(Device).filter_by(id=device_id).first()
+    pidinst.b2inst.update_external_metadata(entry, run_async=False)
+
+
+@b2inst_update.command("platform")
+@click.argument("platform_id")
+def b2inst_update_platform(platform_id):
+    """Update the b2inst entry for the platform with the platform_id."""
+    from project.api.models import Platform
+    from project.extensions.instances import pidinst
+
+    entry = db.session.query(Platform).filter_by(id=platform_id).first()
+    pidinst.b2inst.update_external_metadata(entry, run_async=False)
+
+
+@b2inst_update.command("configuration")
+@click.argument("configuration_id")
+def b2inst_update_configuration(configuration_id):
+    """Update the b2inst entry for the configuration with the configuration_id."""
+    from project.api.models import Configuration
+    from project.extensions.instances import pidinst
+
+    entry = db.session.query(Configuration).filter_by(id=configuration_id).first()
+    pidinst.b2inst.update_external_metadata(entry, run_async=False)
+
+
+@b2inst_update.command("all")
+@click.option(
+    "--skip-problematic",
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="Skip the entries that cause problems with the validation on the b2inst side.",
+)
+def b2inst_update_all(skip_problematic):
+    """Update all the entries that have an b2inst record id."""
+    from project.api.models import Configuration, Device, Platform
+    from project.extensions.instances import pidinst
+
+    b2inst = pidinst.b2inst
+    for model_class in [Device, Platform, Configuration]:
+        for entry in (
+            db.session.query(model_class)
+            .filter(model_class.b2inst_record_id.is_not(None))
+            .order_by("id")
+        ):
+            try:
+                b2inst.update_external_metadata(entry, run_async=False)
+                print(f"Updated {entry} successfully")
+            except Exception as e:
+                if skip_problematic:
+                    print(f"Problem with {entry} - skipping...")
+                else:
+                    raise e
+
+
 if __name__ == "__main__":
     cli()
