@@ -13,6 +13,7 @@ Added:
 - show version numbers based on git tags
 - Unit for accuracy
 - sites locations tab shows sub sites
+- Add hint for the selected date at `Platforms and Devices` tab of configuration
 
 Changed:
 - improved sort logic for mounts and unmounts that have the very same date
