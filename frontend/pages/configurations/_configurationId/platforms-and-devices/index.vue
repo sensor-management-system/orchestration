@@ -33,6 +33,10 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <v-alert text type="info" dismissible>
+      Here you can see the setup of platforms and devices mounted for the configuration at a specific point in time. Feel free to select a different day to see the setup on that specific date, showing historical or future mounts.
+      The selection will also be used as default entry for the mount and un-mount dialogs.
+    </v-alert>
     <v-card-actions>
       <v-spacer />
       <v-btn
