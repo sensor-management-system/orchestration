@@ -62,7 +62,7 @@ ENV ALLOWED_MIME_TYPES $ALLOWED_MIME_TYPES_ARG
 ARG CV_URL_ARG=https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV CV_URL $CV_URL_ARG
 
-ARG IDL_URL_ARG=https://web.app.ufz.de/sms-idl/api/idl
+ARG IDL_URL_ARG=https://web.app.ufz.de/idl
 ENV IDL_URL $IDL_URL_ARG
 
 ARG SMS_FRONTEND_URL_ARG=https://webapp.ufz.de/sms
