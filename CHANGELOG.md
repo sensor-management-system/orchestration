@@ -6,7 +6,9 @@ SPDX-FileCopyrightText: 2023
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.11.0 (Unreleased)
+## 1.11.1 (Unreleased)
+
+## 1.11.0 - 2023-12-14
 
 Changed:
 - (UFZ): reverted changes to use the Hifis VO back to old service
