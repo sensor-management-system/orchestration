@@ -6,7 +6,9 @@ SPDX-FileCopyrightText: 2023
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.10.0 (Unreleased)
+## 1.10.1 (Unreleased)
+
+## 1.10.0 - 2023-12-14
 
 Added:
 - Updated the content of legal notice, privacy policy and terms of use within the footer pages for a FZJ instance's demo version.
