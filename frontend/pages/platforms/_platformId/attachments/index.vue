@@ -89,6 +89,7 @@ permissions and limitations under the Licence.
         v-if="editable"
         color="primary"
         small
+        :to="'/platforms/' + platformId + '/attachments/new'"
       >
         Add Attachment
       </v-btn>

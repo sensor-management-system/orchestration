@@ -8,6 +8,9 @@ SPDX-License-Identifier: HEESIL-1.0
 -->
 ## 1.11.1 (Unreleased)
 
+Fixed:
+- The lower button "Add Attachment" in Platform Attachment now works. 
+
 ## 1.11.0 - 2023-12-14
 
 Changed:
