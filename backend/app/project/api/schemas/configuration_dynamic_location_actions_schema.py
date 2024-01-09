@@ -57,6 +57,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         id_field="id",
         allow_none=True,
     )
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
@@ -64,6 +65,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         type_="configuration",
         schema="ConfigurationSchema",
     )
+    x_property_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     x_property = Relationship(
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<x_property_id>"},
@@ -71,6 +73,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         type_="device_property",
         schema="DevicePropertySchema",
     )
+    y_property_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     y_property = Relationship(
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<y_property_id>"},
@@ -78,6 +81,7 @@ class ConfigurationDynamicLocationBeginActionSchema(Schema):
         type_="device_property",
         schema="DevicePropertySchema",
     )
+    z_property_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     z_property = Relationship(
         related_view="api.device_property_detail",
         related_view_kwargs={"id": "<z_property_id>"},

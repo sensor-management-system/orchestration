@@ -367,3 +367,62 @@ class TestDeviceContactRolesServices(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 409)
+
+    def test_filter_by_device_id(self):
+        """Ensure we use filter[device_id]."""
+        device_contact_role1 = add_device_contact_role()
+        device_contact_role2 = add_device_contact_role()
+
+        self.assertFalse(
+            device_contact_role1.device_id == device_contact_role2.device_id
+        )
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[device_id]={device_contact_role1.device_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[device_id]={device_contact_role2.device_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[device_id]={device_contact_role2.device_id + 9999}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
+    def test_filter_by_contact_id(self):
+        """Ensure we use filter[contact_id]."""
+        device_contact_role1 = add_device_contact_role()
+        device_contact_role2 = add_device_contact_role()
+
+        self.assertFalse(
+            device_contact_role1.contact_id == device_contact_role2.contact_id
+        )
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[contact_id]={device_contact_role1.contact_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[contact_id]={device_contact_role2.contact_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url
+                + f"?filter[contact_id]={device_contact_role2.contact_id + 9999}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)

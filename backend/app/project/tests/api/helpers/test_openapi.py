@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -39,6 +39,7 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
             updated_at = fields.DateTime(dump_only=True)
             group_ids = fields.Field(many=True, allow_none=True)
 
+            device_id = fields.Integer(dump_only=True, load_only=True)
             device = Relationship(
                 related_view="api.device_detail",
                 related_view_kwargs={"id": "<device_id>"},
@@ -406,7 +407,6 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
     def test_patch(self):
         """Ensure the post method gives us a schema for a patch payload."""
         result = self.mapper.patch()
-
         expected = {
             "schema": {
                 "properties": {
@@ -479,4 +479,79 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
                 }
             }
         }
+        self.assertEqual(result, expected)
+
+    def test_filters(self):
+        """Ensure we can extract the filters from the schema."""
+        result = self.mapper.filters()
+
+        expected = [
+            {
+                "name": "filter[id]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "string",
+                },
+            },
+            {
+                "name": "filter[label]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "string",
+                },
+            },
+            {
+                "name": "filter[description]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "string",
+                },
+            },
+            {
+                "name": "filter[unit_uri]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "string",
+                },
+            },
+            {
+                "name": "filter[unit_name]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "string",
+                },
+            },
+            {
+                "name": "filter[created_at]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "string",
+                    "format": "date-time",
+                },
+            },
+            {
+                "name": "filter[updated_at]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "string",
+                    "format": "date-time",
+                },
+            },
+            {
+                "name": "filter[device_id]",
+                "in": "query",
+                "required": False,
+                "schema": {
+                    "type": "number",
+                },
+            },
+        ]
+
         self.assertEqual(result, expected)

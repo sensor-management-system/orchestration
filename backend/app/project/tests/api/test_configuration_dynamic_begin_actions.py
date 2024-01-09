@@ -949,6 +949,43 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             "test dynamic_location_begin_action1",
         )
 
+    def test_filtered_by_configuration_id(self):
+        """Ensure that filter by filter[configuration_id]."""
+        data1, config1 = self.prepare_request_data_with_config(
+            "test dynamic_location_begin_action1"
+        )
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data1,
+            object_type=self.object_type,
+        )
+        data2, _ = self.prepare_request_data_with_config(
+            "test dynamic_location_begin_action2"
+        )
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data2,
+            object_type=self.object_type,
+        )
+
+        # Test only for the first one
+        with self.client:
+            url_get_for_config1 = (
+                base_url
+                + f"/dynamic-location-actions?filter[configuration_id]={config1.id}"
+            )
+            response = self.client.get(
+                url_get_for_config1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "test dynamic_location_begin_action1",
+        )
+
     def prepare_request_data_with_x_property(self, description):
         """Prepare some payloads to add/update an x property."""
         device = Device(
@@ -1005,6 +1042,118 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         }
         return data, x_property
 
+    def prepare_request_data_with_y_property(self, description):
+        """Prepare some payloads to add/update an y property."""
+        device = Device(
+            short_name="Device 575",
+            manufacturer_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        y_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test x_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        config = generate_configuration_model(
+            is_public=True, is_private=False, is_internal=False
+        )
+        userinfo = generate_userinfo_data()
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        db.session.add_all([device, contact, config, y_property])
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "begin_date": fake.future_datetime().__str__(),
+                    "begin_description": description,
+                },
+                "relationships": {
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "y_property": {
+                        "data": {"type": "device_property", "id": y_property.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config.id}
+                    },
+                },
+            }
+        }
+        return data, y_property
+
+    def prepare_request_data_with_z_property(self, description):
+        """Prepare some payloads to add/update an z property."""
+        device = Device(
+            short_name="Device 575",
+            manufacturer_name=fake.pystr(),
+            is_public=False,
+            is_private=False,
+            is_internal=True,
+        )
+        z_property = DeviceProperty(
+            device=device,
+            measuring_range_min=fake.pyfloat(),
+            measuring_range_max=fake.pyfloat(),
+            failure_value=fake.pyfloat(),
+            accuracy=fake.pyfloat(),
+            label=fake.pystr(),
+            unit_uri=fake.uri(),
+            unit_name=fake.pystr(),
+            compartment_uri=fake.uri(),
+            compartment_name=fake.pystr(),
+            property_uri=fake.uri(),
+            property_name="Test x_property",
+            sampling_media_uri=fake.uri(),
+            sampling_media_name=fake.pystr(),
+        )
+        config = generate_configuration_model(
+            is_public=True, is_private=False, is_internal=False
+        )
+        userinfo = generate_userinfo_data()
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+        )
+        db.session.add_all([device, contact, config, z_property])
+        db.session.commit()
+        data = {
+            "data": {
+                "type": self.object_type,
+                "attributes": {
+                    "begin_date": fake.future_datetime().__str__(),
+                    "begin_description": description,
+                },
+                "relationships": {
+                    "begin_contact": {"data": {"type": "contact", "id": contact.id}},
+                    "z_property": {
+                        "data": {"type": "device_property", "id": z_property.id}
+                    },
+                    "configuration": {
+                        "data": {"type": "configuration", "id": config.id}
+                    },
+                },
+            }
+        }
+        return data, z_property
+
     def ensure_device_mount_action_exists(self, data1, x_property1):
         """Help to add a device mount action for the dynamic location property."""
         # As we use a device property here, we need to make sure that
@@ -1059,12 +1208,129 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
         self.assertEqual(len(response.json["data"]), 2)
         # Test only for the first one
         with self.client:
-            url_get_for_config1 = (
+            url_get_for_property1 = (
                 base_url
                 + f"/device-properties/{x_property1.id}/dynamic-location-actions-x"
             )
             response = self.client.get(
-                url_get_for_config1, content_type="application/vnd.api+json"
+                url_get_for_property1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "test dynamic_location_begin_action1",
+        )
+
+    def test_filtered_by_x_property_id(self):
+        """Ensure that filter by filter[x_property_id]."""
+        data1, x_property1 = self.prepare_request_data_with_x_property(
+            "test dynamic_location_begin_action1"
+        )
+        self.ensure_device_mount_action_exists(data1, x_property1)
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data1,
+            object_type=self.object_type,
+        )
+        data2, x_property2 = self.prepare_request_data_with_x_property(
+            "test dynamic_location_begin_action2"
+        )
+        self.ensure_device_mount_action_exists(data2, x_property2)
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data2,
+            object_type=self.object_type,
+        )
+
+        # Test only for the first one
+        with self.client:
+            url_get_for_property1 = (
+                base_url
+                + f"/dynamic-location-actions?filter[x_property_id]={x_property1.id}"
+            )
+            response = self.client.get(
+                url_get_for_property1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "test dynamic_location_begin_action1",
+        )
+
+    def test_filtered_by_y_property_id(self):
+        """Ensure that filter by filter[y_property_id]."""
+        data1, y_property1 = self.prepare_request_data_with_y_property(
+            "test dynamic_location_begin_action1"
+        )
+        self.ensure_device_mount_action_exists(data1, y_property1)
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data1,
+            object_type=self.object_type,
+        )
+        data2, y_property2 = self.prepare_request_data_with_y_property(
+            "test dynamic_location_begin_action2"
+        )
+        self.ensure_device_mount_action_exists(data2, y_property2)
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data2,
+            object_type=self.object_type,
+        )
+
+        # Test only for the first one
+        with self.client:
+            url_get_for_property1 = (
+                base_url
+                + f"/dynamic-location-actions?filter[y_property_id]={y_property1.id}"
+            )
+            response = self.client.get(
+                url_get_for_property1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "test dynamic_location_begin_action1",
+        )
+
+    def test_filtered_by_z_property_id(self):
+        """Ensure that filter by filter[z_property_id]."""
+        data1, z_property1 = self.prepare_request_data_with_z_property(
+            "test dynamic_location_begin_action1"
+        )
+        self.ensure_device_mount_action_exists(data1, z_property1)
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data1,
+            object_type=self.object_type,
+        )
+        data2, z_property2 = self.prepare_request_data_with_z_property(
+            "test dynamic_location_begin_action2"
+        )
+        self.ensure_device_mount_action_exists(data2, z_property2)
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data2,
+            object_type=self.object_type,
+        )
+
+        # Test only for the first one
+        with self.client:
+            url_get_for_property1 = (
+                base_url
+                + f"/dynamic-location-actions?filter[z_property_id]={z_property1.id}"
+            )
+            response = self.client.get(
+                url_get_for_property1, content_type="application/vnd.api+json"
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 1)

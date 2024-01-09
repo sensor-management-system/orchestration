@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
@@ -27,6 +27,7 @@ class DeviceCalibrationActionSchema(Schema):
     formula = fields.Str(allow_none=True)
     value = fields.Float(allow_none=True)
 
+    device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device = Relationship(
         attribute="device",
         related_view="api.device_detail",
@@ -73,6 +74,7 @@ class DevicePropertyCalibrationSchema(Schema):
 
     id = fields.Integer(as_string=True)
 
+    device_property_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device_property = Relationship(
         attribute="device_property",
         related_view="api.device_property_detail",
@@ -83,6 +85,9 @@ class DevicePropertyCalibrationSchema(Schema):
         id_field="id",
     )
 
+    calibration_action_id = fields.Integer(
+        dump_only=True, load_only=True, as_string=True
+    )
     calibration_action = Relationship(
         attribute="calibration_action",
         related_view="api.device_property_calibration_detail",

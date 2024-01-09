@@ -299,6 +299,67 @@ class TestPlatformAttachmentServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+    def test_get_platform_attachment_filter_platform_id(self):
+        """Ensure that we can filter the list by filter[platform_id]."""
+        platform1 = Platform(
+            short_name="Just a platform",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        platform2 = Platform(
+            short_name="Another platform",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        db.session.add(platform1)
+        db.session.add(platform2)
+        db.session.commit()
+
+        platform_attachment1 = PlatformAttachment(
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
+            platform=platform1,
+        )
+        platform_attachment2 = PlatformAttachment(
+            label="UFZ",
+            url="https://www.ufz.de",
+            platform=platform1,
+        )
+        platform_attachment3 = PlatformAttachment(
+            label="PIK",
+            url="https://www.pik-potsdam.de",
+            platform=platform2,
+        )
+
+        db.session.add(platform_attachment1)
+        db.session.add(platform_attachment2)
+        db.session.add(platform_attachment3)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url
+                + "/platform-attachments?filter[platform_id]="
+                + str(platform1.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 2)
+            response = self.client.get(
+                base_url
+                + "/platform-attachments?filter[platform_id]="
+                + str(platform2.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+
     def test_patch_platform_attachment_api(self):
         """Ensure that we can update a platform attachment."""
         platform1 = Platform(

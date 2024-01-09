@@ -313,6 +313,63 @@ class TestConfigurationAttachmentServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+    def test_get_configuration_attachment_filter_by_configuration(self):
+        """Ensure that we can filter the list by filter[configuration_id]."""
+        configuration1 = Configuration(
+            label="Just a configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        configuration2 = Configuration(
+            label="Another configuration",
+            is_public=True,
+            is_internal=False,
+        )
+
+        db.session.add(configuration1)
+        db.session.add(configuration2)
+        db.session.commit()
+
+        configuration_attachment1 = ConfigurationAttachment(
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
+            configuration=configuration1,
+        )
+        configuration_attachment2 = ConfigurationAttachment(
+            label="UFZ",
+            url="https://www.ufz.de",
+            configuration=configuration1,
+        )
+        configuration_attachment3 = ConfigurationAttachment(
+            label="PIK",
+            url="https://www.pik-potsdam.de",
+            configuration=configuration2,
+        )
+
+        db.session.add(configuration_attachment1)
+        db.session.add(configuration_attachment2)
+        db.session.add(configuration_attachment3)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url
+                + "/configuration-attachments?filter[configuration_id]="
+                + str(configuration1.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 2)
+            response = self.client.get(
+                base_url
+                + "/configuration-attachments?filter[configuration_id]="
+                + str(configuration2.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+
     def test_patch_configuration_attachment_api(self):
         """Ensure that we can update a configuration attachment."""
         configuration1 = Configuration(

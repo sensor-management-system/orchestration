@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -6,12 +6,11 @@
 
 """Openapi part for the device contact roles."""
 
-from ...api.schemas.json_schema import JSONSchema
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
 from ...api.schemas.role import DeviceRoleSchema
 
-schema = DeviceRoleSchema()
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(DeviceRoleSchema)
 
-json_schema = JSONSchema().dump(schema)
 paths = {
     "/device-contact-roles": {
         "get": {
@@ -19,18 +18,32 @@ paths = {
             "parameters": [
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                *schema_mapper.filters(),
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceContactRole_coll"}
+                "200": {
+                    "description": "List of device contact roles",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                },
             },
         },
         "post": {
             "tags": ["Device contact roles"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/DeviceContactRoles_inst"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/DeviceContactRolel_inst"}
+                "201": {
+                    "description": "Payload of the created device contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
     },
@@ -42,7 +55,13 @@ paths = {
                 {"$ref": "#/components/parameters/device_contact_role_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DeviceContactRole_inst"}
+                "200": {
+                    "description": "Instance of a device contct role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "patch": {
@@ -50,15 +69,19 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/device_contact_role_id"}],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/DeviceContactRoles"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "",
+                "description": "Device contact role attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/DeviceContactRole_inst"}
+                "200": {
+                    "description": "Payload of the udpated device contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "delete": {
@@ -70,166 +93,12 @@ paths = {
 }
 
 components = {
-    "responses": {
-        "DeviceContactRole_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": [
-                                    {
-                                        "id": "0",
-                                        "type": "device_contact_role",
-                                        "attributes": {
-                                            "role_name": "PI",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "device": {
-                                                "data": {"type": "device", "id": "123"}
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "000",
-                                                },
-                                            },
-                                        },
-                                    },
-                                    {
-                                        "id": "1",
-                                        "type": "device_contact_role",
-                                        "attributes": {
-                                            "role_name": "Administrator",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "device": {
-                                                "data": {"type": "device", "id": "1234"}
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "1",
-                                                },
-                                            },
-                                        },
-                                    },
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-        "DeviceContactRole_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "id": "0",
-                                    "type": "device_contact_role",
-                                    "attributes": {"role_name": "", "role_uri": ""},
-                                    "relationships": {
-                                        "device": {
-                                            "data": {"type": "device", "id": "123"}
-                                        },
-                                        "contact": {
-                                            "data": {"type": "contact", "id": "000"},
-                                        },
-                                    },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-    },
-    "requestBodies": {
-        "DeviceContactRoles_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "device_contact_role",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "role_name": {"type": "string"},
-                                            "role_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["contact"],
-                                        "properties": {
-                                            "contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "device": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-    },
     "parameters": {
         "device_contact_role_id": {
             "name": "device_contact_role_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
-    "schemas": {
-        "DeviceContactRoles": {
-            "properties": json_schema["properties"],
-            "description": "Device Contact Roles Schema;",
         },
     },
 }

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -111,6 +111,11 @@ class DevicePropertySchema(Schema):
     aggregation_type_name = fields.String(allow_none=True)
     description = fields.Str(allow_none=True)
 
+    # Adding this field will allow us to filter over the device_id field.
+    # Unfortunally it is not possible to use the relationship directly.
+    # However, we don't want to allow the user to use it to overwrite,
+    # nor we want to put it out as a result.
+    device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device = Relationship(
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -6,12 +6,11 @@
 
 """Openapi part for the site contact roles."""
 
-from ...api.schemas.json_schema import JSONSchema
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
 from ...api.schemas.role import SiteRoleSchema
 
-schema = SiteRoleSchema()
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(SiteRoleSchema)
 
-json_schema = JSONSchema().dump(schema)
 paths = {
     "/site-contact-roles": {
         "get": {
@@ -19,29 +18,33 @@ paths = {
             "parameters": [
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                *schema_mapper.filters(),
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/SiteContactRole_coll"}
+                "200": {
+                    "description": "List of site contact roles",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                },
             },
         },
         "post": {
             "tags": ["Site contact roles"],
-            "requestBody": {"$ref": "#/components/requestBodies/SiteContactRoles_inst"},
-            "responses": {
-                "201": {"$ref": "#/components/responses/SiteContactRolel_inst"}
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
-        },
-    },
-    "/site/{site_id}/site-contact-roles": {
-        "get": {
-            "tags": ["Site contact roles"],
             "responses": {
-                "200": {"$ref": "#/components/responses/SiteContactRole_coll"}
+                "201": {
+                    "description": "Payload of the created site contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
-            "parameters": [
-                {"$ref": "#/components/parameters/site_id"},
-            ],
-            "description": "Retrieve the contact roles for a specific site.",
         },
     },
     "/site-contact-roles/{site_contact_role_id}": {
@@ -52,7 +55,13 @@ paths = {
                 {"$ref": "#/components/parameters/site_contact_role_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/SiteContactRole_inst"}
+                "200": {
+                    "description": "Instance of a site contct role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "patch": {
@@ -60,15 +69,19 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/site_contact_role_id"}],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/SiteContactRoles"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "",
+                "description": "Site contact role attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/SiteContactRole_inst"}
+                "200": {
+                    "description": "Payload of the udpated site contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "delete": {
@@ -80,164 +93,12 @@ paths = {
 }
 
 components = {
-    "responses": {
-        "SiteContactRole_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": [
-                                    {
-                                        "id": "0",
-                                        "type": "site_contact_role",
-                                        "attributes": {
-                                            "role_name": "PI",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "site": {
-                                                "data": {"type": "site", "id": "123"}
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "000",
-                                                },
-                                            },
-                                        },
-                                    },
-                                    {
-                                        "id": "1",
-                                        "type": "site_contact_role",
-                                        "attributes": {
-                                            "role_name": "Administrator",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "site": {
-                                                "data": {"type": "site", "id": "1234"}
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "1",
-                                                },
-                                            },
-                                        },
-                                    },
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-        "SiteContactRole_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "id": "0",
-                                    "type": "site_contact_role",
-                                    "attributes": {"role_name": "", "role_uri": ""},
-                                    "relationships": {
-                                        "site": {"data": {"type": "site", "id": "123"}},
-                                        "contact": {
-                                            "data": {"type": "contact", "id": "000"},
-                                        },
-                                    },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-    },
-    "requestBodies": {
-        "SiteContactRoles_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "site_contact_role",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "role_name": {"type": "string"},
-                                            "role_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["contact"],
-                                        "properties": {
-                                            "contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "site": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "site",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-    },
     "parameters": {
         "site_contact_role_id": {
             "name": "site_contact_role_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
-    "schemas": {
-        "SiteContactRoles": {
-            "properties": json_schema["properties"],
-            "description": "Site Contact Roles Schema;",
         },
     },
 }

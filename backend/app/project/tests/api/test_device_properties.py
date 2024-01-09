@@ -541,6 +541,65 @@ class TestDevicePropertyServices(BaseTestCase):
             < response2.json["data"]["attributes"]["updated_at"]
         )
 
+    def test_get_with_device_id_filter(self):
+        """Ensure we can use filter[device_id] in the get list request."""
+        device1 = Device(
+            short_name="Just a device",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        device2 = Device(
+            short_name="Another device",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        db.session.add(device1)
+        db.session.add(device2)
+        db.session.commit()
+
+        device_property1 = DeviceProperty(
+            label="device property1",
+            property_name="device_property1",
+            description="Device property 1",
+            accuracy_unit_name="%",
+            accuracy_unit_uri="https://sensors.gfz-potsdam.de/cv/api/v1/units/1",
+            device=device1,
+        )
+        device_property2 = DeviceProperty(
+            label="device property2",
+            property_name="device_property2",
+            device=device1,
+        )
+        device_property3 = DeviceProperty(
+            label="device property3",
+            property_name="device_property3",
+            device=device2,
+        )
+
+        db.session.add(device_property1)
+        db.session.add(device_property2)
+        db.session.add(device_property3)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url + f"/device-properties?filter[device_id]={device2.id}",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            payload = response.get_json()
+
+            self.assertEqual(len(payload["data"]), 1)
+
+        self.expect(payload["data"][0]["attributes"].keys()).not_.to_include(
+            "device_id"
+        )
+
 
 class TestDevicePropertyDeletion(BaseTestCase):
     """Test class for deleting with some relationships."""

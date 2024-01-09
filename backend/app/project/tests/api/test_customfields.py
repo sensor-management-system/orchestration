@@ -286,6 +286,63 @@ class TestCustomFieldServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+    def test_get_customfields_filter_device_id(self):
+        """Ensure that we can filter the list by filter[device_id]."""
+        device1 = Device(
+            short_name="Just a device",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        device2 = Device(
+            short_name="Another device",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        db.session.add(device1)
+        db.session.add(device2)
+        db.session.commit()
+
+        customfield1 = CustomField(
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
+            device=device1,
+        )
+        customfield2 = CustomField(
+            key="UFZ",
+            value="https://www.ufz.de",
+            device=device1,
+        )
+        customfield3 = CustomField(
+            key="PIK",
+            value="https://www.pik-potsdam.de",
+            device=device2,
+        )
+
+        db.session.add(customfield1)
+        db.session.add(customfield2)
+        db.session.add(customfield3)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url + "/customfields?filter[device_id]=" + str(device1.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 2)
+            response = self.client.get(
+                base_url + "/customfields?filter[device_id]=" + str(device2.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+
     def test_patch_customfield_api_device(self):
         """Ensure that we can update a customfield by changing the device."""
         device1 = Device(

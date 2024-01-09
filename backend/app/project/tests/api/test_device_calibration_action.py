@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2023
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -228,6 +228,87 @@ class TestDeviceCalibrationAction(BaseTestCase):
                 url_get_for_non_existing_device, content_type="application/vnd.api+json"
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_filtered_by_device_id(self):
+        """Ensure that I can prefilter by filter[device_id]."""
+        device1 = Device(
+            short_name="sample device",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device1)
+        device2 = Device(
+            short_name="sample device II",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        action1 = DeviceCalibrationAction(
+            device=device1,
+            contact=contact,
+            description="Some first action",
+            current_calibration_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceCalibrationAction(
+            device=device2,
+            contact=contact,
+            description="Some other action",
+            current_calibration_date=fake.date_time(),
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        # Test only for the first device
+        with self.client:
+            url_get_for_device1 = (
+                base_url + f"/device-calibration-actions?filter[device_id]={device1.id}"
+            )
+            response = self.client.get(
+                url_get_for_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second device
+        with self.client:
+            url_get_for_device2 = (
+                base_url + f"/device-calibration-actions?filter[device_id]={device2.id}"
+            )
+            response = self.client.get(
+                url_get_for_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url
+                + f"/device-calibration-actions?filter[device_id]={device2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
 
     def test_delete_device_calibration_action_with_an_attachment_link(self):
         """Make sure the deletion of a DeviceCalibrationAction can be done even

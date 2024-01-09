@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -61,6 +61,7 @@ class ConfigurationStaticLocationBeginActionSchema(Schema):
         allow_none=True,
     )
 
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         # self_view="api.configuration_static_location_begin_action_configuration",
         # self_view_kwargs={"id": "<id>"},

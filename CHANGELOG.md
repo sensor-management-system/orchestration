@@ -10,6 +10,7 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Fixed:
 - The lower button "Add Attachment" in Platform Attachment now works. 
+- Improved id filters for json:api relationships
 
 ## 1.11.0 - 2023-12-14
 

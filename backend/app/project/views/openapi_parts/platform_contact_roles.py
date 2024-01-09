@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -6,12 +6,10 @@
 
 """Openapi part for the platform contact roles."""
 
-from ...api.schemas.json_schema import JSONSchema
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
 from ...api.schemas.role import PlatformRoleSchema
 
-schema = PlatformRoleSchema()
-
-json_schema = JSONSchema().dump(schema)
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(PlatformRoleSchema)
 
 paths = {
     "/platform-contact-roles": {
@@ -20,18 +18,32 @@ paths = {
             "parameters": [
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                *schema_mapper.filters(),
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/PlatformContactRole_coll"}
+                "200": {
+                    "description": "List of platform contact roles",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                },
             },
         },
         "post": {
             "tags": ["Platform contact roles"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/PlatformContactRoles_inst"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/PlatformContactRolel_inst"}
+                "201": {
+                    "description": "Payload of the created platform contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
     },
@@ -43,7 +55,13 @@ paths = {
                 {"$ref": "#/components/parameters/platform_contact_role_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/PlatformContactRole_inst"}
+                "200": {
+                    "description": "Instance of a platform contct role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "patch": {
@@ -53,15 +71,19 @@ paths = {
             ],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/PlatformContactRoles"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "",
+                "description": "Platform contact role attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/PlatformContactRole_inst"}
+                "200": {
+                    "description": "Payload of the udpated platform contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "delete": {
@@ -75,172 +97,12 @@ paths = {
 }
 
 components = {
-    "responses": {
-        "PlatformContactRole_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": [
-                                    {
-                                        "id": "0",
-                                        "type": "platform_contact_role",
-                                        "attributes": {
-                                            "role_name": "PI",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "platform": {
-                                                "data": {
-                                                    "type": "platform",
-                                                    "id": "123",
-                                                }
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "000",
-                                                },
-                                            },
-                                        },
-                                    },
-                                    {
-                                        "id": "1",
-                                        "type": "platform_contact_role",
-                                        "attributes": {
-                                            "role_name": "Administrator",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "platform": {
-                                                "data": {
-                                                    "type": "platform",
-                                                    "id": "1234",
-                                                }
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "1",
-                                                },
-                                            },
-                                        },
-                                    },
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-        "PlatformContactRole_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "id": "0",
-                                    "type": "platform_contact_role",
-                                    "attributes": {"role_name": "", "role_uri": ""},
-                                    "relationships": {
-                                        "platform": {
-                                            "data": {"type": "platform", "id": "123"}
-                                        },
-                                        "contact": {
-                                            "data": {"type": "contact", "id": "000"},
-                                        },
-                                    },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-    },
-    "requestBodies": {
-        "PlatformContactRoles_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "platform_contact_role",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "role_name": {"type": "string"},
-                                            "role_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["contact"],
-                                        "properties": {
-                                            "contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "platform": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "platform",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-    },
     "parameters": {
         "platform_contact_role_id": {
             "name": "platform_contact_role_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
-    "schemas": {
-        "PlatformContactRoles": {
-            "properties": json_schema["properties"],
-            "description": "Platform Contact Roles Schema;",
         },
     },
 }

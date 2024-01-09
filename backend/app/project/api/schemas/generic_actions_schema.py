@@ -1,10 +1,12 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
+
+"""Schemas for the generic actions."""
 
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Relationship, Schema
@@ -13,11 +15,14 @@ from marshmallow_jsonapi.flask import Relationship, Schema
 class GenericPlatformActionSchema(Schema):
     """
     This class create a schema for a generic_platform_action.
+
     It uses library called marshmallow-jsonapi that fit
     the JSONAPI 1.0 specification and provides Flask integration.
     """
 
     class Meta:
+        """Meta class for the GenericPlatformActionSchema."""
+
         type_ = "generic_platform_action"
         self_view = "api.generic_platform_action_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -32,6 +37,7 @@ class GenericPlatformActionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    platform_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     platform = Relationship(
         related_view="api.platform_detail",
         related_view_kwargs={"id": "<platform_id>"},
@@ -79,7 +85,11 @@ class GenericPlatformActionSchema(Schema):
 
 
 class GenericDeviceActionSchema(Schema):
+    """Schema class for the generic actions for devices."""
+
     class Meta:
+        """Meta class for the GenericDeviceActionSchema."""
+
         type_ = "generic_device_action"
         self_view = "api.generic_device_action_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -94,6 +104,7 @@ class GenericDeviceActionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device = Relationship(
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
@@ -141,7 +152,11 @@ class GenericDeviceActionSchema(Schema):
 
 
 class GenericConfigurationActionSchema(Schema):
+    """Schema for the generic actions for configurations."""
+
     class Meta:
+        """Meta class for the GenericConfigurationActionSchema."""
+
         type_ = "generic_configuration_action"
         self_view = "api.generic_configuration_action_detail"
         self_view_kwargs = {"id": "<id>"}
@@ -156,6 +171,7 @@ class GenericConfigurationActionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},

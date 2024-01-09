@@ -288,6 +288,59 @@ class TestSiteAttachmentServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+    def test_get_site_attachment_filter_by_site_id(self):
+        """Ensure that we can filter the list by filter[site_id]."""
+        site1 = Site(
+            label="Just a site",
+            is_public=True,
+            is_internal=False,
+        )
+        site2 = Site(
+            label="Another site",
+            is_public=True,
+            is_internal=False,
+        )
+
+        db.session.add(site1)
+        db.session.add(site2)
+        db.session.commit()
+
+        site_attachment1 = SiteAttachment(
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
+            site=site1,
+        )
+        site_attachment2 = SiteAttachment(
+            label="UFZ",
+            url="https://www.ufz.de",
+            site=site1,
+        )
+        site_attachment3 = SiteAttachment(
+            label="PIK",
+            url="https://www.pik-potsdam.de",
+            site=site2,
+        )
+
+        db.session.add(site_attachment1)
+        db.session.add(site_attachment2)
+        db.session.add(site_attachment3)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url + "/site-attachments?filter[site_id]=" + str(site1.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 2)
+            response = self.client.get(
+                base_url + "/site-attachments?filter[site_id]=" + str(site2.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+
     def test_patch_site_attachment_api(self):
         """Ensure that we can update a site attachment."""
         site1 = Site(

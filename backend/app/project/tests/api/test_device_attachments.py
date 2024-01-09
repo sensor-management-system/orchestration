@@ -297,6 +297,63 @@ class TestDeviceAttachmentServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+    def test_get_device_attachment_filter_by_device_id(self):
+        """Ensure that we can filter the list by filter[device_id]."""
+        device1 = Device(
+            short_name="Just a device",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        device2 = Device(
+            short_name="Another device",
+            manufacturer_name=fake.pystr(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        db.session.add(device1)
+        db.session.add(device2)
+        db.session.commit()
+
+        device_attachment1 = DeviceAttachment(
+            label="GFZ",
+            url="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
+            device=device1,
+        )
+        device_attachment2 = DeviceAttachment(
+            label="UFZ",
+            url="https://www.ufz.de",
+            device=device1,
+        )
+        device_attachment3 = DeviceAttachment(
+            label="PIK",
+            url="https://www.pik-potsdam.de",
+            device=device2,
+        )
+
+        db.session.add(device_attachment1)
+        db.session.add(device_attachment2)
+        db.session.add(device_attachment3)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url + "/device-attachments?filter[device_id]=" + str(device1.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 2)
+            response = self.client.get(
+                base_url + "/device-attachments?filter[device_id]=" + str(device2.id),
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+
     def test_patch_device_attachment_api(self):
         """Ensure that we can update a device attachment."""
         device1 = Device(

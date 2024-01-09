@@ -207,6 +207,92 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
+    def test_filtered_by_device_id(self):
+        """Ensure that I can prefilter by filter[device_id]."""
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        device1 = Device(
+            short_name="device1",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device1)
+
+        device2 = Device(
+            short_name="device2",
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device2)
+
+        action1 = DeviceSoftwareUpdateAction(
+            contact=contact,
+            device=device1,
+            description="Some first action",
+            software_type_name="firmware",
+            update_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceSoftwareUpdateAction(
+            contact=contact,
+            device=device2,
+            description="Some other action",
+            software_type_name="sampleScript",
+            update_date=fake.date_time(),
+        )
+        db.session.add(action2)
+
+        db.session.commit()
+
+        # Test only for the first device
+        with self.client:
+            url_get_for_device1 = (
+                base_url
+                + f"/device-software-update-actions?filter[device_id]={device1.id}"
+            )
+            response = self.client.get(
+                url_get_for_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second device
+        with self.client:
+            url_get_for_device2 = (
+                base_url
+                + f"/device-software-update-actions?filter[device_id]={device2.id}"
+            )
+            response = self.client.get(
+                url_get_for_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url
+                + f"/device-software-update-actions?filter[device_id]={device2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"

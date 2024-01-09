@@ -428,6 +428,50 @@ class TestConfigurationParameterServices(BaseTestCase):
         )
         self.expect(resp.status_code).to_equal(404)
 
+    @fixtures.use(
+        ["public_configuration1_in_group1", "public_configuration2_in_group1"]
+    )
+    def test_get_list_prefiltered_by_configuration_id(
+        self, public_configuration1_in_group1, public_configuration2_in_group1
+    ):
+        """Ensure we get can prefilter by filter[configuration_id]."""
+        parameter1 = ConfigurationParameter(
+            configuration=public_configuration1_in_group1,
+            label="specialvalue",
+            description="some value",
+            unit_name="count",
+            unit_uri="http://foo/count",
+        )
+        parameter2 = ConfigurationParameter(
+            configuration=public_configuration2_in_group1,
+            label="othervalue",
+            description="some value",
+            unit_name="meter",
+            unit_uri="http://foo/meter",
+        )
+        db.session.add_all([parameter1, parameter2])
+        db.session.commit()
+
+        resp1 = self.client.get(
+            f"{base_url}/configuration-parameters?filter[configuration_id]={public_configuration1_in_group1.id}"
+        )
+        self.expect(resp1.status_code).to_equal(200)
+        self.expect(resp1.json["data"]).to_have_length(1)
+        self.expect(resp1.json["data"][0]["id"]).to_equal(str(parameter1.id))
+
+        resp2 = self.client.get(
+            f"{base_url}/configuration-parameters?filter[configuration_id]={public_configuration2_in_group1.id}"
+        )
+        self.expect(resp2.status_code).to_equal(200)
+        self.expect(resp2.json["data"]).to_have_length(1)
+        self.expect(resp2.json["data"][0]["id"]).to_equal(str(parameter2.id))
+
+        resp3 = self.client.get(
+            f"{base_url}/configuration-parameters?filter[configuration_id]={public_configuration2_in_group1.id + 9999}"
+        )
+        self.expect(resp3.status_code).to_equal(200)
+        self.expect(resp3.json["data"]).to_have_length(0)
+
     @fixtures.use(["public_configuration1_in_group1"])
     def test_post_no_user(self, public_configuration1_in_group1):
         """Ensure we can't post if we don't have a user."""

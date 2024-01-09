@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -29,6 +29,7 @@ class ConfigurationParameterSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
