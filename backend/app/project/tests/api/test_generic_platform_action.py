@@ -270,6 +270,91 @@ class TestGenericPlatformAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
+    def test_filtered_by_platform_id(self):
+        """Ensure that I can prefilter by filter[platform_id]."""
+        platform1 = Platform(
+            short_name="sample platform",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform1)
+        platform2 = Platform(
+            short_name="sample platform II",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        action1 = GenericPlatformAction(
+            platform=platform1,
+            contact=contact,
+            description="Some first action",
+            begin_date=fake.date_time(),
+            action_type_name="PlatformActivity",
+        )
+        db.session.add(action1)
+
+        action2 = GenericPlatformAction(
+            platform=platform2,
+            contact=contact,
+            description="Some other action",
+            begin_date=fake.date_time(),
+            action_type_name="PlatformActivity",
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        with self.client:
+            url_get_for_platform1 = (
+                base_url
+                + f"/generic-platform-actions?filter[platform_id]={platform1.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second platform
+        with self.client:
+            url_get_for_platform2 = (
+                base_url
+                + f"/generic-platform-actions?filter[platform_id]={platform2.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_platform = (
+                base_url
+                + f"/generic-platform-actions?filter[platform_id]={platform2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_platform,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
     # def test_delete_generic_platform_action_with_attachment_link(self):
     #     """Ensure a generic_platform_action with attachment link can be deleted."""
     #     generic_platform_action_attachment = (

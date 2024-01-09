@@ -296,6 +296,69 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.get_json()["data"]), 1)
 
+    def test_get_configuration_customfields_filter_configuration_id(self):
+        """Ensure that we can get filter by configuration_id."""
+        configuration1 = Configuration(
+            label="Just a configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        configuration2 = Configuration(
+            label="Another configuration",
+            is_public=True,
+            is_internal=False,
+        )
+
+        db.session.add(configuration1)
+        db.session.add(configuration2)
+        db.session.commit()
+
+        customfield1 = ConfigurationCustomField(
+            key="GFZ",
+            value="https://www.gfz-potsdam.de",
+            description="The GFZ homepage",
+            configuration=configuration1,
+        )
+        customfield2 = ConfigurationCustomField(
+            key="UFZ",
+            value="https://www.ufz.de",
+            configuration=configuration1,
+        )
+        customfield3 = ConfigurationCustomField(
+            key="PIK",
+            value="https://www.pik-potsdam.de",
+            configuration=configuration2,
+        )
+
+        db.session.add(customfield1)
+        db.session.add(customfield2)
+        db.session.add(customfield3)
+        db.session.commit()
+
+        with self.client:
+            response = self.client.get(
+                base_url
+                + f"/configuration-customfields?filter[configuration_id]={configuration1.id}",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 2)
+            response = self.client.get(
+                base_url
+                + f"/configuration-customfields?filter[configuration_id]={configuration2.id}",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 1)
+
+            response = self.client.get(
+                base_url
+                + f"/configuration-customfields?filter[configuration_id]={configuration2.id + 999}",
+                content_type="application/vnd.api+json",
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.get_json()["data"]), 0)
+
     def test_patch_configuration_customfield_api_configuration(self):
         """Ensure that we can update a customfield by changing the configuration."""
         configuration1 = Configuration(

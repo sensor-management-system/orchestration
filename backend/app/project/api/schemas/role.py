@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -31,6 +31,7 @@ class DeviceRoleSchema(Schema, RoleSchema):
         self_view_kwargs = {"id": "<id>"}
         self_view_many = "api.device_contact_role_list"
 
+    device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device = Relationship(
         self_view="api.device_list",
         self_view_kwargs={"id": "<id>"},
@@ -41,6 +42,7 @@ class DeviceRoleSchema(Schema, RoleSchema):
         type_="device",
         id_field="id",
     )
+    contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     contact = Relationship(
         self_view="api.contact_list",
         self_view_kwargs={"id": "<id>"},
@@ -64,6 +66,7 @@ class PlatformRoleSchema(Schema, RoleSchema):
         self_view_kwargs = {"id": "<id>"}
         self_view_many = "api.platform_contact_role_list"
 
+    platform_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     platform = Relationship(
         self_view="api.platform_list",
         self_view_kwargs={"id": "<id>"},
@@ -74,6 +77,7 @@ class PlatformRoleSchema(Schema, RoleSchema):
         type_="platform",
         id_field="id",
     )
+    contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     contact = Relationship(
         self_view="api.contact_list",
         self_view_kwargs={"id": "<id>"},
@@ -97,6 +101,7 @@ class ConfigurationRoleSchema(Schema, RoleSchema):
         self_view_kwargs = {"id": "<id>"}
         self_view_many = "api.configuration_contact_role_list"
 
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},
@@ -105,6 +110,7 @@ class ConfigurationRoleSchema(Schema, RoleSchema):
         type_="configuration",
         id_field="id",
     )
+    contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     contact = Relationship(
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},
@@ -126,6 +132,7 @@ class SiteRoleSchema(Schema, RoleSchema):
         self_view_kwargs = {"id": "<id>"}
         self_view_many = "api.site_contact_role_list"
 
+    site_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     site = Relationship(
         related_view="api.site_detail",
         related_view_kwargs={"id": "<site_id>"},
@@ -134,6 +141,7 @@ class SiteRoleSchema(Schema, RoleSchema):
         type_="site",
         id_field="id",
     )
+    contact_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     contact = Relationship(
         related_view="api.contact_detail",
         related_view_kwargs={"id": "<contact_id>"},

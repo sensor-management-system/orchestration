@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -38,6 +38,7 @@ class PlatformMountActionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    platform_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     platform = Relationship(
         attribute="platform",
         related_view="api.platform_detail",
@@ -47,6 +48,7 @@ class PlatformMountActionSchema(Schema):
         type_="platform",
         id_field="id",
     )
+    parent_platform_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     parent_platform = Relationship(
         attribute="parent_platform",
         related_view="api.platform_detail",
@@ -56,6 +58,7 @@ class PlatformMountActionSchema(Schema):
         type_="platform",
         id_field="id",
     )
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         attribute="configuration",
         related_view="api.configuration_detail",
@@ -130,6 +133,7 @@ class DeviceMountActionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device = Relationship(
         attribute="device",
         related_view="api.device_detail",
@@ -139,6 +143,7 @@ class DeviceMountActionSchema(Schema):
         type_="device",
         id_field="id",
     )
+    parent_platform_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     parent_platform = Relationship(
         attribute="parent_platform",
         related_view="api.platform_detail",
@@ -148,6 +153,7 @@ class DeviceMountActionSchema(Schema):
         type_="platform",
         id_field="id",
     )
+    parent_device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     parent_device = Relationship(
         attribute="parent_device",
         related_view="api.device_detail",
@@ -157,6 +163,7 @@ class DeviceMountActionSchema(Schema):
         type_="device",
         id_field="id",
     )
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         attribute="configuration",
         related_view="api.configuration_detail",

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -20,26 +20,7 @@ paths = {
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
-                {"$ref": "#/components/parameters/created_at"},
-                {"$ref": "#/components/parameters/updated_at"},
-                {"$ref": "#/components/parameters/created_by_id"},
-                {"$ref": "#/components/parameters/updated_by_id"},
-                {"$ref": "#/components/parameters/description"},
-                {"$ref": "#/components/parameters/short_name"},
-                {"$ref": "#/components/parameters/long_name"},
-                {"$ref": "#/components/parameters/serial_number"},
-                {"$ref": "#/components/parameters/manufacturer_uri"},
-                {"$ref": "#/components/parameters/manufacturer_name"},
-                {"$ref": "#/components/parameters/dual_use"},
-                {"$ref": "#/components/parameters/model"},
-                {"$ref": "#/components/parameters/inventory_number"},
-                {"$ref": "#/components/parameters/persistent_identifier"},
-                {"$ref": "#/components/parameters/website"},
-                {"$ref": "#/components/parameters/device_type_uri"},
-                {"$ref": "#/components/parameters/device_type_name"},
-                {"$ref": "#/components/parameters/status_uri"},
-                {"$ref": "#/components/parameters/status_name"},
-                {"$ref": "#/components/parameters/id"},
+                *schema_mapper.filters(),
                 {"$ref": "#/components/parameters/filter"},
                 {"$ref": "#/components/parameters/hide_archived"},
             ],

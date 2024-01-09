@@ -392,3 +392,69 @@ class TestConfigurationContactRolesServices(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 409)
+
+    def test_filter_by_configuration_id(self):
+        """Ensure we use filter[configuration_id]."""
+        configuration_contact_role1 = add_configuration_contact_role()
+        configuration_contact_role2 = add_configuration_contact_role()
+
+        self.assertFalse(
+            configuration_contact_role1.configuration_id
+            == configuration_contact_role2.configuration_id
+        )
+        with self.client:
+            response = self.client.get(
+                self.url
+                + f"?filter[configuration_id]={configuration_contact_role1.configuration_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url
+                + f"?filter[configuration_id]={configuration_contact_role2.configuration_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url
+                + f"?filter[configuration_id]={configuration_contact_role2.configuration_id + 9999}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
+    def test_filter_by_contact_id(self):
+        """Ensure we use filter[contact_id]."""
+        configuration_contact_role1 = add_configuration_contact_role()
+        configuration_contact_role2 = add_configuration_contact_role()
+
+        self.assertFalse(
+            configuration_contact_role1.contact_id
+            == configuration_contact_role2.contact_id
+        )
+        with self.client:
+            response = self.client.get(
+                self.url
+                + f"?filter[contact_id]={configuration_contact_role1.contact_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url
+                + f"?filter[contact_id]={configuration_contact_role2.contact_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url
+                + f"?filter[contact_id]={configuration_contact_role2.contact_id + 9999}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)

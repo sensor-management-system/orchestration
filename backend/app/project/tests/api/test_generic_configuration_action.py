@@ -232,6 +232,87 @@ class TestGenericConfigurationAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
+    def test_filtered_by_configuration_id(self):
+        """Ensure that I can prefilter by filter[configuration_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        action1 = GenericConfigurationAction(
+            configuration=configuration1,
+            contact=contact,
+            description="Some first action",
+            begin_date=fake.date_time(),
+            action_type_name="ConfigurationActivity",
+        )
+        db.session.add(action1)
+
+        action2 = GenericConfigurationAction(
+            configuration=configuration2,
+            contact=contact,
+            description="Some other action",
+            begin_date=fake.date_time(),
+            action_type_name="ConfigurationActivity",
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        with self.client:
+            url_get_for_configuration1 = (
+                base_url
+                + f"/generic-configuration-actions?filter[configuration_id]={configuration1.id}"
+            )
+            response = self.client.get(
+                url_get_for_configuration1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some first action"
+        )
+
+        # and test the second configuration
+        with self.client:
+            url_get_for_configuration2 = (
+                base_url
+                + f"/generic-configuration-actions?filter[configuration_id]={configuration2.id}"
+            )
+            response = self.client.get(
+                url_get_for_configuration2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["description"], "Some other action"
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_configuration = (
+                base_url
+                + f"/generic-configuration-actions?filter[configuration_id]={configuration2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_configuration,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
     def test_delete_generic_configuration_action_with_attachment_link(self):
         """Delete GenericConfigurationAction with an attachment link."""
         configuration_action = add_generic_configuration_action_model()

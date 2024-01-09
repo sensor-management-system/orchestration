@@ -291,6 +291,10 @@ class Expectation:
             self.test_case.assertIn(value, self.value)
         return self
 
+    def to_include(self, value):
+        """Raise an assertion of the value is not included."""
+        self.to_include_all_of([value])
+
     def to_be_a_datetime_string(self):
         """Raise an assertion if the value is not a datetime string."""
         try:
@@ -329,6 +333,10 @@ class InvertedExpectation:
     def to_be_none(self):
         """Raise an assertion if we have none."""
         self.test_case.assertIsNotNone(self.value)
+
+    def to_include(self, value):
+        """Raise an assertion if the value is not in the set."""
+        self.test_case.assertFalse(value in self.value)
 
 
 class ExpectMixin:

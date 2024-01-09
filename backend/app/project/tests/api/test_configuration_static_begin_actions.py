@@ -402,6 +402,38 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
             "test static_location_begin_action1",
         )
 
+    def test_filtered_by_configuration_id(self):
+        """Ensure that filter by filter[configuration_id]."""
+        data1, config1 = self.prepare_request_data("test static_location_begin_action1")
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data1,
+            object_type=self.object_type,
+        )
+        data2, config2 = self.prepare_request_data("test static_location_begin_action2")
+
+        _ = super().add_object(
+            url=self.url,
+            data_object=data2,
+            object_type=self.object_type,
+        )
+
+        # Test only for the first one
+        with self.client:
+            url_get_for_config1 = (
+                base_url + f"/static-location-actions?filter[configuration_id]={config1.id}"
+            )
+            response = self.client.get(
+                url_get_for_config1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "test static_location_begin_action1",
+        )
+
     def test_filtered_by_site(self):
         """Ensure that filter by a specific site works well."""
         site1 = Site(label="test site 1")

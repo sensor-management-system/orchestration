@@ -142,6 +142,110 @@ class TestPlatformMountAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
+    def test_filtered_by_configuration_id(self):
+        """Ensure that I can prefilter by a filter[configuration_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        platform1 = Platform(
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform1)
+
+        platform2 = Platform(
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform2)
+
+        action1 = PlatformMountAction(
+            configuration=configuration1,
+            begin_contact=contact,
+            parent_platform=None,
+            platform=platform1,
+            begin_description="Some first action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = PlatformMountAction(
+            configuration=configuration2,
+            begin_contact=contact,
+            platform=platform2,
+            parent_platform=None,
+            begin_description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        # test only for the first configuration
+        with self.client:
+            url_get_for_configuration1 = (
+                base_url
+                + f"/platform-mount-actions?filter[configuration_id]?={configuration1.id}"
+            )
+            response = self.client.get(
+                url_get_for_configuration1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
+        )
+
+        # and test the second configuration
+        with self.client:
+            url_get_for_configuration2 = (
+                base_url
+                + f"/platform-mount-actions?filter[configuration_id]={configuration2.id}"
+            )
+            response = self.client.get(
+                url_get_for_configuration2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_configuration = (
+                base_url
+                + f"/platform-mount-actions?filter[configuration_id]={configuration2.id+9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_configuration,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""
         configuration1 = Configuration(
@@ -239,6 +343,106 @@ class TestPlatformMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_filtered_by_platform_id(self):
+        """Ensure that I can prefilter by filter[platform_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II", is_public=True, is_internal=False
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        platform1 = Platform(
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform1)
+
+        platform2 = Platform(
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform2)
+
+        action1 = PlatformMountAction(
+            configuration=configuration1,
+            begin_contact=contact,
+            parent_platform=None,
+            platform=platform1,
+            begin_description="Some first action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = PlatformMountAction(
+            configuration=configuration2,
+            begin_contact=contact,
+            platform=platform2,
+            parent_platform=None,
+            begin_description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        # Test only for the first platform
+        with self.client:
+            url_get_for_platform1 = (
+                base_url + f"/platform-mount-actions?filter[platform_id]={platform1.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
+        )
+
+        # and test the second platform
+        with self.client:
+            url_get_for_platform2 = (
+                base_url + f"/platform-mount-actions?filter[platform_id]={platform2.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing = (
+                base_url
+                + f"/platform-mount-actions?filter[platform_id]={platform2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
 
     def test_filtered_by_parent_platform(self):
         """Ensure filter by a specific parent platform works well."""
@@ -363,6 +567,133 @@ class TestPlatformMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_filtered_by_parent_platform_id(self):
+        """Ensure filter by filter[parent_platform_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+
+        configuration2 = Configuration(
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
+        )
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+
+        platform1 = Platform(
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        platform2 = Platform(
+            short_name="Platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        platform3 = Platform(
+            short_name="platform3",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        platform4 = Platform(
+            short_name="Platform4",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+
+        action1 = PlatformMountAction(
+            configuration=configuration1,
+            begin_contact=contact,
+            parent_platform=platform3,
+            platform=platform1,
+            begin_description="Some first action",
+            begin_date=fake.date_time(),
+        )
+
+        action2 = PlatformMountAction(
+            configuration=configuration2,
+            begin_contact=contact,
+            platform=platform2,
+            parent_platform=platform4,
+            begin_description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add_all(
+            [
+                configuration1,
+                configuration2,
+                contact,
+                platform1,
+                platform2,
+                platform3,
+                platform4,
+                action1,
+                action2,
+            ]
+        )
+        db.session.commit()
+
+        # test only for the first platform
+        with self.client:
+            url_get_for_platform1 = (
+                base_url
+                + f"/platform-mount-actions?filter[parent_platform_id]={platform3.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
+        )
+
+        # and test the second platform
+        with self.client:
+            url_get_for_platform2 = (
+                base_url
+                + f"/platform-mount-actions?filter[parent_platform_id]={platform4.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing = (
+                base_url
+                + f"/platform-mount-actions?filter[parent_platform_id]={platform4.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
 
     def test_get_platform_mount_action(self):
         """Ensure the GET /platform_mount_actions route reachable."""

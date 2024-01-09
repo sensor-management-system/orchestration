@@ -30,6 +30,7 @@ class ConfigurationAttachmentSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
         related_view="api.configuration_detail",
         related_view_kwargs={"id": "<configuration_id>"},

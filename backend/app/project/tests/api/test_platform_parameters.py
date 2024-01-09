@@ -578,6 +578,42 @@ class TestPlatformParameterServices(BaseTestCase):
         self.expect(resp2.json["data"]).to_have_length(1)
         self.expect(resp2.json["data"][0]["id"]).to_equal(str(parameter2.id))
 
+    @fixtures.use(["public_platform1_in_group1", "public_platform2_in_group1"])
+    def test_get_list_prefiltered_by_platform_via_filter(
+        self, public_platform1_in_group1, public_platform2_in_group1
+    ):
+        """Ensure we get can prefilter by platform via filter parameter."""
+        parameter1 = PlatformParameter(
+            platform=public_platform1_in_group1,
+            label="specialvalue",
+            description="some value",
+            unit_name="count",
+            unit_uri="http://foo/count",
+        )
+        parameter2 = PlatformParameter(
+            platform=public_platform2_in_group1,
+            label="othervalue",
+            description="some value",
+            unit_name="meter",
+            unit_uri="http://foo/meter",
+        )
+        db.session.add_all([parameter1, parameter2])
+        db.session.commit()
+
+        resp1 = self.client.get(
+            f"{base_url}/platform-parameters?filter[platform_id]={public_platform1_in_group1.id}"
+        )
+        self.expect(resp1.status_code).to_equal(200)
+        self.expect(resp1.json["data"]).to_have_length(1)
+        self.expect(resp1.json["data"][0]["id"]).to_equal(str(parameter1.id))
+
+        resp2 = self.client.get(
+            f"{base_url}/platform-parameters?filter[platform_id]={public_platform2_in_group1.id}"
+        )
+        self.expect(resp2.status_code).to_equal(200)
+        self.expect(resp2.json["data"]).to_have_length(1)
+        self.expect(resp2.json["data"][0]["id"]).to_equal(str(parameter2.id))
+
     @fixtures.use(["public_platform1_in_group1"])
     def test_get_list_prefiltered_invalid_platform_id(self, public_platform1_in_group1):
         """Ensure we get an 404 if the platform id doesn't exist."""

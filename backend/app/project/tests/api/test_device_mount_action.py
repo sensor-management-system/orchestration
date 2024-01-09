@@ -452,6 +452,108 @@ class TestDeviceMountAction(BaseTestCase):
             )
         self.assertEqual(response.status_code, 404)
 
+    def test_filtered_by_configuration_id(self):
+        """Ensure that I can prefilter by filter[configuration_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        device1 = Device(
+            short_name="device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device1)
+
+        device2 = Device(
+            short_name="device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device2)
+
+        action1 = DeviceMountAction(
+            configuration=configuration1,
+            begin_contact=contact,
+            device=device1,
+            parent_platform=None,
+            begin_description="Some first action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceMountAction(
+            configuration=configuration2,
+            begin_contact=contact,
+            device=device2,
+            begin_description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action2)
+        db.session.commit()
+
+        with self.client:
+            url_get_for_configuration1 = (
+                base_url
+                + f"/device-mount-actions?filter[configuration_id]={configuration1.id}"
+            )
+            response = self.client.get(
+                url_get_for_configuration1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
+        )
+
+        # and test the second configuration
+        with self.client:
+            url_get_for_configuration2 = (
+                base_url
+                + f"/device-mount-actions?filter[configuration_id]={configuration2.id}"
+            )
+            response = self.client.get(
+                url_get_for_configuration2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_configuration = (
+                base_url
+                + f"/device-mount-actions?filter[configuration_id]={configuration2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_configuration,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific devices."""
         configuration1 = Configuration(
@@ -551,6 +653,108 @@ class TestDeviceMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_filtered_by_device_id(self):
+        """Ensure that I can prefilter by filter[device_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        device1 = Device(
+            short_name="device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device1)
+
+        device2 = Device(
+            short_name="device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device2)
+
+        action1 = DeviceMountAction(
+            configuration=configuration1,
+            begin_contact=contact,
+            device=device1,
+            parent_platform=None,
+            begin_description="Some first action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceMountAction(
+            configuration=configuration2,
+            begin_contact=contact,
+            device=device2,
+            begin_description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action2)
+
+        db.session.commit()
+
+        # test only for the first device
+        with self.client:
+            url_get_for_device1 = (
+                base_url + f"/device-mount-actions?filter[device_id]={device1.id}"
+            )
+            response = self.client.get(
+                url_get_for_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
+        )
+
+        # and test the second device
+        with self.client:
+            url_get_for_device2 = (
+                base_url + f"/device-mount-actions?filter[device_id]={device2.id}"
+            )
+            response = self.client.get(
+                url_get_for_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing_device = (
+                base_url
+                + f"/device-mount-actions?filter[device_id]={device2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing_device,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific (parent) platform."""
@@ -670,6 +874,252 @@ class TestDeviceMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 404)
+
+    def test_filtered_by_parent_platform_id(self):
+        """Ensure that I can prefilter by filter[parent_platform_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        platform1 = Platform(
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform1)
+
+        platform2 = Platform(
+            short_name="platform2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(platform2)
+
+        device1 = Device(
+            short_name="device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device1)
+
+        device2 = Device(
+            short_name="device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device2)
+
+        action1 = DeviceMountAction(
+            configuration=configuration1,
+            begin_contact=contact,
+            device=device1,
+            parent_platform=platform1,
+            begin_description="Some first action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceMountAction(
+            configuration=configuration2,
+            parent_platform=platform2,
+            begin_contact=contact,
+            device=device2,
+            begin_description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action2)
+
+        db.session.commit()
+
+        # test only for the first platform
+        with self.client:
+            url_get_for_platform1 = (
+                base_url
+                + f"/device-mount-actions?filter[parent_platform_id]={platform1.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
+        )
+
+        # and test the second platform
+        with self.client:
+            url_get_for_platform2 = (
+                base_url
+                + f"/device-mount-actions?filter[parent_platform_id]={platform2.id}"
+            )
+            response = self.client.get(
+                url_get_for_platform2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing = (
+                base_url
+                + f"/device-mount-actions?filter[parent_platform_id]={platform2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
+    def test_filtered_by_parent_device_id(self):
+        """Ensure that I can prefilter by filter[parent_device_id]."""
+        configuration1 = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration1)
+        configuration2 = Configuration(
+            label="sample configuration II",
+            is_public=True,
+            is_internal=False,
+        )
+        db.session.add(configuration2)
+
+        contact = Contact(
+            given_name="Nils", family_name="Brinckmann", email="nils@gfz-potsdam.de"
+        )
+        db.session.add(contact)
+
+        parent_device1 = Device(
+            short_name="parent device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(parent_device1)
+
+        parent_device2 = Device(
+            short_name="parent device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(parent_device2)
+
+        device1 = Device(
+            short_name="device1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device1)
+
+        device2 = Device(
+            short_name="device2",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        db.session.add(device2)
+
+        action1 = DeviceMountAction(
+            configuration=configuration1,
+            begin_contact=contact,
+            device=device1,
+            parent_device=parent_device1,
+            begin_description="Some first action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action1)
+
+        action2 = DeviceMountAction(
+            configuration=configuration2,
+            parent_device=parent_device2,
+            begin_contact=contact,
+            device=device2,
+            begin_description="Some other action",
+            begin_date=fake.date_time(),
+        )
+        db.session.add(action2)
+
+        db.session.commit()
+
+        # test only for the first parent device
+        with self.client:
+            url_get_for_parent_device1 = (
+                base_url
+                + f"/device-mount-actions?filter[parent_device_id]={parent_device1.id}"
+            )
+            response = self.client.get(
+                url_get_for_parent_device1, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some first action",
+        )
+
+        # and test the second parent device
+        with self.client:
+            url_get_for_parent_device2 = (
+                base_url
+                + f"/device-mount-actions?filter[parent_device_id]={parent_device2.id}"
+            )
+            response = self.client.get(
+                url_get_for_parent_device2, content_type="application/vnd.api+json"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+        self.assertEqual(
+            response.json["data"][0]["attributes"]["begin_description"],
+            "Some other action",
+        )
+
+        # and for a non existing
+        with self.client:
+            url_get_for_non_existing = (
+                base_url
+                + f"/device-mount-actions?filter[parent_device_id]={parent_device2.id + 9999}"
+            )
+            response = self.client.get(
+                url_get_for_non_existing,
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

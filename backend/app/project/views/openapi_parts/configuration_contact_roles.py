@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -6,11 +6,10 @@
 
 """Openapi part for the configuration contact roles."""
 
-from ...api.schemas.json_schema import JSONSchema
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
 from ...api.schemas.role import ConfigurationRoleSchema
 
-schema = ConfigurationRoleSchema()
-json_schema = JSONSchema().dump(schema)
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(ConfigurationRoleSchema)
 
 paths = {
     "/configuration-contact-roles": {
@@ -19,18 +18,32 @@ paths = {
             "parameters": [
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                *schema_mapper.filters(),
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/ConfigurationContactRole_coll"}
+                "200": {
+                    "description": "List of configuration contact roles",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                },
             },
         },
         "post": {
             "tags": ["Configuration contact roles"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/ConfigurationContactRoles_inst"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/ConfigurationContactRolel_inst"}
+                "201": {
+                    "description": "Payload of the created configuration contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
     },
@@ -42,7 +55,13 @@ paths = {
                 {"$ref": "#/components/parameters/configuration_contact_role_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/ConfigurationContactRole_inst"}
+                "200": {
+                    "description": "Instance of a configuration contct role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "patch": {
@@ -52,17 +71,19 @@ paths = {
             ],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {
-                            "$ref": "#/components/schemas/ConfigurationContactRoles"
-                        }
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "",
+                "description": "Configuration contact role attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/ConfigurationContactRole_inst"}
+                "200": {
+                    "description": "Payload of the udpated configuration contact role",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
             },
         },
         "delete": {
@@ -76,175 +97,12 @@ paths = {
 }
 
 components = {
-    "responses": {
-        "ConfigurationContactRole_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": [
-                                    {
-                                        "id": "0",
-                                        "type": "configuration_contact_role",
-                                        "attributes": {
-                                            "role_name": "PI",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "configuration": {
-                                                "data": {
-                                                    "type": "configuration",
-                                                    "id": "123",
-                                                }
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "000",
-                                                },
-                                            },
-                                        },
-                                    },
-                                    {
-                                        "id": "1",
-                                        "type": "configuration_contact_role",
-                                        "attributes": {
-                                            "role_name": "Administrator",
-                                            "role_uri": "",
-                                        },
-                                        "relationships": {
-                                            "configuration": {
-                                                "data": {
-                                                    "type": "configuration",
-                                                    "id": "1234",
-                                                }
-                                            },
-                                            "contact": {
-                                                "data": {
-                                                    "type": "contact",
-                                                    "id": "1",
-                                                },
-                                            },
-                                        },
-                                    },
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-        "ConfigurationContactRole_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "id": "0",
-                                    "type": "configuration_contact_role",
-                                    "attributes": {"role_name": "", "role_uri": ""},
-                                    "relationships": {
-                                        "configuration": {
-                                            "data": {
-                                                "type": "configuration",
-                                                "id": "123",
-                                            }
-                                        },
-                                        "contact": {
-                                            "data": {"type": "contact", "id": "000"},
-                                        },
-                                    },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        },
-    },
-    "requestBodies": {
-        "ConfigurationContactRoles_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "configuration_contact_role",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "role_name": {"type": "string"},
-                                            "role_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["contact"],
-                                        "properties": {
-                                            "contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "configuration": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "configuration",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-    },
     "parameters": {
         "configuration_contact_role_id": {
             "name": "configuration_contact_role_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
-    "schemas": {
-        "ConfigurationContactRoles": {
-            "properties": json_schema["properties"],
-            "description": "Configuration Contact Roles Schema;",
         },
     },
 }

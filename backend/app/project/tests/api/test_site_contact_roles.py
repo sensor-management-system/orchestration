@@ -919,3 +919,85 @@ class TestSiteContacts(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(response.status_code, 409)
+
+    def test_filter_by_site_id(self):
+        """Ensure we use filter[site_id]."""
+        site1 = Site(label="Site1", is_public=True)
+        site2 = Site(label="Site2", is_public=True)
+        contact1 = Contact(
+            given_name="contact1", family_name="localhost", email="contact1@localhost"
+        )
+        contact2 = Contact(
+            given_name="contact2", family_name="localhost", email="contact2@localhost"
+        )
+        site_contact_role1 = SiteContactRole(
+            site=site1, contact=contact1, role_name="owner"
+        )
+        site_contact_role2 = SiteContactRole(
+            site=site2, contact=contact2, role_name="owner"
+        )
+        db.session.add_all(
+            [site1, site2, contact1, contact2, site_contact_role1, site_contact_role2]
+        )
+        db.session.commit()
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[site_id]={site_contact_role1.site_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[site_id]={site_contact_role2.site_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[site_id]={site_contact_role2.site_id + 9999}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)
+
+    def test_filter_by_contact_id(self):
+        """Ensure we use filter[contact_id]."""
+        site1 = Site(label="Site1", is_public=True)
+        site2 = Site(label="Site2", is_public=True)
+        contact1 = Contact(
+            given_name="contact1", family_name="localhost", email="contact1@localhost"
+        )
+        contact2 = Contact(
+            given_name="contact2", family_name="localhost", email="contact2@localhost"
+        )
+        site_contact_role1 = SiteContactRole(
+            site=site1, contact=contact1, role_name="owner"
+        )
+        site_contact_role2 = SiteContactRole(
+            site=site2, contact=contact2, role_name="owner"
+        )
+        db.session.add_all(
+            [site1, site2, contact1, contact2, site_contact_role1, site_contact_role2]
+        )
+        db.session.commit()
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[contact_id]={site_contact_role1.contact_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[contact_id]={site_contact_role2.contact_id}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 1)
+
+        with self.client:
+            response = self.client.get(
+                self.url + f"?filter[contact_id]={site_contact_role2.contact_id + 9999}"
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json["data"]), 0)

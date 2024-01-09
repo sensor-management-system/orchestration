@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -73,12 +73,14 @@ class MarshmallowJsonApiToOpenApiMapper:
         id_property = {}
 
         for name, field in self.schema._declared_fields.items():
-            if name == "id":
-                id_property = {"id": self._field_to_openapi_type(field)}
-            elif isinstance(field, Relationship):
-                relationship_properties[name] = self._field_to_openapi_type(field)
-            else:
-                attribute_properties[name] = self._field_to_openapi_type(field)
+            load_only = getattr(field, "load_only", False)
+            if not load_only:
+                if name == "id":
+                    id_property = {"id": self._field_to_openapi_type(field)}
+                elif isinstance(field, Relationship):
+                    relationship_properties[name] = self._field_to_openapi_type(field)
+                else:
+                    attribute_properties[name] = self._field_to_openapi_type(field)
         properties = {
             "data": {
                 "type": "object",
@@ -114,12 +116,14 @@ class MarshmallowJsonApiToOpenApiMapper:
         id_property = {}
 
         for name, field in self.schema._declared_fields.items():
-            if name == "id":
-                id_property = {"id": self._field_to_openapi_type(field)}
-            elif isinstance(field, Relationship):
-                relationship_properties[name] = self._field_to_openapi_type(field)
-            else:
-                attribute_properties[name] = self._field_to_openapi_type(field)
+            load_only = getattr(field, "load_only", False)
+            if not load_only:
+                if name == "id":
+                    id_property = {"id": self._field_to_openapi_type(field)}
+                elif isinstance(field, Relationship):
+                    relationship_properties[name] = self._field_to_openapi_type(field)
+                else:
+                    attribute_properties[name] = self._field_to_openapi_type(field)
 
         properties = {
             "data": {
@@ -230,3 +234,21 @@ class MarshmallowJsonApiToOpenApiMapper:
             }
         }
         return {"schema": {"properties": properties}}
+
+    def filters(self):
+        result = []
+        for name, field in self.schema._declared_fields.items():
+            if isinstance(field, Relationship):
+                continue
+            type_information = self._field_to_openapi_type(field)
+            if type_information["type"] != "array":
+                one_filter = {
+                    "name": f"filter[{name}]",
+                    "in": "query",
+                    # As those are all filters, all of them are optional.
+                    "required": False,
+                    "schema": type_information,
+                }
+                result.append(one_filter)
+
+        return result

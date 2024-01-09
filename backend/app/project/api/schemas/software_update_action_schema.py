@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -35,6 +35,7 @@ class PlatformSoftwareUpdateActionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    platform_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     platform = Relationship(
         self_view="api.platform_software_update_action_list",
         self_view_kwargs={"id": "<id>"},
@@ -112,6 +113,7 @@ class DeviceSoftwareUpdateActionSchema(Schema):
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
+    device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device = Relationship(
         related_view="api.device_detail",
         related_view_kwargs={"id": "<device_id>"},
