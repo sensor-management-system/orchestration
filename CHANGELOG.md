@@ -6,7 +6,13 @@ SPDX-FileCopyrightText: 2023
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.11.1 (Unreleased)
+## 1.12.0 (Unreleased)
+
+Changed:
+- Tree with hierarchy of platforms and devices on a configuration now
+  shows the device & platform types instead of generic "Device" and "Platform"
+  texts
+
 
 Fixed:
 - The lower button "Add Attachment" in Platform Attachment now works. 
