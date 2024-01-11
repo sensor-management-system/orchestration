@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -39,6 +39,8 @@ import { IConfigurationsTreeNodeWithChildren } from '@/viewmodels/IConfiguration
 import { ConfigurationsTree } from '@/viewmodels/ConfigurationsTree'
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { PlatformMountAction } from '@/models/PlatformMountAction'
+
+import { coalesce } from '@/utils/stringHelpers'
 
 /**
  * a class that wraps a Platform instance for the usage in a ConfigurationsTree
@@ -131,6 +133,11 @@ export class PlatformNode implements IConfigurationsTreeNodeWithChildren<Platfor
 
   get children (): ConfigurationsTreeNode[] {
     return this.tree.toArray()
+  }
+
+  get typeName (): string {
+    const platform = this.node.platform
+    return coalesce(platform.platformTypeName, 'Platform')
   }
 
   static createFromObject (someObject: PlatformNode): PlatformNode {
