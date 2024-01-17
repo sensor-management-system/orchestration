@@ -67,7 +67,7 @@ permissions and limitations under the Licence.
               color="accent"
               small
               nuxt
-              to="/sites/new"
+              :to="newSiteLink"
             >
               New Site / Lab
             </v-btn>
@@ -207,7 +207,11 @@ permissions and limitations under the Licence.
       </v-row>
       <BaseList :list-items="sites">
         <template #list-item="{ item }">
-          <SitesListItem :key="item.id" :site="item">
+          <SitesListItem
+            :key="item.id"
+            :site="item"
+            from="searchResult"
+          >
             <template
               #dot-menu-items
             >
@@ -216,7 +220,7 @@ permissions and limitations under the Licence.
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
-                :path="'/sites/copy/' + item.id"
+                :path="copyLink(item.id)"
               />
               <DotMenuActionArchive
                 v-if="canArchiveEntity(item)"
@@ -265,8 +269,11 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Route } from 'vue-router'
+
 import { mapState, mapActions, mapGetters } from 'vuex'
-import { SetActiveTabAction, SetTabsAction, SetTitleAction } from '@/store/appbar'
+
+import { SetActiveTabAction, SetTabsAction, SetTitleAction, SetBackToAction } from '@/store/appbar'
 
 import { Site } from '@/models/Site'
 
@@ -349,7 +356,7 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
 
   },
   methods: {
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo']),
     ...mapActions('sites', [
       'searchSitesPaginated',
       'setPageNumber',
@@ -416,6 +423,7 @@ export default class SearchSitesPage extends Vue {
   getSensorMLUrl!: GetSensorMLUrlAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setBackTo!: SetBackToAction
 
   async created () {
     this.initializeAppBar()
@@ -528,7 +536,8 @@ export default class SearchSitesPage extends Vue {
       this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchSitesPaginated(this.searchParams)
-      this.setPageAndSizeInUrl()
+      await this.setPageAndSizeInUrl()
+      this.setBackTo({ path: this.$route.path, query: this.$route.query })
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of sites & labs failed')
     } finally {
@@ -691,7 +700,7 @@ export default class SearchSitesPage extends Vue {
     })
   }
 
-  setPageAndSizeInUrl (preserveHash: boolean = true): void {
+  setPageAndSizeInUrl (preserveHash: boolean = true): Promise<Route> {
     // In general it should be possible to just call
     // setPageInUrl()
     // and
@@ -715,7 +724,7 @@ export default class SearchSitesPage extends Vue {
         page: String(this.page)
       }
     }
-    this.$router.push({
+    return this.$router.replace({
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
@@ -761,6 +770,16 @@ export default class SearchSitesPage extends Vue {
         return null
       }
     }
+  }
+
+  copyLink (id: string): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/sites/copy/${id}${params}`
+  }
+
+  get newSiteLink (): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/sites/new${params}`
   }
 }
 </script>

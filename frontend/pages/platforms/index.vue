@@ -42,7 +42,7 @@ permissions and limitations under the Licence.
             color="accent"
             small
             nuxt
-            to="/platforms/new"
+            :to="newPlatformLink"
           >
             New Platform
           </v-btn>
@@ -123,7 +123,7 @@ permissions and limitations under the Licence.
             :disabled="isLoading"
             :length="totalPages"
             :total-visible="7"
-            @input="searchPlatformsPaginated"
+            @input="searchPlatformsPaginatedAndHooks"
           />
         </v-col>
         <v-col
@@ -148,6 +148,7 @@ permissions and limitations under the Licence.
           <PlatformsListItem
             :key="item.id"
             :platform="item"
+            from="searchResult"
           >
             <template
               #dot-menu-items
@@ -157,7 +158,7 @@ permissions and limitations under the Licence.
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
-                :path="'/platforms/copy/' + item.id"
+                :path="copyLink(item.id)"
               />
               <DotMenuActionArchive
                 v-if="canArchiveEntity(item)"
@@ -180,7 +181,7 @@ permissions and limitations under the Licence.
         :disabled="isLoading"
         :length="totalPages"
         :total-visible="7"
-        @input="searchPlatformsPaginated"
+        @input="searchPlatformsPaginatedAndHooks"
       />
     </div>
     <DeleteDialog
@@ -234,7 +235,7 @@ import {
   ReplacePlatformInPlatformsAction,
   GetSensorMLUrlAction
 } from 'store/platforms'
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetBackToAction } from '@/store/appbar'
 
 import { CanAccessEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
@@ -292,7 +293,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   },
   methods: {
     ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'loadPlatform', 'replacePlatformInPlatforms', 'getSensorMLUrl']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setBackTo']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -333,6 +334,7 @@ export default class SearchPlatformsPage extends Vue {
   getSensorMLUrl!: GetSensorMLUrlAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setBackTo!: SetBackToAction
 
   created () {
     this.initializeAppBar()
@@ -357,6 +359,11 @@ export default class SearchPlatformsPage extends Vue {
     return this.pageSize
   }
 
+  async searchPlatformsPaginatedAndHooks () {
+    await this.searchPlatformsPaginated()
+    this.setBackTo({ path: this.$route.path, query: this.$route.query })
+  }
+
   set size (newVal: number) {
     const sizeChanged: boolean = this.size !== newVal
 
@@ -364,7 +371,7 @@ export default class SearchPlatformsPage extends Vue {
     this.setSizeInUrl(false)
 
     if (sizeChanged) {
-      this.searchPlatformsPaginated()
+      this.searchPlatformsPaginatedAndHooks()
     }
   }
 
@@ -400,7 +407,7 @@ export default class SearchPlatformsPage extends Vue {
     try {
       this.setLoading(true)
       await this.deletePlatform(this.platformToDelete.id)
-      this.searchPlatformsPaginated()
+      this.searchPlatformsPaginatedAndHooks()
       this.$store.commit('snackbar/setSuccess', 'Platform deleted')
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Platform could not be deleted')
@@ -546,6 +553,16 @@ export default class SearchPlatformsPage extends Vue {
         return null
       }
     }
+  }
+
+  copyLink (id: string): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/platforms/copy/${id}${params}`
+  }
+
+  get newPlatformLink (): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/platforms/new${params}`
   }
 }
 

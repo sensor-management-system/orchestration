@@ -115,7 +115,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
 import { LoadSiteAction, CopySiteAction, SitesState } from '@/store/sites'
 import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
@@ -142,7 +142,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
   },
   methods: {
     ...mapActions('sites', ['copySite', 'loadSite', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -171,6 +171,7 @@ export default class SiteCopyPage extends Vue {
   loadCountries!: LoadCountriesAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     this.initializeAppBar()
@@ -259,6 +260,9 @@ export default class SiteCopyPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/sites/copy/' + this.siteId,

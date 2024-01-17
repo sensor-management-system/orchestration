@@ -134,7 +134,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
 import { PlatformsState, LoadPlatformAction, CopyPlatformAction, CreatePidAction } from '@/store/platforms'
 
@@ -161,7 +161,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   methods: {
     ...mapActions('platforms', ['loadPlatform', 'copyPlatform', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('vocabulary', ['loadCountries'])
   }
@@ -194,6 +194,7 @@ export default class PlatformCopyPage extends Vue {
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
+  setShowBackButton!: SetShowBackButtonAction
 
   created () {
     this.initializeAppBar()
@@ -293,6 +294,9 @@ export default class PlatformCopyPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/platform/copy/' + this.platformId,

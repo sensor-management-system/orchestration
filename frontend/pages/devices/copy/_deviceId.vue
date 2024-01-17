@@ -145,7 +145,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
 import { LoadDeviceAction, CopyDeviceAction, DevicesState, CreatePidAction } from '@/store/devices'
 
@@ -172,7 +172,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   methods: {
     ...mapActions('vocabulary', ['loadCountries']),
     ...mapActions('devices', ['copyDevice', 'loadDevice', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -205,6 +205,7 @@ export default class DeviceCopyPage extends Vue {
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     this.initializeAppBar()
@@ -299,6 +300,9 @@ export default class DeviceCopyPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/devices/copy/' + this.deviceId,

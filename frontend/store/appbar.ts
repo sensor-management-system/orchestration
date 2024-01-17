@@ -30,17 +30,16 @@
  * permissions and limitations under the Licence.
  */
 import { Commit, ActionTree } from 'vuex'
+import { RawLocation } from 'vue-router'
 import { RootState } from '@/store'
 import { TabItemConfiguration } from '@/models/TabItemConfiguration'
 
 export interface IAppbarState {
-  activeTab: null | number,
-  cancelBtnDisabled: boolean,
-  cancelBtnHidden: boolean,
-  saveBtnDisabled: boolean,
-  saveBtnHidden: boolean,
-  tabs: TabItemConfiguration[],
+  activeTab: null | number
+  tabs: TabItemConfiguration[]
   title: string
+  showBackButton: boolean
+  backTo: RawLocation
 }
 
 /**
@@ -51,12 +50,10 @@ export interface IAppbarState {
 const state = (): IAppbarState => {
   return {
     activeTab: null,
-    cancelBtnDisabled: false,
-    cancelBtnHidden: true,
-    saveBtnDisabled: false,
-    saveBtnHidden: true,
     tabs: [] as TabItemConfiguration[],
-    title: ''
+    title: '',
+    showBackButton: false,
+    backTo: '' as RawLocation
   }
 }
 
@@ -99,41 +96,11 @@ const mutations = {
     }
     state.activeTab = active
   },
-  /**
-   * Hides or shows the save button
-   *
-   * @param {IAppbarState} state - the current state
-   * @param {boolean} hidden - whether to hide or show the save button
-   */
-  setSaveBtnHidden (state: IAppbarState, hidden: boolean): void {
-    state.saveBtnHidden = hidden
+  setShowBackButton (state: IAppbarState, show: boolean): void {
+    state.showBackButton = show
   },
-  /**
-   * Disables the save button
-   *
-   * @param {IAppbarState} state - the current state
-   * @param {boolean} disabled - whether to hide or show the save button
-   */
-  setSaveBtnDisabled (state: IAppbarState, disabled: boolean): void {
-    state.saveBtnDisabled = disabled
-  },
-  /**
-   * Hides or shows the cancel button
-   *
-   * @param {IAppbarState} state - the current state
-   * @param {boolean} hidden - whether to hide or show the cancel button
-   */
-  setCancelBtnHidden (state: IAppbarState, hidden: boolean): void {
-    state.cancelBtnHidden = hidden
-  },
-  /**
-   * Disables the cancel button
-   *
-   * @param {IAppbarState} state - the current state
-   * @param {boolean} disabled - whether to hide or show the cancel button
-   */
-  setCancelBtnDisabled (state: IAppbarState, disabled: boolean): void {
-    state.cancelBtnDisabled = disabled
+  setBackTo (state: IAppbarState, to: RawLocation): void {
+    state.backTo = to
   }
 }
 
@@ -147,10 +114,8 @@ export type SetDefaultsAction = () => void
 export type SetTitleAction = (title: string) => void
 export type SetTabsAction = (tabs: TabItemConfiguration[]) => void
 export type SetActiveTabAction = (active: null | number) => void
-export type SetSaveBtnHiddenAction = (hidden: boolean) => void
-export type SetSaveBtnDisabledAction = (disabled: boolean) => void
-export type SetCancelBtnHiddenAction = (hidden: boolean) => void
-export type SetCancelBtnDisabledAction = (disabled: boolean) => void
+export type SetShowBackButtonAction = (show: boolean) => void
+export type SetBackToAction = (to: RawLocation) => void
 
 const actions: ActionTree<IAppbarState, RootState> = {
   /**
@@ -165,10 +130,8 @@ const actions: ActionTree<IAppbarState, RootState> = {
     context.commit('setTitle', payload.title || '')
     context.commit('setTabs', payload.tabs || [])
     context.commit('setActiveTab', payload.activeTab || null)
-    context.commit('setSaveBtnHidden', payload.saveBtnHidden || true)
-    context.commit('setSaveBtnDisabled', payload.saveBtnDisabled || true)
-    context.commit('setCancelBtnHidden', payload.cancelBtnHidden || true)
-    context.commit('setCancelBtnDisabled', payload.cancelBtnDisabled || true)
+    context.commit('setShowBackButton', payload.showBackButton || false)
+    context.commit('setBackTo', payload.backTo || '')
   },
   /**
    * sets the Appbar to its default settings
@@ -187,17 +150,11 @@ const actions: ActionTree<IAppbarState, RootState> = {
   setActiveTab ({ commit }: { commit: Commit }, active: null | number): void {
     commit('setActiveTab', active)
   },
-  setSaveBtnHidden ({ commit }: { commit: Commit }, hidden: boolean): void {
-    commit('setSaveBtnHidden', hidden)
+  setShowBackButton ({ commit }: { commit: Commit }, show: boolean): void {
+    commit('setShowBackButton', show)
   },
-  setSaveBtnDisabled ({ commit }: { commit: Commit }, disabled: boolean): void {
-    commit('setSaveBtnDisabled', disabled)
-  },
-  setCancelBtnHidden ({ commit }: { commit: Commit }, hidden: boolean): void {
-    commit('setCancelBtnHidden', hidden)
-  },
-  setCancelBtnDisabled ({ commit }: { commit: Commit }, disabled: boolean): void {
-    commit('setCancelBtnDisabled', disabled)
+  setBackTo ({ commit }: { commit: Commit }, to: RawLocation): void {
+    commit('setBackTo', to)
   }
 }
 

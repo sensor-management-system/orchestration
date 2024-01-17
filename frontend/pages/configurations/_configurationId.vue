@@ -62,14 +62,14 @@ permissions and limitations under the Licence.
 import { Component, ProvideReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
+import { SetLoadingAction } from '@/store/progressindicator'
+import { ConfigurationsState, LoadConfigurationAction } from '@/store/configurations'
 
 import { Configuration } from '@/models/Configuration'
 
-import { SetLoadingAction } from '@/store/progressindicator'
 import ModificationInfo from '@/components/ModificationInfo.vue'
-import { ConfigurationsState } from '@/store/configurations'
 
 @Component({
   components: {
@@ -81,7 +81,7 @@ import { ConfigurationsState } from '@/store/configurations'
   },
   methods: {
     ...mapActions('configurations', ['loadConfiguration']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -101,7 +101,7 @@ export default class ConfigurationsIdPage extends Vue {
 
   // vuex definition for typescript check
   configuration!: Configuration | null
-  loadConfiguration!: (id: string) => void
+  loadConfiguration!: LoadConfigurationAction
   canAccessEntity!: CanAccessEntityGetter
   canModifyEntity!: CanModifyEntityGetter
   canDeleteEntity!: CanDeleteEntityGetter
@@ -110,6 +110,7 @@ export default class ConfigurationsIdPage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     try {
@@ -140,6 +141,9 @@ export default class ConfigurationsIdPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/configurations/' + this.configurationId + '/basic',

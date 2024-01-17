@@ -196,7 +196,7 @@ import PlatformTypeSelect from '@/components/PlatformTypeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { PermissionsState, LoadPermissionGroupsAction } from '@/store/permissions'
-import { SetActiveTabAction } from '@/store/appbar'
+import { SetActiveTabAction, SetBackToAction } from '@/store/appbar'
 
 @Component({
   components: { PlatformTypeSelect, StatusSelect, ManufacturerSelect, PermissionGroupSearchSelect },
@@ -230,7 +230,7 @@ import { SetActiveTabAction } from '@/store/appbar'
       'setSearchText'
     ]),
     ...mapActions('permissions', ['loadPermissionGroups']),
-    ...mapActions('appbar', ['setActiveTab'])
+    ...mapActions('appbar', ['setActiveTab', 'setBackTo'])
   }
 })
 export default class PlatformSearch extends Vue {
@@ -263,6 +263,7 @@ export default class PlatformSearch extends Vue {
   permissionGroups!: PermissionsState['permissionGroups']
   setActiveTab!: SetActiveTabAction
   setLoading!: SetLoadingAction
+  setBackTo!: SetBackToAction
 
   get activeTab (): number | null {
     return this.$store.state.appbar.activeTab
@@ -364,6 +365,7 @@ export default class PlatformSearch extends Vue {
   async runInitialSearch (): Promise<void> {
     this.setActiveTab(this.isExtendedSearch() ? 1 : 0)
     await this.searchPlatformsPaginated()
+    this.setBackTo({ path: this.$route.path, query: this.$route.query })
   }
 
   basicSearch () {
@@ -403,6 +405,7 @@ export default class PlatformSearch extends Vue {
       this.setPageNumber(1) // important for query
       this.initUrlQueryParams()
       await this.searchPlatformsPaginated()
+      this.setBackTo({ path: this.$route.path, query: this.$route.query })
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of platforms failed')
     } finally {

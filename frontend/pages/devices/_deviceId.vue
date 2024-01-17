@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
 import { Component, ProvideReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { DevicesState, LoadDeviceAction } from '@/store/devices'
 import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
@@ -82,7 +82,7 @@ import ModificationInfo from '@/components/ModificationInfo.vue'
   },
   methods: {
     ...mapActions('devices', ['loadDevice']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -110,6 +110,7 @@ export default class DevicePage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
+  setShowBackButton!: SetShowBackButtonAction
 
   mounted () {
     this.initializeAppBar()
@@ -155,6 +156,9 @@ export default class DevicePage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/devices/' + this.deviceId + '/basic',

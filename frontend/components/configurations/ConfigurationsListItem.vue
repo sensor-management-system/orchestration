@@ -57,7 +57,7 @@ permissions and limitations under the Licence.
     <template #actions>
       <v-btn
         nuxt
-        :to="'/configurations/' + configuration.id"
+        :to="detailLink"
         color="primary"
         text
         small
@@ -220,5 +220,19 @@ export default class ConfigurationsListItem extends Vue {
     type: Object
   })
   readonly configuration!: Configuration
+
+  @Prop({
+    default: '',
+    type: String
+  })
+  private from!: string
+
+  get detailLink (): string {
+    let params = ''
+    if (this.from) {
+      params = '?' + (new URLSearchParams({ from: this.from })).toString()
+    }
+    return `/configurations/${this.configuration.id}${params}`
+  }
 }
 </script>
