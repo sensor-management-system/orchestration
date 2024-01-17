@@ -66,7 +66,7 @@ import { Component, Vue, mixins } from 'nuxt-property-decorator'
 
 import { mapActions } from 'vuex'
 
-import { SetDefaultsAction, SetTitleAction } from '@/store/appbar'
+import { SetDefaultsAction, SetTitleAction, SetShowBackButtonAction } from '@/store/appbar'
 import { SaveContactAction } from '@/store/contacts'
 
 import { Rules } from '@/mixins/Rules'
@@ -86,7 +86,7 @@ import { ErrorMessageDispatcher, sourceLowerCaseIncludes } from '@/utils/errorHe
   middleware: ['auth'],
   methods: {
     ...mapActions('contacts', ['saveContact']),
-    ...mapActions('appbar', ['setDefaults', 'setTitle']),
+    ...mapActions('appbar', ['setDefaults', 'setTitle', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -101,6 +101,7 @@ export default class ContactNewPage extends mixins(Rules) {
   setDefaults!: SetDefaultsAction
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
+  setShowBackButton!: SetShowBackButtonAction
 
   created () {
     /** this page accepts the query parameter 'redirect' as a html encoded URI
@@ -116,6 +117,9 @@ export default class ContactNewPage extends mixins(Rules) {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTitle('New Contact')
   }
 

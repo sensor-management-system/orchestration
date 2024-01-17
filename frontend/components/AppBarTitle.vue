@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020
+Copyright (C) 2020 - 2023
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -30,25 +30,16 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div class="v-toolbar__content" style="width:100%">
+    <v-btn
+      v-if="showBackButton"
+      :to="backTo"
+      icon
+      title="Back to the search result"
+      @click="$emit('back-click', $event)"
+    >
+      <v-icon>mdi-arrow-left</v-icon>
+    </v-btn>
     <v-toolbar-title>{{ title }}</v-toolbar-title>
-    <v-spacer />
-    <v-btn
-      v-if="!cancelBtnHidden"
-      color="secondary"
-      class="mr-1"
-      :disabled="cancelBtnDisabled"
-      @click="onCancelButtonClick($event)"
-    >
-      Cancel
-    </v-btn>
-    <v-btn
-      v-if="!saveBtnHidden"
-      color="primary"
-      :disabled="saveBtnDisabled"
-      @click="onSaveButtonClick($event)"
-    >
-      Save
-    </v-btn>
   </div>
 </template>
 
@@ -58,14 +49,14 @@ permissions and limitations under the Licence.
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { RawLocation } from 'vue-router'
 
 /**
  * A class component to provide a title and two buttons in the App-Bar
  * @extends Vue
  */
 @Component
-// @ts-ignore
-export default class AppBarEditModeContent extends Vue {
+export default class AppBarTitle extends Vue {
   /**
    * the Appbar title
    */
@@ -73,77 +64,42 @@ export default class AppBarEditModeContent extends Vue {
     default: '',
     type: String
   })
-  // @ts-ignore
-  readonly title: string
+  readonly title!: string
 
   /**
-   * whether to hide the save button or not
-   */
-  @Prop({
-    default: true,
-    type: Boolean
-  })
-  // @ts-ignore
-  readonly saveBtnHidden: boolean
-
-  /**
-   * whether to hide the cancel button or not
-   */
-  @Prop({
-    default: true,
-    type: Boolean
-  })
-  // @ts-ignore
-  readonly cancelBtnHidden: boolean
-
-  /**
-   * whether to disable the save button or not
+   * whether to show the back button or not
    */
   @Prop({
     default: false,
     type: Boolean
   })
-  // @ts-ignore
-  readonly saveBtnDisabled: boolean
+  readonly showBackButton!: boolean
 
   /**
-   * whether to disable the cancel button or not
+   * title of the back button
    */
   @Prop({
-    default: false,
-    type: Boolean
+    default: '',
+    type: String
   })
-  // @ts-ignore
-  readonly cancelBtnDisabled: boolean
+  readonly backButtonTitle!: string
 
   /**
-   * fires the cancel button click event
-   *
-   * @param {Event} event - the DOM event
-   * @fires AppBarEditModeContent:cancel-btn-click
+   * link of the back button
    */
-  onCancelButtonClick (event: Event) {
-    /**
-     * fires the cancel button click event
-     * @event AppBarEditModeContent:cancel-btn-click
-     * @type {Event}
-     */
-    this.$nuxt.$emit('AppBarEditModeContent:cancel-btn-click', event)
-  }
+  @Prop({
+    default: '',
+    type: String
+  })
+  readonly backButtonTo!: string
 
   /**
-   * fires the save button click event
-   *
-   * @param {Event} event - the DOM event
-   * @fires AppBarEditModeContent:save-btn-click
+   * link of the back button
    */
-  onSaveButtonClick (event: Event) {
-    /**
-     * fires the save button click event
-     * @event AppBarEditModeContent:save-btn-click
-     * @type {Event}
-     */
-    this.$nuxt.$emit('AppBarEditModeContent:save-btn-click', event)
-  }
+  @Prop({
+    default: '',
+    type: [Object, String]
+  })
+  readonly backTo!: RawLocation
 }
 </script>

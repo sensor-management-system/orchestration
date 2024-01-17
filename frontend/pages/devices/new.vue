@@ -70,7 +70,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CreatePidAction, SaveDeviceAction } from '@/store/devices'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
@@ -96,7 +96,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   methods: {
     ...mapActions('vocabulary', ['loadCountries']),
     ...mapActions('devices', ['saveDevice', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -117,6 +117,7 @@ export default class DeviceNewPage extends Vue {
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     this.initializeAppBar()
@@ -167,6 +168,9 @@ export default class DeviceNewPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/devices/new/',

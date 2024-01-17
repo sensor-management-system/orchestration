@@ -291,6 +291,12 @@ export default class PlatformsListItem extends Vue {
   })
   private target!: string
 
+  @Prop({
+    default: '',
+    type: String
+  })
+  private from!: string
+
   public readonly NO_TYPE: string = 'Unknown type'
 
   // vuex definition for typescript check
@@ -321,7 +327,11 @@ export default class PlatformsListItem extends Vue {
   }
 
   get link (): string {
-    return `/platforms/${this.platform.id}`
+    let params = ''
+    if (this.from) {
+      params = '?' + (new URLSearchParams({ from: this.from })).toString()
+    }
+    return `/platforms/${this.platform.id}${params}`
   }
 
   openLink () {

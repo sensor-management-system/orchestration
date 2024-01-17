@@ -72,7 +72,7 @@ permissions and limitations under the Licence.
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CreatePidAction, SavePlatformAction } from '@/store/platforms'
 
 import { SetLoadingAction } from '@/store/progressindicator'
@@ -97,7 +97,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   methods: {
     ...mapActions('platforms', ['savePlatform', 'createPid']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('vocabulary', ['loadCountries'])
   }
@@ -119,6 +119,7 @@ export default class PlatformNewPage extends Vue {
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     this.initializeAppBar()
@@ -163,6 +164,9 @@ export default class PlatformNewPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/platforms/new',

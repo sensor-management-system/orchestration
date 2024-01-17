@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
           color="accent"
           small
           nuxt
-          to="/contacts/new"
+          :to="newContactLink"
         >
           New Contact
         </v-btn>
@@ -143,7 +143,7 @@ permissions and limitations under the Licence.
             </template>
             <template #actions>
               <v-btn
-                :to="'/contacts/' + item.id"
+                :to="getDetailLink(item.id)"
                 color="primary"
                 text
                 small
@@ -178,9 +178,10 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Route } from 'vue-router'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetBackToAction } from '@/store/appbar'
 import {
   ContactsState,
   PageSizesGetter,
@@ -189,6 +190,8 @@ import {
   SetPageSizeAction,
   DeleteContactAction
 } from '@/store/contacts'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import { CanDeleteContactGetter } from '@/store/permissions'
 
 import { Contact } from '@/models/Contact'
 
@@ -197,11 +200,9 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import ContactsListItem from '@/components/contacts/ContactsListItem.vue'
-import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import FoundEntries from '@/components/shared/FoundEntries.vue'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
-import { CanDeleteContactGetter } from '@/store/permissions'
-import FoundEntries from '@/components/shared/FoundEntries.vue'
 
 @Component({
   components: {
@@ -220,7 +221,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   },
   methods: {
     ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'setPageSize', 'deleteContact']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setBackTo']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -244,6 +245,7 @@ export default class SearchContactsPage extends Vue {
   canDeleteContact!: CanDeleteContactGetter
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setBackTo!: SetBackToAction
 
   async created () {
     if (!this.$auth.loggedIn) {
@@ -320,7 +322,8 @@ export default class SearchContactsPage extends Vue {
       this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchContactsPaginated(this.searchText)
-      this.setPageAndSizeInUrl()
+      await this.setPageAndSizeInUrl()
+      this.setBackTo({ path: this.$route.path, query: this.$route.query })
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of contacts failed')
     } finally {
@@ -423,7 +426,7 @@ export default class SearchContactsPage extends Vue {
     })
   }
 
-  setPageAndSizeInUrl (preserveHash: boolean = true): void {
+  setPageAndSizeInUrl (preserveHash: boolean = true): Promise<Route> {
     // In general it should be possible to just call
     // setPageInUrl()
     // and
@@ -447,10 +450,20 @@ export default class SearchContactsPage extends Vue {
         page: String(this.page)
       }
     }
-    this.$router.push({
+    return this.$router.replace({
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
+  }
+
+  getDetailLink (contactId: string): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/contacts/${contactId}${params}`
+  }
+
+  get newContactLink (): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/contacts/new${params}`
   }
 }
 </script>

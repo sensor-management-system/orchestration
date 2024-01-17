@@ -8,6 +8,9 @@ SPDX-License-Identifier: HEESIL-1.0
 -->
 ## 1.12.0 (Unreleased)
 
+Added:
+- Buttons to return to search pages
+
 Changed:
 - Tree with hierarchy of platforms and devices on a configuration now
   shows the device & platform types instead of generic "Device" and "Platform"

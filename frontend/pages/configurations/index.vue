@@ -74,7 +74,7 @@ permissions and limitations under the Licence.
               color="accent"
               small
               nuxt
-              to="/configurations/new"
+              :to="newConfigurationLink"
             >
               New Configuration
             </v-btn>
@@ -236,6 +236,7 @@ permissions and limitations under the Licence.
         <template #list-item="{item}">
           <ConfigurationsListItem
             :configuration="item"
+            from="searchResult"
           >
             <template
               #dot-menu-items
@@ -294,12 +295,14 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Route } from 'vue-router'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction, SetBackToAction } from '@/store/appbar'
 import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
-import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, LoadConfigurationAction, ConfigurationsState, ReplaceConfigurationInConfigurationsAction, GetSensorMLUrlAction, LoadProjectsAction } from '@/store/configurations'
+import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, LoadConfigurationAction, ConfigurationsState, ReplaceConfigurationInConfigurationsAction, GetSensorMLUrlAction, LoadProjectsAction, SearchConfigurationsPaginatedAction } from '@/store/configurations'
 import { SearchSitesAction, SitesState } from '@/store/sites'
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import ConfigurationsListItem from '@/components/configurations/ConfigurationsListItem.vue'
@@ -314,15 +317,15 @@ import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
 import DotMenuActionArchive from '@/components/DotMenuActionArchive.vue'
 import DotMenuActionRestore from '@/components/DotMenuActionRestore.vue'
-import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import FoundEntries from '@/components/shared/FoundEntries.vue'
 
 import { Configuration } from '@/models/Configuration'
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
 import { ConfigurationSearchParamsSerializer, IConfigurationSearchParams } from '@/modelUtils/ConfigurationSearchParams'
-import { QueryParams } from '@/modelUtils/QueryParams'
 import { Site } from '@/models/Site'
-import FoundEntries from '@/components/shared/FoundEntries.vue'
+import { QueryParams } from '@/modelUtils/QueryParams'
+
 @Component({
   components: {
     FoundEntries,
@@ -350,7 +353,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   },
   methods: {
     ...mapActions('configurations', ['searchConfigurationsPaginated', 'loadConfiguration', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'archiveConfiguration', 'restoreConfiguration', 'exportAsSensorML', 'replaceConfigurationInConfigurations', 'getSensorMLUrl', 'loadProjects']),
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo']),
     ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('sites', ['searchSites']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -387,7 +390,7 @@ export default class SearchConfigurationsPage extends Vue {
   setPageSize!: (newPageSize: number) => void
   pageSizes!: number[]
   totalCount!: ConfigurationsState['totalCount']
-  searchConfigurationsPaginated!: (searchParams: IConfigurationSearchParams) => void
+  searchConfigurationsPaginated!: SearchConfigurationsPaginatedAction
   configurations!: Configuration[]
   deleteConfiguration!: (id: string) => void
   configurationStates!: string[]
@@ -410,6 +413,7 @@ export default class SearchConfigurationsPage extends Vue {
   projects!: ConfigurationsState['projects']
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setBackTo!: SetBackToAction
 
   async created () {
     try {
@@ -524,7 +528,8 @@ export default class SearchConfigurationsPage extends Vue {
       this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchConfigurationsPaginated(this.searchParams)
-      this.setPageAndSizeInUrl()
+      await this.setPageAndSizeInUrl()
+      this.setBackTo({ path: this.$route.path, query: this.$route.query })
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Loading of configurations failed')
     } finally {
@@ -684,7 +689,7 @@ export default class SearchConfigurationsPage extends Vue {
     })
   }
 
-  setPageAndSizeInUrl (preserveHash: boolean = true): void {
+  setPageAndSizeInUrl (preserveHash: boolean = true): Promise<Route> {
     // In general it should be possible to just call
     // setPageInUrl()
     // and
@@ -708,7 +713,7 @@ export default class SearchConfigurationsPage extends Vue {
         page: String(this.page)
       }
     }
-    this.$router.push({
+    return this.$router.replace({
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
@@ -754,6 +759,11 @@ export default class SearchConfigurationsPage extends Vue {
         return null
       }
     }
+  }
+
+  get newConfigurationLink (): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/configurations/new${params}`
   }
 }
 

@@ -40,7 +40,7 @@ import { Component, Vue, Watch, ProvideReactive } from 'nuxt-property-decorator'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction } from '@/store/appbar'
+import { SetTitleAction, SetShowBackButtonAction } from '@/store/appbar'
 import { ContactsState, LoadContactAction } from '@/store/contacts'
 
 import { SetLoadingAction } from '@/store/progressindicator'
@@ -53,7 +53,7 @@ import { CanDeleteContactGetter, CanModifyContactGetter } from '@/store/permissi
   },
   methods: {
     ...mapActions('contacts', ['loadContact']),
-    ...mapActions('appbar', ['setTitle']),
+    ...mapActions('appbar', ['setTitle', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -71,6 +71,7 @@ export default class ContactShowPage extends Vue {
   canModifyContact!: CanModifyContactGetter
   canDeleteContact!: CanDeleteContactGetter
   setLoading!: SetLoadingAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     if (!this.$auth.loggedIn) {
@@ -97,6 +98,9 @@ export default class ContactShowPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     if (this.contact) {
       this.setTitle(this.contact.toString())
     }

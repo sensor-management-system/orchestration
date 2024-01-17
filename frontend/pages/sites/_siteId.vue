@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
 import { Component, ProvideReactive, Vue, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
-import { SetTitleAction, SetTabsAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 
 import { SetLoadingAction } from '@/store/progressindicator'
 import ModificationInfo from '@/components/ModificationInfo.vue'
@@ -83,7 +83,7 @@ import { CanAccessEntityGetter, CanArchiveEntityGetter, CanDeleteEntityGetter, C
   },
   methods: {
     ...mapActions('sites', ['loadSite', 'loadSiteConfigurations']),
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
 
   }
@@ -113,6 +113,7 @@ export default class SitePage extends Vue {
   setTabs!: SetTabsAction
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
+  setShowBackButton!: SetShowBackButtonAction
 
   mounted () {
     this.initializeAppBar()
@@ -155,6 +156,9 @@ export default class SitePage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/sites/' + this.siteId + '/basic',

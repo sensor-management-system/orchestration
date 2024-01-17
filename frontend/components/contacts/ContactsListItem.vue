@@ -240,6 +240,12 @@ export default class ContactsListItem extends Vue {
     type: Object
   })
   private contact!: Contact
+
+  @Prop({
+    default: '',
+    type: String
+  })
+  private from!: string
 }
 </script>
 

@@ -142,12 +142,11 @@ permissions and limitations under the Licence.
       app
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <AppBarEditModeContent
+      <AppBarTitle
         :title="appBarTitle"
-        :save-btn-hidden="saveBtnHidden"
-        :cancel-btn-hidden="cancelBtnHidden"
-        :save-btn-disabled="saveBtnDisabled"
-        :cancel-btn-disabled="cancelBtnDisabled"
+        :show-back-button="appBarShowBackButton"
+        :back-to="appBarBackTo"
+        @back-click="clickAppBarBackButton"
       />
       <template v-if="tabs.length" #extension>
         <AppBarTabsExtension
@@ -435,7 +434,7 @@ permissions and limitations under the Licence.
 import CookieLaw from 'vue-cookie-law'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
-import AppBarEditModeContent from '@/components/AppBarEditModeContent'
+import AppBarTitle from '@/components/AppBarTitle'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import LogoFooter from '@/components/LogoFooter'
 import ProgressIndicator from '@/components/ProgressIndicator.vue'
@@ -447,7 +446,7 @@ import { saveCurrentRoute } from '@/utils/loginHelpers'
 
 export default {
   components: {
-    AppBarEditModeContent,
+    AppBarTitle,
     AppBarTabsExtension,
     CookieLaw,
     LogoFooter,
@@ -535,17 +534,11 @@ export default {
     appBarTitle () {
       return this.$store.state.appbar.title || this.title
     },
-    saveBtnHidden () {
-      return this.$store.state.appbar.saveBtnHidden
+    appBarShowBackButton () {
+      return this.$store.state.appbar.showBackButton
     },
-    saveBtnDisabled () {
-      return this.$store.state.appbar.saveBtnDisabled
-    },
-    cancelBtnHidden () {
-      return this.$store.state.appbar.cancelBtnHidden
-    },
-    cancelBtnDisabled () {
-      return this.$store.state.appbar.cancelBtnDisabled
+    appBarBackTo () {
+      return this.$store.state.appbar.backTo
     },
     initials () {
       if (this.$auth.loggedIn) {
@@ -653,6 +646,10 @@ export default {
     async logout () {
       await this.$auth.logout()
       this.clearUserInfo()
+    },
+    clickAppBarBackButton () {
+      // as soon as the back button was clicked, we hide it
+      this.$store.commit('appbar/setShowBackButton', false)
     }
   }
 }

@@ -486,6 +486,7 @@ export type LoadConfigurationParameterChangeActionsAction = (id: string) => Prom
 export type LoadConfigurationParametersAction = (id: string) => Promise<void>
 export type UpdateConfigurationParameterAction = (params: { configurationId: string, parameter: Parameter }) => Promise<Parameter>
 export type UpdateConfigurationParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>
+export type SearchConfigurationsPaginatedAction = (searchParams: IConfigurationSearchParams) => Promise<void>
 
 export type SetSelectedTimepointItemAction = (newVal: ILocationTimepoint|null) => void
 export type SetSelectedLocationDateAction = (newVal: DateTime | null) => void

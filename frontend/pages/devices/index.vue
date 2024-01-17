@@ -77,7 +77,7 @@ permissions and limitations under the Licence.
               color="accent"
               small
               nuxt
-              to="/devices/new"
+              :to="newDeviceLink"
             >
               New Device
             </v-btn>
@@ -274,6 +274,7 @@ permissions and limitations under the Licence.
           <DevicesListItem
             :key="item.id"
             :device="item"
+            from="searchResult"
           >
             <template
               #dot-menu-items
@@ -283,7 +284,7 @@ permissions and limitations under the Licence.
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
-                :path="'/devices/copy/' + item.id"
+                :path="copyLink(item.id)"
               />
               <DotMenuActionArchive
                 v-if="canArchiveEntity(item)"
@@ -342,10 +343,11 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
+import { Route } from 'vue-router'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction, SetBackToAction } from '@/store/appbar'
 
 import {
   VocabularyState,
@@ -379,11 +381,14 @@ import {
   CanRestoreEntityGetter
 } from '@/store/permissions'
 
+import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
 import { Manufacturer } from '@/models/Manufacturer'
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { Status } from '@/models/Status'
+import { Visibility } from '@/models/Visibility'
 
 import { QueryParams } from '@/modelUtils/QueryParams'
 import { DeviceSearchParamsSerializer } from '@/modelUtils/DeviceSearchParams'
@@ -403,9 +408,7 @@ import BaseList from '@/components/shared/BaseList.vue'
 import DevicesListItem from '@/components/devices/DevicesListItem.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import PermissionGroupSearchSelect from '@/components/PermissionGroupSearchSelect.vue'
-import { Visibility } from '@/models/Visibility'
 import FoundEntries from '@/components/shared/FoundEntries.vue'
-import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
 @Component({
   components: {
@@ -437,7 +440,7 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
     ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'loadDevice', 'replaceDeviceInDevices', 'getSensorMLUrl']),
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo']),
     ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -499,6 +502,7 @@ export default class SearchDevicesPage extends Vue {
   getSensorMLUrl!: GetSensorMLUrlAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setBackTo!: SetBackToAction
 
   async created () {
     this.initializeAppBar()
@@ -510,7 +514,7 @@ export default class SearchDevicesPage extends Vue {
         this.loadManufacturers(),
         this.loadPermissionGroups()
       ])
-      this.initSearchQueryParams()
+      this.initSearchQueryParams(this.$route.query)
       await this.runInitialSearch()
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
@@ -619,7 +623,8 @@ export default class SearchDevicesPage extends Vue {
       this.setLoading(true)
       this.initUrlQueryParams()
       await this.searchDevicesPaginated(this.searchParams)
-      this.setPageAndSizeInUrl()
+      await this.setPageAndSizeInUrl()
+      this.setBackTo({ path: this.$route.path, query: this.$route.query })
     } catch {
       this.$store.commit('snackbar/setError', 'Loading of devices failed')
     } finally {
@@ -713,13 +718,13 @@ export default class SearchDevicesPage extends Vue {
     }
   }
 
-  initSearchQueryParams (): void {
+  initSearchQueryParams (queryParams: QueryParams): void {
     const searchParamsObject = (new DeviceSearchParamsSerializer({
       states: this.equipmentstatus,
       deviceTypes: this.devicetypes,
       manufacturer: this.manufacturers,
       permissionGroups: this.permissionGroups
-    })).toSearchParams(this.$route.query)
+    })).toSearchParams(queryParams)
 
     // prefill the form by the serialized search params from the URL
     if (searchParamsObject.searchText) {
@@ -796,7 +801,7 @@ export default class SearchDevicesPage extends Vue {
     })
   }
 
-  setPageAndSizeInUrl (preserveHash: boolean = true): void {
+  setPageAndSizeInUrl (preserveHash: boolean = true): Promise<Route> {
     // In general it should be possible to just call
     // setPageInUrl()
     // and
@@ -820,7 +825,7 @@ export default class SearchDevicesPage extends Vue {
         page: String(this.page)
       }
     }
-    this.$router.push({
+    return this.$router.replace({
       query,
       hash: preserveHash ? this.$route.hash : ''
     })
@@ -866,6 +871,16 @@ export default class SearchDevicesPage extends Vue {
         return null
       }
     }
+  }
+
+  copyLink (id: string): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/devices/copy/${id}${params}`
+  }
+
+  get newDeviceLink (): string {
+    const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
+    return `/devices/new${params}`
   }
 }
 

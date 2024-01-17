@@ -73,7 +73,7 @@ import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { Site } from '@/models/Site'
 import { SaveSiteAction } from '@/store/sites'
-import { SetTabsAction, SetTitleAction } from '@/store/appbar'
+import { SetTabsAction, SetTitleAction, SetShowBackButtonAction } from '@/store/appbar'
 import { LoadEpsgCodesAction, LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 
 import { hasSelfIntersection } from '@/utils/mapHelpers'
@@ -91,7 +91,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
     ...mapActions('sites', ['saveSite']),
     ...mapActions('vocabulary', ['loadEpsgCodes', 'loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
 
-    ...mapActions('appbar', ['setTitle', 'setTabs']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -111,6 +111,7 @@ export default class SiteNewPage extends Vue {
   loadCountries!: LoadCountriesAction
   countryNames!: CountryNamesGetter
   setLoading!: SetLoadingAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     this.initializeAppBar()
@@ -156,6 +157,9 @@ export default class SiteNewPage extends Vue {
   }
 
   initializeAppBar () {
+    if ('from' in this.$route.query && this.$route.query.from === 'searchResult') {
+      this.setShowBackButton(true)
+    }
     this.setTabs([
       {
         to: '/sites/new/',

@@ -54,7 +54,7 @@ permissions and limitations under the Licence.
     </template>
     <template #actions>
       <v-btn
-        :to="'/sites/' + site.id"
+        :to="detailLink"
         color="primary"
         text
         small
@@ -269,6 +269,12 @@ export default class SitesListItem extends Vue {
   })
   private hideHeader!: boolean
 
+  @Prop({
+    default: '',
+    type: String
+  })
+  private from!: string
+
   public readonly NO_TYPE: string = 'Unknown type'
 
   // vuex definition for typescript check
@@ -304,6 +310,14 @@ export default class SitesListItem extends Vue {
       return parts.join(': ')
     }
     return this.NO_TYPE
+  }
+
+  get detailLink (): string {
+    let params = ''
+    if (this.from) {
+      params = '?' + (new URLSearchParams({ from: this.from })).toString()
+    }
+    return `/sites/${this.site.id}${params}`
   }
 }
 </script>
