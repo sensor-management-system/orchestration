@@ -6,7 +6,9 @@ SPDX-FileCopyrightText: 2023
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.12.0 (Unreleased)
+## 1.12.1 (Unreleased)
+
+## 1.12.0 - 2024-01-17
 
 Added:
 - Buttons to return to search pages
