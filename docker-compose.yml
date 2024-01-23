@@ -134,7 +134,6 @@ services:
     working_dir: /usr/cv/app
     volumes:
       - './sms-cv/src:/usr/cv/app'
-      - './sms-cv-entrypoint-dev.sh:/entrypoint.sh'
       - static-files:/static/cv
     ports:
       - 8000:8000
@@ -152,7 +151,7 @@ services:
       SQL_PORT: ${SQL_PORT:-5433}
       CORS_ORIGIN_WHITELIST: ${CORS_ORIGIN_WHITELIST:-https://localhost.localdomain}
       EMAIL_HOST: ${EMAIL_HOST}
-    entrypoint: /entrypoint.sh
+    entrypoint: ./entrypoint-dev.sh
     networks:
       - sms
     depends_on:
