@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
       </template>
-      <template v-if="action.genericAction || action.parameterChangeAction" #dot-menu-items>
+      <template v-if="action.genericAction || action.parameterChangeAction || action.mountAction" #dot-menu-items>
         <DotMenuActionDelete
           v-if="action.genericAction"
           :readonly="!editable"
@@ -70,6 +70,16 @@ permissions and limitations under the Licence.
           v-if="action.parameterChangeAction"
           :readonly="!editable"
           @click="initDeleteDialogParameterChangeAction(action.parameterChangeAction)"
+        />
+        <DotMenuActionEdit
+          v-if="action.mountAction.device"
+          :readonly="!editable"
+          @click="openEditDeviceMountActionForm(action)"
+        />
+        <DotMenuActionEdit
+          v-if="action.mountAction.platform"
+          :readonly="!editable"
+          @click="openEditPlatformMountActionForm(action)"
         />
       </template>
       <template #actions>
@@ -321,17 +331,19 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
-import { ITimelineAction } from '@/utils/configurationInterfaces'
+import { DeviceMountTimelineAction, ITimelineAction, PlatformMountTimelineAction } from '@/utils/configurationInterfaces'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
 import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 import { Attachment } from '@/models/Attachment'
+import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
 
 @Component({
   filters: {
     dateToDateTimeString
   },
   components: {
+    DotMenuActionEdit,
     BaseExpandableListItem,
     DotMenu,
     DotMenuActionDelete,
@@ -458,6 +470,14 @@ export default class ConfigurationsTimelineActionCard extends Vue {
 
   openAttachment (attachment: Attachment) {
     this.$emit('open-attachment', attachment)
+  }
+
+  openEditDeviceMountActionForm (action: DeviceMountTimelineAction) {
+    this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices/device-mount-actions/' + action.mountAction.id + '/edit')
+  }
+
+  openEditPlatformMountActionForm (action: PlatformMountTimelineAction) {
+    this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices/platform-mount-actions/' + action.mountAction.id + '/edit')
   }
 }
 </script>
