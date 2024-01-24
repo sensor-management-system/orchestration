@@ -6,7 +6,10 @@ SPDX-FileCopyrightText: 2023
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.12.1 (Unreleased)
+## 1.13.0 (Unreleased)
+
+Added:
+- Mount actions listed in the 'actions' tab of a configuration now have the "edit" option, which redirect to the edit form of that mount action   
 
 ## 1.12.0 - 2024-01-17
 

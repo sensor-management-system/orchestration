@@ -36,22 +36,21 @@ permissions and limitations under the Licence.
         <p>
           Groups and roles are handled using the <b>Data Projects</b>.
           You can access them at <a href="https://web.app.ufz.de/dataprojects" target="_blank" style="text-decoration: none">
-          <strong>UFZ DPVM</strong>
-          <v-icon small>
-            mdi-open-in-new
-          </v-icon>
-        </a>.
+            <strong>UFZ DPVM</strong>
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon>
+          </a>.
         </p>
         <v-alert color="red lighten-3">
-            The service is currently unavailable as we're planning to use the <a href="https://hifis.net/doc/helmholtz-aai/" target="_blank" style="text-decoration: none">
+          The service is currently unavailable as we're planning to use the <a href="https://hifis.net/doc/helmholtz-aai/" target="_blank" style="text-decoration: none">
             <strong>HIFIS VO</strong>
             <v-icon small>
               mdi-open-in-new
             </v-icon>
           </a>.
-            This page will be updated, once the change is done.
+          This page will be updated, once the change is done.
         </v-alert>
-
       </v-card-text>
     </v-card>
     <v-card flat class="pb-0">
