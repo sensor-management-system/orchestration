@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -323,7 +323,7 @@ import { mapActions, mapState } from 'vuex'
 import {
   DeleteConfigurationGenericAction,
   DeleteConfigurationParameterChangeActionAction,
-  LoadAllConfigurationActionsAction
+  LoadAllConfigurationActionsAction, SetSelectedDateAction
 } from '@/store/configurations'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
@@ -351,7 +351,7 @@ import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
   },
   computed: mapState('progressindicator', ['isLoading']),
   methods: {
-    ...mapActions('configurations', ['deleteConfigurationGenericAction', 'deleteConfigurationParameterChangeAction', 'loadAllConfigurationActions']),
+    ...mapActions('configurations', ['deleteConfigurationGenericAction', 'deleteConfigurationParameterChangeAction', 'loadAllConfigurationActions', 'setSelectedDate']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -381,6 +381,7 @@ export default class ConfigurationsTimelineActionCard extends Vue {
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  private setSelectedDate!: SetSelectedDateAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -473,10 +474,12 @@ export default class ConfigurationsTimelineActionCard extends Vue {
   }
 
   openEditDeviceMountActionForm (action: DeviceMountTimelineAction) {
+    this.setSelectedDate(action.mountAction.beginDate)
     this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices/device-mount-actions/' + action.mountAction.id + '/edit')
   }
 
   openEditPlatformMountActionForm (action: PlatformMountTimelineAction) {
+    this.setSelectedDate(action.mountAction.beginDate)
     this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices/platform-mount-actions/' + action.mountAction.id + '/edit')
   }
 }
