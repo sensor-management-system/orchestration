@@ -72,12 +72,12 @@ permissions and limitations under the Licence.
           @click="initDeleteDialogParameterChangeAction(action.parameterChangeAction)"
         />
         <DotMenuActionEdit
-          v-if="action.mountAction.device"
+          v-if="action.mountAction && action.mountAction.device"
           :readonly="!editable"
           @click="openEditDeviceMountActionForm(action)"
         />
         <DotMenuActionEdit
-          v-if="action.mountAction.platform"
+          v-if="action.mountAction && action.mountAction.platform"
           :readonly="!editable"
           @click="openEditPlatformMountActionForm(action)"
         />
