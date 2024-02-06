@@ -12,6 +12,9 @@ Added:
 - Mount actions listed in the 'actions' tab of a configuration now have the "edit" option, which redirect to the edit form of that mount action   
 - Mounts can have explicit coordinates
 
+Fixed:
+- Adjusted the ordering of the elements in sensorML 
+
 ## 1.12.0 - 2024-01-17
 
 Added:

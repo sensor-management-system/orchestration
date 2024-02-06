@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -39,16 +39,20 @@ class TestSensorMLDevice(BaseTestCase):
 
     url = base_url + "/devices"
 
-    def setUp(self):
-        """Set up data for the tests."""
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        """Set up data that we can reuse between all the test cases."""
         path_this_file = pathlib.Path(__file__)
         path_pickle_schema = (
             path_this_file.parent / "helpers" / "sensorml_schema_validator.pickle"
         )
 
         with path_pickle_schema.open("rb") as infile:
-            self.schema = pickle.load(infile)
+            cls.schema = pickle.load(infile)
+
+    def setUp(self):
+        """Set up data for the tests."""
+        super().setUp()
 
         self.device = Device(
             is_public=True,
@@ -2041,3 +2045,73 @@ class TestSensorMLDevice(BaseTestCase):
 
         self.assertEqual(sml_keyword_entries[0].text, "some")
         self.assertEqual(sml_keyword_entries[1].text, "fancy keyword")
+
+    def test_ordering(self):
+        """Check that we use the right ordering of the elements."""
+        # This test here is based on an example at KIT where the
+        # ordering of the elements in the sensorML was not right.
+        # So we use this test to fix it.
+        # https://sms.atmohub.kit.edu/backend/rdm/svm-api/v1/configurations/11/sensorml
+        self.device.website = "https://gfz-potsdam.de"
+        self.device_type_name = "Thermometer"
+        self.device_type_uri = current_app.config["CV_URL"] + "/equipmenttypes/123/"
+
+        air_temperature_uri = current_app.config["CV_URL"] + "/measuredquantity/4/"
+        device_property = DeviceProperty(
+            device=self.device,
+            sampling_media_name="Weather",
+            property_name="Air temperature",
+            property_uri=air_temperature_uri,
+            unit_name="°C",
+            label="Air temp",
+        )
+        owner_name = "Owner"
+        owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
+        contact1 = Contact(
+            given_name="Given",
+            family_name="Fam",
+            email="given@family",
+            website="https://given.fam/index.html",
+            organization="Dummy organization",
+        )
+        contact_role1 = DeviceContactRole(
+            contact=contact1,
+            device=self.device,
+            role_name=owner_name,
+            role_uri=owner_uri,
+        )
+        device_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
+        device_action = GenericDeviceAction(
+            device=self.device,
+            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            contact=contact1,
+            description="Some desc",
+            action_type_name="Device Maintenance",
+            action_type_uri=device_maintenance_uri,
+        )
+        parameter = DeviceParameter(
+            unit_name="°C",
+            unit_uri="https://cv/units/1",
+            label="Fan start temperature",
+            description="Temperature on that the fan starts",
+            device=self.device,
+        )
+
+        db.session.add_all(
+            [
+                self.device,
+                device_property,
+                device_action,
+                contact1,
+                contact_role1,
+                parameter,
+            ]
+        )
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
