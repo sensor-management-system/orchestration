@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -41,16 +41,20 @@ class TestSensorMLConfiguration(BaseTestCase):
 
     url = base_url + "/configurations"
 
-    def setUp(self):
-        """Set up data for the tests."""
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        """Set up data that we can reuse between all the test cases."""
         path_this_file = pathlib.Path(__file__)
         path_pickle_schema = (
             path_this_file.parent / "helpers" / "sensorml_schema_validator.pickle"
         )
 
         with path_pickle_schema.open("rb") as infile:
-            self.schema = pickle.load(infile)
+            cls.schema = pickle.load(infile)
+
+    def setUp(self):
+        """Set up data for the tests."""
+        super().setUp()
 
         self.configuration = Configuration(
             is_public=True,
@@ -3391,3 +3395,63 @@ class TestSensorMLConfiguration(BaseTestCase):
 
         self.assertEqual(sml_keyword_entries[0].text, "some")
         self.assertEqual(sml_keyword_entries[1].text, "fancy keyword")
+
+    def test_ordering(self):
+        """Check that we use the right ordering of the elements."""
+        # This test here is based on an example at KIT where the
+        # ordering of the elements in the sensorML was not right.
+        # So we use this test to fix it.
+        # https://sms.atmohub.kit.edu/backend/rdm/svm-api/v1/configurations/11/sensorml
+        self.configuration.keywords = ["some", "fancy keyword"]
+        self.configuration.description = "some example configuration"
+        self.configuration.persistent_identifier = "12345/test.abc.1234-4567"
+        self.configuration.project = "DataHub"
+        self.configuration.start_date = datetime.datetime(
+            2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc
+        )
+        owner_name = "Owner"
+        owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
+        contact1 = Contact(
+            given_name="Given",
+            family_name="Fam",
+            email="given@family",
+            website="https://given.fam/index.html",
+            organization="Dummy organization",
+        )
+        contact_role1 = ConfigurationContactRole(
+            contact=contact1,
+            configuration=self.configuration,
+            role_name=owner_name,
+            role_uri=owner_uri,
+        )
+        attachment = ConfigurationAttachment(
+            configuration=self.configuration, url="https://ufz.de", label="UFZ-Page"
+        )
+        configuration_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
+        configuration_action = GenericConfigurationAction(
+            configuration=self.configuration,
+            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            contact=contact1,
+            description="Some desc",
+            action_type_name="Configuration Maintenance",
+            action_type_uri=configuration_maintenance_uri,
+        )
+
+        db.session.add_all(
+            [
+                self.configuration,
+                contact1,
+                contact_role1,
+                attachment,
+                configuration_action,
+            ]
+        )
+
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)

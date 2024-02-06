@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -31,16 +31,20 @@ class TestSensorMLSite(BaseTestCase):
 
     url = base_url + "/sites"
 
-    def setUp(self):
-        """Set up data for the tests."""
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        """Set up data that we can reuse between all the test cases."""
         path_this_file = pathlib.Path(__file__)
         path_pickle_schema = (
             path_this_file.parent / "helpers" / "sensorml_schema_validator.pickle"
         )
 
         with path_pickle_schema.open("rb") as infile:
-            self.schema = pickle.load(infile)
+            cls.schema = pickle.load(infile)
+
+    def setUp(self):
+        """Set up data for the tests."""
+        super().setUp()
 
         self.site = Site(
             is_public=True,
@@ -821,3 +825,48 @@ class TestSensorMLSite(BaseTestCase):
         )
 
         self.assertEqual(gml_id_internal_config, f"site_{internal_inner_site.id}")
+
+    def test_ordering(self):
+        """Ensure we use the right ordering for the elements."""
+        wkt = "POLYGON ((0 0, 0 15, 15 15, 15 0, 0 0))"
+        self.site.geometry = WktPolygonField().deserialize(wkt)
+        self.site.epsg_code = "4326"
+        self.site.site_type_name = "Forest"
+        self.site.description = "example site"
+        self.site.city = "Potsdam"
+        self.site.zip_code = "14473"
+        self.site.country = "Germany"
+        self.site.street = "Telegrafenberg"
+        # GFZ doesn't have a street number, but lets imagine that it would have it.
+        self.site.street_number = "123"
+        self.site.building = "A70"
+        self.site.room = "319"
+
+        owner_name = "Owner"
+        owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
+        contact1 = Contact(
+            given_name="Given",
+            family_name="Fam",
+            email="given@family",
+            website="https://given.fam/index.html",
+            organization="Dummy organization",
+        )
+        contact_role1 = SiteContactRole(
+            contact=contact1,
+            site=self.site,
+            role_name=owner_name,
+            role_uri=owner_uri,
+        )
+        attachment = SiteAttachment(
+            site=self.site, url="https://ufz.de", label="UFZ-Page"
+        )
+
+        db.session.add_all([self.site, contact1, contact_role1, attachment])
+        db.session.commit()
+
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.site.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)

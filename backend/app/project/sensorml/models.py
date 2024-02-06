@@ -1091,20 +1091,20 @@ class SmlPhysicalSystem:
             element.append(self.gml_location.to_xml())
         if self.sml_keywords:
             element.append(self.sml_keywords.to_xml())
-        if self.sml_valid_time:
-            element.append(self.sml_valid_time.to_xml())
         if self.sml_identification:
             element.append(self.sml_identification.to_xml())
         if self.sml_classification:
             element.append(self.sml_classification.to_xml())
-        if self.sml_documentation:
-            element.append(self.sml_documentation.to_xml())
+        if self.sml_valid_time:
+            element.append(self.sml_valid_time.to_xml())
         if self.sml_contacts:
             element.append(self.sml_contacts.to_xml())
-        if self.sml_outputs:
-            element.append(self.sml_outputs.to_xml())
+        if self.sml_documentation:
+            element.append(self.sml_documentation.to_xml())
         if self.sml_history:
             element.append(self.sml_history.to_xml())
+        if self.sml_outputs:
+            element.append(self.sml_outputs.to_xml())
         if self.sml_parameters:
             element.append(self.sml_parameters.to_xml())
         if self.sml_position:

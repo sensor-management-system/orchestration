@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -37,16 +37,20 @@ class TestSensorMLPlatform(BaseTestCase):
 
     url = base_url + "/platforms"
 
-    def setUp(self):
-        """Set up data for the tests."""
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        """Set up data that we can reuse between all the test cases."""
         path_this_file = pathlib.Path(__file__)
         path_pickle_schema = (
             path_this_file.parent / "helpers" / "sensorml_schema_validator.pickle"
         )
 
         with path_pickle_schema.open("rb") as infile:
-            self.schema = pickle.load(infile)
+            cls.schema = pickle.load(infile)
+
+    def setUp(self):
+        """Set up data for the tests."""
+        super().setUp()
 
         self.platform = Platform(
             is_public=True,
