@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -94,6 +94,28 @@ permissions and limitations under the Licence.
       </v-col>
       <v-col cols="8">
         {{ getOffsets(calculatedOffsets) }}
+      </v-col>
+    </v-row>
+    <v-row v-if="(mountAction.x !== null) || (mountAction.y !== null)" dense>
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Coordinates:
+      </v-col>
+      <v-col cols="8">
+        {{ getCoordinates(mountAction) }}
+      </v-col>
+    </v-row>
+    <v-row v-if="mountAction.z !== null" dense>
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Height:
+      </v-col>
+      <v-col cols="8">
+        {{ getHeight(mountAction) }}
       </v-col>
     </v-row>
     <v-row
@@ -250,6 +272,22 @@ export default class BaseMountInfo extends Vue {
 
   getOffsets (valueWithOffsets: IOffsets): string {
     return `X = ${valueWithOffsets.offsetX} m | Y = ${valueWithOffsets.offsetY} m | Z = ${valueWithOffsets.offsetZ} m`
+  }
+
+  getCoordinates (value: DeviceMountAction | PlatformMountAction): string {
+    const partXY = `X = ${value.x} | Y = ${value.y}`
+    if (value.epsgCode) {
+      return `${partXY} | EPSG code = ${value.epsgCode}`
+    }
+    return partXY
+  }
+
+  getHeight (value: DeviceMountAction | PlatformMountAction): string {
+    const partZ = `Z = ${value.z}`
+    if (value.elevationDatumName) {
+      return `${partZ} | Elevation datum = ${value.elevationDatumName}`
+    }
+    return partZ
   }
 }
 </script>

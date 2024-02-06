@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021
+ * Copyright (C) 2021 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -62,6 +62,12 @@ describe('PlatformMountActionSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
+        epsgCode: '',
+        x: null,
+        y: null,
+        z: null,
+        elevationDatumName: '',
+        elevationDatumUri: '',
         beginContact: contact,
         endContact: null,
         beginDate: date,
@@ -83,7 +89,13 @@ describe('PlatformMountActionSerializer', () => {
           begin_description: 'Platform mount',
           end_description: '',
           begin_date: '2020-01-01T12:00:00.000Z',
-          end_date: null
+          end_date: null,
+          epsg_code: '',
+          x: null,
+          y: null,
+          z: null,
+          elevation_datum_name: '',
+          elevation_datum_uri: ''
         },
         relationships: {
           platform: {
@@ -118,6 +130,12 @@ describe('PlatformMountActionSerializer', () => {
         offsetX: 1,
         offsetY: 2,
         offsetZ: 3,
+        epsgCode: 'epsg:4326',
+        x: 4,
+        y: 5,
+        z: 6,
+        elevationDatumName: 'MSL',
+        elevationDatumUri: 'http://cv/el/1',
         beginContact: contact,
         endContact: null,
         beginDate: date,
@@ -139,7 +157,13 @@ describe('PlatformMountActionSerializer', () => {
           begin_description: 'Platform mount',
           end_description: '',
           begin_date: '2020-01-01T12:00:00.000Z',
-          end_date: null
+          end_date: null,
+          epsg_code: 'epsg:4326',
+          x: 4,
+          y: 5,
+          z: 6,
+          elevation_datum_name: 'MSL',
+          elevation_datum_uri: 'http://cv/el/1'
         },
         relationships: {
           platform: {
@@ -178,6 +202,12 @@ describe('PlatformMountActionSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
+        epsgCode: '',
+        x: null,
+        y: null,
+        z: null,
+        elevationDatumName: '',
+        elevationDatumUri: '',
         beginContact: contact,
         endContact: null,
         beginDate: date,
@@ -200,7 +230,13 @@ describe('PlatformMountActionSerializer', () => {
           begin_description: 'Platform mount',
           end_description: '',
           begin_date: '2020-01-01T12:00:00.000Z',
-          end_date: null
+          end_date: null,
+          epsg_code: '',
+          x: null,
+          y: null,
+          z: null,
+          elevation_datum_name: '',
+          elevation_datum_uri: ''
         },
         relationships: {
           platform: {
@@ -243,7 +279,13 @@ describe('PlatformMountActionSerializer', () => {
               end_description: null,
               offset_x: 1.0,
               offset_z: 3.0,
-              begin_description: 'begin of mount'
+              begin_description: 'begin of mount',
+              epsg_code: 'epsg:4326',
+              x: 12.5,
+              y: 52.1,
+              z: 0.0,
+              elevation_datum_name: 'MSL',
+              elevation_datum_uri: 'http://cv/el/1'
             },
             relationships: {
               parent_platform: {
@@ -442,6 +484,12 @@ describe('PlatformMountActionSerializer', () => {
         1.0,
         2.0,
         3.0,
+        'epsg:4326',
+        12.5,
+        52.1,
+        0.0,
+        'MSL',
+        'http://cv/el/1',
         contact,
         null,
         'begin of mount',
@@ -457,6 +505,12 @@ describe('PlatformMountActionSerializer', () => {
         4.0,
         5.0,
         6.0,
+        '',
+        null,
+        null,
+        null,
+        '',
+        '',
         contact,
         contact,
         'begin of mount',
@@ -480,6 +534,12 @@ describe('PlatformMountActionSerializer', () => {
       expect(mountActions[0].endContact).toBeNull()
       expect(mountActions[0].beginDescription).toBe(platformMountAction1.beginDescription)
       expect(mountActions[0].endDescription).toBe('')
+      expect(mountActions[0].epsgCode).toBe(platformMountAction1.epsgCode)
+      expect(mountActions[0].x).toBe(platformMountAction1.x)
+      expect(mountActions[0].y).toBe(platformMountAction1.y)
+      expect(mountActions[0].z).toBe(platformMountAction1.z)
+      expect(mountActions[0].elevationDatumName).toBe(platformMountAction1.elevationDatumName)
+      expect(mountActions[0].elevationDatumUri).toBe(platformMountAction1.elevationDatumUri)
       // mount action 2
       expect(mountActions[1].id).toBe(platformMountAction2.id)
       expect(mountActions[1].platform.id).toBe(platformMountAction2.platform.id)
@@ -496,6 +556,12 @@ describe('PlatformMountActionSerializer', () => {
       expect(mountActions[1].endContact?.id).toBe(platformMountAction2.endContact?.id)
       expect(mountActions[1].beginDescription).toBe(platformMountAction2.beginDescription)
       expect(mountActions[1].endDescription).toBe(platformMountAction2.endDescription)
+      expect(mountActions[1].epsgCode).toBe('')
+      expect(mountActions[1].x).toBeNull()
+      expect(mountActions[1].y).toBeNull()
+      expect(mountActions[1].z).toBeNull()
+      expect(mountActions[1].elevationDatumName).toBe('')
+      expect(mountActions[1].elevationDatumUri).toBe('')
     })
   })
 })

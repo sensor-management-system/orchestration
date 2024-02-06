@@ -44,6 +44,12 @@ export interface IMountAction {
   offsetX: number
   offsetY: number
   offsetZ: number
+  epsgCode: string
+  x: number | null
+  y: number | null
+  z: number | null
+  elevationDatumName: string
+  elevationDatumUri: string
   beginContact: IContact
   endContact: IContact | null
   beginDescription: string
@@ -67,6 +73,12 @@ export class MountAction implements IMountAction {
   private _offsetX: number = 0
   private _offsetY: number = 0
   private _offsetZ: number = 0
+  private _epsgCode: string = ''
+  private _x: number | null = null
+  private _y: number | null = null
+  private _z: number | null = null
+  private _elevationDatumName: string = ''
+  private _elevationDatumUri: string = ''
   private _beginContact: Contact
   private _endContact: Contact | null = null
   private _beginDescription: string = ''
@@ -80,6 +92,12 @@ export class MountAction implements IMountAction {
     offsetX: number,
     offsetY: number,
     offsetZ: number,
+    epsgCode: string,
+    x: number | null,
+    y: number | null,
+    z: number | null,
+    elevationDatumName: string,
+    elevationDatumUri: string,
     beginContact: Contact,
     endContact: Contact | null,
     beginDescription: string,
@@ -92,6 +110,12 @@ export class MountAction implements IMountAction {
     this._offsetX = offsetX
     this._offsetY = offsetY
     this._offsetZ = offsetZ
+    this._epsgCode = epsgCode
+    this._x = x
+    this._y = y
+    this._z = z
+    this._elevationDatumName = elevationDatumName
+    this._elevationDatumUri = elevationDatumUri
     this._beginContact = beginContact
     this._endContact = endContact
     this._beginDescription = beginDescription
@@ -154,6 +178,54 @@ export class MountAction implements IMountAction {
     this._offsetZ = newOffsetZ
   }
 
+  get epsgCode (): string {
+    return this._epsgCode
+  }
+
+  set epsgCode (newEpsgCode: string) {
+    this._epsgCode = newEpsgCode
+  }
+
+  get x (): number | null {
+    return this._x
+  }
+
+  set x (newX: number | null) {
+    this._x = newX
+  }
+
+  get y (): number | null {
+    return this._y
+  }
+
+  set y (newY: number | null) {
+    this._y = newY
+  }
+
+  get z (): number | null {
+    return this._z
+  }
+
+  set z (newZ: number | null) {
+    this._z = newZ
+  }
+
+  get elevationDatumName (): string {
+    return this._elevationDatumName
+  }
+
+  set elevationDatumName (newElevationDatumName: string) {
+    this._elevationDatumName = newElevationDatumName
+  }
+
+  get elevationDatumUri (): string {
+    return this._elevationDatumUri
+  }
+
+  set elevationDatumUri (newElevationDatumUri: string) {
+    this._elevationDatumUri = newElevationDatumUri
+  }
+
   get beginContact (): Contact {
     return this._beginContact
   }
@@ -199,6 +271,12 @@ export class MountAction implements IMountAction {
       otherAction.offsetX,
       otherAction.offsetY,
       otherAction.offsetZ,
+      otherAction.epsgCode,
+      otherAction.x,
+      otherAction.y,
+      otherAction.z,
+      otherAction.elevationDatumName,
+      otherAction.elevationDatumUri,
       Contact.createFromObject(otherAction.beginContact),
       otherAction.endContact ? Contact.createFromObject(otherAction.endContact) : null,
       otherAction.beginDescription,

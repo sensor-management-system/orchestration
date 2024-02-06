@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2021
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -31,6 +31,7 @@
  */
 
 import Vue from 'vue'
+import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 
 import { DateTime } from 'luxon'
@@ -47,11 +48,30 @@ import { PlatformMountAction } from '@/models/PlatformMountAction'
 Vue.use(Vuetify)
 
 describe('MountActionDetailsForm', () => {
-  const localVue = createLocalVue()
-  let vuetify = new Vuetify()
+  let store: any
+  let localVue: any
+  let vuetify: any
 
   beforeEach(() => {
+    localVue = createLocalVue()
+    localVue.use(Vuex)
     vuetify = new Vuetify()
+    const vocabulary = {
+      namespaced: true,
+      state: {
+        epsgCodes: [],
+        elevationData: []
+      },
+      mutations: {
+      },
+      actions: {
+        loadElevationData: () => {},
+        loadEpsgCodes: () => {}
+      }
+    }
+    store = new Vuex.Store({
+      modules: { vocabulary }
+    })
   })
 
   const createWrapper = (propsData?: any) => {
@@ -80,6 +100,12 @@ describe('MountActionDetailsForm', () => {
       0,
       0,
       0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
       contact1,
       null,
       'begin of mount',
@@ -89,6 +115,7 @@ describe('MountActionDetailsForm', () => {
     return mount(MountActionDetailsForm, {
       localVue,
       vuetify,
+      store,
       propsData: {
         value: mountAction,
         readonly: false,

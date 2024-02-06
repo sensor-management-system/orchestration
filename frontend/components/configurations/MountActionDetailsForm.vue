@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022
+Copyright (C) 2022 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -190,6 +190,65 @@ permissions and limitations under the Licence.
             </v-row>
           </v-col>
         </v-row>
+        <v-row class="pb-0">
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model.number="mountActionInformationDTO.x"
+              label="Coordinate (x)"
+              type="number"
+              step="any"
+              clearable
+              @wheel.prevent
+              @change="update"
+            />
+          </v-col>
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model.number="mountActionInformationDTO.y"
+              label="Coordinate (y)"
+              type="number"
+              step="any"
+              clearable
+              @wheel.prevent
+              @change="update"
+            />
+          </v-col>
+          <v-col cols="12" md="4">
+            <v-select
+              v-model="mountActionInformationDTO.epsgCode"
+              :item-value="(x) => x.code"
+              :item-text="(x) => x.text"
+              :items="epsgCodes"
+              label="EPSG Code"
+              clearable
+              @change="update"
+            />
+          </v-col>
+        </v-row>
+        <v-row class="pb-0">
+          <v-col cols="12" md="4" offset-md="4">
+            <v-text-field
+              v-model.number="mountActionInformationDTO.z"
+              label="Coordinate (z)"
+              type="number"
+              step="any"
+              clearable
+              @wheel.prevent
+              @change="update"
+            />
+          </v-col>
+          <v-col cols="12" md="4">
+            <v-select
+              v-model="elevationDatum"
+              :item-value="(x) => x.name"
+              :item-text="(x) => x.name"
+              :items="elevationData"
+              label="Elevation Datum"
+              clearable
+              @change="update"
+            />
+          </v-col>
+        </v-row>
         <v-row>
           <v-col>
             <span>
@@ -256,10 +315,12 @@ permissions and limitations under the Licence.
 <script lang="ts">
 
 import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 import { DateTime } from 'luxon'
 
 import { Rules } from '@/mixins/Rules'
+import { VocabularyState, LoadEpsgCodesAction, LoadElevationDataAction } from '@/store/vocabulary'
 
 import { Contact } from '@/models/Contact'
 
@@ -269,6 +330,12 @@ import { MountActionDateDTO, MountActionInformationDTO, IOffsets } from '@/utils
 @Component({
   components: {
     MountActionDateForm
+  },
+  computed: {
+    ...mapState('vocabulary', ['epsgCodes', 'elevationData'])
+  },
+  methods: {
+    ...mapActions('vocabulary', ['loadEpsgCodes', 'loadElevationData'])
   }
 })
 export default class MountActionDetailsForm extends mixins(Rules) {
@@ -329,6 +396,16 @@ export default class MountActionDetailsForm extends mixins(Rules) {
   })
   readonly parentOffsets!: IOffsets
 
+  // vuex definition for typescript check
+  epsgCodes!: VocabularyState['epsgCodes']
+  elevationData!: VocabularyState['elevationData']
+  loadElevationData!: LoadElevationDataAction
+  loadEpsgCodes!: LoadEpsgCodesAction
+
+  fetch () {
+    Promise.all([this.loadElevationData(), this.loadEpsgCodes()])
+  }
+
   get mountActionDateDTO (): MountActionDateDTO {
     return {
       beginDate: this.mountActionInformationDTO.beginDate,
@@ -382,6 +459,30 @@ export default class MountActionDetailsForm extends mixins(Rules) {
       offsetX: this.parentOffsets.offsetX + this.value.offsetX,
       offsetY: this.parentOffsets.offsetY + this.value.offsetY,
       offsetZ: this.parentOffsets.offsetZ + this.value.offsetZ
+    }
+  }
+
+  get elevationDatum (): string | null {
+    if (!this.mountActionInformationDTO.elevationDatumName) {
+      return null
+    }
+    const elevationDatumIndex = this.elevationData.findIndex(d => d.uri === this.mountActionInformationDTO.elevationDatumUri)
+    if (elevationDatumIndex > -1) {
+      return this.elevationData[elevationDatumIndex].name
+    }
+    return this.mountActionInformationDTO.elevationDatumName
+  }
+
+  set elevationDatum (newElevationDatumName: string | null) {
+    this.mountActionInformationDTO.elevationDatumUri = ''
+    if (!newElevationDatumName) {
+      this.mountActionInformationDTO.elevationDatumName = ''
+    } else {
+      this.mountActionInformationDTO.elevationDatumName = newElevationDatumName
+      const elevationDatumIndex = this.elevationData.findIndex(d => d.uri === this.mountActionInformationDTO.elevationDatumUri)
+      if (elevationDatumIndex > -1) {
+        this.mountActionInformationDTO.elevationDatumUri = this.elevationData[elevationDatumIndex].uri
+      }
     }
   }
 }

@@ -177,6 +177,37 @@ permissions and limitations under the Licence.
                 {{ action.mountInfo.offsetZ }}
               </v-col>
             </v-row>
+            <div v-if="action.mountInfo.x !== null || action.mountInfo.y !== null || action.mountInfo.z !== null">
+              <v-row
+                dense
+              >
+                <v-col cols="12" md="3">
+                  <label>x</label>
+                  {{ action.mountInfo.x | orDefault }}
+                </v-col>
+                <v-col cols="12" md="3">
+                  <label>y</label>
+                  {{ action.mountInfo.y | orDefault }}
+                </v-col>
+                <v-col cols="12" md="3">
+                  <label>EPSG Code</label>
+                  {{ action.mountInfo.epsgCode | orDefault }}
+                </v-col>
+              </v-row>
+              <v-row
+                dense
+              >
+                <v-col cols="12" md="3" />
+                <v-col cols="12" md="3">
+                  <label>z</label>
+                  {{ action.mountInfo.z | orDefault }}
+                </v-col>
+                <v-col cols="12" md="3">
+                  <label>Elevation Datum</label>
+                  {{ action.mountInfo.elevationDatumName | orDefault }}
+                </v-col>
+              </v-row>
+            </div>
           </div>
           <div v-else-if="action.staticLocationInfo">
             <v-row
@@ -201,7 +232,7 @@ permissions and limitations under the Licence.
               <v-col cols="12" md="3" />
               <v-col cols="12" md="3">
                 <label>z</label>
-                {{ action.staticLocationInfo.z }}
+                {{ action.staticLocationInfo.z | orDefault }}
               </v-col>
               <v-col cols="12" md="3">
                 <label>Elevation Datum</label>

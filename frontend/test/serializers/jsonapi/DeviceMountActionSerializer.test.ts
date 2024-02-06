@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021 - 2023
+ * Copyright (C) 2021 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -71,6 +71,12 @@ describe('DeviceMountActionSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
+        epsgCode: '',
+        x: null,
+        y: null,
+        z: null,
+        elevationDatumName: '',
+        elevationDatumUri: '',
         beginContact: contact,
         endContact: null,
         beginDescription: 'Device mount',
@@ -92,7 +98,13 @@ describe('DeviceMountActionSerializer', () => {
           begin_description: 'Device mount',
           end_description: '',
           begin_date: '2020-01-01T00:00:00.000Z',
-          end_date: null
+          end_date: null,
+          epsg_code: '',
+          x: null,
+          y: null,
+          z: null,
+          elevation_datum_name: '',
+          elevation_datum_uri: ''
         },
         relationships: {
           device: {
@@ -131,6 +143,12 @@ describe('DeviceMountActionSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
+        epsgCode: 'epsg:4326',
+        x: 12.5,
+        y: 52.1,
+        z: 0.0,
+        elevationDatumName: 'MSL',
+        elevationDatumUri: 'http://cv/el/1',
         beginContact: contact,
         endContact: null,
         beginDescription: 'Device mount',
@@ -150,7 +168,13 @@ describe('DeviceMountActionSerializer', () => {
           begin_description: 'Device mount',
           end_description: '',
           begin_date: '2020-01-01T00:00:00.000Z',
-          end_date: null
+          end_date: null,
+          epsg_code: 'epsg:4326',
+          x: 12.5,
+          y: 52.1,
+          z: 0.0,
+          elevation_datum_name: 'MSL',
+          elevation_datum_uri: 'http://cv/el/1'
         },
         relationships: {
           device: {
@@ -195,6 +219,12 @@ describe('DeviceMountActionSerializer', () => {
         offsetX: 0,
         offsetY: 0,
         offsetZ: 0,
+        epsgCode: '',
+        x: null,
+        y: null,
+        z: null,
+        elevationDatumName: '',
+        elevationDatumUri: '',
         beginContact: contact,
         endContact: null,
         beginDescription: 'Device mount',
@@ -214,7 +244,13 @@ describe('DeviceMountActionSerializer', () => {
           begin_description: 'Device mount',
           end_description: '',
           begin_date: '2020-01-01T00:00:00.000Z',
-          end_date: null
+          end_date: null,
+          epsg_code: '',
+          x: null,
+          y: null,
+          z: null,
+          elevation_datum_name: '',
+          elevation_datum_uri: ''
         },
         relationships: {
           device: {
@@ -262,7 +298,13 @@ describe('DeviceMountActionSerializer', () => {
           begin_description: 'Device mount',
           end_description: '',
           begin_date: '2020-01-01T00:00:00.000Z',
-          end_date: null
+          end_date: null,
+          epsg_code: '',
+          x: null,
+          y: null,
+          z: null,
+          elevation_datum_name: '',
+          elevation_datum_uri: ''
         },
         relationships: {
           device: {
@@ -306,7 +348,13 @@ describe('DeviceMountActionSerializer', () => {
               end_description: 'end of mount',
               offset_x: 1.0,
               offset_z: 3.0,
-              begin_description: 'begin of mount'
+              begin_description: 'begin of mount',
+              epsg_code: 'epsg:4326',
+              x: 12.5,
+              y: 52.1,
+              z: 0.0,
+              elevation_datum_name: 'MSL',
+              elevation_datum_uri: 'http://cv/el/1'
             },
             relationships: {
               parent_platform: {
@@ -634,6 +682,12 @@ describe('DeviceMountActionSerializer', () => {
         1.0,
         2.0,
         3.0,
+        'epsg:4326',
+        12.5,
+        52.1,
+        0.0,
+        'MSL',
+        'http://cv/el/1',
         contact,
         contact,
         'begin of mount',
@@ -650,6 +704,12 @@ describe('DeviceMountActionSerializer', () => {
         4.0,
         5.0,
         6.0,
+        '',
+        null,
+        null,
+        null,
+        '',
+        '',
         contact,
         null,
         'begin of another mount',
@@ -666,6 +726,12 @@ describe('DeviceMountActionSerializer', () => {
         4.0,
         5.0,
         6.0,
+        '',
+        null,
+        null,
+        null,
+        '',
+        '',
         contact,
         null,
         'begin of another mount',
@@ -693,6 +759,12 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[0].beginDescription).toBe(deviceMountAction1.beginDescription)
       expect(mountActions[0].endDescription).not.toBeNull()
       expect(mountActions[0].endDescription).toBe(deviceMountAction1.endDescription)
+      expect(mountActions[0].epsgCode).toBe(deviceMountAction1.epsgCode)
+      expect(mountActions[0].x).toBe(deviceMountAction1.x)
+      expect(mountActions[0].y).toBe(deviceMountAction1.y)
+      expect(mountActions[0].z).toBe(deviceMountAction1.z)
+      expect(mountActions[0].elevationDatumName).toBe(deviceMountAction1.elevationDatumName)
+      expect(mountActions[0].elevationDatumUri).toBe(deviceMountAction1.elevationDatumUri)
       // mount action 2
       expect(mountActions[1].id).toBe(deviceMountAction2.id)
       expect(mountActions[1].device.id).toBe(deviceMountAction2.device.id)
@@ -708,6 +780,12 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[1].endContact).toBeNull()
       expect(mountActions[1].beginDescription).toBe(deviceMountAction2.beginDescription)
       expect(mountActions[1].endDescription).toBe('')
+      expect(mountActions[1].epsgCode).toBe('')
+      expect(mountActions[1].x).toBeNull()
+      expect(mountActions[1].y).toBeNull()
+      expect(mountActions[1].z).toBeNull()
+      expect(mountActions[1].elevationDatumName).toBe('')
+      expect(mountActions[1].elevationDatumUri).toBe('')
 
       // mount action 3
       expect(mountActions[2].id).toBe(deviceMountAction3.id)
@@ -724,6 +802,12 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[2].endContact).toBeNull()
       expect(mountActions[2].beginDescription).toBe(deviceMountAction3.beginDescription)
       expect(mountActions[2].endDescription).toBe('')
+      expect(mountActions[2].epsgCode).toBe('')
+      expect(mountActions[2].x).toBeNull()
+      expect(mountActions[2].y).toBeNull()
+      expect(mountActions[2].z).toBeNull()
+      expect(mountActions[2].elevationDatumName).toBe('')
+      expect(mountActions[2].elevationDatumUri).toBe('')
     })
   })
 })

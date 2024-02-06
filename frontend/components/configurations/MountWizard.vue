@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -470,6 +470,12 @@ export default class MountWizard extends Vue {
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
         offsetZ: mountInfo.offsetZ,
+        epsgCode: mountInfo.epsgCode,
+        x: mountInfo.x,
+        y: mountInfo.y,
+        z: mountInfo.z,
+        elevationDatumName: mountInfo.elevationDatumName,
+        elevationDatumUri: mountInfo.elevationDatumUri,
         beginContact: Contact.createFromObject(mountInfo.beginContact!),
         endContact: mountInfo.endContact ? Contact.createFromObject(mountInfo.endContact) : null,
         beginDescription: mountInfo.beginDescription,
@@ -512,6 +518,12 @@ export default class MountWizard extends Vue {
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
         offsetZ: mountInfo.offsetZ,
+        epsgCode: mountInfo.epsgCode,
+        x: mountInfo.x,
+        y: mountInfo.y,
+        z: mountInfo.z,
+        elevationDatumName: mountInfo.elevationDatumName,
+        elevationDatumUri: mountInfo.elevationDatumUri,
         beginContact: Contact.createFromObject(mountInfo.beginContact!),
         endContact: mountInfo.endContact ? Contact.createFromObject(mountInfo.endContact) : null,
         beginDescription: mountInfo.beginDescription,
@@ -570,6 +582,12 @@ export default class MountWizard extends Vue {
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
         offsetZ: mountInfo.offsetZ,
+        epsgCode: mountInfo.epsgCode,
+        x: mountInfo.x,
+        y: mountInfo.y,
+        z: mountInfo.z,
+        elevationDatumName: mountInfo.elevationDatumName,
+        elevationDatumUri: mountInfo.elevationDatumUri,
         beginDate: mountInfo.beginDate!,
         beginContact: mountInfo.beginContact!,
         endDate: mountInfo.endDate,
@@ -589,6 +607,12 @@ export default class MountWizard extends Vue {
         offsetX: mountInfo.offsetX,
         offsetY: mountInfo.offsetY,
         offsetZ: mountInfo.offsetZ,
+        epsgCode: mountInfo.epsgCode,
+        x: mountInfo.x,
+        y: mountInfo.y,
+        z: mountInfo.z,
+        elevationDatumName: mountInfo.elevationDatumName,
+        elevationDatumUri: mountInfo.elevationDatumUri,
         beginDate: mountInfo.beginDate!,
         beginContact: mountInfo.beginContact!,
         endDate: mountInfo.endDate,
@@ -629,6 +653,12 @@ export default class MountWizard extends Vue {
           0,
           0,
           0,
+          '',
+          null,
+          null,
+          null,
+          '',
+          '',
           new Contact(),
           null,
           '',
@@ -642,6 +672,12 @@ export default class MountWizard extends Vue {
           0,
           0,
           0,
+          '',
+          null,
+          null,
+          null,
+          '',
+          '',
           new Contact(),
           null,
           '',
@@ -686,7 +722,13 @@ export default class MountWizard extends Vue {
           endDescription: '',
           offsetX: 0,
           offsetY: 0,
-          offsetZ: 0
+          offsetZ: 0,
+          epsgCode: '',
+          x: null,
+          y: null,
+          z: null,
+          elevationDatumName: '',
+          elevationDatumUri: ''
         }
       }
     }

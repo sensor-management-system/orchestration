@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -92,6 +92,9 @@ permissions and limitations under the Licence.
                   </v-tooltip>
                 </th>
                 <th class="text-left">
+                  Coordinates (X | Y | Z)
+                </th>
+                <th class="text-left">
                   Description
                 </th>
                 <th class="text-left">
@@ -122,6 +125,13 @@ permissions and limitations under the Licence.
                 </td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
                 <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
+                <td v-if="item.mountInfo.x !== null || item.mountInfo.y !== null || item.mountInfo.z !== null">
+                  ({{ item.mountInfo.x }} | {{ item.mountInfo.y }} | {{ item.mountInfo.z }})
+                </td>
+                <!-- For the very same default value we show if the other fields are not set -->
+                <td v-else>
+                  {{ null | orDefault }}
+                </td>
                 <td>
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>
@@ -151,6 +161,13 @@ permissions and limitations under the Licence.
                 </td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
                 <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
+                <td v-if="item.mountInfo.x !== null || item.mountInfo.y !== null || item.mountInfo.z !== null">
+                  ({{ item.mountInfo.x }} | {{ item.mountInfo.y }} | {{ item.mountInfo.z }})
+                </td>
+                <!-- For the very same default value we show if the other fields are not set -->
+                <td v-else>
+                  {{ null | orDefault }}
+                </td>
                 <td>
                   {{ item.mountInfo.beginDescription | shortenRight(14, '...') | orDefault }}
                 </td>

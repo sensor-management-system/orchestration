@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -175,6 +175,12 @@ export default class MountActionEditForm extends Vue {
       offsetX: this.value.offsetX,
       offsetY: this.value.offsetY,
       offsetZ: this.value.offsetZ,
+      epsgCode: this.value.epsgCode,
+      x: this.value.x,
+      y: this.value.y,
+      z: this.value.z,
+      elevationDatumName: this.value.elevationDatumName,
+      elevationDatumUri: this.value.elevationDatumUri,
       beginContact: this.value.beginContact,
       endContact: this.value.endContact,
       beginDescription: this.value.beginDescription,
@@ -236,6 +242,12 @@ export default class MountActionEditForm extends Vue {
         mountActionInformationDTO.offsetX,
         mountActionInformationDTO.offsetY,
         mountActionInformationDTO.offsetZ,
+        mountActionInformationDTO.epsgCode,
+        mountActionInformationDTO.x,
+        mountActionInformationDTO.y,
+        mountActionInformationDTO.z,
+        mountActionInformationDTO.elevationDatumName,
+        mountActionInformationDTO.elevationDatumUri,
         Contact.createFromObject(mountActionInformationDTO.beginContact),
         mountActionInformationDTO.endContact ? Contact.createFromObject(mountActionInformationDTO.endContact) : null,
         mountActionInformationDTO.beginDescription,
@@ -252,6 +264,12 @@ export default class MountActionEditForm extends Vue {
         mountActionInformationDTO.offsetX,
         mountActionInformationDTO.offsetY,
         mountActionInformationDTO.offsetZ,
+        mountActionInformationDTO.epsgCode,
+        mountActionInformationDTO.x,
+        mountActionInformationDTO.y,
+        mountActionInformationDTO.z,
+        mountActionInformationDTO.elevationDatumName,
+        mountActionInformationDTO.elevationDatumUri,
         Contact.createFromObject(mountActionInformationDTO.beginContact),
         mountActionInformationDTO.endContact ? Contact.createFromObject(mountActionInformationDTO.endContact) : null,
         mountActionInformationDTO.beginDescription,

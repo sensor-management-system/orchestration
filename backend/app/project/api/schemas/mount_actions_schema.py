@@ -35,6 +35,14 @@ class PlatformMountActionSchema(Schema):
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)
     offset_z = fields.Float(allow_none=True)
+
+    x = fields.Float(allow_none=True)
+    y = fields.Float(allow_none=True)
+    z = fields.Float(allow_none=True)
+    epsg_code = fields.Str(allow_none=True)
+    elevation_datum_name = fields.Str(allow_none=True)
+    elevation_datum_uri = fields.Str(allow_none=True)
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
@@ -130,6 +138,14 @@ class DeviceMountActionSchema(Schema):
     offset_x = fields.Float(allow_none=True)
     offset_y = fields.Float(allow_none=True)
     offset_z = fields.Float(allow_none=True)
+
+    x = fields.Float(allow_none=True)
+    y = fields.Float(allow_none=True)
+    z = fields.Float(allow_none=True)
+    epsg_code = fields.Str(allow_none=True)
+    elevation_datum_name = fields.Str(allow_none=True)
+    elevation_datum_uri = fields.Str(allow_none=True)
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
