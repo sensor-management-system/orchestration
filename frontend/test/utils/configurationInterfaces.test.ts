@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -49,8 +49,47 @@ describe('logicOrder', () => {
     const platform = new Platform()
     const device = new Device()
 
-    const platformMount = new PlatformMountAction('1', platform, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
-    const deviceMountAction = new DeviceMountAction('2', device, null, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
+    const platformMount = new PlatformMountAction(
+      '1',
+      platform,
+      null,
+      DateTime.utc(),
+      null,
+      0,
+      0,
+      0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
+      contact,
+      null,
+      '',
+      null
+    )
+    const deviceMountAction = new DeviceMountAction(
+      '2',
+      device,
+      null,
+      null,
+      DateTime.utc(),
+      null,
+      0,
+      0,
+      0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
+      contact,
+      null,
+      '',
+      null
+    )
 
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)
@@ -67,8 +106,47 @@ describe('logicOrder', () => {
     const platform = new Platform()
     const device = new Device()
 
-    const platformMount = new PlatformMountAction('1', platform, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
-    const deviceMountAction = new DeviceMountAction('2', device, null, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
+    const platformMount = new PlatformMountAction(
+      '1',
+      platform,
+      null,
+      DateTime.utc(),
+      null,
+      0,
+      0,
+      0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
+      contact,
+      null,
+      '',
+      null
+    )
+    const deviceMountAction = new DeviceMountAction(
+      '2',
+      device,
+      null,
+      null,
+      DateTime.utc(),
+      null,
+      0,
+      0,
+      0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
+      contact,
+      null,
+      '',
+      null
+    )
 
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
 
@@ -81,8 +159,47 @@ describe('logicOrder', () => {
     const platform = new Platform()
     const device = new Device()
 
-    const platformMount = new PlatformMountAction('1', platform, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
-    const deviceMountAction = new DeviceMountAction('2', device, null, null, DateTime.utc(), null, 0, 0, 0, contact, null, '', null)
+    const platformMount = new PlatformMountAction(
+      '1',
+      platform,
+      null,
+      DateTime.utc(),
+      null,
+      0,
+      0,
+      0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
+      contact,
+      null,
+      '',
+      null
+    )
+    const deviceMountAction = new DeviceMountAction(
+      '2',
+      device,
+      null,
+      null,
+      DateTime.utc(),
+      null,
+      0,
+      0,
+      0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
+      contact,
+      null,
+      '',
+      null
+    )
 
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)
 

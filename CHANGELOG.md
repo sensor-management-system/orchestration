@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2023
+SPDX-FileCopyrightText: 2023 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -10,6 +10,7 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Added:
 - Mount actions listed in the 'actions' tab of a configuration now have the "edit" option, which redirect to the edit form of that mount action   
+- Mounts can have explicit coordinates
 
 ## 1.12.0 - 2024-01-17
 

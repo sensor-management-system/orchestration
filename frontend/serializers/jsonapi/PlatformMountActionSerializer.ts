@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021 - 2022
+ * Copyright (C) 2021 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -71,7 +71,13 @@ export class PlatformMountActionSerializer {
         begin_description: platformMountAction.beginDescription,
         end_description: platformMountAction.endDescription,
         begin_date: platformMountAction.beginDate.setZone('UTC').toISO(),
-        end_date: platformMountAction.endDate === null ? null : platformMountAction.endDate.setZone('UTC').toISO()
+        end_date: platformMountAction.endDate === null ? null : platformMountAction.endDate.setZone('UTC').toISO(),
+        epsg_code: platformMountAction.epsgCode,
+        x: platformMountAction.x,
+        y: platformMountAction.y,
+        z: platformMountAction.z,
+        elevation_datum_name: platformMountAction.elevationDatumName,
+        elevation_datum_uri: platformMountAction.elevationDatumUri
 
       },
       relationships: {
@@ -206,6 +212,12 @@ export class PlatformMountActionSerializer {
       attributes?.offset_x || 0,
       attributes?.offset_y || 0,
       attributes?.offset_z || 0,
+      attributes?.epsg_code || '',
+      !isNaN(attributes?.x) ? attributes?.x : null,
+      !isNaN(attributes?.y) ? attributes?.y : null,
+      !isNaN(attributes?.z) ? attributes?.z : null,
+      attributes?.elevation_datum_name || '',
+      attributes?.elevation_datum_uri || '',
       beginContact,
       endContact,
       attributes?.begin_description || '',

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -72,6 +72,12 @@ export interface IMountInfo {
   offsetX: number
   offsetY: number
   offsetZ: number
+  epsgCode: string
+  x: number | null
+  y: number | null
+  z: number | null
+  elevationDatumName: string
+  elevationDatumUri: string
 }
 
 export interface IStaticLocationInfo {
@@ -194,7 +200,13 @@ export class PlatformMountTimelineAction implements IMountTimelineAction<Platfor
       parentDevice: null,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
-      offsetZ: this._mountAction.offsetZ
+      offsetZ: this._mountAction.offsetZ,
+      epsgCode: this._mountAction.epsgCode,
+      x: this._mountAction.x,
+      y: this._mountAction.y,
+      z: this._mountAction.z,
+      elevationDatumName: this._mountAction.elevationDatumName,
+      elevationDatumUri: this._mountAction.elevationDatumUri
     }
   }
 
@@ -260,7 +272,13 @@ export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMou
       parentDevice: this._mountAction.parentDevice,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
-      offsetZ: this._mountAction.offsetZ
+      offsetZ: this._mountAction.offsetZ,
+      epsgCode: this._mountAction.epsgCode,
+      x: this._mountAction.x,
+      y: this._mountAction.y,
+      z: this._mountAction.z,
+      elevationDatumName: this._mountAction.elevationDatumName,
+      elevationDatumUri: this._mountAction.elevationDatumUri
     }
   }
 
@@ -326,7 +344,13 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction<Platf
       parentDevice: null,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
-      offsetZ: this._mountAction.offsetZ
+      offsetZ: this._mountAction.offsetZ,
+      epsgCode: this._mountAction.epsgCode,
+      x: this._mountAction.x,
+      y: this._mountAction.y,
+      z: this._mountAction.z,
+      elevationDatumName: this._mountAction.elevationDatumName,
+      elevationDatumUri: this._mountAction.elevationDatumUri
     }
   }
 
@@ -392,7 +416,13 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceM
       parentDevice: this._mountAction.parentDevice,
       offsetX: this._mountAction.offsetX,
       offsetY: this._mountAction.offsetY,
-      offsetZ: this._mountAction.offsetZ
+      offsetZ: this._mountAction.offsetZ,
+      epsgCode: this._mountAction.epsgCode,
+      x: this._mountAction.x,
+      y: this._mountAction.y,
+      z: this._mountAction.z,
+      elevationDatumName: this._mountAction.elevationDatumName,
+      elevationDatumUri: this._mountAction.elevationDatumUri
     }
   }
 
@@ -826,6 +856,12 @@ export type MountActionInformationDTO = {
   offsetX: number
   offsetY: number
   offsetZ: number
+  epsgCode: string
+  x: number | null
+  y: number | null
+  z: number | null
+  elevationDatumName: string
+  elevationDatumUri: string
   beginContact: IContact | null
   endContact: IContact | null
   beginDescription: string

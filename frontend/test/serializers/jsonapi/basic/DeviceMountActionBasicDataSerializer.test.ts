@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2021-2022
+ * Copyright (C) 2021-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -51,7 +51,13 @@ describe('DeviceMountActionBasicDataSerializer', () => {
           begin_description: 'Device mount',
           begin_date: '2020-01-01T12:00:00.000Z',
           end_description: 'Device unmount',
-          end_date: '2020-02-01T12:00:00.000Z'
+          end_date: '2020-02-01T12:00:00.000Z',
+          epsg_code: '4326',
+          x: 12.5,
+          y: 51.1,
+          z: 0.0,
+          elevation_datum_name: 'MSL',
+          elevation_datum_uri: 'http://cv/el/1'
         },
         id: '1'
       }
@@ -64,7 +70,13 @@ describe('DeviceMountActionBasicDataSerializer', () => {
         beginDate,
         endDate,
         beginDescription: 'Device mount',
-        endDescription: 'Device unmount'
+        endDescription: 'Device unmount',
+        epsgCode: '4326',
+        x: 12.5,
+        y: 51.1,
+        z: 0.0,
+        elevationDatumName: 'MSL',
+        elevationDatumUri: 'http://cv/el/1'
       })
 
       const serializer = new DeviceMountActionBasicDataSerializer()

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -56,6 +56,12 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
     offsetX: number,
     offsetY: number,
     offsetZ: number,
+    epsgCode: string,
+    x: number | null,
+    y: number | null,
+    z: number | null,
+    elevationDatumName: string,
+    elevationDatumUri: string,
     beginContact: Contact,
     endContact: Contact | null,
     beginDescription: string,
@@ -69,6 +75,12 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
       offsetX,
       offsetY,
       offsetZ,
+      epsgCode,
+      x,
+      y,
+      z,
+      elevationDatumName,
+      elevationDatumUri,
       beginContact,
       endContact,
       beginDescription,
@@ -105,6 +117,12 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
       otherAction.offsetX,
       otherAction.offsetY,
       otherAction.offsetZ,
+      otherAction.epsgCode,
+      otherAction.x,
+      otherAction.y,
+      otherAction.z,
+      otherAction.elevationDatumName,
+      otherAction.elevationDatumUri,
       Contact.createFromObject(otherAction.beginContact),
       otherAction.endContact === null ? null : Contact.createFromObject(otherAction.endContact),
       otherAction.beginDescription,

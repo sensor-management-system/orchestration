@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -53,6 +53,12 @@ describe('#sumOffsets', () => {
         offsetX: 1,
         offsetY: 2,
         offsetZ: 3,
+        epsgCode: '',
+        x: null,
+        y: null,
+        z: null,
+        elevationDatumName: '',
+        elevationDatumUri: '',
         beginContact: contact,
         beginDate: date,
         beginDescription: 'Platform mount',
@@ -67,6 +73,12 @@ describe('#sumOffsets', () => {
         offsetX: 4,
         offsetY: 5,
         offsetZ: 6,
+        epsgCode: '',
+        x: null,
+        y: null,
+        z: null,
+        elevationDatumName: '',
+        elevationDatumUri: '',
         beginContact: contact,
         beginDate: date,
         beginDescription: 'Platform mount',
@@ -81,6 +93,12 @@ describe('#sumOffsets', () => {
         offsetX: 7,
         offsetY: 8,
         offsetZ: 9,
+        epsgCode: '',
+        x: null,
+        y: null,
+        z: null,
+        elevationDatumName: '',
+        elevationDatumUri: '',
         beginContact: contact,
         beginDate: date,
         beginDescription: 'Platform mount',

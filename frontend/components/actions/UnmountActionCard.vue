@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -87,6 +87,37 @@ permissions and limitations under the Licence.
             <label>Offset z</label>{{ value.basicData.offsetZ }} m
           </v-col>
         </v-row>
+        <div v-if="value.basicData.x !== null || value.basicData.y !== null || value.basicData.z !== null">
+          <v-row
+            dense
+          >
+            <v-col cols="12" md="4">
+              <label>x</label>
+              {{ value.basicData.x | orDefault }}
+            </v-col>
+            <v-col cols="12" md="4">
+              <label>y</label>
+              {{ value.basicData.y | orDefault }}
+            </v-col>
+            <v-col cols="12" md="4">
+              <label>EPSG Code</label>
+              {{ value.basicData.epsgCode | orDefault }}
+            </v-col>
+          </v-row>
+          <v-row
+            dense
+          >
+            <v-col cols="12" md="4" />
+            <v-col cols="12" md="4">
+              <label>z</label>
+              {{ value.basicData.z | orDefault }}
+            </v-col>
+            <v-col cols="12" md="4">
+              <label>Elevation Datum</label>
+              {{ value.basicData.elevationDatumName | orDefault }}
+            </v-col>
+          </v-row>
+        </div>
         <v-row dense>
           <v-col>
             <label>Description</label>

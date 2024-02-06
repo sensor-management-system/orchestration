@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022 - 2023
+ * Copyright (C) 2022 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -79,6 +79,12 @@ export class MountingActionsSerializer {
           offsetX: action.data.attributes.offset_x,
           offsetY: action.data.attributes.offset_y,
           offsetZ: action.data.attributes.offset_z,
+          epsgCode: action.data.attributes.epsg_code || '',
+          x: !isNaN(action.data.attributes.x) ? action.data.attributes.x : null,
+          y: !isNaN(action.data.attributes.y) ? action.data.attributes.y : null,
+          z: !isNaN(action.data.attributes.z) ? action.data.attributes.z : null,
+          elevationDatumName: action.data.attributes.elevation_datum_name || '',
+          elevationDatumUri: action.data.attributes.elevation_datum_uri || '',
           beginDescription: action.data.attributes.begin_description,
           endDescription: action.data.attributes.end_description ?? '',
           beginDate: stringToDate(action.data.attributes.begin_date),
@@ -102,6 +108,12 @@ export class MountingActionsSerializer {
           offsetX: action.data.attributes.offset_x,
           offsetY: action.data.attributes.offset_y,
           offsetZ: action.data.attributes.offset_z,
+          epsgCode: action.data.attributes.epsg_code || '',
+          x: !isNaN(action.data.attributes.x) ? action.data.attributes.x : null,
+          y: !isNaN(action.data.attributes.y) ? action.data.attributes.y : null,
+          z: !isNaN(action.data.attributes.z) ? action.data.attributes.z : null,
+          elevationDatumName: action.data.attributes.elevation_datum_name || '',
+          elevationDatumUri: action.data.attributes.elevation_datum_uri || '',
           beginDescription: action.data.attributes.begin_description,
           endDescription: action.data.attributes.end_description ?? '',
           beginDate: stringToDate(action.data.attributes.begin_date),

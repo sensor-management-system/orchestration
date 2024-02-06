@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -787,6 +787,9 @@ class TestPlatformMountAction(BaseTestCase):
                     "offset_x": str(fake.coordinate()),
                     "offset_y": str(fake.coordinate()),
                     "offset_z": str(fake.coordinate()),
+                    "x": float(fake.coordinate()),
+                    "y": float(fake.coordinate()),
+                    "z": float(fake.coordinate()),
                     "end_date": end_date.__str__(),
                     "end_description": "Test PlatformUnmountAction",
                 },
@@ -819,6 +822,15 @@ class TestPlatformMountAction(BaseTestCase):
         msg = "create;platform mount action"
         self.assertEqual(
             msg, result_platform_mount_action.configuration.update_description
+        )
+        self.expect(response["data"]["attributes"]["x"]).to_equal(
+            data["data"]["attributes"]["x"]
+        )
+        self.expect(response["data"]["attributes"]["y"]).to_equal(
+            data["data"]["attributes"]["y"]
+        )
+        self.expect(response["data"]["attributes"]["z"]).to_equal(
+            data["data"]["attributes"]["z"]
         )
 
     def test_update_platform_mount_action(self):

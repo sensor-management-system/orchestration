@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2023
+ * Copyright (C) 2023 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -197,6 +197,12 @@ describe('TsmLinkingSerializer', () => {
         0,
         0,
         0,
+        '',
+        null,
+        null,
+        null,
+        '',
+        '',
         contact,
         contact,
         '',
@@ -287,6 +293,12 @@ describe('TsmLinkingSerializer', () => {
         0,
         0,
         0,
+        '',
+        null,
+        null,
+        null,
+        '',
+        '',
         contact,
         contact,
         '',

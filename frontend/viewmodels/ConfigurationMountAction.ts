@@ -66,6 +66,12 @@ export class ConfigurationMountAction extends MountAction implements IConfigurat
       0,
       0,
       0,
+      '',
+      null,
+      null,
+      null,
+      '',
+      '',
       // we need a contact, so we take the first one we can get or create an
       // empty one
       configuration.contacts.length ? Contact.createFromObject(configuration.contacts[0]) : new Contact(),
