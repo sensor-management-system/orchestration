@@ -33,6 +33,9 @@
  * implied. See the Licence for the specific language governing
  * permissions and limitations under the Licence.
  */
+import { IOptionsForActionType as DeviceActionOptionType } from '@/store/devices'
+import { IOptionsForActionType as PlatformActionOptionType } from '@/store/platforms'
+import { IOptionsForActionType as ConfigurationActionOptionType } from '@/store/configurations'
 
 export interface IActionKind {
   kind: string
@@ -74,3 +77,24 @@ export type KindOfPlatformAction =
 
 export type KindOfConfigurationAction =
   typeof KIND_OF_ACTION_TYPE_GENERIC_ACTION | typeof KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+
+export const deviceParameterChangeActionOption: DeviceActionOptionType = {
+  id: 'parameter_change_action',
+  name: 'Parameter Value Change',
+  uri: '',
+  kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+}
+
+export const platformParameterChangeActionOption: PlatformActionOptionType = {
+  id: 'parameter_change_action',
+  name: 'Parameter Value Change',
+  uri: '',
+  kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+}
+
+export const configurationParameterChangeActionOption: ConfigurationActionOptionType = {
+  id: 'parameter_change_action',
+  name: 'Parameter Value Change',
+  uri: '',
+  kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
+}

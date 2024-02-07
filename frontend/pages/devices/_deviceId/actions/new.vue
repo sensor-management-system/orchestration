@@ -89,7 +89,7 @@ import {
   SetChosenKindOfDeviceActionAction,
   LoadDeviceMeasuredQuantitiesAction,
   LoadDeviceParametersAction,
-  DevicesState
+  DevicesState, SetDevicePresetParameterAction
 } from '@/store/devices'
 
 import { DeviceActionTypeItemsGetter, LoadDeviceGenericActionTypesAction } from '@/store/vocabulary'
@@ -111,7 +111,7 @@ import {
   },
   methods: {
     ...mapActions('vocabulary', ['loadDeviceGenericActionTypes']),
-    ...mapActions('devices', ['loadDeviceAttachments', 'setChosenKindOfDeviceAction', 'loadDeviceMeasuredQuantities', 'loadDeviceParameters']),
+    ...mapActions('devices', ['loadDeviceAttachments', 'setChosenKindOfDeviceAction', 'loadDeviceMeasuredQuantities', 'loadDeviceParameters', 'setDevicePresetParameter']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -127,6 +127,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
   loadDeviceParameters!: LoadDeviceParametersAction
   setChosenKindOfDeviceAction!: SetChosenKindOfDeviceActionAction
   setLoading!: SetLoadingAction
+  setDevicePresetParameter!: SetDevicePresetParameterAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -150,10 +151,17 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     return 'You\'re not allowed to edit this device.'
   }
 
+  get isBasePath (): boolean {
+    return this.$route.path === '/devices/' + this.deviceId + '/actions/new'
+  }
+
   async fetch (): Promise<void> {
     try {
       this.setLoading(true)
-      this.chosenKindOfAction = null
+      if (this.isBasePath) {
+        this.chosenKindOfAction = null
+        this.setDevicePresetParameter(null)
+      }
       await Promise.all([
         this.loadDeviceGenericActionTypes(),
         this.loadDeviceAttachments(this.deviceId),

@@ -60,19 +60,22 @@ permissions and limitations under the Licence.
             #actions
           >
             <v-btn
-              :to="'/configurations/' + configurationId + '/parameters/' + item.id + '/edit'"
               color="primary"
               text
               small
-              @click.stop.prevent
+              @click.stop.prevent="openPageToAddValue(item)"
             >
-              Edit
+              Add value
             </v-btn>
           </template>
           <template
             v-if="editable"
             #dot-menu-items
           >
+            <DotMenuActionEdit
+              :readonly="!editable"
+              @click="openEditForm(item)"
+            />
             <DotMenuActionCopy
               :readonly="!editable"
               :path="'/configurations/' + configurationId + '/parameters/' + item.id + '/copy'"
@@ -124,7 +127,7 @@ import { mapActions, mapState } from 'vuex'
 import {
   DeleteConfigurationParameterAction,
   ConfigurationsState,
-  LoadConfigurationParametersAction
+  LoadConfigurationParametersAction, SetChosenKindOfConfigurationActionAction, SetConfigurationPresetParameterAction
 } from '@/store/configurations'
 import { VocabularyState } from '@/store/vocabulary'
 
@@ -141,9 +144,12 @@ import HintCard from '@/components/HintCard.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
 import ParameterValueTable from '@/components/shared/ParameterValueTable.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import { configurationParameterChangeActionOption } from '@/models/ActionKind'
+import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
 
 @Component({
   components: {
+    DotMenuActionEdit,
     BaseList,
     DeleteDialog,
     DotMenuActionCopy,
@@ -159,7 +165,7 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('configurations', ['deleteConfigurationParameter', 'loadConfigurationParameters']),
+    ...mapActions('configurations', ['deleteConfigurationParameter', 'loadConfigurationParameters', 'setConfigurationPresetParameter', 'setChosenKindOfConfigurationAction']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -180,6 +186,8 @@ export default class ConfigurationParameterShowPage extends Vue {
   deleteConfigurationParameter!: DeleteConfigurationParameterAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setChosenKindOfConfigurationAction!: SetChosenKindOfConfigurationActionAction
+  setConfigurationPresetParameter!: SetConfigurationPresetParameterAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -219,6 +227,16 @@ export default class ConfigurationParameterShowPage extends Vue {
 
   parameterHasChangeActions (parameterId: string): boolean {
     return this.configurationParameterChangeActions.filter(action => action.parameter?.id === parameterId).length > 0
+  }
+
+  openPageToAddValue (parameter: Parameter) {
+    this.setConfigurationPresetParameter(parameter)
+    this.setChosenKindOfConfigurationAction(configurationParameterChangeActionOption)
+    this.$router.push('/configurations/' + this.configurationId + '/actions/new/parameter-change-actions')
+  }
+
+  openEditForm (parameter: Parameter) {
+    this.$router.push('/configurations/' + this.configurationId + '/parameters/' + parameter.id + '/edit')
   }
 }
 </script>

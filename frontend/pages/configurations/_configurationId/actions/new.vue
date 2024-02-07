@@ -96,7 +96,7 @@ import {
 import {
   ConfigurationsState,
   LoadConfigurationAttachmentsAction, LoadConfigurationParametersAction,
-  SetChosenKindOfConfigurationActionAction
+  SetChosenKindOfConfigurationActionAction, SetConfigurationPresetParameterAction
 } from '@/store/configurations'
 
 import { SetLoadingAction } from '@/store/progressindicator'
@@ -112,7 +112,7 @@ import { KIND_OF_ACTION_TYPE_GENERIC_ACTION, KIND_OF_ACTION_TYPE_PARAMETER_CHANG
   },
   methods: {
     ...mapActions('vocabulary', ['loadConfigurationGenericActionTypes']),
-    ...mapActions('configurations', ['setChosenKindOfConfigurationAction', 'loadConfigurationAttachments', 'loadConfigurationParameters']),
+    ...mapActions('configurations', ['setChosenKindOfConfigurationAction', 'loadConfigurationAttachments', 'loadConfigurationParameters', 'setConfigurationPresetParameter']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -128,6 +128,7 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
   loadConfigurationParameters!: LoadConfigurationParametersAction
   setChosenKindOfConfigurationAction!: SetChosenKindOfConfigurationActionAction
   setLoading!: SetLoadingAction
+  setConfigurationPresetParameter!: SetConfigurationPresetParameterAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -155,10 +156,17 @@ export default class ActionAddPage extends mixins(CheckEditAccess) {
     return ACTION_TYPE_API_FILTER_CONFIGURATION
   }
 
+  get isBasePath (): boolean {
+    return this.$route.path === '/configurations/' + this.configurationId + '/actions/new'
+  }
+
   async fetch (): Promise<void> {
     try {
       this.setLoading(true)
-      this.chosenKindOfAction = null
+      if (this.isBasePath) {
+        this.chosenKindOfAction = null
+        this.setConfigurationPresetParameter(null)
+      }
       await Promise.all([
         this.loadConfigurationGenericActionTypes(),
         this.loadConfigurationAttachments(this.configurationId),

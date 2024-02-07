@@ -80,7 +80,7 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     SaveAndCancelButtons,
     ParameterChangeActionForm
   },
-  computed: mapState('configurations', ['chosenKindOfConfigurationAction', 'configurationParameters']),
+  computed: mapState('configurations', ['chosenKindOfConfigurationAction', 'configurationParameters', 'configurationPresetParameter']),
   methods: {
     ...mapActions('configurations', ['addConfigurationParameterChangeAction', 'loadAllConfigurationActions']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -92,6 +92,7 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
   // vuex definition for typescript check
   configurationParameters!: ConfigurationsState['configurationParameters']
   chosenKindOfConfigurationAction!: ConfigurationsState['chosenKindOfConfigurationAction']
+  configurationPresetParameter!: ConfigurationsState['configurationPresetParameter']
   addConfigurationParameterChangeAction!: AddConfigurationParameterChangeActionAction
   loadAllConfigurationActions!: LoadAllConfigurationActionsAction
   setLoading!: SetLoadingAction
@@ -123,7 +124,10 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
       this.$router.push('/configurations/' + this.configurationId + '/actions')
       return
     }
-    if (this.configurationParameters.length === 1) {
+
+    if (this.configurationPresetParameter) {
+      this.parameterChangeAction.parameter = this.configurationPresetParameter
+    } else if (this.configurationParameters.length === 1) {
       this.parameterChangeAction.parameter = this.configurationParameters[0]
     }
   }

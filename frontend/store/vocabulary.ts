@@ -59,18 +59,19 @@ import { License } from '@/models/License'
 import { ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION, ActionTypeApiFilterType } from '@/services/cv/ActionTypeApi'
 import { GlobalProvenance } from '@/models/GlobalProvenance'
 import {
+  configurationParameterChangeActionOption,
+  deviceParameterChangeActionOption,
   KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION,
   KIND_OF_ACTION_TYPE_DEVICE_MOUNT,
   KIND_OF_ACTION_TYPE_DEVICE_UNMOUNT,
   KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_BEGIN,
   KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_END,
   KIND_OF_ACTION_TYPE_GENERIC_ACTION,
-  KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION,
   KIND_OF_ACTION_TYPE_PLATFORM_MOUNT,
   KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT,
   KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE,
   KIND_OF_ACTION_TYPE_STATIC_LOCATION_BEGIN,
-  KIND_OF_ACTION_TYPE_STATIC_LOCATION_END
+  KIND_OF_ACTION_TYPE_STATIC_LOCATION_END, platformParameterChangeActionOption
 } from '@/models/ActionKind'
 
 export interface VocabularyState {
@@ -170,12 +171,7 @@ const getters: GetterTree<VocabularyState, RootState> = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
-      {
-        id: 'parameter_change_action',
-        name: 'Parameter Value Change',
-        uri: '',
-        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-      },
+      platformParameterChangeActionOption,
       ...state.platformGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,
@@ -194,12 +190,7 @@ const getters: GetterTree<VocabularyState, RootState> = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
-      {
-        id: 'parameter_change_action',
-        name: 'Parameter Value Change',
-        uri: '',
-        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-      },
+      platformParameterChangeActionOption,
       {
         id: 'platform_mount',
         name: 'Platform Mount',
@@ -236,12 +227,7 @@ const getters: GetterTree<VocabularyState, RootState> = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
-      {
-        id: 'parameter_change_action',
-        name: 'Parameter Value Change',
-        uri: '',
-        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-      },
+      deviceParameterChangeActionOption,
       ...state.deviceGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,
@@ -266,12 +252,7 @@ const getters: GetterTree<VocabularyState, RootState> = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
-      {
-        id: 'parameter_change_action',
-        name: 'Parameter Value Change',
-        uri: '',
-        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-      },
+      deviceParameterChangeActionOption,
       {
         id: 'device_mount',
         name: 'Device Mount',
@@ -296,12 +277,7 @@ const getters: GetterTree<VocabularyState, RootState> = {
   },
   configurationActionTypeItems: (state: VocabularyState) => {
     return [
-      {
-        id: 'parameter_change_action',
-        name: 'Parameter Value Change',
-        uri: '',
-        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-      },
+      configurationParameterChangeActionOption,
       ...state.configurationGenericActionTypes.map((actionType) => {
         return {
           id: actionType.id,
@@ -338,12 +314,7 @@ const getters: GetterTree<VocabularyState, RootState> = {
         uri: '',
         kind: KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT
       },
-      {
-        id: 'parameter_change_action',
-        name: 'Parameter Value Change',
-        uri: '',
-        kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
-      },
+      configurationParameterChangeActionOption,
       {
         id: 'dynamic_location_begin',
         name: 'Dynamic Location Begin',

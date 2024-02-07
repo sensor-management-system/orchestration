@@ -138,6 +138,7 @@ export interface ConfigurationsState {
   configurationCustomField: CustomTextField | null
   configurationParameter: Parameter | null
   configurationParameters: Parameter[]
+  configurationPresetParameter: Parameter | null
   configurationParameterChangeAction: ParameterChangeAction | null
   configurationParameterChangeActions: ParameterChangeAction[]
   totalPages: number
@@ -176,6 +177,7 @@ const state = (): ConfigurationsState => ({
   configurationCustomField: null,
   configurationParameter: null,
   configurationParameters: [],
+  configurationPresetParameter: null,
   configurationParameterChangeAction: null,
   configurationParameterChangeActions: [],
   totalPages: 1,
@@ -496,6 +498,7 @@ export type DeleteConfigurationCustomFieldAction = (customFieldId: string) => Pr
 export type AddConfigurationCustomFieldAction = (params: { configurationId: string, configurationCustomField: CustomTextField }) => Promise<CustomTextField>
 export type UpdateConfigurationCustomFieldAction = (params: { configurationId: string, configurationCustomField: CustomTextField }) => Promise<CustomTextField>
 
+export type SetConfigurationPresetParameterAction = (parameter: Parameter | null) => void
 export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActionType | null) => void
 
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
@@ -862,6 +865,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     }
     commit('setConfigurations', result)
   },
+  setConfigurationPresetParameter ({ commit }: {commit: Commit}, parameter: Parameter | null) {
+    commit('setConfigurationPresetParameter', parameter)
+  },
   setChosenKindOfConfigurationAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfConfigurationAction', newval)
   },
@@ -989,6 +995,9 @@ const mutations = {
   },
   setConfigurationParameter (state: ConfigurationsState, configurationParameter: Parameter) {
     state.configurationParameter = configurationParameter
+  },
+  setConfigurationPresetParameter (state: ConfigurationsState, configurationPresetParameter: Parameter|null) {
+    state.configurationPresetParameter = configurationPresetParameter
   },
   setConfigurationParameterChangeActions (state: ConfigurationsState, configurationParameterChangeActions: ParameterChangeAction[]) {
     state.configurationParameterChangeActions = configurationParameterChangeActions
