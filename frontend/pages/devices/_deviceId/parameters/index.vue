@@ -60,19 +60,22 @@ permissions and limitations under the Licence.
             #actions
           >
             <v-btn
-              :to="'/devices/' + deviceId + '/parameters/' + item.id + '/edit'"
               color="primary"
               text
               small
-              @click.stop.prevent
+              @click.stop.prevent="openPageToAddValue(item)"
             >
-              Edit
+              Add value
             </v-btn>
           </template>
           <template
             v-if="editable"
             #dot-menu-items
           >
+            <DotMenuActionEdit
+              :readonly="!editable"
+              @click="openEditForm(item)"
+            />
             <DotMenuActionCopy
               :readonly="!editable"
               :path="'/devices/' + deviceId + '/parameters/' + item.id + '/copy'"
@@ -124,7 +127,7 @@ import { mapActions, mapState } from 'vuex'
 import {
   DeleteDeviceParameterAction,
   DevicesState,
-  LoadDeviceParametersAction
+  LoadDeviceParametersAction, SetChosenKindOfDeviceActionAction, SetDevicePresetParameterAction
 } from '@/store/devices'
 import { VocabularyState } from '@/store/vocabulary'
 
@@ -141,9 +144,12 @@ import HintCard from '@/components/HintCard.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
 import ParameterValueTable from '@/components/shared/ParameterValueTable.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import { deviceParameterChangeActionOption } from '@/models/ActionKind'
+import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
 
 @Component({
   components: {
+    DotMenuActionEdit,
     BaseList,
     DeleteDialog,
     DotMenuActionCopy,
@@ -159,7 +165,7 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('devices', ['deleteDeviceParameter', 'loadDeviceParameters']),
+    ...mapActions('devices', ['deleteDeviceParameter', 'loadDeviceParameters', 'setChosenKindOfDeviceAction', 'setDevicePresetParameter']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -180,6 +186,8 @@ export default class DeviceParameterShowPage extends Vue {
   deleteDeviceParameter!: DeleteDeviceParameterAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setChosenKindOfDeviceAction!: SetChosenKindOfDeviceActionAction
+  setDevicePresetParameter!: SetDevicePresetParameterAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -219,6 +227,16 @@ export default class DeviceParameterShowPage extends Vue {
 
   parameterHasChangeActions (parameterId: string): boolean {
     return this.deviceParameterChangeActions.filter(action => action.parameter?.id === parameterId).length > 0
+  }
+
+  openPageToAddValue (parameter: Parameter) {
+    this.setDevicePresetParameter(parameter)
+    this.setChosenKindOfDeviceAction(deviceParameterChangeActionOption)
+    this.$router.push('/devices/' + this.deviceId + '/actions/new/parameter-change-actions')
+  }
+
+  openEditForm (parameter: Parameter) {
+    this.$router.push('/devices/' + this.deviceId + '/parameters/' + parameter.id + '/edit')
   }
 }
 </script>

@@ -81,7 +81,7 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     SaveAndCancelButtons,
     ParameterChangeActionForm
   },
-  computed: mapState('platforms', ['chosenKindOfPlatformAction', 'platformParameters']),
+  computed: mapState('platforms', ['chosenKindOfPlatformAction', 'platformParameters', 'platformPresetParameter']),
   methods: {
     ...mapActions('platforms', ['addPlatformParameterChangeAction', 'loadAllPlatformActions']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -93,6 +93,7 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
   // vuex definition for typescript check
   platformParameters!: PlatformsState['platformParameters']
   chosenKindOfPlatformAction!: PlatformsState['chosenKindOfPlatformAction']
+  platformPresetParameter!: PlatformsState['platformPresetParameter']
   addPlatformParameterChangeAction!: AddPlatformParameterChangeActionAction
   loadAllPlatformActions!: LoadAllPlatformActionsAction
   setLoading!: SetLoadingAction
@@ -124,7 +125,10 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
       this.$router.push('/platforms/' + this.platformId + '/actions')
       return
     }
-    if (this.platformParameters.length === 1) {
+
+    if (this.platformPresetParameter) {
+      this.parameterChangeAction.parameter = this.platformPresetParameter
+    } else if (this.platformParameters.length === 1) {
       this.parameterChangeAction.parameter = this.platformParameters[0]
     }
   }

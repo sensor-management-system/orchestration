@@ -81,7 +81,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
     SaveAndCancelButtons,
     ParameterChangeActionForm
   },
-  computed: mapState('devices', ['chosenKindOfDeviceAction', 'deviceParameters']),
+  computed: mapState('devices', ['chosenKindOfDeviceAction', 'deviceParameters', 'devicePresetParameter']),
   methods: {
     ...mapActions('devices', ['addDeviceParameterChangeAction', 'loadAllDeviceActions']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -93,6 +93,7 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
   // vuex definition for typescript check
   deviceParameters!: DevicesState['deviceParameters']
   chosenKindOfDeviceAction!: DevicesState['chosenKindOfDeviceAction']
+  devicePresetParameter!: DevicesState['devicePresetParameter']
   addDeviceParameterChangeAction!: AddDeviceParameterChangeActionAction
   loadAllDeviceActions!: LoadAllDeviceActionsAction
   setLoading!: SetLoadingAction
@@ -124,7 +125,10 @@ export default class NewParameterChangeAction extends mixins(CheckEditAccess) {
       this.$router.push('/devices/' + this.deviceId + '/actions')
       return
     }
-    if (this.deviceParameters.length === 1) {
+
+    if (this.devicePresetParameter) {
+      this.parameterChangeAction.parameter = this.devicePresetParameter
+    } else if (this.deviceParameters.length === 1) {
       this.parameterChangeAction.parameter = this.deviceParameters[0]
     }
   }

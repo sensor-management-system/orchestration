@@ -40,6 +40,14 @@ permissions and limitations under the Licence.
           :to="'/devices/' + deviceId + '/parameters'"
           @save="save"
         />
+        <v-btn
+          class="ml-1"
+          color="accent darken-3"
+          small
+          @click="saveAndRedirectToAddValue"
+        >
+          Copy & Set Value
+        </v-btn>
       </v-card-actions>
       <v-card-text>
         <parameter-form
@@ -56,6 +64,14 @@ permissions and limitations under the Licence.
           :to="'/devices/' + deviceId + '/parameters'"
           @save="save"
         />
+        <v-btn
+          class="ml-1"
+          color="accent darken-3"
+          small
+          @click="saveAndRedirectToAddValue"
+        >
+          Copy & Set Value
+        </v-btn>
       </v-card-actions>
     </v-card>
     <v-subheader
@@ -86,7 +102,7 @@ import {
   DevicesState,
   LoadDeviceParameterAction,
   LoadDeviceParametersAction,
-  AddDeviceParameterAction
+  AddDeviceParameterAction, SetChosenKindOfDeviceActionAction, SetDevicePresetParameterAction
 } from '@/store/devices'
 import { VocabularyState } from '@/store/vocabulary'
 
@@ -97,6 +113,7 @@ import ParameterForm from '@/components/shared/ParameterForm.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
+import { deviceParameterChangeActionOption } from '@/models/ActionKind'
 
 @Component({
   middleware: ['auth'],
@@ -111,7 +128,7 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     ...mapState('devices', ['deviceParameter', 'deviceParameters'])
   },
   methods: {
-    ...mapActions('devices', ['addDeviceParameter', 'loadDeviceParameters', 'loadDeviceParameter']),
+    ...mapActions('devices', ['addDeviceParameter', 'loadDeviceParameters', 'loadDeviceParameter', 'setChosenKindOfDeviceAction', 'setDevicePresetParameter']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -127,6 +144,8 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
   addDeviceParameter!: AddDeviceParameterAction
   units!: VocabularyState['units']
   setLoading!: SetLoadingAction
+  setChosenKindOfDeviceAction!: SetChosenKindOfDeviceActionAction
+  setDevicePresetParameter!: SetDevicePresetParameterAction
 
   mounted () {
     (this.$refs.parameterForm as ParameterForm).focus()
@@ -176,7 +195,7 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
     return this.$route.params.parameterId
   }
 
-  async save (): Promise<void> {
+  private async _save (callback: (newParameter: Parameter) => void | (() => void)) {
     if (!(this.$refs.parameterForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -184,18 +203,36 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
 
     try {
       this.setLoading(true)
-      await this.addDeviceParameter({
+      const newParameter = await this.addDeviceParameter({
         deviceId: this.deviceId,
         parameter: this.valueCopy
       })
-      this.loadDeviceParameters(this.deviceId)
+
       this.$store.commit('snackbar/setSuccess', 'Copy of parameter has been saved')
-      this.$router.push('/devices/' + this.deviceId + '/parameters')
+
+      callback(newParameter)
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to copy parameter')
+      this.$store.commit('snackbar/setError', 'Failed to save parameter')
     } finally {
       this.setLoading(false)
     }
+  }
+
+  save () {
+    this._save(() => {
+      this.loadDeviceParameters(this.deviceId)
+      this.$router.push('/devices/' + this.deviceId + '/parameters')
+    })
+  }
+
+  saveAndRedirectToAddValue () {
+    this._save(
+      (newParameter: Parameter) => {
+        this.setDevicePresetParameter(newParameter)
+        this.setChosenKindOfDeviceAction(deviceParameterChangeActionOption)
+        this.$router.push('/devices/' + this.deviceId + '/actions/new/parameter-change-actions')
+      }
+    )
   }
 }
 </script>

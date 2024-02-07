@@ -40,6 +40,14 @@ permissions and limitations under the Licence.
           :to="'/configurations/' + configurationId + '/parameters'"
           @save="save"
         />
+        <v-btn
+          class="ml-1"
+          color="accent darken-3"
+          small
+          @click="saveAndRedirectToAddValue"
+        >
+          Copy & Set Value
+        </v-btn>
       </v-card-actions>
       <v-card-text>
         <parameter-form
@@ -56,6 +64,14 @@ permissions and limitations under the Licence.
           :to="'/configurations/' + configurationId + '/parameters'"
           @save="save"
         />
+        <v-btn
+          class="ml-1"
+          color="accent darken-3"
+          small
+          @click="saveAndRedirectToAddValue"
+        >
+          Copy & Set Value
+        </v-btn>
       </v-card-actions>
     </v-card>
     <v-subheader
@@ -86,7 +102,7 @@ import {
   ConfigurationsState,
   LoadConfigurationParameterAction,
   LoadConfigurationParametersAction,
-  AddConfigurationParameterAction
+  AddConfigurationParameterAction, SetChosenKindOfConfigurationActionAction, SetConfigurationPresetParameterAction
 } from '@/store/configurations'
 import { VocabularyState } from '@/store/vocabulary'
 
@@ -97,6 +113,7 @@ import ParameterForm from '@/components/shared/ParameterForm.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
+import { configurationParameterChangeActionOption } from '@/models/ActionKind'
 
 @Component({
   middleware: ['auth'],
@@ -111,7 +128,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
     ...mapState('configurations', ['configurationParameter', 'configurationParameters'])
   },
   methods: {
-    ...mapActions('configurations', ['addConfigurationParameter', 'loadConfigurationParameters', 'loadConfigurationParameter']),
+    ...mapActions('configurations', ['addConfigurationParameter', 'loadConfigurationParameters', 'loadConfigurationParameter', 'setConfigurationPresetParameter', 'setChosenKindOfConfigurationAction']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -127,6 +144,8 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
   addConfigurationParameter!: AddConfigurationParameterAction
   units!: VocabularyState['units']
   setLoading!: SetLoadingAction
+  setChosenKindOfConfigurationAction!: SetChosenKindOfConfigurationActionAction
+  setConfigurationPresetParameter!: SetConfigurationPresetParameterAction
 
   mounted () {
     (this.$refs.parameterForm as ParameterForm).focus()
@@ -176,7 +195,7 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
     return this.$route.params.parameterId
   }
 
-  async save (): Promise<void> {
+  private async _save (callback: (newParameter: Parameter) => void | (() => void)) {
     if (!(this.$refs.parameterForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
@@ -184,18 +203,36 @@ export default class ParametersCopyPage extends mixins(CheckEditAccess) {
 
     try {
       this.setLoading(true)
-      await this.addConfigurationParameter({
+      const newParameter = await this.addConfigurationParameter({
         configurationId: this.configurationId,
         parameter: this.valueCopy
       })
-      this.loadConfigurationParameters(this.configurationId)
+
       this.$store.commit('snackbar/setSuccess', 'Copy of parameter has been saved')
-      this.$router.push('/configurations/' + this.configurationId + '/parameters')
+
+      callback(newParameter)
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to copy parameter')
+      this.$store.commit('snackbar/setError', 'Failed to save parameter')
     } finally {
       this.setLoading(false)
     }
+  }
+
+  save () {
+    this._save(() => {
+      this.loadConfigurationParameters(this.configurationId)
+      this.$router.push('/configurations/' + this.configurationId + '/parameters')
+    })
+  }
+
+  saveAndRedirectToAddValue () {
+    this._save(
+      (newParameter: Parameter) => {
+        this.setConfigurationPresetParameter(newParameter)
+        this.setChosenKindOfConfigurationAction(configurationParameterChangeActionOption)
+        this.$router.push('/configurations/' + this.configurationId + '/actions/new/parameter-change-actions')
+      }
+    )
   }
 }
 </script>

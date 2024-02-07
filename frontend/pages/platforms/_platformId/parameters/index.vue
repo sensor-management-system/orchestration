@@ -60,19 +60,22 @@ permissions and limitations under the Licence.
             #actions
           >
             <v-btn
-              :to="'/platforms/' + platformId + '/parameters/' + item.id + '/edit'"
               color="primary"
               text
               small
-              @click.stop.prevent
+              @click.stop.prevent="openPageToAddValue(item)"
             >
-              Edit
+              Add value
             </v-btn>
           </template>
           <template
             v-if="editable"
             #dot-menu-items
           >
+            <DotMenuActionEdit
+              :readonly="!editable"
+              @click="openEditForm(item)"
+            />
             <DotMenuActionCopy
               :readonly="!editable"
               :path="'/platforms/' + platformId + '/parameters/' + item.id + '/copy'"
@@ -124,7 +127,7 @@ import { mapActions, mapState } from 'vuex'
 import {
   DeletePlatformParameterAction,
   PlatformsState,
-  LoadPlatformParametersAction
+  LoadPlatformParametersAction, SetPlatformPresetParameterAction, SetChosenKindOfPlatformActionAction
 } from '@/store/platforms'
 import { VocabularyState } from '@/store/vocabulary'
 
@@ -141,9 +144,12 @@ import HintCard from '@/components/HintCard.vue'
 import ParameterListItem from '@/components/shared/ParameterListItem.vue'
 import ParameterValueTable from '@/components/shared/ParameterValueTable.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import { platformParameterChangeActionOption } from '@/models/ActionKind'
+import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
 
 @Component({
   components: {
+    DotMenuActionEdit,
     BaseList,
     DeleteDialog,
     DotMenuActionCopy,
@@ -159,7 +165,7 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('platforms', ['deletePlatformParameter', 'loadPlatformParameters']),
+    ...mapActions('platforms', ['deletePlatformParameter', 'loadPlatformParameters', 'setPlatformPresetParameter', 'setChosenKindOfPlatformAction']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -180,6 +186,8 @@ export default class PlatformParameterShowPage extends Vue {
   deletePlatformParameter!: DeletePlatformParameterAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  setPlatformPresetParameter!: SetPlatformPresetParameterAction
+  setChosenKindOfPlatformAction!: SetChosenKindOfPlatformActionAction
 
   get platformId (): string {
     return this.$route.params.platformId
@@ -219,6 +227,16 @@ export default class PlatformParameterShowPage extends Vue {
 
   parameterHasChangeActions (parameterId: string): boolean {
     return this.platformParameterChangeActions.filter(action => action.parameter?.id === parameterId).length > 0
+  }
+
+  openPageToAddValue (parameter: Parameter) {
+    this.setPlatformPresetParameter(parameter)
+    this.setChosenKindOfPlatformAction(platformParameterChangeActionOption)
+    this.$router.push('/platforms/' + this.platformId + '/actions/new/parameter-change-actions')
+  }
+
+  openEditForm (parameter: Parameter) {
+    this.$router.push('/platforms/' + this.platformId + '/parameters/' + parameter.id + '/edit')
   }
 }
 </script>

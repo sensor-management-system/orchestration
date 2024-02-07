@@ -91,7 +91,13 @@ import { ActionType } from '@/models/ActionType'
 import { ACTION_TYPE_API_FILTER_PLATFORM } from '@/services/cv/ActionTypeApi'
 
 import { LoadPlatformGenericActionTypesAction, PlatformActionTypeItemsGetter } from '@/store/vocabulary'
-import { LoadPlatformAttachmentsAction, LoadPlatformParametersAction, PlatformsState, SetChosenKindOfPlatformActionAction } from '@/store/platforms'
+import {
+  LoadPlatformAttachmentsAction,
+  LoadPlatformParametersAction,
+  PlatformsState,
+  SetChosenKindOfPlatformActionAction,
+  SetPlatformPresetParameterAction
+} from '@/store/platforms'
 import {
   KIND_OF_ACTION_TYPE_GENERIC_ACTION,
   KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION,
@@ -107,7 +113,7 @@ import {
   },
   methods: {
     ...mapActions('vocabulary', ['loadPlatformGenericActionTypes']),
-    ...mapActions('platforms', ['loadPlatformAttachments', 'setChosenKindOfPlatformAction', 'loadPlatformParameters']),
+    ...mapActions('platforms', ['loadPlatformAttachments', 'setChosenKindOfPlatformAction', 'loadPlatformParameters', 'setPlatformPresetParameter']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -122,6 +128,7 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
   loadPlatformParameters!: LoadPlatformParametersAction
   setChosenKindOfPlatformAction!: SetChosenKindOfPlatformActionAction
   setLoading!: SetLoadingAction
+  setPlatformPresetParameter!: SetPlatformPresetParameterAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -145,10 +152,18 @@ export default class NewPlatformAction extends mixins(CheckEditAccess) {
     return 'You\'re not allowed to edit this platform.'
   }
 
+  get isBasePath (): boolean {
+    return this.$route.path === '/platforms/' + this.platformId + '/actions/new'
+  }
+
   async fetch (): Promise<void> {
     try {
       this.setLoading(true)
-      this.chosenKindOfAction = null
+      if (this.isBasePath) {
+        this.chosenKindOfAction = null
+        this.setPlatformPresetParameter(null)
+      }
+
       await Promise.all([
         this.loadPlatformGenericActionTypes(),
         this.loadPlatformAttachments(this.platformId),

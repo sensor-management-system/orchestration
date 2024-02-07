@@ -98,6 +98,7 @@ export interface DevicesState {
   deviceParameterChangeAction: ParameterChangeAction | null
   deviceParameterChangeActions: ParameterChangeAction[]
   deviceParameters: Parameter[]
+  devicePresetParameter: Parameter | null
   deviceSoftwareUpdateAction: SoftwareUpdateAction | null
   deviceSoftwareUpdateActions: SoftwareUpdateAction[]
   devices: Device[]
@@ -127,6 +128,7 @@ const state = (): DevicesState => ({
   deviceParameterChangeAction: null,
   deviceParameterChangeActions: [],
   deviceParameters: [],
+  devicePresetParameter: null,
   deviceSoftwareUpdateAction: null,
   deviceSoftwareUpdateActions: [],
   devices: [],
@@ -249,6 +251,7 @@ export type SearchDevicesPaginatedAction = (searchParams: IDeviceSearchParams) =
 export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
 export type SetPageNumberAction = (newPageNumber: number) => void
 export type SetPageSizeAction = (newPageSize: number) => void
+export type SetDevicePresetParameterAction = (parameter: Parameter | null) => void
 export type UpdateDeviceAttachmentAction = (params: { deviceId: string, attachment: Attachment }) => Promise<Attachment>
 export type UpdateDeviceCalibrationAction = (params: { deviceId: string, calibrationAction: DeviceCalibrationAction }) => Promise<DeviceCalibrationAction>
 export type UpdateDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
@@ -652,6 +655,9 @@ const actions: ActionTree<DevicesState, RootState> = {
   setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
     commit('setPageSize', newPageSize)
   },
+  setDevicePresetParameter ({ commit }: { commit: Commit }, parameter: Parameter | null) {
+    commit('setDevicePresetParameter', parameter)
+  },
   setChosenKindOfDeviceAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfDeviceAction', newval)
   },
@@ -743,6 +749,9 @@ const mutations = {
   },
   setDeviceParameter (state: DevicesState, deviceParameter: Parameter) {
     state.deviceParameter = deviceParameter
+  },
+  setDevicePresetParameter (state: DevicesState, devicePresetParameter: Parameter | null) {
+    state.devicePresetParameter = devicePresetParameter
   },
   setDeviceParameterChangeActions (state: DevicesState, deviceParameterChangeActions: ParameterChangeAction[]) {
     state.deviceParameterChangeActions = deviceParameterChangeActions

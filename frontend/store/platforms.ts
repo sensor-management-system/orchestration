@@ -97,6 +97,7 @@ export interface PlatformsState {
   platformParameterChangeAction: ParameterChangeAction | null
   platformParameterChangeActions: ParameterChangeAction[]
   platformParameters: Parameter[]
+  platformPresetParameter: Parameter | null
   platformSoftwareUpdateAction: SoftwareUpdateAction | null
   platformSoftwareUpdateActions: SoftwareUpdateAction[]
   platforms: Platform[]
@@ -127,6 +128,7 @@ const state = (): PlatformsState => ({
   platformParameterChangeAction: null,
   platformParameterChangeActions: [],
   platformParameters: [],
+  platformPresetParameter: null,
   platformSoftwareUpdateAction: null,
   platformSoftwareUpdateActions: [],
   platforms: [],
@@ -289,6 +291,7 @@ export type SetSelectedSearchManufacturersAction = (selectedSearchManufacturers:
 export type SetSelectedSearchPermissionGroupsAction = (selectedSearchPermissionGroups: PermissionGroup[]) => void
 export type SetSelectedSearchPlatformTypesAction = (selectedSearchPlatformTypes: PlatformType[]) => void
 export type SetSelectedSearchStatesAction = (selectedSearchStates: Status[]) => void
+export type SetPlatformPresetParameterAction = (parameter: Parameter|null) => void
 export type UpdatePlatformAction = (platform: Platform) => void
 export type UpdatePlatformAttachmentAction = (params: {
   platformId: string,
@@ -633,6 +636,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
   setPageSize ({ commit }: { commit: Commit }, newPageSize: number) {
     commit('setPageSize', newPageSize)
   },
+  setPlatformPresetParameter ({ commit }: {commit: Commit}, parameter: Parameter | null) {
+    commit('setPlatformPresetParameter', parameter)
+  },
   setChosenKindOfPlatformAction ({ commit }: { commit: Commit }, newval: IOptionsForActionType | null) {
     commit('setChosenKindOfPlatformAction', newval)
   },
@@ -754,6 +760,9 @@ const mutations = {
   },
   setPlatformParameter (state: PlatformsState, platformParameter: Parameter) {
     state.platformParameter = platformParameter
+  },
+  setPlatformPresetParameter (state: PlatformsState, platformPresetParameter: Parameter|null) {
+    state.platformPresetParameter = platformPresetParameter
   },
   setPlatformParameterChangeActions (state: PlatformsState, platformParameterChangeActions: ParameterChangeAction[]) {
     state.platformParameterChangeActions = platformParameterChangeActions
