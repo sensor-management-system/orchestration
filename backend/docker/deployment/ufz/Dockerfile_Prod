@@ -71,7 +71,7 @@ ENV SMS_FRONTEND_URL $SMS_FRONTEND_URL_ARG
 ARG SMS_BACKEND_URL_ARG=https://webapp.ufz.de/sms/backend/api/v1
 ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
 
-ARG TSM_ENDPOINTS_ARG='[{"fields": {"name": "UFZ", "url": "https://tsm.intranet.ufz.de/tsmdl"}, "model": "TsmEndpoint", "pk": 2}]'
+ARG TSM_ENDPOINTS_ARG='[{"fields": {"name": "UFZ", "url": "https://tsm.ufz.de/tsmdl"}, "model": "TsmEndpoint", "pk": 2}]'
 ENV TSM_ENDPOINTS $TSM_ENDPOINTS_ARG
 
 ARG B2INST_TOKEN_ARG
