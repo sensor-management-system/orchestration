@@ -56,9 +56,19 @@
                 :menu-props="{closeOnContentClick: true}"
                 @input="update('endpoint',$event)"
               >
+                <template #item="data">
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      {{ data.item.name }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ data.item.url }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
                 <template v-if="suggestedTsmEndpoint" #prepend-item>
                   <v-list-item @click="update('endpoint', suggestedTsmEndpoint)">
-                    <v-list-item-title>
+                    <v-list-item-content>
                       <label>
                         Suggested TSMDL Endpoint
                         <v-tooltip top>
@@ -70,11 +80,16 @@
                               mdi-information-outline
                             </v-icon>
                           </template>
-                          This endpoint is suggested based on recent selected datasources for this device.
+                          This endpoint is suggested based on recent selected endpoints for this device.
                         </v-tooltip>
                       </label>
-                      {{ suggestedTsmEndpoint.name }}
-                    </v-list-item-title>
+                      <v-list-item-title>
+                        {{ suggestedTsmEndpoint.name }}
+                      </v-list-item-title>
+                      <v-list-item-subtitle>
+                        {{ suggestedTsmEndpoint.url }}
+                      </v-list-item-subtitle>
+                    </v-list-item-content>
                   </v-list-item>
                   <v-divider class="mt-2" />
                 </template>
