@@ -12,7 +12,7 @@ Added:
 - Mount actions listed in the 'actions' tab of a configuration now have the "edit" option, which redirect to the edit form of that mount action   
 - Mounts can have explicit coordinates
 - Shortcut to add a value for a parameter of device, platform or configuration 
-
+- Endpoint URL is displayed in the tsm linking form when selecting a endpoint
 Fixed:
 - Adjusted the ordering of the elements in sensorML 
 
