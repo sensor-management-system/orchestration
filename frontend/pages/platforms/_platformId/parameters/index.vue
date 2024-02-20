@@ -80,10 +80,17 @@ permissions and limitations under the Licence.
               :readonly="!editable"
               :path="'/platforms/' + platformId + '/parameters/' + item.id + '/copy'"
             />
-            <DotMenuActionDelete
-              :readonly="!$auth.loggedIn || parameterHasChangeActions(item.id)"
-              @click="initDeleteDialog(item)"
-            />
+            <v-tooltip bottom>
+              <template #activator="{ on }">
+                <div v-on="$auth.loggedIn && parameterHasChangeActions(item.id)? on:null">
+                  <DotMenuActionDelete
+                    :readonly="!$auth.loggedIn || parameterHasChangeActions(item.id)"
+                    @click="initDeleteDialog(item)"
+                  />
+                </div>
+              </template>
+              The paramter can't be deleted because it has assigend values.
+            </v-tooltip>
           </template>
         </parameter-list-item>
       </template>

@@ -13,6 +13,8 @@ Added:
 - Mounts can have explicit coordinates
 - Shortcut to add a value for a parameter of device, platform or configuration 
 - Endpoint URL is displayed in the tsm linking form when selecting a endpoint
+- Tooltip to explain why a paramter can not be deleted if the delete button is disabled
+
 Fixed:
 - Adjusted the ordering of the elements in sensorML 
 
