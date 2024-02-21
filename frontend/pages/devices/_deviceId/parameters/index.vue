@@ -43,11 +43,11 @@ permissions and limitations under the Licence.
         Add Parameter
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="deviceParameters.length === 0">
+    <hint-card v-if="deviceParametersSortedAlphabetically.length === 0">
       There are no parameters for this device.
     </hint-card>
     <BaseList
-      :list-items="deviceParameters"
+      :list-items="deviceParametersSortedAlphabetically"
     >
       <template #list-item="{item,index}">
         <parameter-list-item
@@ -131,7 +131,7 @@ permissions and limitations under the Licence.
     />
 
     <v-card-actions
-      v-if="deviceParameters.length > 3"
+      v-if="deviceParametersSortedAlphabetically.length > 3"
     >
       <v-spacer />
       <v-btn
@@ -169,7 +169,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
   DeleteDeviceParameterAction, DeleteDeviceParameterChangeActionAction,
@@ -209,8 +209,9 @@ import { ParameterChangeAction } from '@/models/ParameterChangeAction'
   },
   computed: {
     ...mapState('vocabulary', ['units']),
-    ...mapState('devices', ['deviceParameters', 'deviceParameterChangeActions']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('devices', ['deviceParameterChangeActions']),
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapGetters('devices', ['deviceParametersSortedAlphabetically'])
   },
   methods: {
     ...mapActions('devices', ['deleteDeviceParameter', 'loadDeviceParameters', 'setChosenKindOfDeviceAction', 'setDevicePresetParameter', 'deleteDeviceParameterChangeAction', 'loadDeviceParameterChangeActions']),
@@ -230,7 +231,7 @@ export default class DeviceParameterShowPage extends Vue {
 
   // vuex definition for typescript check
   units!: VocabularyState['units']
-  deviceParameters!: DevicesState['deviceParameters']
+  deviceParametersSortedAlphabetically!: DevicesState['deviceParameters']
   deviceParameterChangeActions!: DevicesState['deviceParameterChangeActions']
   loadDeviceParameters!: LoadDeviceParametersAction
   deleteDeviceParameter!: DeleteDeviceParameterAction

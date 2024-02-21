@@ -59,12 +59,12 @@ permissions and limitations under the Licence.
       </v-card-actions>
     </v-card>
     <v-subheader
-      v-if="configurationParameters.length > 1"
+      v-if="configurationParametersSortedAlphabetically.length > 1"
     >
       Existing parameters
     </v-subheader>
     <BaseList
-      :list-items="configurationParameters"
+      :list-items="configurationParametersSortedAlphabetically"
     >
       <template #list-item="{item,index}">
         <ParameterListItem
@@ -79,7 +79,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, mixins } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
@@ -109,7 +109,8 @@ import { SetLoadingAction } from '@/store/progressindicator'
   },
   computed: {
     ...mapState('vocabulary', ['units']),
-    ...mapState('configurations', ['configurationParameter', 'configurationParameters'])
+    ...mapState('configurations', ['configurationParameter']),
+    ...mapGetters('configurations', ['configurationParametersSortedAlphabetically'])
   },
   methods: {
     ...mapActions('configurations', ['updateConfigurationParameter', 'loadConfigurationParameters', 'loadConfigurationParameter']),
@@ -122,7 +123,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
 
   // vuex definition for typescript check
   configurationParameter!: ConfigurationsState['configurationParameter']
-  configurationParameters!: ConfigurationsState['configurationParameters']
+  configurationParametersSortedAlphabetically!: ConfigurationsState['configurationParameters']
   loadConfigurationParameter!: LoadConfigurationParameterAction
   loadConfigurationParameters!: LoadConfigurationParametersAction
   updateConfigurationParameter!: UpdateConfigurationParameterAction

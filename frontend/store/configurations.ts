@@ -399,6 +399,10 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
       }
     }
     return result
+  },
+  configurationParametersSortedAlphabetically: (state: ConfigurationsState): Parameter[] => {
+    // @ts-ignore
+    return state.configurationParameters.toSorted((a: Parameter, b: Parameter) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
   }
 }
 

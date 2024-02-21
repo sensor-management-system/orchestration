@@ -75,12 +75,12 @@ permissions and limitations under the Licence.
       </v-card-actions>
     </v-card>
     <v-subheader
-      v-if="deviceParameters.length > 0"
+      v-if="deviceParametersSortedAlphabetically.length > 0"
     >
       Existing parameters
     </v-subheader>
     <BaseList
-      :list-items="deviceParameters"
+      :list-items="deviceParametersSortedAlphabetically"
     >
       <template #list-item="{item,index}">
         <ParameterListItem
@@ -95,7 +95,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, mixins } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
@@ -125,7 +125,8 @@ import { deviceParameterChangeActionOption } from '@/models/ActionKind'
   },
   computed: {
     ...mapState('vocabulary', ['units']),
-    ...mapState('devices', ['deviceParameters', 'deviceParameterChangeActions'])
+    ...mapState('devices', ['deviceParameterChangeActions']),
+    ...mapGetters('devices', ['deviceParametersSortedAlphabetically'])
   },
   methods: {
     ...mapActions('devices', ['addDeviceParameter', 'loadDeviceParameters', 'setChosenKindOfDeviceAction', 'setDevicePresetParameter']),
@@ -138,7 +139,7 @@ export default class ParametersAddPage extends mixins(CheckEditAccess) {
 
   // vuex definition for typescript check
   units!: VocabularyState['units']
-  deviceParameters!: DevicesState['deviceParameters']
+  deviceParametersSortedAlphabetically!: DevicesState['deviceParameters']
   deviceParameterChangeActions!: DevicesState['deviceParameterChangeActions']
   addDeviceParameter!: AddDeviceParameterAction
   loadDeviceParameters!: LoadDeviceParametersAction

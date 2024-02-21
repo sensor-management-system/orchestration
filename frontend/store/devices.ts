@@ -193,6 +193,10 @@ const getters: GetterTree<DevicesState, RootState> = {
       }
     }
     return result
+  },
+  deviceParametersSortedAlphabetically: (state: DevicesState): Parameter[] => {
+    // @ts-ignore
+    return state.deviceParameters.toSorted((a: Parameter, b: Parameter) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
   }
 }
 
