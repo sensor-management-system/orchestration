@@ -59,12 +59,12 @@ permissions and limitations under the Licence.
       </v-card-actions>
     </v-card>
     <v-subheader
-      v-if="platformParameters.length > 1"
+      v-if="platformParametersSortedAlphabetically.length > 1"
     >
       Existing parameters
     </v-subheader>
     <BaseList
-      :list-items="platformParameters"
+      :list-items="platformParametersSortedAlphabetically"
     >
       <template #list-item="{item,index}">
         <ParameterListItem
@@ -79,7 +79,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, mixins } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
@@ -109,7 +109,8 @@ import { SetLoadingAction } from '@/store/progressindicator'
   },
   computed: {
     ...mapState('vocabulary', ['units']),
-    ...mapState('platforms', ['platformParameter', 'platformParameters'])
+    ...mapState('platforms', ['platformParameter']),
+    ...mapGetters('platforms', ['platformParametersSortedAlphabetically'])
   },
   methods: {
     ...mapActions('platforms', ['updatePlatformParameter', 'loadPlatformParameters', 'loadPlatformParameter']),
@@ -122,7 +123,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
 
   // vuex definition for typescript check
   platformParameter!: PlatformsState['platformParameter']
-  platformParameters!: PlatformsState['platformParameters']
+  platformParametersSortedAlphabetically!: PlatformsState['platformParameters']
   loadPlatformParameter!: LoadPlatformParameterAction
   loadPlatformParameters!: LoadPlatformParametersAction
   updatePlatformParameter!: UpdatePlatformParameterAction

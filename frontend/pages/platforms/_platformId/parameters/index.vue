@@ -43,11 +43,11 @@ permissions and limitations under the Licence.
         Add Parameter
       </v-btn>
     </v-card-actions>
-    <hint-card v-if="platformParameters.length === 0">
+    <hint-card v-if="platformParametersSortedAlphabetically.length === 0">
       There are no parameters for this platform.
     </hint-card>
     <BaseList
-      :list-items="platformParameters"
+      :list-items="platformParametersSortedAlphabetically"
     >
       <template #list-item="{item,index}">
         <parameter-list-item
@@ -131,7 +131,7 @@ permissions and limitations under the Licence.
     />
 
     <v-card-actions
-      v-if="platformParameters.length > 3"
+      v-if="platformParametersSortedAlphabetically.length > 3"
     >
       <v-spacer />
       <v-btn
@@ -169,7 +169,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
   DeletePlatformParameterAction,
@@ -212,8 +212,9 @@ import { ParameterChangeAction } from '@/models/ParameterChangeAction'
   },
   computed: {
     ...mapState('vocabulary', ['units']),
-    ...mapState('platforms', ['platformParameters', 'platformParameterChangeActions']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('platforms', ['platformParameterChangeActions']),
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapGetters('platforms', ['platformParametersSortedAlphabetically'])
   },
   methods: {
     ...mapActions('platforms', ['deletePlatformParameter', 'loadPlatformParameters', 'setPlatformPresetParameter', 'setChosenKindOfPlatformAction', 'loadPlatformParameterChangeActions', 'deletePlatformParameterChangeAction']),
@@ -233,7 +234,7 @@ export default class PlatformParameterShowPage extends Vue {
 
   // vuex definition for typescript check
   units!: VocabularyState['units']
-  platformParameters!: PlatformsState['platformParameters']
+  platformParametersSortedAlphabetically!: PlatformsState['platformParameters']
   platformParameterChangeActions!: PlatformsState['platformParameterChangeActions']
   loadPlatformParameters!: LoadPlatformParametersAction
   deletePlatformParameter!: DeletePlatformParameterAction

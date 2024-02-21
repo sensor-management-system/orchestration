@@ -147,22 +147,14 @@ export default class ParameterValueTable extends Vue {
       }
       return true
     }).sort((a, b) => {
-      // the actions are already sorted by date
-      // in addition to it, sort the actions by their parameter ids to ensure,
-      // that the parameters are always shown in the same order
       if (!a.parameter || !a.parameter.id) {
         return -1
       }
       if (!b.parameter || !b.parameter.id) {
         return 1
       }
-      if (a.parameter.id < b.parameter.id) {
-        return -1
-      }
-      if (a.parameter.id > b.parameter.id) {
-        return 1
-      }
-      return 0
+
+      return a.parameter.label.toLowerCase().localeCompare(b.parameter.label.toLowerCase())
     })
   }
 }
