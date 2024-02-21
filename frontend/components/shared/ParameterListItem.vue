@@ -63,6 +63,7 @@ permissions and limitations under the Licence.
               Date (UTC)
             </th>
             <th>Value</th>
+            <slot name="action-header" />
           </tr>
         </thead>
         <tbody>
@@ -83,6 +84,7 @@ permissions and limitations under the Licence.
                 :shorten-at="120"
               />
             </td>
+            <slot name="parameter-actions" :parameter-action="action" />
           </tr>
         </tbody>
       </v-simple-table>
