@@ -14,6 +14,7 @@ Added:
 - Shortcut to add a value for a parameter of device, platform or configuration 
 - Endpoint URL is displayed in the tsm linking form when selecting a endpoint
 - Tooltip to explain why a paramter can not be deleted if the delete button is disabled
+- Shortcut to edit or delete a value of a parameter of device, platform or configuration
 
 Fixed:
 - Adjusted the ordering of the elements in sensorML 

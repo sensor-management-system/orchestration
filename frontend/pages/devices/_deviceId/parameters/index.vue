@@ -92,6 +92,36 @@ permissions and limitations under the Licence.
               The paramter can't be deleted because it has assigend values.
             </v-tooltip>
           </template>
+          <template #action-header>
+            <th>Actions</th>
+          </template>
+          <template
+            v-if="editable"
+            #parameter-actions="{parameterAction}"
+          >
+            <td>
+              <v-btn
+                icon
+                :to="'/devices/' + deviceId + '/actions/parameter-change-actions/' + parameterAction.id + '/edit'"
+              >
+                <v-icon
+                  small
+                  color="primary"
+                >
+                  mdi-pencil
+                </v-icon>
+              </v-btn>
+              <v-btn icon>
+                <v-icon
+                  small
+                  color="red"
+                  @click="initDeleteDialogParameterChangeAction(parameterAction)"
+                >
+                  mdi-delete
+                </v-icon>
+              </v-btn>
+            </td>
+          </template>
         </parameter-list-item>
       </template>
     </BaseList>
@@ -124,6 +154,16 @@ permissions and limitations under the Licence.
     >
       Do you really want to delete the parameter <em>{{ parameterToDelete.label }}</em>?
     </DeleteDialog>
+    <DeleteDialog
+      v-if="parameterChangeActionToDelete"
+      v-model="showDeleteDialogForParameterChangeActionToDelete"
+      title="Delete parameter value"
+      :disabled="isLoading"
+      @cancel="closeDeleteDialogForParameterChangeActionToDelete"
+      @delete="deleteParameterChangeAction"
+    >
+      Do you really want to delete the parameter value?
+    </DeleteDialog>
   </div>
 </template>
 
@@ -132,8 +172,8 @@ import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import {
-  DeleteDeviceParameterAction,
-  DevicesState,
+  DeleteDeviceParameterAction, DeleteDeviceParameterChangeActionAction,
+  DevicesState, LoadDeviceParameterChangeActionsAction,
   LoadDeviceParametersAction, SetChosenKindOfDeviceActionAction, SetDevicePresetParameterAction
 } from '@/store/devices'
 import { VocabularyState } from '@/store/vocabulary'
@@ -153,6 +193,7 @@ import ParameterValueTable from '@/components/shared/ParameterValueTable.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { deviceParameterChangeActionOption } from '@/models/ActionKind'
 import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
+import { ParameterChangeAction } from '@/models/ParameterChangeAction'
 
 @Component({
   components: {
@@ -172,7 +213,7 @@ import DotMenuActionEdit from '@/components/DotMenuActionEdit.vue'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('devices', ['deleteDeviceParameter', 'loadDeviceParameters', 'setChosenKindOfDeviceAction', 'setDevicePresetParameter']),
+    ...mapActions('devices', ['deleteDeviceParameter', 'loadDeviceParameters', 'setChosenKindOfDeviceAction', 'setDevicePresetParameter', 'deleteDeviceParameterChangeAction', 'loadDeviceParameterChangeActions']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -182,8 +223,10 @@ export default class DeviceParameterShowPage extends Vue {
   private editable!: boolean
 
   private showDeleteDialog = false
+  private showDeleteDialogForParameterChangeActionToDelete = false
 
   private parameterToDelete: Parameter | null = null
+  private parameterChangeActionToDelete: ParameterChangeAction | null = null
 
   // vuex definition for typescript check
   units!: VocabularyState['units']
@@ -195,6 +238,8 @@ export default class DeviceParameterShowPage extends Vue {
   setLoading!: SetLoadingAction
   setChosenKindOfDeviceAction!: SetChosenKindOfDeviceActionAction
   setDevicePresetParameter!: SetDevicePresetParameterAction
+  deleteDeviceParameterChangeAction!: DeleteDeviceParameterChangeActionAction
+  loadDeviceParameterChangeActions!: LoadDeviceParameterChangeActionsAction
 
   get deviceId (): string {
     return this.$route.params.deviceId
@@ -244,6 +289,34 @@ export default class DeviceParameterShowPage extends Vue {
 
   openEditForm (parameter: Parameter) {
     this.$router.push('/devices/' + this.deviceId + '/parameters/' + parameter.id + '/edit')
+  }
+
+  initDeleteDialogParameterChangeAction (action: ParameterChangeAction) {
+    this.showDeleteDialogForParameterChangeActionToDelete = true
+    this.parameterChangeActionToDelete = action
+  }
+
+  async deleteParameterChangeAction () {
+    if (this.parameterChangeActionToDelete === null || this.parameterChangeActionToDelete.id === null) {
+      return
+    }
+
+    try {
+      this.setLoading(true)
+      await this.deleteDeviceParameterChangeAction(this.parameterChangeActionToDelete.id)
+      this.loadDeviceParameterChangeActions(this.deviceId)
+      this.$store.commit('snackbar/setSuccess', 'Parameter value deleted')
+    } catch (_error) {
+      this.$store.commit('snackbar/setError', 'Parameter value could not be deleted')
+    } finally {
+      this.setLoading(false)
+      this.closeDeleteDialogForParameterChangeActionToDelete()
+    }
+  }
+
+  closeDeleteDialogForParameterChangeActionToDelete () {
+    this.showDeleteDialogForParameterChangeActionToDelete = false
+    this.parameterChangeActionToDelete = null
   }
 }
 </script>
