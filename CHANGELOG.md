@@ -21,6 +21,7 @@ Changed:
 
 Fixed:
 - Adjusted the ordering of the elements in sensorML 
+- Stop showing the back to search button when opening the search page manually
 
 ## 1.12.0 - 2024-01-17
 
