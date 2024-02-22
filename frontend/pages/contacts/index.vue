@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -181,7 +181,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { Route } from 'vue-router'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
-import { SetTitleAction, SetTabsAction, SetBackToAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetBackToAction, SetShowBackButtonAction } from '@/store/appbar'
 import {
   ContactsState,
   PageSizesGetter,
@@ -221,7 +221,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
   },
   methods: {
     ...mapActions('contacts', ['searchContactsPaginated', 'setPageNumber', 'setPageSize', 'deleteContact']),
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setBackTo']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setBackTo', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -246,6 +246,7 @@ export default class SearchContactsPage extends Vue {
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   setBackTo!: SetBackToAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     if (!this.$auth.loggedIn) {
@@ -409,6 +410,7 @@ export default class SearchContactsPage extends Vue {
   initializeAppBar () {
     this.setTitle('Contacts')
     this.setTabs([])
+    this.setShowBackButton(false)
   }
 
   setSizeInUrl (preserveHash: boolean = true): void {

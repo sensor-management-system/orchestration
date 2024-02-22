@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -273,7 +273,7 @@ import { Route } from 'vue-router'
 
 import { mapState, mapActions, mapGetters } from 'vuex'
 
-import { SetActiveTabAction, SetTabsAction, SetTitleAction, SetBackToAction } from '@/store/appbar'
+import { SetActiveTabAction, SetTabsAction, SetTitleAction, SetBackToAction, SetShowBackButtonAction } from '@/store/appbar'
 
 import { Site } from '@/models/Site'
 
@@ -356,7 +356,7 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
 
   },
   methods: {
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo', 'setShowBackButton']),
     ...mapActions('sites', [
       'searchSitesPaginated',
       'setPageNumber',
@@ -424,6 +424,7 @@ export default class SearchSitesPage extends Vue {
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   setBackTo!: SetBackToAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     this.initializeAppBar()
@@ -736,6 +737,7 @@ export default class SearchSitesPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Sites & Labs')
+    this.setShowBackButton(false)
   }
 
   openSensorMLDialog (site: Site) {

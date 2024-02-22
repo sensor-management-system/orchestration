@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -347,7 +347,7 @@ import { Route } from 'vue-router'
 
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction, SetBackToAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction, SetBackToAction, SetShowBackButtonAction } from '@/store/appbar'
 
 import {
   VocabularyState,
@@ -440,7 +440,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   methods: {
     ...mapActions('vocabulary', ['loadEquipmentstatus', 'loadDevicetypes', 'loadManufacturers']),
     ...mapActions('devices', ['searchDevicesPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deleteDevice', 'archiveDevice', 'restoreDevice', 'exportAsSensorML', 'loadDevice', 'replaceDeviceInDevices', 'getSensorMLUrl']),
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo', 'setShowBackButton']),
     ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -503,6 +503,7 @@ export default class SearchDevicesPage extends Vue {
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   setBackTo!: SetBackToAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     this.initializeAppBar()
@@ -837,6 +838,7 @@ export default class SearchDevicesPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Devices')
+    this.setShowBackButton(false)
   }
 
   openSensorMLDialog (device: Device) {

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -298,7 +298,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { Route } from 'vue-router'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction, SetBackToAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction, SetBackToAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, LoadConfigurationAction, ConfigurationsState, ReplaceConfigurationInConfigurationsAction, GetSensorMLUrlAction, LoadProjectsAction, SearchConfigurationsPaginatedAction } from '@/store/configurations'
 import { SearchSitesAction, SitesState } from '@/store/sites'
@@ -353,7 +353,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
   },
   methods: {
     ...mapActions('configurations', ['searchConfigurationsPaginated', 'loadConfiguration', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'archiveConfiguration', 'restoreConfiguration', 'exportAsSensorML', 'replaceConfigurationInConfigurations', 'getSensorMLUrl', 'loadProjects']),
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo', 'setShowBackButton']),
     ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('sites', ['searchSites']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -414,6 +414,7 @@ export default class SearchConfigurationsPage extends Vue {
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   setBackTo!: SetBackToAction
+  setShowBackButton!: SetShowBackButtonAction
 
   async created () {
     try {
@@ -725,6 +726,7 @@ export default class SearchConfigurationsPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Configurations')
+    this.setShowBackButton(false)
   }
 
   openSensorMLDialog (configuration: Configuration) {

@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -235,7 +235,7 @@ import {
   ReplacePlatformInPlatformsAction,
   GetSensorMLUrlAction
 } from 'store/platforms'
-import { SetTitleAction, SetTabsAction, SetBackToAction } from '@/store/appbar'
+import { SetTitleAction, SetTabsAction, SetBackToAction, SetShowBackButtonAction } from '@/store/appbar'
 
 import { CanAccessEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
 
@@ -293,7 +293,7 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   },
   methods: {
     ...mapActions('platforms', ['searchPlatformsPaginated', 'setPageNumber', 'setPageSize', 'exportAsCsv', 'deletePlatform', 'archivePlatform', 'restorePlatform', 'exportAsSensorML', 'loadPlatform', 'replacePlatformInPlatforms', 'getSensorMLUrl']),
-    ...mapActions('appbar', ['setTitle', 'setTabs', 'setBackTo']),
+    ...mapActions('appbar', ['setTitle', 'setTabs', 'setBackTo', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -335,6 +335,7 @@ export default class SearchPlatformsPage extends Vue {
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   setBackTo!: SetBackToAction
+  setShowBackButton!: SetShowBackButtonAction
 
   created () {
     this.initializeAppBar()
@@ -519,6 +520,7 @@ export default class SearchPlatformsPage extends Vue {
       'Extended Search'
     ])
     this.setTitle('Platforms')
+    this.setShowBackButton(false)
   }
 
   openSensorMLDialog (platform: Platform) {
