@@ -15,6 +15,7 @@ import pytz
 from flask import current_app, url_for
 
 from project import base_url
+from project.api.helpers.dictutils import dict_from_kv_list
 from project.api.models import (
     Configuration,
     ConfigurationAttachment,
@@ -109,8 +110,19 @@ class TestSensorMLConfiguration(BaseTestCase):
             resp = self.client.get(f"{self.url}/{self.configuration.id}/sensorml")
         self.assertEqual(resp.status_code, 200)
         xml_text = resp.text
+        self.expect(xml_text).to_start_with('<?xml version="1.0" encoding="UTF-8"?>\n')
         self.schema.validate(xml_text)
         root = xml.etree.ElementTree.fromstring(resp.text)
+
+        schema_locations = dict_from_kv_list(
+            root.attrib[
+                "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
+            ].split(" ")
+        )
+
+        self.expect(schema_locations["http://www.opengis.net/sensorml/2.0"]).to_equal(
+            "http://schemas.opengis.net/sensorML/2.0/sensorML.xsd"
+        )
 
         gml_id = root.attrib.get("{http://www.opengis.net/gml/3.2}id")
         self.assertEqual(gml_id, f"configuration_{self.configuration.id}")
@@ -203,15 +215,16 @@ class TestSensorMLConfiguration(BaseTestCase):
             .text,
             "2022-12-24T00:00:00+00:00",
         )
-        self.assertEqual(
-            len(
-                root.find("{http://www.opengis.net/sensorml/2.0}validTime")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            root.find("{http://www.opengis.net/sensorml/2.0}validTime")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
     def test_get_public_configuration_with_description(self):
         """Check that we give out the description."""
@@ -814,16 +827,16 @@ class TestSensorMLConfiguration(BaseTestCase):
 
         sml_action_event = sml_events[0]
 
-        self.assertEqual(
-            len(
-                sml_action_event.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_action_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
     def test_get_public_configuration_with_generic_action_without_description(self):
         """Check that we give out the generic action without description."""
@@ -919,6 +932,7 @@ class TestSensorMLConfiguration(BaseTestCase):
             x=1,
             y=2,
             z=1.5,
+            epsg_code="4326",
         )
 
         db.session.add_all([contact, static_location_action])
@@ -1008,6 +1022,54 @@ class TestSensorMLConfiguration(BaseTestCase):
             static_location_action.begin_description,
         )
 
+        location = root.find("{http://www.opengis.net/gml/3.2}location")
+        multi_point = location.find("{http://www.opengis.net/gml/3.2}MultiPoint")
+        point_members = multi_point.findall(
+            "{http://www.opengis.net/gml/3.2}pointMembers"
+        )
+        self.expect(len).of(point_members).to_equal(1)
+        point_member = point_members[0]
+
+        point = point_member.find("{http://www.opengis.net/gml/3.2}Point")
+        self.expect(point.attrib["srsName"]).to_equal(
+            "http://www.opengis.net/def/crs/EPSG/0/4326"
+        )
+        pos = point.find("{http://www.opengis.net/gml/3.2}pos")
+        # Due to epsg, the latitude (y) is mentioned first, then the longitude (x) later
+        self.expect(pos.text).to_equal("2.0 1.0 1.5")
+
+        meta_data_property = point.find(
+            "{http://www.opengis.net/gml/3.2}metaDataProperty"
+        )
+        generic_meta_data = meta_data_property.find(
+            "{http://www.opengis.net/gml/3.2}GenericMetaData"
+        )
+        time_period = generic_meta_data.find(
+            "{http://www.opengis.net/gml/3.2}TimePeriod"
+        )
+        begin_text = (
+            time_period.find("{http://www.opengis.net/gml/3.2}begin")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text
+        )
+        self.expect(begin_text).to_equal("2022-12-24T00:00:00+00:00")
+
+        end_text = (
+            time_period.find("{http://www.opengis.net/gml/3.2}end")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text
+        )
+        self.expect(end_text).to_equal("2022-12-25T00:00:00+00:00")
+
+        time_period_description = time_period.find(
+            "{http://www.opengis.net/gml/3.2}description"
+        )
+        self.expect(time_period_description.text).to_equal(
+            "Point location is only valid in the time period."
+        )
+
     def test_get_public_configuration_with_static_location_with_label(self):
         """Check that we give out the static location with a label."""
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")
@@ -1089,15 +1151,60 @@ class TestSensorMLConfiguration(BaseTestCase):
 
         sml_location_event = sml_events[0]
 
-        self.assertEqual(
-            len(
-                sml_location_event.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_location_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
+        )
+
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
+
+        location = root.find("{http://www.opengis.net/gml/3.2}location")
+        multi_point = location.find("{http://www.opengis.net/gml/3.2}MultiPoint")
+        point_members = multi_point.findall(
+            "{http://www.opengis.net/gml/3.2}pointMembers"
+        )
+        self.expect(len).of(point_members).to_equal(1)
+        point_member = point_members[0]
+
+        point = point_member.find("{http://www.opengis.net/gml/3.2}Point")
+        self.expect(point.attrib["srsName"]).to_equal(
+            "http://www.opengis.net/def/crs/EPSG/0/4326"
+        )
+        pos = point.find("{http://www.opengis.net/gml/3.2}pos")
+        # Due to epsg, the latitude (y) is mentioned first, then the longitude (x) later
+        self.expect(pos.text).to_equal("2.0 1.0 1.5")
+
+        meta_data_property = point.find(
+            "{http://www.opengis.net/gml/3.2}metaDataProperty"
+        )
+        generic_meta_data = meta_data_property.find(
+            "{http://www.opengis.net/gml/3.2}GenericMetaData"
+        )
+        time_period = generic_meta_data.find(
+            "{http://www.opengis.net/gml/3.2}TimePeriod"
+        )
+        begin_text = (
+            time_period.find("{http://www.opengis.net/gml/3.2}begin")
+            .find("{http://www.opengis.net/gml/3.2}TimeInstant")
+            .find("{http://www.opengis.net/gml/3.2}timePosition")
+            .text
+        )
+        self.expect(begin_text).to_equal("2022-12-24T00:00:00+00:00")
+
+        gml_end = time_period.find("{http://www.opengis.net/gml/3.2}end")
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
+
+        time_period_description = time_period.find(
+            "{http://www.opengis.net/gml/3.2}description"
+        )
+        self.expect(time_period_description.text).to_equal(
+            "Point location is only valid in the time period."
         )
 
     def test_get_public_configuration_with_static_location_without_description(self):
@@ -1314,16 +1421,17 @@ class TestSensorMLConfiguration(BaseTestCase):
 
         sml_location_event = sml_events[0]
 
-        self.assertEqual(
-            len(
-                sml_location_event.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_location_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
     def test_get_public_configuration_with_dynamic_location_without_description(self):
         """Check that we give out the dynamic location."""
@@ -1634,16 +1742,16 @@ class TestSensorMLConfiguration(BaseTestCase):
 
         sml_mount_event = sml_events[0]
 
-        self.assertEqual(
-            len(
-                sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
         self.assertIsNone(
             sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
@@ -1687,16 +1795,16 @@ class TestSensorMLConfiguration(BaseTestCase):
             .find("{http://www.opengis.net/gml/3.2}description")
             .text,
         )
-        self.assertEqual(
-            len(
-                sml_mount_event_pl.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_mount_event_pl.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
     def test_get_public_configuration_with_device_mount(self):
         """Check that we give out the device mount."""
@@ -1968,16 +2076,16 @@ class TestSensorMLConfiguration(BaseTestCase):
 
         sml_mount_event = sml_events[0]
 
-        self.assertEqual(
-            len(
-                sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
         self.assertIsNone(
             sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
@@ -2021,16 +2129,16 @@ class TestSensorMLConfiguration(BaseTestCase):
             .find("{http://www.opengis.net/gml/3.2}description")
             .text,
         )
-        self.assertEqual(
-            len(
-                sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_mount_event_dv.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
     def test_get_public_configuration_with_device_mount_with_empty_device_property(
         self,

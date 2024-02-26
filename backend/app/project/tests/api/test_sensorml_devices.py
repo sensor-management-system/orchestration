@@ -15,6 +15,7 @@ import pytz
 from flask import current_app
 
 from project import base_url
+from project.api.helpers.dictutils import dict_from_kv_list
 from project.api.models import (
     Configuration,
     Contact,
@@ -161,8 +162,20 @@ class TestSensorMLDevice(BaseTestCase):
             resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
         self.assertEqual(resp.status_code, 200)
         xml_text = resp.text
+        self.expect(xml_text).to_start_with('<?xml version="1.0" encoding="UTF-8"?>\n')
         self.schema.validate(xml_text)
         root = xml.etree.ElementTree.fromstring(resp.text)
+
+        schema_locations = dict_from_kv_list(
+            root.attrib[
+                "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
+            ].split(" ")
+        )
+
+        self.expect(schema_locations["http://www.opengis.net/sensorml/2.0"]).to_equal(
+            "http://schemas.opengis.net/sensorML/2.0/sensorML.xsd"
+        )
+
         gml_id = root.attrib.get("{http://www.opengis.net/gml/3.2}id")
         self.assertEqual(gml_id, f"device_{self.device.id}")
         sml_identification = root.find(
@@ -1448,16 +1461,16 @@ class TestSensorMLDevice(BaseTestCase):
 
         sml_mount_event = sml_events[0]
 
-        self.assertEqual(
-            len(
-                sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
     def test_get_public_device_with_mount_without_description(self):
         """Check that we give out the device mount without a description."""
@@ -1804,16 +1817,16 @@ class TestSensorMLDevice(BaseTestCase):
 
         sml_action_event = sml_events[0]
 
-        self.assertEqual(
-            len(
-                sml_action_event.find("{http://www.opengis.net/sensorml/2.0}Event")
-                .find("{http://www.opengis.net/sensorml/2.0}time")
-                .find("{http://www.opengis.net/gml/3.2}TimePeriod")
-                .find("{http://www.opengis.net/gml/3.2}end")
-                .findall("{http://www.opengis.net/gml/3.2}TimeInstant")
-            ),
-            0,
+        gml_end = (
+            sml_action_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}time")
+            .find("{http://www.opengis.net/gml/3.2}TimePeriod")
+            .find("{http://www.opengis.net/gml/3.2}end")
         )
+        self.expect(len).of(
+            gml_end.findall("{http://www.opengis.net/gml/3.2}TimeInstant")
+        ).to_equal(0)
+        self.expect(gml_end.attrib["nilReason"]).to_equal("inapplicable")
 
     def test_get_public_device_with_generic_action_without_description(self):
         """Check that we give out the generic action without description."""

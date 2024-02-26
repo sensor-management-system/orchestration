@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Dirk Ecker <d.ecker@fz-juelich.de>
@@ -32,7 +32,7 @@ from ..sensorml.converters import (
     PlatformConverter,
     SiteConverter,
 )
-from ..sensorml.models import gco, gmd, gml, sml, swe, xlink
+from ..sensorml.models import gco, gmd, gml, sml, swe, xlink, xsi
 
 sensor_ml_routes = Blueprint(
     "sensorml", __name__, url_prefix=env("URL_PREFIX", "/rdm/svm-api/v1")
@@ -64,7 +64,17 @@ def device_to_sensor_ml(device_id):
         ET.register_namespace("sml", sml.namespace)
         ET.register_namespace("swe", swe.namespace)
         ET.register_namespace("xlink", xlink.namespace)
-        text = ET.tostring(xml_object)
+        ET.register_namespace("xsi", xsi.namespace)
+        schema_locations = {}
+        for ns_element in [gml, gco, gmd, sml, swe, xlink, xsi]:
+            if ns_element.schema_location:
+                schema_locations[ns_element.namespace] = ns_element.schema_location
+
+        xml_object.attrib[xsi.attrib("schemaLocation")] = " ".join(
+            f"{k} {v}" for k, v in schema_locations.items()
+        )
+        header = b'<?xml version="1.0" encoding="UTF-8"?>\n'
+        text = header + ET.tostring(xml_object)
         response = make_response(text)
         response.headers["Content-Type"] = "application/xml"
         return response
@@ -99,7 +109,17 @@ def platform_to_sensor_ml(platform_id):
         ET.register_namespace("sml", sml.namespace)
         ET.register_namespace("swe", swe.namespace)
         ET.register_namespace("xlink", xlink.namespace)
-        text = ET.tostring(xml_object)
+        ET.register_namespace("xsi", xsi.namespace)
+        schema_locations = {}
+        for ns_element in [gml, gco, gmd, sml, swe, xlink, xsi]:
+            if ns_element.schema_location:
+                schema_locations[ns_element.namespace] = ns_element.schema_location
+
+        xml_object.attrib[xsi.attrib("schemaLocation")] = " ".join(
+            f"{k} {v}" for k, v in schema_locations.items()
+        )
+        header = b'<?xml version="1.0" encoding="UTF-8"?>\n'
+        text = header + ET.tostring(xml_object)
         response = make_response(text)
         response.headers["Content-Type"] = "application/xml"
         return response
@@ -155,7 +175,17 @@ def configuration_to_sensor_ml(configuration_id):
         ET.register_namespace("sml", sml.namespace)
         ET.register_namespace("swe", swe.namespace)
         ET.register_namespace("xlink", xlink.namespace)
-        text = ET.tostring(xml_object)
+        ET.register_namespace("xsi", xsi.namespace)
+        schema_locations = {}
+        for ns_element in [gml, gco, gmd, sml, swe, xlink, xsi]:
+            if ns_element.schema_location:
+                schema_locations[ns_element.namespace] = ns_element.schema_location
+
+        xml_object.attrib[xsi.attrib("schemaLocation")] = " ".join(
+            f"{k} {v}" for k, v in schema_locations.items()
+        )
+        header = b'<?xml version="1.0" encoding="UTF-8"?>\n'
+        text = header + ET.tostring(xml_object)
 
         # We need to make sure that our gml:ids are unique in the
         # overall document.
@@ -229,8 +259,18 @@ def site_to_sensor_ml(site_id):
         ET.register_namespace("sml", sml.namespace)
         ET.register_namespace("swe", swe.namespace)
         ET.register_namespace("xlink", xlink.namespace)
-        text = ET.tostring(xml_object)
+        ET.register_namespace("xsi", xsi.namespace)
+        schema_locations = {}
+        for ns_element in [gml, gco, gmd, sml, swe, xlink, xsi]:
+            if ns_element.schema_location:
+                schema_locations[ns_element.namespace] = ns_element.schema_location
 
+        xml_object.attrib[xsi.attrib("schemaLocation")] = " ".join(
+            f"{k} {v}" for k, v in schema_locations.items()
+        )
+
+        header = b'<?xml version="1.0" encoding="UTF-8"?>\n'
+        text = header + ET.tostring(xml_object)
         # We need to make sure that our gml:ids are unique in the
         # overall document.
         # The strategy here to give different names - with `_dup_{n}`

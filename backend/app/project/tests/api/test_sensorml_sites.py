@@ -13,6 +13,7 @@ import xml
 from flask import current_app
 
 from project import base_url
+from project.api.helpers.dictutils import dict_from_kv_list
 from project.api.models import (
     Configuration,
     Contact,
@@ -98,8 +99,19 @@ class TestSensorMLSite(BaseTestCase):
             resp = self.client.get(f"{self.url}/{self.site.id}/sensorml")
         self.assertEqual(resp.status_code, 200)
         xml_text = resp.text
+        self.expect(xml_text).to_start_with('<?xml version="1.0" encoding="UTF-8"?>\n')
         self.schema.validate(xml_text)
         root = xml.etree.ElementTree.fromstring(resp.text)
+
+        schema_locations = dict_from_kv_list(
+            root.attrib[
+                "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
+            ].split(" ")
+        )
+
+        self.expect(schema_locations["http://www.opengis.net/sensorml/2.0"]).to_equal(
+            "http://schemas.opengis.net/sensorML/2.0/sensorML.xsd"
+        )
 
         gml_id = root.attrib.get("{http://www.opengis.net/gml/3.2}id")
         self.assertEqual(gml_id, f"site_{self.site.id}")
