@@ -87,7 +87,8 @@ import {
   PlatformsState,
   LoadPlatformParameterAction,
   LoadPlatformParametersAction,
-  UpdatePlatformParameterAction
+  UpdatePlatformParameterAction,
+  LoadPlatformParameterChangeActionsAction
 } from '@/store/platforms'
 import { VocabularyState } from '@/store/vocabulary'
 
@@ -113,7 +114,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
     ...mapGetters('platforms', ['platformParametersSortedAlphabetically'])
   },
   methods: {
-    ...mapActions('platforms', ['updatePlatformParameter', 'loadPlatformParameters', 'loadPlatformParameter']),
+    ...mapActions('platforms', ['updatePlatformParameter', 'loadPlatformParameters', 'loadPlatformParameter', 'loadPlatformParameterChangeActions']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -126,6 +127,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
   platformParametersSortedAlphabetically!: PlatformsState['platformParameters']
   loadPlatformParameter!: LoadPlatformParameterAction
   loadPlatformParameters!: LoadPlatformParametersAction
+  loadPlatformParameterChangeActions!: LoadPlatformParameterChangeActionsAction
   updatePlatformParameter!: UpdatePlatformParameterAction
   units!: VocabularyState['units']
   setLoading!: SetLoadingAction
@@ -188,6 +190,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
         parameter: this.valueCopy
       })
       this.loadPlatformParameters(this.platformId)
+      this.loadPlatformParameterChangeActions(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Parameter successfully updated')
       this.$router.push('/platforms/' + this.platformId + '/parameters')
     } catch (e) {
