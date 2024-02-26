@@ -86,6 +86,7 @@ import CheckEditAccess from '@/mixins/CheckEditAccess'
 import {
   DevicesState,
   LoadDeviceParameterAction,
+  LoadDeviceParameterChangeActionsAction,
   LoadDeviceParametersAction,
   UpdateDeviceParameterAction
 } from '@/store/devices'
@@ -113,7 +114,7 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     ...mapGetters('devices', ['deviceParametersSortedAlphabetically'])
   },
   methods: {
-    ...mapActions('devices', ['updateDeviceParameter', 'loadDeviceParameters', 'loadDeviceParameter']),
+    ...mapActions('devices', ['updateDeviceParameter', 'loadDeviceParameters', 'loadDeviceParameter', 'loadDeviceParameterChangeActions']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -126,6 +127,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
   deviceParametersSortedAlphabetically!: DevicesState['deviceParameters']
   loadDeviceParameter!: LoadDeviceParameterAction
   loadDeviceParameters!: LoadDeviceParametersAction
+  loadDeviceParameterChangeActions!: LoadDeviceParameterChangeActionsAction
   updateDeviceParameter!: UpdateDeviceParameterAction
   units!: VocabularyState['units']
   setLoading!: SetLoadingAction
@@ -188,6 +190,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
         parameter: this.valueCopy
       })
       this.loadDeviceParameters(this.deviceId)
+      this.loadDeviceParameterChangeActions(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Parameter successfully updated')
       this.$router.push('/devices/' + this.deviceId + '/parameters')
     } catch (e) {

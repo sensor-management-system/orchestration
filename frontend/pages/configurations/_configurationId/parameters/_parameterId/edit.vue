@@ -86,6 +86,7 @@ import CheckEditAccess from '@/mixins/CheckEditAccess'
 import {
   ConfigurationsState,
   LoadConfigurationParameterAction,
+  LoadConfigurationParameterChangeActionsAction,
   LoadConfigurationParametersAction,
   UpdateConfigurationParameterAction
 } from '@/store/configurations'
@@ -113,7 +114,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
     ...mapGetters('configurations', ['configurationParametersSortedAlphabetically'])
   },
   methods: {
-    ...mapActions('configurations', ['updateConfigurationParameter', 'loadConfigurationParameters', 'loadConfigurationParameter']),
+    ...mapActions('configurations', ['updateConfigurationParameter', 'loadConfigurationParameters', 'loadConfigurationParameter', 'loadConfigurationParameterChangeActions']),
     ...mapActions('progressindicator', ['setLoading'])
   },
   scrollToTop: true
@@ -126,6 +127,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
   configurationParametersSortedAlphabetically!: ConfigurationsState['configurationParameters']
   loadConfigurationParameter!: LoadConfigurationParameterAction
   loadConfigurationParameters!: LoadConfigurationParametersAction
+  loadConfigurationParameterChangeActions!: LoadConfigurationParameterChangeActionsAction
   updateConfigurationParameter!: UpdateConfigurationParameterAction
   units!: VocabularyState['units']
   setLoading!: SetLoadingAction
@@ -188,6 +190,7 @@ export default class ParametersEditPage extends mixins(CheckEditAccess) {
         parameter: this.valueCopy
       })
       this.loadConfigurationParameters(this.configurationId)
+      this.loadConfigurationParameterChangeActions(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Parameter successfully updated')
       this.$router.push('/configurations/' + this.configurationId + '/parameters')
     } catch (e) {

@@ -22,6 +22,7 @@ Changed:
 Fixed:
 - Adjusted the ordering of the elements in sensorML 
 - Stop showing the back to search button when opening the search page manually
+- After editing the name of a parameter of device, platform or configuration the updated name will also be displayed in the parameter value table for a selected date
 
 ## 1.12.0 - 2024-01-17
 
