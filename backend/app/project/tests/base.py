@@ -304,9 +304,17 @@ class Expectation:
             self.test_case.fail("Not a datetime string")
         return self
 
+    def to_start_with(self, text):
+        """Raise an assertion if the value doesn't start with the expected text."""
+        self.test_case.assertTrue(self.value.startswith(text))
+
     def map(self, f, *args, **kwargs):
         """Run a function and return an Expectation object with the result."""
         return Expectation(self, f(self.value, *args, **kwargs))
+
+    def of(self, value_for_function):
+        """Use the argument as parameter for a function and expect for that."""
+        return Expectation(self.test_case, self.value(value_for_function))
 
     @property
     def not_(self):

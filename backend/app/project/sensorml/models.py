@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -30,12 +30,12 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 
+@dataclass
 class Namespace:
     """Helper class to handle xml namespaces and create tags."""
 
-    def __init__(self, namespace):
-        """Init the object with a namespace."""
-        self.namespace = namespace
+    namespace: str
+    schema_location: Optional[str] = None
 
     def tag(self, tag):
         """Create a xml tag as ElementTree element using the namespace."""
@@ -49,9 +49,13 @@ class Namespace:
 gco = Namespace("http://www.isotc211.org/2005/gco")
 gmd = Namespace("http://www.isotc211.org/2005/gmd")
 gml = Namespace("http://www.opengis.net/gml/3.2")
-sml = Namespace("http://www.opengis.net/sensorml/2.0")
+sml = Namespace(
+    "http://www.opengis.net/sensorml/2.0",
+    schema_location="http://schemas.opengis.net/sensorML/2.0/sensorML.xsd",
+)
 swe = Namespace("http://www.opengis.net/swe/2.0")
 xlink = Namespace("http://www.w3.org/1999/xlink")
+xsi = Namespace("http://www.w3.org/2001/XMLSchema-instance")
 
 
 @dataclass
@@ -147,13 +151,15 @@ class GmlEnd:
     # Think about adding a handling for a nil reason
     # gco_nil_reason: Optional[str]
     gml_time_instant: Optional[GmlTimeInstant] = None
+    nil_reason: Optional[str] = None
 
     def to_xml(self):
         """Transform to xml element."""
         element = gml.tag("end")
         if self.gml_time_instant:
             element.append(self.gml_time_instant.to_xml())
-        # TODO Add gco nil reason
+        if self.nil_reason:
+            element.attrib["nilReason"] = self.nil_reason
         return element
 
 
@@ -196,6 +202,36 @@ class GmlTimePeriod:
             sub_element = self.gml_end.to_xml()
             element.append(sub_element)
 
+        return element
+
+
+@dataclass
+class GmlGenericMetaData:
+    """Represent a gml:GenericMetaData."""
+
+    gml_time_period: Optional[GmlTimePeriod] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("GenericMetaData")
+        if self.gml_time_period:
+            sub_element = self.gml_time_period.to_xml()
+            element.append(sub_element)
+        return element
+
+
+@dataclass
+class GmlMetaDataProperty:
+    """Represent a gml:metaDataProperty."""
+
+    gml_generic_meta_data: Optional[GmlGenericMetaData] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("metaDataProperty")
+        if self.gml_generic_meta_data:
+            sub_element = self.gml_generic_meta_data.to_xml()
+            element.append(sub_element)
         return element
 
 
@@ -901,11 +937,15 @@ class GmlPos:
 
     x: float
     y: float
+    z: Optional[float] = None
 
     def to_xml(self):
         """Transform to xml element."""
         element = gml.tag("pos")
-        element.text = f"{self.x} {self.y}"
+        if self.z is None:
+            element.text = f"{self.x} {self.y}"
+        else:
+            element.text = f"{self.x} {self.y} {self.z}"
         return element
 
 
@@ -955,16 +995,55 @@ class GmlPolygon:
 
 
 @dataclass
+class GmlPoint:
+    """Represent a gml:Point."""
+
+    gml_pos: GmlPos
+    gml_meta_data_property: Optional[GmlMetaDataProperty] = None
+    srs_name: Optional[str] = None
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("Point")
+        if self.gml_meta_data_property:
+            sub_element = self.gml_meta_data_property.to_xml()
+            element.append(sub_element)
+        element.append(self.gml_pos.to_xml())
+        if self.srs_name:
+            element.attrib["srsName"] = self.srs_name
+        return element
+
+
+@dataclass
+class GmlMultiPoint:
+    """Represent a gml:MultiPoint."""
+
+    gml_point_members: List[GmlPoint] = field(default_factory=lambda: [])
+
+    def to_xml(self):
+        """Transform to xml element."""
+        element = gml.tag("MultiPoint")
+        sub_element = gml.tag("pointMembers")
+        for point_member in self.gml_point_members:
+            sub_element.append(point_member.to_xml())
+        element.append(sub_element)
+        return element
+
+
+@dataclass
 class GmlLocation:
     """Represents a gml:location."""
 
     gml_polygon: Optional[GmlPolygon] = None
+    gml_multi_point: Optional[GmlMultiPoint] = None
 
     def to_xml(self):
         """Transform to xml element."""
         element = gml.tag("location")
         if self.gml_polygon:
             element.append(self.gml_polygon.to_xml())
+        if self.gml_multi_point:
+            element.append(self.gml_multi_point.to_xml())
         return element
 
 

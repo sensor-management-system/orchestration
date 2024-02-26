@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -41,9 +41,13 @@ from .models import (
     GmlDescription,
     GmlEnd,
     GmlExterior,
+    GmlGenericMetaData,
     GmlLinearRing,
     GmlLocation,
+    GmlMetaDataProperty,
+    GmlMultiPoint,
     GmlName,
+    GmlPoint,
     GmlPolygon,
     GmlPos,
     GmlTimeInstant,
@@ -214,6 +218,7 @@ class ConfigurationConverter:
             gml_id=self.gml_id(),
             gml_name=self.gml_name(),
             gml_description=self.gml_description(),
+            gml_location=self.gml_location(),
             sml_keywords=self.sml_keywords(),
             sml_valid_time=self.sml_valid_time(),
             sml_identification=self.sml_identification(),
@@ -239,6 +244,69 @@ class ConfigurationConverter:
         if not self.configuration.description:
             return None
         return GmlDescription(text=self.configuration.description)
+
+    def gml_location(self) -> Optional[GmlLocation]:
+        """Return the gml:location."""
+        epsg_codes_with_y_x = ["4326"]
+        gml_point_members = []
+        for (
+            static_location
+        ) in self.configuration.configuration_static_location_begin_actions:
+            if static_location.epsg_code in epsg_codes_with_y_x:
+                gml_pos = GmlPos(
+                    x=static_location.y, y=static_location.x, z=static_location.z
+                )
+            else:
+                gml_pos = GmlPos(
+                    x=static_location.x, y=static_location.y, z=static_location.z
+                )
+
+            if static_location.epsg_code:
+                srs_name = (
+                    f"http://www.opengis.net/def/crs/EPSG/0/{static_location.epsg_code}"
+                )
+            else:
+                srs_name = None
+            gml_begin = GmlBegin(
+                gml_time_instant=GmlTimeInstant(
+                    gml_time_position=GmlTimePosition(text=static_location.begin_date),
+                )
+            )
+            gml_end = GmlEnd()
+            if static_location.end_date:
+                gml_end = GmlEnd(
+                    gml_time_instant=GmlTimeInstant(
+                        gml_time_position=GmlTimePosition(
+                            text=static_location.end_date
+                        ),
+                    )
+                )
+            else:
+                gml_end.nil_reason = "inapplicable"
+            gml_time_period = GmlTimePeriod(
+                gml_begin=gml_begin,
+                gml_end=gml_end,
+                gml_description=GmlDescription(
+                    "Point location is only valid in the time period."
+                ),
+            )
+            gml_meta_data_property = GmlMetaDataProperty(
+                gml_generic_meta_data=GmlGenericMetaData(
+                    gml_time_period=gml_time_period
+                )
+            )
+            gml_point = GmlPoint(
+                gml_pos=gml_pos,
+                srs_name=srs_name,
+                gml_meta_data_property=gml_meta_data_property,
+            )
+            gml_point_members.append(gml_point)
+        if not gml_point_members:
+            return None
+
+        return GmlLocation(
+            gml_multi_point=GmlMultiPoint(gml_point_members=gml_point_members)
+        )
 
     def sml_keywords(self) -> Optional[SmlKeywords]:
         """Return the sml:keywords."""
@@ -266,6 +334,9 @@ class ConfigurationConverter:
             gml_end.gml_time_instant = GmlTimeInstant(
                 gml_time_position=GmlTimePosition(text=self.configuration.end_date)
             )
+        else:
+            gml_end.nil_reason = "inapplicable"
+
         gml_time_period = GmlTimePeriod(
             gml_id=f"ValidTime_{self.gml_id()}", gml_begin=gml_begin, gml_end=gml_end
         )
@@ -359,6 +430,8 @@ class ConfigurationConverter:
                         gml_time_position=GmlTimePosition(text=event.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_time_period = GmlTimePeriod(
                 gml_id=f"TimePeriodForDeviceMountAction_{event.id}_of_{self.gml_id()}",
                 gml_begin=gml_begin,
@@ -395,6 +468,8 @@ class ConfigurationConverter:
                         gml_time_position=GmlTimePosition(text=event.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_time_period = GmlTimePeriod(
                 gml_id=f"TimePeriodForPlatformMountAction_{event.id}_of_{self.gml_id()}",
                 gml_begin=gml_begin,
@@ -433,6 +508,8 @@ class ConfigurationConverter:
                         gml_time_position=GmlTimePosition(text=event.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_time_period = GmlTimePeriod(
                 gml_id=f"TimePeriodForStaticLocationAction_{event.id}_of_{self.gml_id()}",
                 gml_begin=gml_begin,
@@ -470,6 +547,8 @@ class ConfigurationConverter:
                         gml_time_position=GmlTimePosition(text=event.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_time_period = GmlTimePeriod(
                 gml_id=f"TimePeriodForDynamicLocationAction_{event.id}_of_{self.gml_id()}",
                 gml_begin=gml_begin,
@@ -509,6 +588,8 @@ class ConfigurationConverter:
                         gml_time_position=GmlTimePosition(text=action.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_id = cleanup.identifier(
                 f"TimePeriodFor{action.action_type_name}_{action.id}_of_{self.gml_id()}",
                 replacement="",
@@ -800,6 +881,8 @@ class DeviceConverter:
                         gml_time_position=GmlTimePosition(text=action.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_time_period = GmlTimePeriod(
                 gml_id=f"TimePeriodForDeviceMountAction_{action.id}_of_{self.gml_id()}",
                 gml_begin=gml_begin,
@@ -868,6 +951,8 @@ class DeviceConverter:
                         gml_time_position=GmlTimePosition(text=action.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_id = cleanup.identifier(
                 f"TimePeriodFor{action.action_type_name}_{action.id}_of_{self.gml_id()}",
                 replacement="",
@@ -1164,6 +1249,8 @@ class PlatformConverter:
                         gml_time_position=GmlTimePosition(text=action.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_time_period = GmlTimePeriod(
                 gml_id=f"TimePeriodForPlatformMountAction_{action.id}_of_{self.gml_id()}",
                 gml_begin=gml_begin,
@@ -1201,6 +1288,8 @@ class PlatformConverter:
                         gml_time_position=GmlTimePosition(text=action.end_date),
                     )
                 )
+            else:
+                gml_end.nil_reason = "inapplicable"
             gml_id = cleanup.identifier(
                 f"TimePeriodFor{action.action_type_name}_{action.id}_of_{self.gml_id()}",
                 replacement="",
