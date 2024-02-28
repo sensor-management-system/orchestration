@@ -16,6 +16,7 @@ Added:
 - Tooltip to explain why a paramter can not be deleted if the delete button is disabled
 - Shortcut to edit or delete a value of a parameter of device, platform or configuration
 - Locations of configurations in sensorML
+- Autocompletion for device & platform model fields
 
 Changed:
 - Parameters of device, platform or configuration are now sorted alphabetically

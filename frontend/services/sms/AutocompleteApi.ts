@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -49,9 +49,9 @@ export class AutocompleteApi {
     this.basePath = basePath
   }
 
-  async getSuggestions (endpoint: string): Promise<string[]> {
+  async getSuggestions (endpoint: string, filters: Object = {}): Promise<string[]> {
     const url = this.basePath + '/' + endpoint
-    const rawServerResponse = await this.axiosApi.get(url)
+    const rawServerResponse = await this.axiosApi.get(url, { params: { ...filters } })
     if (rawServerResponse.data) {
       return rawServerResponse.data.data
     } else {

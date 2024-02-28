@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -73,6 +73,12 @@ export default class AutocompleteTextInput extends Vue {
   })
   readonly endpoint!: string
 
+  @Prop({
+    default: () => {},
+    type: Object
+  })
+  readonly filters!: Object
+
   private loading = false
   private autocompleteItems: string[] = []
 
@@ -92,7 +98,7 @@ export default class AutocompleteTextInput extends Vue {
   async loadSuggestions (endpoint: string) {
     this.loading = true
     try {
-      this.autocompleteItems = await this.$api.autocomplete.getSuggestions(endpoint)
+      this.autocompleteItems = await this.$api.autocomplete.getSuggestions(endpoint, this.filters)
     } catch (_error) {
     } finally {
       this.loading = false
