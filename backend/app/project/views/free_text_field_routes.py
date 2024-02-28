@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 # - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
@@ -290,6 +290,20 @@ class DeviceManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
     created_by_id_field = Device.created_by_id
 
 
+@free_text_field_routes.route("/controller/device-models", methods=["GET"])
+@class_based_view
+class DeviceModelEndpoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct device models."""
+
+    field = Device.model
+    is_private_field = Device.is_private
+    created_by_id_field = Device.created_by_id
+    filter_fields = {
+        "manufacturer_name": Device.manufacturer_name,
+        "manufacturer_uri": Device.manufacturer_uri,
+    }
+
+
 @free_text_field_routes.route("/controller/device-parameter-labels", methods=["GET"])
 @class_based_view
 class DeviceParameterLabelEndPoint(AbstractFreeTextFieldEndpoint):
@@ -433,6 +447,20 @@ class PlatformManufacturerNameEndpoint(AbstractFreeTextFieldEndpoint):
     field = Platform.manufacturer_name
     is_private_field = Platform.is_private
     created_by_id_field = Platform.created_by_id
+
+
+@free_text_field_routes.route("/controller/platform-models", methods=["GET"])
+@class_based_view
+class PlatformModelEndpoint(AbstractFreeTextFieldEndpoint):
+    """Endpoint for distinct platform models."""
+
+    field = Platform.model
+    is_private_field = Platform.is_private
+    created_by_id_field = Platform.created_by_id
+    filter_fields = {
+        "manufacturer_name": Platform.manufacturer_name,
+        "manufacturer_uri": Platform.manufacturer_uri,
+    }
 
 
 @free_text_field_routes.route("/controller/platform-serial-numbers", methods=["GET"])

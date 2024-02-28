@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2020-2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -240,11 +240,13 @@ permissions and limitations under the Licence.
         </combobox>
       </v-col>
       <v-col cols="12" md="3">
-        <v-text-field
+        <autocomplete-text-input
           :value="value.model"
           :readonly="readonly"
           :disabled="readonly"
           label="Model"
+          endpoint="device-models"
+          :filters="{manufacturer_name: value.manufacturerName}"
           @input="update('model', $event)"
         />
       </v-col>

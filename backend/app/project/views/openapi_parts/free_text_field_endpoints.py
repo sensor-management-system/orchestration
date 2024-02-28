@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 # - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
@@ -245,6 +245,126 @@ paths = {
             },
             "description": "Get the list of distinct serial numbers of all devices.",
             "operationId": "controller_device_serial_numbers",
+        }
+    },
+    "/controller/platform-models": {
+        "get": {
+            "tags": [
+                "Controller",
+            ],
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "manufacturer_name",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer name.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "manufacturer_uri",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer uri.",
+                        ]
+                    ),
+                },
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of distinct models for platforms.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+            },
+            "description": "Get the list of distinct models of all platforms.",
+            "operationId": "controller_platform_models",
+        }
+    },
+    "/controller/device-models": {
+        "get": {
+            "tags": [
+                "Controller",
+            ],
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "manufacturer_name",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer name.",
+                        ]
+                    ),
+                },
+                {
+                    "in": "query",
+                    "name": "manufacturer_uri",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given manufacturer uri.",
+                        ]
+                    ),
+                },
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of distinct models for devices.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+                "401": {
+                    "description": "Authentification required.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/authentification_required"
+                            }
+                        }
+                    },
+                },
+            },
+            "description": "Get the list of distinct models of all devices.",
+            "operationId": "controller_device_models",
         }
     },
     **template(
