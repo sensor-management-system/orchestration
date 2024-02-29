@@ -8,6 +8,9 @@ SPDX-License-Identifier: HEESIL-1.0
 -->
 ## 1.13.1 (Unreleased)
 
+Added:
+- Images are also previewed in edit mode on mobile devices
+
 ## 1.13.0 - 2024-02-29
 
 Added:
