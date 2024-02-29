@@ -11,6 +11,9 @@ SPDX-License-Identifier: HEESIL-1.0
 Added:
 - Images are also previewed in edit mode on mobile devices
 
+Fixed:
+- Improve/Enable the correct rearranging of images
+
 ## 1.13.0 - 2024-02-29
 
 Added:
