@@ -6,7 +6,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.13.0 (Unreleased)
+## 1.13.1 (Unreleased)
+
+## 1.13.0 - 2024-02-29
 
 Added:
 - Image attachments of devices, platforms, configurations and sites can now be selected as rendered preview images on the `Basic Data` tab
