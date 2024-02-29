@@ -50,7 +50,7 @@ permissions and limitations under the Licence.
 
           <v-col v-if="images && images.length > 0">
             <v-label>Preview images</v-label>
-            <v-list height="250" class="overflow-y-auto">
+            <v-list max-height="250" class="overflow-y-auto">
               <v-list-item-group :value="visibleImageIndex">
                 <v-hover
                   v-for="(image, i) in images"
@@ -108,7 +108,7 @@ permissions and limitations under the Licence.
         </v-row>
       </v-col>
 
-      <v-col cols="5" lg="4" class="d-none d-md-block">
+      <v-col cols="12" md="5" lg="4">
         <v-hover v-if="images && images.length > 0" cols="6">
           <v-carousel
             v-model="visibleImageIndex"
