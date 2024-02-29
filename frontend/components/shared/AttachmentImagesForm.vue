@@ -241,8 +241,8 @@ export default class AttachmentImagesForm extends Vue {
 
   moveImageAtIndexToRight (index: number) {
     const imageToSwap = this.images[index]
-    this.images[index] = this.images[index + 1]
-    this.images[index + 1] = imageToSwap
+    Vue.set(this.images, index, this.images[index + 1])
+    Vue.set(this.images, index + 1, imageToSwap)
 
     this.visibleImageIndex = index + 1
     this.orderImages()
@@ -250,8 +250,8 @@ export default class AttachmentImagesForm extends Vue {
 
   moveImageAtIndexToLeft (index: number) {
     const imageToSwap = this.images[index]
-    this.images[index] = this.images[index - 1]
-    this.images[index - 1] = imageToSwap
+    Vue.set(this.images, index, this.images[index - 1])
+    Vue.set(this.images, index - 1, imageToSwap)
 
     this.visibleImageIndex = index - 1
     this.orderImages()
