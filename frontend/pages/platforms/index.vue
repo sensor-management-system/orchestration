@@ -458,7 +458,8 @@ export default class SearchPlatformsPage extends Vue {
         await this.loadPlatform({
           platformId: platform.id,
           includeCreatedBy: true,
-          includeUpdatedBy: true
+          includeUpdatedBy: true,
+          includeImages: true
         })
         await this.replacePlatformInPlatforms(this.platform!)
         this.$store.commit('snackbar/setSuccess', 'Platform restored')

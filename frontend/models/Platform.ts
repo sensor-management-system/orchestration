@@ -32,6 +32,7 @@
  */
 import { DateTime } from 'luxon'
 
+import { Image, IImage } from '@/models/Image'
 import { Attachment, IAttachment } from '@/models/Attachment'
 import { IContact, Contact } from '@/models/Contact'
 import { IMetaCreationInfo } from '@/models/MetaCreationInfo'
@@ -82,6 +83,7 @@ export interface IPlatform extends IPermissionableMultipleGroups, IMetaCreationI
 
   contacts: IContact[]
   attachments: IAttachment[]
+  images: IImage[]
   parameters: IParameter[]
   permissionGroups: IPermissionGroup[]
   keywords: string[]
@@ -124,6 +126,7 @@ export class Platform implements IPlatform, IVisible {
   private _createdByUserId: string | null = null
 
   private _contacts: Contact[] = []
+  private _images: Image[] = []
   private _attachments: Attachment[] = []
   private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
@@ -299,6 +302,14 @@ export class Platform implements IPlatform, IVisible {
     this._updatedBy = user
   }
 
+  set images (images: Image[]) {
+    this._images = images
+  }
+
+  get images (): Image[] {
+    return this._images
+  }
+
   get attachments (): Attachment[] {
     return this._attachments
   }
@@ -417,6 +428,7 @@ export class Platform implements IPlatform, IVisible {
     newObject.updatedBy = someObject.updatedBy
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
+    newObject.images = someObject.images.map(Image.createFromObject)
     newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
     newObject.keywords = [...someObject.keywords]

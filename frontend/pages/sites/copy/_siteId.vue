@@ -117,7 +117,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
-import { LoadSiteAction, CopySiteAction, SitesState } from '@/store/sites'
+import { LoadSiteAction, CopySiteAction, SitesState, LoadSiteAttachmentsAction } from '@/store/sites'
 import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 import { Site } from '@/models/Site'
 
@@ -141,7 +141,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
 
   },
   methods: {
-    ...mapActions('sites', ['copySite', 'loadSite', 'createPid']),
+    ...mapActions('sites', ['copySite', 'loadSite', 'createPid', 'loadSiteAttachments']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -172,20 +172,23 @@ export default class SiteCopyPage extends Vue {
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   setShowBackButton!: SetShowBackButtonAction
+  loadSiteAttachments!: LoadSiteAttachmentsAction
 
   async created () {
     this.initializeAppBar()
     try {
       this.setLoading(true)
       await this.loadSite({
-        siteId: this.siteId
+        siteId: this.siteId,
+        includeImages: true
       })
 
       try {
         await Promise.all([
           this.loadSiteUsages(),
           this.loadSiteTypes(),
-          this.loadCountries()
+          this.loadCountries(),
+          this.loadSiteAttachments(this.siteId)
         ])
       } catch (e) {
         this.$store.commit('snackbar/setError', 'Failed to load types or usages')

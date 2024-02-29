@@ -30,7 +30,7 @@
  * permissions and limitations under the Licence.
 */
 
-import { coalesce } from '@/utils/stringHelpers'
+import { coalesce, capitalize } from '@/utils/stringHelpers'
 
 describe('coalesce', () => {
   it('should return the first string if defined', () => {
@@ -44,5 +44,21 @@ describe('coalesce', () => {
   })
   it('should return the second string if the first is empty', () => {
     expect(coalesce('', 'B')).toEqual('B')
+  })
+})
+
+describe('capitalize', () => {
+  it('should return an empty string, if an empty string was provided', () => {
+    expect(capitalize('')).toEqual('')
+  })
+  it('should return a string with the first letter in captial, if it was lowercase', () => {
+    expect(capitalize('a')).toEqual('A')
+  })
+  it('should return a string with the first letter in captial, if it was uppercase', () => {
+    expect(capitalize('A')).toEqual('A')
+  })
+  it('should return a string with the first letter in captial and does not change the other letters', () => {
+    expect(capitalize('abc')).toEqual('Abc')
+    expect(capitalize('ABC')).toEqual('ABC')
   })
 })

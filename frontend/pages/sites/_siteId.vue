@@ -123,7 +123,8 @@ export default class SitePage extends Vue {
     try {
       this.setLoading(true)
       await this.loadSite({
-        siteId: this.siteId
+        siteId: this.siteId,
+        includeImages: true
       })
       if (this.site) {
         await this.loadSiteConfigurations(this.siteId)

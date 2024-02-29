@@ -39,6 +39,16 @@ class PlatformAttachmentSchema(Schema):
         schema="PlatformSchema",
         id_field="id",
     )
+    platform_images = Relationship(
+        related_view="api.platform_image_list",
+        related_view_kwargs={"filter[attachment_id]": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="PlatformImageSchema",
+        type_="platform_image",
+        id_field="id",
+    )
     created_by = Relationship(
         attribute="created_by",
         related_view="api.user_detail",

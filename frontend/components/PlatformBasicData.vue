@@ -11,7 +11,7 @@ Copyright (C) 2020-2023
   (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
-
+vuex
 Parts of this program were developed within the context of the
 following publicly funded projects or measures:
 - Helmholtz Earth and Environment DataHub
@@ -35,38 +35,48 @@ permissions and limitations under the Licence.
 
 <template>
   <div>
-    <v-row>
-      <v-col cols="12">
-        <label>Visibility / Permissions</label>
-        <visibility-chip
-          v-model="value.visibility"
+    <v-row align="center">
+      <v-col>
+        <v-row>
+          <v-col cols="12">
+            <label>Visibility / Permissions</label>
+            <visibility-chip
+              v-model="value.visibility"
+            />
+            <permission-group-chips
+              v-model="value.permissionGroups"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" :md="platformImagesShouldBeRendered ? 12 : 6">
+            <label>URN</label>
+            {{ platformURN }}
+          </v-col>
+          <v-col cols="12" :md="platformImagesShouldBeRendered ? 12 : 6">
+            <label>Persistent identifier (PID)</label>
+            <pid-tooltip
+              :value="value.persistentIdentifier"
+              show-button
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" :md="platformImagesShouldBeRendered ? 12 : 6">
+            <label>Short name</label>
+            {{ value.shortName | orDefault }}
+          </v-col>
+          <v-col cols="12" :md="platformImagesShouldBeRendered ? 12 : 6">
+            <label>Long name</label>
+            {{ value.longName | orDefault }}
+          </v-col>
+        </v-row>
+      </v-col>
+      <v-col v-if="platformImagesShouldBeRendered" cols="12" md="6">
+        <AttachmentImagesCarousel
+          :value="value.images"
+          :download-attachment="downloadAttachment"
         />
-        <permission-group-chips
-          v-model="value.permissionGroups"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <label>URN</label>
-        {{ platformURN }}
-      </v-col>
-      <v-col cols="12" md="6">
-        <label>Persistent identifier (PID)</label>
-        <pid-tooltip
-          :value="value.persistentIdentifier"
-          show-button
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <label>Short name</label>
-        {{ value.shortName | orDefault }}
-      </v-col>
-      <v-col cols="12" md="6">
-        <label>Long name</label>
-        {{ value.longName | orDefault }}
       </v-col>
     </v-row>
     <v-row>
@@ -198,10 +208,12 @@ import { PlatformType } from '@/models/PlatformType'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 
+import { DownloadAttachmentAction } from '@/store/platforms'
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 import PidTooltip from '@/components/shared/PidTooltip.vue'
+import AttachmentImagesCarousel from '@/components/shared/AttachmentImagesCarousel.vue'
 import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 
@@ -210,13 +222,17 @@ import VisibilityChip from '@/components/VisibilityChip.vue'
     PermissionGroupChips,
     PidTooltip,
     QrCodeDialog,
-    VisibilityChip
+    VisibilityChip,
+    AttachmentImagesCarousel
   },
   computed: {
     ...mapState('vocabulary', ['platformtypes']),
     ...mapGetters('vocabulary', ['getEquipmentstatusByUri', 'getPlatformTypeByUri', 'getManufacturerByUri'])
   },
-  methods: mapActions('vocabulary', ['loadManufacturers', 'loadPlatformtypes', 'loadEquipmentstatus'])
+  methods: {
+    ...mapActions('vocabulary', ['loadManufacturers', 'loadPlatformtypes', 'loadEquipmentstatus']),
+    ...mapActions('platforms', ['downloadAttachment'])
+  }
 })
 export default class PlatformBasicData extends Vue {
   public readonly NO_TYPE: string = 'Unknown type'
@@ -236,6 +252,7 @@ export default class PlatformBasicData extends Vue {
   getPlatformTypeByUri!: GetPlatformTypeByUriGetter
   getEquipmentstatusByUri!: GetEquipmentstatusByUriGetter
   platformtypes!: VocabularyState['platformtypes']
+  downloadAttachment!: DownloadAttachmentAction
 
   async mounted () {
     try {
@@ -315,6 +332,10 @@ export default class PlatformBasicData extends Vue {
 
   get platformURN () {
     return createPlatformUrn(this.value, this.platformtypes)
+  }
+
+  get platformImagesShouldBeRendered () {
+    return this.value.images.length > 0
   }
 }
 </script>

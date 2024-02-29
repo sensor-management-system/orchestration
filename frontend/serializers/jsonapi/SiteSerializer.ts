@@ -51,6 +51,7 @@ import {
   IJsonApiRelationshipsData, IJsonApiTypedEntityWithoutDetailsDataNullable
 } from '@/serializers/jsonapi/JsonApiTypes'
 
+import { SiteImageSerializer } from '@/serializers/jsonapi/ImageSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { Visibility } from '@/models/Visibility'
 
@@ -64,6 +65,7 @@ export interface ISiteWithMeta {
 }
 
 export class SiteSerializer {
+  private imageSerializer: SiteImageSerializer = new SiteImageSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private _permissionGroups: PermissionGroup[] = []
 
@@ -153,6 +155,9 @@ export class SiteSerializer {
 
       result.archived = attributes.archived || false
     }
+
+    const images = this.imageSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.images = images
 
     const contactsWithMissing = this.contactSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.contacts = contactsWithMissing.contacts
@@ -268,8 +273,10 @@ export class SiteSerializer {
 
     if (includeRelationships) {
       const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(site.contacts)
+      const images = this.imageSerializer.convertModelListToJsonApiRelationshipObject(site.images)
       data.relationships = {
-        ...contacts
+        ...contacts,
+        ...images
       }
     }
 

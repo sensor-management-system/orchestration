@@ -50,6 +50,7 @@ import { SiteAttachmentSerializer } from '@/serializers/jsonapi/SiteAttachmentSe
 import { Attachment } from '@/models/Attachment'
 
 export interface IncludedRelationships {
+  includeImages?: boolean
   includeContacts?: boolean
   includeCreatedBy?: boolean
   includeUpdatedBy?: boolean
@@ -59,6 +60,9 @@ function getIncludeParams (includes: IncludedRelationships): string {
   const listIncludedRelationships: string[] = []
   if (includes.includeContacts) {
     listIncludedRelationships.push('contacts')
+  }
+  if (includes.includeImages) {
+    listIncludedRelationships.push('site_images.attachment')
   }
   if (includes.includeCreatedBy) {
     listIncludedRelationships.push('created_by.contact')

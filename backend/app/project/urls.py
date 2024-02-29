@@ -73,6 +73,18 @@ api.route(
     "platform_attachment_detail",
     "/platform-attachments/<int:id>",
 )
+# Platform Images
+api.route(
+    PlatformImageList,
+    "platform_image_list",
+    "/platform-images",
+    "/platforms/<int:platform_id>/platform-images",
+)
+api.route(
+    PlatformImageDetail,
+    "platform_image_detail",
+    "/platform-images/<int:id>"
+)
 # configuration Attachment
 api.route(
     ConfigurationAttachmentList,
@@ -85,6 +97,18 @@ api.route(
     "configuration_attachment_detail",
     "/configuration-attachments/<int:id>",
 )
+# Configuration Images
+api.route(
+    ConfigurationImageList,
+    "configuration_image_list",
+    "/configuration-images",
+    "/configurations/<int:configuration_id>/configuration-images",
+)
+api.route(
+    ConfigurationImageDetail,
+    "configuration_image_detail",
+    "/configuration-images/<int:id>"
+)
 # site Attachment
 api.route(
     SiteAttachmentList,
@@ -96,6 +120,18 @@ api.route(
     SiteAttachmentDetail,
     "site_attachment_detail",
     "/site-attachments/<int:id>",
+)
+# Site Images
+api.route(
+    SiteImageList,
+    "site_image_list",
+    "/site-images",
+    "/sites/<int:site_id>/site-images",
+)
+api.route(
+    SiteImageDetail,
+    "site_image_detail",
+    "/site-images/<int:id>"
 )
 # Device
 api.route(
@@ -157,6 +193,18 @@ api.route(
     DeviceAttachmentDetail,
     "device_attachment_detail",
     "/device-attachments/<int:id>",
+)
+# Device Images
+api.route(
+    DeviceImageList,
+    "device_image_list",
+    "/device-images",
+    "/devices/<int:device_id>/device-images",
+)
+api.route(
+    DeviceImageDetail,
+    "device_image_detail",
+    "/device-images/<int:id>"
 )
 
 # CustomField

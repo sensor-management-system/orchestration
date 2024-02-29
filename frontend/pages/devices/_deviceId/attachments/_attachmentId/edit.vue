@@ -96,6 +96,7 @@ import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import {
   DevicesState,
+  LoadDeviceAction,
   LoadDeviceAttachmentAction,
   LoadDeviceAttachmentsAction,
   UpdateDeviceAttachmentAction
@@ -126,7 +127,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment']),
+    ...mapActions('devices', ['loadDeviceAttachment', 'loadDeviceAttachments', 'updateDeviceAttachment', 'loadDevice']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -136,6 +137,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
 
   // vuex definition for typescript check
   deviceAttachment!: DevicesState['deviceAttachment']
+  loadDevice!: LoadDeviceAction
   loadDeviceAttachment!: LoadDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
   updateDeviceAttachment!: UpdateDeviceAttachmentAction
@@ -196,6 +198,13 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
       await this.updateDeviceAttachment({
         deviceId: this.deviceId,
         attachment: this.valueCopy
+      })
+      // update attachment previews
+      this.loadDevice({
+        deviceId: this.deviceId,
+        includeImages: true,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
       })
       this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Attachment updated')

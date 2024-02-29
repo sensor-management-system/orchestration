@@ -73,7 +73,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
-import { CreatePidAction, SavePlatformAction } from '@/store/platforms'
+import { CreatePidAction, SavePlatformAction, ClearPlatformAttachmentsAction } from '@/store/platforms'
 
 import { SetLoadingAction } from '@/store/progressindicator'
 import PlatformBasicDataForm from '@/components/PlatformBasicDataForm.vue'
@@ -96,7 +96,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
     ...mapGetters('vocabulary', ['countryNames'])
   },
   methods: {
-    ...mapActions('platforms', ['savePlatform', 'createPid']),
+    ...mapActions('platforms', ['savePlatform', 'createPid', 'clearPlatformAttachments']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('vocabulary', ['loadCountries'])
@@ -120,10 +120,17 @@ export default class PlatformNewPage extends Vue {
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
   setShowBackButton!: SetShowBackButtonAction
+  clearPlatformAttachments!: ClearPlatformAttachmentsAction
 
   async created () {
     this.initializeAppBar()
-    await this.loadCountries()
+    this.clearPlatformAttachments()
+
+    try {
+      await this.loadCountries()
+    } catch (e) {
+      this.$store.commit('snackbar/setError', 'Failed to load countries')
+    }
   }
 
   saveWithoutSerialNumber () {

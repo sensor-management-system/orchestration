@@ -21,6 +21,10 @@ from .configuration_dynamic_location_begin_actions_resources import (  # noqa: F
     ConfigurationDynamicLocationBeginActionDetail,
     ConfigurationDynamicLocationBeginActionList,
 )
+from .configuration_image_resources import (  # noqa: F401
+    ConfigurationImageDetail,
+    ConfigurationImageList,
+)
 from .configuration_location_action_controller import (  # noqa: F401
     ControllerConfigurationLocationActionTimepoints,
 )
@@ -68,6 +72,10 @@ from .device_calibration_action_attachment_resources import (  # noqa: F401
 from .device_calibration_action_resources import (  # noqa: F401
     DeviceCalibrationActionDetail,
     DeviceCalibrationActionList,
+)
+from .device_image_resources import (  # noqa: F401
+    DeviceImageDetail,
+    DeviceImageList,
 )
 from .device_mount_action_resources import (  # noqa: F401
     DeviceMountActionDetail,
@@ -136,6 +144,10 @@ from .platform_attachment_resources import (  # noqa: F401
     PlatformAttachmentDetail,
     PlatformAttachmentList,
 )
+from .platform_image_resources import (  # noqa: F401
+    PlatformImageDetail,
+    PlatformImageList,
+)
 from .platform_mount_action_resources import (  # noqa: F401
     PlatformMountActionDetail,
     PlatformMountActionList,
@@ -168,6 +180,10 @@ from .site_resources import (  # noqa: F401
 from .site_attachment_resources import (  # noqa: F401
     SiteAttachmentDetail,
     SiteAttachmentList,
+)
+from .site_image_resources import (  # noqa: F401
+    SiteImageDetail,
+    SiteImageList,
 )
 from .site_role_resources import (  # noqa: F401
     SiteRoleDetail,

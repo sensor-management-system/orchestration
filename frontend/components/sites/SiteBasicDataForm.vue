@@ -219,6 +219,17 @@ permissions and limitations under the Licence.
         </v-col>
       </v-row>
 
+      <v-row align="center">
+        <v-col v-if="siteAttachments.length > 0" cols="12">
+          <AttachmentImagesForm
+            :attachments="siteAttachments"
+            :value="value.images"
+            :download-attachment="downloadAttachment"
+            @input="update('images', $event)"
+          />
+        </v-col>
+      </v-row>
+
       <v-row>
         <v-col cols="12">
           <v-textarea
@@ -418,6 +429,7 @@ import { ICvSelectItem, hasDefinition, CvSelectItem } from '@/models/CvSelectIte
 import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
 import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import AttachmentImagesForm from '@/components/shared/AttachmentImagesForm.vue'
 import SiteUsageDialog from '@/components/sites/SiteUsageDialog.vue'
 import SiteTypeDialog from '@/components/sites/SiteTypeDialog.vue'
 import Combobox from '@/components/shared/Combobox.vue'
@@ -427,8 +439,9 @@ import SiteMap from '@/components/sites/SiteMap.vue'
 import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
 
-import { SearchSitesAction, SitesState } from '@/store/sites'
+import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store/sites'
 import { VocabularyState } from '@/store/vocabulary'
+import { Image } from '@/models/Image'
 interface INameAndUri {
   name: string
   uri: string
@@ -445,14 +458,15 @@ type SiteTypeComboboxValue = SiteType | string | undefined
     AutocompleteTextInput,
     SiteUsageDialog,
     SiteTypeDialog,
-    Combobox
+    Combobox,
+    AttachmentImagesForm
   },
   methods: {
     ...mapState('vocabulary', ['epsgCodes']),
-    ...mapActions('sites', ['searchSites'])
+    ...mapActions('sites', ['searchSites', 'downloadAttachment'])
   },
   computed: {
-    ...mapState('sites', ['sites'])
+    ...mapState('sites', ['sites', 'siteAttachments'])
   }
 })
 export default class SiteBasicDataForm extends mixins(Rules) {
@@ -464,6 +478,8 @@ export default class SiteBasicDataForm extends mixins(Rules) {
   private newKeyword = ''
 
   // vuex definition for typescript check
+  siteAttachments!: SitesState['siteAttachments']
+  downloadAttachment!: DownloadAttachmentAction
   epsgCodes!: VocabularyState['epsgCodes']
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
@@ -615,7 +631,7 @@ export default class SiteBasicDataForm extends mixins(Rules) {
     this.$emit('input', newObj)
   }
 
-  update (key: string, value: string|PermissionGroup[]) {
+  update (key: string, value: string|PermissionGroup[]|Image[]) {
     const newObj = Site.createFromObject(this.value)
 
     switch (key) {
@@ -625,6 +641,10 @@ export default class SiteBasicDataForm extends mixins(Rules) {
 
       case 'outerSiteId':
         newObj.outerSiteId = value as string
+        break
+
+      case 'images':
+        newObj.images = value as Image[]
         break
 
       case 'description':

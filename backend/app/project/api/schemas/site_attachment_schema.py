@@ -37,6 +37,16 @@ class SiteAttachmentSchema(Schema):
         schema="SiteSchema",
         id_field="id",
     )
+    site_images = Relationship(
+        related_view="api.site_image_list",
+        related_view_kwargs={"filter[attachment_id]": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="SiteImageSchema",
+        type_="site_image",
+        id_field="id",
+    )
     created_by = Relationship(
         attribute="created_by",
         related_view="api.user_detail",

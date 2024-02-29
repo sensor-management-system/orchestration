@@ -63,6 +63,7 @@ export interface IAttachmentSerializer {
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): Attachment
   convertJsonApiDataToModel (jsonApiData: IJsonApiEntityWithOptionalAttributes): Attachment
   convertJsonApiObjectListToModelList (jsonApiObjectList: IJsonApiEntityListEnvelope): Attachment[]
+  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): Attachment | null
 }
 
 export class AttachmentSerializer implements IAttachmentSerializer {
@@ -123,6 +124,29 @@ export class AttachmentSerializer implements IAttachmentSerializer {
       data.id = attachment.id
     }
     return data
+  }
+
+  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): Attachment | null {
+    let requiredAttachmentId = null
+    if (relationships[this._type]) {
+      const attachmentObject = relationships[this._type]
+      if (attachmentObject.data) {
+        requiredAttachmentId = (attachmentObject.data as IJsonApiEntityWithoutDetails).id
+      }
+    }
+
+    if (included && included.length > 0) {
+      for (const includedEntry of included) {
+        if (includedEntry.type === this._type) {
+          const attachmentId = includedEntry.id
+          if (requiredAttachmentId === attachmentId) {
+            return this.convertJsonApiDataToModel(includedEntry)
+          }
+        }
+      }
+    }
+
+    return null
   }
 
   convertJsonApiRelationshipsModelList (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): IAttachmentsAndMissing {

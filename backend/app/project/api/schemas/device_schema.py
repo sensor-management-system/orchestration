@@ -112,6 +112,16 @@ class DeviceSchema(Schema):
         type_="device_attachment",
         id_field="id",
     )
+    device_images = Relationship(
+        related_view="api.device_image_list",
+        related_view_kwargs={"filter[device_id]": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="DeviceImageSchema",
+        type_="device_image",
+        id_field="id",
+    )
     device_parameters = Relationship(
         related_view="api.device_parameter_list",
         related_view_kwargs={"id": "<id>"},

@@ -3,10 +3,11 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020, 2021
+ * Copyright (C) 2020 - 2024
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
+ * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ
  *   (UFZ, https://www.ufz.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -85,6 +86,9 @@ export class AttachmentsMixin extends Vue {
       case 'png':
       case 'jpg':
       case 'jpeg':
+      case 'gif':
+      case 'svg':
+      case 'webp':
         return 'mdi-image'
       case 'pdf':
         return 'mdi-file-pdf-box'

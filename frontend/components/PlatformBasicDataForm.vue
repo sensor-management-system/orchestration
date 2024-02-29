@@ -112,6 +112,16 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
+    <v-row align="center">
+      <v-col v-if="platformAttachments.length > 0" cols="12">
+        <AttachmentImagesForm
+          :attachments="platformAttachments"
+          :value="value.images"
+          :download-attachment="downloadAttachment"
+          @input="update('images', $event)"
+        />
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12" md="3">
         <combobox
@@ -444,6 +454,7 @@ import { Rules } from '@/mixins/Rules'
 
 import { Platform } from '@/models/Platform'
 import { PlatformType } from '@/models/PlatformType'
+import { Image } from '@/models/Image'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 import { PermissionGroup } from '@/models/PermissionGroup'
@@ -457,12 +468,14 @@ import PlatformTypeDialog from '@/components/platforms/PlatformTypeDialog.vue'
 import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
 import StatusDialog from '@/components/shared/StatusDialog.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import AttachmentImagesForm from '@/components/shared/AttachmentImagesForm.vue'
 import Combobox from '@/components/shared/Combobox.vue'
 
 import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 
 import Validator from '@/utils/validator'
 import { LoadEquipmentstatusAction, LoadManufacturersAction, LoadPlatformtypesAction, VocabularyState } from '@/store/vocabulary'
+import { DownloadAttachmentAction, PlatformsState } from '@/store/platforms'
 
 type StatusSelectValue = Status | string | undefined
 type PlatformTypeSelectValue = PlatformType | string | undefined
@@ -476,14 +489,17 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
     StatusDialog,
     VisibilitySwitch,
     AutocompleteTextInput,
-    Combobox
+    Combobox,
+    AttachmentImagesForm
   },
   computed: {
     ...mapGetters('permissions', ['userGroups']),
-    ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus'])
+    ...mapState('vocabulary', ['platformtypes', 'manufacturers', 'equipmentstatus']),
+    ...mapState('platforms', ['platformAttachments'])
   },
   methods: {
-    ...mapActions('vocabulary', ['loadPlatformtypes', 'loadManufacturers', 'loadEquipmentstatus'])
+    ...mapActions('vocabulary', ['loadPlatformtypes', 'loadManufacturers', 'loadEquipmentstatus']),
+    ...mapActions('platforms', ['downloadAttachment'])
   }
 })
 export default class PlatformBasicDataForm extends mixins(Rules) {
@@ -501,6 +517,9 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
   private initialSerialNumber = ''
   private newKeyword = ''
 
+  // vuex definition for typescript check
+  platformAttachments!: PlatformsState['platformAttachments']
+  downloadAttachment!: DownloadAttachmentAction
   loadPlatformtypes !: LoadPlatformtypesAction
   loadManufacturers !: LoadManufacturersAction
   loadEquipmentstatus !: LoadEquipmentstatusAction
@@ -621,6 +640,9 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
         break
       case 'description':
         newObj.description = value
+        break
+      case 'images':
+        newObj.images = value as Image[]
         break
       case 'website':
         newObj.website = value

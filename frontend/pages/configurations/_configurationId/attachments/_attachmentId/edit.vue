@@ -99,7 +99,8 @@ import {
   ConfigurationsState,
   LoadConfigurationAttachmentsAction,
   LoadConfigurationAttachmentAction,
-  UpdateConfigurationAttachmentAction
+  UpdateConfigurationAttachmentAction,
+  LoadConfigurationAction
 } from '@/store/configurations'
 
 import { Attachment } from '@/models/Attachment'
@@ -126,7 +127,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('configurations', ['loadConfigurationAttachment', 'loadConfigurationAttachments', 'updateConfigurationAttachment']),
+    ...mapActions('configurations', ['loadConfigurationAttachment', 'loadConfigurationAttachments', 'updateConfigurationAttachment', 'loadConfiguration']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -136,6 +137,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
 
   // vuex definition for typescript check
   configurationAttachment!: ConfigurationsState['configurationAttachment']
+  loadConfiguration!: LoadConfigurationAction
   loadConfigurationAttachment!: LoadConfigurationAttachmentAction
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   updateConfigurationAttachment!: UpdateConfigurationAttachmentAction
@@ -197,6 +199,8 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
         configurationId: this.configurationId,
         attachment: this.valueCopy
       })
+      // update attachment previews
+      this.loadConfiguration(this.configurationId)
       this.loadConfigurationAttachments(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Attachment updated')
       this.$router.push('/configurations/' + this.configurationId + '/attachments')

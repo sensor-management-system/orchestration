@@ -117,7 +117,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { PlatformsState, LoadPlatformAttachmentsAction, DeletePlatformAttachmentAction, DownloadAttachmentAction } from '@/store/platforms'
+import { PlatformsState, LoadPlatformAttachmentsAction, DeletePlatformAttachmentAction, DownloadAttachmentAction, LoadPlatformAction, DeletePlatformImageAction } from '@/store/platforms'
 
 import { Attachment } from '@/models/Attachment'
 import { Visibility } from '@/models/Visibility'
@@ -131,6 +131,7 @@ import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 
 import { getLastPathElement } from '@/utils/urlHelpers'
+import { Image } from '@/models/Image'
 
 @Component({
   components: { DeleteDialog, DotMenuActionDelete, AttachmentListItem, BaseList, HintCard, DownloadDialog },
@@ -139,7 +140,7 @@ import { getLastPathElement } from '@/utils/urlHelpers'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('platforms', ['loadPlatformAttachments', 'deletePlatformAttachment', 'downloadAttachment']),
+    ...mapActions('platforms', ['loadPlatform', 'loadPlatformAttachments', 'deletePlatformAttachment', 'deletePlatformImage', 'downloadAttachment']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -156,8 +157,10 @@ export default class PlatformAttachmentShowPage extends Vue {
   // vuex definition for typescript check
   platformAttachments!: PlatformsState['platformAttachments']
   platform!: PlatformsState['platform']
+  loadPlatform!: LoadPlatformAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
   deletePlatformAttachment!: DeletePlatformAttachmentAction
+  deletePlatformImage!: DeletePlatformImageAction
   downloadAttachment!: DownloadAttachmentAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
@@ -192,10 +195,26 @@ export default class PlatformAttachmentShowPage extends Vue {
     }
     try {
       this.setLoading(true)
+      if (this.platformImageUsingAttachment?.id) {
+        await this.deletePlatformImage(this.platformImageUsingAttachment.id)
+      }
       const attachmentId = this.attachmentToDelete.id
       await this.deletePlatformAttachment(attachmentId)
-      this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
+
+      // update attachment previews
+      try {
+        this.loadPlatformAttachments(this.platformId)
+        await this.loadPlatformAttachments(this.platformId)
+        this.loadPlatform({
+          platformId: this.platformId,
+          includeImages: true,
+          includeCreatedBy: true,
+          includeUpdatedBy: true
+        })
+      } catch (_error) {
+        this.$store.commit('snackbar/setWarning', 'Failed to load device')
+      }
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
@@ -206,6 +225,10 @@ export default class PlatformAttachmentShowPage extends Vue {
 
   openAttachment (attachment: Attachment) {
     this.initDowloadDialog(attachment)
+  }
+
+  get platformImageUsingAttachment (): Image | null {
+    return this.platform?.images.find(image => image.attachment?.id === this.attachmentToDelete?.id) ?? null
   }
 
   get selectedAttachmentFilename (): string {

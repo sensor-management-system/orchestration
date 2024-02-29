@@ -281,9 +281,13 @@ class Expectation:
         return self
 
     def to_have_length(self, expected_length):
-        """Raise an assertion if the length is not the expectd length."""
+        """Raise an assertion if the length is not the expected length."""
         self.test_case.assertEqual(len(self.value), expected_length)
         return self
+
+    def to_have_type(self, expected_type):
+        """Raise an assertion if the type is not the expected type"""
+        self.test_case.assertIsInstance(self.value, expected_type)
 
     def to_include_all_of(self, list_of_values):
         """Raise an assertion if one of the values is not included."""
@@ -303,6 +307,10 @@ class Expectation:
         except ValueError:
             self.test_case.fail("Not a datetime string")
         return self
+
+    def to_be_greater_than(self, expected_smaller_value):
+        """Raise an assertion if the value is not greater then the other one."""
+        self.test_case.assertTrue(self.value > expected_smaller_value)
 
     def to_start_with(self, text):
         """Raise an assertion if the value doesn't start with the expected text."""

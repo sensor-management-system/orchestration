@@ -44,6 +44,16 @@ class DeviceAttachmentSchema(Schema):
         schema="DeviceSchema",
         id_field="id",
     )
+    device_images = Relationship(
+        related_view="api.device_image_list",
+        related_view_kwargs={"filter[attachment_id]": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="DeviceImageSchema",
+        type_="device_image",
+        id_field="id",
+    )
     created_by = Relationship(
         attribute="created_by",
         related_view="api.user_detail",

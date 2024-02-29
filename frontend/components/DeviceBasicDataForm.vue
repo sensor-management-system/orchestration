@@ -112,6 +112,18 @@ permissions and limitations under the Licence.
         />
       </v-col>
     </v-row>
+
+    <v-row align="center">
+      <v-col v-if="deviceAttachments.length > 0" cols="12">
+        <AttachmentImagesForm
+          :attachments="deviceAttachments"
+          :value="value.images"
+          :download-attachment="downloadAttachment"
+          @input="update('images', $event)"
+        />
+      </v-col>
+    </v-row>
+
     <v-row>
       <v-col cols="12" md="3">
         <combobox
@@ -462,6 +474,7 @@ import { Rules } from '@/mixins/Rules'
 
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
+import { Image } from '@/models/Image'
 import { Status } from '@/models/Status'
 import { Manufacturer } from '@/models/Manufacturer'
 import { PermissionGroup } from '@/models/PermissionGroup'
@@ -475,12 +488,15 @@ import DeviceTypeDialog from '@/components/devices/DeviceTypeDialog.vue'
 import ManufacturerDialog from '@/components/shared/ManufacturerDialog.vue'
 import StatusDialog from '@/components/shared/StatusDialog.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import AttachmentImagesForm from '@/components/shared/AttachmentImagesForm.vue'
+
 import Combobox from '@/components/shared/Combobox.vue'
 
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 import Validator from '@/utils/validator'
 import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersAction, VocabularyState } from '@/store/vocabulary'
+import { DownloadAttachmentAction, DevicesState } from '@/store/devices'
 
 type StatusSelectValue = Status | string | undefined
 type DeviceTypeSelectValue = DeviceType | string | undefined
@@ -488,10 +504,12 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
 
 @Component({
   computed: {
-    ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus'])
+    ...mapState('vocabulary', ['devicetypes', 'manufacturers', 'equipmentstatus']),
+    ...mapState('devices', ['deviceAttachments'])
   },
   methods: {
-    ...mapActions('vocabulary', ['loadDevicetypes', 'loadManufacturers', 'loadEquipmentstatus'])
+    ...mapActions('vocabulary', ['loadDevicetypes', 'loadManufacturers', 'loadEquipmentstatus']),
+    ...mapActions('devices', ['downloadAttachment'])
   },
   components: {
     DeviceTypeDialog,
@@ -500,7 +518,8 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
     StatusDialog,
     VisibilitySwitch,
     AutocompleteTextInput,
-    Combobox
+    Combobox,
+    AttachmentImagesForm
   }
 })
 export default class DeviceBasicDataForm extends mixins(Rules) {
@@ -517,6 +536,9 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   private initialSerialNumber = ''
   private newKeyword = ''
 
+  // vuex definition for typescript check
+  deviceAttachments!: DevicesState['deviceAttachments']
+  downloadAttachment!: DownloadAttachmentAction
   loadDevicetypes !: LoadDevicetypesAction
   loadManufacturers !: LoadManufacturersAction
   loadEquipmentstatus !: LoadEquipmentstatusAction
@@ -637,6 +659,9 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         break
       case 'description':
         newObj.description = value as string
+        break
+      case 'images':
+        newObj.images = value as Image[]
         break
       case 'website':
         newObj.website = value as string

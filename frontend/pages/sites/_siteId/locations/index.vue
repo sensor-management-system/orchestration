@@ -224,7 +224,7 @@ export default class SiteLocations extends Vue {
       this.setLoading(true)
       await Promise.all(
         [
-          this.loadSite({ siteId: this.siteId }),
+          this.loadSite({ siteId: this.siteId, includeImages: true }),
           this.loadSiteConfigurations(this.siteId),
           this.searchSites()
         ]

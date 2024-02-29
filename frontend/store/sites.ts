@@ -40,6 +40,7 @@ import { Commit, GetterTree, ActionTree, Dispatch } from 'vuex'
 import { RootState } from '@/store'
 
 import { Attachment } from '@/models/Attachment'
+import { Image } from '@/models/Image'
 import { Site } from '@/models/Site'
 import { ISiteSearchParams } from '@/modelUtils/SiteSearchParams'
 import { IncludedRelationships } from '@/services/sms/SiteApi'
@@ -104,7 +105,7 @@ const getters: GetterTree<SitesState, RootState> = {
   }
 }
 
-export type LoadSiteAction = (params: { siteId: string }) => Promise<void>
+export type LoadSiteAction = (params: { siteId: string } & IncludedRelationships) => Promise<void>
 export type SearchSitesAction = () => Promise<void>
 export type SearchSitesPaginatedAction = (searchParams: ISiteSearchParams) => Promise<void>
 export type LoadSiteConfigurationsAction = (id: string) => Promise<void>
@@ -113,11 +114,14 @@ export type AddSiteContactRoleAction = (params: { siteId: string, contactRole: C
 export type RemoveSiteContactRoleAction = (params: { siteContactRoleId: string }) => Promise<void>
 export type AddSiteAttachmentAction = (params: { siteId: string, attachment: Attachment }) => Promise<Attachment>
 export type DeleteSiteAttachmentAction = (attachmentId: string) => Promise<void>
+export type DeleteSiteImageAction = (imageId: string) => Promise<void>
 export type UpdateSiteAttachmentAction = (params: { siteId: string, attachment: Attachment }) => Promise<Attachment>
 export type LoadSiteAttachmentsAction = (id: string) => Promise<void>
 export type LoadSiteAttachmentAction = (id: string) => Promise<void>
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
+export type ClearSiteAttachmentsAction = () => void
 export type SaveSiteAction = (site: Site) => Promise<Site>
+export type SaveSiteImagesAction = (params: {siteId: string, siteImages: Image[], siteCopyImages: Image[]}) => Promise<Image[]>
 export type CopySiteAction = (params: {site: Site, copyContacts: boolean, copyAttachments: boolean, originalSiteId: string}) => Promise<string>
 export type DeleteSiteAction = (id: string) => Promise<void>
 export type ArchiveSiteAction = (id: string) => Promise<void>
@@ -178,13 +182,15 @@ const actions: ActionTree<SitesState, RootState> = {
       siteId,
       includeContacts,
       includeCreatedBy,
-      includeUpdatedBy
+      includeUpdatedBy,
+      includeImages
     }: { siteId: string } & IncludedRelationships
   ): Promise<void> {
     const site = await this.$api.sites.findById(siteId, {
       includeContacts,
       includeCreatedBy,
-      includeUpdatedBy
+      includeUpdatedBy,
+      includeImages
     })
     const configurations = await this.$api.sites.findRelatedConfigurations(site.id)
     commit('setSite', site)
@@ -194,6 +200,45 @@ const actions: ActionTree<SitesState, RootState> = {
     const siteConfigurations = await this.$api.sites.findRelatedConfigurations(id)
     commit('setSiteConfigurations', siteConfigurations)
   },
+
+  deleteSiteImage (_, imageId: string): Promise<void> {
+    return this.$api.siteImages.deleteById(imageId)
+  },
+  updateSiteImage (_, {
+    siteId,
+    siteImage
+  }: { siteId: string, siteImage: Image }): Promise<Image> {
+    return this.$api.siteImages.update(siteId, siteImage)
+  },
+  addSiteImage (_, {
+    siteId,
+    siteImage
+  }: { siteId: string, siteImage: Image }): Promise<Image> {
+    return this.$api.siteImages.add(siteId, siteImage)
+  },
+  async saveSiteImages (
+    { dispatch }: { dispatch: Dispatch }, {
+      siteId,
+      siteImages,
+      siteCopyImages
+    }: {siteId: string, siteImages: Image[], siteCopyImages: Image[]}): Promise<Image[]> {
+    const imagesToDelete = siteImages.filter(el => !siteCopyImages.map(i => i.id).includes(el.id))
+    imagesToDelete.forEach(async (siteImage) => {
+      await dispatch('deleteSiteImage', siteImage.id)
+    })
+    const images = siteCopyImages
+    for (const i in images) {
+      const imageId = images[i].id
+      if (!imageId) {
+        images[i].id = (await dispatch('addSiteImage', { siteId, siteImage: images[i] })).id
+      } else if (siteImages.find(i => i.id === imageId)?.orderIndex !== images[i].orderIndex) {
+        images[i].id = (await dispatch('updateSiteImage', { siteId, siteImage: images[i] })).id
+      }
+    }
+
+    return images
+  },
+
   saveSite (_, site: Site): Promise<Site> {
     return this.$api.sites.save(site)
   },
@@ -221,19 +266,33 @@ const actions: ActionTree<SitesState, RootState> = {
         }))
       }
     }
-    if (copyAttachments) {
-      const attachments = await this.$api.sites.findRelatedSiteAttachments(originalSiteId)
-      for (const attachment of attachments) {
-        attachment.id = null
-        if (attachment.isUpload) {
-          const blob = await dispatch('downloadAttachment', attachment.url)
-          const filename = getLastPathElement(attachment.url)
-          const uplaodResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
-          const newUrl = uplaodResult.url
-          attachment.url = newUrl
-        }
-        related.push(dispatch('addSiteAttachment', { siteId: savedSiteId, attachment }))
+
+    const siteImages = site.images.map(Image.createFromObject)
+    const siteAttachments = await this.$api.sites.findRelatedSiteAttachments(originalSiteId)
+    for (const attachment of siteAttachments) {
+      // copy if attachments should be copied or copied images include attachment
+      if (!copyAttachments && !siteImages.map(i => i.attachment?.id).includes(attachment.id)) {
+        continue
       }
+
+      const oldAttachmentId = attachment.id
+      attachment.id = null
+
+      if (attachment.isUpload) {
+        const blob = await dispatch('downloadAttachment', attachment.url)
+        const filename = getLastPathElement(attachment.url)
+        const uploadResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
+        const newUrl = uploadResult.url
+        attachment.url = newUrl
+      }
+      const savedAttachment = await dispatch('addSiteAttachment', { siteId: savedSiteId, attachment })
+
+      const siteImageToCopy = siteImages.find(i => i.attachment?.id && i.attachment.id === oldAttachmentId)
+      if (!siteImageToCopy) { continue }
+      const siteImage = Image.createFromObject(siteImageToCopy)
+      siteImage.id = ''
+      siteImage.attachment = savedAttachment
+      related.push(dispatch('addSiteImage', { siteId: savedSiteId, siteImage }))
     }
 
     await Promise.all(related)
@@ -306,6 +365,9 @@ const actions: ActionTree<SitesState, RootState> = {
   },
   async exportAsSensorML (_, id: string): Promise<Blob> {
     return await this.$api.sites.getSensorML(id)
+  },
+  clearSiteAttachments ({ commit }: { commit: Commit }): void {
+    commit('setSiteAttachments', [])
   }
 }
 

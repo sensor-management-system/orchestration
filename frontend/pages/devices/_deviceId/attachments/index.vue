@@ -2,11 +2,12 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
+- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
   Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -114,9 +115,10 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { LoadDeviceAttachmentsAction, DeleteDeviceAttachmentAction, DevicesState, DownloadAttachmentAction } from '@/store/devices'
+import { LoadDeviceAction, LoadDeviceAttachmentsAction, DeleteDeviceImageAction, DeleteDeviceAttachmentAction, DevicesState, DownloadAttachmentAction } from '@/store/devices'
 
 import { Attachment } from '@/models/Attachment'
+import { Image } from '@/models/Image'
 
 import BaseList from '@/components/shared/BaseList.vue'
 import AttachmentListItem from '@/components/shared/AttachmentListItem.vue'
@@ -135,7 +137,7 @@ import { getLastPathElement } from '@/utils/urlHelpers'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('devices', ['loadDeviceAttachments', 'deleteDeviceAttachment', 'downloadAttachment']),
+    ...mapActions('devices', ['loadDevice', 'loadDeviceAttachments', 'deleteDeviceAttachment', 'downloadAttachment', 'deleteDeviceImage']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -152,7 +154,9 @@ export default class DeviceAttachmentShowPage extends Vue {
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
   device!: DevicesState['device']
+  loadDevice!: LoadDeviceAction
   deleteDeviceAttachment!: DeleteDeviceAttachmentAction
+  deleteDeviceImage!: DeleteDeviceImageAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
   downloadAttachment!: DownloadAttachmentAction
   isLoading!: LoadingSpinnerState['isLoading']
@@ -172,7 +176,7 @@ export default class DeviceAttachmentShowPage extends Vue {
     this.attachmentToDelete = null
   }
 
-  initDowloadDialog (attachment: Attachment) {
+  initDownloadDialog (attachment: Attachment) {
     this.attachmentToDownload = attachment
     this.showDownloadDialog = true
   }
@@ -188,10 +192,25 @@ export default class DeviceAttachmentShowPage extends Vue {
     }
     try {
       this.setLoading(true)
+      if (this.deviceImageUsingAttachment?.id) {
+        await this.deleteDeviceImage(this.deviceImageUsingAttachment.id)
+      }
       const attachmentId = this.attachmentToDelete.id
       await this.deleteDeviceAttachment(attachmentId)
-      await this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
+
+      // update attachment previews
+      try {
+        await this.loadDeviceAttachments(this.deviceId)
+        this.loadDevice({
+          deviceId: this.deviceId,
+          includeImages: true,
+          includeCreatedBy: true,
+          includeUpdatedBy: true
+        })
+      } catch (_error) {
+        this.$store.commit('snackbar/setWarning', 'Failed to load device')
+      }
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
@@ -201,7 +220,11 @@ export default class DeviceAttachmentShowPage extends Vue {
   }
 
   openAttachment (attachment: Attachment) {
-    this.initDowloadDialog(attachment)
+    this.initDownloadDialog(attachment)
+  }
+
+  get deviceImageUsingAttachment (): Image | null {
+    return this.device?.images.find(image => image.attachment?.id === this.attachmentToDelete?.id) ?? null
   }
 
   get selectedAttachmentFilename (): string {

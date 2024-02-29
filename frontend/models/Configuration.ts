@@ -31,6 +31,7 @@
  */
 import { DateTime } from 'luxon'
 
+import { Image, IImage } from '@/models/Image'
 import { IContact, Contact } from '@/models/Contact'
 import { IMountActions } from '@/models/IMountActions'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
@@ -51,6 +52,7 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   archived: boolean
   contacts: IContact[]
   parameters: IParameter[]
+  images: IImage[]
   createdAt: DateTime | null
   updatedAt: DateTime | null
   updateDescription: string
@@ -80,6 +82,7 @@ export class Configuration implements IConfiguration, IVisible {
   private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
   private _parameters: Parameter[] = []
+  private _images: Image[] = []
   private _deviceMountActions: DeviceMountAction[] = []
   private _platformMountActions: PlatformMountAction[] = []
   private _permissionGroup: IPermissionGroup | null = null
@@ -183,6 +186,14 @@ export class Configuration implements IConfiguration, IVisible {
 
   get parameters (): Parameter[] {
     return this._parameters
+  }
+
+  set images (images: Image[]) {
+    this._images = images
+  }
+
+  get images (): Image[] {
+    return this._images
   }
 
   set parameters (parameters: Parameter[]) {
@@ -308,6 +319,7 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.platformMountActions = someObject.platformMountActions.map(PlatformMountAction.createFromObject)
 
     newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
+    newObject.images = someObject.images.map(Image.createFromObject)
     newObject.permissionGroup = someObject.permissionGroup ? PermissionGroup.createFromObject(someObject.permissionGroup) : null
 
     newObject.createdAt = someObject.createdAt

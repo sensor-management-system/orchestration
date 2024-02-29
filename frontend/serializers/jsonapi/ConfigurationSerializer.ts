@@ -46,6 +46,7 @@ import {
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { SiteSerializer } from '@/serializers/jsonapi/SiteSerializer'
 import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
+import { ConfigurationImageSerializer } from '@/serializers/jsonapi/ImageSerializer'
 
 import { PermissionGroup } from '@/models/PermissionGroup'
 import { Visibility } from '@/models/Visibility'
@@ -60,6 +61,7 @@ export interface IConfigurationWithMeta {
 }
 
 export class ConfigurationSerializer {
+  private imageSerializer: ConfigurationImageSerializer = new ConfigurationImageSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private siteSerializer: SiteSerializer = new SiteSerializer()
   private parameterSerializer: ParameterSerializer = new ParameterSerializer(ParameterEntityType.CONFIGURATION)
@@ -118,6 +120,9 @@ export class ConfigurationSerializer {
         configuration.keywords = [...attributes.keywords]
       }
     }
+
+    const images = this.imageSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    configuration.images = images
 
     let missingDataForContactIds: string[] = []
     if (relationships) {
@@ -189,6 +194,7 @@ export class ConfigurationSerializer {
     const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(configuration.contacts)
     const sites = this.siteSerializer.convertIdToJsonApiRelationshipObject(configuration.siteId)
     const parameters = this.parameterSerializer.convertModelListToJsonApiRelationshipObject(configuration.parameters)
+    const images = this.imageSerializer.convertModelListToJsonApiRelationshipObject(configuration.images)
 
     const result: IJsonApiEntityWithOptionalId = {
       attributes: {
@@ -207,7 +213,8 @@ export class ConfigurationSerializer {
       relationships: {
         ...contacts,
         ...sites,
-        ...parameters
+        ...parameters,
+        ...images
       },
       type: 'configuration'
     }

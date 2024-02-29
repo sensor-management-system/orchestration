@@ -48,6 +48,7 @@ import {
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
+import { PlatformImageSerializer } from '@/serializers/jsonapi/ImageSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import { PlatformAttachmentSerializer } from '@/serializers/jsonapi/PlatformAttachmentSerializer'
 import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
@@ -64,6 +65,7 @@ export interface IPlatformWithMeta {
 }
 
 export class PlatformSerializer {
+  private imageSerializer: PlatformImageSerializer = new PlatformImageSerializer()
   private attachmentSerializer: PlatformAttachmentSerializer = new PlatformAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private parameterSerializer: ParameterSerializer = new ParameterSerializer(ParameterEntityType.PLATFORM)
@@ -122,6 +124,9 @@ export class PlatformSerializer {
       }
       result.archived = attributes.archived || false
     }
+
+    const images = this.imageSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.images = images
 
     const attachmentsWithMissing = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.attachments = attachmentsWithMissing.attachments
@@ -246,10 +251,12 @@ export class PlatformSerializer {
       const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(platform.attachments)
       const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(platform.contacts)
       const parameters = this.parameterSerializer.convertModelListToJsonApiRelationshipObject(platform.parameters)
+      const images = this.imageSerializer.convertModelListToJsonApiRelationshipObject(platform.images)
       data.relationships = {
         ...contacts,
         ...attachments,
-        ...parameters
+        ...parameters,
+        ...images
       }
     }
 

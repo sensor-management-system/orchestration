@@ -42,6 +42,7 @@ import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { AutocompleteApi } from '@/services/sms/AutocompleteApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
+import { ConfigurationImageApi, DeviceImageApi, SiteImageApi, PlatformImageApi } from '@/services/sms/ImageApi'
 import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachmentApi'
 import { ConfigurationCustomfieldsApi } from '@/services/sms/ConfigurationCustomfieldsApi'
 import { ConfigurationParameterApi } from '@/services/sms/ConfigurationParameterApi'
@@ -123,12 +124,15 @@ export class Api {
   private readonly _configurationStatesApi: ConfigurationStatusApi
   private readonly _deviceCustomfieldsApi: DeviceCustomfieldsApi
   private readonly _deviceAttachmentApi: DeviceAttachmentApi
+  private readonly _deviceImageApi: DeviceImageApi
   private readonly _deviceParameterApi: DeviceParameterApi
   private readonly _deviceParameterChangeActionApi: DeviceParameterChangeActionApi
   private readonly _platformAttachmentApi: PlatformAttachmentApi
+  private readonly _platformImageApi: PlatformImageApi
   private readonly _platformParameterApi: PlatformParameterApi
   private readonly _platformParameterChangeActionApi: PlatformParameterChangeActionApi
   private readonly _configurationAttachmentApi: ConfigurationAttachmentApi
+  private readonly _configurationImageApi: ConfigurationImageApi
   private readonly _devicePropertyApi: DevicePropertyApi
   private readonly _genericDeviceActionApi: GenericDeviceActionApi
   private readonly _genericConfigurationActionApi: GenericConfigurationActionApi
@@ -139,6 +143,7 @@ export class Api {
   private readonly _configurationCustomfieldsApi: ConfigurationCustomfieldsApi
   private readonly _configurationParameterApi: ConfigurationParameterApi
   private readonly _configurationParameterChangeActionApi: ConfigurationParameterChangeActionApi
+  private readonly _siteImageApi: SiteImageApi
   private readonly _siteAttachmentApi: SiteAttachmentApi
 
   private readonly _deviceSoftwareUpdateActionApi: DeviceSoftwareUpdateActionApi
@@ -266,6 +271,11 @@ export class Api {
       '/site-attachments'
     )
 
+    this._siteImageApi = new SiteImageApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/site-images'
+    )
+
     const deviceMountActionApi = new DeviceMountActionApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/device-mount-actions'
@@ -335,9 +345,19 @@ export class Api {
       '/device-attachments'
     )
 
+    this._deviceImageApi = new DeviceImageApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/device-images'
+    )
+
     this._platformAttachmentApi = new PlatformAttachmentApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/platform-attachments'
+    )
+
+    this._platformImageApi = new PlatformImageApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/platform-images'
     )
 
     this._platformParameterApi = new PlatformParameterApi(
@@ -353,6 +373,11 @@ export class Api {
     this._configurationAttachmentApi = new ConfigurationAttachmentApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/configuration-attachments'
+    )
+
+    this._configurationImageApi = new ConfigurationImageApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/configuration-images'
     )
 
     this._configurationCustomfieldsApi = new ConfigurationCustomfieldsApi(
@@ -617,8 +642,16 @@ export class Api {
     return this._deviceAttachmentApi
   }
 
+  get deviceImages (): DeviceImageApi {
+    return this._deviceImageApi
+  }
+
   get platformAttachments (): PlatformAttachmentApi {
     return this._platformAttachmentApi
+  }
+
+  get platformImages (): PlatformImageApi {
+    return this._platformImageApi
   }
 
   get platformParameters (): PlatformParameterApi {
@@ -633,8 +666,16 @@ export class Api {
     return this._configurationAttachmentApi
   }
 
+  get configurationImages (): ConfigurationImageApi {
+    return this._configurationImageApi
+  }
+
   get siteAttachments (): SiteAttachmentApi {
     return this._siteAttachmentApi
+  }
+
+  get siteImages (): SiteImageApi {
+    return this._siteImageApi
   }
 
   get configurationCustomfields (): ConfigurationCustomfieldsApi {

@@ -113,7 +113,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { LoadSiteAttachmentsAction, DeleteSiteAttachmentAction, SitesState, DownloadAttachmentAction } from '@/store/sites'
+import { LoadSiteAttachmentsAction, DeleteSiteAttachmentAction, SitesState, DownloadAttachmentAction, DeleteSiteImageAction, LoadSiteAction } from '@/store/sites'
 
 import { Attachment } from '@/models/Attachment'
 import { Visibility } from '@/models/Visibility'
@@ -126,12 +126,13 @@ import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { getLastPathElement } from '@/utils/urlHelpers'
+import { Image } from '@/models/Image'
 
 @Component({
   components: { DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
   computed: mapState('sites', ['siteAttachments', 'site']),
   methods: {
-    ...mapActions('sites', ['loadSiteAttachments', 'deleteSiteAttachment', 'downloadAttachment']),
+    ...mapActions('sites', ['laodSite', 'loadSiteAttachments', 'deleteSiteAttachment', 'deleteSiteImage', 'downloadAttachment']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -148,7 +149,9 @@ export default class SiteAttachmentShowPage extends Vue {
   // vuex definition for typescript check
   siteAttachments!: SitesState['siteAttachments']
   site!: SitesState['site']
+  loadSite!: LoadSiteAction
   deleteSiteAttachment!: DeleteSiteAttachmentAction
+  deleteSiteImage!: DeleteSiteImageAction
   loadSiteAttachments!: LoadSiteAttachmentsAction
   downloadAttachment!: DownloadAttachmentAction
   setLoading!: SetLoadingAction
@@ -173,11 +176,26 @@ export default class SiteAttachmentShowPage extends Vue {
     }
     try {
       this.setLoading(true)
+      if (this.siteImageUsingAttachment?.id) {
+        await this.deleteSiteImage(this.siteImageUsingAttachment.id)
+      }
       const attachmendId = this.attachmentToDelete.id
       this.closeDialog()
       await this.deleteSiteAttachment(attachmendId)
-      this.loadSiteAttachments(this.siteId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
+
+      // update attachment previews
+      try {
+        await this.loadSiteAttachments(this.siteId)
+        this.loadSite({
+          siteId: this.siteId,
+          includeImages: true,
+          includeCreatedBy: true,
+          includeUpdatedBy: true
+        })
+      } catch (_error) {
+        this.$store.commit('snackbar/setWarning', 'Failed to load site')
+      }
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
@@ -197,6 +215,10 @@ export default class SiteAttachmentShowPage extends Vue {
 
   openAttachment (attachment: Attachment) {
     this.initDowloadDialog(attachment)
+  }
+
+  get siteImageUsingAttachment (): Image | null {
+    return this.site?.images.find(image => image.attachment?.id === this.attachmentToDelete?.id) ?? null
   }
 
   get selectedAttachmentFilename (): string {
