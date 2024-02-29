@@ -102,7 +102,8 @@ import {
   PlatformsState,
   LoadPlatformAttachmentAction,
   LoadPlatformAttachmentsAction,
-  UpdatePlatformAttachmentAction
+  UpdatePlatformAttachmentAction,
+  LoadPlatformAction
 } from '@/store/platforms'
 
 import { Attachment } from '@/models/Attachment'
@@ -125,7 +126,7 @@ import { Rules } from '@/mixins/Rules'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment']),
+    ...mapActions('platforms', ['loadPlatformAttachment', 'loadPlatformAttachments', 'updatePlatformAttachment', 'loadPlatform']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -135,6 +136,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
 
   // vuex definition for typescript check
   platformAttachment!: PlatformsState['platformAttachment']
+  loadPlatform!: LoadPlatformAction
   loadPlatformAttachment!: LoadPlatformAttachmentAction
   updatePlatformAttachment!: UpdatePlatformAttachmentAction
   loadPlatformAttachments!: LoadPlatformAttachmentsAction
@@ -195,6 +197,13 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
       await this.updatePlatformAttachment({
         platformId: this.platformId,
         attachment: this.valueCopy
+      })
+      // update attachment previews
+      this.loadPlatform({
+        platformId: this.platformId,
+        includeImages: true,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
       })
       this.loadPlatformAttachments(this.platformId)
       this.$store.commit('snackbar/setSuccess', 'Attachment updated')

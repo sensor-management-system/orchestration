@@ -125,6 +125,7 @@ export default class DevicePage extends Vue {
         includeCustomFields: false,
         includeDeviceProperties: false,
         includeDeviceAttachments: false,
+        includeImages: true,
         includeCreatedBy: true,
         includeUpdatedBy: true
       })

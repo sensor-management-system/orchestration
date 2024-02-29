@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
@@ -79,7 +79,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { CreatePidAction, DevicesState, LoadDeviceAction, SaveDeviceAction } from '@/store/devices'
+import { CreatePidAction, DevicesState, LoadDeviceAction, SaveDeviceAction, LoadDeviceAttachmentsAction, SaveDeviceImagesAction } from '@/store/devices'
 
 import { Device } from '@/models/Device'
 
@@ -99,12 +99,12 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   middleware: ['auth'],
   computed: {
-    ...mapState('devices', ['device']),
+    ...mapState('devices', ['device', 'deviceAttachments']),
     ...mapGetters('vocabulary', ['countryNames'])
   },
   methods: {
     ...mapActions('vocabulary', ['loadCountries']),
-    ...mapActions('devices', ['saveDevice', 'loadDevice', 'createPid']),
+    ...mapActions('devices', ['loadDeviceAttachments', 'saveDevice', 'loadDevice', 'createPid', 'saveDeviceImages']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -120,11 +120,14 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
 
   // vuex definition for typescript check
   device!: DevicesState['device']
+  deviceAttachments!: DevicesState['deviceAttachments']
   saveDevice!: SaveDeviceAction
   loadDevice!: LoadDeviceAction
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  saveDeviceImages!: SaveDeviceImagesAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -150,6 +153,14 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
   async created () {
     if (this.device) {
       this.deviceCopy = Device.createFromObject(this.device)
+      try {
+        this.setLoading(true)
+        await this.loadDeviceAttachments(this.deviceId)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'failed to fetch attachments')
+      } finally {
+        this.setLoading(false)
+      }
     }
     await this.loadCountries()
   }
@@ -174,6 +185,15 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
       return
     }
 
+    // handle images first
+    try {
+      this.setLoading(true)
+      const savedImagesWithIds = await this.saveDeviceImages({ deviceId: this.deviceId, deviceImages: this.device!.images, deviceCopyImages: this.deviceCopy.images })
+      this.deviceCopy.images = savedImagesWithIds
+    } catch (e) {
+      this.$store.commit('snackbar/setWarning', 'Save of images failed')
+    }
+
     try {
       this.setLoading(true)
       const savedDevice = await this.saveDevice(this.deviceCopy)
@@ -184,12 +204,14 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
           this.$store.commit('snackbar/setError', 'Creation of Persistent Identifier failed')
         }
       }
+
       await this.loadDevice({
         deviceId: this.deviceId,
         includeContacts: false,
         includeCustomFields: false,
         includeDeviceProperties: false,
-        includeDeviceAttachments: false
+        includeDeviceAttachments: false,
+        includeImages: true
       })
       this.hasSaved = true
       this.$store.commit('snackbar/setSuccess', 'Device updated')

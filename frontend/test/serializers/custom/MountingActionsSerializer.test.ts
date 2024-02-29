@@ -266,6 +266,7 @@ describe('MountingActionsSerializer', () => {
             archived: false,
             country: '',
             attachments: [],
+            images: [],
             parameters: [],
             keywords: []
           }),
@@ -317,6 +318,7 @@ describe('MountingActionsSerializer', () => {
             permissionGroups: [],
             visibility: Visibility.Internal,
             attachments: [],
+            images: [],
             customFields: [],
             properties: [],
             parameters: [],
@@ -533,6 +535,7 @@ describe('MountingActionsSerializer', () => {
         archived: false,
         country: '',
         attachments: [],
+        images: [],
         parameters: [],
         keywords: []
       })
@@ -581,6 +584,7 @@ describe('MountingActionsSerializer', () => {
             visibility: Visibility.Internal,
             archived: false,
             attachments: [],
+            images: [],
             customFields: [],
             properties: [],
             parameters: [],
@@ -821,6 +825,7 @@ describe('MountingActionsSerializer', () => {
         visibility: Visibility.Internal,
         archived: false,
         attachments: [],
+        images: [],
         parameters: [],
         customFields: [],
         properties: [],
@@ -873,6 +878,7 @@ describe('MountingActionsSerializer', () => {
             visibility: Visibility.Internal,
             archived: false,
             attachments: [],
+            images: [],
             customFields: [],
             properties: [],
             parameters: [],

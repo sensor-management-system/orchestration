@@ -70,6 +70,7 @@ export interface IncludedRelationships {
   includeContacts?: boolean
   includeCustomFields?: boolean
   includeDeviceProperties?: boolean
+  includeImages?: boolean
   includeDeviceAttachments?: boolean
   includeDeviceParameters?: boolean
   includeCreatedBy?: boolean
@@ -86,6 +87,9 @@ function getIncludeParams (includes: IncludedRelationships): string {
   }
   if (includes.includeCustomFields) {
     listIncludedRelationships.push('customfields')
+  }
+  if (includes.includeImages) {
+    listIncludedRelationships.push('device_images.attachment')
   }
   if (includes.includeDeviceAttachments) {
     listIncludedRelationships.push('device_attachments')

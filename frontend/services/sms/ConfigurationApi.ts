@@ -75,6 +75,7 @@ import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/
 
 export interface IncludedRelationships {
   includeContacts?: boolean
+  includeImages?: boolean
   includeConfigurationParameters?: boolean
   includeCreatedBy?: boolean
   includeUpdatedBy?: boolean
@@ -84,6 +85,9 @@ function getIncludeParams (includes: IncludedRelationships): string {
   const listIncludedRelationships: string[] = []
   if (includes.includeContacts) {
     listIncludedRelationships.push('contacts')
+  }
+  if (includes.includeImages) {
+    listIncludedRelationships.push('configuration_images.attachment')
   }
   if (includes.includeConfigurationParameters) {
     listIncludedRelationships.push('configuration_parameters')

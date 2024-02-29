@@ -40,6 +40,7 @@ import { DateTime } from 'luxon'
 import { RootState } from '@/store'
 
 import { Attachment } from '@/models/Attachment'
+import { Image } from '@/models/Image'
 import { Configuration } from '@/models/Configuration'
 import { ConfigurationMountingAction } from '@/models/ConfigurationMountingAction'
 import { ContactRole } from '@/models/ContactRole'
@@ -419,6 +420,8 @@ export type FilteredActionsGetter = (filter: ConfigurationFilter) => ITimelineAc
 
 type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 
+export type DeleteConfigurationImageAction = (imageId: string) => Promise<void>
+export type SaveConfigurationImagesAction = (params: {configurationId: string, configurationImages: Image[], configurationCopyImages: Image[]}) => Promise<Image[]>
 export type SetSelectedDateAction = (params: DateTime | null) => void
 export type AddConfigurationContactRoleAction = (params: { configurationId: string, contactRole: ContactRole }) => Promise<void>
 export type AddDeviceMountActionAction = (params: { configurationId: string, deviceMountAction: DeviceMountAction }) => Promise<string>
@@ -478,6 +481,7 @@ export type SetPlatformMountActionAction = (action: PlatformMountAction) => void
 export type UpdateStaticLocationActionAction = (params: {configurationId: string, staticLocationAction: StaticLocationAction}) => Promise<string>
 export type UpdateDynamicLocationActionAction = (params: {configurationId: string, dynamicLocationAction: DynamicLocationAction}) => Promise<string>
 export type UpdateConfigurationAttachmentAction = (params: { configurationId: string, attachment: Attachment }) => Promise<Attachment>
+export type ClearConfigurationAttachmentsAction = () => void
 export type UpdateConfigurationGenericActionAction = (params: {configurationId: string,
   genericAction: GenericAction
 }) => Promise<string>
@@ -543,7 +547,8 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async loadConfiguration ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const configuration = await this.$api.configurations.findById(id, {
       includeCreatedBy: true,
-      includeUpdatedBy: true
+      includeUpdatedBy: true,
+      includeImages: true
     })
     commit('setConfiguration', configuration)
   },
@@ -715,6 +720,45 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async restoreConfiguration (_, id: string): Promise<void> {
     await this.$api.configurations.restoreById(id)
   },
+
+  deleteConfigurationImage (_, imageId: string): Promise<void> {
+    return this.$api.configurationImages.deleteById(imageId)
+  },
+  updateConfigurationImage (_, {
+    configurationId,
+    configurationImage
+  }: { configurationId: string, configurationImage: Image }): Promise<Image> {
+    return this.$api.configurationImages.update(configurationId, configurationImage)
+  },
+  addConfigurationImage (_, {
+    configurationId,
+    configurationImage
+  }: { configurationId: string, configurationImage: Image }): Promise<Image> {
+    return this.$api.configurationImages.add(configurationId, configurationImage)
+  },
+  async saveConfigurationImages (
+    { dispatch }: { dispatch: Dispatch }, {
+      configurationId,
+      configurationImages,
+      configurationCopyImages
+    }: {configurationId: string, configurationImages: Image[], configurationCopyImages: Image[]}): Promise<Image[]> {
+    const imagesToDelete = configurationImages.filter(el => !configurationCopyImages.map(i => i.id).includes(el.id))
+    imagesToDelete.forEach(async (configurationImage) => {
+      await dispatch('deleteConfigurationImage', configurationImage.id)
+    })
+    const images = configurationCopyImages
+    for (const i in images) {
+      const imageId = images[i].id
+      if (!imageId) {
+        images[i].id = (await dispatch('addConfigurationImage', { configurationId, configurationImage: images[i] })).id
+      } else if (configurationImages.find(i => i.id === imageId)?.orderIndex !== images[i].orderIndex) {
+        images[i].id = (await dispatch('updateConfigurationImage', { configurationId, configurationImage: images[i] })).id
+      }
+    }
+
+    return images
+  },
+
   saveConfiguration (_context, configuration: Configuration): Promise<Configuration> {
     return this.$api.configurations.save(configuration)
   },
@@ -897,6 +941,9 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     configurationCustomField
   }: { configurationId: string, configurationCustomField: CustomTextField }): Promise<CustomTextField> {
     return this.$api.configurationCustomfields.update(configurationId, configurationCustomField)
+  },
+  clearConfigurationAttachments ({ commit }: { commit: Commit }): void {
+    commit('setConfigurationAttachments', [])
   }
 }
 

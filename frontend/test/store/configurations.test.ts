@@ -30,7 +30,7 @@
  * permissions and limitations under the Licence.
  */
 import { DateTime } from 'luxon'
-import storeConfig from './../../store/configurations'
+import storeConfig from '@/store/configurations'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'

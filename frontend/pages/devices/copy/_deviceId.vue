@@ -147,7 +147,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
-import { LoadDeviceAction, CopyDeviceAction, DevicesState, CreatePidAction } from '@/store/devices'
+import { LoadDeviceAction, CopyDeviceAction, DevicesState, CreatePidAction, LoadDeviceAttachmentsAction } from '@/store/devices'
 
 import { Device } from '@/models/Device'
 
@@ -171,7 +171,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   methods: {
     ...mapActions('vocabulary', ['loadCountries']),
-    ...mapActions('devices', ['copyDevice', 'loadDevice', 'createPid']),
+    ...mapActions('devices', ['copyDevice', 'loadDevice', 'createPid', 'loadDeviceAttachments']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -206,6 +206,7 @@ export default class DeviceCopyPage extends Vue {
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
   setShowBackButton!: SetShowBackButtonAction
+  loadDeviceAttachments!: LoadDeviceAttachmentsAction
 
   async created () {
     this.initializeAppBar()
@@ -218,9 +219,11 @@ export default class DeviceCopyPage extends Vue {
           includeCustomFields: true,
           includeDeviceProperties: true,
           includeDeviceAttachments: true,
+          includeImages: true,
           includeDeviceParameters: true
         }),
-        this.loadCountries()
+        this.loadCountries(),
+        this.loadDeviceAttachments(this.deviceId)
       ])
 
       if (!this.device || !this.canAccessEntity(this.device)) {

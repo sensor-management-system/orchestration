@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -81,6 +81,16 @@ class PlatformSchema(Schema):
         allow_none=True,
         schema="PlatformAttachmentSchema",
         type_="platform_attachment",
+        id_field="id",
+    )
+    platform_images = Relationship(
+        related_view="api.platform_image_list",
+        related_view_kwargs={"filter[platform_id]": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="PlatformImageSchema",
+        type_="platform_image",
         id_field="id",
     )
     platform_parameters = Relationship(

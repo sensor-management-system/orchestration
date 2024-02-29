@@ -67,6 +67,10 @@ export class DeviceAttachmentSerializer implements IAttachmentSerializer {
     return this.serializer.convertJsonApiRelationshipsModelList(relationships, included)
   }
 
+  convertJsonApiRelationshipsSingleModel (relationships: IJsonApiRelationships, included: IJsonApiEntityWithOptionalAttributes[]): Attachment | null {
+    return this.serializer.convertJsonApiRelationshipsSingleModel(relationships, included)
+  }
+
   convertModelListToJsonApiRelationshipObject (attachments: IAttachment[]): IJsonApiTypedEntityWithoutDetailsDataDictList {
     return this.serializer.convertModelListToJsonApiRelationshipObject(attachments)
   }

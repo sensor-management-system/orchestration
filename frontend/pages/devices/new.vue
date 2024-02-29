@@ -71,7 +71,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
-import { CreatePidAction, SaveDeviceAction } from '@/store/devices'
+import { CreatePidAction, SaveDeviceAction, ClearDeviceAttachmentsAction } from '@/store/devices'
 
 import DeviceBasicDataForm from '@/components/DeviceBasicDataForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
@@ -95,7 +95,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   methods: {
     ...mapActions('vocabulary', ['loadCountries']),
-    ...mapActions('devices', ['saveDevice', 'createPid']),
+    ...mapActions('devices', ['saveDevice', 'createPid', 'clearDeviceAttachments']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -118,9 +118,12 @@ export default class DeviceNewPage extends Vue {
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
   setShowBackButton!: SetShowBackButtonAction
+  clearDeviceAttachments!: ClearDeviceAttachmentsAction
 
   async created () {
     this.initializeAppBar()
+    this.clearDeviceAttachments()
+
     try {
       await this.loadCountries()
     } catch (e) {

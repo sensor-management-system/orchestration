@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2020-2024
 - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -80,7 +80,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { PlatformsState, LoadPlatformAction, SavePlatformAction, CreatePidAction } from '@/store/platforms'
+import { PlatformsState, LoadPlatformAction, SavePlatformAction, LoadPlatformAttachmentsAction, SavePlatformImagesAction, CreatePidAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
 
@@ -100,12 +100,12 @@ import { LoadCountriesAction } from '@/store/vocabulary'
   },
   middleware: ['auth'],
   computed: {
-    ...mapState('platforms', ['platform']),
+    ...mapState('platforms', ['platform', 'platformAttachments']),
     ...mapGetters('vocabulary', ['countryNames'])
   },
   methods: {
     ...mapActions('vocabulary', ['loadCountries']),
-    ...mapActions('platforms', ['loadPlatform', 'savePlatform', 'createPid']),
+    ...mapActions('platforms', ['loadPlatform', 'savePlatform', 'createPid', 'savePlatformImages', 'loadPlatformAttachments']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -126,6 +126,8 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
   createPid!: CreatePidAction
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
+  savePlatformImages!: SavePlatformImagesAction
   /**
    * route to which the user is redirected when he is not allowed to access the page
    *
@@ -151,6 +153,14 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
   async created () {
     if (this.platform) {
       this.platformCopy = Platform.createFromObject(this.platform)
+      try {
+        this.setLoading(true)
+        await this.loadPlatformAttachments(this.platformId)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'failed to fetch attachments')
+      } finally {
+        this.setLoading(false)
+      }
     }
     await this.loadCountries()
   }
@@ -175,6 +185,15 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
       return
     }
 
+    // handle images first
+    try {
+      this.setLoading(true)
+      const savedImagesWithIds = await this.savePlatformImages({ platformId: this.platformId, platformImages: this.platform!.images, platformCopyImages: this.platformCopy.images })
+      this.platformCopy.images = savedImagesWithIds
+    } catch (e) {
+      this.$store.commit('snackbar/setWarning', 'Save of images failed')
+    }
+
     try {
       this.setLoading(true)
       const savedPlatform = await this.savePlatform(this.platformCopy)
@@ -188,6 +207,7 @@ export default class PlatformEditBasicPage extends mixins(CheckEditAccess) {
       await this.loadPlatform({
         platformId: this.platformId,
         includeContacts: false,
+        includeImages: true,
         includePlatformAttachments: false
       })
       this.hasSaved = true

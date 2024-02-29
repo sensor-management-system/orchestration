@@ -9,6 +9,7 @@ SPDX-License-Identifier: HEESIL-1.0
 ## 1.13.0 (Unreleased)
 
 Added:
+- Image attachments of devices, platforms, configurations and sites can now be selected as rendered preview images on the `Basic Data` tab
 - Mount actions listed in the 'actions' tab of a configuration now have the "edit" option, which redirect to the edit form of that mount action   
 - Mounts can have explicit coordinates
 - Shortcut to add a value for a parameter of device, platform or configuration 

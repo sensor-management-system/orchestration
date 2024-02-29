@@ -31,6 +31,7 @@
  */
 import { DateTime } from 'luxon'
 
+import { Image, IImage } from '@/models/Image'
 import { IContact, Contact } from '@/models/Contact'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { CustomTextField, ICustomTextField } from '@/models/CustomTextField'
@@ -79,6 +80,7 @@ export interface IDevice extends IPermissionableMultipleGroups, IMetaCreationInf
   properties: DeviceProperty[]
   customFields: ICustomTextField[]
   attachments: IAttachment[]
+  images: IImage[]
   parameters: IParameter[]
   permissionGroups: IPermissionGroup[]
   keywords: string[]
@@ -121,6 +123,7 @@ export class Device implements IDevice, IVisible {
   private _contacts: Contact[] = []
   private _properties: DeviceProperty[] = []
   private _customFields: CustomTextField[] = []
+  private _images: Image[] = []
   private _attachments: Attachment[] = []
   private _parameters: Parameter[] = []
   private _permissionGroups: PermissionGroup[] = []
@@ -310,6 +313,14 @@ export class Device implements IDevice, IVisible {
     this._customFields = customFields
   }
 
+  set images (images: Image[]) {
+    this._images = images
+  }
+
+  get images (): Image[] {
+    return this._images
+  }
+
   get attachments (): Attachment[] {
     return this._attachments
   }
@@ -439,6 +450,7 @@ export class Device implements IDevice, IVisible {
     newObject.properties = someObject.properties.map(DeviceProperty.createFromObject)
     newObject.customFields = someObject.customFields.map(CustomTextField.createFromObject)
     newObject.attachments = someObject.attachments.map(Attachment.createFromObject)
+    newObject.images = someObject.images.map(Image.createFromObject)
     newObject.parameters = someObject.parameters.map(Parameter.createFromObject)
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
     newObject.keywords = [...someObject.keywords]

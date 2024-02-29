@@ -102,6 +102,16 @@ permissions and limitations under the Licence.
         </v-text-field>
       </v-col>
     </v-row>
+    <v-row align="center">
+      <v-col v-if="configurationAttachments.length > 0" cols="12">
+        <AttachmentImagesForm
+          :attachments="configurationAttachments"
+          :value="value.images"
+          :download-attachment="downloadAttachment"
+          @input="update('images', $event)"
+        />
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12" md="3">
         <date-time-picker
@@ -198,22 +208,25 @@ import Validator from '@/utils/validator'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PermissionGroupSelect from '@/components/PermissionGroupSelect.vue'
 import VisibilitySwitch from '@/components/VisibilitySwitch.vue'
+import AttachmentImagesForm from '@/components/shared/AttachmentImagesForm.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import { SearchSitesAction, SitesState } from '@/store/sites'
+import { DownloadAttachmentAction, ConfigurationsState } from '@/store/configurations'
 
 @Component({
   components: {
     VisibilitySwitch,
     PermissionGroupSelect,
     DateTimePicker,
-    AutocompleteTextInput
+    AutocompleteTextInput,
+    AttachmentImagesForm
   },
   computed: {
-    ...mapState('configurations', ['configurationStates']),
+    ...mapState('configurations', ['configurationStates', 'configurationAttachments']),
     ...mapState('sites', ['sites'])
   },
   methods: {
-    ...mapActions('configurations', ['loadConfigurationsStates']),
+    ...mapActions('configurations', ['loadConfigurationsStates', 'downloadAttachment']),
     ...mapActions('sites', ['searchSites'])
   }
 })
@@ -230,6 +243,8 @@ export default class ConfigurationsBasicDataForm extends Vue {
   private newKeyword = ''
 
   // vuex definition for typescript check
+  configurationAttachments!: ConfigurationsState['configurationAttachments']
+  downloadAttachment!: DownloadAttachmentAction
   loadConfigurationsStates!: () => void
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
@@ -252,7 +267,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   }
 
   update (
-    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'startDate' | 'endDate' | 'siteId' | 'description' | 'project'>,
+    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'images' | 'startDate' | 'endDate' | 'siteId' | 'description' | 'project'>,
     value: any
   ) {
     if (key in this.value) {

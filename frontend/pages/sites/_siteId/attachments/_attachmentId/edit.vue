@@ -99,7 +99,8 @@ import {
   SitesState,
   LoadSiteAttachmentsAction,
   LoadSiteAttachmentAction,
-  UpdateSiteAttachmentAction
+  UpdateSiteAttachmentAction,
+  LoadSiteAction
 } from '@/store/sites'
 
 import { Attachment } from '@/models/Attachment'
@@ -127,7 +128,7 @@ import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('sites', ['loadSiteAttachment', 'loadSiteAttachments', 'updateSiteAttachment']),
+    ...mapActions('sites', ['loadSiteAttachment', 'loadSiteAttachments', 'updateSiteAttachment', 'loadSite']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -137,6 +138,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
 
   // vuex definition for typescript check
   siteAttachment!: SitesState['siteAttachment']
+  loadSite!: LoadSiteAction
   loadSiteAttachment!: LoadSiteAttachmentAction
   loadSiteAttachments!: LoadSiteAttachmentsAction
   updateSiteAttachment!: UpdateSiteAttachmentAction
@@ -197,6 +199,13 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
       await this.updateSiteAttachment({
         siteId: this.siteId,
         attachment: this.valueCopy
+      })
+      // update attachment previews
+      this.loadSite({
+        siteId: this.siteId,
+        includeImages: true,
+        includeCreatedBy: true,
+        includeUpdatedBy: true
       })
       this.loadSiteAttachments(this.siteId)
       this.$store.commit('snackbar/setSuccess', 'Attachment updated')

@@ -49,6 +49,7 @@ import {
 } from '@/serializers/jsonapi/JsonApiTypes'
 
 import { IMissingAttachmentData } from '@/serializers/jsonapi/AttachmentSerializer'
+import { DeviceImageSerializer } from '@/serializers/jsonapi/ImageSerializer'
 import { ContactSerializer, IMissingContactData } from '@/serializers/jsonapi/ContactSerializer'
 import {
   CustomTextFieldSerializer,
@@ -75,6 +76,7 @@ export interface IDeviceWithMeta {
 }
 
 export class DeviceSerializer {
+  private imageSerializer: DeviceImageSerializer = new DeviceImageSerializer()
   private attachmentSerializer: DeviceAttachmentSerializer = new DeviceAttachmentSerializer()
   private contactSerializer: ContactSerializer = new ContactSerializer()
   private customTextFieldSerializer: CustomTextFieldSerializer = new CustomTextFieldSerializer()
@@ -135,6 +137,9 @@ export class DeviceSerializer {
 
       result.archived = attributes.archived || false
     }
+
+    const images = this.imageSerializer.convertJsonApiRelationshipsModelList(relationships, included)
+    result.images = images
 
     const attachmentsWithMissing = this.attachmentSerializer.convertJsonApiRelationshipsModelList(relationships, included)
     result.attachments = attachmentsWithMissing.attachments
@@ -284,12 +289,14 @@ export class DeviceSerializer {
       const attachments = this.attachmentSerializer.convertModelListToJsonApiRelationshipObject(device.attachments)
       const contacts = this.contactSerializer.convertModelListToJsonApiRelationshipObject(device.contacts)
       const parameters = this.parameterSerializer.convertModelListToJsonApiRelationshipObject(device.parameters)
+      const images = this.imageSerializer.convertModelListToJsonApiRelationshipObject(device.images)
       data.relationships = {
         ...contacts,
         ...properties,
         ...attachments,
         ...customfields,
-        ...parameters
+        ...parameters,
+        ...images
       }
     }
 

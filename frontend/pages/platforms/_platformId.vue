@@ -120,6 +120,7 @@ export default class PlatformPage extends Vue {
         platformId: this.platformId,
         includeContacts: false,
         includePlatformAttachments: false,
+        includeImages: true,
         includeCreatedBy: true,
         includeUpdatedBy: true
       }

@@ -33,38 +33,50 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row>
-      <v-col cols="12">
-        <label>Visibility / Permissions</label>
-        <VisibilityChip
-          v-model="value.visibility"
+    <v-row align="center">
+      <v-col>
+        <v-row>
+          <v-col>
+            <label>Visibility / Permissions</label>
+            <VisibilityChip
+              v-model="value.visibility"
+            />
+            <PermissionGroupChips
+              v-model="value.permissionGroups"
+            />
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12" :md="deviceImagesShouldBeRendered ? 12 : 6">
+            <label>URN</label>
+            {{ deviceURN }}
+          </v-col>
+          <v-col cols="12" :md="deviceImagesShouldBeRendered ? 12 : 6">
+            <label>Persistent identifier (PID)</label>
+            <pid-tooltip
+              :value="value.persistentIdentifier"
+              show-button
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" :md="deviceImagesShouldBeRendered ? 12 : 6">
+            <label>Short name</label>
+            {{ value.shortName | orDefault }}
+          </v-col>
+          <v-col cols="12" :md="deviceImagesShouldBeRendered ? 12 : 6">
+            <label>Long name</label>
+            {{ value.longName | orDefault }}
+          </v-col>
+        </v-row>
+      </v-col>
+
+      <v-col v-if="deviceImagesShouldBeRendered" cols="12" md="6">
+        <AttachmentImagesCarousel
+          :value="value.images"
+          :download-attachment="downloadAttachment"
         />
-        <PermissionGroupChips
-          v-model="value.permissionGroups"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <label>URN</label>
-        {{ deviceURN }}
-      </v-col>
-      <v-col cols="12" md="6">
-        <label>Persistent identifier (PID)</label>
-        <pid-tooltip
-          :value="value.persistentIdentifier"
-          show-button
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <label>Short name</label>
-        {{ value.shortName | orDefault }}
-      </v-col>
-      <v-col cols="12" md="6">
-        <label>Long name</label>
-        {{ value.longName | orDefault }}
       </v-col>
     </v-row>
     <v-row>
@@ -185,6 +197,7 @@ permissions and limitations under the Licence.
 
 <script lang="ts">
 import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { mapActions } from 'vuex'
 
 import { Device } from '@/models/Device'
 import { DeviceType } from '@/models/DeviceType'
@@ -193,9 +206,11 @@ import { Manufacturer } from '@/models/Manufacturer'
 
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 import PidTooltip from '@/components/shared/PidTooltip.vue'
+import AttachmentImagesCarousel from '@/components/shared/AttachmentImagesCarousel.vue'
 import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 
+import { DownloadAttachmentAction } from '@/store/devices'
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 @Component({
@@ -203,13 +218,20 @@ import { createDeviceUrn } from '@/modelUtils/urnBuilders'
     PermissionGroupChips,
     PidTooltip,
     QrCodeDialog,
-    VisibilityChip
+    VisibilityChip,
+    AttachmentImagesCarousel
+  },
+  methods: {
+    ...mapActions('devices', ['downloadAttachment'])
   }
 })
 export default class DeviceBasicData extends Vue {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
   private deviceTypes: DeviceType[] = []
+
+  // vuex definition for typescript check
+  downloadAttachment!: DownloadAttachmentAction
 
   @Prop({
     default: () => new Device(),
@@ -298,6 +320,10 @@ export default class DeviceBasicData extends Vue {
 
   get deviceURN () {
     return createDeviceUrn(this.value, this.manufacturers)
+  }
+
+  get deviceImagesShouldBeRendered () {
+    return this.value.images.length > 0
   }
 
   /**

@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -67,6 +67,7 @@ import {
   sortActions
 } from '@/utils/actionHelper'
 import { ContactWithRoles } from '@/models/ContactWithRoles'
+import { Image } from '@/models/Image'
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfDeviceActionType
@@ -211,6 +212,7 @@ export type AddDeviceParameterChangeActionAction = (params: { parameterId: strin
 export type AddDeviceSoftwareUpdateAction = (params: { deviceId: string, softwareUpdateAction: SoftwareUpdateAction }) => Promise<SoftwareUpdateAction>
 export type ArchiveDeviceAction = (id: string) => Promise<void>
 export type ClearDeviceAvailabilitiesAction = () => void
+export type ClearDeviceAttachmentsAction = () => void
 export type CopyDeviceAction = (params: {device: Device, copyContacts: boolean, copyAttachments: boolean, copyMeasuredQuantities: boolean, copyParameters: boolean, copyCustomFields: boolean, originalDeviceId: string}) => Promise<string>
 export type CreatePidAction = (id: string | null) => Promise<string>
 export type DeleteDeviceAction = (id: string) => Promise<void>
@@ -218,6 +220,7 @@ export type DeleteDeviceAttachmentAction = (attachmentId: string) => Promise<voi
 export type DeleteDeviceCalibrationAction = (calibrationActionId: string) => Promise<void>
 export type DeleteDeviceCustomFieldAction = (customFieldId: string) => Promise<void>
 export type DeleteDeviceGenericAction = (genericActionId: string) => Promise<void>
+export type DeleteDeviceImageAction = (imageId: string) => Promise<void>
 export type DeleteDeviceMeasuredQuantityAction = (measuredQuantityId: string) => Promise<void>
 export type DeleteDeviceParameterAction = (parameterId: string) => Promise<void>
 export type DeleteDeviceParameterChangeActionAction = (actionId: string) => Promise<void>
@@ -251,6 +254,7 @@ export type RemoveDeviceContactRoleAction = (params: { deviceContactRoleId: stri
 export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
 export type RestoreDeviceAction = (id: string) => Promise<void>
 export type SaveDeviceAction = (device: Device) => Promise<Device>
+export type SaveDeviceImagesAction = (params: {deviceId: string, deviceImages: Image[], deviceCopyImages: Image[]}) => Promise<Image[]>
 export type SearchDevicesPaginatedAction = (searchParams: IDeviceSearchParams) => Promise<void>
 export type SetChosenKindOfDeviceActionAction = (newval: IOptionsForActionType | null) => void
 export type SetPageNumberAction = (newPageNumber: number) => void
@@ -306,6 +310,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       includeCustomFields,
       includeDeviceProperties,
       includeDeviceAttachments,
+      includeImages,
       includeDeviceParameters,
       includeCreatedBy,
       includeUpdatedBy
@@ -316,6 +321,7 @@ const actions: ActionTree<DevicesState, RootState> = {
       includeCustomFields,
       includeDeviceProperties,
       includeDeviceAttachments,
+      includeImages,
       includeDeviceParameters,
       includeCreatedBy,
       includeUpdatedBy
@@ -546,6 +552,43 @@ const actions: ActionTree<DevicesState, RootState> = {
   }: { deviceContactRoleId: string }): Promise<void> {
     return this.$api.devices.removeContact(deviceContactRoleId)
   },
+  deleteDeviceImage (_, imageId: string): Promise<void> {
+    return this.$api.deviceImages.deleteById(imageId)
+  },
+  updateDeviceImage (_, {
+    deviceId,
+    deviceImage
+  }: { deviceId: string, deviceImage: Image }): Promise<Image> {
+    return this.$api.deviceImages.update(deviceId, deviceImage)
+  },
+  addDeviceImage (_, {
+    deviceId,
+    deviceImage
+  }: { deviceId: string, deviceImage: Image }): Promise<Image> {
+    return this.$api.deviceImages.add(deviceId, deviceImage)
+  },
+  async saveDeviceImages (
+    { dispatch }: { dispatch: Dispatch }, {
+      deviceId,
+      deviceImages,
+      deviceCopyImages
+    }: {deviceId: string, deviceImages: Image[], deviceCopyImages: Image[]}): Promise<Image[]> {
+    const imagesToDelete = deviceImages.filter(el => !deviceCopyImages.map(i => i.id).includes(el.id))
+    imagesToDelete.forEach(async (deviceImage) => {
+      await dispatch('deleteDeviceImage', deviceImage.id)
+    })
+    const images = deviceCopyImages
+    for (const i in images) {
+      const imageId = images[i].id
+      if (!imageId) {
+        images[i].id = (await dispatch('addDeviceImage', { deviceId, deviceImage: images[i] })).id
+      } else if (deviceImages.find(i => i.id === imageId)?.orderIndex !== images[i].orderIndex) {
+        images[i].id = (await dispatch('updateDeviceImage', { deviceId, deviceImage: images[i] })).id
+      }
+    }
+
+    return images
+  },
   saveDevice (_, device: Device): Promise<Device> {
     return this.$api.devices.save(device)
   },
@@ -577,20 +620,35 @@ const actions: ActionTree<DevicesState, RootState> = {
         }))
       }
     }
-    if (copyAttachments) {
-      const attachments = device.attachments.map(Attachment.createFromObject)
-      for (const attachment of attachments) {
-        attachment.id = null
-        if (attachment.isUpload) {
-          const blob = await dispatch('downloadAttachment', attachment.url)
-          const filename = getLastPathElement(attachment.url)
-          const uploadResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
-          const newUrl = uploadResult.url
-          attachment.url = newUrl
-        }
-        related.push(dispatch('addDeviceAttachment', { deviceId: savedDeviceId, attachment }))
+
+    const deviceImages = device.images.map(Image.createFromObject)
+    const deviceAttachments = device.attachments.map(Attachment.createFromObject)
+    for (const attachment of deviceAttachments) {
+      // copy if attachments should be copied or copied images include attachment
+      if (!copyAttachments && !deviceImages.map(i => i.attachment?.id).includes(attachment.id)) {
+        continue
       }
+
+      const oldAttachmentId = attachment.id
+      attachment.id = null
+
+      if (attachment.isUpload) {
+        const blob = await dispatch('downloadAttachment', attachment.url)
+        const filename = getLastPathElement(attachment.url)
+        const uploadResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
+        const newUrl = uploadResult.url
+        attachment.url = newUrl
+      }
+      const savedAttachment = await dispatch('addDeviceAttachment', { deviceId: savedDeviceId, attachment })
+
+      const deviceImageToCopy = deviceImages.find(i => i.attachment?.id && i.attachment.id === oldAttachmentId)
+      if (!deviceImageToCopy) { continue }
+      const deviceImage = Image.createFromObject(deviceImageToCopy)
+      deviceImage.id = ''
+      deviceImage.attachment = savedAttachment
+      related.push(dispatch('addDeviceImage', { deviceId: savedDeviceId, deviceImage }))
     }
+
     if (copyMeasuredQuantities) {
       const measuredQuantities = device.properties.map(DeviceProperty.createFromObject)
       for (const measuredQuantity of measuredQuantities) {
@@ -678,6 +736,9 @@ const actions: ActionTree<DevicesState, RootState> = {
   },
   clearDeviceAvailabilities ({ commit }: { commit: Commit }) {
     commit('setDeviceAvailabilities', [])
+  },
+  clearDeviceAttachments ({ commit }: { commit: Commit }): void {
+    commit('setDeviceAttachments', [])
   }
 }
 

@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
 import { Component, Vue, InjectReactive } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { LoadConfigurationAttachmentsAction, DeleteConfigurationAttachmentAction, ConfigurationsState, DownloadAttachmentAction } from '@/store/configurations'
+import { LoadConfigurationAttachmentsAction, DeleteConfigurationAttachmentAction, ConfigurationsState, DownloadAttachmentAction, DeleteConfigurationImageAction, LoadConfigurationAction } from '@/store/configurations'
 
 import { Attachment } from '@/models/Attachment'
 import { Visibility } from '@/models/Visibility'
@@ -127,6 +127,7 @@ import HintCard from '@/components/HintCard.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { getLastPathElement } from '@/utils/urlHelpers'
+import { Image } from '@/models/Image'
 
 @Component({
   components: { DotMenuActionDelete, HintCard, DeleteDialog, AttachmentListItem, BaseList, DownloadDialog },
@@ -135,7 +136,7 @@ import { getLastPathElement } from '@/utils/urlHelpers'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('configurations', ['loadConfigurationAttachments', 'deleteConfigurationAttachment', 'downloadAttachment']),
+    ...mapActions('configurations', ['loadConfiguration', 'loadConfigurationAttachments', 'deleteConfigurationAttachment', 'deleteConfigurationImage', 'downloadAttachment']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
@@ -153,9 +154,11 @@ export default class ConfigurationAttachmentShowPage extends Vue {
   configurationAttachments!: ConfigurationsState['configurationAttachments']
   configuration!: ConfigurationsState['configuration']
   deleteConfigurationAttachment!: DeleteConfigurationAttachmentAction
+  deleteConfigurationImage!: DeleteConfigurationImageAction
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   downloadAttachment!: DownloadAttachmentAction
   setLoading!: SetLoadingAction
+  loadConfiguration!: LoadConfigurationAction
 
   get configurationId (): string {
     return this.$route.params.configurationId
@@ -177,11 +180,21 @@ export default class ConfigurationAttachmentShowPage extends Vue {
     }
     try {
       this.setLoading(true)
+      if (this.configurationImageUsingAttachment?.id) {
+        await this.deleteConfigurationImage(this.configurationImageUsingAttachment.id)
+      }
       const attachmendId = this.attachmentToDelete.id
       this.closeDialog()
       await this.deleteConfigurationAttachment(attachmendId)
-      this.loadConfigurationAttachments(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'Attachment deleted')
+
+      // update attachment previews
+      try {
+        await this.loadConfigurationAttachments(this.configurationId)
+        this.loadConfiguration(this.configurationId)
+      } catch (_error) {
+        this.$store.commit('snackbar/setWarning', 'Failed to load configuration')
+      }
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')
     } finally {
@@ -201,6 +214,10 @@ export default class ConfigurationAttachmentShowPage extends Vue {
 
   openAttachment (attachment: Attachment) {
     this.initDowloadDialog(attachment)
+  }
+
+  get configurationImageUsingAttachment (): Image | null {
+    return this.configuration?.images.find(image => image.attachment?.id === this.attachmentToDelete?.id) ?? null
   }
 
   get selectedAttachmentFilename (): string {

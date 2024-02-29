@@ -77,7 +77,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { SitesState, LoadSiteAction, SaveSiteAction } from '@/store/sites'
+import { SitesState, LoadSiteAction, SaveSiteAction, LoadSiteAttachmentsAction, SaveSiteImagesAction } from '@/store/sites'
 
 import { Site } from '@/models/Site'
 
@@ -102,7 +102,7 @@ import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountri
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
   },
   methods: {
-    ...mapActions('sites', ['saveSite', 'loadSite']),
+    ...mapActions('sites', ['saveSite', 'loadSite', 'loadSiteAttachments', 'saveSiteImages']),
     ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -115,6 +115,7 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
 
   // vuex definition for typescript check
   site!: SitesState['site']
+  siteAttachments!: SitesState['siteAttachments']
   saveSite!: SaveSiteAction
   loadSite!: LoadSiteAction
   siteUsages!: VocabularyState['siteUsages']
@@ -124,6 +125,8 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   countryNames!: CountryNamesGetter
   loadCountries!: LoadCountriesAction
   setLoading!: SetLoadingAction
+  loadSiteAttachments!: LoadSiteAttachmentsAction
+  saveSiteImages!: SaveSiteImagesAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -159,9 +162,17 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
     }
   }
 
-  created () {
+  async created () {
     if (this.site) {
       this.siteCopy = Site.createFromObject(this.site)
+      try {
+        this.setLoading(true)
+        await this.loadSiteAttachments(this.siteId)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'failed to fetch attachments')
+      } finally {
+        this.setLoading(false)
+      }
     }
   }
 
@@ -195,11 +206,21 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
       return
     }
 
+    // handle images first
+    try {
+      this.setLoading(true)
+      const savedImagesWithIds = await this.saveSiteImages({ siteId: this.siteId, siteImages: this.site!.images, siteCopyImages: this.siteCopy.images })
+      this.siteCopy.images = savedImagesWithIds
+    } catch (e) {
+      this.$store.commit('snackbar/setWarning', 'Save of images failed')
+    }
+
     try {
       this.setLoading(true)
       const savedSite = await this.saveSite(this.siteCopy)
       await this.loadSite({
-        siteId: savedSite.id
+        siteId: savedSite.id,
+        includeImages: true
       })
       this.hasSaved = true
       this.$store.commit('snackbar/setSuccess', 'Site / Lab updated')

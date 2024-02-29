@@ -34,67 +34,77 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row>
-      <v-col cols="12">
-        <label>Visibility / Permissions</label>
-        <VisibilityChip
-          v-model="value.visibility"
+    <v-row align="center">
+      <v-col>
+        <v-row>
+          <v-col>
+            <label>Visibility / Permissions</label>
+            <VisibilityChip
+              v-model="value.visibility"
+            />
+            <PermissionGroupChips
+              :value="value.permissionGroup ? [value.permissionGroup] : []"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 12 : 6">
+            <label>Persistent identifier (PID)</label>
+            <pid-tooltip
+              :value="value.persistentIdentifier"
+              show-button
+            />
+          </v-col>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+            <label>Label</label>
+            {{ value.label }}
+          </v-col>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+            <label>Status</label>
+            {{ value.status | orDefault }}
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+            <label>Start date</label>
+            <span v-if="value.startDate">
+              {{ value.startDate | toUtcDateTimeStringHHMM | orDefault }}
+              <span class="text-caption text--secondary">(UTC)</span>
+            </span>
+            <span v-else>
+              {{ null | orDefault }}
+            </span>
+          </v-col>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+            <label>End date</label>
+            <span v-if="value.endDate">
+              {{ value.endDate | toUtcDateTimeStringHHMM | orDefault }}
+              <span class="text-caption text--secondary">(UTC)</span>
+            </span>
+            <span v-else>
+              {{ null | orDefault }}
+            </span>
+          </v-col>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+            <label>Project</label>
+            {{ value.project | orDefault }}
+          </v-col>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+            <label>Site / Lab</label>
+            <span v-if="value.siteId && site">
+              <nuxt-link :to="'/sites/' + value.siteId" target="_blank">{{ site.label }}</nuxt-link><v-icon small>mdi-open-in-new</v-icon>
+            </span>
+            <span v-else>
+              {{ null | orDefault }}
+            </span>
+          </v-col>
+        </v-row>
+      </v-col>
+      <v-col v-if="configurationImagesShouldBeRendered" cols="12" md="6">
+        <AttachmentImagesCarousel
+          :value="value.images"
+          :download-attachment="downloadAttachment"
         />
-        <PermissionGroupChips
-          :value="value.permissionGroup ? [value.permissionGroup] : []"
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <label>Label</label>
-        {{ value.label }}
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>Status</label>
-        {{ value.status | orDefault }}
-      </v-col>
-      <v-col cols="12" md="6">
-        <label>Persistent identifier (PID)</label>
-        <pid-tooltip
-          :value="value.persistentIdentifier"
-          show-button
-        />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <label>Start date</label>
-        <span v-if="value.startDate">
-          {{ value.startDate | toUtcDateTimeStringHHMM | orDefault }}
-          <span class="text-caption text--secondary">(UTC)</span>
-        </span>
-        <span v-else>
-          {{ null | orDefault }}
-        </span>
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>End date</label>
-        <span v-if="value.endDate">
-          {{ value.endDate | toUtcDateTimeStringHHMM | orDefault }}
-          <span class="text-caption text--secondary">(UTC)</span>
-        </span>
-        <span v-else>
-          {{ null | orDefault }}
-        </span>
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>Project</label>
-        {{ value.project | orDefault }}
-      </v-col>
-      <v-col cols="12" md="3">
-        <label>Site / Lab</label>
-        <span v-if="value.siteId && site">
-          <nuxt-link :to="'/sites/' + value.siteId" target="_blank">{{ site.label }}</nuxt-link><v-icon small>mdi-open-in-new</v-icon>
-        </span>
-        <span v-else>
-          {{ null | orDefault }}
-        </span>
       </v-col>
     </v-row>
     <v-row>
@@ -127,10 +137,12 @@ import { Configuration } from '@/models/Configuration'
 import { Site } from '@/models/Site'
 
 import { SearchSitesAction, SitesState } from '@/store/sites'
+import { DownloadAttachmentAction } from '@/store/devices'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 import PidTooltip from '@/components/shared/PidTooltip.vue'
+import AttachmentImagesCarousel from '@/components/shared/AttachmentImagesCarousel.vue'
 import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 
@@ -140,10 +152,14 @@ import VisibilityChip from '@/components/VisibilityChip.vue'
     PermissionGroupChips,
     PidTooltip,
     QrCodeDialog,
-    VisibilityChip
+    VisibilityChip,
+    AttachmentImagesCarousel
   },
   computed: mapState('sites', ['sites']),
-  methods: mapActions('sites', ['searchSites'])
+  methods: {
+    ...mapActions('sites', ['searchSites']),
+    ...mapActions('configurations', ['downloadAttachment'])
+  }
 })
 export default class ConfigurationsBasicDataForm extends Vue {
   @Prop({ default: false, type: Boolean }) readonly readonly!: boolean
@@ -157,6 +173,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   // vuex definition for typescript check
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
+  downloadAttachment!: DownloadAttachmentAction
 
   async mounted () {
     try {
@@ -190,6 +207,10 @@ export default class ConfigurationsBasicDataForm extends Vue {
 
   public validateForm (): boolean {
     return (this.$refs.basicDataForm as Vue & { validate: () => boolean }).validate()
+  }
+
+  get configurationImagesShouldBeRendered () {
+    return this.value.images.length > 0
   }
 }
 </script>

@@ -19,6 +19,7 @@ from ..models import (
     ConfigurationContactRole,
     ConfigurationCustomField,
     ConfigurationDynamicLocationBeginAction,
+    ConfigurationImage,
     ConfigurationParameter,
     ConfigurationParameterValueChangeAction,
     ConfigurationStaticLocationBeginAction,
@@ -30,6 +31,7 @@ from ..models import (
     DeviceCalibrationAction,
     DeviceCalibrationAttachment,
     DeviceContactRole,
+    DeviceImage,
     DeviceMountAction,
     DeviceParameter,
     DeviceParameterValueChangeAction,
@@ -46,6 +48,7 @@ from ..models import (
     Platform,
     PlatformAttachment,
     PlatformContactRole,
+    PlatformImage,
     PlatformMountAction,
     PlatformParameter,
     PlatformParameterValueChangeAction,
@@ -54,6 +57,7 @@ from ..models import (
     Site,
     SiteAttachment,
     SiteContactRole,
+    SiteImage,
     User,
 )
 from ..models.base_model import db
@@ -393,6 +397,7 @@ def filter_visible(query):
 # ConfigurationContactRole
 # ConfigurationCustomField
 # ConfigurationDynamicLocationBeginAction
+# ConfigurationImage
 # ConfigurationParameter
 # ConfigurationStaticLocationBeginAction
 # GenericConfigurationAction
@@ -400,6 +405,7 @@ for model in [
     ConfigurationContactRole,
     ConfigurationCustomField,
     ConfigurationDynamicLocationBeginAction,
+    ConfigurationImage,
     ConfigurationParameter,
     ConfigurationStaticLocationBeginAction,
     GenericConfigurationAction,
@@ -683,6 +689,7 @@ def filter_visible(query):
 # DeviceAttachment
 # DeviceCalibrationAction
 # DeviceContactRole
+# DeviceImage
 # DeviceParameter
 # DeviceProperty
 # DeviceSoftwareUpdateAction
@@ -691,6 +698,7 @@ for model in [
     DeviceAttachment,
     DeviceCalibrationAction,
     DeviceContactRole,
+    DeviceImage,
     DeviceParameter,
     DeviceProperty,
     DeviceSoftwareUpdateAction,
@@ -1314,11 +1322,13 @@ def filter_visible(query):
 
 # PlatformAttachment
 # PlatformContactRole
+# PlatformImage
 # PlatformSoftwareUpdateAction
 # PlatformParameter
 for model in [
     PlatformAttachment,
     PlatformContactRole,
+    PlatformImage,
     PlatformSoftwareUpdateAction,
     PlatformParameter,
 ]:
@@ -1718,7 +1728,8 @@ def filter_visible(query):
 
 
 # SiteAttachment
-for model in [SiteAttachment]:
+# SiteImage
+for model in [SiteAttachment, SiteImage]:
     can_see.register_same(model, handler=SiteContactRole)
     can_create.register_same(model, handler=SiteContactRole)
     can_edit.register_same(model, handler=SiteContactRole)

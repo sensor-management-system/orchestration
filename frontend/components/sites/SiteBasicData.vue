@@ -33,45 +33,55 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
-    <v-row>
-      <v-col cols="12">
-        <label>Visibility / Permissions</label>
-        <VisibilityChip
-          v-model="value.visibility"
+    <v-row align="center">
+      <v-col>
+        <v-row>
+          <v-col>
+            <label>Visibility / Permissions</label>
+            <VisibilityChip
+              v-model="value.visibility"
+            />
+            <PermissionGroupChips
+              v-model="value.permissionGroups"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
+            <label>Label</label>
+            {{ value.label }}
+          </v-col>
+          <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
+            <label>Part of</label>
+            <span v-if="value.outerSiteId && site">
+              <nuxt-link :to="'/sites/' + value.outerSiteId" target="_blank">{{ site.label }}</nuxt-link>
+              <v-icon small>mdi-open-in-new</v-icon>
+            </span>
+            <span v-else>
+              {{ null | orDefault }}
+            </span>
+          </v-col>
+        </v-row>
+        <v-divider class="my-4" />
+        <v-row>
+          <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
+            <label>Usage</label>
+            {{ value.siteUsageName | orDefault }}
+          </v-col>
+          <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
+            <label>Type</label>
+            {{ value.siteTypeName | orDefault }}
+          </v-col>
+        </v-row>
+        <v-divider class="my-4" />
+      </v-col>
+      <v-col v-if="siteImagesShouldBeRendered" cols="12" md="6">
+        <AttachmentImagesCarousel
+          :value="value.images"
+          :download-attachment="downloadAttachment"
         />
-        <PermissionGroupChips
-          v-model="value.permissionGroups"
-        />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <label>Label</label>
-        {{ value.label }}
-      </v-col>
-      <v-col cols="12" md="6">
-        <label>Part of</label>
-        <span v-if="value.outerSiteId && site">
-          <nuxt-link :to="'/sites/' + value.outerSiteId" target="_blank">{{ site.label }}</nuxt-link>
-          <v-icon small>mdi-open-in-new</v-icon>
-        </span>
-        <span v-else>
-          {{ null | orDefault }}
-        </span>
-      </v-col>
-    </v-row>
-    <v-divider class="my-4" />
-    <v-row>
-      <v-col cols="12" md="6">
-        <label>Usage</label>
-        {{ value.siteUsageName | orDefault }}
-      </v-col>
-      <v-col cols="12" md="6">
-        <label>Type</label>
-        {{ value.siteTypeName | orDefault }}
-      </v-col>
-    </v-row>
-    <v-divider class="my-4" />
     <v-row>
       <v-col cols="12" md="9">
         <label>Description</label>
@@ -150,21 +160,23 @@ import { Site } from '@/models/Site'
 import SiteMap from '@/components/sites/SiteMap.vue'
 
 import VisibilityChip from '@/components/VisibilityChip.vue'
+import AttachmentImagesCarousel from '@/components/shared/AttachmentImagesCarousel.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
-import { SearchSitesAction, SitesState } from '@/store/sites'
+import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store/sites'
 
 @Component({
   components: {
     VisibilityChip,
     PermissionGroupChips,
-    SiteMap
+    SiteMap,
+    AttachmentImagesCarousel
   },
   computed: {
     ...mapState('sites', ['sites'])
   },
   methods: {
-    ...mapActions('sites', ['searchSites'])
+    ...mapActions('sites', ['searchSites', 'downloadAttachment'])
   }
 })
 export default class SiteBasicData extends Vue {
@@ -176,10 +188,9 @@ export default class SiteBasicData extends Vue {
   readonly value!: Site
 
   // vuex definition for typescript check
-
-  // vuex definition for typescript check
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
+  downloadAttachment!: DownloadAttachmentAction
 
   async mounted () {
     try {
@@ -198,6 +209,10 @@ export default class SiteBasicData extends Vue {
       return this.sites[idx]
     }
     return null
+  }
+
+  get siteImagesShouldBeRendered () {
+    return this.value.images.length > 0
   }
 }
 </script>

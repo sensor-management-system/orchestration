@@ -40,6 +40,7 @@ import { RootState } from '@/store'
 import { IncludedRelationships } from '@/services/sms/PlatformApi'
 
 import { Attachment } from '@/models/Attachment'
+import { Image } from '@/models/Image'
 import { Availability } from '@/models/Availability'
 import { ContactRole } from '@/models/ContactRole'
 import { GenericAction } from '@/models/GenericAction'
@@ -243,6 +244,7 @@ export type AddPlatformSoftwareUpdateActionAction = (params: {
 }) => Promise<SoftwareUpdateAction>
 export type ArchivePlatformAction = (id: string) => Promise<void>
 export type ClearPlatformAvailabilitiesAction = () => void
+export type ClearPlatformAttachmentsAction = () => void
 export type CopyPlatformAction = (params: {
   platform: Platform,
   copyContacts: boolean,
@@ -253,6 +255,7 @@ export type CopyPlatformAction = (params: {
 export type CreatePidAction = (id: string | null) => Promise<string>
 export type DeletePlatformAction = (id: string) => Promise<void>
 export type DeletePlatformAttachmentAction = (attachmentId: string) => Promise<void>
+export type DeletePlatformImageAction = (imageId: string) => Promise<void>
 export type DeletePlatformGenericActionAction = (genericPlatformActionId: string) => Promise<void>
 export type DeletePlatformParameterAction = (parameterId: string) => Promise<void>
 export type DeletePlatformParameterChangeActionAction = (actionId: string) => Promise<void>
@@ -284,6 +287,7 @@ export type RemovePlatformContactRoleAction = (params: { platformContactRoleId: 
 export type ReplacePlatformInPlatformsAction = (newPlatform: Platform) => void
 export type RestorePlatformAction = (id: string) => Promise<void>
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
+export type SavePlatformImagesAction = (params: {platformId: string, platformImages: Image[], platformCopyImages: Image[]}) => Promise<Image[]>
 export type SearchPlatformsPaginatedAction = () => Promise<void>
 export type SetChosenKindOfPlatformActionAction = (newval: IOptionsForActionType | null) => void
 export type SetIncludeArchivedPlatformsAction = (includeArchivedPlatforms: boolean) => void
@@ -358,7 +362,8 @@ const actions: ActionTree<PlatformsState, RootState> = {
       includePlatformAttachments,
       includePlatformParameters,
       includeCreatedBy,
-      includeUpdatedBy
+      includeUpdatedBy,
+      includeImages
     }: { platformId: string } & IncludedRelationships
   ): Promise<void> {
     const platform = await this.$api.platforms.findById(platformId, { // TODO Überprüfen, ob man diese Parameter wirklich braucht/ notfalls die payload als Object übergeben lassen
@@ -366,7 +371,8 @@ const actions: ActionTree<PlatformsState, RootState> = {
       includePlatformAttachments,
       includePlatformParameters,
       includeCreatedBy,
-      includeUpdatedBy
+      includeUpdatedBy,
+      includeImages
     })
     commit('setPlatform', platform)
   },
@@ -522,6 +528,43 @@ const actions: ActionTree<PlatformsState, RootState> = {
   deletePlatformParameterChangeAction (_, actionId: string): Promise<void> {
     return this.$api.platformParameterChangeActions.deleteById(actionId)
   },
+  deletePlatformImage (_, imageId: string): Promise<void> {
+    return this.$api.platformImages.deleteById(imageId)
+  },
+  updatePlatformImage (_, {
+    platformId,
+    platformImage
+  }: { platformId: string, platformImage: Image }): Promise<Image> {
+    return this.$api.platformImages.update(platformId, platformImage)
+  },
+  addPlatformImage (_, {
+    platformId,
+    platformImage
+  }: { platformId: string, platformImage: Image }): Promise<Image> {
+    return this.$api.platformImages.add(platformId, platformImage)
+  },
+  async savePlatformImages (
+    { dispatch }: { dispatch: Dispatch }, {
+      platformId,
+      platformImages,
+      platformCopyImages
+    }: {platformId: string, platformImages: Image[], platformCopyImages: Image[]}): Promise<Image[]> {
+    const imagesToDelete = platformImages.filter(el => !platformCopyImages.map(i => i.id).includes(el.id))
+    imagesToDelete.forEach(async (platformImage) => {
+      await dispatch('deletePlatformImage', platformImage.id)
+    })
+    const images = platformCopyImages
+    for (const i in images) {
+      const imageId = images[i].id
+      if (!imageId) {
+        images[i].id = (await dispatch('addPlatformImage', { platformId, platformImage: images[i] })).id
+      } else if (platformImages.find(i => i.id === imageId)?.orderIndex !== images[i].orderIndex) {
+        images[i].id = (await dispatch('updatePlatformImage', { platformId, platformImage: images[i] })).id
+      }
+    }
+
+    return images
+  },
   updatePlatform ({ commit }: { commit: Commit }, platform: Platform): void {
     commit('setPlatform', platform)
   },
@@ -565,27 +608,35 @@ const actions: ActionTree<PlatformsState, RootState> = {
         }))
       }
     }
-    if (copyAttachments) {
-      // hier erstmal die Umsetztung, wie es vorher in pages/platforms/copy/_platformId.vue
-      const attachments = platform.attachments.map(Attachment.createFromObject)
-      for (const attachment of attachments) {
-        attachment.id = null
-        if (attachment.isUpload) {
-          const blob = await dispatch('downloadAttachment', attachment.url)
-          const filename = getLastPathElement(attachment.url)
-          const uploadResult = await dispatch('files/uploadBlob', {
-            blob,
-            filename
-          }, { root: true })
-          const newUrl = uploadResult.url
-          attachment.url = newUrl
-        }
-        related.push(dispatch('addPlatformAttachment', {
-          platformId: savedPlatformId,
-          attachment
-        }))
+
+    const platformImages = platform.images.map(Image.createFromObject)
+    const platformAttachments = platform.attachments.map(Attachment.createFromObject)
+    for (const attachment of platformAttachments) {
+      // copy if attachments should be copied or copied images include attachment
+      if (!copyAttachments && !platformImages.map(i => i.attachment?.id).includes(attachment.id)) {
+        continue
       }
+
+      const oldAttachmentId = attachment.id
+      attachment.id = null
+
+      if (attachment.isUpload) {
+        const blob = await dispatch('downloadAttachment', attachment.url)
+        const filename = getLastPathElement(attachment.url)
+        const uploadResult = await dispatch('files/uploadBlob', { blob, filename }, { root: true })
+        const newUrl = uploadResult.url
+        attachment.url = newUrl
+      }
+      const savedAttachment = await dispatch('addPlatformAttachment', { platformId: savedPlatformId, attachment })
+
+      const platformImageToCopy = platformImages.find(i => i.attachment?.id && i.attachment.id === oldAttachmentId)
+      if (!platformImageToCopy) { continue }
+      const platformImage = Image.createFromObject(platformImageToCopy)
+      platformImage.id = ''
+      platformImage.attachment = savedAttachment
+      related.push(dispatch('addPlatformImage', { platformId: savedPlatformId, platformImage }))
     }
+
     if (copyParameters) {
       const parameters = platform.parameters.map(Parameter.createFromObject)
       for (const parameter of parameters) {
@@ -685,6 +736,9 @@ const actions: ActionTree<PlatformsState, RootState> = {
   },
   clearPlatformAvailabilities ({ commit }: { commit: Commit }) {
     commit('setPlatformAvailabilities', [])
+  },
+  clearPlatformAttachments ({ commit }: { commit: Commit }): void {
+    commit('setPlatformAttachments', [])
   }
 
 }

@@ -73,6 +73,7 @@ const testConfig1 = Configuration.createFromObject({
   platformMountActions: [],
   deviceMountActions: [],
   parameters: [],
+  images: [],
   permissionGroup: null,
   keywords: []
 })

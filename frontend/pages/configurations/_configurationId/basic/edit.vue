@@ -83,14 +83,14 @@ import CheckEditAccess from '@/mixins/CheckEditAccess'
 
 import { SetTitleAction } from '@/store/appbar'
 
-import { Configuration, IConfiguration } from '@/models/Configuration'
+import { Configuration } from '@/models/Configuration'
 
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import ConfigurationsBasicDataForm from '@/components/configurations/ConfigurationsBasicDataForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
-import { CreatePidAction, LoadConfigurationAction, SaveConfigurationAction } from '@/store/configurations'
+import { CreatePidAction, LoadConfigurationAction, SaveConfigurationAction, LoadConfigurationAttachmentsAction, SaveConfigurationImagesAction } from '@/store/configurations'
 
 @Component({
   components: {
@@ -102,7 +102,7 @@ import { CreatePidAction, LoadConfigurationAction, SaveConfigurationAction } fro
   middleware: ['auth'],
   computed: mapState('configurations', ['configuration']),
   methods: {
-    ...mapActions('configurations', ['saveConfiguration', 'loadConfiguration', 'createPid']),
+    ...mapActions('configurations', ['saveConfiguration', 'loadConfiguration', 'loadConfigurationAttachments', 'createPid', 'saveConfigurationImages']),
     ...mapActions('appbar', ['setTitle']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -118,9 +118,11 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
   }
 
   // vuex definition for typescript check
-  configuration!: IConfiguration
+  configuration!: Configuration
   saveConfiguration!: SaveConfigurationAction
+  saveConfigurationImages!: SaveConfigurationImagesAction
   loadConfiguration!: LoadConfigurationAction
+  loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   createPid!: CreatePidAction
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
@@ -146,9 +148,17 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
     return 'You\'re not allowed to edit this configuration.'
   }
 
-  created () {
+  async created () {
     if (this.configuration) {
       this.configurationCopy = Configuration.createFromObject(this.configuration)
+      try {
+        this.setLoading(true)
+        await this.loadConfigurationAttachments(this.configurationId)
+      } catch (e) {
+        this.$store.commit('snackbar/setError', 'failed to fetch attachments')
+      } finally {
+        this.setLoading(false)
+      }
     }
   }
 
@@ -164,6 +174,19 @@ export default class ConfigurationEditBasicPage extends mixins(CheckEditAccess) 
     if (!(this.$refs.basicDataForm as Vue & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
+    }
+
+    // handle images first
+    try {
+      this.setLoading(true)
+      const savedImagesWithIds = await this.saveConfigurationImages({
+        configurationId: this.configurationId,
+        configurationImages: this.configuration!.images,
+        configurationCopyImages: this.configurationCopy.images
+      })
+      this.configurationCopy.images = savedImagesWithIds
+    } catch (e) {
+      this.$store.commit('snackbar/setWarning', 'Save of images failed')
     }
 
     try {

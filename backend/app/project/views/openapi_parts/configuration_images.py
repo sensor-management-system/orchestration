@@ -1,0 +1,119 @@
+# SPDX-FileCopyrightText: 2024
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+#
+# SPDX-License-Identifier: HEESIL-1.0
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.configuration_image_schema import ConfigurationImageSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(ConfigurationImageSchema)
+
+paths = {
+    "/configuration-images": {
+        "get": {
+            "tags": ["Configuration images"],
+            "parameters": [
+                {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
+                {"$ref": "#/components/parameters/page_size"},
+                {"$ref": "#/components/parameters/sort"},
+                *schema_mapper.filters(),
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of configuration images",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
+            },
+            "description": "Retrieve a list of configuration images",
+            "operationId": "RetrievecollectionofConfigurationImageobjects",
+        },
+        "post": {
+            "tags": ["Configuration images"],
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
+            },
+            "responses": {
+                "201": {
+                    "description": "Payload of the created configuration image",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+            },
+            "operationId": "CreateConfigurationImage",
+        },
+    },
+    "/configuration-images/{configuration_image_id}": {
+        "get": {
+            "tags": ["Configuration images"],
+            "parameters": [
+                {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/configuration_image_id"},
+            ],
+            "responses": {
+                "200": {
+                    "description": "Instance of a configuration image",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+            },
+            "description": "Retrieve a single configuration image",
+            "operationId": "RetrieveConfigurationImageInstance",
+        },
+        "patch": {
+            "tags": ["Configuration images"],
+            "parameters": [
+                {"$ref": "#/components/parameters/configuration_image_id"},
+            ],
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.patch(),
+                },
+                "description": "ConfigurationImage attributes",
+                "required": True,
+            },
+            "responses": {
+                "200": {
+                    "description": "Payload of the updated configuration image",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+            },
+            "description": "Update ConfigurationImage attributes",
+            "operationId": "UpdateConfigurationImage",
+        },
+        "delete": {
+            "tags": ["Configuration images"],
+            "parameters": [
+                {"$ref": "#/components/parameters/configuration_image_id"},
+            ],
+            "responses": {
+                "200": {"$ref": "#/components/responses/object_deleted"},
+                "404": {"$ref": "#/components/responses/jsonapi_error_404"},
+            },
+            "operationId": "DeleteConfigurationImage",
+        },
+    },
+}
+
+components = {
+    "parameters": {
+        "configuration_image_id": {
+            "name": "configuration_image_id",
+            "in": "path",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+    },
+}

@@ -79,6 +79,16 @@ export function shortenRight (text: string, length: number = DEFAULT_SHORTEN_LEN
 }
 
 /**
+ * capitalizes the first character of a string
+ *
+ * @param {string} text - the text to capitalize
+ * @returns {string} the capitalized string
+ */
+export function capitalize (text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+/**
  * shortens a string to length characters to the legt, adds a replacement character
  *
  * @param {string} text - the text to shorten

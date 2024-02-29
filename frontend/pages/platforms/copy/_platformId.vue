@@ -136,7 +136,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanAccessEntityGetter, CanModifyEntityGetter, UserGroupsGetter } from '@/store/permissions'
-import { PlatformsState, LoadPlatformAction, CopyPlatformAction, CreatePidAction } from '@/store/platforms'
+import { PlatformsState, LoadPlatformAction, CopyPlatformAction, CreatePidAction, LoadPlatformAttachmentsAction } from '@/store/platforms'
 
 import { Platform } from '@/models/Platform'
 
@@ -160,7 +160,7 @@ import { LoadCountriesAction } from '@/store/vocabulary'
     ...mapGetters('vocabulary', ['countryNames'])
   },
   methods: {
-    ...mapActions('platforms', ['loadPlatform', 'copyPlatform', 'createPid']),
+    ...mapActions('platforms', ['loadPlatform', 'copyPlatform', 'createPid', 'loadPlatformAttachments']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading']),
     ...mapActions('vocabulary', ['loadCountries'])
@@ -195,6 +195,7 @@ export default class PlatformCopyPage extends Vue {
   setLoading!: SetLoadingAction
   loadCountries!: LoadCountriesAction
   setShowBackButton!: SetShowBackButtonAction
+  loadPlatformAttachments!: LoadPlatformAttachmentsAction
 
   created () {
     this.initializeAppBar()
@@ -207,10 +208,12 @@ export default class PlatformCopyPage extends Vue {
         this.loadPlatform({
           platformId: this.platformId,
           includeContacts: true,
+          includeImages: true,
           includePlatformAttachments: true,
           includePlatformParameters: true
         }),
-        this.loadCountries()
+        this.loadCountries(),
+        await this.loadPlatformAttachments(this.platformId)
       ])
 
       if (!this.platform || !this.canAccessEntity(this.platform)) {

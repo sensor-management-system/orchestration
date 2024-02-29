@@ -75,7 +75,7 @@ import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/
 
 import { Configuration } from '@/models/Configuration'
 
-import { CreatePidAction, SaveConfigurationAction } from '@/store/configurations'
+import { CreatePidAction, SaveConfigurationAction, ClearConfigurationAttachmentsAction } from '@/store/configurations'
 
 import { SetLoadingAction } from '@/store/progressindicator'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
@@ -90,7 +90,7 @@ import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonMod
   },
   middleware: ['auth'],
   methods: {
-    ...mapActions('configurations', ['saveConfiguration', 'createPid']),
+    ...mapActions('configurations', ['saveConfiguration', 'createPid', 'clearConfigurationAttachments']),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -109,9 +109,11 @@ export default class ConfigurationNewPage extends Vue {
   setTitle!: SetTitleAction
   setLoading!: SetLoadingAction
   setShowBackButton!: SetShowBackButtonAction
+  clearConfigurationAttachments!: ClearConfigurationAttachmentsAction
 
   created () {
     this.initializeAppBar()
+    this.clearConfigurationAttachments()
   }
 
   async save () {

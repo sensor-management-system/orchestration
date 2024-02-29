@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2022
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -129,6 +129,26 @@ class ConfigurationSchema(Schema):
         allow_none=True,
         schema="ConfigurationCustomFieldSchema",
         type_="configuration_customfield",
+        id_field="id",
+    )
+    configuration_images = Relationship(
+        related_view="api.configuration_image_list",
+        related_view_kwargs={"filter[configuration_id]": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="ConfigurationImageSchema",
+        type_="configuration_image",
+        id_field="id",
+    )
+    configuration_attachments = Relationship(
+        related_view="api.configuration_attachment_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="ConfigurationAttachmentSchema",
+        type_="configuration_attachment",
         id_field="id",
     )
     configuration_parameters = Relationship(

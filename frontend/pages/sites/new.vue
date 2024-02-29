@@ -72,7 +72,7 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { Site } from '@/models/Site'
-import { SaveSiteAction } from '@/store/sites'
+import { SaveSiteAction, ClearSiteAttachmentsAction } from '@/store/sites'
 import { SetTabsAction, SetTitleAction, SetShowBackButtonAction } from '@/store/appbar'
 import { LoadEpsgCodesAction, LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 
@@ -88,7 +88,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
   },
   methods: {
-    ...mapActions('sites', ['saveSite']),
+    ...mapActions('sites', ['saveSite', 'clearSiteAttachments']),
     ...mapActions('vocabulary', ['loadEpsgCodes', 'loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
 
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
@@ -112,9 +112,11 @@ export default class SiteNewPage extends Vue {
   countryNames!: CountryNamesGetter
   setLoading!: SetLoadingAction
   setShowBackButton!: SetShowBackButtonAction
+  clearSiteAttachments!: ClearSiteAttachmentsAction
 
   async created () {
     this.initializeAppBar()
+    this.clearSiteAttachments()
     try {
       await Promise.all([
         this.loadEpsgCodes(),

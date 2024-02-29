@@ -34,6 +34,7 @@
  */
 import { DateTime } from 'luxon'
 
+import { Image, IImage } from '@/models/Image'
 import { IContact, Contact } from '@/models/Contact'
 import { PermissionGroup, IPermissionGroup, IPermissionableMultipleGroups } from '@/models/PermissionGroup'
 
@@ -80,6 +81,7 @@ export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo 
   updateDescription: string
   visibility: Visibility
   permissionGroups: IPermissionGroup[]
+  images: IImage[]
   website: string
   keywords: string[]
 
@@ -111,6 +113,7 @@ export class Site implements ISite, IVisible {
 
   private _visibility: Visibility = Visibility.Internal
   private _permissionGroups: PermissionGroup[] = []
+  private _images: Image[] = []
   private _website: string = ''
   private _keywords: string[] = []
   private _outerSiteId: string | null = null
@@ -275,6 +278,14 @@ export class Site implements ISite, IVisible {
     this._permissionGroups = permissionGroups
   }
 
+  set images (images: Image[]) {
+    this._images = images
+  }
+
+  get images (): Image[] {
+    return this._images
+  }
+
   get website (): string {
     return this._website
   }
@@ -352,6 +363,7 @@ export class Site implements ISite, IVisible {
     newObject.visibility = someObject.visibility
     newObject.permissionGroups = someObject.permissionGroups.map(PermissionGroup.createFromObject)
 
+    newObject.images = someObject.images.map(Image.createFromObject)
     newObject.website = someObject.website
     newObject.keywords = [...someObject.keywords]
 
