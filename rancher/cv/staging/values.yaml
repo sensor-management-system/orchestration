@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2023 Norman Ziegner <norman.ziegner@ufz.de>
+# SPDX-FileCopyrightText: 2023 Helmholtz Centre for Environmental Research GmbH - UFZ
+#
+# SPDX-License-Identifier: LicenseRef-HEESIL-1.0
+
+imagePullSecrets:
+  - name: sms-read-registry-token
+
+# SMS-CV app container
+cv:
+  image:
+    registry: "registry.hzdr.de"
+    image: "hub-terra/sms/sms-cv"
+    tag: "1.1.0"
+  env:
+    DEBUG: 0
+
+# Nginx container
+nginx:
+  image:
+    registry: "registry.hzdr.de"
+    image: "hub-terra/sms/orchestration/nginx"
+    tag: "ufz-orchestration-1.5.1"
+
+# CV-Backup container
+cvbackup:
+  enabled: false
+  env:
+    S3_HOST: 'minio.ufz.de'
+    S3_PORT: '443'
+    S3_PROTOCOL: 'https'
+    S3_BUCKET: 'rancher-test'
+    S3_USER:
+      secret_name: "sms-cv-s3-password"
+      secret_key: "S3_USER"
+    S3_PASSWORD:
+      secret_name: "sms-cv-s3-password"
+      secret_key: "S3_PASSWORD"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/app-root: /sms/cv
+  hosts:
+    - host: cv-testing-131-169-234-191.nip.io
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: cv-testing-131-169-234-191-nip-io-tls
+      hosts:
+        - cv-testing-131-169-234-191.nip.io

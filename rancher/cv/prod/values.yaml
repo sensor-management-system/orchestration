@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2023 Norman Ziegner <norman.ziegner@ufz.de>
+# SPDX-FileCopyrightText: 2023 Helmholtz Centre for Environmental Research GmbH - UFZ
+#
+# SPDX-License-Identifier: LicenseRef-HEESIL-1.0
+
+# CV container
+cv:
+  image:
+    registry: "registry.hzdr.de"
+    image: "hub-terra/sms/sms-cv"
+    tag: "1.1.0"
+
+# Nginx container
+nginx:
+  image:
+    registry: "registry.hzdr.de"
+    image: "hub-terra/sms/orchestration/nginx"
+    tag: "ufz-orchestration-1.5.1"
+
+# CV Backup container
+cvbackup:
+  env:
+    S3_HOST: 's3.gfz-potsdam.de'
+    S3_PORT: '443'
+    S3_PROTOCOL: 'https'
+    S3_BUCKET: 'dog.sms-cv-backups.cvbackups'

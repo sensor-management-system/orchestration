@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: sms-cv.helmholtz.cloud
+  namespace: sms-cv-prod
+spec:
+  secretName: sms-cv-helmholtz-cloud-tls
+  issuerRef:
+    name: letsencrypt-production
+  dnsNames:
+    - sms-cv.helmholtz.cloud
+

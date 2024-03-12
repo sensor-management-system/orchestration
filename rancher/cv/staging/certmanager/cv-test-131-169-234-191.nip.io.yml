@@ -1,0 +1,12 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cv-testing-131-169-234-191.nip.io
+  namespace: sms-cv-testing
+spec:
+  secretName: cv-testing-131-169-234-191-nip-io-tls
+  issuerRef:
+    name: letsencrypt-production
+  dnsNames:
+    - cv-testing-131-169-234-191.nip.io

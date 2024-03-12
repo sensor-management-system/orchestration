@@ -1,0 +1,9 @@
+---
+global:
+  storageClass: "csi-cinder-sc-retain"
+  postgresql:
+    auth:
+      username: "sms-cv-prod"
+      database: "sms-cv-prod"
+
+...
