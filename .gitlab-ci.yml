@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
 # - Hannes Bohring <hannes.bohring@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -625,6 +625,7 @@ deploy-gfz-prod:
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
     SMS_VERSION: ${CI_COMMIT_TAG}
+    MATTERMOST_RELEASE_NOTIFICATION_HOOK: ${MATTERMOST_RELEASE_NOTIFICATION_HOOK}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -642,6 +643,12 @@ deploy-gfz-prod:
     - sleep 1m
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
+    # Curl is already installed on the deployment machine
+    - >
+      curl \
+        -X POST ${MATTERMOST_RELEASE_NOTIFICATION_HOOK} \
+        -H "Content-Type: application/json" \
+        -d "{\"text\":\"@here SMS version $SMS_VERSION released on https://sensors.gfz-potsdam.de\"}"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
