@@ -118,6 +118,7 @@ permissions and limitations under the Licence.
           :attachments="platformAttachments"
           :value="value.images"
           :download-attachment="downloadAttachment"
+          :proxy-url="proxyUrl"
           @input="update('images', $event)"
         />
       </v-col>
@@ -476,6 +477,7 @@ import { createPlatformUrn } from '@/modelUtils/urnBuilders'
 import Validator from '@/utils/validator'
 import { LoadEquipmentstatusAction, LoadManufacturersAction, LoadPlatformtypesAction, VocabularyState } from '@/store/vocabulary'
 import { DownloadAttachmentAction, PlatformsState } from '@/store/platforms'
+import { ProxyUrlAction } from '@/store/proxy'
 
 type StatusSelectValue = Status | string | undefined
 type PlatformTypeSelectValue = PlatformType | string | undefined
@@ -499,7 +501,8 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
   },
   methods: {
     ...mapActions('vocabulary', ['loadPlatformtypes', 'loadManufacturers', 'loadEquipmentstatus']),
-    ...mapActions('platforms', ['downloadAttachment'])
+    ...mapActions('platforms', ['downloadAttachment']),
+    ...mapActions('proxy', ['proxyUrl'])
   }
 })
 export default class PlatformBasicDataForm extends mixins(Rules) {
@@ -520,6 +523,7 @@ export default class PlatformBasicDataForm extends mixins(Rules) {
   // vuex definition for typescript check
   platformAttachments!: PlatformsState['platformAttachments']
   downloadAttachment!: DownloadAttachmentAction
+  proxyUrl!: ProxyUrlAction
   loadPlatformtypes !: LoadPlatformtypesAction
   loadManufacturers !: LoadManufacturersAction
   loadEquipmentstatus !: LoadEquipmentstatusAction

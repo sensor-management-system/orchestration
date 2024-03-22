@@ -119,6 +119,7 @@ permissions and limitations under the Licence.
           :attachments="deviceAttachments"
           :value="value.images"
           :download-attachment="downloadAttachment"
+          :proxy-url="proxyUrl"
           @input="update('images', $event)"
         />
       </v-col>
@@ -497,6 +498,7 @@ import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 import Validator from '@/utils/validator'
 import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersAction, VocabularyState } from '@/store/vocabulary'
 import { DownloadAttachmentAction, DevicesState } from '@/store/devices'
+import { ProxyUrlAction } from '@/store/proxy'
 
 type StatusSelectValue = Status | string | undefined
 type DeviceTypeSelectValue = DeviceType | string | undefined
@@ -509,7 +511,8 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
   },
   methods: {
     ...mapActions('vocabulary', ['loadDevicetypes', 'loadManufacturers', 'loadEquipmentstatus']),
-    ...mapActions('devices', ['downloadAttachment'])
+    ...mapActions('devices', ['downloadAttachment']),
+    ...mapActions('proxy', ['proxyUrl'])
   },
   components: {
     DeviceTypeDialog,
@@ -539,6 +542,7 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
   // vuex definition for typescript check
   deviceAttachments!: DevicesState['deviceAttachments']
   downloadAttachment!: DownloadAttachmentAction
+  proxyUrlAction!: ProxyUrlAction
   loadDevicetypes !: LoadDevicetypesAction
   loadManufacturers !: LoadManufacturersAction
   loadEquipmentstatus !: LoadEquipmentstatusAction

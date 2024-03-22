@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2020-2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -79,6 +79,7 @@ permissions and limitations under the Licence.
         <AttachmentImagesCarousel
           :value="value.images"
           :download-attachment="downloadAttachment"
+          :proxy-url="proxyUrl"
         />
       </v-col>
     </v-row>
@@ -164,6 +165,7 @@ import AttachmentImagesCarousel from '@/components/shared/AttachmentImagesCarous
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store/sites'
+import { ProxyUrlAction } from '@/store/proxy'
 
 @Component({
   components: {
@@ -176,7 +178,8 @@ import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store
     ...mapState('sites', ['sites'])
   },
   methods: {
-    ...mapActions('sites', ['searchSites', 'downloadAttachment'])
+    ...mapActions('sites', ['searchSites', 'downloadAttachment']),
+    ...mapActions('proxy', ['proxyUrl'])
   }
 })
 export default class SiteBasicData extends Vue {
@@ -191,6 +194,7 @@ export default class SiteBasicData extends Vue {
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
   downloadAttachment!: DownloadAttachmentAction
+  proxyUrl!: ProxyUrlAction
 
   async mounted () {
     try {

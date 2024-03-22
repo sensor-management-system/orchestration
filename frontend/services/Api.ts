@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -86,6 +86,7 @@ import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
 import { UploadApi } from '@/services/sms/UploadApi'
 import { UserInfoApi } from '@/services/sms/UserInfoApi'
 import { UserModificationApi } from '@/services/sms/UserModificationApi'
+import { ProxyApi } from '@/services/sms/ProxyApi'
 
 import { ActionCategoryApi } from '@/services/cv/ActionCategoryApi'
 import { ActionTypeApi } from '@/services/cv/ActionTypeApi'
@@ -195,6 +196,7 @@ export class Api {
   private readonly _userInfoApi: UserInfoApi
   private readonly _permissionGroupApi: PermissionGroupApi
   private readonly _userModificationApi: UserModificationApi
+  private readonly _proxyApi: ProxyApi
 
   constructor (
     getIdToken: () => string | null,
@@ -604,6 +606,7 @@ export class Api {
     )
     this._permissionGroupApi = new PermissionGroupApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/permission-groups')
     this._userModificationApi = new UserModificationApi(createAxios(smsBaseUrl, smsConfig, getIdToken))
+    this._proxyApi = new ProxyApi(smsBaseUrl!)
   }
 
   get devices (): DeviceApi {
@@ -864,5 +867,9 @@ export class Api {
 
   get staticLocationActions (): StaticLocationActionApi {
     return this._staticLocationActionApi
+  }
+
+  get proxy (): ProxyApi {
+    return this._proxyApi
   }
 }

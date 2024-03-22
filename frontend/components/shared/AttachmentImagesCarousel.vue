@@ -68,7 +68,7 @@ permissions and limitations under the Licence.
 </template>
 
 <script lang="ts">
-import { Vue, Prop, Component } from 'nuxt-property-decorator'
+import { Vue, Prop, Component, Watch } from 'nuxt-property-decorator'
 
 import { Image, IAttachmentWithUrl } from '@/models/Image'
 import { Attachment } from '@/models/Attachment'
@@ -92,6 +92,12 @@ export default class AttachmentImagesCarousel extends Vue {
   })
   private downloadAttachment!: (attachmentUrl: string) => Promise<Blob>
 
+  @Prop({
+    required: true,
+    type: Function
+  })
+  private proxyUrl!: (attachmentUrl: string) => Promise<string>
+
   async created () {
     await this.setUrlsForAttachments()
   }
@@ -106,7 +112,7 @@ export default class AttachmentImagesCarousel extends Vue {
       try {
         const url: string | null = attachment.isUpload
           ? await this.downloadAttachment(attachment!.url).then(blob => window.URL.createObjectURL(blob))
-          : attachment.url
+          : await this.proxyUrl(attachment.url)
         if (url) {
           this.urlsForAttachments.push({ attachment, url })
         }
@@ -130,6 +136,12 @@ export default class AttachmentImagesCarousel extends Vue {
         entry => entry.attachment.id === attachment.id
       )?.url ?? ''
     )
+  }
+
+  @Watch('value', { deep: true })
+  onImagesChange () {
+    this.urlsForAttachments = []
+    this.setUrlsForAttachments()
   }
 }
 </script>

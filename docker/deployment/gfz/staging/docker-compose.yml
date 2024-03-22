@@ -155,6 +155,8 @@ services:
       B2INST_TOKEN: ${B2INST_TOKEN}
       B2INST_URL: https://b2inst-test.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
+      # We only want to allow access to extenral resources via the proxy - not to internal ones
+      PROXY_NETLOC_BLOCKLIST: 127.0.0.1,localhost,backend-db,backend,minio,elastic-search,idl-db,idl,nginx
     depends_on:
       - backend-db
     volumes:
