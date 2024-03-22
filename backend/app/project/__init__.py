@@ -48,6 +48,7 @@ from .views import (
     download_routes,
     free_text_field_routes,
     login_routes,
+    proxy_routes,
     sensor_ml_routes,
     upload_routes,
 )
@@ -130,6 +131,8 @@ def create_app():
     app.register_blueprint(additional_platforms_routes)
     app.register_blueprint(additional_configuration_routes)
     app.register_blueprint(additional_site_routes)
+    # proxy routes
+    app.register_blueprint(proxy_routes)
     # upload_routes
     app.register_blueprint(upload_routes)
     # download routes

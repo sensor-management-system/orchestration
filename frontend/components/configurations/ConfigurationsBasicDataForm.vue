@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -108,6 +108,7 @@ permissions and limitations under the Licence.
           :attachments="configurationAttachments"
           :value="value.images"
           :download-attachment="downloadAttachment"
+          :proxy-url="proxyUrl"
           @input="update('images', $event)"
         />
       </v-col>
@@ -212,6 +213,7 @@ import AttachmentImagesForm from '@/components/shared/AttachmentImagesForm.vue'
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import { SearchSitesAction, SitesState } from '@/store/sites'
 import { DownloadAttachmentAction, ConfigurationsState } from '@/store/configurations'
+import { ProxyUrlAction } from '@/store/proxy'
 
 @Component({
   components: {
@@ -227,7 +229,8 @@ import { DownloadAttachmentAction, ConfigurationsState } from '@/store/configura
   },
   methods: {
     ...mapActions('configurations', ['loadConfigurationsStates', 'downloadAttachment']),
-    ...mapActions('sites', ['searchSites'])
+    ...mapActions('sites', ['searchSites']),
+    ...mapActions('proxy', ['proxyUrl'])
   }
 })
 export default class ConfigurationsBasicDataForm extends Vue {
@@ -245,6 +248,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   // vuex definition for typescript check
   configurationAttachments!: ConfigurationsState['configurationAttachments']
   downloadAttachment!: DownloadAttachmentAction
+  proxyUrl!: ProxyUrlAction
   loadConfigurationsStates!: () => void
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction

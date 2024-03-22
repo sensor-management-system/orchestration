@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2020-2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
@@ -76,6 +76,7 @@ permissions and limitations under the Licence.
         <AttachmentImagesCarousel
           :value="value.images"
           :download-attachment="downloadAttachment"
+          :proxy-url="proxyUrl"
         />
       </v-col>
     </v-row>
@@ -211,6 +212,7 @@ import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
 
 import { DownloadAttachmentAction } from '@/store/devices'
+import { ProxyUrlAction } from '@/store/proxy'
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
 
 @Component({
@@ -222,7 +224,8 @@ import { createDeviceUrn } from '@/modelUtils/urnBuilders'
     AttachmentImagesCarousel
   },
   methods: {
-    ...mapActions('devices', ['downloadAttachment'])
+    ...mapActions('devices', ['downloadAttachment']),
+    ...mapActions('proxy', ['proxyUrl'])
   }
 })
 export default class DeviceBasicData extends Vue {
@@ -232,6 +235,7 @@ export default class DeviceBasicData extends Vue {
 
   // vuex definition for typescript check
   downloadAttachment!: DownloadAttachmentAction
+  proxyUrl!: ProxyUrlAction
 
   @Prop({
     default: () => new Device(),

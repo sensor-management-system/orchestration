@@ -169,6 +169,12 @@ export default class AttachmentImagesForm extends Vue {
   })
   private downloadAttachment!: (attachmentUrl: string) => Promise<Blob>
 
+  @Prop({
+    required: true,
+    type: Function
+  })
+  private proxyUrl!: (attachmentUrl: string) => Promise<string>
+
   private urlsForAttachments: IAttachmentWithUrl[] = []
   private visibleImageIndex = 0
   private attachmentToAdd = null
@@ -213,7 +219,7 @@ export default class AttachmentImagesForm extends Vue {
     try {
       const url: string | null = attachment.isUpload
         ? await this.downloadAttachment(attachment!.url).then(blob => window.URL.createObjectURL(blob))
-        : attachment.url
+        : await this.proxyUrl(attachment.url)
       if (url) {
         this.urlsForAttachments.push({ attachment, url })
       }

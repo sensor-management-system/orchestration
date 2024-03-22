@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020 - 2023
+Copyright (C) 2020 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
@@ -104,6 +104,7 @@ permissions and limitations under the Licence.
         <AttachmentImagesCarousel
           :value="value.images"
           :download-attachment="downloadAttachment"
+          :proxy-url="proxyUrl"
         />
       </v-col>
     </v-row>
@@ -137,7 +138,8 @@ import { Configuration } from '@/models/Configuration'
 import { Site } from '@/models/Site'
 
 import { SearchSitesAction, SitesState } from '@/store/sites'
-import { DownloadAttachmentAction } from '@/store/devices'
+import { DownloadAttachmentAction } from '@/store/configurations'
+import { ProxyUrlAction } from '@/store/proxy'
 
 import DateTimePicker from '@/components/DateTimePicker.vue'
 import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
@@ -158,7 +160,8 @@ import VisibilityChip from '@/components/VisibilityChip.vue'
   computed: mapState('sites', ['sites']),
   methods: {
     ...mapActions('sites', ['searchSites']),
-    ...mapActions('configurations', ['downloadAttachment'])
+    ...mapActions('configurations', ['downloadAttachment']),
+    ...mapActions('proxy', ['proxyUrl'])
   }
 })
 export default class ConfigurationsBasicDataForm extends Vue {
@@ -174,6 +177,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
   downloadAttachment!: DownloadAttachmentAction
+  proxyUrl!: ProxyUrlAction
 
   async mounted () {
     try {

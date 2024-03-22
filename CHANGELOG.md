@@ -6,13 +6,15 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.13.1 (Unreleased)
+## 1.14.0 (Unreleased)
 
 Added:
 - Images are also previewed in edit mode on mobile devices
 
 Fixed:
 - Improve/Enable the correct rearranging of images
+- Images are shown via a proxy, so that we can show images on servers with more CORS restrictions
+- Fixed loading of image urls after saving configurations
 
 ## 1.13.0 - 2024-02-29
 

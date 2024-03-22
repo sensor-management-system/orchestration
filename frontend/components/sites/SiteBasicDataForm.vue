@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2020-2023
+Copyright (C) 2020-2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -225,6 +225,7 @@ permissions and limitations under the Licence.
             :attachments="siteAttachments"
             :value="value.images"
             :download-attachment="downloadAttachment"
+            :proxy-url="proxyUrl"
             @input="update('images', $event)"
           />
         </v-col>
@@ -440,6 +441,7 @@ import { SiteUsage } from '@/models/SiteUsage'
 import { SiteType } from '@/models/SiteType'
 
 import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store/sites'
+import { ProxyUrlAction } from '@/store/proxy'
 import { VocabularyState } from '@/store/vocabulary'
 import { Image } from '@/models/Image'
 interface INameAndUri {
@@ -463,7 +465,8 @@ type SiteTypeComboboxValue = SiteType | string | undefined
   },
   methods: {
     ...mapState('vocabulary', ['epsgCodes']),
-    ...mapActions('sites', ['searchSites', 'downloadAttachment'])
+    ...mapActions('sites', ['searchSites', 'downloadAttachment']),
+    ...mapActions('proxy', ['proxyUrl'])
   },
   computed: {
     ...mapState('sites', ['sites', 'siteAttachments'])
@@ -480,6 +483,7 @@ export default class SiteBasicDataForm extends mixins(Rules) {
   // vuex definition for typescript check
   siteAttachments!: SitesState['siteAttachments']
   downloadAttachment!: DownloadAttachmentAction
+  proxyUrl!: ProxyUrlAction
   epsgCodes!: VocabularyState['epsgCodes']
   sites!: SitesState['sites']
   searchSites!: SearchSitesAction
