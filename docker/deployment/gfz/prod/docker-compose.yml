@@ -54,7 +54,7 @@ services:
       - nginx
 
   idl:
-    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.3
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.4
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'
@@ -68,6 +68,7 @@ services:
       DJANGO_DB_PASSWORD: $IDL_DB_PASSWORD
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
+      DJANGO_SECRET_KEY: ${IDL_SECRET_KEY}
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'
