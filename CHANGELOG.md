@@ -15,6 +15,7 @@ Fixed:
 - Improve/Enable the correct rearranging of images
 - Images are shown via a proxy, so that we can show images on servers with more CORS restrictions
 - Fixed loading of image urls after saving configurations
+- Fixed some typos on the tsm linking wizzard
 
 ## 1.13.0 - 2024-02-29
 

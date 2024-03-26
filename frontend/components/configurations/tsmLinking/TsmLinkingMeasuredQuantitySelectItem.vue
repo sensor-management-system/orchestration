@@ -2,7 +2,7 @@
  Web client of the Sensor Management System software developed within the
  Helmholtz DataHub Initiative by GFZ and UFZ.
 
- Copyright (C) 2020 - 2023
+ Copyright (C) 2020 - 2024
  - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -99,7 +99,7 @@ export default class TsmLinkingMeasuredQuantitySelectItem extends Vue {
     if (this.calcDevicesPropertiesWithoutLinking.length > 0) {
       const itemWithoutLinking = {
         id: 'WithoutLinking-0',
-        name: 'Measured quanitites without linking',
+        name: 'Measured quantities without linking',
         children: this.calcDevicesPropertiesWithoutLinking.map((el) => {
           return {
             id: el.id,
@@ -113,7 +113,7 @@ export default class TsmLinkingMeasuredQuantitySelectItem extends Vue {
     if (this.calcDevicesPropertiesWithLinking.length > 0) {
       const itemWithLinking = {
         id: 'WithLinking-0',
-        name: 'Measured quanitites with linking',
+        name: 'Measured quantities with linking',
         children: this.calcDevicesPropertiesWithLinking.map((el) => {
           return {
             id: el.id,
