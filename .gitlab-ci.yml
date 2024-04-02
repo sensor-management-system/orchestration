@@ -2,6 +2,7 @@
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
 # - Hannes Bohring <hannes.bohring@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 # - Norman Ziegner <norman.ziegner@ufz.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
@@ -297,6 +298,31 @@ build-deploy-image-nginx-gfz-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
+build-deploy-image-nginx-gfz-sandbox:
+  stage: build
+  extends: .docker_build
+  variables:
+    CLIENT_ID: ${GFZ_SANDBOX_HIFIS_OIDC_CLIENT_ID}
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest" -f docker/build/nginx/gfz/sandbox/Dockerfile \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+          --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+          .
+    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
 
 build-deploy-image-nginx-gfz-prod:
   stage: build
@@ -359,9 +385,9 @@ build-deploy-image-backend-gfz-prod:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-prod-latest}" -f backend/Dockerfile \
+        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-prod-latest}" --tag "$CI_REGISTRY_IMAGE/backend:gfz-sandbox-latest" -f backend/Dockerfile \
           backend
-    - docker push "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-prod-latest}"
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/backend"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
@@ -394,10 +420,10 @@ build-deploy-image-mc-gfz-prod:
         docker build \
           --tag "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG}" \
           --tag "$CI_REGISTRY_IMAGE/mc:gfz-prod-latest" \
+          --tag "$CI_REGISTRY_IMAGE/mc:gfz-sandbox-latest" \
           -f docker/build/mc/gfz/Dockerfile \
           docker/build/mc/gfz
-    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG}"
-    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-prod-latest"
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/mc"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
@@ -589,12 +615,6 @@ deploy-gfz-staging:
     - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py db upgrade
-    # We need to write from the env variable of the runner here into the container.
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend sh -c "echo '$TSM_ENDPOINTS' > /tmp/tsm_endpoint_fixture.json"
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py loaddata /tmp/tsm_endpoint_fixture.json
-    - sleep 1m
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -641,11 +661,6 @@ deploy-gfz-prod:
     - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend python3 manage.py db upgrade
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend sh -c "echo '$TSM_ENDPOINTS' > /tmp/tsm_endpoint_fixture.json"
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend python3 manage.py loaddata /tmp/tsm_endpoint_fixture.json
-    - sleep 1m
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend python3 manage.py es reindex
     - docker rmi $(docker images -q -f dangling=true) || true
     # Curl is already installed on the deployment machine
     - >
@@ -660,6 +675,26 @@ deploy-gfz-prod:
       when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
+
+deploy-gfz-sandbox:
+  stage: deploy
+  environment:
+    name: gfz-sandbox
+    url: https://sensors-sandbox.gfz-potsdam.de
+  tags:
+    - gfz
+    - gfz-net
+  image: alpine:latest
+  script:
+    - wget -q --post-data "" "$GFZ_SANDBOX_HOOK_URL"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$GFZ_SANDBOX_HOOK_URL && $CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
 
 build-ufz-backend-image-staging:
   stage: build

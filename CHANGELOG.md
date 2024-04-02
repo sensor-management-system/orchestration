@@ -10,6 +10,8 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Added:
 - Images are also previewed in edit mode on mobile devices
+- Setup for SMS sandbox deployment on https://sensors-sandbox.gfz-potsdam.de
+- (GFZ): GFZ IDL Version 0.4 will be used
 
 Fixed:
 - Improve/Enable the correct rearranging of images
