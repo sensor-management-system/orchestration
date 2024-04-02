@@ -14,6 +14,14 @@ SPDX-License-Identifier: HEESIL-1.0
 
 ![SMS work flow](docs/images/sms.png)
 
+## Demo instance
+
+If you just want to try out the Sensor Management System, you are welcome to do
+so on [our test instance](https://sensors-sandbox.gfz-potsdam.de). 
+
+⚠️ Please be aware that the data you enter there will not be stored permanently
+and the instance should not be used for productive work!
+
 ## Usage
 
 ### Set up Controlled Vocabulary
