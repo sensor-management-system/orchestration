@@ -12,6 +12,7 @@ Added:
 - Images are also previewed in edit mode on mobile devices
 - Setup for SMS sandbox deployment on https://sensors-sandbox.gfz-potsdam.de
 - (GFZ): GFZ IDL Version 0.4 will be used
+- Autocompletion for keywords
 
 Fixed:
 - Improve/Enable the correct rearranging of images

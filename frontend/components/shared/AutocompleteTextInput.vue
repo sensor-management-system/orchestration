@@ -108,5 +108,9 @@ export default class AutocompleteTextInput extends Vue {
   focus (): void {
     (this.$refs.combobox as Vue & { focus: () => void }).focus()
   }
+
+  blur (): void {
+    (this.$refs.combobox as Vue & { blur: () => void }).blur()
+  }
 }
 </script>

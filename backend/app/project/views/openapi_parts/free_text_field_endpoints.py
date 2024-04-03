@@ -610,4 +610,10 @@ paths = {
         operation_id="controller_attachment_labels",
         response_description="List of distinct attachment labels.",
     ),
+    **template(
+        endpoint="/controller/keywords",
+        description="Get the list of distinct keywords of all devices, platforms, configurations and sites.",
+        operation_id="controller_keywords",
+        response_description="List of distinct keywords.",
+    ),
 }

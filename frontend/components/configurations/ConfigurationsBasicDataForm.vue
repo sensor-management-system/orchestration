@@ -180,17 +180,19 @@ permissions and limitations under the Licence.
     </v-row>
     <v-row>
       <v-col>
-        <v-text-field
-          v-model="newKeyword"
+        <autocomplete-text-input
+          :search-input.sync="newKeyword"
+          ref="newKeywordField"
           label="New keyword"
-          @keydown.enter="addNewKeyword"
+          endpoint="keywords"
+          @keyup.enter="addNewKeyword"
         >
           <template #append>
-            <v-btn icon :disabled="!newKeyword" @click="addNewKeyword">
+            <v-btn icon :disabled="!newKeyword" @click="addNewKeywordAndBlurNewKeywordField">
               <v-icon>mdi-plus</v-icon>
             </v-btn>
           </template>
-        </v-text-field>
+        </autocomplete-text-input>
       </v-col>
     </v-row>
   </v-form>
@@ -314,9 +316,18 @@ export default class ConfigurationsBasicDataForm extends Vue {
       return
     }
     const newObj = Configuration.createFromObject(this.value)
-    newObj.keywords.push(this.newKeyword)
+    if (!newObj.keywords.includes(this.newKeyword)) {
+      newObj.keywords.push(this.newKeyword)
+    }
     this.newKeyword = ''
     this.$emit('input', newObj)
+  }
+
+  addNewKeywordAndBlurNewKeywordField () {
+    this.addNewKeyword()
+    this.$nuxt.$nextTick(() => {
+      (this.$refs.newKeywordField as Vue & { blur: () => void }).blur()
+    })
   }
 
   removeKeyword (keyword: string) {

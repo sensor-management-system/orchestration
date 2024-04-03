@@ -7093,3 +7093,361 @@ class TestPlatformModelEndpoint(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json["data"]
         self.assertEqual(data, ["dummy"])
+
+
+class TestKeywordEndpoint(BaseTestCase):
+    """Tests for the label endpoint for all keywords."""
+
+    url = f"{base_url}/controller/keywords"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure that we need a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 401)
+
+    def test_get_empty(self):
+        """Ensure we can get an empty response."""
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_for_all_keywords(self):
+        """Ensure we get a list of keywords."""
+        device = Device(
+            short_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword1", "keyword2"],
+        )
+        platform = Platform(
+            short_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword3", "keyword4"],
+        )
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+            keywords=["keyword5", "keyword6"],
+        )
+        site = Site(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+            keywords=["keyword7", "keyword8"],
+        )
+
+        db.session.add_all(
+            [
+                device,
+                platform,
+                configuration,
+                site,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(
+            data,
+            [
+                "keyword1",
+                "keyword2",
+                "keyword3",
+                "keyword4",
+                "keyword5",
+                "keyword6",
+                "keyword7",
+                "keyword8",
+            ],
+        )
+
+    def test_get_distinct_all_keyword_fields(self):
+        """Ensure we get a list of keywords."""
+        device = Device(
+            short_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword1"],
+        )
+        platform = Platform(
+            short_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword1"],
+        )
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+            keywords=["keyword1"],
+        )
+        site = Site(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+            keywords=["keyword1"],
+        )
+
+        db.session.add_all(
+            [
+                device,
+                platform,
+                configuration,
+                site,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["keyword1"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+        self.assertIn("401", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+    def test_entry_of_private_device_is_not_included_for_other(self):
+        """Ensure we don't show data for private devices to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword1"],
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+            keywords=["keyword2"],
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["keyword1"])
+
+    def test_entry_of_private_device_is_included_for_owner(self):
+        """Ensure we give out private device data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        device1 = Device(
+            short_name="d1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword1"],
+        )
+        device2 = Device(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+            keywords=["keyword2"],
+        )
+
+        db.session.add_all(
+            [
+                device1,
+                device2,
+            ]
+        )
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["keyword1", "keyword2"])
+
+    def test_entry_of_private_platform_is_not_included_for_other(self):
+        """Ensure we don't show data for private platforms to other users."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword1"],
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by_id=other_user.id,
+            keywords=["keyword2"],
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["keyword1"])
+
+    def test_entry_of_private_platform_is_included_for_owner(self):
+        """Ensure we give out private platform data for the owner."""
+        other_contact = Contact(
+            given_name="other", family_name="contact", email="other.contact@localhost"
+        )
+        other_user = User(subject=other_contact.email, contact=other_contact)
+        db.session.add_all([other_contact, other_user])
+        db.session.commit()
+        platform1 = Platform(
+            short_name="d1",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+            keywords=["keyword1"],
+        )
+        platform2 = Platform(
+            short_name="d2",
+            is_public=False,
+            is_internal=False,
+            is_private=True,
+            created_by=other_user,
+            keywords=["keyword2"],
+        )
+
+        db.session.add_all(
+            [
+                platform1,
+                platform2,
+            ]
+        )
+        with self.run_requests_as(other_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["keyword1", "keyword2"])
+
+    def test_get_distinct_all__with_empty(self):
+        """Ensure we get a list of labels."""
+        device = Device(
+            short_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        platform = Platform(
+            short_name="dummy",
+            is_public=True,
+            is_internal=False,
+            is_private=False,
+        )
+        configuration = Configuration(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        site1 = Site(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        site2 = Site(
+            label="dummy",
+            is_public=True,
+            is_internal=False,
+            keywords=["keyword1"],
+        )
+
+        db.session.add_all(
+            [
+                device,
+                platform,
+                configuration,
+                site1,
+                site2,
+            ]
+        )
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["keyword1"])

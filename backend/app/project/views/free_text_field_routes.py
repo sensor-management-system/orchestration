@@ -610,7 +610,7 @@ class ContactOrganizationEndPoint(AbstractFreeTextFieldEndpoint):
 
 @free_text_field_routes.route("/controller/attachment-labels", methods=["GET"])
 @class_based_view
-class AttachmentLabelEndPoiint:
+class AttachmentLabelEndPoint:
     """
     Endpoint for the distinct attachment labels.
 
@@ -649,5 +649,44 @@ class AttachmentLabelEndPoiint:
                     labels.add(x.label)
 
             return {"data": sorted(labels)}
+        except ErrorResponse as e:
+            return e.respond()
+
+
+@free_text_field_routes.route("/controller/keywords", methods=["GET"])
+@class_based_view
+class KeywordEndPoint:
+    """
+    Endpoint for the distinct keywords.
+
+    This is a combination of the lists for device keywords,
+    as well as the labels of keywords for platforms, sites and
+    configurations.
+    """
+
+    def __call__(self):
+        """Return the list of attachment labels."""
+        try:
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            keywords = set()
+
+            visible_devices = filter_visible(db.session.query(Device))
+            visible_platforms = filter_visible(db.session.query(Platform))
+            visible_configurations = filter_visible(db.session.query(Configuration))
+            visible_sites = filter_visible(db.session.query(Site))
+
+            for query in [
+                visible_devices.distinct(Device.keywords),
+                visible_platforms.distinct(Platform.keywords),
+                visible_configurations.distinct(Configuration.keywords),
+                visible_sites.distinct(Site.keywords),
+            ]:
+                for x in query:
+                    if x.keywords is not None:
+                        for keyword in x.keywords:
+                            keywords.add(keyword)
+
+            return {"data": sorted(keywords)}
         except ErrorResponse as e:
             return e.respond()
