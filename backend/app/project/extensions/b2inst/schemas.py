@@ -24,8 +24,9 @@ class B2InstOwner:
         """Transform to a python dictionary."""
         result = {
             "ownerName": self.ownerName,
-            "ownerContact": self.ownerContact,
         }
+        if self.ownerContact:
+            result["ownerContact"] = self.ownerContact
         if self.ownerIdentifierType and self.ownerIdentifier:
             result["ownerIdentifier"] = {
                 "ownerIdentifierType": self.ownerIdentifierType,

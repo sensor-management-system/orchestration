@@ -55,6 +55,22 @@ class TestB2InstOwner(TestCase):
         }
         self.assertEqual(result, expected)
 
+    def test_dict_with_only_the_name(self):
+        """Test the dict method even without the contact."""
+        owner = schemas.B2InstOwner(
+            ownerName=":unav",
+            ownerContact=None,
+            ownerIdentifier=None,
+            ownerIdentifierType=None,
+        )
+
+        result = owner.dict()
+
+        expected = {
+            "ownerName": ":unav",
+        }
+        self.assertEqual(result, expected)
+
 
 class TestB2InstInstrumentType(TestCase):
     """Test class for the B2InstInstrumentType class."""

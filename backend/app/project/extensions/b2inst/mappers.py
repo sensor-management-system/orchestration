@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023-2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -53,7 +53,7 @@ class B2InstDeviceMapper:
         for x in [device.manufacturer_name, device.model, device.serial_number]:
             if x:
                 parts.append(x)
-        return " - ".join(parts)
+        return " - ".join(parts) or ":unas"
 
     def _device_owners(self, device):
         owners = []
@@ -81,6 +81,15 @@ class B2InstDeviceMapper:
                     ownerContact=contact.email,
                     ownerIdentifier=owner_identifier,
                     ownerIdentifierType=owner_identifier_type,
+                )
+            )
+        if not owners:
+            owners.append(
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
                 )
             )
         return owners
@@ -117,6 +126,15 @@ class B2InstDeviceMapper:
                     manufacturerIdentifierType=manufacturer_identifier_type,
                 )
             )
+        if not manufacturers:
+            manufacturers.append(
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            )
+
         return manufacturers
 
     def _device_models(self, device):
@@ -195,7 +213,7 @@ class B2InstPlatformMapper:
         for x in [platform.manufacturer_name, platform.model, platform.serial_number]:
             if x:
                 parts.append(x)
-        return " - ".join(parts)
+        return " - ".join(parts) or ":unas"
 
     def _platform_owners(self, platform):
         owners = []
@@ -223,6 +241,15 @@ class B2InstPlatformMapper:
                     ownerContact=contact.email,
                     ownerIdentifier=owner_identifier,
                     ownerIdentifierType=owner_identifier_type,
+                )
+            )
+        if not owners:
+            owners.append(
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
                 )
             )
         return owners
@@ -257,6 +284,14 @@ class B2InstPlatformMapper:
                     manufacturerName=platform.manufacturer_name,
                     manufacturerIdentifier=manufacturer_identifier,
                     manufacturerIdentifierType=manufacturer_identifier_type,
+                )
+            )
+        if not manufacturers:
+            manufacturers.append(
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
                 )
             )
         return manufacturers
@@ -339,9 +374,19 @@ class B2InstConfigurationMapper:
             for instrument_type in data.InstrumentType:
                 instrument_types.add(instrument_type)
             for manufacturer in data.Manufacturer:
-                manufacturers.add(manufacturer)
+                if manufacturer.manufacturerName != ":unav":
+                    manufacturers.add(manufacturer)
             for measured_variable in data.MeasuredVariable:
                 measured_variables.add(measured_variable)
+
+        if not manufacturers:
+            manufacturers.add(
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            )
 
         dates = []
         if configuration.start_date:
@@ -361,7 +406,7 @@ class B2InstConfigurationMapper:
         return schemas.B2InstDraftPost(
             community=community,
             open_access=open_access,
-            Name=configuration.label,
+            Name=configuration.label or ":unas",
             Description=configuration.description,
             Owner=self._configuration_owners(configuration),
             InstrumentType=sorted(instrument_types, key=lambda x: x.instrumentTypeName),
@@ -410,6 +455,15 @@ class B2InstConfigurationMapper:
                     ownerContact=contact.email,
                     ownerIdentifier=owner_identifier,
                     ownerIdentifierType=owner_identifier_type,
+                )
+            )
+        if not owners:
+            owners.append(
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
                 )
             )
         return owners
