@@ -105,15 +105,29 @@ class TestB2InstDeviceMapper(BaseTestCase):
             serial_number="123",
             inventory_number="345",
         )
-        contact = Contact(
+        contact1 = Contact(
             given_name="A",
             family_name="B",
             email="ab@localhost",
             orcid="1234-5678-9012-3456",
+            organization="LocalHost",
         )
-        device_contact_role = DeviceContactRole(
+        contact2 = Contact(
+            given_name="C",
+            family_name="B",
+            email="cb@localhost",
+            orcid="9234-5678-9012-3456",
+            organization="LocalHost",
+        )
+        device_contact_role1 = DeviceContactRole(
             device=device,
-            contact=contact,
+            contact=contact1,
+            role_name="Owner",
+            role_uri="https://cv/api/v1/roles/1/",
+        )
+        device_contact_role2 = DeviceContactRole(
+            device=device,
+            contact=contact2,
             role_name="Owner",
             role_uri="https://cv/api/v1/roles/1/",
         )
@@ -121,7 +135,16 @@ class TestB2InstDeviceMapper(BaseTestCase):
             device=device,
             property_name="Soil moisture",
         )
-        db.session.add_all([device, contact, device_contact_role, device_property])
+        db.session.add_all(
+            [
+                device,
+                contact1,
+                contact2,
+                device_contact_role1,
+                device_contact_role2,
+                device_property,
+            ]
+        )
         db.session.commit()
 
         mapper = mappers.B2InstDeviceMapper()
@@ -140,10 +163,10 @@ class TestB2InstDeviceMapper(BaseTestCase):
             Description="The SMT 100",
             Owner=[
                 schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
-                    ownerIdentifier="https://orcid.org/1234-5678-9012-3456",
-                    ownerIdentifierType="URN",
+                    ownerName="LocalHost",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
                 )
             ],
             InstrumentType=[
@@ -171,6 +194,11 @@ class TestB2InstDeviceMapper(BaseTestCase):
                     alternateIdentifierName=None,
                 ),
                 schemas.B2InstAlternateIdentifier(
+                    alternateIdentifier="345",
+                    alternateIdentifierType="InventoryNumber",
+                    alternateIdentifierName=None,
+                ),
+                schemas.B2InstAlternateIdentifier(
                     alternateIdentifier=f"{self.landing_page}/devices/{device.id}",
                     alternateIdentifierType="Other",
                     alternateIdentifierName="URL",
@@ -194,6 +222,7 @@ class TestB2InstDeviceMapper(BaseTestCase):
             given_name="A",
             family_name="B",
             email="ab@localhost",
+            organization="LocalHost",
         )
         device_contact_role = DeviceContactRole(
             device=device,
@@ -224,8 +253,8 @@ class TestB2InstDeviceMapper(BaseTestCase):
             Description="The SMT 100",
             Owner=[
                 schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
+                    ownerName="LocalHost",
+                    ownerContact=None,
                     ownerIdentifier=None,
                     ownerIdentifierType=None,
                 )
@@ -273,6 +302,7 @@ class TestB2InstDeviceMapper(BaseTestCase):
             given_name="A",
             family_name="B",
             email="ab@localhost",
+            organization="LocalHost",
         )
         device_contact_role = DeviceContactRole(
             device=device,
@@ -353,6 +383,7 @@ class TestB2InstDeviceMapper(BaseTestCase):
             family_name="B",
             email="ab@localhost",
             active=False,
+            organization="LocalHost",
         )
         device_contact_role = DeviceContactRole(
             device=device,
@@ -490,19 +521,41 @@ class TestB2InstPlatformMapper(BaseTestCase):
             serial_number="123",
             inventory_number="345",
         )
-        contact = Contact(
+        contact1 = Contact(
             given_name="A",
             family_name="B",
             email="ab@localhost",
             orcid="1234-5678-9012-3456",
+            organization="LocalHost",
         )
-        platform_contact_role = PlatformContactRole(
+        contact2 = Contact(
+            given_name="C",
+            family_name="B",
+            email="cb@localhost",
+            orcid="9234-5678-9012-3456",
+            organization="LocalHost",
+        )
+        platform_contact_role1 = PlatformContactRole(
             platform=platform,
-            contact=contact,
+            contact=contact1,
             role_name="Owner",
             role_uri="https://cv/api/v1/roles/1/",
         )
-        db.session.add_all([platform, contact, platform_contact_role])
+        platform_contact_role2 = PlatformContactRole(
+            platform=platform,
+            contact=contact2,
+            role_name="Owner",
+            role_uri="https://cv/api/v1/roles/1/",
+        )
+        db.session.add_all(
+            [
+                platform,
+                contact1,
+                contact2,
+                platform_contact_role1,
+                platform_contact_role2,
+            ]
+        )
         db.session.commit()
 
         mapper = mappers.B2InstPlatformMapper()
@@ -521,10 +574,10 @@ class TestB2InstPlatformMapper(BaseTestCase):
             Description="The CR 1000",
             Owner=[
                 schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
-                    ownerIdentifier="https://orcid.org/1234-5678-9012-3456",
-                    ownerIdentifierType="URN",
+                    ownerName="LocalHost",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
                 )
             ],
             InstrumentType=[
@@ -552,6 +605,11 @@ class TestB2InstPlatformMapper(BaseTestCase):
                     alternateIdentifierName=None,
                 ),
                 schemas.B2InstAlternateIdentifier(
+                    alternateIdentifier="345",
+                    alternateIdentifierType="InventoryNumber",
+                    alternateIdentifierName=None,
+                ),
+                schemas.B2InstAlternateIdentifier(
                     alternateIdentifier=f"{self.landing_page}/platforms/{platform.id}",
                     alternateIdentifierType="Other",
                     alternateIdentifierName="URL",
@@ -575,6 +633,7 @@ class TestB2InstPlatformMapper(BaseTestCase):
             given_name="A",
             family_name="B",
             email="ab@localhost",
+            organization="LocalHost",
         )
         platform_contact_role = PlatformContactRole(
             platform=platform,
@@ -601,8 +660,8 @@ class TestB2InstPlatformMapper(BaseTestCase):
             Description="The CR 1000",
             Owner=[
                 schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
+                    ownerName="LocalHost",
+                    ownerContact=None,
                     ownerIdentifier=None,
                     ownerIdentifierType=None,
                 )
@@ -650,6 +709,7 @@ class TestB2InstPlatformMapper(BaseTestCase):
             given_name="A",
             family_name="B",
             email="ab@localhost",
+            organization="LocalHost",
         )
         platform_contact_role = PlatformContactRole(
             platform=platform,
@@ -726,6 +786,7 @@ class TestB2InstPlatformMapper(BaseTestCase):
             family_name="B",
             email="ab@localhost",
             active=False,
+            organization="LocalHost",
         )
         platform_contact_role = PlatformContactRole(
             platform=platform,
@@ -854,15 +915,29 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             start_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
             end_date=datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
         )
-        contact = Contact(
+        contact1 = Contact(
             given_name="A",
             family_name="B",
             email="ab@localhost",
             orcid="1234-5678-9012-3456",
+            organization="LocalHost",
         )
-        configuration_contact_role = ConfigurationContactRole(
+        contact2 = Contact(
+            given_name="Z",
+            family_name="B",
+            email="zb@localhost",
+            orcid="9234-5678-9012-3456",
+            organization="LocalHost",
+        )
+        configuration_contact_role1 = ConfigurationContactRole(
             configuration=configuration,
-            contact=contact,
+            contact=contact1,
+            role_name="Owner",
+            role_uri="https://cv/api/v1/roles/1/",
+        )
+        configuration_contact_role2 = ConfigurationContactRole(
+            configuration=configuration,
+            contact=contact2,
             role_name="Owner",
             role_uri="https://cv/api/v1/roles/1/",
         )
@@ -879,6 +954,7 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             family_name="B",
             email="cb@localhost",
             orcid="1234-5678-9012-5555",
+            organization="LocalHost",
         )
         device_contact_role = DeviceContactRole(
             device=device,
@@ -922,8 +998,10 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         db.session.add_all(
             [
                 configuration,
-                configuration_contact_role,
-                contact,
+                configuration_contact_role1,
+                configuration_contact_role2,
+                contact1,
+                contact2,
                 device,
                 device_contact,
                 device_contact_role,
@@ -952,10 +1030,10 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             Description="example description",
             Owner=[
                 schemas.B2InstOwner(
-                    ownerName="A B",
-                    ownerContact="ab@localhost",
-                    ownerIdentifier="https://orcid.org/1234-5678-9012-3456",
-                    ownerIdentifierType="URN",
+                    ownerName="LocalHost",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
                 )
             ],
             InstrumentType=[
@@ -1015,6 +1093,7 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             family_name="B",
             email="ab@localhost",
             orcid="1234-5678-9012-3456",
+            organization="LocalHost",
         )
         configuration_contact_role = ConfigurationContactRole(
             configuration=configuration,
@@ -1084,6 +1163,7 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             email="ab@localhost",
             orcid="1234-5678-9012-3456",
             active=False,
+            organization="LocalHost",
         )
         configuration_contact_role = ConfigurationContactRole(
             configuration=configuration,

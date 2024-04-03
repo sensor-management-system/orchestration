@@ -56,7 +56,7 @@ class B2InstDeviceMapper:
         return " - ".join(parts) or ":unas"
 
     def _device_owners(self, device):
-        owners = []
+        owners = set()
         for contact_role in (
             db.session.query(DeviceContactRole)
             .join(Contact)
@@ -69,22 +69,20 @@ class B2InstDeviceMapper:
             )
         ):
             contact = contact_role.contact
-            name = f"{contact.given_name} {contact.family_name}"
+            name = contact.organization
             owner_identifier = None
             owner_identifier_type = None
-            if contact.orcid:
-                owner_identifier = f"https://orcid.org/{contact.orcid}"
-                owner_identifier_type = "URN"
-            owners.append(
-                schemas.B2InstOwner(
-                    ownerName=name,
-                    ownerContact=contact.email,
-                    ownerIdentifier=owner_identifier,
-                    ownerIdentifierType=owner_identifier_type,
+            if name:
+                owners.add(
+                    schemas.B2InstOwner(
+                        ownerName=name,
+                        ownerContact=None,
+                        ownerIdentifier=owner_identifier,
+                        ownerIdentifierType=owner_identifier_type,
+                    )
                 )
-            )
         if not owners:
-            owners.append(
+            owners.add(
                 schemas.B2InstOwner(
                     ownerName=":unav",
                     ownerContact=None,
@@ -92,7 +90,7 @@ class B2InstDeviceMapper:
                     ownerIdentifierType=None,
                 )
             )
-        return owners
+        return list(owners)
 
     def _device_instrument_types(self, device):
         instrument_types = []
@@ -152,12 +150,14 @@ class B2InstDeviceMapper:
                     alternateIdentifierName=None,
                 )
             )
-        # For the moment we decide not to publish the inventory number
-        # on the b2inst.
-        # We may re-add them in the future, but only if we add proper
-        # institute information about the owner.
-        # (Would just be the alternateIdentifierType="InventoryNumber")
-
+        if device.inventory_number:
+            result.append(
+                schemas.B2InstAlternateIdentifier(
+                    alternateIdentifier=device.inventory_number,
+                    alternateIdentifierType="InventoryNumber",
+                    alternateIdentifierName=None,
+                )
+            )
         # You may ask why to include that while we still ahve the landing page
         # as an extra element.
         # The point is a small problem in b2inst, that doesn't allow us to patch
@@ -216,7 +216,7 @@ class B2InstPlatformMapper:
         return " - ".join(parts) or ":unas"
 
     def _platform_owners(self, platform):
-        owners = []
+        owners = set()
         for contact_role in (
             db.session.query(PlatformContactRole)
             .join(Contact)
@@ -229,22 +229,20 @@ class B2InstPlatformMapper:
             )
         ):
             contact = contact_role.contact
-            name = f"{contact.given_name} {contact.family_name}"
+            name = contact.organization
             owner_identifier = None
             owner_identifier_type = None
-            if contact.orcid:
-                owner_identifier = f"https://orcid.org/{contact.orcid}"
-                owner_identifier_type = "URN"
-            owners.append(
-                schemas.B2InstOwner(
-                    ownerName=name,
-                    ownerContact=contact.email,
-                    ownerIdentifier=owner_identifier,
-                    ownerIdentifierType=owner_identifier_type,
+            if name:
+                owners.add(
+                    schemas.B2InstOwner(
+                        ownerName=name,
+                        ownerContact=None,
+                        ownerIdentifier=owner_identifier,
+                        ownerIdentifierType=owner_identifier_type,
+                    )
                 )
-            )
         if not owners:
-            owners.append(
+            owners.add(
                 schemas.B2InstOwner(
                     ownerName=":unav",
                     ownerContact=None,
@@ -252,7 +250,7 @@ class B2InstPlatformMapper:
                     ownerIdentifierType=None,
                 )
             )
-        return owners
+        return list(owners)
 
     def _platform_instrument_types(self, platform):
         instrument_types = []
@@ -308,6 +306,14 @@ class B2InstPlatformMapper:
                 schemas.B2InstAlternateIdentifier(
                     alternateIdentifier=platform.serial_number,
                     alternateIdentifierType="SerialNumber",
+                    alternateIdentifierName=None,
+                )
+            )
+        if platform.inventory_number:
+            result.append(
+                schemas.B2InstAlternateIdentifier(
+                    alternateIdentifier=platform.inventory_number,
+                    alternateIdentifierType="InventoryNumber",
                     alternateIdentifierName=None,
                 )
             )
@@ -430,7 +436,7 @@ class B2InstConfigurationMapper:
         )
 
     def _configuration_owners(self, configuration):
-        owners = []
+        owners = set()
         for contact_role in (
             db.session.query(ConfigurationContactRole)
             .join(Contact)
@@ -443,22 +449,20 @@ class B2InstConfigurationMapper:
             )
         ):
             contact = contact_role.contact
-            name = f"{contact.given_name} {contact.family_name}"
+            name = contact.organization
             owner_identifier = None
             owner_identifier_type = None
-            if contact.orcid:
-                owner_identifier = f"https://orcid.org/{contact.orcid}"
-                owner_identifier_type = "URN"
-            owners.append(
-                schemas.B2InstOwner(
-                    ownerName=name,
-                    ownerContact=contact.email,
-                    ownerIdentifier=owner_identifier,
-                    ownerIdentifierType=owner_identifier_type,
+            if name:
+                owners.add(
+                    schemas.B2InstOwner(
+                        ownerName=name,
+                        ownerContact=None,
+                        ownerIdentifier=owner_identifier,
+                        ownerIdentifierType=owner_identifier_type,
+                    )
                 )
-            )
         if not owners:
-            owners.append(
+            owners.add(
                 schemas.B2InstOwner(
                     ownerName=":unav",
                     ownerContact=None,
@@ -466,7 +470,7 @@ class B2InstConfigurationMapper:
                     ownerIdentifierType=None,
                 )
             )
-        return owners
+        return list(owners)
 
 
 class B2InstDraftMapper:

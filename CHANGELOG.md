@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
+
 ## 1.14.0 (Unreleased)
 
 Added:
@@ -22,6 +23,10 @@ Fixed:
 - Images are shown via a proxy, so that we can show images on servers with more CORS restrictions
 - Fixed loading of image urls after saving configurations
 - Fixed some typos on the tsm linking wizzard
+
+Changed:
+- Owner information for B2inst are now the institutions
+- Re-added the inventory number for the B2inst export
 
 ## 1.13.0 - 2024-02-29
 
@@ -43,6 +48,7 @@ Fixed:
 - Adjusted the ordering of the elements in sensorML 
 - Stop showing the back to search button when opening the search page manually
 - After editing the name of a parameter of device, platform or configuration the updated name will also be displayed in the parameter value table for a selected date
+
 
 ## 1.12.0 - 2024-01-17
 
