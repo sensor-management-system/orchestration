@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023-2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -48,15 +48,35 @@ class TestB2InstDeviceMapper(BaseTestCase):
             schema_version="1.0.0",
         )
 
+        # Some of the information need to be present in the
+        # pidinst schema - and so for the b2inst too.
+        # The pidinst docs for that are here:
+        # https://docs.pidinst.org/en/latest/white-paper/metadata-schema-recommendations.html#dealing-with-unknown-information
+        # For a missing name it makes sense to handle it as "Untitled" - so the :unas value makes most sense.
+        # For a missing owner or manufacturer, maybe we should use :unav - as there might be an owner
+        # or a manufacturer, but we have no information about it.
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            Name="",
+            Name=":unas",
             Description="",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[],
             LandingPage=f"{self.landing_page}/devices/{device.id}",
-            Manufacturer=[],
+            Manufacturer=[
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            ],
             Model=None,
             MeasuredVariable=[],
             Date=[],
@@ -281,7 +301,14 @@ class TestB2InstDeviceMapper(BaseTestCase):
             open_access=True,
             Name="SMT100 - TRUEBENER GmbH - SMT 100",
             Description="The SMT 100",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[
                 schemas.B2InstInstrumentType(
                     instrumentTypeName="Soil moisture sensor",
@@ -354,7 +381,14 @@ class TestB2InstDeviceMapper(BaseTestCase):
             open_access=True,
             Name="SMT100 - TRUEBENER GmbH - SMT 100",
             Description="The SMT 100",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[
                 schemas.B2InstInstrumentType(
                     instrumentTypeName="Soil moisture sensor",
@@ -409,12 +443,25 @@ class TestB2InstPlatformMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            Name="",
+            Name=":unas",
             Description="",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[],
             LandingPage=f"{self.landing_page}/platforms/{platform.id}",
-            Manufacturer=[],
+            Manufacturer=[
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            ],
             Model=None,
             MeasuredVariable=[],
             Date=[],
@@ -627,7 +674,14 @@ class TestB2InstPlatformMapper(BaseTestCase):
             open_access=True,
             Name="CR1000 - Campbell Scientific - CR 1000",
             Description="The CR 1000",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[
                 schemas.B2InstInstrumentType(
                     instrumentTypeName="Logger",
@@ -696,7 +750,14 @@ class TestB2InstPlatformMapper(BaseTestCase):
             open_access=True,
             Name="CR1000 - Campbell Scientific - CR 1000",
             Description="The CR 1000",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[
                 schemas.B2InstInstrumentType(
                     instrumentTypeName="Logger",
@@ -751,12 +812,25 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            Name="",
+            Name=":unas",
             Description="",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[],
             LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
-            Manufacturer=[],
+            Manufacturer=[
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            ],
             Model=None,
             MeasuredVariable=[],
             Date=[],
@@ -967,12 +1041,25 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            Name="",
+            Name=":unas",
             Description="",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[],
             LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
-            Manufacturer=[],
+            Manufacturer=[
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            ],
             Model=None,
             MeasuredVariable=[],
             Date=[],
@@ -1023,12 +1110,25 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         expected = schemas.B2InstDraftPost(
             community="A",
             open_access=True,
-            Name="",
+            Name=":unas",
             Description="",
-            Owner=[],
+            Owner=[
+                schemas.B2InstOwner(
+                    ownerName=":unav",
+                    ownerContact=None,
+                    ownerIdentifier=None,
+                    ownerIdentifierType=None,
+                )
+            ],
             InstrumentType=[],
             LandingPage=f"{self.landing_page}/configurations/{configuration.id}",
-            Manufacturer=[],
+            Manufacturer=[
+                schemas.B2InstManufacturer(
+                    manufacturerName=":unav",
+                    manufacturerIdentifier=None,
+                    manufacturerIdentifierType=None,
+                )
+            ],
             Model=None,
             MeasuredVariable=[],
             Date=[],

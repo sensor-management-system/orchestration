@@ -14,6 +14,9 @@ Added:
 - (GFZ): GFZ IDL Version 0.4 will be used
 - Autocompletion for keywords
 
+Changed:
+- The SMS now sends values for missing information according to the datacite values for unknown information
+
 Fixed:
 - Improve/Enable the correct rearranging of images
 - Images are shown via a proxy, so that we can show images on servers with more CORS restrictions

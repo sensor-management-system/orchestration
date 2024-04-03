@@ -235,6 +235,10 @@ test-backend-image:
     OIDC_USERNAME_CLAIM: "sub"
   stage: test
   image: $BACKEND_TEST_IMAGE
+  tags:
+    - docker
+    - dind
+    - hifis-linux-large-amd64
   before_script:
     - export DATABASE_TEST_URL=$DATABASE_TEST_URL
     - export APP_SETTINGS=project.config.TestingConfig
