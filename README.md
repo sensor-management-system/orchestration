@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2021 - 2023
+SPDX-FileCopyrightText: 2021 - 2024
 - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
@@ -10,7 +10,65 @@ SPDX-FileCopyrightText: 2021 - 2023
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-# Orchestration
+# Sensor Management System
+
+## Description
+
+The Sensor Management System (SMS) allows the comprehensive
+acquisition, administration and export of metadata of platforms,
+sensors and measurement configurations by stations and campaigns
+operated in the Helmholtz research field Earth & Environment.
+
+Information on specific setups can be summarized and made available
+as metadata together with the data for scientific evaluations,
+making the data genesis permanently traceable and transparent via
+provenance tracking. In the data management cycle, the service
+particularly supports the acquisition of additional information
+during data collection and prepares the publication of research
+data with associated metadata by capturing and providing relevant
+information about the measurement setup during data generation.
+The service is targeted at the work of scientists and technicians
+in the earth and environmental sciences, but also offers sufficient
+flexibility for use in other domains as well as individual extension
+and customization possibilities due to the use of common standards.
+
+## Instances
+
+- https://sensors.gfz-potsdam.de
+- https://web.app.ufz.de/sms/
+- https://sms.atmohub.kit.edu/
+- https://ibg3sms.ibg.kfa-juelich.de/ (FZJ intranet only)
+
+## Authors
+
+- [Nils Brinckmann](https://orcid.org/0000-0001-8159-3888)
+- Kotyba Alhaj Taha
+- Tobias Kuhnert
+- [Marc Hanisch](https://orcid.org/0000-0001-5272-4674)
+- Maximilian Schaldach
+- Florian Gransee
+- [Daniel Sielaff](https://orcid.org/0009-0002-8606-9385)
+- [Tim Eder](https://orcid.org/0009-0005-1965-931X)
+- Luca Johannes Nendel
+- [Norman Ziegner](https://orcid.org/0000-0001-7579-216X)
+- [Hannes Bohring](https://orcid.org/0009-0007-5103-5886)
+- [Rubankumar Moorthy](https://orcid.org/0000-0002-3567-1475)
+- Wilhelm Becker
+- [Martin Abbrent](https://orcid.org/0000-0003-1252-9107)
+- Erik Pongratz
+- [Dirk Ecker](https://orcid.org/0000-0003-4241-9208)
+- [Christof Lorenz](https://orcid.org/0000-0001-5590-5470)
+- [Paul Remmler](https://orcid.org/0000-0001-8900-9009)
+- [Vivien Rosin](https://orcid.org/0009-0003-9261-6696)
+- Marie Schaeffer
+- [Jannes Breier](https://orcid.org/0000-0002-9055-6904)
+
+## API Reference
+
+The openapi specification can be explored interactively on the sms instances.
+For example [on sensors.gfz-potsdam.de](https://sensors.gfz-potsdam.de/backend/api/v1/openapi).
+
+## Orchestration
 
 ![SMS work flow](docs/images/sms.png)
 
