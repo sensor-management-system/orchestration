@@ -41,8 +41,8 @@ services:
       DJANGO_SECRET_KEY: ${SMS_SANDBOX_IDL_SECRET_KEY}
       IDL_TOKEN: $SMS_SANDBOX_IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
-      VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'
-      VO_MEMBER_CONVENTIONS: 'gfz:*,*:gfz-sms-member'
+      VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin,*:ufz-sms-admin,*:kit-sms-admin,*:fzj-sms-admin'
+      VO_MEMBER_CONVENTIONS: 'gfz:*,*:gfz-sms-member,*:ufz-sms-member,*:kit-sms-member,*:fzj-sms-member'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.idl.rule=Host(`${SMS_SANDBOX_FQDN}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}idl/`)"
