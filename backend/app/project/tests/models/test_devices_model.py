@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -27,7 +27,6 @@ class TestDeviceModel(BaseTestCase):
             manufacturer_name="manufacturer_name test",
             manufacturer_uri="http://cv/manufacturer_uri",
             model="device_model test",
-            dual_use=True,
             serial_number="device_serial_number test",
             website="http://website/device",
             inventory_number="inventory_number test",

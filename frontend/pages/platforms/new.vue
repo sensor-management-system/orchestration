@@ -192,6 +192,10 @@ export default class PlatformNewPage extends Vue {
         disabled: true
       },
       {
+        name: 'Export Control',
+        disabled: true
+      },
+      {
         name: 'Actions',
         disabled: true
       }

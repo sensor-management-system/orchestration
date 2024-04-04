@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -90,6 +90,7 @@ export type CanModifyContactGetter = (entity: Contact) => boolean
 
 export type CanArchiveEntityGetter = (entity: PermissionHandable) => boolean
 export type CanRestoreEntityGetter = (entity: PermissionHandable) => boolean
+export type CanHandleExportControlGetter = boolean
 export type MemberedPermissionGroupsGetter = PermissionGroup[]
 export type AdministradedPermissionGroupsGetter = PermissionGroup[]
 export type UserGroupsGetter = PermissionGroup[]
@@ -247,6 +248,18 @@ const getters: GetterTree<PermissionsState, RootState> = {
       return true
     }
     // in case that we missed a check, restrict access
+    return false
+  },
+  canHandleExportControl: (state: PermissionsState) => {
+    if (!state.userInfo) {
+      return false
+    }
+    if (state.userInfo.isSuperUser) {
+      return true
+    }
+    if (state.userInfo.isExportControl) {
+      return true
+    }
     return false
   },
   memberedPermissionGroups: (state: PermissionsState): PermissionGroup[] => {

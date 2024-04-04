@@ -103,6 +103,16 @@ permissions and limitations under the Licence.
           </v-list-item-content>
         </v-list-item>
 
+        <!-- Manufacturer models -->
+        <v-list-item to="/manufacturer-models" nuxt>
+          <v-list-item-action>
+            <v-icon>mdi-group</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Manufacturer models</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
         <!-- Contacts -->
         <v-list-item v-if="isLoggedIn" to="/contacts" nuxt>
           <v-list-item-action>

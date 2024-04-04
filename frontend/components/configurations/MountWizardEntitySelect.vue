@@ -392,7 +392,9 @@ export default class MountWizardEntitySelect extends Vue {
         types: [],
         permissionGroups: [],
         onlyOwnDevices: false,
-        includeArchivedDevices: false
+        includeArchivedDevices: false,
+        manufacturerName: null,
+        model: null
       })
       await this.checkAvailabilities('device')
       if (this.devicesSearchPage > this.devicesTotalPages) {

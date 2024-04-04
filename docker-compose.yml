@@ -107,6 +107,7 @@ services:
       B2INST_URL: https://b2inst-test.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
       B2INST_TOKEN: ${B2INST_TOKEN}
+      EXPORT_CONTROL_VO_LIST: ${EXPORT_CONTROL_VO_LIST:-}
     depends_on:
       - db
     entrypoint: /usr/src/app/entrypoint-dev.sh

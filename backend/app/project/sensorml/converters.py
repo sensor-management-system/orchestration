@@ -11,7 +11,7 @@ from typing import List, Optional
 from geoalchemy2.shape import to_shape
 
 from ..api.helpers.configuration_helpers import build_tree
-from ..api.models import Configuration, Site
+from ..api.models import Configuration, ManufacturerModel, Site
 from ..api.models.base_model import db
 from ..api.permissions.rules import filter_visible
 from ..extensions.instances import pidinst
@@ -1068,6 +1068,32 @@ class DeviceConverter:
             )
             sml_document_list.append(sml_document)
 
+        manufacturer_model = (
+            db.session.query(ManufacturerModel)
+            .filter_by(
+                manufacturer_name=self.device.manufacturer_name,
+                model=self.device.model,
+            )
+            .first()
+        )
+
+        if manufacturer_model:
+            export_control_attachments = manufacturer_model.export_control_attachments
+            for attachment in export_control_attachments:
+                if not attachment.is_export_control_only:
+                    sml_document = SmlDocument(
+                        xlink_arcrole="Attachment",
+                        gmd_ci_online_resource=GmdCiOnlineResource(
+                            gmd_linkage=GmdLinkage(gmd_url=GmdUrl(text=attachment.url)),
+                            gmd_name=GmdName(
+                                gco_character_string=GcoCharacterString(
+                                    text=attachment.label
+                                )
+                            ),
+                        ),
+                    )
+                    sml_document_list.append(sml_document)
+
         if not sml_document_list:
             return None
         return SmlDocumentation(sml_document_list=sml_document_list)
@@ -1083,6 +1109,30 @@ class DeviceConverter:
             )
             sml_classifier = SmlClassifier(sml_term=sml_term)
             sml_classifier_list.append(sml_classifier)
+        manufacturer_model = (
+            db.session.query(ManufacturerModel)
+            .filter_by(
+                manufacturer_name=self.device.manufacturer_name,
+                model=self.device.model,
+            )
+            .first()
+        )
+
+        if manufacturer_model:
+            export_control = manufacturer_model.export_control
+            if export_control:
+                dual_use_values_to_export = {True: "yes", False: "no"}
+                if export_control.dual_use in dual_use_values_to_export.keys():
+                    sml_term = SmlTerm(
+                        definition=None,
+                        sml_label=SmlLabel(text="dual use"),
+                        sml_value=SmlValue(
+                            text=dual_use_values_to_export[export_control.dual_use]
+                        ),
+                    )
+                    sml_classifier = SmlClassifier(sml_term=sml_term)
+                    sml_classifier_list.append(sml_classifier)
+
         if not sml_classifier_list:
             return None
         return SmlClassification(sml_classifier_list=sml_classifier_list)
@@ -1161,6 +1211,37 @@ class DeviceConverter:
             )
             sml_identifier = SmlIdentifier(sml_term=sml_term)
             sml_identifier_list.append(sml_identifier)
+
+        manufacturer_model = (
+            db.session.query(ManufacturerModel)
+            .filter_by(
+                manufacturer_name=self.device.manufacturer_name,
+                model=self.device.model,
+            )
+            .first()
+        )
+
+        if manufacturer_model:
+            export_control = manufacturer_model.export_control
+            if export_control:
+                if export_control.export_control_classification_number:
+                    sml_term = SmlTerm(
+                        definition=None,
+                        sml_label=SmlLabel(text="Export Control Classification Number"),
+                        sml_value=SmlValue(
+                            text=export_control.export_control_classification_number
+                        ),
+                    )
+                    sml_identifier = SmlIdentifier(sml_term=sml_term)
+                    sml_identifier_list.append(sml_identifier)
+                if export_control.customs_tariff_number:
+                    sml_term = SmlTerm(
+                        definition=None,
+                        sml_label=SmlLabel(text="Customs Tariff Number"),
+                        sml_value=SmlValue(text=export_control.customs_tariff_number),
+                    )
+                    sml_identifier = SmlIdentifier(sml_term=sml_term)
+                    sml_identifier_list.append(sml_identifier)
 
         if not sml_identifier_list:
             return None
@@ -1422,6 +1503,32 @@ class PlatformConverter:
             )
             sml_document_list.append(sml_document)
 
+        manufacturer_model = (
+            db.session.query(ManufacturerModel)
+            .filter_by(
+                manufacturer_name=self.platform.manufacturer_name,
+                model=self.platform.model,
+            )
+            .first()
+        )
+
+        if manufacturer_model:
+            export_control_attachments = manufacturer_model.export_control_attachments
+            for attachment in export_control_attachments:
+                if not attachment.is_export_control_only:
+                    sml_document = SmlDocument(
+                        xlink_arcrole="Attachment",
+                        gmd_ci_online_resource=GmdCiOnlineResource(
+                            gmd_linkage=GmdLinkage(gmd_url=GmdUrl(text=attachment.url)),
+                            gmd_name=GmdName(
+                                gco_character_string=GcoCharacterString(
+                                    text=attachment.label
+                                )
+                            ),
+                        ),
+                    )
+                    sml_document_list.append(sml_document)
+
         if not sml_document_list:
             return None
         return SmlDocumentation(sml_document_list=sml_document_list)
@@ -1437,6 +1544,30 @@ class PlatformConverter:
             )
             sml_classifier = SmlClassifier(sml_term=sml_term)
             sml_classifier_list.append(sml_classifier)
+
+        manufacturer_model = (
+            db.session.query(ManufacturerModel)
+            .filter_by(
+                manufacturer_name=self.platform.manufacturer_name,
+                model=self.platform.model,
+            )
+            .first()
+        )
+
+        if manufacturer_model:
+            export_control = manufacturer_model.export_control
+            if export_control:
+                dual_use_values_to_export = {True: "yes", False: "no"}
+                if export_control.dual_use in dual_use_values_to_export.keys():
+                    sml_term = SmlTerm(
+                        definition=None,
+                        sml_label=SmlLabel(text="dual use"),
+                        sml_value=SmlValue(
+                            text=dual_use_values_to_export[export_control.dual_use]
+                        ),
+                    )
+                    sml_classifier = SmlClassifier(sml_term=sml_term)
+                    sml_classifier_list.append(sml_classifier)
         if not sml_classifier_list:
             return None
         return SmlClassification(sml_classifier_list=sml_classifier_list)
@@ -1515,6 +1646,37 @@ class PlatformConverter:
             )
             sml_identifier = SmlIdentifier(sml_term=sml_term)
             sml_identifier_list.append(sml_identifier)
+
+        manufacturer_model = (
+            db.session.query(ManufacturerModel)
+            .filter_by(
+                manufacturer_name=self.platform.manufacturer_name,
+                model=self.platform.model,
+            )
+            .first()
+        )
+
+        if manufacturer_model:
+            export_control = manufacturer_model.export_control
+            if export_control:
+                if export_control.export_control_classification_number:
+                    sml_term = SmlTerm(
+                        definition=None,
+                        sml_label=SmlLabel(text="Export Control Classification Number"),
+                        sml_value=SmlValue(
+                            text=export_control.export_control_classification_number
+                        ),
+                    )
+                    sml_identifier = SmlIdentifier(sml_term=sml_term)
+                    sml_identifier_list.append(sml_identifier)
+                if export_control.customs_tariff_number:
+                    sml_term = SmlTerm(
+                        definition=None,
+                        sml_label=SmlLabel(text="Customs Tariff Number"),
+                        sml_value=SmlValue(text=export_control.customs_tariff_number),
+                    )
+                    sml_identifier = SmlIdentifier(sml_term=sml_term)
+                    sml_identifier_list.append(sml_identifier)
 
         if not sml_identifier_list:
             return None

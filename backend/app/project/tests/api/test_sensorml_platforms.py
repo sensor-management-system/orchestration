@@ -19,7 +19,10 @@ from project.api.helpers.dictutils import dict_from_kv_list
 from project.api.models import (
     Configuration,
     Contact,
+    ExportControl,
+    ExportControlAttachment,
     GenericPlatformAction,
+    ManufacturerModel,
     Platform,
     PlatformAttachment,
     PlatformContactRole,
@@ -1602,3 +1605,180 @@ class TestSensorMLPlatform(BaseTestCase):
 
         self.assertEqual(sml_keyword_entries[0].text, "some")
         self.assertEqual(sml_keyword_entries[1].text, "fancy keyword")
+
+    def test_export_control(self):
+        """Check that we give out export contorl information."""
+        self.platform.manufacturer_name = "TRUEBENER"
+        self.platform.model = "SMT 100"
+
+        manufacturer_model = ManufacturerModel(
+            manufacturer_name=self.platform.manufacturer_name, model=self.platform.model
+        )
+        export_control = ExportControl(
+            manufacturer_model=manufacturer_model,
+            dual_use=True,
+            export_control_classification_number="1234",
+            customs_tariff_number="5678",
+        )
+        visible_attachment = ExportControlAttachment(
+            manufacturer_model=manufacturer_model,
+            label="website",
+            url="https://www.gfz-potsdam.de",
+            is_export_control_only=False,
+        )
+        invisble_attachment = ExportControlAttachment(
+            manufacturer_model=manufacturer_model,
+            label="internal",
+            url="https://www.gfz-potsdam.de/special",
+            is_export_control_only=True,
+        )
+        db.session.add_all(
+            [
+                self.platform,
+                manufacturer_model,
+                export_control,
+                visible_attachment,
+                invisble_attachment,
+            ]
+        )
+        db.session.commit()
+
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.platform.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+
+        sml_identification = root.find(
+            "{http://www.opengis.net/sensorml/2.0}identification"
+        )
+        sml_identifier_list = sml_identification.find(
+            "{http://www.opengis.net/sensorml/2.0}IdentifierList"
+        )
+        sml_identifiers = sml_identifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}identifier"
+        )
+        self.assertEqual(len(sml_identifiers), 5)
+
+        sml_identifier1 = sml_identifiers[0]
+        sml_term1 = sml_identifier1.find("{http://www.opengis.net/sensorml/2.0}Term")
+        sml_term_definition1 = sml_term1.attrib.get("definition")
+        self.assertEqual(
+            sml_term_definition1, "http://sensorml.com/ont/swe/property/ShortName"
+        )
+        sml_term_label1 = sml_term1.find(
+            "{http://www.opengis.net/sensorml/2.0}label"
+        ).text
+        self.assertEqual(sml_term_label1, "Short Name")
+        sml_term_value1 = sml_term1.find(
+            "{http://www.opengis.net/sensorml/2.0}value"
+        ).text
+        self.assertEqual(sml_term_value1, self.platform.short_name)
+
+        sml_identifier2 = sml_identifiers[1]
+        sml_term2 = sml_identifier2.find("{http://www.opengis.net/sensorml/2.0}Term")
+        sml_term_label2 = sml_term2.find(
+            "{http://www.opengis.net/sensorml/2.0}label"
+        ).text
+        self.assertEqual(sml_term_label2, "Model Number")
+        sml_term_value2 = sml_term2.find(
+            "{http://www.opengis.net/sensorml/2.0}value"
+        ).text
+        self.assertEqual(sml_term_value2, self.platform.model)
+
+        sml_identifier3 = sml_identifiers[2]
+        sml_term3 = sml_identifier3.find("{http://www.opengis.net/sensorml/2.0}Term")
+        sml_term_label3 = sml_term3.find(
+            "{http://www.opengis.net/sensorml/2.0}label"
+        ).text
+        self.assertEqual(sml_term_label3, "Manufacturer")
+        sml_term_value3 = sml_term3.find(
+            "{http://www.opengis.net/sensorml/2.0}value"
+        ).text
+        self.assertEqual(sml_term_value3, self.platform.manufacturer_name)
+
+        sml_identifier4 = sml_identifiers[3]
+        sml_term4 = sml_identifier4.find("{http://www.opengis.net/sensorml/2.0}Term")
+        sml_term_label4 = sml_term4.find(
+            "{http://www.opengis.net/sensorml/2.0}label"
+        ).text
+        self.assertEqual(sml_term_label4, "Export Control Classification Number")
+        sml_term_value4 = sml_term4.find(
+            "{http://www.opengis.net/sensorml/2.0}value"
+        ).text
+        self.assertEqual(
+            sml_term_value4, export_control.export_control_classification_number
+        )
+
+        sml_identifier5 = sml_identifiers[4]
+        sml_term5 = sml_identifier5.find("{http://www.opengis.net/sensorml/2.0}Term")
+        sml_term_label5 = sml_term5.find(
+            "{http://www.opengis.net/sensorml/2.0}label"
+        ).text
+        self.assertEqual(sml_term_label5, "Customs Tariff Number")
+        sml_term_value5 = sml_term5.find(
+            "{http://www.opengis.net/sensorml/2.0}value"
+        ).text
+        self.assertEqual(sml_term_value5, export_control.customs_tariff_number)
+
+        sml_documentation = root.find(
+            "{http://www.opengis.net/sensorml/2.0}documentation"
+        )
+        sml_document_list = sml_documentation.find(
+            "{http://www.opengis.net/sensorml/2.0}DocumentList"
+        )
+        sml_documents = sml_document_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}document"
+        )
+        self.assertEqual(len(sml_documents), 1)
+        sml_document_website = sml_documents[0]
+
+        self.assertEqual(
+            sml_document_website.attrib.get("{http://www.w3.org/1999/xlink}arcrole"),
+            "Attachment",
+        )
+        self.assertEqual(
+            sml_document_website.find(
+                "{http://www.isotc211.org/2005/gmd}CI_OnlineResource"
+            )
+            .find("{http://www.isotc211.org/2005/gmd}linkage")
+            .find("{http://www.isotc211.org/2005/gmd}URL")
+            .text,
+            visible_attachment.url,
+        )
+        self.assertEqual(
+            sml_document_website.find(
+                "{http://www.isotc211.org/2005/gmd}CI_OnlineResource"
+            )
+            .find("{http://www.isotc211.org/2005/gmd}name")
+            .find("{http://www.isotc211.org/2005/gco}CharacterString")
+            .text,
+            visible_attachment.label,
+        )
+
+        sml_classification = root.find(
+            "{http://www.opengis.net/sensorml/2.0}classification"
+        )
+        sml_classifier_list = sml_classification.find(
+            "{http://www.opengis.net/sensorml/2.0}ClassifierList"
+        )
+        sml_classifiers = sml_classifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}classifier"
+        )
+        self.assertEqual(len(sml_classifiers), 1)
+        sml_classifier_dual_use = sml_classifiers[0]
+
+        self.assertEqual(
+            sml_classifier_dual_use.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "dual use",
+        )
+        self.assertEqual(
+            sml_classifier_dual_use.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            "yes",
+        )

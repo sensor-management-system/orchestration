@@ -40,7 +40,6 @@ class Device(
     serial_number = db.Column(db.String(256), nullable=True)
     manufacturer_uri = db.Column(db.String(256), nullable=True)
     manufacturer_name = db.Column(db.String(256), nullable=True)
-    dual_use = db.Column(db.Boolean, default=False)
     model = db.Column(db.String(256), nullable=True)
     inventory_number = db.Column(db.String(256), nullable=True)
     b2inst_record_id = db.Column(db.String(256), nullable=True)
@@ -63,7 +62,6 @@ class Device(
             "serial_number": self.serial_number,
             "manufacturer_name": self.manufacturer_name,
             "manufacturer_uri": self.manufacturer_uri,
-            "dual_use": self.dual_use,
             "archived": self.archived,
             "model": self.model,
             "inventory_number": self.inventory_number,
@@ -137,8 +135,6 @@ class Device(
             "manufacturer_name": type_keyword_and_full_searchable,
             # Manufacturer uri (as all uris), should be keyword only.
             "manufacturer_uri": type_keyword,
-            # dual use is a boolean
-            "dual_use": {"type": "boolean"},
             "archived": {"type": "boolean"},
             "is_internal": {
                 "type": "boolean",

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
@@ -26,7 +26,14 @@ from ..helpers.resource_mixin import (
     add_updated_by_id,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
-from ..models import Configuration, Device, DeviceContactRole, DeviceMountAction
+from ..models import (
+    Configuration,
+    Device,
+    DeviceContactRole,
+    DeviceMountAction,
+    ManufacturerModel,
+    Platform,
+)
 from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
@@ -115,6 +122,20 @@ class DeviceList(CsvListMixin, ResourceList):
 
         save_to_db(device)
 
+        if device.manufacturer_name and device.model:
+            existing_manufacturer_model = (
+                db.session.query(ManufacturerModel)
+                .filter_by(
+                    manufacturer_name=device.manufacturer_name, model=device.model
+                )
+                .first()
+            )
+            if not existing_manufacturer_model:
+                manufacturer_model = ManufacturerModel(
+                    manufacturer_name=device.manufacturer_name, model=device.model
+                )
+                save_to_db(manufacturer_model)
+
         return result
 
     schema = DeviceSchema
@@ -163,6 +184,42 @@ class DeviceDetail(ResourceDetail):
         for url in urls:
             delete_attachments_in_minio_by_url(url)
 
+        if device.manufacturer_name and device.model:
+            existing_manufacturer_model = (
+                db.session.query(ManufacturerModel)
+                .filter_by(
+                    manufacturer_name=device.manufacturer_name, model=device.model
+                )
+                .first()
+            )
+            if not any(
+                [
+                    existing_manufacturer_model.external_system_name,
+                    existing_manufacturer_model.external_system_url,
+                    existing_manufacturer_model.export_control,
+                    existing_manufacturer_model.export_control_attachments,
+                ]
+            ):
+                other_device = (
+                    db.session.query(Device)
+                    .filter_by(
+                        manufacturer_name=device.manufacturer_name, model=device.model
+                    )
+                    .first()
+                )
+                if not other_device:
+                    other_platform = (
+                        db.session.query(Platform)
+                        .filter_by(
+                            manufacturer_name=device.manufacturer_name,
+                            model=device.model,
+                        )
+                        .first()
+                    )
+                    if not other_platform:
+                        db.session.delete(existing_manufacturer_model)
+                        db.session.commit()
+
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
 
@@ -175,6 +232,10 @@ class DeviceDetail(ResourceDetail):
         In Flask those data should be stored in the `g` object.
         """
         add_updated_by_id(data)
+        device = db.session.query(Device).filter_by(id=kwargs["id"]).first()
+        if device:
+            self.device_manufacturer_name_before_patch = device.manufacturer_name
+            self.device_model_before_patch = device.model
 
     def after_patch(self, result):
         """Run some update logic after the change by the patch request."""
@@ -196,6 +257,68 @@ class DeviceDetail(ResourceDetail):
             if pidinst.has_external_metadata(configuration):
                 pidinst.update_external_metadata(configuration)
 
+        if (
+            self.device_manufacturer_name_before_patch is not None
+            and self.device_model_before_patch is not None
+        ):
+            if (
+                self.device_manufacturer_name_before_patch
+                != self.device_manufacturer_name_before_patch
+                or self.device_model_before_patch != device.model
+            ):
+                existing_manufacturer_model = (
+                    db.session.query(ManufacturerModel)
+                    .filter_by(
+                        manufacturer_name=self.device_manufacturer_name_before_patch,
+                        model=self.device_model_before_patch,
+                    )
+                    .first()
+                )
+                if not any(
+                    [
+                        existing_manufacturer_model.external_system_name,
+                        existing_manufacturer_model.external_system_url,
+                        existing_manufacturer_model.export_control,
+                        existing_manufacturer_model.export_control_attachments,
+                    ]
+                ):
+                    other_device = (
+                        db.session.query(Device)
+                        .filter_by(
+                            manufacturer_name=existing_manufacturer_model.manufacturer_name,
+                            model=existing_manufacturer_model.model,
+                        )
+                        .first()
+                    )
+                    if not other_device:
+                        other_platform = (
+                            db.session.query(Platform)
+                            .filter_by(
+                                manufacturer_name=existing_manufacturer_model.manufacturer_name,
+                                model=existing_manufacturer_model.model,
+                            )
+                            .first()
+                        )
+                        if not other_platform:
+                            db.session.delete(existing_manufacturer_model)
+                            db.session.commit()
+
+        if device.manufacturer_name and device.model:
+            existing_manufacturer_model = (
+                db.session.query(ManufacturerModel)
+                .filter_by(
+                    manufacturer_name=device.manufacturer_name, model=device.model
+                )
+                .first()
+            )
+            if not existing_manufacturer_model:
+                manufacturer_model = ManufacturerModel(
+                    manufacturer_name=device.manufacturer_name, model=device.model
+                )
+                save_to_db(manufacturer_model)
+
+        self.device_manufacturer_name_before_patch = None
+        self.device_model_before_patch = None
         return result
 
     schema = DeviceSchema

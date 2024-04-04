@@ -318,6 +318,10 @@ export default class PlatformCopyPage extends Vue {
         disabled: true
       },
       {
+        name: 'Export Control',
+        disabled: true
+      },
+      {
         name: 'Actions',
         disabled: true
       }

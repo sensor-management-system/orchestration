@@ -424,8 +424,8 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col>
         <autocomplete-text-input
-          :search-input.sync="newKeyword"
           ref="newKeywordField"
+          :search-input.sync="newKeyword"
           label="New keyword"
           endpoint="keywords"
           @keyup.enter="addNewKeyword"
@@ -436,20 +436,6 @@ permissions and limitations under the Licence.
             </v-btn>
           </template>
         </autocomplete-text-input>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <v-checkbox
-          :input-value="value.dualUse"
-          :readonly="readonly"
-          :disabled="readonly"
-          label="Dual use"
-          hint="can be used for military aims"
-          :persistent-hint="true"
-          color="red darken-3"
-          @change="update('dualUse', $event)"
-        />
       </v-col>
     </v-row>
     <device-type-dialog
@@ -677,15 +663,6 @@ export default class DeviceBasicDataForm extends mixins(Rules) {
         break
       case 'inventoryNumber':
         newObj.inventoryNumber = value as string
-        break
-      case 'dualUse':
-        // Boolean(true) => true
-        // Boolean(false) => false
-        // but Boolean('false') => true
-        // due to the change handler, this is already a boolean
-        // only typescript doesn't know about this
-        // so we can be sure to go with it here
-        newObj.dualUse = Boolean(value)
         break
       case 'permissionGroups':
         newObj.permissionGroups = value as PermissionGroup[]

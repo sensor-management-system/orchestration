@@ -632,3 +632,25 @@ api.route(
     "/tsm-endpoints",
 )
 api.route(TsmEndpointDetail, "tsm_endpoint_detail", "/tsm-endpoints/<int:id>")
+api.route(ManufacturerModelList, "manufacturer_model_list", "/manufacturer-models")
+api.route(ManufacturerModelDetail, "manufacturer_model_detail", "/manufacturer-models/<int:id>")
+api.route(
+    ExportControlList,
+    "export_control_list",
+    "/export-control",
+    "/manufacturer-models/<int:manufacturer_model_id>/export-control",
+    "/devices/<int:device_id>/export-control",
+    "/platforms/<int:platform_id>/export-control",
+)
+api.route(ExportControlDetail, "export_control_detail", "/export-control/<int:id>")
+api.route(
+    ExportControlAttachmentList,
+    "export_control_attachment_list",
+    "/export-control-attachments",
+    "/manufacturer-models/<int:manufacturer_model_id>/export-control-attachments",
+)
+api.route(
+    ExportControlAttachmentDetail,
+    "export_control_attachment_detail",
+    "/export-control-attachments/<int:id>",
+)

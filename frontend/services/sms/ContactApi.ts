@@ -85,6 +85,13 @@ export class ContactApi {
     })
   }
 
+  async findContactByUserId (userId: string): Promise<Contact> {
+    const userResponse = await this.axiosApi.get(`/users/${userId}`)
+    const userData = userResponse.data
+    const contactId = userData.data.relationships.contact.data.id
+    return await this.findById(contactId)
+  }
+
   deleteById (id: string): Promise<void> {
     return this.axiosApi.delete<string, void>(this.basePath + '/' + id)
   }

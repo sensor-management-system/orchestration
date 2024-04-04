@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -107,9 +107,23 @@ def es():
 @es.command("reindex")
 def es_reindex():
     """Reindex all the models that should be used in the es."""
-    from project.api.models import Configuration, Contact, Device, Platform, Site
+    from project.api.models import (
+        Configuration,
+        Contact,
+        Device,
+        ManufacturerModel,
+        Platform,
+        Site,
+    )
 
-    for model_type in [Platform, Device, Configuration, Contact, Site]:
+    for model_type in [
+        Configuration,
+        Contact,
+        Device,
+        ManufacturerModel,
+        Platform,
+        Site,
+    ]:
         model_type.reindex()
 
 
@@ -389,6 +403,66 @@ def b2inst_update_all(skip_problematic):
                     print(f"Problem with {entry} - skipping...")
                 else:
                     raise e
+
+
+@cli.group("import")
+def import_group():
+    """Group some import commands."""
+    pass
+
+
+@import_group.group("manufacturer-models")
+def import_manufacturer_models():
+    """Group some import commands for manufacturer models."""
+    pass
+
+
+@import_manufacturer_models.command("from-gipp")
+def import_manufacturer_models_from_gipp():
+    """Import the manufacturer models from GIPP."""
+    import requests
+
+    from project.api.models import ManufacturerModel
+    from project.api.models.base_model import db
+
+    base_url = "https://gipp.gfz-potsdam.de"
+    response = requests.get(f"{base_url}/instrumentcategories.json")
+    response.raise_for_status()
+    data = response.json()
+
+    def generate_child_elements(data_list):
+        for data_entry in data_list:
+            if data_entry.get("nodes", []):
+                yield from generate_child_elements(data_entry["nodes"])
+            else:
+                yield data_entry["id"]
+
+    instrument_category_ids_to_import = generate_child_elements(data)
+
+    for id_ in instrument_category_ids_to_import:
+        response = requests.get(
+            f"{base_url}/instrumentcategories/view/{id_}.json"
+        )
+        response.raise_for_status()
+        data = response.json()
+        manufacturer_name = data["Instrumentcategory"]["manufacturer"]
+        model = data["Instrumentcategory"]["name"]
+
+        if manufacturer_name and model:
+            existing_manufacturer_model = (
+                db.session.query(ManufacturerModel)
+                .filter_by(manufacturer_name=manufacturer_name, model=model)
+                .first()
+            )
+            if not existing_manufacturer_model:
+                new_model = ManufacturerModel(
+                    manufacturer_name=manufacturer_name,
+                    model=model,
+                    external_system_name="GIPP",
+                    external_system_url=f"{base_url}/instrumentcategories/view/{id_}",
+                )
+                db.session.add(new_model)
+                db.session.commit()
 
 
 if __name__ == "__main__":

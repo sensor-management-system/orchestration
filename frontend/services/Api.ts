@@ -62,11 +62,14 @@ import { DevicePropertyApi } from '@/services/sms/DevicePropertyApi'
 import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
 import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
 import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
+import { ExportControlAttachmentApi } from '@/services/sms/ExportControlAttachmentApi'
+import { ExportControlApi } from '@/services/sms/ExportControlApi'
 import { GenericConfigurationActionApi } from '@/services/sms/GenericConfigurationActionApi'
 import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
 import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi, GenericConfigurationActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
 import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
+import { ManufacturerModelApi } from '@/services/sms/ManufacturerModelApi'
 import { MountingActionsControllerApi } from '@/services/sms/MountingActionsControllerApi'
 import { PermissionGroupApi } from '@/services/sms/PermissionGroupApi'
 import { PidApi } from '@/services/sms/PidApi'
@@ -196,6 +199,9 @@ export class Api {
   private readonly _userInfoApi: UserInfoApi
   private readonly _permissionGroupApi: PermissionGroupApi
   private readonly _userModificationApi: UserModificationApi
+  private readonly _manufacturerModelApi: ManufacturerModelApi
+  private readonly _exportControlApi: ExportControlApi
+  private readonly _exportControlAttachmentApi: ExportControlAttachmentApi
   private readonly _proxyApi: ProxyApi
 
   constructor (
@@ -606,6 +612,9 @@ export class Api {
     )
     this._permissionGroupApi = new PermissionGroupApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/permission-groups')
     this._userModificationApi = new UserModificationApi(createAxios(smsBaseUrl, smsConfig, getIdToken))
+    this._manufacturerModelApi = new ManufacturerModelApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/manufacturer-models')
+    this._exportControlApi = new ExportControlApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/export-control')
+    this._exportControlAttachmentApi = new ExportControlAttachmentApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/export-control-attachments')
     this._proxyApi = new ProxyApi(smsBaseUrl!)
   }
 
@@ -847,6 +856,18 @@ export class Api {
 
   get userModificationApi (): UserModificationApi {
     return this._userModificationApi
+  }
+
+  get manufacturerModels (): ManufacturerModelApi {
+    return this._manufacturerModelApi
+  }
+
+  get exportControl (): ExportControlApi {
+    return this._exportControlApi
+  }
+
+  get exportControlAttachments (): ExportControlAttachmentApi {
+    return this._exportControlAttachmentApi
   }
 
   get datastreams (): TsmdlDatastreamApi {

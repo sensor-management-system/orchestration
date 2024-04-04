@@ -226,7 +226,7 @@ export default class DeviceEditBasicPage extends mixins(CheckEditAccess) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   beforeRouteLeave (to: RawLocation, from: RawLocation, next: any) {
     if (this.deviceHasBeenEdited && !this.hasSaved) {
-      if (this.to && this.to) {
+      if (this.to) {
         next()
       } else {
         this.to = to

@@ -332,6 +332,10 @@ export default class DeviceCopyPage extends Vue {
         disabled: true
       },
       {
+        name: 'Export Control',
+        disabled: true
+      },
+      {
         name: 'Actions',
         disabled: true
       }

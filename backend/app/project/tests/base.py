@@ -286,7 +286,7 @@ class Expectation:
         return self
 
     def to_have_type(self, expected_type):
-        """Raise an assertion if the type is not the expected type"""
+        """Raise an assertion if the type is not the expected type."""
         self.test_case.assertIsInstance(self.value, expected_type)
 
     def to_include_all_of(self, list_of_values):
@@ -298,6 +298,10 @@ class Expectation:
     def to_include(self, value):
         """Raise an assertion of the value is not included."""
         self.to_include_all_of([value])
+
+    def to_be_in(self, options):
+        """Raise an assertion if the value is not in the options."""
+        self.test_case.assertIn(self.value, options)
 
     def to_be_a_datetime_string(self):
         """Raise an assertion if the value is not a datetime string."""
@@ -345,6 +349,10 @@ class InvertedExpectation:
     def to_be(self, value):
         """Raise an assertion if we have identical values."""
         self.test_case.assertIsNot(self.value, value)
+
+    def to_equal(self, value):
+        """Raise an assertion if we have equal values."""
+        self.test_case.assertNotEqual(self.value, value)
 
     def to_be_none(self):
         """Raise an assertion if we have none."""

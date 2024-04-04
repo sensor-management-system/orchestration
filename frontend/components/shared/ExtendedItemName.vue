@@ -37,7 +37,7 @@ permissions and limitations under the Licence.
       <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
         <template #activator="{ on, attrs }">
           <span
-            v-if="value.manufacturerName !== ''"
+            v-if="!skipManufacturerName && value.manufacturerName !== ''"
             v-bind="attrs"
             class="text--disabled"
             v-on="on"
@@ -48,7 +48,7 @@ permissions and limitations under the Licence.
       <v-tooltip v-if="$vuetify.breakpoint.smAndUp" bottom>
         <template #activator="{ on, attrs }">
           <span
-            v-if="value.model !== ''"
+            v-if="!skipModel && value.model !== ''"
             v-bind="attrs"
             class="text--disabled"
             v-on="on"
@@ -98,6 +98,20 @@ export default class ExtendedItemName extends Vue {
     type: Boolean
   })
   private shorten!: boolean
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private skipManufacturerName!: boolean
+
+  @Prop({
+    default: false,
+    required: false,
+    type: Boolean
+  })
+  private skipModel!: boolean
 
   get shortenedName (): string {
     if (this.shorten) {

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -32,7 +32,6 @@ class TestDeviceCsvExport(BaseTestCase):
             manufacturer_name="manufacturer_name test",
             manufacturer_uri="http://cv/manufacturer_uri",
             model="device_model test",
-            dual_use=True,
             serial_number="device_serial_number test",
             website="http://website/device",
             inventory_number="inventory_number test",
@@ -51,7 +50,6 @@ class TestDeviceCsvExport(BaseTestCase):
             manufacturer_name="manufacturer_name test2",
             manufacturer_uri="http://cv/manufacturer_uri2",
             model="device_model test2",
-            dual_use=False,
             serial_number="device_serial_number test2",
             website="http://website/device2",
             inventory_number="inventory_number test2",
@@ -92,7 +90,6 @@ class TestDeviceCsvExport(BaseTestCase):
             manufacturer_name="manufacturer_name test",
             manufacturer_uri="http://cv/manufacturer_uri",
             model="device_model test",
-            dual_use=True,
             serial_number="device_serial_number test",
             website="http://website/device",
             inventory_number="inventory_number test",
@@ -128,7 +125,6 @@ class TestDeviceCsvExport(BaseTestCase):
             manufacturer_name="manufacturer_name test",
             manufacturer_uri="http://cv/manufacturer_uri",
             model="device_model test",
-            dual_use=True,
             serial_number="device_serial_number test",
             website="http://website/device",
             inventory_number="inventory_number test",

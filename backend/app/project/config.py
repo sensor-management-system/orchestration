@@ -79,6 +79,7 @@ class BaseConfig:
     B2INST_COMMUNITY = env("B2INST_COMMUNITY", "EUDAT")
     SMS_VERSION = env("SMS_VERSION", "develop")
     PROXY_NETLOC_BLOCKLIST = env.list("PROXY_NETLOC_BLOCKLIST", [])
+    EXPORT_CONTROL_VO_LIST = env.list("EXPORT_CONTROL_VO_LIST", [])
 
 
 class DevelopmentConfig(BaseConfig):

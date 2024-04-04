@@ -49,6 +49,8 @@ from .device_parameter_value_change_action import (  # noqa: F401
     DeviceParameterValueChangeAction,
 )
 from .device_property import DeviceProperty  # noqa: F401
+from .export_control import ExportControl  # noqa: F401
+from .export_control_attachment import ExportControlAttachment  # noqa: F401
 from .generic_action_attachments import (  # noqa: F401
     GenericConfigurationActionAttachment,
     GenericDeviceActionAttachment,
@@ -59,6 +61,7 @@ from .generic_actions import (  # noqa: F401
     GenericDeviceAction,
     GenericPlatformAction,
 )
+from .manufacturer_model import ManufacturerModel  # noqa: F401
 from .mount_actions import DeviceMountAction, PlatformMountAction  # noqa: F401
 from .platform import Platform  # noqa: F401
 from .platform_attachment import PlatformAttachment  # noqa: F401

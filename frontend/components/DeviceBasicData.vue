@@ -187,12 +187,6 @@ permissions and limitations under the Licence.
         </span>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="3">
-        <label>Dual use</label>
-        {{ value.dualUse ? 'yes' : 'no' }}
-      </v-col>
-    </v-row>
   </div>
 </template>
 
