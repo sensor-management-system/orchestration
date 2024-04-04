@@ -521,6 +521,11 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
     commit,
     state
   }: { commit: Commit, state: ConfigurationsState }, searchParams: IConfigurationSearchParams) {
+    let userId = null
+    if (searchParams.onlyOwnConfigurations) {
+      userId = this.getters['permissions/userId']
+    }
+
     const {
       elements,
       totalCount
@@ -529,6 +534,7 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
       .setSearchedStates(searchParams.states)
       .setSearchedProjects(searchParams.projects)
       .setSearchPermissionGroups(searchParams.permissionGroups)
+      .setSearchedCreatorId(userId)
       .setSearchedSites(searchParams.sites)
       .setSearchIncludeArchivedConfigurations(searchParams.includeArchivedConfigurations)
       .searchPaginated(
