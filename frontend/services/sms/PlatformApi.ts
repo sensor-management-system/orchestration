@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -62,6 +62,8 @@ import { Availability } from '@/models/Availability'
 import { AvailabilitySerializer } from '@/serializers/controller/AvailabilitySerializer'
 import { ParameterChangeActionSerializer, ParameterChangeActionEntityType } from '@/serializers/jsonapi/ParameterChangeActionSerializer'
 import { ParameterSerializer, ParameterEntityType } from '@/serializers/jsonapi/ParameterSerializer'
+import { ExportControl } from '@/models/ExportControl'
+import { ExportControlSerializer } from '@/serializers/jsonapi/ExportControlSerializer'
 
 export interface IncludedRelationships {
   includeContacts?: boolean
@@ -111,6 +113,8 @@ export class PlatformApi {
   private _searchedCreatorId: string | null = null
   private _searchedIncludeArchivedPlatforms = false
   private _searchText: string | null = null
+  private _searchManufacturerName: string | null = null
+  private _searchModel: string | null = null
   private filterSettings: any[] = []
 
   constructor (axiosInstance: AxiosInstance, basePath: string, permissionFetcher?: PlatformPermissionFetchFunction) {
@@ -164,6 +168,24 @@ export class PlatformApi {
 
   setSearchText (value: string | null) {
     this._searchText = value
+    return this
+  }
+
+  get searchManufacturerName (): string | null {
+    return this._searchManufacturerName
+  }
+
+  setSearchManufacturerName (value: string | null) {
+    this._searchManufacturerName = value
+    return this
+  }
+
+  get searchModel (): string | null {
+    return this._searchModel
+  }
+
+  setSearchModel (value: string | null) {
+    this._searchModel = value
     return this
   }
 
@@ -309,6 +331,8 @@ export class PlatformApi {
     this.preparePermissionGroups()
     this.prepareMail()
     this.prepareCreator()
+    this.prepareManufacturerName()
+    this.prepareModel()
   }
 
   prepareMail () {
@@ -402,6 +426,26 @@ export class PlatformApi {
             val: permissionGroup.id
           }
         })
+      })
+    }
+  }
+
+  prepareManufacturerName () {
+    if (this.searchManufacturerName) {
+      this.filterSettings.push({
+        name: 'manufacturer_name',
+        op: 'eq',
+        val: this.searchManufacturerName
+      })
+    }
+  }
+
+  prepareModel () {
+    if (this.searchModel) {
+      this.filterSettings.push({
+        name: 'model',
+        op: 'eq',
+        val: this.searchModel
       })
     }
   }
@@ -585,5 +629,18 @@ export class PlatformApi {
     return this.axiosApi.get(url, { params }).then((rawServerResponse) => {
       return new AvailabilitySerializer().convertJsonApiObjectListToModelList(rawServerResponse)
     })
+  }
+
+  async findExportControlByManufacturerModelIdOrNewOne (deviceId: string): Promise<ExportControl> {
+    const rawResponse = await this.axiosApi.get(`${this.basePath}/${deviceId}/export-control`)
+    const rawData = rawResponse.data
+    const exportControlList = new ExportControlSerializer().convertJsonApiObjectListToModelList(rawData)
+    if (exportControlList.length > 0) {
+      return exportControlList[0]
+    }
+    const newOne = new ExportControl()
+    // We can't set the manufacturerModelId here. But this is ok, as we don't write with those objects.
+    // We just want to show the main fields.
+    return newOne
   }
 }

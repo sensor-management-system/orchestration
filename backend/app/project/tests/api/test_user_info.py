@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -102,6 +102,30 @@ class TestUserinfo(BaseTestCase):
                     )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["apikey"], "1234")
+        # And we check that we use the export control setting.
+        self.assertEqual(
+            response.json["data"]["attributes"]["is_export_control"], False
+        )
+
+    def test_get_includes_export_control(self):
+        """Test that we include the export control in the payload."""
+        contact = Contact(given_name="A", family_name="B", email="ab@localhost")
+        user = User(subject="dummy", contact=contact, is_export_control=True)
+        db.session.add_all([contact, user])
+        db.session.commit()
+        with self.run_requests_as(user):
+            with patch.object(
+                idl, "get_all_permission_groups_for_a_user"
+            ) as test_get_all_permission_groups_for_a_user:
+                test_get_all_permission_groups_for_a_user.return_value = (
+                    IDL_USER_ACCOUNT
+                )
+                with self.client:
+                    response = self.client.get(
+                        self.url,
+                    )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["data"]["attributes"]["is_export_control"], True)
 
     def test_get_includes_contact_id(self):
         """Test that we include the contact id in the payload."""

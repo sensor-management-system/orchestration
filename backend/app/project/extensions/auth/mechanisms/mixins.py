@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -10,6 +10,8 @@
 
 import json
 import pathlib
+
+from flask import current_app
 
 from ....api.models import Contact, User
 from ....api.models.base_model import db
@@ -30,6 +32,28 @@ class CreateNewUserByUserinfoMixin:
         # We check if we find a user for this identity entry.
         found_user = db.session.query(User).filter_by(subject=identity).one_or_none()
         if found_user:
+            vo_list_for_export_control_check = current_app.config[
+                "EXPORT_CONTROL_VO_LIST"
+            ]
+            # Check the current setting and overwrite the permission.
+            if vo_list_for_export_control_check and attributes.get(
+                "eduperson_entitlement"
+            ):
+                should_be_allowed_to_handle_export_control = any(
+                    [
+                        vo in attributes["eduperson_entitlement"]
+                        for vo in vo_list_for_export_control_check
+                    ]
+                )
+                if (
+                    found_user.is_export_control
+                    != should_be_allowed_to_handle_export_control
+                ):
+                    found_user.is_export_control = (
+                        should_be_allowed_to_handle_export_control
+                    )
+                    db.session.add(found_user)
+                    db.session.commit()
             return found_user
 
         # We haven't found any user with the subject.
@@ -65,7 +89,25 @@ class CreateNewUserByUserinfoMixin:
             )
             db.session.add(contact)
         apikey = User.generate_new_apikey()
-        user = User(subject=identity, contact=contact, active=True, apikey=apikey)
+        is_export_control = False
+
+        vo_list_for_export_control_check = current_app.config["EXPORT_CONTROL_VO_LIST"]
+        # Check the current setting and overwrite the permission.
+        if vo_list_for_export_control_check and attributes.get("eduperson_entitlement"):
+            is_export_control = any(
+                [
+                    vo in attributes["eduperson_entitlement"]
+                    for vo in vo_list_for_export_control_check
+                ]
+            )
+
+        user = User(
+            subject=identity,
+            contact=contact,
+            active=True,
+            apikey=apikey,
+            is_export_control=is_export_control,
+        )
         db.session.add(user)
         db.session.commit()
         return user

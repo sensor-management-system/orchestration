@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Tim Eder (UFZ, tim.eder@ufz.de)
@@ -445,7 +445,6 @@ describe('GenericActionSerializer', () => {
           long_name: 'Adcon SM 1 soil moisture / temperature sensor',
           device_type_uri: '',
           status_name: 'In Use',
-          dual_use: false,
           device_type_name: 'Frequency/Time Domain Reflectometer (FTDR)(Soil moisture and temperature)',
           description: '',
           inventory_number: '',

@@ -175,7 +175,6 @@ describe('MountingActionsSerializer', () => {
                 device_type_name: 'Device',
                 persistent_identifier: 'boeken_BF11',
                 manufacturer_uri: 'manufacturer/xy',
-                dualuse: false,
                 archived: false
               },
               relationships: {
@@ -322,7 +321,6 @@ describe('MountingActionsSerializer', () => {
             customFields: [],
             properties: [],
             parameters: [],
-            dualUse: false,
             archived: false,
             keywords: [],
             country: ''
@@ -460,7 +458,6 @@ describe('MountingActionsSerializer', () => {
                     device_type_name: 'Device',
                     persistent_identifier: 'boeken_BF11',
                     manufacturer_uri: 'manufacturer/xy',
-                    dualuse: false,
                     archived: false
                   },
                   relationships: {
@@ -588,7 +585,6 @@ describe('MountingActionsSerializer', () => {
             customFields: [],
             properties: [],
             parameters: [],
-            dualUse: false,
             keywords: [],
             country: ''
           }),
@@ -681,8 +677,7 @@ describe('MountingActionsSerializer', () => {
                 device_type_name: 'Station',
                 persistent_identifier: 'boeken_BF1',
                 manufacturer_uri: 'manufacturer/xyz',
-                archived: false,
-                dualuse: false
+                archived: false
               },
               relationships: {
                 created_by: {
@@ -751,7 +746,6 @@ describe('MountingActionsSerializer', () => {
                     device_type_name: 'Device',
                     persistent_identifier: 'boeken_BF11',
                     manufacturer_uri: 'manufacturer/xy',
-                    dualuse: false,
                     archived: false
                   },
                   relationships: {
@@ -829,7 +823,6 @@ describe('MountingActionsSerializer', () => {
         parameters: [],
         customFields: [],
         properties: [],
-        dualUse: false,
         keywords: [],
         country: ''
       })
@@ -882,7 +875,6 @@ describe('MountingActionsSerializer', () => {
             customFields: [],
             properties: [],
             parameters: [],
-            dualUse: false,
             keywords: [],
             country: ''
           }),

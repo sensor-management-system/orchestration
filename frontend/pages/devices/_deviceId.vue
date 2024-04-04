@@ -186,6 +186,10 @@ export default class DevicePage extends Vue {
         name: 'Attachments'
       },
       {
+        to: '/devices/' + this.deviceId + '/export-control',
+        name: 'Export Control'
+      },
+      {
         to: '/devices/' + this.deviceId + '/actions',
         name: 'Actions'
       }

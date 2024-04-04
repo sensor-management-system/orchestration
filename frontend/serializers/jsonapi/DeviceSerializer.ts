@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -117,7 +117,6 @@ export class DeviceSerializer {
       result.statusUri = attributes.status_uri || ''
       result.statusName = attributes.status_name || ''
       result.model = attributes.model || ''
-      result.dualUse = attributes.dual_use || false
       result.inventoryNumber = attributes.inventory_number || ''
       result.persistentIdentifier = attributes.persistent_identifier || ''
       result.website = attributes.website || ''
@@ -257,7 +256,6 @@ export class DeviceSerializer {
         model: device.model,
         persistent_identifier: device.persistentIdentifier === '' ? null : device.persistentIdentifier,
         website: device.website,
-        dual_use: device.dualUse,
         is_private: device.isPrivate,
         is_internal: device.isInternal,
         is_public: device.isPublic,

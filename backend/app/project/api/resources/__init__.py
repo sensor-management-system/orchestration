@@ -110,6 +110,14 @@ from .device_software_update_action_resource import (  # noqa: F401
     DeviceSoftwareUpdateActionDetail,
     DeviceSoftwareUpdateActionList,
 )
+from .export_control_attachment_resources import (  # noqa: F401
+    ExportControlAttachmentDetail,
+    ExportControlAttachmentList,
+)
+from .export_control_resources import (  # noqa: F401
+    ExportControlDetail,
+    ExportControlList,
+)
 from .generic_configuration_action_attachment_resources import (  # noqa: F401
     GenericConfigurationActionAttachmentDetail,
     GenericConfigurationActionAttachmentList,
@@ -133,6 +141,10 @@ from .generic_platform_action_attachment_resources import (  # noqa: F401
 from .generic_platform_action_resources import (  # noqa: F401
     GenericPlatformActionDetail,
     GenericPlatformActionList,
+)
+from .manufacturer_model_resources import (  # noqa: F401
+    ManufacturerModelDetail,
+    ManufacturerModelList,
 )
 from .mounting_availabilities import (  # noqa: F401
     DeviceAvailabilities,

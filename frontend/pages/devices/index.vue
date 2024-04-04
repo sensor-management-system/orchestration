@@ -167,7 +167,7 @@ permissions and limitations under the Licence.
               color="accent"
               small
               nuxt
-              to="/devices/new"
+              :to="newDeviceLink"
             >
               New Device
             </v-btn>
@@ -564,7 +564,9 @@ export default class SearchDevicesPage extends Vue {
       types: this.selectedSearchDeviceTypes,
       permissionGroups: this.selectedSearchPermissionGroups,
       onlyOwnDevices: this.onlyOwnDevices && this.$auth.loggedIn,
-      includeArchivedDevices: this.includeArchivedDevices
+      includeArchivedDevices: this.includeArchivedDevices,
+      manufacturerName: null,
+      model: null
     }
   }
 

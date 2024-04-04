@@ -39,6 +39,8 @@ from ..models import (
     DevicePropertyCalibration,
     DeviceSoftwareUpdateAction,
     DeviceSoftwareUpdateActionAttachment,
+    ExportControl,
+    ExportControlAttachment,
     GenericConfigurationAction,
     GenericConfigurationActionAttachment,
     GenericDeviceAction,
@@ -416,6 +418,7 @@ for model in [
     can_change.register_same(model, handler=ConfigurationAttachment)
     can_delete.register_same(model, handler=ConfigurationAttachment)
     filter_visible.register_same(model, handler=ConfigurationAttachment)
+
 
 # ConfigurationParameterValueChangeAction
 @can_see.register(ConfigurationParameterValueChangeAction)
@@ -1339,6 +1342,7 @@ for model in [
     can_delete.register_same(model, handler=GenericPlatformAction)
     filter_visible.register_same(model, handler=GenericPlatformAction)
 
+
 # GenericPlatformActionAttachment
 @can_see.register(GenericPlatformActionAttachment)
 def can_see(entity):
@@ -1686,6 +1690,7 @@ def filter_visible(query):
 
 filter_visible_es.register_same(Site, handler=Configuration)
 
+
 # SiteContactRole
 @can_see.register(SiteContactRole)
 def can_see(entity):
@@ -1736,3 +1741,68 @@ for model in [SiteAttachment, SiteImage]:
     can_change.register_same(model, handler=SiteContactRole)
     can_delete.register_same(model, handler=SiteContactRole)
     filter_visible.register_same(model, handler=SiteContactRole)
+
+
+# ExportControl
+@can_see.register(ExportControl)
+def can_see(entity):
+    """Return True if the entity can be seen."""
+    return True
+
+
+@can_create.register(ExportControl)
+def can_create(type_, data):
+    """Return True if the entity can be created."""
+    if not g.user:
+        return False
+    if g.user.is_superuser:
+        return True
+    if g.user.is_export_control:
+        return True
+    return False
+
+
+@can_edit.register(ExportControl)
+def can_edit(entity):
+    """Return True if the entity can be edited."""
+    if not g.user:
+        return False
+    if g.user.is_superuser:
+        return True
+    if g.user.is_export_control:
+        return True
+    return False
+
+
+@can_delete.register(ExportControl)
+def can_delete(entity):
+    """Return True if the entity can be deleted."""
+    if not g.user:
+        return False
+    if g.user.is_superuser:
+        return True
+    if g.user.is_export_control:
+        return True
+    return False
+
+
+# ExportControlAttachment
+@filter_visible.register(ExportControlAttachment)
+def filter_visible(query):
+    """Filter the query based on the visibility settings."""
+    if g.user and (g.user.is_superuser or g.user.is_export_control):
+        return query
+    return query.filter(ExportControlAttachment.is_export_control_only.is_(False))
+
+
+@can_see.register(ExportControlAttachment)
+def can_see(entity):
+    """Return True if the entity can be seen."""
+    if g.user and (g.user.is_superuser or g.user.is_export_control):
+        return True
+    return not entity.is_export_control_only
+
+
+can_create.register_same(ExportControlAttachment, handler=ExportControl)
+can_edit.register_same(ExportControlAttachment, handler=ExportControl)
+can_delete.register_same(ExportControlAttachment, handler=ExportControl)

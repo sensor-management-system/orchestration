@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
@@ -27,7 +27,14 @@ from ..helpers.resource_mixin import (
     add_updated_by_id,
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
-from ..models import Configuration, Platform, PlatformContactRole, PlatformMountAction
+from ..models import (
+    Configuration,
+    Device,
+    ManufacturerModel,
+    Platform,
+    PlatformContactRole,
+    PlatformMountAction,
+)
 from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
@@ -115,6 +122,19 @@ class PlatformList(CsvListMixin, ResourceList):
 
         save_to_db(platform)
 
+        if platform.manufacturer_name and platform.model:
+            existing_manufacturer_model = (
+                db.session.query(ManufacturerModel)
+                .filter_by(
+                    manufacturer_name=platform.manufacturer_name, model=platform.model
+                )
+                .first()
+            )
+            if not existing_manufacturer_model:
+                manufacturer_model = ManufacturerModel(
+                    manufacturer_name=platform.manufacturer_name, model=platform.model
+                )
+                save_to_db(manufacturer_model)
         return result
 
     schema = PlatformSchema
@@ -167,6 +187,68 @@ class PlatformDetail(ResourceDetail):
             if pidinst.has_external_metadata(configuration):
                 pidinst.update_external_metadata(configuration)
 
+        if (
+            self.platform_manufacturer_name_before_patch is not None
+            and self.platform_model_before_patch is not None
+        ):
+            if (
+                self.platform_manufacturer_name_before_patch
+                != self.platform_manufacturer_name_before_patch
+                or self.platform_model_before_patch != platform.model
+            ):
+                existing_manufacturer_model = (
+                    db.session.query(ManufacturerModel)
+                    .filter_by(
+                        manufacturer_name=self.platform_manufacturer_name_before_patch,
+                        model=self.platform_model_before_patch,
+                    )
+                    .first()
+                )
+                if not any(
+                    [
+                        existing_manufacturer_model.external_system_name,
+                        existing_manufacturer_model.external_system_url,
+                        existing_manufacturer_model.export_control,
+                        existing_manufacturer_model.export_control_attachments,
+                    ]
+                ):
+                    other_platform = (
+                        db.session.query(Platform)
+                        .filter_by(
+                            manufacturer_name=existing_manufacturer_model.manufacturer_name,
+                            model=existing_manufacturer_model.model,
+                        )
+                        .first()
+                    )
+                    if not other_platform:
+                        other_device = (
+                            db.session.query(Device)
+                            .filter_by(
+                                manufacturer_name=existing_manufacturer_model.manufacturer_name,
+                                model=existing_manufacturer_model.model,
+                            )
+                            .first()
+                        )
+                        if not other_device:
+                            db.session.delete(existing_manufacturer_model)
+                            db.session.commit()
+
+        if platform.manufacturer_name and platform.model:
+            existing_manufacturer_model = (
+                db.session.query(ManufacturerModel)
+                .filter_by(
+                    manufacturer_name=platform.manufacturer_name, model=platform.model
+                )
+                .first()
+            )
+            if not existing_manufacturer_model:
+                manufacturer_model = ManufacturerModel(
+                    manufacturer_name=platform.manufacturer_name, model=platform.model
+                )
+                save_to_db(manufacturer_model)
+
+        self.platform_manufacturer_name_before_patch = None
+        self.platform_model_before_patch = None
         return result
 
     def delete(self, *args, **kwargs):
@@ -191,6 +273,43 @@ class PlatformDetail(ResourceDetail):
         for url in urls:
             delete_attachments_in_minio_by_url(url)
 
+        if platform.manufacturer_name and platform.model:
+            existing_manufacturer_model = (
+                db.session.query(ManufacturerModel)
+                .filter_by(
+                    manufacturer_name=platform.manufacturer_name, model=platform.model
+                )
+                .first()
+            )
+            if not any(
+                [
+                    existing_manufacturer_model.external_system_name,
+                    existing_manufacturer_model.external_system_url,
+                    existing_manufacturer_model.export_control,
+                    existing_manufacturer_model.export_control_attachments,
+                ]
+            ):
+                other_platform = (
+                    db.session.query(Platform)
+                    .filter_by(
+                        manufacturer_name=platform.manufacturer_name,
+                        model=platform.model,
+                    )
+                    .first()
+                )
+                if not other_platform:
+                    other_device = (
+                        db.session.query(Device)
+                        .filter_by(
+                            manufacturer_name=platform.manufacturer_name,
+                            model=platform.model,
+                        )
+                        .first()
+                    )
+                    if not other_device:
+                        db.session.delete(existing_manufacturer_model)
+                        db.session.commit()
+
         final_result = {"meta": {"message": "Object successfully deleted"}}
         return final_result
 
@@ -202,6 +321,10 @@ class PlatformDetail(ResourceDetail):
         with the id of the user that run the request.
         """
         add_updated_by_id(data)
+        platform = db.session.query(Platform).filter_by(id=kwargs["id"]).first()
+        if platform:
+            self.platform_manufacturer_name_before_patch = platform.manufacturer_name
+            self.platform_model_before_patch = platform.model
 
     schema = PlatformSchema
     decorators = (token_required,)

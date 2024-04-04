@@ -12,6 +12,7 @@ from ..api.helpers.errors import ErrorResponse, ForbiddenError, UnauthorizedErro
 from ..api.models import (
     ConfigurationAttachment,
     DeviceAttachment,
+    ExportControlAttachment,
     PlatformAttachment,
     SiteAttachment,
 )
@@ -145,6 +146,38 @@ def get_site_attachment_content(id, filename):
         return redirect(site_attachment.url)
 
     url = site_attachment.internal_url
+    mimetype = get_content_type(url)
+
+    # See https://flask.palletsprojects.com/en/2.1.x/patterns/streaming/
+    # for the streaming content
+    return current_app.response_class(build_response(url), mimetype=mimetype)
+
+
+@download_routes.route(
+    "/export-control-attachments/<int:id>/file/<filename>", methods=["GET"]
+)
+def get_export_control_attachment_content(id, filename):
+    """Get the file content response for the export control attachment."""
+    # filename will be ignored. It is just that the backend can work with
+    # some urls that include them.
+    export_control_attachment = (
+        db.session.query(ExportControlAttachment).filter_by(id=id).first()
+    )
+    if not export_control_attachment:
+        return {"details": "Object not found"}, 404
+
+    try:
+        if not can_see(export_control_attachment):
+            if not g.user:
+                raise UnauthorizedError("Authentication required")
+            raise ForbiddenError("Attachment not accessable")
+    except ErrorResponse as e:
+        return e.respond()
+
+    if not export_control_attachment.is_upload:
+        return redirect(export_control_attachment.url)
+
+    url = export_control_attachment.internal_url
     mimetype = get_content_type(url)
 
     # See https://flask.palletsprojects.com/en/2.1.x/patterns/streaming/

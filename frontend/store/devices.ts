@@ -68,6 +68,7 @@ import {
 } from '@/utils/actionHelper'
 import { ContactWithRoles } from '@/models/ContactWithRoles'
 import { Image } from '@/models/Image'
+import { ExportControl } from '@/models/ExportControl'
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfDeviceActionType
@@ -102,6 +103,8 @@ export interface DevicesState {
   devicePresetParameter: Parameter | null
   deviceSoftwareUpdateAction: SoftwareUpdateAction | null
   deviceSoftwareUpdateActions: SoftwareUpdateAction[]
+  exportControl: ExportControl | null
+  manufacturerModelId: string | null
   devices: Device[]
   pageNumber: number
   pageSize: number
@@ -132,6 +135,8 @@ const state = (): DevicesState => ({
   devicePresetParameter: null,
   deviceSoftwareUpdateAction: null,
   deviceSoftwareUpdateActions: [],
+  exportControl: null,
+  manufacturerModelId: null,
   devices: [],
   pageNumber: 1,
   pageSize: PAGE_SIZES[0],
@@ -250,6 +255,8 @@ export type LoadDeviceParameterChangeActionsAction = (id: string) => Promise<voi
 export type LoadDeviceParametersAction = (id: string) => Promise<void>
 export type LoadDeviceSoftwareUpdateActionAction = (actionId: string) => Promise<void>
 export type LoadDeviceSoftwareUpdateActionsAction = (id: string) => Promise<void>
+export type LoadExportControlAction = (params: { deviceId: string}) => Promise<void>
+export type LoadManufacturerModelIdAction = (params: { deviceId: string}) => Promise<void>
 export type RemoveDeviceContactRoleAction = (params: { deviceContactRoleId: string }) => Promise<void>
 export type ReplaceDeviceInDevicesAction = (newDevice: Device) => void
 export type RestoreDeviceAction = (id: string) => Promise<void>
@@ -290,6 +297,8 @@ const actions: ActionTree<DevicesState, RootState> = {
       .setSearchedPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
       .setSearchIncludeArchivedDevices(searchParams.includeArchivedDevices)
+      .setSearchManufacturerName(searchParams.manufacturerName)
+      .setSearchModel(searchParams.model)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,
@@ -420,6 +429,21 @@ const actions: ActionTree<DevicesState, RootState> = {
   async loadDeviceParameter ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const parameter = await this.$api.deviceParameters.findById(id)
     commit('setDeviceParameter', parameter)
+  },
+  async loadExportControl ({ commit }: { commit: Commit }, { deviceId }: { deviceId: string }) {
+    const exportControl = await this.$api.devices.findExportControlByManufacturerModelIdOrNewOne(deviceId)
+    commit('setExportControl', exportControl)
+  },
+  async loadManufacturerModelId ({ commit }: { commit: Commit }, { deviceId }: { deviceId: string }) {
+    const device = await this.$api.devices.findById(deviceId)
+    const manufacturerName = device.manufacturerName
+    const model = device.model
+    const manufacturerModel = await this.$api.manufacturerModels.findByManufacturerNameAndModel(manufacturerName, model, { includeExportControl: false })
+    if (manufacturerModel) {
+      commit('setManufacturerModelId', manufacturerModel.id)
+    } else {
+      commit('setManufacturerModelId', null)
+    }
   },
   deleteDeviceParameter (_, parameterId: string): Promise<void> {
     return this.$api.deviceParameters.deleteById(parameterId)
@@ -823,6 +847,12 @@ const mutations = {
   },
   setDeviceParameterChangeAction (state: DevicesState, deviceParameterChangeAction: ParameterChangeAction) {
     state.deviceParameterChangeAction = deviceParameterChangeAction
+  },
+  setExportControl (state: DevicesState, exportControl: ExportControl) {
+    state.exportControl = exportControl
+  },
+  setManufacturerModelId (state: DevicesState, manufacturerModelId: string | null) {
+    state.manufacturerModelId = manufacturerModelId
   }
 }
 

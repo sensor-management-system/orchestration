@@ -418,8 +418,8 @@ permissions and limitations under the Licence.
     <v-row>
       <v-col>
         <autocomplete-text-input
-          :search-input.sync="newKeyword"
           ref="newKeywordField"
+          :search-input.sync="newKeyword"
           label="New keyword"
           endpoint="keywords"
           @keyup.enter="addNewKeyword"

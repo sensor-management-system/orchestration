@@ -14,9 +14,13 @@ Added:
 - Setup for SMS sandbox deployment on https://sensors-sandbox.gfz-potsdam.de
 - (GFZ): GFZ IDL Version 0.4 will be used
 - Autocompletion for keywords
+- Export control workflow support
+- Organization and search by manufacturer and model
 
 Changed:
 - The SMS now sends values for missing information according to the datacite values for unknown information
+- Owner information for B2inst are now the institutions
+- Re-added the inventory number for the B2inst export
 
 Fixed:
 - Improve/Enable the correct rearranging of images
@@ -24,9 +28,6 @@ Fixed:
 - Fixed loading of image urls after saving configurations
 - Fixed some typos on the tsm linking wizzard
 
-Changed:
-- Owner information for B2inst are now the institutions
-- Re-added the inventory number for the B2inst export
 
 ## 1.13.0 - 2024-02-29
 

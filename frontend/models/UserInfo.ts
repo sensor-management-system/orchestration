@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2022 - 2023
+ * Copyright (C) 2022 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -39,6 +39,7 @@ export interface IUserInfo {
   id: string | null
   active: boolean
   isSuperUser: boolean
+  isExportControl: boolean
   contactId: string | null
   member: PermissionGroupId[]
   admin: PermissionGroupId[]
@@ -54,6 +55,7 @@ export class UserInfo implements IUserInfo {
   private _id: string | null = null
   private _active: boolean = false
   private _isSuperUser: boolean = false
+  private _isExportControl: boolean = false
   private _contactId: string | null = null
   private _member: PermissionGroupId[] = []
   private _admin: PermissionGroupId[] = []
@@ -82,6 +84,14 @@ export class UserInfo implements IUserInfo {
 
   set isSuperUser (isSuperUser: boolean) {
     this._isSuperUser = isSuperUser
+  }
+
+  get isExportControl (): boolean {
+    return this._isExportControl
+  }
+
+  set isExportControl (newIsExportControl: boolean) {
+    this._isExportControl = newIsExportControl
   }
 
   get contactId (): string | null {
@@ -149,6 +159,9 @@ export class UserInfo implements IUserInfo {
     }
     if (someObject.isSuperUser) {
       userinfo.isSuperUser = someObject.isSuperUser
+    }
+    if (someObject.isExportControl) {
+      userinfo.isExportControl = someObject.isExportControl
     }
     if (someObject.contactId) {
       userinfo.contactId = someObject.contactId

@@ -187,6 +187,24 @@ Please note: Regarding that we may want to provide a central instance in the fut
 ids of the endpoints distinct. So to have pk=1 for GFZ, pk=2 for UFZ, pk=3 for FZJ, pk=4 for KIT and so on. Doing so can
 make an merge of the data much easier (but it is also possible to work around it).
 
+## Export control
+
+The export control workflow implemented in the SMS is there to allow export control
+officers on the centres to store information if a device or a platform can be
+used for military uses (dual use) and requires extra documents when transported
+to different countries.
+
+While the usual handling in the SMS is based on physical devices, the export control
+works on their device types - in this case the combination of manufacturer & model - so
+that the check needs to be done just once for a group of devices or platforms.
+
+The permission to handle those information is bound to the `EXPORT_CONTROL_VO_LIST`
+env variable. It is a comma seperated list that points to the full qualified name
+of a virtual organization.
+
+For the GFZ we have a `sensor-management-system-export-control` group within myprofile.
+This is visible as `urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de` within the Helmholtz AAI - and this is the value that is
+used in the `EXPORT_CONTROL_VO_LIST` variable.
 
 ## Additional step UFZ developer for Frontend local development - Identity Provider
 

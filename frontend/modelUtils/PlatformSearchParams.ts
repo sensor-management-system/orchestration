@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -45,6 +45,8 @@ export interface IPlatformSearchParams {
   permissionGroups: PermissionGroup[]
   onlyOwnPlatforms: boolean
   includeArchivedPlatforms: boolean
+  manufacturerName: string | null
+  model: string | null
 }
 
 /**
@@ -56,8 +58,10 @@ export class PlatformSearchParamsSerializer {
   public platformTypes: PlatformType[] = []
   public manufacturer: Manufacturer[] = []
   public permissionGroups: PermissionGroup[] = []
+  public skipManufacturerName: boolean = false
+  public skipModel: boolean = false
 
-  constructor ({ states, platformTypes, manufacturer, permissionGroups }: {states?: Status[], platformTypes?: PlatformType[], manufacturer?: Manufacturer[], permissionGroups?: PermissionGroup[]} = {}) {
+  constructor ({ states, platformTypes, manufacturer, permissionGroups, skipManufacturerName, skipModel }: {states?: Status[], platformTypes?: PlatformType[], manufacturer?: Manufacturer[], permissionGroups?: PermissionGroup[], skipManufacturerName?: boolean, skipModel?: boolean} = {}) {
     if (states) {
       this.states = states
     }
@@ -70,6 +74,8 @@ export class PlatformSearchParamsSerializer {
     if (permissionGroups) {
       this.permissionGroups = permissionGroups
     }
+    this.skipManufacturerName = !!skipManufacturerName
+    this.skipModel = !!skipModel
   }
 
   /**
@@ -100,6 +106,12 @@ export class PlatformSearchParamsSerializer {
     }
     if (params.permissionGroups) {
       result.permissionGroups = params.permissionGroups.map(p => p.id)
+    }
+    if (params.manufacturerName && !this.skipManufacturerName) {
+      result.manufacturerName = params.manufacturerName
+    }
+    if (params.model && !this.skipModel) {
+      result.model = params.model
     }
     return result
   }
@@ -152,7 +164,9 @@ export class PlatformSearchParamsSerializer {
       types,
       permissionGroups,
       onlyOwnPlatforms: typeof params.onlyOwnPlatforms !== 'undefined' && params.onlyOwnPlatforms === 'true',
-      includeArchivedPlatforms: typeof params.includeArchivedPlatforms !== 'undefined' && params.includeArchivedPlatforms === 'true'
+      includeArchivedPlatforms: typeof params.includeArchivedPlatforms !== 'undefined' && params.includeArchivedPlatforms === 'true',
+      manufacturerName: typeof params.manufacturerName === 'string' && !this.skipManufacturerName ? params.manufacturerName : '',
+      model: typeof params.model === 'string' && !this.skipModel ? params.model : ''
     }
   }
 }

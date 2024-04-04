@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2022
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -45,6 +45,8 @@ export interface IDeviceSearchParams {
   permissionGroups: PermissionGroup[]
   onlyOwnDevices: boolean
   includeArchivedDevices: boolean
+  manufacturerName: string | null
+  model: string | null
 }
 
 /**
@@ -56,8 +58,10 @@ export class DeviceSearchParamsSerializer {
   public deviceTypes: DeviceType[] = []
   public manufacturer: Manufacturer[] = []
   public permissionGroups: PermissionGroup[] = []
+  public skipManufacturerName: boolean = false
+  public skipModel: boolean = false
 
-  constructor ({ states, deviceTypes, manufacturer, permissionGroups }: {states?: Status[], deviceTypes?: DeviceType[], manufacturer?: Manufacturer[], permissionGroups?: PermissionGroup[]} = {}) {
+  constructor ({ states, deviceTypes, manufacturer, permissionGroups, skipManufacturerName, skipModel }: {states?: Status[], deviceTypes?: DeviceType[], manufacturer?: Manufacturer[], permissionGroups?: PermissionGroup[], skipManufacturerName?: boolean, skipModel?: boolean} = {}) {
     if (states) {
       this.states = states
     }
@@ -70,6 +74,8 @@ export class DeviceSearchParamsSerializer {
     if (permissionGroups) {
       this.permissionGroups = permissionGroups
     }
+    this.skipManufacturerName = !!skipManufacturerName
+    this.skipModel = !!skipModel
   }
 
   /**
@@ -101,6 +107,13 @@ export class DeviceSearchParamsSerializer {
     if (params.permissionGroups) {
       result.permissionGroups = params.permissionGroups.map(p => p.id)
     }
+    if (params.manufacturerName && !this.skipManufacturerName) {
+      result.manufacturerName = params.manufacturerName
+    }
+    if (params.model && !this.skipModel) {
+      result.model = params.model
+    }
+
     return result
   }
 
@@ -152,7 +165,9 @@ export class DeviceSearchParamsSerializer {
       types,
       permissionGroups,
       onlyOwnDevices: typeof params.onlyOwnDevices !== 'undefined' && params.onlyOwnDevices === 'true',
-      includeArchivedDevices: typeof params.includeArchivedDevices !== 'undefined' && params.includeArchivedDevices === 'true'
+      includeArchivedDevices: typeof params.includeArchivedDevices !== 'undefined' && params.includeArchivedDevices === 'true',
+      manufacturerName: typeof params.manufacturerName === 'string' && !this.skipManufacturerName ? params.manufacturerName : '',
+      model: typeof params.model === 'string' && !this.skipModel ? params.model : ''
     }
   }
 }

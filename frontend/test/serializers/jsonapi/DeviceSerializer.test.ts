@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Kotyba Alhaj Taha (UFZ, kotyba.alhaj-taha@ufz.de)
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
@@ -65,7 +65,6 @@ const createTestDevice = () => {
   device.model = '0815'
   device.persistentIdentifier = 'doi:4354545'
   device.website = 'http://gfz-potsdam.de'
-  device.dualUse = true
   device.createdAt = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
   device.updatedAt = DateTime.utc(2020, 8, 30, 13, 49, 48, 15)
   device.updateDescription = ''
@@ -228,7 +227,6 @@ describe('DeviceSerializer', () => {
             device_type_uri: 'Logger',
             short_name: 'Campbell CR1000 logger unit',
             status_name: null,
-            dual_use: false,
             persistent_identifier: null,
             manufacturer_uri: null,
             archived: false,
@@ -308,7 +306,6 @@ describe('DeviceSerializer', () => {
             device_type_uri: 'Logger',
             short_name: 'Campbell CR200X logger unit',
             status_name: null,
-            dual_use: false,
             persistent_identifier: null,
             manufacturer_uri: null,
             archived: false,
@@ -376,7 +373,6 @@ describe('DeviceSerializer', () => {
       expectedDevice1.customFields = []
       expectedDevice1.shortName = 'Campbell CR1000 logger unit'
       expectedDevice1.statusName = ''
-      expectedDevice1.dualUse = false
       expectedDevice1.persistentIdentifier = ''
       expectedDevice1.manufacturerUri = ''
       expectedDevice1.contacts = []
@@ -405,7 +401,6 @@ describe('DeviceSerializer', () => {
       expectedDevice2.customFields = []
       expectedDevice2.shortName = 'Campbell CR200X logger unit'
       expectedDevice2.statusName = ''
-      expectedDevice2.dualUse = false
       expectedDevice2.persistentIdentifier = ''
       expectedDevice2.manufacturerUri = ''
       expectedDevice2.contacts = []
@@ -454,7 +449,6 @@ describe('DeviceSerializer', () => {
             device_type_uri: null,
             short_name: 'Device short name',
             status_name: null,
-            dual_use: false,
             persistent_identifier: '0000001',
             manufacturer_uri: null,
             archived: false
@@ -515,7 +509,6 @@ describe('DeviceSerializer', () => {
       expectedDevice.customFields = []
       expectedDevice.shortName = 'Device short name'
       expectedDevice.statusName = ''
-      expectedDevice.dualUse = false
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
@@ -548,7 +541,6 @@ describe('DeviceSerializer', () => {
             device_type_uri: null,
             short_name: 'Device short name',
             status_name: null,
-            dual_use: true,
             persistent_identifier: '0000001',
             manufacturer_uri: null,
             archived: false
@@ -952,7 +944,6 @@ describe('DeviceSerializer', () => {
       ]
       expectedDevice.shortName = 'Device short name'
       expectedDevice.statusName = ''
-      expectedDevice.dualUse = true
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = [
@@ -1016,7 +1007,6 @@ describe('DeviceSerializer', () => {
           device_type_uri: null,
           short_name: 'Device short name',
           status_name: null,
-          dual_use: false,
           persistent_identifier: '0000001',
           manufacturer_uri: null,
           archived: false
@@ -1071,7 +1061,6 @@ describe('DeviceSerializer', () => {
       expectedDevice.customFields = []
       expectedDevice.shortName = 'Device short name'
       expectedDevice.statusName = ''
-      expectedDevice.dualUse = false
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
@@ -1113,7 +1102,6 @@ describe('DeviceSerializer', () => {
           customfields: [],
           short_name: 'Device short name',
           status_name: null,
-          dual_use: false,
           persistent_identifier: '0000001',
           manufacturer_uri: null,
           archived: false
@@ -1168,7 +1156,6 @@ describe('DeviceSerializer', () => {
       expectedDevice.customFields = []
       expectedDevice.shortName = 'Device short name'
       expectedDevice.statusName = ''
-      expectedDevice.dualUse = false
       expectedDevice.persistentIdentifier = '0000001'
       expectedDevice.manufacturerUri = ''
       expectedDevice.contacts = []
@@ -1232,8 +1219,6 @@ describe('DeviceSerializer', () => {
       expect(attributes.persistent_identifier).toEqual('doi:4354545')
       expect(attributes).toHaveProperty('website')
       expect(attributes.website).toEqual('http://gfz-potsdam.de')
-      expect(attributes).toHaveProperty('dual_use')
-      expect(attributes.dual_use).toEqual(true)
       expect(attributes).toHaveProperty('keywords')
       expect(attributes.keywords).toEqual(['key', 'word'])
       expect(attributes).toHaveProperty('country')

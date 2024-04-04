@@ -88,9 +88,11 @@ permissions and limitations under the Licence.
         </template>
         <span>Archived</span>
       </v-tooltip>
-      <extended-item-name
-        :value="device"
-      />
+      <slot name="title">
+        <extended-item-name
+          :value="device"
+        />
+      </slot>
     </template>
     <template #expandable>
       <v-row

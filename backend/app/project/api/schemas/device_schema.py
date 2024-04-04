@@ -49,7 +49,6 @@ class DeviceSchema(Schema):
     status_uri = fields.Str(allow_none=True)
     status_name = fields.Str(allow_none=True)
     model = fields.Str(allow_none=True)
-    dual_use = fields.Boolean(allow_none=True)
     inventory_number = fields.Str(allow_none=True)
     persistent_identifier = fields.Str(allow_none=True)
     schema_version = fields.Str(allow_none=True)
@@ -216,7 +215,6 @@ class DeviceToNestedDictSerializer:
                 "serial_number": device.serial_number,
                 "manufacturer_name": device.manufacturer_name,
                 "manufacturer_uri": device.manufacturer_uri,
-                "dual_use": device.dual_use,
                 "model": device.model,
                 "inventory_number": device.inventory_number,
                 "persistent_identifier": device.persistent_identifier,

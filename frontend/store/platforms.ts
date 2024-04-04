@@ -69,6 +69,7 @@ import {
   sortActions
 } from '@/utils/actionHelper'
 import { ContactWithRoles } from '@/models/ContactWithRoles'
+import { ExportControl } from '@/models/ExportControl'
 
 export type IOptionsForActionType = Pick<IActionType, 'id' | 'name' | 'uri'> & {
   kind: KindOfPlatformAction
@@ -101,6 +102,8 @@ export interface PlatformsState {
   platformPresetParameter: Parameter | null
   platformSoftwareUpdateAction: SoftwareUpdateAction | null
   platformSoftwareUpdateActions: SoftwareUpdateAction[]
+  exportControl: ExportControl | null
+  manufacturerModelId: string | null
   platforms: Platform[]
   searchText: string | null
   selectedSearchManufacturers: Manufacturer[]
@@ -132,6 +135,8 @@ const state = (): PlatformsState => ({
   platformPresetParameter: null,
   platformSoftwareUpdateAction: null,
   platformSoftwareUpdateActions: [],
+  exportControl: null,
+  manufacturerModelId: null,
   platforms: [],
   searchText: null,
   selectedSearchManufacturers: [],
@@ -169,7 +174,10 @@ const getters: GetterTree<PlatformsState, RootState> = {
       types: state.selectedSearchPlatformTypes,
       permissionGroups: state.selectedSearchPermissionGroups,
       onlyOwnPlatforms: state.onlyOwnPlatforms && isLoggedIn,
-      includeArchivedPlatforms: state.includeArchivedPlatforms
+      includeArchivedPlatforms: state.includeArchivedPlatforms,
+      // We don't have it in the store.
+      manufacturerName: null,
+      model: null
     }
   },
   availableContactsOfActions: (_state: PlatformsState, getters): string[] => {
@@ -261,7 +269,7 @@ export type DeletePlatformParameterAction = (parameterId: string) => Promise<voi
 export type DeletePlatformParameterChangeActionAction = (actionId: string) => Promise<void>
 export type DeletePlatformSoftwareUpdateActionAction = (softwareUpdateActionId: string) => Promise<void>
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
-export type ExportAsCsvAction = () => Promise<Blob>
+export type ExportAsCsvAction = (searchParams?: IPlatformSearchParams) => Promise<Blob>
 export type ExportAsSensorMLAction = (id: string) => Promise<Blob>
 export type GetSensorMLUrlAction = (id: string) => string
 export type LoadAllPlatformActionsAction = (id: string) => Promise<void>
@@ -283,12 +291,14 @@ export type LoadPlatformParameterChangeActionsAction = (id: string) => Promise<v
 export type LoadPlatformParametersAction = (id: string) => Promise<void>
 export type LoadPlatformSoftwareUpdateActionAction = (actionId: string) => Promise<void>
 export type LoadPlatformSoftwareUpdateActionsAction = (id: string) => Promise<void>
+export type LoadExportControlAction = (params: { platformId: string}) => Promise<void>
+export type LoadManufacturerModelIdAction = (params: { platformId: string}) => Promise<void>
 export type RemovePlatformContactRoleAction = (params: { platformContactRoleId: string }) => Promise<void>
 export type ReplacePlatformInPlatformsAction = (newPlatform: Platform) => void
 export type RestorePlatformAction = (id: string) => Promise<void>
 export type SavePlatformAction = (platform: Platform) => Promise<Platform>
 export type SavePlatformImagesAction = (params: {platformId: string, platformImages: Image[], platformCopyImages: Image[]}) => Promise<Image[]>
-export type SearchPlatformsPaginatedAction = () => Promise<void>
+export type SearchPlatformsPaginatedAction = (searchParams?: IPlatformSearchParams) => Promise<void>
 export type SetChosenKindOfPlatformActionAction = (newval: IOptionsForActionType | null) => void
 export type SetIncludeArchivedPlatformsAction = (includeArchivedPlatforms: boolean) => void
 export type SetOnlyOwnPlatformsAction = (onlyOwnPlatforms: boolean) => void
@@ -324,10 +334,13 @@ const actions: ActionTree<PlatformsState, RootState> = {
     commit,
     state,
     getters
-  }: { commit: Commit, state: PlatformsState, getters: any }): Promise<void> {
-    const searchParams = getters.searchParams(this.$auth.loggedIn)
+  }: { commit: Commit, state: PlatformsState, getters: any }, searchParams?: IPlatformSearchParams): Promise<void> {
+    const searchParamsFromStore = getters.searchParams(this.$auth.loggedIn)
+    if (!searchParams) {
+      searchParams = searchParamsFromStore
+    }
     let userId = null
-    if (searchParams.onlyOwnPlatforms) {
+    if (searchParams!.onlyOwnPlatforms) {
       userId = this.getters['permissions/userId']
     }
 
@@ -335,13 +348,15 @@ const actions: ActionTree<PlatformsState, RootState> = {
       elements,
       totalCount
     } = await this.$api.platforms
-      .setSearchText(searchParams.searchText)
-      .setSearchedManufacturers(searchParams.manufacturer)
-      .setSearchedStates(searchParams.states)
-      .setSearchedPlatformTypes(searchParams.types)
-      .setSearchedPermissionGroups(searchParams.permissionGroups)
+      .setSearchText(searchParams!.searchText)
+      .setSearchedManufacturers(searchParams!.manufacturer)
+      .setSearchedStates(searchParams!.states)
+      .setSearchedPlatformTypes(searchParams!.types)
+      .setSearchedPermissionGroups(searchParams!.permissionGroups)
       .setSearchedCreatorId(userId)
-      .setSearchIncludeArchivedPlatforms(searchParams.includeArchivedPlatforms)
+      .setSearchIncludeArchivedPlatforms(searchParams!.includeArchivedPlatforms)
+      .setSearchManufacturerName(searchParams!.manufacturerName)
+      .setSearchModel(searchParams!.model)
       .searchPaginated(
         state.pageNumber,
         state.pageSize,
@@ -443,6 +458,21 @@ const actions: ActionTree<PlatformsState, RootState> = {
   async loadPlatformParameter ({ commit }: { commit: Commit }, id: string): Promise<void> {
     const parameter = await this.$api.platformParameters.findById(id)
     commit('setPlatformParameter', parameter)
+  },
+  async loadExportControl ({ commit }: { commit: Commit }, { platformId }: { platformId: string }) {
+    const exportControl = await this.$api.platforms.findExportControlByManufacturerModelIdOrNewOne(platformId)
+    commit('setExportControl', exportControl)
+  },
+  async loadManufacturerModelId ({ commit }: { commit: Commit }, { platformId }: { platformId: string }) {
+    const platform = await this.$api.platforms.findById(platformId, {})
+    const manufacturerName = platform.manufacturerName
+    const model = platform.model
+    const manufacturerModel = await this.$api.manufacturerModels.findByManufacturerNameAndModel(manufacturerName, model, { includeExportControl: false })
+    if (manufacturerModel) {
+      commit('setManufacturerModelId', manufacturerModel.id)
+    } else {
+      commit('setManufacturerModelId', null)
+    }
   },
   deletePlatformParameter (_, parameterId: string): Promise<void> {
     return this.$api.platformParameters.deleteById(parameterId)
@@ -659,21 +689,26 @@ const actions: ActionTree<PlatformsState, RootState> = {
   async exportAsSensorML (_, id: string): Promise<Blob> {
     return await this.$api.platforms.getSensorML(id)
   },
-  async exportAsCsv ({ getters }: { getters: any }): Promise<Blob> {
+  async exportAsCsv ({ getters }: { getters: any }, searchParams?: IPlatformSearchParams): Promise<Blob> {
     let userId = null
-    const searchParams = getters.searchParams(this.$auth.loggedIn)
-    if (searchParams.onlyOwnPlatforms) {
+    const searchParamsFromStore = getters.searchParams(this.$auth.loggedIn)
+    if (!searchParams) {
+      searchParams = searchParamsFromStore
+    }
+    if (searchParams!.onlyOwnPlatforms) {
       userId = this.getters['permissions/userId']
     }
     // @ts-ignore
     return await this.$api.platforms
-      .setSearchText(searchParams.searchText)
-      .setSearchedManufacturers(searchParams.manufacturer)
-      .setSearchedStates(searchParams.states)
-      .setSearchedPlatformTypes(searchParams.types)
-      .setSearchedPermissionGroups(searchParams.permissionGroups)
+      .setSearchText(searchParams!.searchText)
+      .setSearchedManufacturers(searchParams!.manufacturer)
+      .setSearchedStates(searchParams!.states)
+      .setSearchedPlatformTypes(searchParams!.types)
+      .setSearchedPermissionGroups(searchParams!.permissionGroups)
       .setSearchedCreatorId(userId)
-      .setSearchIncludeArchivedPlatforms(searchParams.includeArchivedPlatforms)
+      .setSearchIncludeArchivedPlatforms(searchParams!.includeArchivedPlatforms)
+      .setSearchManufacturerName(searchParams!.manufacturerName)
+      .setSearchModel(searchParams!.model)
       .searchMatchingAsCsvBlob()
   },
   async deletePlatform (_: {}, id: string): Promise<void> {
@@ -827,8 +862,13 @@ const mutations = {
   },
   setPlatformParameterChangeAction (state: PlatformsState, platformParameterChangeAction: ParameterChangeAction) {
     state.platformParameterChangeAction = platformParameterChangeAction
+  },
+  setExportControl (state: PlatformsState, exportControl: ExportControl) {
+    state.exportControl = exportControl
+  },
+  setManufacturerModelId (state: PlatformsState, manufacturerModelId: string | null) {
+    state.manufacturerModelId = manufacturerModelId
   }
-
 }
 
 export default {
