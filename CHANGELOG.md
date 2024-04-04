@@ -16,6 +16,7 @@ Added:
 - Autocompletion for keywords
 - Export control workflow support
 - Organization and search by manufacturer and model
+- Extended sarch option for own configurations
 
 Changed:
 - The SMS now sends values for missing information according to the datacite values for unknown information

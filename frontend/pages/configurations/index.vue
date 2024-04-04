@@ -138,6 +138,9 @@ permissions and limitations under the Licence.
         <v-row
           dense
         >
+          <v-col v-if="$auth.loggedIn" cols="12" md="3">
+            <v-checkbox v-model="onlyOwnConfigurations" label="Only own configurations" />
+          </v-col>
           <v-col cols="12" md="3">
             <v-checkbox v-model="includeArchivedConfigurations" label="Include archived configurations" />
           </v-col>
@@ -366,6 +369,7 @@ export default class SearchConfigurationsPage extends Vue {
   private selectedPermissionGroups: PermissionGroup[] = []
   private selectedProjects: string[] = []
   private selectedSites: Site[] = []
+  private onlyOwnConfigurations: boolean = false
   private includeArchivedConfigurations: boolean = false
 
   private showDeleteDialog: boolean = false
@@ -472,6 +476,7 @@ export default class SearchConfigurationsPage extends Vue {
       searchText: this.searchText,
       states: this.selectedConfigurationStates,
       permissionGroups: this.selectedPermissionGroups,
+      onlyOwnConfigurations: this.onlyOwnConfigurations && this.$auth.loggedIn,
       projects: this.selectedProjects,
       sites: this.selectedSites,
       includeArchivedConfigurations: this.includeArchivedConfigurations
@@ -479,7 +484,8 @@ export default class SearchConfigurationsPage extends Vue {
   }
 
   isExtendedSearch (): boolean {
-    return !!this.selectedPermissionGroups.length ||
+    return this.onlyOwnConfigurations === true ||
+      !!this.selectedPermissionGroups.length ||
       !!this.selectedConfigurationStates.length ||
       !!this.selectedProjects.length ||
       !!this.selectedSites.length ||
@@ -499,6 +505,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.selectedProjects = []
     this.selectedSites = []
     this.selectedPermissionGroups = []
+    this.onlyOwnConfigurations = false
     this.includeArchivedConfigurations = false
     this.page = 1// Important to set page to one otherwise it's possible that you don't anything
     this.runSearch()
@@ -520,6 +527,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.selectedProjects = []
     this.selectedSites = []
     this.selectedPermissionGroups = []
+    this.onlyOwnConfigurations = false
     this.includeArchivedConfigurations = false
     this.initUrlQueryParams()
   }
@@ -621,6 +629,9 @@ export default class SearchConfigurationsPage extends Vue {
     // prefill the form by the serialized search params from the URL
     if (searchParamsObject.searchText) {
       this.searchText = searchParamsObject.searchText
+    }
+    if (searchParamsObject.onlyOwnConfigurations) {
+      this.onlyOwnConfigurations = searchParamsObject.onlyOwnConfigurations
     }
     if (searchParamsObject.states) {
       this.selectedConfigurationStates = searchParamsObject.states

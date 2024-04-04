@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -123,6 +123,7 @@ export class ConfigurationApi {
   private _searchPermissionGroups: PermissionGroup[] = []
   private _searchText: string | null = null
   private _searchedUserMail: string | null = null
+  private _searchedCreatorId: string | null = null
   private _searchedIncludeArchivedConfigurations: boolean = false
   private filterSettings: any[] = []
 
@@ -243,6 +244,15 @@ export class ConfigurationApi {
     return this
   }
 
+  get searchedCreatorId (): string | null {
+    return this._searchedCreatorId
+  }
+
+  setSearchedCreatorId (value: string | null) {
+    this._searchedCreatorId = value
+    return this
+  }
+
   get searchIncludeArchivedConfigurations (): boolean {
     return this._searchedIncludeArchivedConfigurations
   }
@@ -334,6 +344,7 @@ export class ConfigurationApi {
     this.prepareSites()
     this.preparePermissionGroups()
     this.prepareMail()
+    this.prepareCreator()
   }
 
   async getSensorML (configurationId: string): Promise<Blob> {
@@ -400,6 +411,16 @@ export class ConfigurationApi {
         name: 'contacts.email',
         op: 'eq',
         val: this.searchedUserMail
+      })
+    }
+  }
+
+  prepareCreator () {
+    if (this.searchedCreatorId) {
+      this.filterSettings.push({
+        name: 'created_by_id',
+        op: 'eq',
+        val: this.searchedCreatorId
       })
     }
   }

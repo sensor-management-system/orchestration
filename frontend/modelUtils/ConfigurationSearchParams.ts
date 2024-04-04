@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -44,6 +44,7 @@ export interface IConfigurationSearchParams extends IConfigurationBasicSearchPar
   projects: string[]
   sites: Site[]
   permissionGroups: PermissionGroup[]
+  onlyOwnConfigurations: boolean
   includeArchivedConfigurations: boolean
 }
 
@@ -91,6 +92,9 @@ export class ConfigurationSearchParamsSerializer {
     }
     if (params.sites) {
       result.sites = params.sites.map(s => s.id)
+    }
+    if (params.onlyOwnConfigurations) {
+      result.onlyOwnConfigurations = String(params.onlyOwnConfigurations)
     }
     if (params.permissionGroups) {
       result.permissionGroups = params.permissionGroups.map(p => p.id)
@@ -147,6 +151,7 @@ export class ConfigurationSearchParamsSerializer {
       projects,
       sites,
       permissionGroups,
+      onlyOwnConfigurations: typeof params.onlyOwnConfigurations !== 'undefined' && params.onlyOwnConfigurations === 'true',
       includeArchivedConfigurations: typeof params.includeArchivedConfigurations !== 'undefined' && params.includeArchivedConfigurations === 'true'
     }
   }
