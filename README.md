@@ -32,6 +32,10 @@ in the earth and environmental sciences, but also offers sufficient
 flexibility for use in other domains as well as individual extension
 and customization possibilities due to the use of common standards.
 
+## Changelog
+
+You can find the versions and their changes in [CHANGELOG.md](./CHANGELOG.md).
+
 ## Instances
 
 - https://sensors.gfz-potsdam.de
