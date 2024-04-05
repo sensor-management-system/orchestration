@@ -757,6 +757,7 @@ class DeviceConverter:
         """Return a sml:PhysicalSystem."""
         physical_system = SmlPhysicalSystem(
             gml_id=self.gml_id(),
+            gml_name=self.gml_name(),
             gml_description=self.gml_description(),
             sml_keywords=self.sml_keywords(),
             sml_identification=self.sml_identification(),
@@ -772,6 +773,10 @@ class DeviceConverter:
     def gml_id(self) -> str:
         """Return the gml:id of the physical system."""
         return f"device_{self.device.id}"
+
+    def gml_name(self) -> GmlName:
+        """Return the gml:name."""
+        return GmlName(text=self.device.short_name)
 
     def gml_description(self) -> Optional[GmlDescription]:
         """Return the gml:description."""
@@ -1260,6 +1265,7 @@ class PlatformConverter:
         """Return the sml:PhysicalSystem."""
         physical_system = SmlPhysicalSystem(
             gml_id=self.gml_id(),
+            gml_name=self.gml_name(),
             gml_description=self.gml_description(),
             sml_keywords=self.sml_keywords(),
             sml_identification=self.sml_identification(),
@@ -1274,6 +1280,10 @@ class PlatformConverter:
     def gml_id(self):
         """Return the gml:id for the physical system."""
         return f"platform_{self.platform.id}"
+
+    def gml_name(self) -> GmlName:
+        """Return the gml:name."""
+        return GmlName(text=self.platform.short_name)
 
     def gml_description(self) -> Optional[GmlDescription]:
         """Return the gml:description."""

@@ -204,6 +204,12 @@ class TestSensorMLPlatform(BaseTestCase):
         ).text
         self.assertEqual(sml_term_value, self.platform.short_name)
 
+        # The short name is also included as gml:name
+        self.assertEqual(
+            root.find("{http://www.opengis.net/gml/3.2}name").text,
+            self.platform.short_name,
+        )
+
     def test_get_public_platform_contacts(self):
         """Test with a platform with some contacts."""
         owner_name = "Owner"
