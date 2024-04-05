@@ -206,6 +206,12 @@ class TestSensorMLDevice(BaseTestCase):
         ).text
         self.assertEqual(sml_term_value, self.device.short_name)
 
+        # The short name is also included as gml:name
+        self.assertEqual(
+            root.find("{http://www.opengis.net/gml/3.2}name").text,
+            self.device.short_name,
+        )
+
     def test_get_public_device_with_pid(self):
         """Check that we give out the pid."""
         self.device.persistent_identifier = "12345/test.abc.1234-4567"

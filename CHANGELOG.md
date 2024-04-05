@@ -17,6 +17,7 @@ Added:
 - Export control workflow support
 - Organization and search by manufacturer and model
 - Extended sarch option for own configurations
+- SensorML for devices and platforms now contain a gml:name attribute
 
 Changed:
 - The SMS now sends values for missing information according to the datacite values for unknown information
