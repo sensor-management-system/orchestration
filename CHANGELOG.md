@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: HEESIL-1.0
 -->
 
-## 1.14.0 (Unreleased)
+## 1.14.1 (Unreleased)
+
+## 1.14.0 - 2024-04-08
 
 Added:
 - Images are also previewed in edit mode on mobile devices
