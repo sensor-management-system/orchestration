@@ -114,7 +114,7 @@ permissions and limitations under the Licence.
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <date-time-picker
           :value="value.startDate"
           label="Start date"
@@ -124,7 +124,7 @@ permissions and limitations under the Licence.
           @input="update('startDate',$event)"
         />
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="6">
         <date-time-picker
           :value="value.endDate"
           label="End date"
@@ -134,6 +134,8 @@ permissions and limitations under the Licence.
           @input="update('endDate',$event)"
         />
       </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" md="3">
         <autocomplete-text-input
           :value="value.project"
@@ -141,6 +143,16 @@ permissions and limitations under the Licence.
           :readonly="readonly"
           endpoint="configuration-projects"
           @input="update('project',$event)"
+        />
+      </v-col>
+      <v-col cols="12" md="3">
+        <autocomplete-text-input
+          :value="value.campaign"
+          label="Campaign"
+          :readonly="readonly"
+          endpoint="configuration-campaigns"
+          :filters="{project: value.project}"
+          @input="update('campaign',$event)"
         />
       </v-col>
       <v-col cols="12" md="3">
@@ -273,7 +285,7 @@ export default class ConfigurationsBasicDataForm extends Vue {
   }
 
   update (
-    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'images' | 'startDate' | 'endDate' | 'siteId' | 'description' | 'project'>,
+    key: keyof Pick<Configuration, 'visibility' | 'permissionGroup' | 'label' | 'status' | 'images' | 'startDate' | 'endDate' | 'siteId' | 'description' | 'project' | 'campaign'>,
     value: any
   ) {
     if (key in this.value) {

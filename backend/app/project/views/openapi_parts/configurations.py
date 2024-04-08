@@ -1,10 +1,15 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
 """External openapi spec file for the configuration endpoints."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.configuration_schema import ConfigurationSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(ConfigurationSchema)
 
 paths = {
     "/configurations": {
@@ -15,27 +20,38 @@ paths = {
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
-                {"$ref": "#/components/parameters/created_at"},
-                {"$ref": "#/components/parameters/updated_at"},
-                {"$ref": "#/components/parameters/start_date"},
-                {"$ref": "#/components/parameters/end_date"},
-                {"$ref": "#/components/parameters/label"},
-                {"$ref": "#/components/parameters/status"},
-                {"$ref": "#/components/parameters/created_by_id"},
-                {"$ref": "#/components/parameters/updated_by_id"},
-                {"$ref": "#/components/parameters/id"},
+                *schema_mapper.filters(),
                 {"$ref": "#/components/parameters/filter"},
                 {"$ref": "#/components/parameters/hide_archived"},
             ],
-            "responses": {"200": {"$ref": "#/components/responses/Configuration_coll"}},
+            "responses": {
+                "200": {
+                    "description": "List of configurations",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
+            },
             "description": "Retrieve Configuration from configuration",
             "operationId": "RetrieveacollectionofConfigurationobjects_0",
         },
         "post": {
             "tags": ["Configurations"],
             "description": "create a Configuration",
-            "requestBody": {"$ref": "#/components/requestBodies/Configuration_inst"},
-            "responses": {"201": {"$ref": "#/components/responses/Configuration_inst"}},
+            "requestBody": {
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
+            },
+            "responses": {
+                "201": {
+                    "description": "Payload of the created configuration",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
+            },
             "operationId": "CreateConfiguration_0",
         },
     },
@@ -44,22 +60,22 @@ paths = {
             "tags": ["Configurations"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
+                {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
-                {"$ref": "#/components/parameters/created_at"},
-                {"$ref": "#/components/parameters/updated_at"},
-                {"$ref": "#/components/parameters/start_date"},
-                {"$ref": "#/components/parameters/end_date"},
-                {"$ref": "#/components/parameters/label"},
-                {"$ref": "#/components/parameters/status"},
-                {"$ref": "#/components/parameters/created_by_id"},
-                {"$ref": "#/components/parameters/updated_by_id"},
-                {"$ref": "#/components/parameters/id"},
+                *schema_mapper.filters(),
                 {"$ref": "#/components/parameters/site_id"},
                 {"$ref": "#/components/parameters/filter"},
                 {"$ref": "#/components/parameters/hide_archived"},
             ],
-            "responses": {"200": {"$ref": "#/components/responses/Configuration_coll"}},
+            "responses": {
+                "200": {
+                    "description": "List of configurations for the given site",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
+            },
             "description": "Retrieve the configurations for a specific site.",
             "operationId": "RetrieveacollectionofSite_0",
         },
@@ -71,7 +87,14 @@ paths = {
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/configuration_id"},
             ],
-            "responses": {"200": {"$ref": "#/components/responses/Configuration_inst"}},
+            "responses": {
+                "200": {
+                    "description": "Instance of a configuration",
+                    "content": {
+                        "application/vnd.api.json": schema_mapper.get_one(),
+                    },
+                }
+            },
             "description": "Retrieve Configuration from configuration",
             "operationId": "RetrieveConfigurationinstance_0",
         },
@@ -80,15 +103,18 @@ paths = {
             "parameters": [{"$ref": "#/components/parameters/configuration_id"}],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/Configuration"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
                 "description": "Configuration attributes",
                 "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/Configuration_inst"},
+                "200": {
+                    "description": "Payload of the updated configuration",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Update Configuration attributes",
             "operationId": "UpdateConfiguration_0",
@@ -184,338 +210,12 @@ paths = {
     },
 }
 components = {
-    "responses": {
-        "Configuration_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": [
-                                    {
-                                        "attributes": {
-                                            "created_at": "2022-08-31T12:00:00",
-                                            "updated_at": "2022-08-31T12:00:00",
-                                            "start_date": "2022-08-31T12:00:00",
-                                            "end_date": "2022-08-31T12:00:00",
-                                            "label": "test cfg",
-                                            "status": "draft",
-                                            "cfg_permission_group": "1",
-                                            "is_public": False,
-                                            "is_internal": True,
-                                            "archived": False,
-                                            "description": "",
-                                            "project": "",
-                                            "persistent_identifier": "",
-                                        },
-                                        "type": "configuration",
-                                        "id": "0",
-                                        "relationships": {
-                                            "site": {
-                                                "data": {
-                                                    "id": "123",
-                                                    "type": "site",
-                                                },
-                                            },
-                                            "configuration_static_location_actions": {
-                                                "data": [],
-                                                "links": {
-                                                    "self": None,
-                                                },
-                                            },
-                                            "configuration_dynamic_location_actions": {
-                                                "data": [],
-                                                "links": {
-                                                    "self": None,
-                                                },
-                                            },
-                                            "contact_role": {
-                                                "data": [],
-                                                "links": {
-                                                    "self": None,
-                                                },
-                                            },
-                                            "generic_configuration_actions": {
-                                                "data": [],
-                                                "links": {
-                                                    "self": None,
-                                                },
-                                            },
-                                            "platform_mount_actions": {
-                                                "data": [],
-                                                "links": {
-                                                    "self": None,
-                                                },
-                                            },
-                                            "device_mount_actions": {
-                                                "data": [],
-                                                "links": {
-                                                    "self": None,
-                                                },
-                                            },
-                                        },
-                                    }
-                                ],
-                                "type": "string",
-                            }
-                        },
-                        "description": "Configuration get;",
-                    }
-                }
-            },
-            "description": "Request fulfilled, document follows",
-        },
-        "Configuration_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "attributes": {
-                                        "created_at": "2022-08-31T12:00:00",
-                                        "updated_at": "2022-08-31T12:00:00",
-                                        "start_date": "2022-08-31T12:00:00",
-                                        "end_date": "2022-08-31T12:00:00",
-                                        "label": "test cfg",
-                                        "status": "draft",
-                                        "cfg_permission_group": "1",
-                                        "is_public": False,
-                                        "is_internal": True,
-                                        "archived": False,
-                                        "description": "",
-                                        "project": "",
-                                        "persistent_identifier": "",
-                                    },
-                                    "type": "configuration",
-                                    "id": "0",
-                                    "relationships": {
-                                        "site": {
-                                            "data": {
-                                                "id": "123",
-                                                "type": "site",
-                                            },
-                                        },
-                                        "configuration_static_location_actions": {
-                                            "data": [],
-                                            "links": {
-                                                "self": None,
-                                            },
-                                        },
-                                        "configuration_dynamic_location_actions": {
-                                            "data": [],
-                                            "links": {
-                                                "self": None,
-                                            },
-                                        },
-                                        "contact_role": {
-                                            "data": [],
-                                            "links": {
-                                                "self": None,
-                                            },
-                                        },
-                                        "generic_configuration_actions": {
-                                            "data": [],
-                                            "links": {
-                                                "self": None,
-                                            },
-                                        },
-                                        "platform_mount_actions": {
-                                            "data": [],
-                                            "links": {
-                                                "self": None,
-                                            },
-                                        },
-                                        "device_mount_actions": {
-                                            "data": [],
-                                            "links": {
-                                                "self": None,
-                                            },
-                                        },
-                                    },
-                                },
-                                "type": "string",
-                            }
-                        },
-                        "description": "Configuration get;",
-                    }
-                }
-            },
-            "description": "Request fulfilled, document follows",
-        },
-    },
-    "requestBodies": {
-        "Configuration_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "start_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                            "end_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                            "label": {"type": "string"},
-                                            "status": {"type": "string"},
-                                            "cfg_permission_group": {"type": "string"},
-                                            "is_internal": {"type": "boolean"},
-                                            "is_public": {"type": "boolean"},
-                                            "description": {"type": "string"},
-                                            "project": {"type": "string"},
-                                            "persistent_identifier": {"type": "string"},
-                                        },
-                                    }
-                                },
-                                "example": {
-                                    "attributes": {
-                                        "start_date": "2022-08-31T12:00:00",
-                                        "end_date": "2022-08-31T12:00:00",
-                                        "label": "Test",
-                                        "status": "draft",
-                                        "cfg_permission_group": "0",
-                                        "is_public": False,
-                                        "is_internal": True,
-                                        "archived": False,
-                                        "description": "",
-                                        "project": "",
-                                        "persistent_identifier": "",
-                                    },
-                                    "type": "configuration",
-                                    "relationships": {
-                                        "site": {
-                                            "data": {
-                                                "id": "123",
-                                                "type": "site",
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        },
-                        "description": "Configuration request body. For post & patch requests.",
-                    }
-                }
-            }
-        },
-    },
     "parameters": {
         "configuration_id": {
             "name": "configuration_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
-    "schemas": {
-        "Configuration": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "id": {"type": "string"},
-                        "type": {"type": "string", "default": "configuration"},
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "start_date": {"type": "string", "format": "datetime"},
-                                "end_date": {"type": "string", "format": "datetime"},
-                                "label": {"type": "string"},
-                                "status": {"type": "string"},
-                                "cfg_permission_group": {"type": "string"},
-                                "is_internal": {"type": "boolean"},
-                                "is_public": {"type": "boolean"},
-                                "archived": {"type": "boolean"},
-                                "description": {"type": "string"},
-                                "project": {"type": "string"},
-                                "persistent_identifier": {"type": "string"},
-                            },
-                        },
-                        "relationships": {
-                            "type": "object",
-                            "properties": {
-                                "site": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string",
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "site",
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "created_by": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string",
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "user",
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "updated_by": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string",
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "user",
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    "example": {
-                        "id": "0",
-                        "attributes": {
-                            "start_date": "2022-08-31T12:00:00",
-                            "end_date": "2022-08-31T12:00:00",
-                            "label": "",
-                            "status": "draft",
-                            "cfg_permission_group": "0",
-                            "is_public": False,
-                            "is_internal": True,
-                            "archived": False,
-                            "description": "",
-                            "project": "",
-                            "persistent_identifier": "",
-                        },
-                        "type": "configuration",
-                    },
-                }
-            },
-            "description": "Configuration Schema;",
         },
     },
 }

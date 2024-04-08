@@ -367,6 +367,45 @@ paths = {
             "operationId": "controller_device_models",
         }
     },
+    "/controller/configuration-campaigns": {
+        "get": {
+            "tags": [
+                "Controller",
+            ],
+            "parameters": [
+                {
+                    "in": "query",
+                    "name": "project",
+                    "schema": {"type": "string"},
+                    "required": False,
+                    "description": "".join(
+                        [
+                            "Parameter to filter for a given project.",
+                        ]
+                    ),
+                },
+            ],
+            "responses": {
+                "200": {
+                    "description": "List of distinct campaigns for configurations.",
+                    "content": {
+                        "application/vnd.api+json": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    }
+                                }
+                            }
+                        }
+                    },
+                },
+            },
+            "description": "Get the list of distinct campaigns of all configurations.",
+            "operationId": "controller_configuration_campaigns",
+        }
+    },
     **template(
         endpoint="/controller/device-short-names",
         description="Get the list of distinct short names of all devices.",

@@ -58,6 +58,7 @@ describe('ConfigurationSerializer', () => {
             label: 'Tereno NO Boeken',
             description: 'Boeken station',
             project: 'Tereno NO',
+            campaign: 'Demmin',
             status: 'draft',
             archived: true,
             persistent_identifier: '12345/1234567890',
@@ -77,7 +78,7 @@ describe('ConfigurationSerializer', () => {
           type: 'configuration',
           attributes: {
             // no start and no end date
-            // no field for label, none for description, nor project
+            // no field for label, none for description, nor project etc
             status: 'draft',
             archived: false,
             persistent_identifier: null
@@ -265,6 +266,7 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration1.label = 'Tereno NO Boeken'
       expectedConfiguration1.description = 'Boeken station'
       expectedConfiguration1.project = 'Tereno NO'
+      expectedConfiguration1.campaign = 'Demmin'
       expectedConfiguration1.archived = true
       expectedConfiguration1.status = 'draft'
       expectedConfiguration1.createdByUserId = '123456'
@@ -321,6 +323,7 @@ describe('ConfigurationSerializer', () => {
             label: 'Tereno NO Boeken',
             description: 'Boeken station',
             project: 'Tereno NO',
+            campaign: 'Demmin',
             status: 'draft'
           },
           relationships: {
@@ -339,6 +342,7 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.description = 'Boeken station'
       expectedConfiguration.project = 'Tereno NO'
+      expectedConfiguration.campaign = 'Demmin'
       expectedConfiguration.status = 'draft'
 
       const serializer = new ConfigurationSerializer()
@@ -358,6 +362,7 @@ describe('ConfigurationSerializer', () => {
             label: 'Tereno NO Boeken',
             description: 'Boeken station',
             project: 'Tereno NO',
+            campaign: 'Demmin',
             status: 'draft'
           },
           relationships: {
@@ -403,6 +408,7 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.description = 'Boeken station'
       expectedConfiguration.project = 'Tereno NO'
+      expectedConfiguration.campaign = 'Demmin'
       expectedConfiguration.status = 'draft'
       expectedConfiguration.contacts = [
         Contact.createFromObject({
@@ -465,6 +471,7 @@ describe('ConfigurationSerializer', () => {
       expectedConfiguration.label = 'Tereno NO Boeken'
       expectedConfiguration.description = 'Boeken station'
       expectedConfiguration.project = 'Tereno NO'
+      expectedConfiguration.campaign = ''
       expectedConfiguration.status = 'draft'
 
       const included: any[] = []
@@ -484,6 +491,7 @@ describe('ConfigurationSerializer', () => {
       configuration.label = 'ABC'
       configuration.description = 'some description'
       configuration.project = 'Project'
+      configuration.campaign = 'Test-Campaign'
       configuration.persistentIdentifier = '12345/1234567890'
       configuration.startDate = DateTime.utc(2020, 8, 28, 13, 49, 48, 15)
       configuration.endDate = DateTime.utc(2021, 8, 28, 13, 49, 48, 15)
@@ -532,6 +540,7 @@ describe('ConfigurationSerializer', () => {
       expect(attributes.description).toEqual('some description')
       expect(attributes).toHaveProperty('project')
       expect(attributes.project).toEqual('Project')
+      expect(attributes).toHaveProperty('campaign', 'Test-Campaign')
       expect(attributes).toHaveProperty('start_date')
       expect(attributes.start_date).toEqual('2020-08-28T13:49:48.015Z')
       expect(attributes).toHaveProperty('end_date')

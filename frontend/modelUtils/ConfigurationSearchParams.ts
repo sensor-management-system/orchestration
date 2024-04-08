@@ -42,6 +42,7 @@ export interface IConfigurationBasicSearchParams {
 export interface IConfigurationSearchParams extends IConfigurationBasicSearchParams {
   states: string[]
   projects: string[]
+  campaigns: string[]
   sites: Site[]
   permissionGroups: PermissionGroup[]
   onlyOwnConfigurations: boolean
@@ -55,15 +56,19 @@ export interface IConfigurationSearchParams extends IConfigurationBasicSearchPar
 export class ConfigurationSearchParamsSerializer {
   public states: string[] = []
   public projects: string[] = []
+  public campaigns: string[] = []
   public sites: Site[] = []
   public permissionGroups: PermissionGroup[] = []
 
-  constructor ({ states, projects, sites, permissionGroups }: {states?: string[], projects?: string[], sites?: Site[], permissionGroups?: PermissionGroup[]} = {}) {
+  constructor ({ states, projects, sites, permissionGroups, campaigns }: {states?: string[], projects?: string[], sites?: Site[], permissionGroups?: PermissionGroup[], campaigns?: string[]} = {}) {
     if (states) {
       this.states = states
     }
     if (projects) {
       this.projects = projects
+    }
+    if (campaigns) {
+      this.campaigns = campaigns
     }
     if (sites) {
       this.sites = sites
@@ -89,6 +94,9 @@ export class ConfigurationSearchParamsSerializer {
     }
     if (params.projects) {
       result.projects = params.projects
+    }
+    if (params.campaigns) {
+      result.campaigns = params.campaigns
     }
     if (params.sites) {
       result.sites = params.sites.map(s => s.id)
@@ -128,6 +136,13 @@ export class ConfigurationSearchParamsSerializer {
       }
       projects = params.projects.filter(project => typeof project === 'string') as string[]
     }
+    let campaigns: string[] = []
+    if (params.campaigns) {
+      if (!Array.isArray(params.campaigns)) {
+        params.campaigns = [params.campaigns]
+      }
+      campaigns = params.campaigns.filter(campaign => typeof campaign === 'string') as string[]
+    }
 
     let sites: Site[] = []
     if (params.sites) {
@@ -149,6 +164,7 @@ export class ConfigurationSearchParamsSerializer {
       searchText: typeof params.searchText === 'string' ? params.searchText : '',
       states,
       projects,
+      campaigns,
       sites,
       permissionGroups,
       onlyOwnConfigurations: typeof params.onlyOwnConfigurations !== 'undefined' && params.onlyOwnConfigurations === 'true',

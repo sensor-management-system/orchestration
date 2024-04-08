@@ -119,6 +119,7 @@ export class ConfigurationApi {
 
   private _searchedStates: string[] = []
   private _searchedProjects: string[] = []
+  private _searchedCampaigns: string[] = []
   private _searchedSites: Site[] = []
   private _searchPermissionGroups: PermissionGroup[] = []
   private _searchText: string | null = null
@@ -205,6 +206,15 @@ export class ConfigurationApi {
 
   setSearchedProjects (value: string[]) {
     this._searchedProjects = value
+    return this
+  }
+
+  get searchedCampaigns (): string[] {
+    return this._searchedCampaigns
+  }
+
+  setSearchedCampaigns (value: string[]) {
+    this._searchedCampaigns = value
     return this
   }
 
@@ -341,6 +351,7 @@ export class ConfigurationApi {
     this.resetFilterSetting()
     this.prepareStates()
     this.prepareProjects()
+    this.prepareCampaigns()
     this.prepareSites()
     this.preparePermissionGroups()
     this.prepareMail()
@@ -377,6 +388,16 @@ export class ConfigurationApi {
         name: 'project',
         op: 'in_',
         val: this.searchedProjects
+      })
+    }
+  }
+
+  prepareCampaigns () {
+    if (this.searchedCampaigns.length > 0) {
+      this.filterSettings.push({
+        name: 'campaign',
+        op: 'in_',
+        val: this.searchedCampaigns
       })
     }
   }

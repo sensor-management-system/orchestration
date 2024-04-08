@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -33,6 +33,7 @@ class Configuration(
     end_date = db.Column(db.DateTime(timezone=True), nullable=True)
     label = db.Column(db.String(256), nullable=True)
     project = db.Column(db.String(256), nullable=True)
+    campaign = db.Column(db.String(256), nullable=True)
     description = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(256), nullable=True, default="draft")
     cfg_permission_group = db.Column(db.String, nullable=True)
@@ -66,6 +67,7 @@ class Configuration(
             "label": self.label,
             "description": self.description,
             "project": self.project,
+            "campaign": self.campaign,
             "status": self.status,
             "cfg_permission_group": self.cfg_permission_group,
             "updated_at": self.updated_at,
@@ -149,6 +151,7 @@ class Configuration(
                     },
                     "label": type_keyword_and_full_searchable,
                     "project": type_keyword_and_full_searchable,
+                    "campaign": type_keyword_and_full_searchable,
                     "description": type_text_full_searchable,
                     "status": type_keyword_and_full_searchable,
                     "cfg_permission_group": type_keyword,
