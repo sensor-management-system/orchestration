@@ -181,6 +181,40 @@ class ConfigurationProjectEndPoint:
     field = Configuration.project
 
 
+@free_text_field_routes.route("/controller/configuration-campaigns", methods=["GET"])
+@class_based_view
+class ConfigurationCampaignEndPoint:
+    """Endpoint for distinct configuration projects."""
+
+    def __call__(self):
+        """
+        Find all the distinct the campaigns.
+
+        This is the same setting as for the configuration projects. Those should be
+        visible for all the users (as far as they are allowed to see them).
+        """
+        try:
+            base_query = db.session.query(Configuration)
+            if request.values.get("project"):
+                param_value = request.values["project"]
+                base_query = base_query.filter(Configuration.project == param_value)
+
+            visible_configs = filter_visible(base_query)
+            result_list = [
+                x.campaign
+                for x in visible_configs.distinct(Configuration.campaign).order_by(
+                    Configuration.campaign
+                )
+                if x.campaign
+            ]
+            result = {"data": result_list}
+            return result
+        except ErrorResponse as e:
+            return e.respond()
+
+    field = Configuration.campaign
+
+
 @free_text_field_routes.route(
     "/controller/configuration-custom-field-keys", methods=["GET"]
 )

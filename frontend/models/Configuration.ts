@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -48,6 +48,7 @@ export interface IConfiguration extends IMountActions, IPermissionableSingleGrou
   label: string
   description: string
   project: string
+  campaign: string
   status: string
   archived: boolean
   contacts: IContact[]
@@ -78,6 +79,7 @@ export class Configuration implements IConfiguration, IVisible {
   private _label: string = ''
   private _description: string = ''
   private _project: string = ''
+  private _campaign: string = ''
   private _status: string = ''
   private _archived: boolean = false
   private _contacts: IContact[] = [] as IContact[]
@@ -150,6 +152,14 @@ export class Configuration implements IConfiguration, IVisible {
 
   set project (newProject: string) {
     this._project = newProject
+  }
+
+  get campaign (): string {
+    return this._campaign
+  }
+
+  set campaign (newCampaign: string) {
+    this._campaign = newCampaign
   }
 
   get status (): string {
@@ -312,6 +322,7 @@ export class Configuration implements IConfiguration, IVisible {
     newObject.label = someObject.label
     newObject.description = someObject.description
     newObject.project = someObject.project
+    newObject.campaign = someObject.campaign
     newObject.status = someObject.status
 
     newObject.contacts = someObject.contacts.map(Contact.createFromObject)

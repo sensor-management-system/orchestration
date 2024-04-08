@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+          <v-col cols="12" md="6">
             <label>Start date</label>
             <span v-if="value.startDate">
               {{ value.startDate | toUtcDateTimeStringHHMM | orDefault }}
@@ -75,7 +75,7 @@ permissions and limitations under the Licence.
               {{ null | orDefault }}
             </span>
           </v-col>
-          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+          <v-col cols="12" md="6">
             <label>End date</label>
             <span v-if="value.endDate">
               {{ value.endDate | toUtcDateTimeStringHHMM | orDefault }}
@@ -85,9 +85,15 @@ permissions and limitations under the Licence.
               {{ null | orDefault }}
             </span>
           </v-col>
+        </v-row>
+        <v-row>
           <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
             <label>Project</label>
             {{ value.project | orDefault }}
+          </v-col>
+          <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
+            <label>Campaign</label>
+            {{ value.campaign | orDefault }}
           </v-col>
           <v-col cols="12" :md="configurationImagesShouldBeRendered ? 6 : 3">
             <label>Site / Lab</label>

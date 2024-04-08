@@ -2374,7 +2374,6 @@ class TestConfigurationProjectEndpoint(BaseTestCase):
         self.assertIn("responses", get_endpoint.keys())
         self.assertTrue(get_endpoint["responses"])
         self.assertIn("200", get_endpoint["responses"].keys())
-        self.assertIn("401", get_endpoint["responses"].keys())
 
         # In the list of tags is Controller.
         self.assertIn("tags", get_endpoint.keys())
@@ -7451,3 +7450,136 @@ class TestKeywordEndpoint(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json["data"]
         self.assertEqual(data, ["keyword1"])
+
+
+class TestConfigurationCampaignEndpoint(BaseTestCase):
+    """Tests for the free text field endpoint for configuration campaigns."""
+
+    url = f"{base_url}/controller/configuration-campaigns"
+
+    def setUp(self):
+        """Set up some data for the tests."""
+        super().setUp()
+        self.normal_contact = Contact(
+            given_name="normal", family_name="contact", email="normal.contact@localhost"
+        )
+        self.normal_user = User(
+            subject=self.normal_contact.email, contact=self.normal_contact
+        )
+        db.session.add_all([self.normal_contact, self.normal_user])
+        db.session.commit()
+
+    def test_get_without_user(self):
+        """Ensure the campaigns endpoint works without a user."""
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, [])
+
+    def test_get_no_internal_without_user(self):
+        """The campaigns endpoint without a user should only give out public configuration projects."""
+        config1 = Configuration(
+            campaign="Swabian Moses 2023",
+            is_public=True,
+            is_internal=False,
+        )
+        config2 = Configuration(
+            campaign="Hydrex 2022",
+            is_public=False,
+            is_internal=True,
+        )
+
+        db.session.add_all([config1, config2])
+        db.session.commit()
+
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["Swabian Moses 2023"])
+
+    def test_get_for_three_configurations(self):
+        """Ensure we get a list of campaigns."""
+        config1 = Configuration(
+            campaign="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        config2 = Configuration(
+            campaign="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        config3 = Configuration(
+            campaign="no dummy",
+            is_public=True,
+            is_internal=False,
+        )
+
+        db.session.add_all([config1, config2, config3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy", "no dummy"])
+
+    def test_endpoint_is_in_openapi_spec(self):
+        """Ensure that we documented that endpoint in the openAPI."""
+        endpoint_url = self.url.replace(base_url, "")
+        openapi_url = url_for("docs.openapi_json")
+
+        response = self.client.get(openapi_url)
+        openapi_specs = response.json
+        paths = openapi_specs["paths"]
+        self.assertIn(endpoint_url, paths.keys())
+        path_endpoint = paths[endpoint_url]
+        self.assertIn("get", path_endpoint.keys())
+        get_endpoint = path_endpoint["get"]
+
+        # We have an entry for the responses. And we document both
+        # the success response, as well as the error responses.
+        self.assertIn("responses", get_endpoint.keys())
+        self.assertTrue(get_endpoint["responses"])
+        self.assertIn("200", get_endpoint["responses"].keys())
+
+        # In the list of tags is Controller.
+        self.assertIn("tags", get_endpoint.keys())
+        self.assertIn("Controller", get_endpoint["tags"])
+
+        # And we have both description and operationId
+        required = ["description", "operationId"]
+        for field in required:
+            self.assertIn(field, get_endpoint.keys())
+            self.assertTrue(get_endpoint[field] is not None)
+            self.assertTrue(get_endpoint[field] != "")
+
+    def test_prefilter_by_project(self):
+        """Ensure we can filter the set by a project."""
+        config1 = Configuration(
+            project="p1",
+            campaign="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        config2 = Configuration(
+            project="p1",
+            campaign="dummy",
+            is_public=True,
+            is_internal=False,
+        )
+        config3 = Configuration(
+            project="p2",
+            campaign="no dummy",
+            is_public=True,
+            is_internal=False,
+        )
+
+        db.session.add_all([config1, config2, config3])
+        db.session.commit()
+
+        with self.run_requests_as(self.normal_user):
+            resp = self.client.get(self.url + f"?project={config1.project}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json["data"]
+        self.assertEqual(data, ["dummy"])

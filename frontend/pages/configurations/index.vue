@@ -125,6 +125,19 @@ permissions and limitations under the Licence.
           dense
         >
           <v-col cols="12" md="12">
+            <StringSelect
+              v-model="selectedCampaigns"
+              label="Select a campaign"
+              :items="campaigns"
+              color="brown"
+              small
+            />
+          </v-col>
+        </v-row>
+        <v-row
+          dense
+        >
+          <v-col cols="12" md="12">
             <site-search-select v-model="selectedSites" label="Select a site" />
           </v-col>
         </v-row>
@@ -303,7 +316,18 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, IAppbarState, SetActiveTabAction, SetBackToAction, SetShowBackButtonAction } from '@/store/appbar'
 import { CanDeleteEntityGetter, CanAccessEntityGetter, LoadPermissionGroupsAction, PermissionsState, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
-import { ArchiveConfigurationAction, RestoreConfigurationAction, ExportAsSensorMLAction, LoadConfigurationAction, ConfigurationsState, ReplaceConfigurationInConfigurationsAction, GetSensorMLUrlAction, LoadProjectsAction, SearchConfigurationsPaginatedAction } from '@/store/configurations'
+import {
+  ArchiveConfigurationAction,
+  RestoreConfigurationAction,
+  ExportAsSensorMLAction,
+  LoadConfigurationAction,
+  ConfigurationsState,
+  ReplaceConfigurationInConfigurationsAction,
+  GetSensorMLUrlAction,
+  LoadProjectsAction,
+  LoadCampaignsAction,
+  SearchConfigurationsPaginatedAction
+} from '@/store/configurations'
 import { SearchSitesAction, SitesState } from '@/store/sites'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
@@ -347,7 +371,7 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ConfigurationArchiveDialog
   },
   computed: {
-    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'configurationStates', 'configuration', 'projects']),
+    ...mapState('configurations', ['configurations', 'pageNumber', 'pageSize', 'totalPages', 'totalCount', 'configurationStates', 'configuration', 'projects', 'campaigns']),
     ...mapState('appbar', ['activeTab']),
     ...mapGetters('configurations', ['pageSizes']),
     ...mapGetters('permissions', ['canDeleteEntity', 'canAccessEntity', 'permissionGroups', 'canArchiveEntity', 'canRestoreEntity']),
@@ -355,7 +379,21 @@ import { QueryParams } from '@/modelUtils/QueryParams'
     ...mapState('progressindicator', ['isLoading'])
   },
   methods: {
-    ...mapActions('configurations', ['searchConfigurationsPaginated', 'loadConfiguration', 'setPageNumber', 'setPageSize', 'loadConfigurationsStates', 'deleteConfiguration', 'archiveConfiguration', 'restoreConfiguration', 'exportAsSensorML', 'replaceConfigurationInConfigurations', 'getSensorMLUrl', 'loadProjects']),
+    ...mapActions('configurations', [
+      'searchConfigurationsPaginated',
+      'loadConfiguration',
+      'setPageNumber',
+      'setPageSize',
+      'loadConfigurationsStates',
+      'deleteConfiguration',
+      'archiveConfiguration',
+      'restoreConfiguration',
+      'exportAsSensorML',
+      'replaceConfigurationInConfigurations',
+      'getSensorMLUrl',
+      'loadProjects',
+      'loadCampaigns'
+    ]),
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setActiveTab', 'setBackTo', 'setShowBackButton']),
     ...mapActions('permissions', ['loadPermissionGroups']),
     ...mapActions('sites', ['searchSites']),
@@ -368,6 +406,7 @@ export default class SearchConfigurationsPage extends Vue {
   private selectedConfigurationStates: string[] = []
   private selectedPermissionGroups: PermissionGroup[] = []
   private selectedProjects: string[] = []
+  private selectedCampaigns: string[] = []
   private selectedSites: Site[] = []
   private onlyOwnConfigurations: boolean = false
   private includeArchivedConfigurations: boolean = false
@@ -387,6 +426,7 @@ export default class SearchConfigurationsPage extends Vue {
   initConfigurationsIndexAppBar!: () => void
   loadConfigurationsStates!: () => void
   loadProjects!: LoadProjectsAction
+  loadCampaigns!: LoadCampaignsAction
   loadPermissionGroups!: LoadPermissionGroupsAction
   pageNumber!: number
   setPageNumber!: (newPageNumber: number) => void
@@ -415,6 +455,7 @@ export default class SearchConfigurationsPage extends Vue {
   searchSites!: SearchSitesAction
   sites!: SitesState['sites']
   projects!: ConfigurationsState['projects']
+  campaigns!: ConfigurationsState['campaigns']
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
   setBackTo!: SetBackToAction
@@ -428,6 +469,7 @@ export default class SearchConfigurationsPage extends Vue {
         this.loadConfigurationsStates(),
         this.loadPermissionGroups(),
         this.loadProjects(),
+        this.loadCampaigns(),
         this.searchSites()
       ])
       await this.initSearchQueryParams()
@@ -478,6 +520,7 @@ export default class SearchConfigurationsPage extends Vue {
       permissionGroups: this.selectedPermissionGroups,
       onlyOwnConfigurations: this.onlyOwnConfigurations && this.$auth.loggedIn,
       projects: this.selectedProjects,
+      campaigns: this.selectedCampaigns,
       sites: this.selectedSites,
       includeArchivedConfigurations: this.includeArchivedConfigurations
     }
@@ -488,6 +531,7 @@ export default class SearchConfigurationsPage extends Vue {
       !!this.selectedPermissionGroups.length ||
       !!this.selectedConfigurationStates.length ||
       !!this.selectedProjects.length ||
+      !!this.selectedCampaigns.length ||
       !!this.selectedSites.length ||
       this.includeArchivedConfigurations === true
   }
@@ -503,6 +547,7 @@ export default class SearchConfigurationsPage extends Vue {
   basicSearch () {
     this.selectedConfigurationStates = []
     this.selectedProjects = []
+    this.selectedCampaigns = []
     this.selectedSites = []
     this.selectedPermissionGroups = []
     this.onlyOwnConfigurations = false
@@ -525,6 +570,7 @@ export default class SearchConfigurationsPage extends Vue {
     this.clearBasicSearch()
     this.selectedConfigurationStates = []
     this.selectedProjects = []
+    this.selectedCampaigns = []
     this.selectedSites = []
     this.selectedPermissionGroups = []
     this.onlyOwnConfigurations = false
@@ -623,7 +669,8 @@ export default class SearchConfigurationsPage extends Vue {
       states: this.configurationStates,
       permissionGroups: this.permissionGroups,
       sites: this.sites,
-      projects: this.projects
+      projects: this.projects,
+      campaigns: this.campaigns
     })).toSearchParams(this.$route.query)
 
     // prefill the form by the serialized search params from the URL
@@ -638,6 +685,9 @@ export default class SearchConfigurationsPage extends Vue {
     }
     if (searchParamsObject.projects) {
       this.selectedProjects = searchParamsObject.projects
+    }
+    if (searchParamsObject.campaigns) {
+      this.selectedCampaigns = searchParamsObject.campaigns
     }
     if (searchParamsObject.sites) {
       this.selectedSites = searchParamsObject.sites

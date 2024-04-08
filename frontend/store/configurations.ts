@@ -116,6 +116,7 @@ export interface ConfigurationsState {
   configurationContactRoles: ContactRole[]
   configurationStates: string[]
   projects: string[]
+  campaigns: string[]
   configurationMountingActions: ConfigurationMountingAction[]
   configurationMountingActionsForDate: ConfigurationsTree | null
   configurationDeviceMountActions: DeviceMountAction[]
@@ -155,6 +156,7 @@ const state = (): ConfigurationsState => ({
   configurationContactRoles: [],
   configurationStates: [],
   projects: [],
+  campaigns: [],
   configurationMountingActions: [],
   configurationMountingActionsForDate: null,
   configurationDeviceMountActions: [],
@@ -458,6 +460,7 @@ export type LoadConfigurationAttachmentAction = (id: string) => Promise<void>
 export type LoadConfigurationCustomFieldsAction = (id: string) => Promise<void>
 export type LoadConfigurationCustomFieldAction = (id: string) => Promise<void>
 export type LoadProjectsAction = () => Promise<void>
+export type LoadCampaignsAction = () => Promise<void>
 
 export type DeleteConfigurationAttachmentAction = (attachmentId: string) => Promise<void>
 export type LoadConfigurationGenericActionsAction = IdParamReturnsVoidPromiseAction
@@ -533,6 +536,7 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
       .setSearchText(searchParams.searchText)
       .setSearchedStates(searchParams.states)
       .setSearchedProjects(searchParams.projects)
+      .setSearchedCampaigns(searchParams.campaigns)
       .setSearchPermissionGroups(searchParams.permissionGroups)
       .setSearchedCreatorId(userId)
       .setSearchedSites(searchParams.sites)
@@ -646,6 +650,10 @@ const actions: ActionTree<ConfigurationsState, RootState> = {
   async loadProjects ({ commit }: { commit: Commit }) {
     const projects = await this.$api.autocomplete.getSuggestions('configuration-projects')
     commit('setProjects', projects)
+  },
+  async loadCampaigns ({ commit }: { commit: Commit }) {
+    const campaigns = await this.$api.autocomplete.getSuggestions('configuration-campaigns')
+    commit('setCampaigns', campaigns)
   },
   async loadStaticLocationAction ({ commit }: {commit: Commit}, id: string): Promise<void> {
     commit('setStaticLocationAction', await this.$api.configurations.staticLocationActionApi.findById(id))
@@ -977,6 +985,9 @@ const mutations = {
   },
   setProjects (state: ConfigurationsState, projects: string[]) {
     state.projects = projects
+  },
+  setCampaigns (state: ConfigurationsState, campaigns: string[]) {
+    state.campaigns = campaigns
   },
   setPageNumber (state: ConfigurationsState, newPageNumber: number) {
     state.pageNumber = newPageNumber

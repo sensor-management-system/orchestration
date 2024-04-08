@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020-2023
+ * Copyright (C) 2020-2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -98,6 +98,7 @@ export class ConfigurationSerializer {
       configuration.label = attributes.label || ''
       configuration.description = attributes.description || ''
       configuration.project = attributes.project || ''
+      configuration.campaign = attributes.campaign || ''
       configuration.status = attributes.status || ''
       configuration.archived = attributes.archived || false
       configuration.persistentIdentifier = attributes.persistent_identifier || ''
@@ -201,6 +202,7 @@ export class ConfigurationSerializer {
         label: configuration.label,
         description: configuration.description,
         project: configuration.project,
+        campaign: configuration.campaign,
         status: configuration.status,
         start_date: configuration.startDate != null ? configuration.startDate.setZone('UTC').toISO() : null,
         end_date: configuration.endDate != null ? configuration.endDate.setZone('UTC').toISO() : null,

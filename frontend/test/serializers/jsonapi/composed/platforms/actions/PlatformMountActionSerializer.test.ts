@@ -125,6 +125,7 @@ describe('PlatformMountActionSerializer', () => {
               label: 'Tereno NO Boeken',
               description: 'Boeken station',
               project: 'Tereno NO',
+              campaign: 'Demmin',
               status: 'draft',
               archived: true
             }
@@ -234,6 +235,7 @@ describe('PlatformMountActionSerializer', () => {
         label: 'Tereno NO Boeken',
         description: 'Boeken station',
         project: 'Tereno NO',
+        campaign: 'Demmin',
         status: 'draft',
         archived: true
       })

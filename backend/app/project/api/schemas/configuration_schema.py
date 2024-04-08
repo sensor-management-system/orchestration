@@ -31,6 +31,7 @@ class ConfigurationSchema(Schema):
     end_date = fields.DateTime(allow_none=True)
     label = fields.String(allow_none=True)
     project = fields.String(allow_none=True)
+    campaign = fields.String(allow_none=True)
     description = fields.String(allow_none=True)
     status = fields.String(default="draft", allow_none=True)
     cfg_permission_group = fields.String(required=True)
