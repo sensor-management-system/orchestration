@@ -6,8 +6,12 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
+## 1.15.1 (Unreleased)
 
-## 1.14.1 (Unreleased)
+## 1.15.0 - 2024-04-15
+
+Changed:
+- (UFZ): changed to SMS-IDL to use Hifis VO (and subgroups) and allowed syncing of these groups
 
 ## 1.14.0 - 2024-04-08
 
