@@ -143,7 +143,7 @@ permissions and limitations under the Licence.
                 md="6"
                 lg="12"
               >
-                {{ absoluteOffsets.offsetX }} m
+                {{ absoluteOffsets.offsetX | round(6) }} m
               </v-col>
             </v-row>
           </v-col>
@@ -164,7 +164,7 @@ permissions and limitations under the Licence.
                 md="6"
                 lg="12"
               >
-                {{ absoluteOffsets.offsetY }} m
+                {{ absoluteOffsets.offsetY | round(6) }} m
               </v-col>
             </v-row>
           </v-col>
@@ -185,7 +185,7 @@ permissions and limitations under the Licence.
                 md="6"
                 lg="12"
               >
-                {{ absoluteOffsets.offsetZ }} m
+                {{ absoluteOffsets.offsetZ | round(6) }} m
               </v-col>
             </v-row>
           </v-col>

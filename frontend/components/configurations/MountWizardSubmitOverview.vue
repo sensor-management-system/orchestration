@@ -124,7 +124,7 @@ permissions and limitations under the Licence.
                   />
                 </td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
-                <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
+                <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ | round(6) }})</td>
                 <td v-if="item.mountInfo.x !== null || item.mountInfo.y !== null || item.mountInfo.z !== null">
                   ({{ item.mountInfo.x }} | {{ item.mountInfo.y }} | {{ item.mountInfo.z }})
                 </td>
@@ -160,7 +160,7 @@ permissions and limitations under the Licence.
                   />
                 </td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
-                <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ }})</td>
+                <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ | round(6) }})</td>
                 <td v-if="item.mountInfo.x !== null || item.mountInfo.y !== null || item.mountInfo.z !== null">
                   ({{ item.mountInfo.x }} | {{ item.mountInfo.y }} | {{ item.mountInfo.z }})
                 </td>
