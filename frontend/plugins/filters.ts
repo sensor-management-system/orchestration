@@ -3,7 +3,7 @@
  * Web client of the Sensor Management System software developed within
  * the Helmholtz DataHub Initiative by GFZ and UFZ.
  *
- * Copyright (C) 2020 - 2023
+ * Copyright (C) 2020 - 2024
  * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
  * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -34,6 +34,7 @@ import Vue from 'vue'
 import { DateTime } from 'luxon'
 
 import { dateToDateTimeString, dateToDateTimeStringHHMM } from '@/utils/dateHelper'
+import { round } from '@/utils/numericsHelper'
 import { shortenRight, shortenLeft, shortenMiddle } from '@/utils/stringHelpers'
 
 /**
@@ -105,4 +106,8 @@ Vue.filter('shortenMiddle', (text: string, length?: number, replacement?: string
  */
 Vue.filter('sparseJoin', (parts: string[], joinChar: string = ', '): string => {
   return parts.filter(x => !!x).join(joinChar)
+})
+
+Vue.filter('round', (value: number, ndigits: number = 0): number => {
+  return round(value, ndigits)
 })

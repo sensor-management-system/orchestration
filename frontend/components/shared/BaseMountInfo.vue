@@ -65,7 +65,7 @@ permissions and limitations under the Licence.
         Offsets:
       </v-col>
       <v-col cols="8">
-        {{ getOffsets(mountAction) }}
+        X = {{ mountAction.offsetX }} m | Y = {{ mountAction.offsetY }} m | Z = {{ mountAction.offsetZ }} m
       </v-col>
     </v-row>
     <v-row
@@ -93,7 +93,7 @@ permissions and limitations under the Licence.
         </v-tooltip>
       </v-col>
       <v-col cols="8">
-        {{ getOffsets(calculatedOffsets) }}
+        X = {{ calculatedOffsets.offsetX | round(6) }} m | Y = {{ calculatedOffsets.offsetY | round(6) }} m | Z = {{ calculatedOffsets.offsetZ | round(6) }} m
       </v-col>
     </v-row>
     <v-row v-if="(mountAction.x !== null) || (mountAction.y !== null)" dense>
@@ -268,10 +268,6 @@ export default class BaseMountInfo extends Vue {
     return {
       path: removeTrailingSlash(this.$route.path) + '/' + ('device' in this.mountAction ? 'device-mount-actions' : 'platform-mount-actions') + '/' + this.mountAction.id + '/edit'
     }
-  }
-
-  getOffsets (valueWithOffsets: IOffsets): string {
-    return `X = ${valueWithOffsets.offsetX} m | Y = ${valueWithOffsets.offsetY} m | Z = ${valueWithOffsets.offsetZ} m`
   }
 
   getCoordinates (value: DeviceMountAction | PlatformMountAction): string {
