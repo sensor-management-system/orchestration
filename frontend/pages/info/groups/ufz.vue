@@ -49,25 +49,25 @@ permissions and limitations under the Licence.
         </p>
         <p>
           Administrators can manage them on <a
-          target="_blank"
-          style="text-decoration: none"
-          href="https://login.helmholtz.de/upman/"
-        >
-          https://login.helmholtz.de/upman/
-          <v-icon small>
-            mdi-open-in-new
-          </v-icon>
-        </a>.
+            target="_blank"
+            style="text-decoration: none"
+            href="https://login.helmholtz.de/upman/"
+          >
+            https://login.helmholtz.de/upman/
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon>
+          </a>.
           Please note that you need to have <b>two-factor-authentification</b> activated to access this page. You can do so on <a
-          target="_blank"
-          style="text-decoration: none"
-          href="https://login.helmholtz.de"
-        >
-          https://login.helmholtz.de
-          <v-icon small>
-            mdi-open-in-new
-          </v-icon>
-        </a> in the Credentials tab.
+            target="_blank"
+            style="text-decoration: none"
+            href="https://login.helmholtz.de"
+          >
+            https://login.helmholtz.de
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon>
+          </a> in the Credentials tab.
         </p>
         <p>
           For the group management here we use a set of conventions to
@@ -291,6 +291,7 @@ export default class GfzGroupInfoPage extends Vue {
   beforeDestroy () {
     this.$store.dispatch('appbar/setDefaults')
   }
+
   get convention (): string {
     return '<vo-name>:<providername>-<servicename>-<rolename>'
   }

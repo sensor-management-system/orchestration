@@ -6,7 +6,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: HEESIL-1.0
 -->
-## 1.15.1 (Unreleased)
+## 1.15.2 (Unreleased)
+
+## 1.15.1 - 2024-04-24
 
 Changed:
 - computed offsets are now round on micrometer scale to avoid showing odd values due to floating point arithmetic
