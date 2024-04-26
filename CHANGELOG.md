@@ -8,6 +8,9 @@ SPDX-License-Identifier: HEESIL-1.0
 -->
 ## 1.15.2 (Unreleased)
 
+Added:
+- added possibility to edit location actions from the actions tab of a configuration
+
 ## 1.15.1 - 2024-04-24
 
 Changed:
