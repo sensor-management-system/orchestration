@@ -30,6 +30,19 @@ permissions and limitations under the Licence.
 -->
 <template>
   <div>
+    <v-alert v-if="canHandleExportControl" text type="info" dismissible>
+      <p>
+        You are part of the export control group and see more information than
+        normal users will see.
+        Fields are marked according to their visibility for others:
+      </p>
+      <p class="mb-0">
+        {{ visibiltyMarkerPublic }} visible for everyone
+      </p>
+      <p class="mb-0">
+        {{ visibiltyMarkerInternal }} only visible for export control group
+      </p>
+    </v-alert>
     <v-card-actions>
       <v-spacer />
       <v-btn
@@ -53,6 +66,8 @@ permissions and limitations under the Licence.
       v-if="exportControl"
       v-model="exportControl"
       :show-internal-note="canHandleExportControl"
+      :visibilty-marker-public="canHandleExportControl? visibiltyMarkerPublic : ''"
+      :visibilty-marker-internal="canHandleExportControl? visibiltyMarkerInternal : ''"
     />
     <v-card-actions>
       <v-spacer />
@@ -67,7 +82,7 @@ permissions and limitations under the Licence.
       </v-btn>
     </v-card-actions>
     <v-card v-if="publicExportControlAttachments.length > 0" flat>
-      <v-card-subtitle>Attachments:</v-card-subtitle>
+      <v-card-subtitle>Attachments<span v-if="canHandleExportControl"> {{ visibiltyMarkerPublic }}</span>:</v-card-subtitle>
       <base-list :list-items="publicExportControlAttachments">
         <template #list-item="{ item }">
           <attachment-list-item
@@ -94,7 +109,7 @@ permissions and limitations under the Licence.
     </v-card>
 
     <v-card v-if="internalExportControlAttachments.length > 0 && canHandleExportControl" flat>
-      <v-card-subtitle>Internal attachments:</v-card-subtitle>
+      <v-card-subtitle>Internal attachments<span v-if="canHandleExportControl"> {{ visibiltyMarkerInternal }}</span>:</v-card-subtitle>
       <base-list :list-items="internalExportControlAttachments">
         <template #list-item="{ item }">
           <attachment-list-item
@@ -237,6 +252,9 @@ export default class ManufacturerModelShowExportControlPage extends Vue {
 
   private showDeleteDialogForExportControl = false
   private exportControlToDelete: ExportControl | null = null
+
+  private readonly visibiltyMarkerPublic = '👁' // an eye to indicate that it is visible
+  private readonly visibiltyMarkerInternal = 'Ⓔ' // an E to indicate it is visible for the export control group
 
   exportControl!: ManufacturermodelsState['exportControl']
   exportControlCreatedByContact!: ManufacturermodelsState['exportControlCreatedByContact']

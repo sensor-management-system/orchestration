@@ -32,29 +32,29 @@ permissions and limitations under the Licence.
   <div>
     <v-row>
       <v-col cols="12" md="6">
-        <label>Dual use</label>
+        <label>Dual use<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
         {{ dualUseText }}
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="6">
-        <label>Export control classification number</label>
+        <label>Export control classification number<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
         {{ value.exportControlClassificationNumber | orDefault }}
       </v-col>
       <v-col cols="12" md="6">
-        <label>Customs tariff number</label>
+        <label>Customs tariff number<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
         {{ value.customsTariffNumber | orDefault }}
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="9">
-        <label>Additional information</label>
+        <label>Additional information<span v-if="visibiltyMarkerPublic"> {{ visibiltyMarkerPublic }}</span></label>
         {{ value.additionalInformation | orDefault }}
       </v-col>
     </v-row>
     <v-row v-if="showInternalNote">
       <v-col cols="12" md="9">
-        <label>Internal note</label>
+        <label>Internal note<span v-if="visibiltyMarkerInternal"> {{ visibiltyMarkerInternal }}</span></label>
         {{ value.internalNote | orDefault }}
       </v-col>
     </v-row>
@@ -82,6 +82,18 @@ export default class ExportControlBasicData extends Vue {
     type: Boolean
   })
   readonly showInternalNote!: boolean
+
+  @Prop({
+    default: () => '',
+    type: String
+  })
+  readonly visibiltyMarkerPublic!: string
+
+  @Prop({
+    default: () => '',
+    type: String
+  })
+  readonly visibiltyMarkerInternal!: string
 
   get dualUseText (): string {
     if (this.value.dualUse === true) {
