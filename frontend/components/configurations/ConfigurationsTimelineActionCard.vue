@@ -60,7 +60,7 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
       </template>
-      <template v-if="action.genericAction || action.parameterChangeAction || action.mountAction" #dot-menu-items>
+      <template v-if="action.genericAction || action.parameterChangeAction || action.mountAction || action.staticLocationInfo || action.dynamicLocationInfo" #dot-menu-items>
         <DotMenuActionDelete
           v-if="action.genericAction"
           :readonly="!editable"
@@ -80,6 +80,16 @@ permissions and limitations under the Licence.
           v-if="action.mountAction && action.mountAction.platform"
           :readonly="!editable"
           @click="openEditPlatformMountActionForm(action)"
+        />
+        <DotMenuActionEdit
+          v-if="action.staticLocationInfo"
+          :readonly="!editable"
+          @click="openEditStaticLocationForm(action)"
+        />
+        <DotMenuActionEdit
+          v-if="action.dynamicLocationInfo"
+          :readonly="!editable"
+          @click="openEditDynamicLocationForm(action)"
         />
       </template>
       <template #actions>
@@ -362,7 +372,7 @@ import DotMenu from '@/components/DotMenu.vue'
 import DotMenuActionDelete from '@/components/DotMenuActionDelete.vue'
 import DeleteDialog from '@/components/shared/DeleteDialog.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
-import { DeviceMountTimelineAction, ITimelineAction, PlatformMountTimelineAction } from '@/utils/configurationInterfaces'
+import { DeviceMountTimelineAction, DynamicLocationBeginTimelineAction, ITimelineAction, PlatformMountTimelineAction, StaticLocationBeginTimelineAction } from '@/utils/configurationInterfaces'
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { GenericAction } from '@/models/GenericAction'
 import { ParameterChangeAction } from '@/models/ParameterChangeAction'
@@ -512,6 +522,14 @@ export default class ConfigurationsTimelineActionCard extends Vue {
   openEditPlatformMountActionForm (action: PlatformMountTimelineAction) {
     this.setSelectedDate(action.mountAction.beginDate)
     this.$router.push('/configurations/' + this.configurationId + '/platforms-and-devices/platform-mount-actions/' + action.mountAction.id + '/edit')
+  }
+
+  openEditStaticLocationForm (action: StaticLocationBeginTimelineAction) {
+    this.$router.push('/configurations/' + this.configurationId + '/locations/static-location-actions/' + action.staticLocationInfo.id + '/edit')
+  }
+
+  openEditDynamicLocationForm (action: DynamicLocationBeginTimelineAction) {
+    this.$router.push('/configurations/' + this.configurationId + '/locations/dynamic-location-actions/' + action.dynamicLocationInfo.id + '/edit')
   }
 }
 </script>
