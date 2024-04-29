@@ -10,6 +10,7 @@ SPDX-License-Identifier: HEESIL-1.0
 
 Added:
 - added possibility to edit location actions from the actions tab of a configuration
+- visibility markers for export control information (public or export control only)
 
 ## 1.15.1 - 2024-04-24
 
