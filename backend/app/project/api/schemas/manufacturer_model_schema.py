@@ -36,3 +36,4 @@ class ManufacturerModelSchema(Schema):
         schema=PublicExportControlSchema,
         id_field="id",
     )
+    created_at = fields.DateTime(dump_only=True)
