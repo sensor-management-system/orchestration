@@ -8,7 +8,7 @@
 
 from ..es_utils import ElasticSearchIndexTypes, settings_with_ngrams
 from .base_model import db
-from .mixin import SearchableMixin
+from .mixin import SearchableMixin, utc_now
 
 
 class ManufacturerModel(db.Model, SearchableMixin):
@@ -24,6 +24,7 @@ class ManufacturerModel(db.Model, SearchableMixin):
     # (as we don't list their devices within the SMS).
     external_system_name = db.Column(db.String(256), nullable=True)
     external_system_url = db.Column(db.String(256), nullable=True)
+    created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
 
     def to_search_entry(self):
         """Convert the model to a dict to store in the full text search."""
@@ -42,6 +43,7 @@ class ManufacturerModel(db.Model, SearchableMixin):
             "model": self.model,
             "external_system_name": self.external_system_name,
             "export_control": export_control,
+            "created_at": self.created_at,
         }
 
     @staticmethod
@@ -64,6 +66,7 @@ class ManufacturerModel(db.Model, SearchableMixin):
                     "dual_use": {"type": "boolean"},
                 },
             },
+            "created_at": {"type": "date"},
         }
 
     @classmethod

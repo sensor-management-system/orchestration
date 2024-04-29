@@ -154,16 +154,19 @@ class TestManuafacturerModels(BaseTestCase):
         self.expect(response.status_code).to_equal(200)
         data = response.json["data"]
         self.expect(len).of(data).to_equal(2)
-        self.expect(data[0]["attributes"]).to_equal(
-            {
-                "manufacturer_name": manufacturer_model1.manufacturer_name,
-                "model": manufacturer_model1.model,
-                "external_system_name": None,
-                "external_system_url": None,
-            }
-        )
+        expected_fields = {
+            "manufacturer_name": manufacturer_model1.manufacturer_name,
+            "model": manufacturer_model1.model,
+            "external_system_name": None,
+            "external_system_url": None,
+        }
+        for key, value in expected_fields.items():
+            self.expect(data[0]["attributes"][key]).to_equal(value)
+
+        self.expect(data[0]["attributes"].get("created_at")).not_.to_equal(None)
         self.expect(data[0]["attributes"]["model"]).to_equal("SMT 100")
         self.expect(data[1]["attributes"]["model"]).to_equal("CRS 1000")
+        self.expect(data[1]["attributes"].get("created_at")).not_.to_equal(None)
 
     def test_get_one_non_existing(self):
         """Ensure we return a 404 response if the element doesn't exist."""
@@ -178,14 +181,16 @@ class TestManuafacturerModels(BaseTestCase):
         data = response.json["data"]
         self.expect(data["type"]).to_equal("manufacturer_model")
         self.expect(data["id"]).to_equal(str(manufacturer_model1.id))
-        self.expect(data["attributes"]).to_equal(
-            {
-                "manufacturer_name": manufacturer_model1.manufacturer_name,
-                "model": manufacturer_model1.model,
-                "external_system_name": None,
-                "external_system_url": None,
-            }
-        )
+        expected_fields = {
+            "manufacturer_name": manufacturer_model1.manufacturer_name,
+            "model": manufacturer_model1.model,
+            "external_system_name": None,
+            "external_system_url": None,
+        }
+        for key, value in expected_fields.items():
+            self.expect(data["attributes"][key]).to_equal(value)
+
+        self.expect(data["attributes"].get("created_at")).not_.to_equal(None)
 
     def test_post_not_allowed_no_user(self):
         """Ensure we can't post if we have no user."""
