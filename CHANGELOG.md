@@ -15,6 +15,7 @@ Added:
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces
+- Fixed https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/issues/89
 
 ## 1.15.1 - 2024-04-24
 
