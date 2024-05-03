@@ -13,6 +13,9 @@ Added:
 - visibility markers for export control information (public or export control only)
 - created at field for the manufacturer models in order to keep track when those were added to the system
 
+Fixed:
+- SensorML validation for unit name values that contain whitespaces
+
 ## 1.15.1 - 2024-04-24
 
 Changed:

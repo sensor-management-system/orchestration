@@ -1170,6 +1170,27 @@ class TestSensorMLDevice(BaseTestCase):
             device_property.unit_name,
         )
 
+    def test_get_public_device_with_device_property_unit_with_space(self):
+        """Check that we give out the device properties."""
+        air_temperature_uri = current_app.config["CV_URL"] + "/measuredquantity/4/"
+        device_property = DeviceProperty(
+            device=self.device,
+            sampling_media_name="Weather",
+            property_name="Air temperature",
+            property_uri=air_temperature_uri,
+            unit_name="Degree Celsius",
+            label="Air temp",
+        )
+
+        db.session.add(device_property)
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+
     def test_get_public_device_with_device_properties_without_unit(self):
         """Check that we give out the device properties also without unit."""
         air_temperature_uri = current_app.config["CV_URL"] + "/measuredquantity/4/"

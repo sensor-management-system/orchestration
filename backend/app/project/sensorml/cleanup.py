@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -40,4 +40,14 @@ def identifier(text, replacement="", start="id"):
     # Step two: Check if the entry starts with a char.
     if not re.match("^[a-zA-Z]", text):
         text = start + text
+    return text
+
+
+def code(text):
+    """
+    Clean the text for a code value.
+
+    A code can not contain any kind of whitespace, nor a colon (:).
+    """
+    text = re.sub(r"[: \n\r\t]+", "_", text)
     return text

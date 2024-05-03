@@ -653,7 +653,9 @@ class ConfigurationConverter:
                 )
                 swe_quantity = None
                 if configuration_parameter.unit_name:
-                    swe_uom = SweUom(code=configuration_parameter.unit_name)
+                    swe_uom = SweUom(
+                        code=cleanup.code(configuration_parameter.unit_name)
+                    )
                     swe_quantity = SweQuantity(swe_uom=swe_uom)
                 parameter = SmlParameter(name=name, swe_quantity=swe_quantity)
                 sml_parameter_list.append(parameter)
@@ -813,7 +815,8 @@ class DeviceConverter:
                 swe_label = SweLabel(text=device_property.label)
                 swe_uom = SweUom()
                 if device_property.unit_name:
-                    swe_uom.code = device_property.unit_name
+                    code = cleanup.code(device_property.unit_name)
+                    swe_uom.code = code
 
                 definition = ""
                 if device_property.property_uri:
@@ -840,7 +843,7 @@ class DeviceConverter:
                 name = cleanup.identifier(device_parameter.label, replacement="_")
                 swe_quantity = None
                 if device_parameter.unit_name:
-                    swe_uom = SweUom(code=device_parameter.unit_name)
+                    swe_uom = SweUom(code=cleanup.code(device_parameter.unit_name))
                     swe_quantity = SweQuantity(swe_uom=swe_uom)
                 parameter = SmlParameter(name=name, swe_quantity=swe_quantity)
                 sml_parameter_list.append(parameter)
@@ -1469,7 +1472,7 @@ class PlatformConverter:
                 name = cleanup.identifier(platform_parameter.label, replacement="_")
                 swe_quantity = None
                 if platform_parameter.unit_name:
-                    swe_uom = SweUom(code=platform_parameter.unit_name)
+                    swe_uom = SweUom(code=cleanup.code(platform_parameter.unit_name))
                     swe_quantity = SweQuantity(swe_uom=swe_uom)
                 parameter = SmlParameter(name=name, swe_quantity=swe_quantity)
                 sml_parameter_list.append(parameter)
