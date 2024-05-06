@@ -12,6 +12,7 @@ Added:
 - added possibility to edit location actions from the actions tab of a configuration
 - visibility markers for export control information (public or export control only)
 - created at field for the manufacturer models in order to keep track when those were added to the system
+- extended openapi specs
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces

@@ -14,7 +14,7 @@ schema_mapper = MarshmallowJsonApiToOpenApiMapper(PlatformRoleSchema)
 paths = {
     "/platform-contact-roles": {
         "get": {
-            "tags": ["Platform contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
@@ -30,7 +30,7 @@ paths = {
             },
         },
         "post": {
-            "tags": ["Platform contact roles"],
+            "tags": ["Contact roles"],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": schema_mapper.post(),
@@ -49,7 +49,7 @@ paths = {
     },
     "/platform-contact-roles/{platform_contact_role_id}": {
         "get": {
-            "tags": ["Platform contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/platform_contact_role_id"},
@@ -65,7 +65,7 @@ paths = {
             },
         },
         "patch": {
-            "tags": ["Platform contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/platform_contact_role_id"}
             ],
@@ -87,7 +87,7 @@ paths = {
             },
         },
         "delete": {
-            "tags": ["Platform contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/platform_contact_role_id"}
             ],

@@ -14,7 +14,7 @@ schema_mapper = MarshmallowJsonApiToOpenApiMapper(SiteRoleSchema)
 paths = {
     "/site-contact-roles": {
         "get": {
-            "tags": ["Site contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
@@ -30,7 +30,7 @@ paths = {
             },
         },
         "post": {
-            "tags": ["Site contact roles"],
+            "tags": ["Contact roles"],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": schema_mapper.post(),
@@ -49,7 +49,7 @@ paths = {
     },
     "/site-contact-roles/{site_contact_role_id}": {
         "get": {
-            "tags": ["Site contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/site_contact_role_id"},
@@ -65,7 +65,7 @@ paths = {
             },
         },
         "patch": {
-            "tags": ["Site contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [{"$ref": "#/components/parameters/site_contact_role_id"}],
             "requestBody": {
                 "content": {
@@ -85,7 +85,7 @@ paths = {
             },
         },
         "delete": {
-            "tags": ["Site contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [{"$ref": "#/components/parameters/site_contact_role_id"}],
             "responses": {"200": {"$ref": "#/components/responses/object_deleted"}},
         },

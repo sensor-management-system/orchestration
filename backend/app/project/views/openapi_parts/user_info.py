@@ -16,7 +16,7 @@ and components.
 paths = {
     "/user-info": {
         "get": {
-            "tags": ["User info"],
+            "tags": ["User"],
             "parameters": [
                 {
                     "name": "skip_cache",

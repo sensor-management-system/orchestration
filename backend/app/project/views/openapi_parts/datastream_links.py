@@ -1,10 +1,15 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Part of the openapi for datastream links."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.datastream_link_schema import DatastreamLinkSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(DatastreamLinkSchema)
 
 paths = {
     "/datastream-links": {
@@ -15,10 +20,16 @@ paths = {
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
+                *schema_mapper.filters(),
                 {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DatastreamLink_coll"}
+                "200": {
+                    "description": "List of datastream links",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    }
+                }
             },
             "description": "Retrieve a collection of datastream link objects",
             "operationId": "RetrieveacollectionofDatastreamLinkObjects",
@@ -26,10 +37,18 @@ paths = {
         "post": {
             "tags": ["Datastream links"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/DatastreamLink_post",
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/DatastreamLink_inst"}
+                "201": {
+                    "description": "Payload of the created datastream link",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    }
+                }
             },
             "operationId": "CreateDatastreamLink",
         },
@@ -42,7 +61,12 @@ paths = {
                 {"$ref": "#/components/parameters/datastream_link_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DatastreamLink_inst"}
+                "200": {
+                    "description": "Instance of a datastream link",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Retrieve a single datastream link object",
             "operationId": "RetrieveinstanceofDatastreamLinkObject",
@@ -53,10 +77,19 @@ paths = {
                 {"$ref": "#/components/parameters/datastream_link_id"},
             ],
             "requestBody": {
-                "$ref": "#/components/requestBodies/DatastreamLink_patch",
+                "content": {
+                    "application/vnd.api+json": schema_mapper.patch(),
+                },
+                "description": "Datastream link attributes",
+                "required": True,
             },
             "responses": {
-                "200": {"$ref": "#/components/responses/DatastreamLink_inst"}
+                "200": {
+                    "description": "Payload of the updated datastream link",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
             "description": "Update a datastream link object",
             "operationId": "UpdateDatastreamLinkObject",
@@ -72,491 +105,6 @@ paths = {
     },
 }
 components = {
-    "requestBodies": {
-        "DatastreamLink_post": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "datastream_link",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "datasource_id": {"type": "string"},
-                                            "thing_id": {"type": "string"},
-                                            "datastream_id": {"type": "string"},
-                                            "datasource_name": {"type": "string"},
-                                            "thing_name": {"type": "string"},
-                                            "datastream_name": {"type": "string"},
-                                            "begin_date": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "end_date": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "license_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "license_name": {
-                                                "type": "string",
-                                            },
-                                            "aggregation_period": {"type": "number"},
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "device_mount_action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device_mount_action",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "device_property": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device_property",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "tsm_endpoint": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "tsm_endpoint",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "DatastreamLink_patch": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "datastream_link",
-                                    },
-                                    "id": {
-                                        "type": "string",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "datasource_id": {"type": "string"},
-                                            "thing_id": {"type": "string"},
-                                            "datastream_id": {"type": "string"},
-                                            "datasource_name": {"type": "string"},
-                                            "thing_name": {"type": "string"},
-                                            "datastream_name": {"type": "string"},
-                                            "begin_date": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "end_date": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "license_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "license_name": {
-                                                "type": "string",
-                                            },
-                                            "aggregation_period": {
-                                                "type": "number",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "device_mount_action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device_mount_action",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "device_property": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device_property",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "tsm_endpoint": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "tsm_endpoint",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-    },
-    "responses": {
-        "DatastreamLink_coll": {
-            "description": "List of datastream links.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "type": {
-                                            "type": "string",
-                                            "default": "datastream_link",
-                                        },
-                                        "id": {
-                                            "type": "string",
-                                        },
-                                        "attributes": {
-                                            "type": "object",
-                                            "properties": {
-                                                "datasource_id": {"type": "string"},
-                                                "thing_id": {"type": "string"},
-                                                "datastream_id": {"type": "string"},
-                                                "datasource_name": {"type": "string"},
-                                                "thing_name": {"type": "string"},
-                                                "datastream_name": {"type": "string"},
-                                                "begin_date": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                },
-                                                "end_date": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                },
-                                                "license_uri": {
-                                                    "type": "string",
-                                                    "format": "uri",
-                                                },
-                                                "license_name": {
-                                                    "type": "string",
-                                                },
-                                                "aggregation_period": {
-                                                    "type": "number",
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                },
-                                            },
-                                        },
-                                        "relationships": {
-                                            "type": "object",
-                                            "properties": {
-                                                "device_mount_action": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string",
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                                "device_property": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string",
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                                "tsm_endpoint": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string",
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                                "created_by": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string",
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                                "updated_by": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string",
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            },
-        },
-        "DatastreamLink_inst": {
-            "description": "A single datastream link.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "datastream_link",
-                                    },
-                                    "id": {
-                                        "type": "string",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "datasource_id": {"type": "string"},
-                                            "thing_id": {"type": "string"},
-                                            "datastream_id": {"type": "string"},
-                                            "datasource_name": {"type": "string"},
-                                            "thing_name": {"type": "string"},
-                                            "datastream_name": {"type": "string"},
-                                            "begin_date": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "end_date": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "license_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "license_name": {
-                                                "type": "string",
-                                            },
-                                            "aggregation_period": {
-                                                "type": "number",
-                                            },
-                                            "created_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                            "updated_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "device_mount_action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "device_property": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "tsm_endpoint": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "created_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "updated_by": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "user",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            },
-        },
-    },
     "parameters": {
         "datastream_link_id": {
             "name": "datastream_link_id",

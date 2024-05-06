@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -6,29 +6,52 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-"""External openapi spec file for the generic platform action attachments."""
+"""External openapi spec fiel for the generic platform action attachments."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.generic_action_attachment_schema import (
+    GenericConfigurationActionAttachmentSchema,
+)
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(
+    GenericConfigurationActionAttachmentSchema
+)
+
 paths = {
     "/generic-platform-action-attachments": {
         "get": {
             "tags": ["Generic platform action attachments"],
             "parameters": [
+                {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                {"$ref": "#/components/parameters/sort"},
+                *schema_mapper.filters(),
+                {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
                 "200": {
-                    "$ref": "#/components/responses/GenericPlatformActionAttachment_coll"
+                    "description": "List of generic platform action attachments",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
                 }
             },
         },
         "post": {
             "tags": ["Generic platform action attachments"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/GenericPlatformActionAttachment_inst_post"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
                 "201": {
-                    "$ref": "#/components/responses/GenericPlatformActionAttachment_inst"
+                    "description": "Payload of the created generic platform action attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
                 }
             },
         },
@@ -44,7 +67,10 @@ paths = {
             ],
             "responses": {
                 "200": {
-                    "$ref": "#/components/responses/GenericPlatformActionAttachment_coll"
+                    "description": "Instance of a generic platform action attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
                 }
             },
         },
@@ -56,12 +82,19 @@ paths = {
                 }
             ],
             "requestBody": {
-                "$ref": "#/components/requestBodies/GenericPlatformActionAttachment_inst_patch"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.patch(),
+                },
+                "description": "Generic platform action attachment attributes",
+                "required": True,
             },
             "description": "",
             "responses": {
                 "200": {
-                    "$ref": "#/components/responses/GenericPlatformActionAttachment_coll"
+                    "description": "Payload of the updated generic platform action attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
                 }
             },
         },
@@ -77,329 +110,6 @@ paths = {
     },
 }
 components = {
-    "requestBodies": {
-        "GenericPlatformActionAttachment_inst_post": {
-            "description": "Generic platform action attachments instance.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {},
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "attachment": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "id": "123",
-                                    "type": "generic_platform_action_attachment",
-                                    "attributes": {},
-                                    "relationships": {
-                                        "action": {
-                                            "type": "generic_platform_action",
-                                            "id": "456",
-                                        },
-                                        "attachment": {
-                                            "type": "platform_attachment",
-                                            "id": "789",
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            },
-        },
-        "GenericPlatformActionAttachment_inst_patch": {
-            "description": "Generic platform action attachments instance.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {"type": "object", "properties": {}},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "attachment": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "id": "123",
-                                    "type": "generic_platform_action_attachment",
-                                    "attributes": {},
-                                    "relationships": {
-                                        "action": {
-                                            "type": "generic_platform_action",
-                                            "id": "456",
-                                        },
-                                        "attachment": {
-                                            "type": "platform_attachment",
-                                            "id": "789",
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            },
-        },
-    },
-    "responses": {
-        "GenericPlatformActionAttachment_coll": {
-            "description": "List of generic platform action attachments.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "jsonapi": {
-                                "type": "object",
-                                "properties": {"version": {"type": "string"}},
-                                "example": {"version": "1.0"},
-                            },
-                            "meta": {
-                                "type": "object",
-                                "properties": {"count": {"type": "number"}},
-                                "example": {"count": 2},
-                            },
-                            "data": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {"type": "string"},
-                                        "type": {"type": "string"},
-                                        "attributes": {
-                                            "type": "object",
-                                            "properties": {},
-                                        },
-                                        "relationships": {
-                                            "type": "object",
-                                            "properties": {
-                                                "action": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string"
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                                "attachment": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string"
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": [
-                                    {
-                                        "id": "123",
-                                        "type": "generic_platform_action_attachment",
-                                        "attributes": {},
-                                        "relationships": {
-                                            "action": {
-                                                "type": "generic_platform_action",
-                                                "id": "456",
-                                            },
-                                            "attachment": {
-                                                "type": "platform_attachment",
-                                                "id": "789",
-                                            },
-                                        },
-                                    },
-                                    {
-                                        "id": "124",
-                                        "type": "generic_platform_action_attachment",
-                                        "attributes": {},
-                                        "relationships": {
-                                            "action": {
-                                                "type": "generic_platform_action",
-                                                "id": "457",
-                                            },
-                                            "attachment": {
-                                                "type": "platform_attachment",
-                                                "id": "780",
-                                            },
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                    }
-                }
-            },
-        },
-        "GenericPlatformActionAttachment_inst": {
-            "description": "Generic platform action attachments instance.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "jsonapi": {
-                                "type": "object",
-                                "properties": {"version": {"type": "string"}},
-                                "example": {"version": "1.0"},
-                            },
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {"type": "object", "properties": {}},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "attachment": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "id": "123",
-                                    "type": "generic_platform_action_attachment",
-                                    "attributes": {},
-                                    "relationships": {
-                                        "action": {
-                                            "type": "generic_platform_action",
-                                            "id": "456",
-                                        },
-                                        "attachment": {
-                                            "type": "platform_attachment",
-                                            "id": "789",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    }
-                }
-            },
-        },
-    },
     "parameters": {
         "generic_platform_action_attachment_id": {
             "name": "generic_platform_action_attachment_id",
@@ -407,59 +117,5 @@ components = {
             "required": True,
             "schema": {"type": "string"},
         }
-    },
-    "schemas": {
-        "GenericPlatformActionAttachment_inst": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "default": "generic_platform_action_attachment",
-                        },
-                        "id": {"type": "string"},
-                        "attributes": {"type": "object", "properties": {}},
-                        "relationships": {
-                            "type": "object",
-                            "required": ["action", "attachment"],
-                            "properties": {
-                                "action": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "generic_platform_action",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "attachment": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "platform_attachment",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                            },
-                        },
-                    },
-                }
-            },
-            "description": "Generic Platform Action Attachment Schema",
-        }
-    },
+    }
 }
