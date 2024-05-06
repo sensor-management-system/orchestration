@@ -1,6 +1,8 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
@@ -82,60 +84,6 @@ components = {
                     }
                 }
             },
-        }
-    },
-    "schemas": {
-        "GenericConfigurationActionAttachment_inst": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "default": "generic_configuration_action_attachment",
-                        },
-                        "id": {"type": "string"},
-                        "attributes": {"type": "object", "properties": {}},
-                        "relationships": {
-                            "type": "object",
-                            "required": ["action", "attachment"],
-                            "properties": {
-                                "action": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "generic_configuration_action",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "attachment": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "configuration_attachment",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                            },
-                        },
-                    },
-                }
-            },
-            "description": "Generic Configuration Action Attachment Schema",
         }
     },
 }

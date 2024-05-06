@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -6,29 +6,52 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-"""External openapi spec file for generic configuration action attachments."""
+"""External openapi spec fiel for the generic configuration action attachments."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.generic_action_attachment_schema import (
+    GenericConfigurationActionAttachmentSchema,
+)
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(
+    GenericConfigurationActionAttachmentSchema
+)
+
 paths = {
     "/generic-configuration-action-attachments": {
         "get": {
             "tags": ["Generic configuration action attachments"],
             "parameters": [
+                {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                {"$ref": "#/components/parameters/sort"},
+                *schema_mapper.filters(),
+                {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
                 "200": {
-                    "$ref": "#/components/responses/GenericConfigurationActionAttachment_coll"
+                    "description": "List of generic configuration action attachments",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
                 }
             },
         },
         "post": {
             "tags": ["Generic configuration action attachments"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/GenericConfigurationActionAttachment_inst_post"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
                 "201": {
-                    "$ref": "#/components/responses/GenericConfigurationActionAttachment_inst"
+                    "description": "Payload of the created generic configuration action attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
                 }
             },
         },
@@ -44,7 +67,10 @@ paths = {
             ],
             "responses": {
                 "200": {
-                    "$ref": "#/components/responses/GenericConfigurationActionAttachment_coll"
+                    "description": "Instance of a generic configuration action attachment",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
                 }
             },
         },
@@ -56,12 +82,17 @@ paths = {
                 }
             ],
             "requestBody": {
-                "$ref": "#/components/requestBodies/GenericConfigurationActionAttachment_inst_patch"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.patch(),
+                },
+                "description": "Generic configuration action attachment attributes",
+                "required": True,
             },
             "description": "",
             "responses": {
                 "200": {
-                    "$ref": "#/components/responses/GenericConfigurationActionAttachment_coll"
+                    "description": "Payload of the updated generic configuration action attachment",
+                    "content": {"application/vnd.api+json": schema_mapper.get_one()},
                 }
             },
         },
@@ -77,329 +108,6 @@ paths = {
     },
 }
 components = {
-    "requestBodies": {
-        "GenericConfigurationActionAttachment_inst_post": {
-            "description": "Generic configuration action attachments instance.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {},
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "attachment": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "id": "123",
-                                    "type": "generic_configuration_action_attachment",
-                                    "attributes": {},
-                                    "relationships": {
-                                        "action": {
-                                            "type": "generic_configuration_action",
-                                            "id": "456",
-                                        },
-                                        "attachment": {
-                                            "type": "configuration_attachment",
-                                            "id": "789",
-                                        },
-                                    },
-                                },
-                            }
-                        },
-                    }
-                }
-            },
-        },
-        "GenericConfigurationActionAttachment_inst_patch": {
-            "description": "Generic configuration action attachments instance.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {"type": "object", "properties": {}},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "attachment": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "string",
-                                                            },
-                                                            "type": {
-                                                                "type": "string",
-                                                            },
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "id": "123",
-                                    "type": "generic_configuration_action_attachment",
-                                    "attributes": {},
-                                    "relationships": {
-                                        "action": {
-                                            "type": "generic_configuration_action",
-                                            "id": "456",
-                                        },
-                                        "attachment": {
-                                            "type": "configuration_attachment",
-                                            "id": "789",
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            },
-        },
-    },
-    "responses": {
-        "GenericConfigurationActionAttachment_coll": {
-            "description": "List of generic configuration action attachments.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "jsonapi": {
-                                "type": "object",
-                                "properties": {"version": {"type": "string"}},
-                                "example": {"version": "1.0"},
-                            },
-                            "meta": {
-                                "type": "object",
-                                "properties": {"count": {"type": "number"}},
-                                "example": {"count": 2},
-                            },
-                            "data": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "id": {"type": "string"},
-                                        "type": {"type": "string"},
-                                        "attributes": {
-                                            "type": "object",
-                                            "properties": {},
-                                        },
-                                        "relationships": {
-                                            "type": "object",
-                                            "properties": {
-                                                "action": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string"
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                                "attachment": {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "data": {
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "string"
-                                                                },
-                                                                "type": {
-                                                                    "type": "string"
-                                                                },
-                                                            },
-                                                        }
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": [
-                                    {
-                                        "id": "123",
-                                        "type": "generic_configuration_action_attachment",
-                                        "attributes": {},
-                                        "relationships": {
-                                            "action": {
-                                                "type": "generic_configuration_action",
-                                                "id": "456",
-                                            },
-                                            "attachment": {
-                                                "type": "configuration_attachment",
-                                                "id": "789",
-                                            },
-                                        },
-                                    },
-                                    {
-                                        "id": "124",
-                                        "type": "generic_configuration_action_attachment",
-                                        "attributes": {},
-                                        "relationships": {
-                                            "action": {
-                                                "type": "generic_configuration_action",
-                                                "id": "457",
-                                            },
-                                            "attachment": {
-                                                "type": "configuration_attachment",
-                                                "id": "780",
-                                            },
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                    }
-                }
-            },
-        },
-        "GenericConfigurationActionAttachment_inst": {
-            "description": "Generic configuration action attachments instance.",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "jsonapi": {
-                                "type": "object",
-                                "properties": {"version": {"type": "string"}},
-                                "example": {"version": "1.0"},
-                            },
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "id": {"type": "string"},
-                                    "type": {"type": "string"},
-                                    "attributes": {"type": "object", "properties": {}},
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "action": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "attachment": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "id": {"type": "string"},
-                                                            "type": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                "example": {
-                                    "id": "123",
-                                    "type": "generic_configuration_action_attachment",
-                                    "attributes": {},
-                                    "relationships": {
-                                        "action": {
-                                            "type": "generic_configuration_action",
-                                            "id": "456",
-                                        },
-                                        "attachment": {
-                                            "type": "configuration_attachment",
-                                            "id": "789",
-                                        },
-                                    },
-                                },
-                            },
-                        }
-                    }
-                }
-            },
-        },
-    },
     "parameters": {
         "generic_configuration_action_attachment_id": {
             "name": "generic_configuration_action_attachment_id",

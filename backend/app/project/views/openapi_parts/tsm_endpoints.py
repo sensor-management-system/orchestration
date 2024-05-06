@@ -1,10 +1,15 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
 """Part of the openapi for datastream links."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.tsm_endpoint_schema import TsmEndpointSchema
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(TsmEndpointSchema)
 
 paths = {
     "/tsm-endpoints": {
@@ -15,9 +20,17 @@ paths = {
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
                 {"$ref": "#/components/parameters/sort"},
+                *schema_mapper.filters(),
                 {"$ref": "#/components/parameters/filter"},
             ],
-            "responses": {"200": {"$ref": "#/components/responses/TsmEndpoint_coll"}},
+            "responses": {
+                "200": {
+                    "description": "List of TSM endpoints",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
+            },
             "description": "Retrieve a collection of tsm endpoint objects",
             "operationId": "RetrieveacollectionofTsmEndpointObjects",
         },
@@ -28,78 +41,20 @@ paths = {
             "parameters": [
                 {"$ref": "#/components/parameters/tsm_endpoint_id"},
             ],
-            "responses": {"200": {"$ref": "#/components/responses/TsmEndpoint_inst"}},
+            "responses": {
+                "200": {
+                    "description": "Instance of a TSM endpoint",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
+            },
             "description": "Retrieve a single Tsm endpoint object",
             "operationId": "RetrieveinstanceofTsmEndpointObject",
         },
     },
 }
 components = {
-    "responses": {
-        "TsmEndpoint_coll": {
-            "description": "Data of a list of a TSM endpoints",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "type": {
-                                            "type": "string",
-                                            "default": "tsm_endpoint",
-                                        },
-                                        "id": {
-                                            "type": "string",
-                                        },
-                                        "attributes": {
-                                            "type": "object",
-                                            "properties": {
-                                                "named": {"type": "string"},
-                                                "url": {"type": "string"},
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            },
-        },
-        "TsmEndpoint_inst": {
-            "description": "Data of an instance of a TSM endpoint",
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "tsm_endpoint",
-                                    },
-                                    "id": {
-                                        "type": "string",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "name": {"type": "string"},
-                                            "url": {"type": "string"},
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            },
-        },
-    },
     "parameters": {
         "tsm_endpoint_id": {
             "name": "tsm_endpoint_id",

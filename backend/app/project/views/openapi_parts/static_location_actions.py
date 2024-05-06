@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,9 +8,13 @@
 
 """Externalized openapi spec for the static location actions."""
 from ... import api
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
 from ...api.resources import (
     ConfigurationStaticLocationBeginActionDetail,
     ConfigurationStaticLocationBeginActionList,
+)
+from ...api.schemas.configuration_static_location_actions_schema import (
+    ConfigurationStaticLocationBeginActionSchema,
 )
 
 
@@ -59,26 +63,47 @@ url_detail_endpoint = detail_resource["urls"][0].replace(
 # Other things that we could read from the resources are possible status
 # codes, descriptions, ...
 
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(
+    ConfigurationStaticLocationBeginActionSchema
+)
+
 paths = {
     url_list_endpoint: {
         "get": {
             "tags": ["Static location actions"],
             "parameters": [
+                {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                {"$ref": "#/components/parameters/sort"},
+                *schema_mapper.filters(),
+                {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/StaticLocationAction_coll"}
+                "200": {
+                    "description": "List of static locations",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
             },
             "description": "Get the list of static location actions.",
         },
         "post": {
             "tags": ["Static location actions"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/StaticLocationAction_inst"
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/StaticLocationAction_coll"}
+                "201": {
+                    "description": "Payload of the created static location",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
         },
     },
@@ -90,7 +115,12 @@ paths = {
                 {"$ref": "#/components/parameters/static_location_action_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/StaticLocationAction_coll"}
+                "200": {
+                    "description": "Instance of a static location",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
         },
         "patch": {
@@ -100,15 +130,18 @@ paths = {
             ],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/StaticLocationAction"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "",
+                "description": "Static location attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/StaticLocationAction_coll"}
+                "201": {
+                    "description": "Payload of the updated static location",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
         "delete": {
@@ -120,262 +153,13 @@ paths = {
         },
     },
 }
-# We can also go on & inspect the schema, so that we could generate
-# the requestBodies & responses.
-# But we need further checks if the field is the id field (should
-# not be part of the attributes) or if it is an relationship field
-# (has an extra place - in the relationships dict).
-detail_schema = ConfigurationStaticLocationBeginActionDetail.schema()
-required_attributes_for_request_body = []
-for field_name in ["begin_date"]:
-    field = detail_schema.fields[field_name]
-    if field.required:
-        required_attributes_for_request_body.append(field_name)
-
 components = {
-    "requestBodies": {
-        "StaticLocationAction_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "configuration_static_location_action",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "begin_description": {"type": "string"},
-                                            "end_description": {"type": "string"},
-                                            "label": {"type": "string"},
-                                            "x": {"type": "number", "format": "float"},
-                                            "y": {"type": "number", "format": "float"},
-                                            "z": {"type": "number", "format": "float"},
-                                            "epsg_code": {
-                                                "type": "string",
-                                                "default": "4326",
-                                            },
-                                            "elevation_datum_name": {
-                                                "type": "string",
-                                                "default": "MSL",
-                                            },
-                                            "elevation_datum_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "begin_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                            "end_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "properties": {
-                                            "begin_contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "end_contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "configuration": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "configuration",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "responses": {
-        "StaticLocationAction_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "id": "0",
-                                    "type": "configuration_static_location_action",
-                                    "attributes": {
-                                        "begin_description": "",
-                                        "end_description": "",
-                                        "label": "",
-                                        "begin_date": "",
-                                        "end_date": "",
-                                        "epsg_code": "",
-                                        "elevation_datum_name": "",
-                                        "elevation_datum_uri": "",
-                                        "x": 0,
-                                        "y": 0,
-                                        "z": 0,
-                                    },
-                                    "relationships": {
-                                        "configuration": {
-                                            "data": {
-                                                "type": "configuration",
-                                                "id": "00",
-                                            }
-                                        },
-                                        "begin_contact": {
-                                            "data": {"type": "contact", "id": "000"}
-                                        },
-                                        "end_contact": {
-                                            "data": {"type": "contact", "id": "123"}
-                                        },
-                                    },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        }
-    },
     "parameters": {
         "static_location_action_id": {
             "name": "static_location_action_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        }
-    },
-    "schemas": {
-        "StaticLocationAction": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "default": "configuration_static_location_begin_action",
-                        },
-                        "id": {"type": "string"},
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "begin_description": {"type": "string"},
-                                "end_description": {"type": "string"},
-                                "label": {"type": "string"},
-                                "x": {"type": "number", "format": "float"},
-                                "y": {"type": "number", "format": "float"},
-                                "z": {"type": "number", "format": "float"},
-                                "epsg_code": {"type": "string", "default": "4326"},
-                                "elevation_datum_name": {
-                                    "type": "string",
-                                    "default": "MSL",
-                                },
-                                "elevation_datum_uri": {
-                                    "type": "string",
-                                    "format": "uri",
-                                },
-                                "begin_date": {"type": "string", "format": "datetime"},
-                                "end_date": {"type": "string", "format": "datetime"},
-                            },
-                        },
-                        "relationships": {
-                            "type": "object",
-                            "properties": {
-                                "begin_contact": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "contact",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "end_contact": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "contact",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "configuration": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "configuration",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                            },
-                        },
-                    },
-                }
-            },
-            "description": "Static Location Action Schema;",
         }
     },
 }

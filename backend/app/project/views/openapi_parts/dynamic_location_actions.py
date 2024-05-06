@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -6,26 +6,54 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
+"""Openapi spec for the dynamic location actions."""
+
+from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
+from ...api.schemas.configuration_dynamic_location_actions_schema import (
+    ConfigurationDynamicLocationBeginActionSchema,
+)
+
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(
+    ConfigurationDynamicLocationBeginActionSchema
+)
+
 """External openapi spec file for the dynamic location actions."""
 paths = {
     "/dynamic-location-actions": {
         "get": {
             "tags": ["Dynamic location actions"],
             "parameters": [
+                {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                {"$ref": "#/components/parameters/sort"},
+                *schema_mapper.filters(),
+                {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DynamicLocationAction_coll"}
+                "200": {
+                    "description": "List of dynamic locations",
+                    "content": {
+                        "application/vnd.api.json": schema_mapper.get_list(),
+                    },
+                }
             },
         },
         "post": {
             "tags": ["Dynamic location actions"],
             "requestBody": {
-                "$ref": "#/components/requestBodies/DynamicLocationAction_inst"
+                "content": {
+                    "application/vnd.api.json": schema_mapper.post(),
+                },
+                "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/DynamicLocationAction_coll"}
+                "201": {
+                    "description": "Payload of the created dynamic location action",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                },
             },
         },
     },
@@ -37,7 +65,12 @@ paths = {
                 {"$ref": "#/components/parameters/dynamic_location_action_id"},
             ],
             "responses": {
-                "200": {"$ref": "#/components/responses/DynamicLocationAction_coll"}
+                "200": {
+                    "description": "Instance of a dynamic location action",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
         },
         "patch": {
@@ -47,15 +80,18 @@ paths = {
             ],
             "requestBody": {
                 "content": {
-                    "application/vnd.api+json": {
-                        "schema": {"$ref": "#/components/schemas/DynamicLocationAction"}
-                    }
+                    "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "",
+                "description": "Dynamic location action attributes",
                 "required": True,
             },
             "responses": {
-                "201": {"$ref": "#/components/responses/DynamicLocationAction_coll"}
+                "200": {
+                    "description": "Payload of the updated dynamic location action",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_one(),
+                    },
+                }
             },
         },
         "delete": {
@@ -68,343 +104,12 @@ paths = {
     },
 }
 components = {
-    "requestBodies": {
-        "DynamicLocationAction_inst": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "type": "object",
-                                "properties": {
-                                    "type": {
-                                        "type": "string",
-                                        "default": "configuration_dynamic_location_action",
-                                    },
-                                    "attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "begin_description": {"type": "string"},
-                                            "end_description": {"type": "string"},
-                                            "label": {"type": "string"},
-                                            "epsg_code": {
-                                                "type": "string",
-                                                "default": "4326",
-                                            },
-                                            "elevation_datum_name": {
-                                                "type": "string",
-                                                "default": "MSL",
-                                            },
-                                            "elevation_datum_uri": {
-                                                "type": "string",
-                                                "format": "uri",
-                                            },
-                                            "begin_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                            "end_date": {
-                                                "type": "string",
-                                                "format": "datetime",
-                                            },
-                                        },
-                                    },
-                                    "relationships": {
-                                        "type": "object",
-                                        "required": ["contact"],
-                                        "properties": {
-                                            "begin_contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "end_contact": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "contact",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "configuration": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "configuration",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "x_property": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device_property",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "y_property": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device_property",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                            "z_property": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "data": {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "type": {
-                                                                "type": "string",
-                                                                "default": "device_property",
-                                                            },
-                                                            "id": {"type": "string"},
-                                                        },
-                                                    }
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "responses": {
-        "DynamicLocationAction_coll": {
-            "content": {
-                "application/vnd.api+json": {
-                    "schema": {
-                        "properties": {
-                            "data": {
-                                "example": {
-                                    "id": "0",
-                                    "type": "configuration_dynamic_location_action",
-                                    "attributes": {
-                                        "begin_description": "",
-                                        "end_description": "",
-                                        "label": "",
-                                        "begin_date": "",
-                                        "end_date": "",
-                                        "epsg_code": "",
-                                        "elevation_datum_name": "",
-                                        "elevation_datum_uri": "",
-                                        "action_type_uri": "",
-                                    },
-                                    "relationships": {
-                                        "configuration": {
-                                            "data": {
-                                                "type": "configuration",
-                                                "id": "00",
-                                            }
-                                        },
-                                        "begin_contact": {
-                                            "data": {"type": "contact", "id": "000"}
-                                        },
-                                        "end_contact": {
-                                            "data": {"type": "contact", "id": "000"}
-                                        },
-                                        "x_property": {"type": "contact", "id": "000"},
-                                        "y_property": {
-                                            "type": "device_property",
-                                            "id": "000",
-                                        },
-                                        "z_property": {
-                                            "type": "device_property",
-                                            "id": "000",
-                                        },
-                                    },
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "description": "",
-        }
-    },
     "parameters": {
         "dynamic_location_action_id": {
             "name": "dynamic_location_action_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        }
-    },
-    "schemas": {
-        "DynamicLocationAction": {
-            "properties": {
-                "data": {
-                    "type": "object",
-                    "required": ["id"],
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "default": "configuration_dynamic_location_begin_action",
-                        },
-                        "id": {"type": "string"},
-                        "attributes": {
-                            "type": "object",
-                            "properties": {
-                                "begin_description": {"type": "string"},
-                                "end_description": {"type": "string"},
-                                "label": {"type": "string"},
-                                "epsg_code": {"type": "string", "default": "4326"},
-                                "elevation_datum_name": {
-                                    "type": "string",
-                                    "default": "MSL",
-                                },
-                                "elevation_datum_uri": {
-                                    "type": "string",
-                                    "format": "uri",
-                                },
-                                "begin_date": {"type": "string", "format": "datetime"},
-                                "end_date": {"type": "string", "format": "datetime"},
-                            },
-                        },
-                        "relationships": {
-                            "type": "object",
-                            "required": ["begin_contact"],
-                            "properties": {
-                                "begin_contact": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "contact",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "end_contact": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "contact",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "configuration": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "configuration",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "x_property": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "device_property",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "y_property": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "device_property",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                                "z_property": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "device_property",
-                                                },
-                                                "id": {"type": "string"},
-                                            },
-                                        }
-                                    },
-                                },
-                            },
-                        },
-                    },
-                }
-            },
-            "description": "Dynamic Location Action Schema;",
         }
     },
 }

@@ -18,9 +18,12 @@ paths = {
         "get": {
             "tags": ["Device mount actions"],
             "parameters": [
+                {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
+                {"$ref": "#/components/parameters/sort"},
                 *schema_mapper.filters(),
+                {"$ref": "#/components/parameters/filter"},
             ],
             "responses": {
                 "200": {

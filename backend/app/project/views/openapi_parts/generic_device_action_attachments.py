@@ -6,17 +6,21 @@
 #
 # SPDX-License-Identifier: HEESIL-1.0
 
-"""Externalized openapi spec for the platform mount actions."""
+"""External openapi spec fiel for the generic device action attachments."""
 
 from ...api.helpers.openapi import MarshmallowJsonApiToOpenApiMapper
-from ...api.schemas.mount_actions_schema import PlatformMountActionSchema
+from ...api.schemas.generic_action_attachment_schema import (
+    GenericConfigurationActionAttachmentSchema,
+)
 
-schema_mapper = MarshmallowJsonApiToOpenApiMapper(PlatformMountActionSchema)
+schema_mapper = MarshmallowJsonApiToOpenApiMapper(
+    GenericConfigurationActionAttachmentSchema
+)
 
 paths = {
-    "/platform-mount-actions": {
+    "/generic-device-action-attachments": {
         "get": {
-            "tags": ["Platform mount actions"],
+            "tags": ["Generic device action attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/page_number"},
@@ -27,68 +31,73 @@ paths = {
             ],
             "responses": {
                 "200": {
-                    "description": "List of platform mounts",
-                    "content": {"application/vnd.api+json": schema_mapper.get_list()},
-                },
+                    "description": "List of generic device action attachments",
+                    "content": {
+                        "application/vnd.api+json": schema_mapper.get_list(),
+                    },
+                }
             },
         },
         "post": {
-            "tags": ["Platform mount actions"],
+            "tags": ["Generic device action attachments"],
             "requestBody": {
-                "content": {"application/vnd.api+json": schema_mapper.post()},
+                "content": {
+                    "application/vnd.api+json": schema_mapper.post(),
+                },
                 "required": True,
             },
             "responses": {
                 "201": {
-                    "description": "Payload of the created platform mount",
+                    "description": "Payload of the created generic device action attachment",
                     "content": {
                         "application/vnd.api+json": schema_mapper.get_one(),
                     },
-                },
+                }
             },
         },
     },
-    "/platform-mount-actions/{platform_mount_action_id}": {
+    "/generic-device-action-attachments/{generic_device_action_attachment_id}": {
         "get": {
-            "tags": ["Platform mount actions"],
+            "tags": ["Generic device action attachments"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
-                {"$ref": "#/components/parameters/platform_mount_action_id"},
+                {"$ref": "#/components/parameters/generic_device_action_attachment_id"},
             ],
             "responses": {
                 "200": {
-                    "description": "Instance of a platform mount",
+                    "description": "Instance of a generic device action attachment",
                     "content": {
                         "application/vnd.api+json": schema_mapper.get_one(),
                     },
-                },
+                }
             },
         },
         "patch": {
-            "tags": ["Platform mount actions"],
+            "tags": ["Generic device action attachments"],
             "parameters": [
-                {"$ref": "#/components/parameters/platform_mount_action_id"}
+                {"$ref": "#/components/parameters/generic_device_action_attachment_id"}
             ],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": schema_mapper.patch(),
                 },
-                "description": "PlatformMountAction attributes",
+                "description": "Generic device action attachment attributes",
                 "required": True,
             },
+            "description": "",
             "responses": {
                 "200": {
-                    "description": "Payload of the updated platform mount",
+                    "description": "Payload of the updated generic device action attachment",
                     "content": {
                         "application/vnd.api+json": schema_mapper.get_one(),
                     },
-                },
+                }
             },
         },
         "delete": {
-            "tags": ["Platform mount actions"],
+            "tags": ["Generic device action attachments"],
             "parameters": [
-                {"$ref": "#/components/parameters/platform_mount_action_id"}
+                {"$ref": "#/components/parameters/generic_device_action_attachment_id"}
             ],
             "responses": {"200": {"$ref": "#/components/responses/object_deleted"}},
         },
@@ -96,11 +105,11 @@ paths = {
 }
 components = {
     "parameters": {
-        "platform_mount_action_id": {
-            "name": "platform_mount_action_id",
+        "generic_device_action_attachment_id": {
+            "name": "generic_device_action_attachment_id",
             "in": "path",
             "required": True,
             "schema": {"type": "string"},
-        },
-    },
+        }
+    }
 }

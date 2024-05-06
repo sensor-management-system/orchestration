@@ -14,7 +14,7 @@ schema_mapper = MarshmallowJsonApiToOpenApiMapper(ConfigurationRoleSchema)
 paths = {
     "/configuration-contact-roles": {
         "get": {
-            "tags": ["Configuration contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/page_number"},
                 {"$ref": "#/components/parameters/page_size"},
@@ -30,7 +30,7 @@ paths = {
             },
         },
         "post": {
-            "tags": ["Configuration contact roles"],
+            "tags": ["Contact roles"],
             "requestBody": {
                 "content": {
                     "application/vnd.api+json": schema_mapper.post(),
@@ -49,7 +49,7 @@ paths = {
     },
     "/configuration-contact-roles/{configuration_contact_role_id}": {
         "get": {
-            "tags": ["Configuration contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/include"},
                 {"$ref": "#/components/parameters/configuration_contact_role_id"},
@@ -65,7 +65,7 @@ paths = {
             },
         },
         "patch": {
-            "tags": ["Configuration contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/configuration_contact_role_id"}
             ],
@@ -87,7 +87,7 @@ paths = {
             },
         },
         "delete": {
-            "tags": ["Configuration contact roles"],
+            "tags": ["Contact roles"],
             "parameters": [
                 {"$ref": "#/components/parameters/configuration_contact_role_id"}
             ],

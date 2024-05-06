@@ -10,7 +10,7 @@ paths = {
     "/revoke-apikey": {
         "post": {
             "description": "Revoke the current apikey for the current user and generate a new one.",
-            "tags": ["User modification"],
+            "tags": ["User"],
             "parameters": [],
             "responses": {
                 "200": {"$ref": "#/components/responses/RevokeApikey"},
@@ -31,7 +31,7 @@ paths = {
     "/accept-terms-of-use": {
         "post": {
             "description": "Update the date on which the user accepted the terms.",
-            "tags": ["User modification"],
+            "tags": ["User"],
             "parameters": [],
             "responses": {
                 "200": {"$ref": "#/components/responses/AcceptTermsOfUse"},
