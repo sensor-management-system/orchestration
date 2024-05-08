@@ -103,7 +103,7 @@ class ZenodoApi:
 
 def main():
     """Upload the sms data to zenodo and publish the information."""
-    file_to_upload = sys.argv[0]
+    file_to_upload = sys.argv[1]
     env = Env()
     zenodo_url = env.str("ZENODO_URL")
     zenodo_access_token = env.str("ZENODO_ACCESS_TOKEN")
