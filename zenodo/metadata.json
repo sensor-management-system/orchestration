@@ -1,0 +1,77 @@
+{
+    "title": "Sensor Management System",
+    "upload_type": "software",
+    "creators": [
+        {
+            "name": "Nils Brinckmann",
+            "affiliation": "Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences"
+        },
+        {
+            "name": "Kotyba Alhaj Taha"
+        },
+        {
+            "name": "Tobias Kuhnert",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Marc Hanisch",
+            "affiliation": "Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences"
+        },
+        {
+            "name": "Maximilian Schaldach",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Florian Gransee",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Daniel Sielaff"
+        },
+        {
+            "name": "Tim Eder"
+        },
+        {
+            "name": "Luca Johannes Nendel"
+        },
+        {
+            "name": "Norman Ziegner"
+        },
+        {
+            "name": "Hannes Bohring",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Rubankumar Moorthy",
+            "affiliation": "Forschungszentrum Jülich"
+        },
+        {
+            "name": "Wilhelm Becker",
+            "affiliation": "Helmholtz Centre Potsdam GFZ German Research Centre for Geosciences"
+        },
+        {
+            "name": "Martin Abbrent",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Erik Pongratz"
+        },
+        {
+            "name": "Dirk Ecker"
+        },
+        {
+            "name": "Christof Lorenz",
+            "affiliation": "Karlsruhe Institute of Technology"
+        },
+        {
+            "name": "Paul Remmler",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Vivien Rosin"
+        },
+        {
+            "name": "Jannes Breier"
+        }
+    ]
+}
