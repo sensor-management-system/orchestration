@@ -11,7 +11,7 @@
 
 stages:
   - publish
-  - after-publish
+  - afterpublish
   - buildtest
   - check
   - extract
@@ -876,7 +876,7 @@ publish-zenodo:
     - python3 zenodo/publish.py sms-v${VERSION}.zip
 
 die-after-publish:
-  stage: after-publish
+  stage: afterpublish
   image: python:3.11-slim-buster
   tags:
     - docker
