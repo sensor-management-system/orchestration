@@ -51,7 +51,7 @@ You can find the versions and their changes in [CHANGELOG.md](./CHANGELOG.md).
 - [Marc Hanisch](https://orcid.org/0000-0001-5272-4674)
 - Maximilian Schaldach
 - Florian Gransee
-- [Daniel Sielaff](https://orcid.org/0009-0002-8606-9385)
+- Daniel Sielaff
 - [Tim Eder](https://orcid.org/0009-0005-1965-931X)
 - Luca Johannes Nendel
 - [Norman Ziegner](https://orcid.org/0000-0001-7579-216X)
