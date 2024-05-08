@@ -32,19 +32,19 @@ cache:
   paths:
     - frontend/dist
 
-.docker_login_gitlab_registry: &docker_login_gitlab_registry
-  - echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-
-.docker_build:
-  image: docker:20.10.7
-  services:
-    - docker:20.10.7-dind
-  before_script:
-    - *docker_login_gitlab_registry
-  tags:
-    - docker
-    - dind
-    - hifis
+#.docker_login_gitlab_registry: &docker_login_gitlab_registry
+#  - echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+#
+#.docker_build:
+#  image: docker:20.10.7
+#  services:
+#    - docker:20.10.7-dind
+#  before_script:
+#    - *docker_login_gitlab_registry
+#  tags:
+#    - docker
+#    - dind
+#    - hifis
 
 #build-backend-test-image:
 #  stage: buildtest
