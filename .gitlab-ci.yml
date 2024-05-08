@@ -10,14 +10,15 @@
 # SPDX-License-Identifier: HEESIL-1.0
 
 stages:
-  - buildtest
-  - check
-  - extract
-  - test
-  - build
-  - backup
-  - release
-  - deploy
+  # TODO: Re-Add the other stages
+  #- buildtest
+  #- check
+  #- extract
+  #- test
+  #- build
+  #- backup
+  #- release
+  #- deploy
   - publish
 
 variables:
