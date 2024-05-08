@@ -8,6 +8,7 @@
 
 """Publish the SMS on zenodo."""
 
+import json
 import os
 import pathlib
 import sys
