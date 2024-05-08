@@ -870,6 +870,7 @@ publish-zenodo:
     VERSION: $CI_COMMIT_SHORT_SHA
     ONLY_DRAFT: "yes"
   before_script:
+    - apt-get update && apt-get install zip -y
     - pip3 install requests
   script:
     - zip -r sms-v${VERSION}.zip ./*
