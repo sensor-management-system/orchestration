@@ -123,7 +123,7 @@ def main():
 
     description_file = pathlib.Path(__file__).parent / "description.txt"
     with description_file.open() as infile:
-        description = description_file.read()
+        description = infile.read()
 
     metadata.update({
         "version": version,
