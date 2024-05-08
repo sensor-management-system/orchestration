@@ -861,6 +861,8 @@ build-ufz-orchestration-nginx-image:
 publish-zenodo:
   stage: publish
   image: python:3.11-slim-buster
+  tags:
+    - docker
   variables:
     # We start here on the sandbox
     ZENODO_URL: https://sandbox.zenodo.org
@@ -876,5 +878,7 @@ publish-zenodo:
 die-after-publish:
   stage: after-publish
   image: python:3.11-slim-buster
+  tags:
+    - docker
   script:
     - exit 1
