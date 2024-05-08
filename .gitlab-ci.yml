@@ -46,817 +46,817 @@ cache:
     - dind
     - hifis
 
-build-backend-test-image:
-  stage: buildtest
-  extends: .docker_build
-  variables:
-    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
-    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
-    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
-    OIDC_USERNAME_CLAIM: "sub"
-  script:
-    - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/backend/Dockerfile.ci
-    - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/backend/Dockerfile.ci
-    - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/backend/Dockerfile.ci
-    - echo "ENV CV_URL https://webapp-stage.intranet.ufz.de/sms/cv/api/v1" >> $CI_PROJECT_DIR/backend/Dockerfile.ci
-    - docker build --tag $BACKEND_TEST_IMAGE backend
-    - docker push $BACKEND_TEST_IMAGE
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
+#build-backend-test-image:
+#  stage: buildtest
+#  extends: .docker_build
+#  variables:
+#    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+#    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+#    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+#    OIDC_USERNAME_CLAIM: "sub"
+#  script:
+#    - echo "ENV WELL_KNOWN_URL" $WELL_KNOWN_URL >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+#    - echo "ENV HTTP_ORIGINS" $HTTP_ORIGINS >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+#    - echo "ENV OIDC_USERNAME_CLAIM" $OIDC_USERNAME_CLAIM >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+#    - echo "ENV CV_URL https://webapp-stage.intranet.ufz.de/sms/cv/api/v1" >> $CI_PROJECT_DIR/backend/Dockerfile.ci
+#    - docker build --tag $BACKEND_TEST_IMAGE backend
+#    - docker push $BACKEND_TEST_IMAGE
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - backend/**/*
+#        - .gitlab-ci.yml
+
+#check-lint-frontend:
+#  stage: check
+#  image: node:18.18.0-buster
+#  before_script:
+#    - cd frontend
+#    - node -v
+#    - npm ci
+#  script:
+#    - npm run lint
+#  allow_failure: true
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - frontend/node_modules
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - frontend/**/*
+#        - .gitlab-ci.yml
+
+#check-build-frontend:
+#  stage: check
+#  image: node:18.18.0-buster
+#  before_script:
+#    - cd frontend
+#    - node -v
+#    - npm ci
+#  script:
+#    - npm run build
+#  allow_failure: false
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - frontend/node_modules
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - frontend/**/*
+#        - .gitlab-ci.yml
+
+#check-license-frontend:
+#  stage: check
+#  image: node:18.18.0-buster
+#  before_script:
+#    - cd frontend
+#    - node -v
+#    - npm ci
+#  script:
+#    - npm run licenseCheck
+#  allow_failure: true
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - frontend/node_modules
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - frontend/**/*
+#        - .gitlab-ci.yml
+
+#check-lint-backend:
+#  stage: check
+#  image: $BACKEND_TEST_IMAGE
+#  variables:
+#    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+#    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+#    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+#    OIDC_USERNAME_CLAIM: "sub"
+#  before_script:
+#    - apt-get update
+#    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo g++
+#  script:
+#    - cd $CI_PROJECT_DIR/backend/app/ && tox
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
         - backend/**/*
         - .gitlab-ci.yml
 
-check-lint-frontend:
-  stage: check
-  image: node:18.18.0-buster
-  before_script:
-    - cd frontend
-    - node -v
-    - npm ci
-  script:
-    - npm run lint
-  allow_failure: true
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - frontend/**/*
-        - .gitlab-ci.yml
+#extract-openapi:
+#  stage: extract
+#  extends: .docker_build
+#  variables:
+#    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+#    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+#    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+#    OIDC_USERNAME_CLAIM: "sub"
+#  script:
+#    - docker pull $BACKEND_TEST_IMAGE
+#    - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $BACKEND_TEST_IMAGE python manage.py openapi > openapi.json
+#  artifacts:
+#    expire_in: 1 day
+#    public: false
+#    paths:
+#      - openapi.json
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - backend/**/*
+#        - .gitlab-ci.yml
 
-check-build-frontend:
-  stage: check
-  image: node:18.18.0-buster
-  before_script:
-    - cd frontend
-    - node -v
-    - npm ci
-  script:
-    - npm run build
-  allow_failure: false
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - frontend/**/*
-        - .gitlab-ci.yml
+#test-frontend-unit-tests:
+#  stage: test
+#  image: node:18.18.0-buster
+#  before_script:
+#    - cd frontend
+#    - node -v
+#    - npm ci
+#  script:
+#    - npm test
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - frontend/node_modules
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - frontend/**/*
+#        - .gitlab-ci.yml
 
-check-license-frontend:
-  stage: check
-  image: node:18.18.0-buster
-  before_script:
-    - cd frontend
-    - node -v
-    - npm ci
-  script:
-    - npm run licenseCheck
-  allow_failure: true
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - frontend/**/*
-        - .gitlab-ci.yml
+#test-backend-image:
+#  services:
+#    - name: postgis/postgis:12-3.3-alpine
+#      alias: postgres
+#  variables:
+#    POSTGRES_DB: db_test
+#    POSTGRES_USER: postgres
+#    POSTGRES_PASSWORD: postgres
+#    POSTGRES_HOST_AUTH_METHOD: trust
+#    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
+#    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
+#    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
+#    OIDC_USERNAME_CLAIM: "sub"
+#  tags:
+#    - docker
+#    - dind
+#    - hifis-linux-large-amd64
+#  stage: test
+#  image: $BACKEND_TEST_IMAGE
+#  tags:
+#    - docker
+#    - dind
+#    - hifis-linux-large-amd64
+#  before_script:
+#    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
+#    - export APP_SETTINGS=project.config.TestingConfig
+#  script:
+#    - cd $CI_PROJECT_DIR/backend/app/ && python manage.py cov
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - backend/**/*
+#        - .gitlab-ci.yml
 
-check-lint-backend:
-  stage: check
-  image: $BACKEND_TEST_IMAGE
-  variables:
-    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
-    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
-    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
-    OIDC_USERNAME_CLAIM: "sub"
-  before_script:
-    - apt-get update
-    - apt-get install -y  --no-install-recommends gcc libssl-dev libffi-dev musl-dev cargo g++
-  script:
-    - cd $CI_PROJECT_DIR/backend/app/ && tox
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - backend/**/*
-        - .gitlab-ci.yml
-
-extract-openapi:
-  stage: extract
-  extends: .docker_build
-  variables:
-    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
-    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
-    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
-    OIDC_USERNAME_CLAIM: "sub"
-  script:
-    - docker pull $BACKEND_TEST_IMAGE
-    - docker run --rm -e APP_SETTINGS=project.config.TestingConfig -e DATABASE_TEST_URL=$DATABASE_TEST_URL $BACKEND_TEST_IMAGE python manage.py openapi > openapi.json
-  artifacts:
-    expire_in: 1 day
-    public: false
-    paths:
-      - openapi.json
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - backend/**/*
-        - .gitlab-ci.yml
-
-test-frontend-unit-tests:
-  stage: test
-  image: node:18.18.0-buster
-  before_script:
-    - cd frontend
-    - node -v
-    - npm ci
-  script:
-    - npm test
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - frontend/**/*
-        - .gitlab-ci.yml
-
-test-backend-image:
-  services:
-    - name: postgis/postgis:12-3.3-alpine
-      alias: postgres
-  variables:
-    POSTGRES_DB: db_test
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
-    POSTGRES_HOST_AUTH_METHOD: trust
-    DATABASE_TEST_URL: postgresql://$POSTGRES_USER:@$POSTGRES_PASSWORD:5432/$POSTGRES_DB
-    WELL_KNOWN_URL: https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration
-    HTTP_ORIGINS: "https://registry.hzdr.de http://rdm-test.intranet.ufz.de:5002"
-    OIDC_USERNAME_CLAIM: "sub"
-  tags:
-    - docker
-    - dind
-    - hifis-linux-large-amd64
-  stage: test
-  image: $BACKEND_TEST_IMAGE
-  tags:
-    - docker
-    - dind
-    - hifis-linux-large-amd64
-  before_script:
-    - export DATABASE_TEST_URL=$DATABASE_TEST_URL
-    - export APP_SETTINGS=project.config.TestingConfig
-  script:
-    - cd $CI_PROJECT_DIR/backend/app/ && python manage.py cov
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - backend/**/*
-        - .gitlab-ci.yml
-
-test-openapi:
-  stage: test
-  image: openapitools/openapi-generator-cli
-  script:
-    - docker-entrypoint.sh generate -i openapi.json -g python -o ./generated_clients/python
-  artifacts:
-    expire_in: 1 day
-    public: false
-    paths:
-      - generated_clients/python
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - backend/**/*
-        - .gitlab-ci.yml
+#test-openapi:
+#  stage: test
+#  image: openapitools/openapi-generator-cli
+#  script:
+#    - docker-entrypoint.sh generate -i openapi.json -g python -o ./generated_clients/python
+#  artifacts:
+#    expire_in: 1 day
+#    public: false
+#    paths:
+#      - generated_clients/python
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#      when: never
+#    - if: '$CI_COMMIT_TAG'
+#      when: never
+#    - changes:
+#        - backend/**/*
+#        - .gitlab-ci.yml
 
 
-build-deploy-image-nginx-gfz-staging:
-  stage: build
-  extends: .docker_build
-  variables:
-    CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
-          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
-          --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
-          .
-    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-latest"
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
+#build-deploy-image-nginx-gfz-staging:
+#  stage: build
+#  extends: .docker_build
+#  variables:
+#    CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
+#  script:
+#    - |
+#        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
+#          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+#          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+#          --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
+#          .
+#    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-latest"
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - frontend/node_modules
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
 
-build-deploy-image-nginx-gfz-sandbox:
-  stage: build
-  extends: .docker_build
-  variables:
-    CLIENT_ID: ${GFZ_SANDBOX_HIFIS_OIDC_CLIENT_ID}
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest" -f docker/build/nginx/gfz/sandbox/Dockerfile \
-          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
-          --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
-          .
-    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest"
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
-
-
-build-deploy-image-nginx-gfz-prod:
-  stage: build
-  extends: .docker_build
-  variables:
-    CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/nginx/gfz/prod/Dockerfile \
-          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
-          --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
-          .
-    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}"
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
-
-build-deploy-image-nginx-ufz-staging:
-  stage: build
-  extends: .docker_build
-  script:
-    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" --build-arg SMS_VERSION_ARG=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA} -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
-    - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
-  allow_failure: true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-
-build-deploy-image-backend-gfz-staging:
-  stage: build
-  extends: .docker_build
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" -f backend/Dockerfile \
-          backend
-    - docker push "$CI_REGISTRY_IMAGE/backend:gfz-latest"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-
-build-deploy-image-backend-gfz-prod:
-  stage: build
-  extends: .docker_build
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-prod-latest}" --tag "$CI_REGISTRY_IMAGE/backend:gfz-sandbox-latest" -f backend/Dockerfile \
-          backend
-    - docker push --all-tags "$CI_REGISTRY_IMAGE/backend"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
-
-build-deploy-image-mc-gfz-staging:
-  stage: build
-  extends: .docker_build
-  script:
-    - |
-        docker build --tag "$CI_REGISTRY_IMAGE/mc:gfz-latest" -f docker/build/mc/gfz/Dockerfile \
-          docker/build/mc/gfz
-    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-latest"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-
-build-deploy-image-mc-gfz-prod:
-  stage: build
-  extends: .docker_build
-  script:
-    - |
-        docker build \
-          --tag "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG}" \
-          --tag "$CI_REGISTRY_IMAGE/mc:gfz-prod-latest" \
-          --tag "$CI_REGISTRY_IMAGE/mc:gfz-sandbox-latest" \
-          -f docker/build/mc/gfz/Dockerfile \
-          docker/build/mc/gfz
-    - docker push --all-tags "$CI_REGISTRY_IMAGE/mc"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
-
-backup-gfz-staging:
-  stage: backup
-  environment:
-    name: gfz-staging
-    url: https://rz-vm64.gfz-potsdam.de
-  tags:
-    - deploy
-    - staging
-    - gfz
-    - shell
-  variables:
-    COMPOSE_PROJECT_NAME: sms-staging
-    BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
-    BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
-    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:gfz-latest
-    BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
-    IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
-    IDL_DB_USER: ${GFZ_STAGING_IDL_POSTGRES_USER}
-    IDL_TOKEN: ${GFZ_STAGING_IDL_TOKEN}
-    IDL_SECRET_KEY: ${GFZ_STAGING_IDL_SECRET_KEY}
-    MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
-    MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
-    DAYS_TO_CLEANUP: 30
-    # We want to make sure that we still have 1 GB left to do the backup
-    # comparision value is in kb
-    MINIMUM_STORAGE_LEFT: 1000000
-  before_script:
-    - *docker_login_gitlab_registry
-  script:
-    # clean up & remove files older than x days
-    - mkdir -p /srv/docker/service/backend-db/backups
-    - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - mkdir -p /srv/docker/service/idl-db/backups
-    - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - mkdir -p /srv/docker/service/minio/backups
-    - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - |-
-      if [ $(df -Pk /srv/docker/service | awk '/[0-9]%/{print $(NF-2)}') -lt ${MINIMUM_STORAGE_LEFT} ]
-      then
-          echo 'Not enough space left on the local file system to create the backup'
-          exit 1
-      fi
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull mc
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T idl-db pg_dump -U $IDL_DB_USER -d idl -Fc > /srv/docker/service/idl-db/backups/idl_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
-    # Most of the minio stuff is handled in the backup.sh script.
-    # However, there are some things to mention:
-    # First the mc image was already used to create the bucket. It is very likely that it is
-    # already stopped, so we use docker compose run here.
-    # Next: We will mount our backup folder into the container in order to write the backup right
-    # into there. We will give the current user & group ids, so that we can edit and delete
-    # the backups content right away.
-    - >
-      docker compose -f docker/deployment/gfz/staging/docker-compose.yml \
-        run -T --entrypoint '/backup.sh' \
-        --rm \
-        -e USER_ID=$(id -u) \
-        -e GROUP_ID=$(id -g) \
-        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
-        mc
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-
-backup-gfz-prod:
-  stage: backup
-  environment:
-    name: gfz-prod
-    url: https://sensors.gfz-potsdam.de
-  tags:
-    - deploy
-    - prod
-    - gfz
-    - shell
-  variables:
-    COMPOSE_PROJECT_NAME: sms-prod
-    BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
-    BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
-    BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
-    IDL_DB_PASSWORD: ${GFZ_PROD_IDL_POSTGRES_PASSWORD}
-    IDL_DB_USER: ${GFZ_PROD_IDL_POSTGRES_USER}
-    IDL_TOKEN: ${GFZ_PROD_IDL_TOKEN}
-    IDL_SECRET_KEY: ${GFZ_PROD_IDL_SECRET_KEY}
-    MINIO_ROOT_PASSWORD: ${GFZ_PROD_MINIO_ROOT_PASSWORD}
-    MINIO_ROOT_USER: ${GFZ_PROD_MINIO_ROOT_USER}
-    DAYS_TO_CLEANUP: 30
-    DAYS_TO_CLEANUP_PROJECTSHARE: 180
-    # We want to make sure that we still have 1 GB left to do the backup
-    # comparision value is in kb
-    MINIMUM_STORAGE_LEFT: 1000000
-  before_script:
-    - *docker_login_gitlab_registry
-  script:
-    # clean up & remove files older than 30 days
-    # Note: We store the files of the latest x days on the machine
-    # itself. But we also store the files on the projectshare, where
-    # we keep them for longer.
-    - mkdir -p /srv/docker/service/backend-db/backups
-    - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - mkdir -p /srv/docker/service/idl-db/backups
-    - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - mkdir -p /srv/docker/service/minio/backups
-    - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
-    - |-
-      if [ $(df -Pk /srv/docker/service | awk '/[0-9]%/{print $(NF-2)}') -lt ${MINIMUM_STORAGE_LEFT} ]
-      then
-          echo 'Not enough space left on the local file system to create the backup'
-          exit 1
-      fi
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull mc
-    - |-
-      if [ ! "$(docker ps -q -f name=idl-db)" ]
-      then
-          echo 'idl database not running'
-          echo 'skip'
-      else
-          docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T idl-db pg_dump -U $IDL_DB_USER -d idl -Fc > /srv/docker/service/idl-db/backups/idl_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
-      fi
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
-    - >
-      docker compose -f docker/deployment/gfz/prod/docker-compose.yml \
-        run -T --entrypoint '/backup.sh' \
-        --rm \
-        -e USER_ID=$(id -u) \
-        -e GROUP_ID=$(id -g) \
-        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
-        mc
-    - >
-      docker compose -f docker/deployment/gfz/prod/docker-compose.yml \
-        run -T --entrypoint '/projectshare.sh' \
-        --rm \
-        -e CLEANUP=${DAYS_TO_CLEANUP_PROJECTSHARE:-180} \
-        -u "$(id -u smsbckp):$(id -g sms-backup-rw)" \
-        -v /srv/docker/service:/srv/docker/service:ro \
-        -v /mnt/sms-backup:/mnt/sms-backup \
-        mc
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
-
-deploy-gfz-staging:
-  stage: deploy
-  environment:
-    name: gfz-staging
-    url: https://rz-vm64.gfz-potsdam.de
-  tags:
-    - deploy
-    - staging
-    - gfz
-    - shell
-  variables:
-    COMPOSE_PROJECT_NAME: sms-staging
-    BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
-    BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
-    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:gfz-latest
-    BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
-    IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
-    IDL_DB_USER: ${GFZ_STAGING_IDL_POSTGRES_USER}
-    IDL_TOKEN: ${GFZ_STAGING_IDL_TOKEN}
-    IDL_SECRET_KEY: ${GFZ_STAGING_IDL_SECRET_KEY}
-    MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
-    MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
-    PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
-    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
-    B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
-    SMS_VERSION: ${CI_COMMIT_SHORT_SHA}
-  before_script:
-    - *docker_login_gitlab_registry
-  script:
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
-    # Delete the volume for the static files of the backend.
-    # The volume is used so that the nginx can deliver those files.
-    # But we need it fresh so that we can put new files in.
-    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull
-    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-    - docker rmi $(docker images -q -f dangling=true) || true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-
-deploy-gfz-prod:
-  stage: deploy
-  environment:
-    name: gfz-prod
-    url: https://sensors.gfz-potsdam.de
-  tags:
-    - deploy
-    - prod
-    - gfz
-    - shell
-  variables:
-    COMPOSE_PROJECT_NAME: sms-prod
-    BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
-    BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
-    BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
-    IDL_DB_PASSWORD: ${GFZ_PROD_IDL_POSTGRES_PASSWORD}
-    IDL_DB_USER: ${GFZ_PROD_IDL_POSTGRES_USER}
-    IDL_TOKEN: ${GFZ_PROD_IDL_TOKEN}
-    IDL_SECRET_KEY: ${GFZ_PROD_IDL_SECRET_KEY}
-    MINIO_ROOT_PASSWORD: ${GFZ_PROD_MINIO_ROOT_PASSWORD}
-    MINIO_ROOT_USER: ${GFZ_PROD_MINIO_ROOT_USER}
-    PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
-    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
-    B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
-    SMS_VERSION: ${CI_COMMIT_TAG}
-    MATTERMOST_RELEASE_NOTIFICATION_HOOK: ${MATTERMOST_RELEASE_NOTIFICATION_HOOK}
-  before_script:
-    - *docker_login_gitlab_registry
-  script:
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml down --remove-orphans
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml rm -f
-    # Delete the volume for the static files of the backend.
-    # The volume is used so that the nginx can deliver those files.
-    # But we need it fresh so that we can put new files in.
-    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
-    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
-    - docker rmi $(docker images -q -f dangling=true) || true
-    # Curl is already installed on the deployment machine
-    - >
-      curl \
-        -X POST ${MATTERMOST_RELEASE_NOTIFICATION_HOOK} \
-        -H "Content-Type: application/json" \
-        -d "{\"text\":\"@here SMS version $SMS_VERSION released on https://sensors.gfz-potsdam.de\"}"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
-
-deploy-gfz-sandbox:
-  stage: deploy
-  environment:
-    name: gfz-sandbox
-    url: https://sensors-sandbox.gfz-potsdam.de
-  tags:
-    - gfz
-    - gfz-net
-  image: alpine:latest
-  script:
-    - wget -q --post-data "" "$GFZ_SANDBOX_HOOK_URL"
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$GFZ_SANDBOX_HOOK_URL && $CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-      when: always
+#build-deploy-image-nginx-gfz-sandbox:
+#  stage: build
+#  extends: .docker_build
+#  variables:
+#    CLIENT_ID: ${GFZ_SANDBOX_HIFIS_OIDC_CLIENT_ID}
+#  script:
+#    - |
+#        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest" -f docker/build/nginx/gfz/sandbox/Dockerfile \
+#          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+#          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+#          --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+#          .
+#    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-sandbox-latest"
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - frontend/node_modules
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#      when: always
 
 
-build-ufz-backend-image-staging:
-  stage: build
-  extends: .docker_build
-  variables:
-    OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
-    PID_CERT_FILE: ${UFZ_STAGE_PID_CERT_FILE}
-    PID_CERT_KEY: ${UFZ_STAGE_PID_CERT_KEY}
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_COMMIT_TAG'
-  script:
-    - >
-      if [ -z "$CI_COMMIT_TAG" ]; then        
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest" -f backend/docker/deployment/ufz/Dockerfile_Stage \
-                        --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
-                        --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
-                        --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
-                        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-                        --build-arg VCS_REF=$CI_COMMIT_SHA \
-                        --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
-                      .
-        docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest"
-      else
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Stage \
-                --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
-                --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
-                --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
-                --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-                --build-arg VCS_REF=$CI_COMMIT_SHA \
-                --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
-              .
-        docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG"
-      fi
+#build-deploy-image-nginx-gfz-prod:
+#  stage: build
+#  extends: .docker_build
+#  variables:
+#    CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
+#  script:
+#    - |
+#        docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}" -f docker/build/nginx/gfz/prod/Dockerfile \
+#          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+#          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+#          --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+#          .
+#    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-${CI_COMMIT_TAG:-prod-latest}"
+#  cache:
+#    key: ${CI_COMMIT_REF_SLUG}
+#    paths:
+#      - frontend/node_modules
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#      when: always
 
-build-ufz-backend-image-prod:
-  stage: build
-  extends: .docker_build
-  variables:
-    OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
-    PID_CERT_FILE: ${UFZ_PROD_PID_CERT_FILE}
-    PID_CERT_KEY: ${UFZ_PROD_PID_CERT_KEY}
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-  script:
-    - |
-      docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Prod \
-        --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
-        --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
-        --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
-        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-        --build-arg VCS_REF=$CI_COMMIT_SHA \
-        --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
-      .
-    - docker push "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG"
+#build-deploy-image-nginx-ufz-staging:
+#  stage: build
+#  extends: .docker_build
+#  script:
+#    - docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-latest" --build-arg SMS_VERSION_ARG=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA} -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+#    - docker push "$CI_REGISTRY_IMAGE/nginx:ufz-latest"
+#  allow_failure: true
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
 
-build-ufz-frontend-image-staging:
-  stage: build
-  extends: .docker_build
-  variables:
-    CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_COMMIT_TAG'
-  script:
-    - >
-      if [ -z "$CI_COMMIT_TAG" ]; then        
-        docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-staging-latest" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
-              --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-              --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-              --build-arg VCS_REF=$CI_COMMIT_SHA \
-              --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
-            .
-        docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-latest"
-      else
-        docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
-                --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-                --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-                --build-arg VCS_REF=$CI_COMMIT_SHA \
-                --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
-              .
-        docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG"    
-      fi
+#build-deploy-image-backend-gfz-staging:
+#  stage: build
+#  extends: .docker_build
+#  script:
+#    - |
+#        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" -f backend/Dockerfile \
+#          backend
+#    - docker push "$CI_REGISTRY_IMAGE/backend:gfz-latest"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
 
-build-ufz-frontend-image-prod:
-  stage: build
-  extends: .docker_build
-  variables:
-    CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
-  script:
-    - |
-      docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-prod-$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Prod \
-        --build-arg CLIENT_ID_ARG=$CLIENT_ID \
-        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
-        --build-arg VCS_REF=$CI_COMMIT_SHA \
-        --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
-      .
-    - docker push "$CI_REGISTRY_IMAGE/frontend:ufz-prod-$CI_COMMIT_TAG"
+#build-deploy-image-backend-gfz-prod:
+#  stage: build
+#  extends: .docker_build
+#  script:
+#    - |
+#        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-${CI_COMMIT_TAG:-prod-latest}" --tag "$CI_REGISTRY_IMAGE/backend:gfz-sandbox-latest" -f backend/Dockerfile \
+#          backend
+#    - docker push --all-tags "$CI_REGISTRY_IMAGE/backend"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#      when: always
 
-build-ufz-backend-nginx-image:
-  stage: build
-  extends: .docker_build
-  allow_failure: true
-  script:
-    - >
-      if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
-      else
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG"
-      fi
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_COMMIT_TAG'
+#build-deploy-image-mc-gfz-staging:
+#  stage: build
+#  extends: .docker_build
+#  script:
+#    - |
+#        docker build --tag "$CI_REGISTRY_IMAGE/mc:gfz-latest" -f docker/build/mc/gfz/Dockerfile \
+#          docker/build/mc/gfz
+#    - docker push "$CI_REGISTRY_IMAGE/mc:gfz-latest"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
 
-build-ufz-orchestration-nginx-image:
-  stage: build
-  extends: .docker_build
-  script:
-    - >
-      if [ -z "$CI_COMMIT_TAG" ]; then
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
-      else
-        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
-        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG"
-      fi
-  allow_failure: true
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-      when: always
-    - if: '$CI_COMMIT_TAG'
-      when: always
+#build-deploy-image-mc-gfz-prod:
+#  stage: build
+#  extends: .docker_build
+#  script:
+#    - |
+#        docker build \
+#          --tag "$CI_REGISTRY_IMAGE/mc:gfz-${CI_COMMIT_TAG}" \
+#          --tag "$CI_REGISTRY_IMAGE/mc:gfz-prod-latest" \
+#          --tag "$CI_REGISTRY_IMAGE/mc:gfz-sandbox-latest" \
+#          -f docker/build/mc/gfz/Dockerfile \
+#          docker/build/mc/gfz
+#    - docker push --all-tags "$CI_REGISTRY_IMAGE/mc"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#      when: always
+#
+#backup-gfz-staging:
+#  stage: backup
+#  environment:
+#    name: gfz-staging
+#    url: https://rz-vm64.gfz-potsdam.de
+#  tags:
+#    - deploy
+#    - staging
+#    - gfz
+#    - shell
+#  variables:
+#    COMPOSE_PROJECT_NAME: sms-staging
+#    BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
+#    BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
+#    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:gfz-latest
+#    BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
+#    IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
+#    IDL_DB_USER: ${GFZ_STAGING_IDL_POSTGRES_USER}
+#    IDL_TOKEN: ${GFZ_STAGING_IDL_TOKEN}
+#    IDL_SECRET_KEY: ${GFZ_STAGING_IDL_SECRET_KEY}
+#    MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
+#    MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
+#    DAYS_TO_CLEANUP: 30
+#    # We want to make sure that we still have 1 GB left to do the backup
+#    # comparision value is in kb
+#    MINIMUM_STORAGE_LEFT: 1000000
+#  before_script:
+#    - *docker_login_gitlab_registry
+#  script:
+#    # clean up & remove files older than x days
+#    - mkdir -p /srv/docker/service/backend-db/backups
+#    - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+#    - mkdir -p /srv/docker/service/idl-db/backups
+#    - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+#    - mkdir -p /srv/docker/service/minio/backups
+#    - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+#    - |-
+#      if [ $(df -Pk /srv/docker/service | awk '/[0-9]%/{print $(NF-2)}') -lt ${MINIMUM_STORAGE_LEFT} ]
+#      then
+#          echo 'Not enough space left on the local file system to create the backup'
+#          exit 1
+#      fi
+#    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull mc
+#    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T idl-db pg_dump -U $IDL_DB_USER -d idl -Fc > /srv/docker/service/idl-db/backups/idl_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
+#    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
+#    # Most of the minio stuff is handled in the backup.sh script.
+#    # However, there are some things to mention:
+#    # First the mc image was already used to create the bucket. It is very likely that it is
+#    # already stopped, so we use docker compose run here.
+#    # Next: We will mount our backup folder into the container in order to write the backup right
+#    # into there. We will give the current user & group ids, so that we can edit and delete
+#    # the backups content right away.
+#    - >
+#      docker compose -f docker/deployment/gfz/staging/docker-compose.yml \
+#        run -T --entrypoint '/backup.sh' \
+#        --rm \
+#        -e USER_ID=$(id -u) \
+#        -e GROUP_ID=$(id -g) \
+#        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
+#        mc
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
+#
+#backup-gfz-prod:
+#  stage: backup
+#  environment:
+#    name: gfz-prod
+#    url: https://sensors.gfz-potsdam.de
+#  tags:
+#    - deploy
+#    - prod
+#    - gfz
+#    - shell
+#  variables:
+#    COMPOSE_PROJECT_NAME: sms-prod
+#    BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
+#    BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
+#    BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
+#    IDL_DB_PASSWORD: ${GFZ_PROD_IDL_POSTGRES_PASSWORD}
+#    IDL_DB_USER: ${GFZ_PROD_IDL_POSTGRES_USER}
+#    IDL_TOKEN: ${GFZ_PROD_IDL_TOKEN}
+#    IDL_SECRET_KEY: ${GFZ_PROD_IDL_SECRET_KEY}
+#    MINIO_ROOT_PASSWORD: ${GFZ_PROD_MINIO_ROOT_PASSWORD}
+#    MINIO_ROOT_USER: ${GFZ_PROD_MINIO_ROOT_USER}
+#    DAYS_TO_CLEANUP: 30
+#    DAYS_TO_CLEANUP_PROJECTSHARE: 180
+#    # We want to make sure that we still have 1 GB left to do the backup
+#    # comparision value is in kb
+#    MINIMUM_STORAGE_LEFT: 1000000
+#  before_script:
+#    - *docker_login_gitlab_registry
+#  script:
+#    # clean up & remove files older than 30 days
+#    # Note: We store the files of the latest x days on the machine
+#    # itself. But we also store the files on the projectshare, where
+#    # we keep them for longer.
+#    - mkdir -p /srv/docker/service/backend-db/backups
+#    - find /srv/docker/service/backend-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+#    - mkdir -p /srv/docker/service/idl-db/backups
+#    - find /srv/docker/service/idl-db/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+#    - mkdir -p /srv/docker/service/minio/backups
+#    - find /srv/docker/service/minio/backups -type f -mtime +${DAYS_TO_CLEANUP:-30} -exec rm {} \;
+#    - |-
+#      if [ $(df -Pk /srv/docker/service | awk '/[0-9]%/{print $(NF-2)}') -lt ${MINIMUM_STORAGE_LEFT} ]
+#      then
+#          echo 'Not enough space left on the local file system to create the backup'
+#          exit 1
+#      fi
+#    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull mc
+#    - |-
+#      if [ ! "$(docker ps -q -f name=idl-db)" ]
+#      then
+#          echo 'idl database not running'
+#          echo 'skip'
+#      else
+#          docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T idl-db pg_dump -U $IDL_DB_USER -d idl -Fc > /srv/docker/service/idl-db/backups/idl_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
+#      fi
+#    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml exec -T backend-db pg_dump -U $BACKEND_DB_USER -d backend -Fc > /srv/docker/service/backend-db/backups/backend_$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}.dump
+#    - >
+#      docker compose -f docker/deployment/gfz/prod/docker-compose.yml \
+#        run -T --entrypoint '/backup.sh' \
+#        --rm \
+#        -e USER_ID=$(id -u) \
+#        -e GROUP_ID=$(id -g) \
+#        -v /srv/docker/service/minio/backups/$(date +%Y%m%d-%H%M)_${CI_COMMIT_SHORT_SHA}:/backups \
+#        mc
+#    - >
+#      docker compose -f docker/deployment/gfz/prod/docker-compose.yml \
+#        run -T --entrypoint '/projectshare.sh' \
+#        --rm \
+#        -e CLEANUP=${DAYS_TO_CLEANUP_PROJECTSHARE:-180} \
+#        -u "$(id -u smsbckp):$(id -g sms-backup-rw)" \
+#        -v /srv/docker/service:/srv/docker/service:ro \
+#        -v /mnt/sms-backup:/mnt/sms-backup \
+#        mc
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: always
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#      when: always
+#
+#deploy-gfz-staging:
+#  stage: deploy
+#  environment:
+#    name: gfz-staging
+#    url: https://rz-vm64.gfz-potsdam.de
+#  tags:
+#    - deploy
+#    - staging
+#    - gfz
+#    - shell
+#  variables:
+#    COMPOSE_PROJECT_NAME: sms-staging
+#    BACKEND_DB_PASSWORD: ${GFZ_STAGING_BACKEND_POSTGRES_PASSWORD}
+#    BACKEND_DB_USER: ${GFZ_STAGING_BACKEND_POSTGRES_USER}
+#    BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/backend:gfz-latest
+#    BACKEND_SECRET_KEY: ${GFZ_STAGING_BACKEND_SECRET}
+#    IDL_DB_PASSWORD: ${GFZ_STAGING_IDL_POSTGRES_PASSWORD}
+#    IDL_DB_USER: ${GFZ_STAGING_IDL_POSTGRES_USER}
+#    IDL_TOKEN: ${GFZ_STAGING_IDL_TOKEN}
+#    IDL_SECRET_KEY: ${GFZ_STAGING_IDL_SECRET_KEY}
+#    MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
+#    MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
+#    PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
+#    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+#    B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
+#    SMS_VERSION: ${CI_COMMIT_SHORT_SHA}
+#  before_script:
+#    - *docker_login_gitlab_registry
+#  script:
+#    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml down --remove-orphans
+#    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml rm -f
+#    # Delete the volume for the static files of the backend.
+#    # The volume is used so that the nginx can deliver those files.
+#    # But we need it fresh so that we can put new files in.
+#    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
+#    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull
+#    - docker compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
+#    - docker rmi $(docker images -q -f dangling=true) || true
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
+#
+#deploy-gfz-prod:
+#  stage: deploy
+#  environment:
+#    name: gfz-prod
+#    url: https://sensors.gfz-potsdam.de
+#  tags:
+#    - deploy
+#    - prod
+#    - gfz
+#    - shell
+#  variables:
+#    COMPOSE_PROJECT_NAME: sms-prod
+#    BACKEND_DB_PASSWORD: ${GFZ_PROD_BACKEND_POSTGRES_PASSWORD}
+#    BACKEND_DB_USER: ${GFZ_PROD_BACKEND_POSTGRES_USER}
+#    BACKEND_SECRET_KEY: ${GFZ_PROD_BACKEND_SECRET}
+#    IDL_DB_PASSWORD: ${GFZ_PROD_IDL_POSTGRES_PASSWORD}
+#    IDL_DB_USER: ${GFZ_PROD_IDL_POSTGRES_USER}
+#    IDL_TOKEN: ${GFZ_PROD_IDL_TOKEN}
+#    IDL_SECRET_KEY: ${GFZ_PROD_IDL_SECRET_KEY}
+#    MINIO_ROOT_PASSWORD: ${GFZ_PROD_MINIO_ROOT_PASSWORD}
+#    MINIO_ROOT_USER: ${GFZ_PROD_MINIO_ROOT_USER}
+#    PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
+#    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+#    B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
+#    SMS_VERSION: ${CI_COMMIT_TAG}
+#    MATTERMOST_RELEASE_NOTIFICATION_HOOK: ${MATTERMOST_RELEASE_NOTIFICATION_HOOK}
+#  before_script:
+#    - *docker_login_gitlab_registry
+#  script:
+#    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml down --remove-orphans
+#    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml rm -f
+#    # Delete the volume for the static files of the backend.
+#    # The volume is used so that the nginx can deliver those files.
+#    # But we need it fresh so that we can put new files in.
+#    - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
+#    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
+#    - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
+#    - docker rmi $(docker images -q -f dangling=true) || true
+#    # Curl is already installed on the deployment machine
+#    - >
+#      curl \
+#        -X POST ${MATTERMOST_RELEASE_NOTIFICATION_HOOK} \
+#        -H "Content-Type: application/json" \
+#        -d "{\"text\":\"@here SMS version $SMS_VERSION released on https://sensors.gfz-potsdam.de\"}"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#      when: always
+#
+#deploy-gfz-sandbox:
+#  stage: deploy
+#  environment:
+#    name: gfz-sandbox
+#    url: https://sensors-sandbox.gfz-potsdam.de
+#  tags:
+#    - gfz
+#    - gfz-net
+#  image: alpine:latest
+#  script:
+#    - wget -q --post-data "" "$GFZ_SANDBOX_HOOK_URL"
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$GFZ_SANDBOX_HOOK_URL && $CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#      when: always
+#
+#
+#build-ufz-backend-image-staging:
+#  stage: build
+#  extends: .docker_build
+#  variables:
+#    OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
+#    PID_CERT_FILE: ${UFZ_STAGE_PID_CERT_FILE}
+#    PID_CERT_KEY: ${UFZ_STAGE_PID_CERT_KEY}
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+#    - if: '$CI_COMMIT_TAG'
+#  script:
+#    - >
+#      if [ -z "$CI_COMMIT_TAG" ]; then        
+#        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest" -f backend/docker/deployment/ufz/Dockerfile_Stage \
+#                        --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
+#                        --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
+#                        --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
+#                        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+#                        --build-arg VCS_REF=$CI_COMMIT_SHA \
+#                        --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
+#                      .
+#        docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-latest"
+#      else
+#        docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Stage \
+#                --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
+#                --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
+#                --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
+#                --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+#                --build-arg VCS_REF=$CI_COMMIT_SHA \
+#                --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+#              .
+#        docker push "$CI_REGISTRY_IMAGE/backend:ufz-staging-$CI_COMMIT_TAG"
+#      fi
+#
+#build-ufz-backend-image-prod:
+#  stage: build
+#  extends: .docker_build
+#  variables:
+#    OIDC_CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
+#    PID_CERT_FILE: ${UFZ_PROD_PID_CERT_FILE}
+#    PID_CERT_KEY: ${UFZ_PROD_PID_CERT_KEY}
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#  script:
+#    - |
+#      docker build --tag "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG" -f backend/docker/deployment/ufz/Dockerfile_Prod \
+#        --build-arg OIDC_CLIENT_ID_ARG=$OIDC_CLIENT_ID \
+#        --build-arg PID_CERT_FILE_ARG=$PID_CERT_FILE \
+#        --build-arg PID_CERT_KEY_ARG=$PID_CERT_KEY \
+#        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+#        --build-arg VCS_REF=$CI_COMMIT_SHA \
+#        --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+#      .
+#    - docker push "$CI_REGISTRY_IMAGE/backend:ufz-prod-$CI_COMMIT_TAG"
+#
+#build-ufz-frontend-image-staging:
+#  stage: build
+#  extends: .docker_build
+#  variables:
+#    CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+#    - if: '$CI_COMMIT_TAG'
+#  script:
+#    - >
+#      if [ -z "$CI_COMMIT_TAG" ]; then        
+#        docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-staging-latest" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
+#              --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+#              --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+#              --build-arg VCS_REF=$CI_COMMIT_SHA \
+#              --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
+#            .
+#        docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-latest"
+#      else
+#        docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Stage \
+#                --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+#                --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+#                --build-arg VCS_REF=$CI_COMMIT_SHA \
+#                --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+#              .
+#        docker push "$CI_REGISTRY_IMAGE/frontend:ufz-staging-$CI_COMMIT_TAG"    
+#      fi
+#
+#build-ufz-frontend-image-prod:
+#  stage: build
+#  extends: .docker_build
+#  variables:
+#    CLIENT_ID: ${UFZ_OIDC_CLIENT_ID}
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+#  script:
+#    - |
+#      docker build --tag "$CI_REGISTRY_IMAGE/frontend:ufz-prod-$CI_COMMIT_TAG" -f frontend/docker/deployment/ufz/Dockerfile_Prod \
+#        --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+#        --build-arg BUILD_DATE=$(date --utc +%FT%TZ) \
+#        --build-arg VCS_REF=$CI_COMMIT_SHA \
+#        --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+#      .
+#    - docker push "$CI_REGISTRY_IMAGE/frontend:ufz-prod-$CI_COMMIT_TAG"
+#
+#build-ufz-backend-nginx-image:
+#  stage: build
+#  extends: .docker_build
+#  allow_failure: true
+#  script:
+#    - >
+#      if [ -z "$CI_COMMIT_TAG" ]; then
+#        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
+#        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
+#      else
+#        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest" -f backend/docker/build/nginx/ufz/Dockerfile .
+#        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-latest"
+#        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-backend-$CI_COMMIT_TAG"
+#      fi
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+#    - if: '$CI_COMMIT_TAG'
+#
+#build-ufz-orchestration-nginx-image:
+#  stage: build
+#  extends: .docker_build
+#  script:
+#    - >
+#      if [ -z "$CI_COMMIT_TAG" ]; then
+#        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+#        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
+#      else
+#        docker build --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG" --tag "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest" -f docker/build/nginx/ufz/staging/Dockerfile ./docker/build/nginx/ufz/staging/
+#        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-latest"
+#        docker push "$CI_REGISTRY_IMAGE/nginx:ufz-orchestration-$CI_COMMIT_TAG"
+#      fi
+#  allow_failure: true
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+#      when: never
+#    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#      when: always
+#    - if: '$CI_COMMIT_TAG'
+#      when: always
 
 publish-zenodo:
   stage: publish
