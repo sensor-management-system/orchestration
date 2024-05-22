@@ -24,7 +24,7 @@ services:
       - traefik
 
   idl:
-    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.4
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.4.1
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'

@@ -13,6 +13,7 @@ Added:
 - visibility markers for export control information (public or export control only)
 - created at field for the manufacturer models in order to keep track when those were added to the system
 - extended openapi specs
+- multiple wildcard idl conventions are now supported
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces
