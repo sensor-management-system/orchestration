@@ -159,9 +159,7 @@ services:
       - db
 
   frontend:
-    build:
-      context: '.'
-      dockerfile: './frontend/docker/local-dev/Dockerfile-local-dev'
+    image: node:18.18.0-buster
     container_name: sms_frontend
     working_dir: /home/node/
     user: "node"
