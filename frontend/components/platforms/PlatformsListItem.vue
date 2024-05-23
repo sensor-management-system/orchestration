@@ -69,7 +69,7 @@ permissions and limitations under the Licence.
       </v-btn>
       <v-btn
         v-else
-        :to="link"
+        :to="detailLink"
         color="primary"
         text
         small
@@ -328,7 +328,7 @@ export default class PlatformsListItem extends Vue {
     return ''
   }
 
-  get link (): string {
+  get detailLink (): string {
     let params = ''
     if (this.from) {
       params = '?' + (new URLSearchParams({ from: this.from })).toString()
@@ -338,9 +338,9 @@ export default class PlatformsListItem extends Vue {
 
   openLink () {
     if (this.target === '_self') {
-      this.$router.push(this.link)
+      this.$router.push(this.detailLink)
     } else {
-      window.open(this.link, this.target)
+      window.open(this.$router.resolve(this.detailLink).href, this.target)
     }
   }
 }

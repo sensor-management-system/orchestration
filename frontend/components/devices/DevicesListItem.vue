@@ -339,7 +339,7 @@ export default class DevicesListItem extends Vue {
     if (this.target === '_self') {
       this.$router.push(this.detailLink)
     } else {
-      window.open(this.detailLink, this.target)
+      window.open(this.$router.resolve(this.detailLink).href, this.target)
     }
   }
 }
