@@ -15,6 +15,9 @@ Added:
 - extended openapi specs
 - multiple wildcard idl conventions are now supported
 
+Changed:
+- dialog to suggest new manfacturer entries now mentions RORs for the provenance url
+
 Fixed:
 - SensorML validation for unit name values that contain whitespaces
 - Fixed https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/issues/89
