@@ -2,7 +2,7 @@
 Web client of the Sensor Management System software developed within the
 Helmholtz DataHub Initiative by GFZ and UFZ.
 
-Copyright (C) 2022 - 2023
+Copyright (C) 2022 - 2024
 - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
 - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for
@@ -64,7 +64,7 @@ permissions and limitations under the Licence.
               <v-col>
                 <v-textarea
                   v-model="suggestion.definition"
-                  label="Definition"
+                  label="Description"
                   rows="2"
                 />
               </v-col>
@@ -72,28 +72,20 @@ permissions and limitations under the Licence.
             <v-row>
               <v-col>
                 <v-text-field
-                  v-model="suggestion.provenance"
-                  label="Provenance"
-                />
-              </v-col>
-              <v-col>
-                <v-text-field
                   v-model="suggestion.provenanceUri"
-                  label="Provenance URI"
+                  label="ROR URL"
                 />
               </v-col>
             </v-row>
             <v-row class="mt-0">
               <v-col class="pt-0 pb-0">
-                <provenance-hint />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <v-text-field
-                  v-model="suggestion.category"
-                  label="Category"
-                />
+                <p class="text-caption">
+                  ROR is a global, community-led registry of open persistent Identifiers
+                  for research organizations.
+                  If you can find the organization in
+                  <a href="https://ror.org" target="_blank">https://ror.org</a>
+                  then feel free to add the url here.
+                </p>
               </v-col>
             </v-row>
             <v-row>
@@ -102,17 +94,6 @@ permissions and limitations under the Licence.
                   v-model="suggestion.note"
                   label="Note for the curator"
                   rows="2"
-                />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <v-select
-                  v-model="suggestion.globalProvenanceId"
-                  :items="globalProvenances"
-                  label="Global provenance"
-                  item-value="id"
-                  clearable
                 />
               </v-col>
             </v-row>
