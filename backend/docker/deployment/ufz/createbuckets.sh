@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 
-# SPDX-FileCopyrightText: 2021
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 
 while ! nc -z minio 9000; do echo 'Wait minio to startup...' && sleep 0.1; done;

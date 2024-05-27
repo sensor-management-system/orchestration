@@ -2,7 +2,7 @@
 -- - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 -- - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 --
--- SPDX-License-Identifier: HEESIL-1.0
+-- SPDX-License-Identifier: EUPL-1.2
 
 insert into public.contact (id, given_name, family_name, website, email)
 values  (1, 'Test', 'User1', null, 'test-user1@ufz.de'),

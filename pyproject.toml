@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Norman Ziegner <norman.ziegner@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 [tool.poetry]
 name = "orchestration"
@@ -12,7 +12,7 @@ authors = [
     "Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)",
     "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)"
 ]
-license = "\"Helmholtz Earth and Environment\" Software-Infrastruktur-Lizenz (HEESIL) v.1.0"
+license = "EUPL-1.2"
 
 [tool.poetry.dependencies]
 python = "^3.9"

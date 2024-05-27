@@ -1,3 +1,15 @@
+<!--
+SPDX-FileCopyrightText: 2021 - 2024
+- Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Norman Ziegner <norman.ziegner@ufz.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
 # Vuex + TypeScript
 
 To ensure type compatibility when using `state`, `actions` and `getters` from

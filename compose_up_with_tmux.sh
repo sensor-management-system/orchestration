@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 
 SESSION="SMS_Development"

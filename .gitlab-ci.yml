@@ -7,7 +7,7 @@
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 stages:
   - buildtest
@@ -70,6 +70,22 @@ build-backend-test-image:
         - backend/**/*
         - .gitlab-ci.yml
 
+check-reuse-compliance:
+  stage: check
+  image: python:3.11
+  before_script:
+    - pip install reuse
+  script:
+    - reuse lint
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - when: always
+
 check-lint-frontend:
   stage: check
   image: node:18.18.0-buster
@@ -105,31 +121,6 @@ check-build-frontend:
   script:
     - npm run build
   allow_failure: false
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - frontend/node_modules
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - if: '$CI_COMMIT_TAG'
-      when: never
-    - changes:
-        - frontend/**/*
-        - .gitlab-ci.yml
-
-check-license-frontend:
-  stage: check
-  image: node:18.18.0-buster
-  before_script:
-    - cd frontend
-    - node -v
-    - npm ci
-  script:
-    - npm run licenseCheck
-  allow_failure: true
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
