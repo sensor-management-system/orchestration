@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Norman Ziegner <norman.ziegner@ufz.de>
 # SPDX-FileCopyrightText: 2023 Helmholtz Centre for Environmental Research GmbH - UFZ
 #
-# SPDX-License-Identifier: LicenseRef-HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 imagePullSecrets:
   - name: sms-read-registry-token

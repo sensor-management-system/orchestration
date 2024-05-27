@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2023 - 2024
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
-SPDX-License-Identifier: HEESIL-1.0
+SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.16.0 (Unreleased)
 
@@ -17,6 +17,7 @@ Added:
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
+- the licenes of the system is now the EUPL-1.2
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces

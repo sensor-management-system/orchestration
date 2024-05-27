@@ -58,7 +58,6 @@
     "test": "jest",
     "styleguide": "vue-styleguidist server --config styleguide.config.js",
     "styleguide:build": "vue-styleguidist build --config styleguide.config.js",
-    "licenseCheck": "ts-node ./scripts/licenseCheck.ts",
     "generate:license-list": "license-checker --production --customPath=licenseText --json > ./generated/licenses.json"
   },
   "dependencies": {

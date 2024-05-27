@@ -5,7 +5,7 @@
 # - Norman Ziegner <norman.ziegner@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 # Create self-signed certificates for testing.
 # Requires https://pypi.org/project/zeroc-icecertutils/

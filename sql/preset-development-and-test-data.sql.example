@@ -1,4 +1,9 @@
-
+-- SPDX-FileCopyrightText: 2023 - 2024
+-- - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+-- - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+-- 
+-- SPDX-License-Identifier: EUPL-1.2
+--
 -- CONTACT
 -- -- Insert new contact
 INSERT INTO public.contact (id, given_name, family_name, website, email, active, created_at, updated_at, created_by_id, updated_by_id) VALUES (1, 'Tobias', 'Kuhnert', null, 'tobias.kuhnert@ufz.de', true, '2023-03-30 06:32:16.145872 +00:00', '2023-03-30 06:32:16.145883 +00:00', null, null);

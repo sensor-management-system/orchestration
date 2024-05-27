@@ -21,4 +21,4 @@
 - [ ] Cause found
 - [ ] Bug fixed
 
-/label ~type::bug  
+/label ~type::bug
