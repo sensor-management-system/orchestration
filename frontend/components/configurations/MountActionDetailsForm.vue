@@ -33,7 +33,7 @@ SPDX-License-Identifier: EUPL-1.2
             xl="3"
           >
             <v-text-field
-              v-model.number="mountActionInformationDTO.offsetX"
+              :value="mountActionInformationDTO.offsetX"
               data-role="textfield-offset-x"
               label="Offset (x)"
               type="number"
@@ -43,7 +43,7 @@ SPDX-License-Identifier: EUPL-1.2
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
               @wheel.prevent
-              @input="update"
+              @change="updateNumericFieldNonNull($event, 'offsetX')"
             />
           </v-col>
           <v-col
@@ -52,7 +52,7 @@ SPDX-License-Identifier: EUPL-1.2
             xl="3"
           >
             <v-text-field
-              v-model.number="mountActionInformationDTO.offsetY"
+              :value="mountActionInformationDTO.offsetY"
               data-role="textfield-offset-y"
               label="Offset (y)"
               type="number"
@@ -62,7 +62,7 @@ SPDX-License-Identifier: EUPL-1.2
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
               @wheel.prevent
-              @input="update"
+              @change="updateNumericFieldNonNull($event, 'offsetY')"
             />
           </v-col>
           <v-col
@@ -71,7 +71,7 @@ SPDX-License-Identifier: EUPL-1.2
             xl="3"
           >
             <v-text-field
-              v-model.number="mountActionInformationDTO.offsetZ"
+              :value="mountActionInformationDTO.offsetZ"
               data-role="textfield-offset-z"
               label="Offset (z)"
               type="number"
@@ -81,7 +81,7 @@ SPDX-License-Identifier: EUPL-1.2
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
               @wheel.prevent
-              @input="update"
+              @change="updateNumericFieldNonNull($event, 'offsetZ')"
             />
           </v-col>
         </v-row>
@@ -170,24 +170,24 @@ SPDX-License-Identifier: EUPL-1.2
         <v-row class="pb-0">
           <v-col cols="12" md="4">
             <v-text-field
-              v-model.number="mountActionInformationDTO.x"
+              :value="mountActionInformationDTO.x"
               label="Coordinate (x)"
               type="number"
               step="any"
               clearable
               @wheel.prevent
-              @change="update"
+              @change="updateNumericFieldNullable($event, 'x')"
             />
           </v-col>
           <v-col cols="12" md="4">
             <v-text-field
-              v-model.number="mountActionInformationDTO.y"
+              :value="mountActionInformationDTO.y"
               label="Coordinate (y)"
               type="number"
               step="any"
               clearable
               @wheel.prevent
-              @change="update"
+              @change="updateNumericFieldNullable($event, 'y')"
             />
           </v-col>
           <v-col cols="12" md="4">
@@ -205,13 +205,13 @@ SPDX-License-Identifier: EUPL-1.2
         <v-row class="pb-0">
           <v-col cols="12" md="4" offset-md="4">
             <v-text-field
-              v-model.number="mountActionInformationDTO.z"
+              :value="mountActionInformationDTO.z"
               label="Coordinate (z)"
               type="number"
               step="any"
               clearable
               @wheel.prevent
-              @change="update"
+              @change="updateNumericFieldNullable($event, 'z')"
             />
           </v-col>
           <v-col cols="12" md="4">
@@ -303,6 +303,7 @@ import { Contact } from '@/models/Contact'
 
 import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
 import { MountActionDateDTO, MountActionInformationDTO, IOffsets } from '@/utils/configurationInterfaces'
+import { parseFloatOrDefault, parseFloatOrNull } from '@/utils/numericsHelper'
 
 @Component({
   components: {
@@ -427,8 +428,18 @@ export default class MountActionDetailsForm extends mixins(Rules) {
     return []
   }
 
-  update () {
-    this.$emit('input', this.mountActionInformationDTO)
+  async updateNumericFieldNonNull (value: any, field: 'offsetX' | 'offsetY' | 'offsetZ') {
+    this.mountActionInformationDTO[field] = parseFloatOrDefault(value, 0.0)
+    await this.update()
+  }
+
+  async updateNumericFieldNullable (value: any, field: 'x' | 'y' | 'z') {
+    this.mountActionInformationDTO[field] = parseFloatOrNull(value)
+    await this.update()
+  }
+
+  async update () {
+    await this.$emit('input', this.mountActionInformationDTO)
   }
 
   get absoluteOffsets (): IOffsets {
