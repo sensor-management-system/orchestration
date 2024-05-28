@@ -50,7 +50,7 @@ SPDX-License-Identifier: EUPL-1.2
           type="number"
           step="any"
           @wheel.prevent
-          @input="setValue"
+          @change="setValue"
         />
       </v-col>
     </v-row>

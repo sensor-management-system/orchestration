@@ -283,7 +283,7 @@ SPDX-License-Identifier: EUPL-1.2
                 :value="value.aggregationPeriod"
                 type="number"
                 step="any"
-                @input="update('aggregationPeriod', $event)"
+                @change="update('aggregationPeriod', $event)"
                 @wheel.prevent
               />
             </v-col>
