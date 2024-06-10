@@ -41,6 +41,7 @@ services:
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
       DJANGO_SECRET_KEY: ${IDL_SECRET_KEY}
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://rz-vm64.gfz-potsdam.de'
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'

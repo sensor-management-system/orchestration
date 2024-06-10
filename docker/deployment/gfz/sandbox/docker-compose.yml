@@ -39,6 +39,7 @@ services:
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
       DJANGO_SECRET_KEY: ${SMS_SANDBOX_IDL_SECRET_KEY}
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sensors-sandbox.gfz-potsdam.de'
       IDL_TOKEN: $SMS_SANDBOX_IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin,*:ufz-sms-admin,*:kit-sms-admin,*:fzj-sms-admin'

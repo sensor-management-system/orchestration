@@ -24,6 +24,7 @@ Fixed:
 - Fixed https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/issues/89
 - The "Open in new tab" of a device or platform in the mounting wizard (step 3) of a configuration now opens the correct URL (also when creating a new tsm linking)
 - Fixed a problem when inserting small values like 0.05 (stating with 0.0) in some of the number fields
+- Added CSRF trusted origins for the IDL component
 
 ## 1.15.1 - 2024-04-24
 
