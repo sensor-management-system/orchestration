@@ -60,6 +60,7 @@ services:
       IDL_URL: ${IDL_URL}
       SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
       CV_URL: ${CV_URL}
+      CV_URL_BACKEND_ACCESS: http://vocabulary:8000/${CV_BASE_URL:-cv/}api/v1
       INSTITUTE: ${INSTITUTE:-ufz}
       PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile email}
       SMS_BACKEND_URL: ${SMS_BACKEND_URL:-https://localhost.localdomain/backend/api/v1}

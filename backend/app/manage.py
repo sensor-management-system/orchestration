@@ -10,12 +10,14 @@
 """CLI commands for the flask maange.py."""
 
 import json
+import os
 import pathlib
 import sys
 import unittest
 
 import click
 import coverage
+import requests
 from flask.cli import FlaskGroup
 
 from project import create_app
@@ -440,9 +442,7 @@ def import_manufacturer_models_from_gipp():
     instrument_category_ids_to_import = generate_child_elements(data)
 
     for id_ in instrument_category_ids_to_import:
-        response = requests.get(
-            f"{base_url}/instrumentcategories/view/{id_}.json"
-        )
+        response = requests.get(f"{base_url}/instrumentcategories/view/{id_}.json")
         response.raise_for_status()
         data = response.json()
         manufacturer_name = data["Instrumentcategory"]["manufacturer"]
@@ -463,6 +463,161 @@ def import_manufacturer_models_from_gipp():
                 )
                 db.session.add(new_model)
                 db.session.commit()
+
+
+@cli.group("cv")
+@click.pass_context
+def cv_group(ctx):
+    """Group for commands that are related to the controlled vocabulary."""
+    from project.api import models
+    ctx.ensure_object(dict)
+    ctx.obj["fields_to_check"] = [
+        (models.ConfigurationContactRole, {"role_uri": "role_name"}),
+        (
+            models.ConfigurationParameter,
+            {
+                "unit_uri": "unit_name",
+            },
+        ),
+        (
+            models.Device,
+            {
+                "device_type_uri": "device_type_name",
+                "manufacturer_uri": "manufacturer_name",
+                "status_uri": "status_uri",
+            },
+        ),
+        (models.DeviceContactRole, {"role_uri": "role_name"}),
+        (
+            models.DeviceParameter,
+            {
+                "unit_uri": "unit_name",
+            },
+        ),
+        (
+            models.DeviceProperty,
+            {
+                "accuracy_unit_uri": "accuracy_unit_name",
+                "aggregation_type_uri": "aggregation_type_name",
+                "compartment_uri": "compartment_name",
+                "property_uri": "property_name",
+                "resolution_unit_uri": "resolution_unit_name",
+                "sampling_media_uri": "sampling_media_name",
+                "unit_uri": "unit_name",
+            },
+        ),
+        (
+            models.DeviceSoftwareUpdateAction,
+            {
+                "software_type_uri": "software_type_name",
+            },
+        ),
+        (
+            models.GenericConfigurationAction,
+            {
+                "action_type_uri": "action_type_name",
+            },
+        ),
+        (
+            models.GenericDeviceAction,
+            {
+                "action_type_uri": "action_type_name",
+            },
+        ),
+        (
+            models.GenericPlatformAction,
+            {
+                "action_type_uri": "action_type_name",
+            },
+        ),
+        (
+            models.Platform,
+            {
+                "manufacturer_uri": "manufacturer_name",
+                "platform_type_uri": "platform_type_name",
+                "status_uri": "status_name",
+            },
+        ),
+        (models.PlatformContactRole, {"role_uri": "role_name"}),
+        (
+            models.PlatformParameter,
+            {
+                "unit_uri": "unit_name",
+            },
+        ),
+        (
+            models.PlatformSoftwareUpdateAction,
+            {
+                "software_type_uri": "software_type_name",
+            },
+        ),
+        (
+            models.Site,
+            {
+                "site_type_uri": "site_type_name",
+                "site_usage_uri": "site_usage_uri",
+            },
+        ),
+        (models.SiteContactRole, {"role_uri": "role_name"}),
+    ]
+
+
+@cv_group.command("apply-current-terms-to-sms")
+@click.pass_context
+def cv_apply_current_terms(ctx):
+    """Query the CV and set the latest values in the SMS data models."""
+
+    # This is the base url that points to the SMS CV - that the frontend can access.
+    expected_cv_url_in_db = app.config["CV_URL"]
+    # This is just a local setting so that we can overrite it url to a service internal
+    # one in the local development setup.
+    # If it is not set, then we just use the expected_cv_url_in_db - a url that we can
+    # access on staging & production systems.
+    cv_url_backend_access = os.environ.get(
+        "CV_URL_BACKEND_ACCESS", expected_cv_url_in_db
+    )
+
+    cv_cache = {}
+
+    for model_field, fields_to_update in ctx.obj["fields_to_check"]:
+        for entry in db.session.query(model_field).all():
+            for uri_field_name, name_field_name in fields_to_update.items():
+                uri_value = getattr(entry, uri_field_name)
+                name_value = getattr(entry, name_field_name)
+
+                name_to_set = None
+                if uri_value:
+                    if uri_value in cv_cache.keys():
+                        name_to_set = cv_cache[uri_value]
+                    else:
+                        if uri_value.startswith(expected_cv_url_in_db):
+                            url = uri_value.replace(
+                                expected_cv_url_in_db, cv_url_backend_access
+                            )
+                            response = requests.get(url)
+                            if response.ok:
+                                response_data = response.json()["data"]
+                                term = response_data["attributes"]["term"]
+                                name_to_set = term
+                                cv_cache[uri_value] = name_to_set
+
+                    if name_value != name_to_set and name_to_set is not None:
+                        setattr(entry, name_field_name, name_to_set)
+
+            db.session.add(entry)
+    db.session.commit()
+
+@cv_group.command("list-sms-entries-with-name-but-without-uri")
+@click.pass_context
+def cv_list_sms_entries_with_name_but_without_uri(ctx):
+    for model, fields_to_check in ctx.obj["fields_to_check"]:
+        for entry in db.session.query(model).all():
+            for uri_field_name, name_field_name in fields_to_check.items():
+                uri_value = getattr(entry, uri_field_name)
+                name_value = getattr(entry, name_field_name)
+
+                if name_value and not uri_value:
+                    print(f"{model.__name__} {entry.id} {name_field_name}: '{name_value}'")
 
 
 if __name__ == "__main__":

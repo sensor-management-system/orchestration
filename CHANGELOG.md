@@ -14,6 +14,8 @@ Added:
 - created at field for the manufacturer models in order to keep track when those were added to the system
 - extended openapi specs
 - multiple wildcard idl conventions are now supported
+- Scripts to update cv related names from the latest entries in the controlled vocabulary
+  as well as code to analyse for which entries we still miss to have links to CV
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
