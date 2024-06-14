@@ -160,7 +160,7 @@ python manage.py users reactivate srcuserubject@ufz.de
 
 When writing changes to the models. Use migrations.
 
-```
+```bash
 # To generate a migration after doing a model update
 python manage.py db migrate
 
@@ -169,6 +169,19 @@ python manage.py db upgrade
 
 # To rollback
 python manage.py db downgrade
+```
+
+**Update of names with latest CV terms**
+
+When the user suggests a new term it can happen that the term
+needs renaming after the curation team decided to go with a
+slightly different name.
+
+With the following command we can update all the CV related entries
+with their latest terms from the CV:
+
+```bash
+python manage.py cv apply-current-terms-to-sms
 ```
 
 **loading of fixture data**
