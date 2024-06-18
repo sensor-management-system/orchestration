@@ -20,6 +20,7 @@ Added:
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
 - the licenes of the system is now the EUPL-1.2
+- Renamed tsm linking to data linking
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces
