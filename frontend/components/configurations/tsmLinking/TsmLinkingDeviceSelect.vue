@@ -1,5 +1,5 @@
 <!--
- SPDX-FileCopyrightText: 2020 - 2023
+ SPDX-FileCopyrightText: 2020 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
  -->
@@ -54,7 +54,7 @@ SPDX-License-Identifier: EUPL-1.2
                       </v-icon>
                     </v-btn>
                   </template>
-                  <span>No permission to add TSM Linking for <em>{{ item.shortName }}</em>.</span>
+                  <span>No permission to add Data Linking for <em>{{ item.shortName }}</em>.</span>
                 </v-tooltip>
               </template>
             </DevicesListItem>

@@ -1,5 +1,5 @@
 <!--
- SPDX-FileCopyrightText: 2020 - 2023
+ SPDX-FileCopyrightText: 2020 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
  -->
@@ -7,7 +7,7 @@ SPDX-License-Identifier: EUPL-1.2
   <div>
     <v-card-actions>
       <v-card-title class="pl-0">
-        Edit TSM Linking
+        Edit Data Linking
       </v-card-title>
       <v-spacer />
       <SaveAndCancelButtons

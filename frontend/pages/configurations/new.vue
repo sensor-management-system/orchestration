@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
@@ -156,8 +156,7 @@ export default class ConfigurationNewPage extends Vue {
         disabled: true
       },
       {
-        name:
-        'TSM Linkings',
+        name: 'Data Linking',
         disabled: true
       }
     ])

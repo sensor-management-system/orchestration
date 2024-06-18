@@ -1,5 +1,5 @@
 <!--
- SPDX-FileCopyrightText: 2020 - 2023
+ SPDX-FileCopyrightText: 2020 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
  -->
@@ -20,7 +20,7 @@ SPDX-License-Identifier: EUPL-1.2
           nuxt
           :to="'/configurations/' + configurationId + '/tsm-linking/new'"
         >
-          Add TSM Linking
+          Add Data Linking
         </v-btn>
       </v-card-actions>
     </v-card>

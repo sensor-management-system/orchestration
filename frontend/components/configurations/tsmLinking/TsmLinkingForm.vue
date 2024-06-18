@@ -1,5 +1,5 @@
 <!--
- SPDX-FileCopyrightText: 2020 - 2023
+ SPDX-FileCopyrightText: 2020 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
  -->
@@ -45,7 +45,7 @@ SPDX-License-Identifier: EUPL-1.2
                   <v-list-item @click="update('endpoint', suggestedTsmEndpoint)">
                     <v-list-item-content>
                       <label>
-                        Suggested TSMDL Endpoint
+                        Suggested Data Endpoint
                         <v-tooltip top>
                           <template #activator="{ on }">
                             <v-icon
