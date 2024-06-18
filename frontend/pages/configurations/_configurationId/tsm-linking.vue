@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
@@ -59,7 +59,7 @@ export default class ConfigurationTsmLinking extends Vue {
 
   head () {
     return {
-      titleTemplate: 'TSM Linking - %s'
+      titleTemplate: 'Data Linking - %s'
     }
   }
 }

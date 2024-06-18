@@ -1,5 +1,5 @@
 <!--
- SPDX-FileCopyrightText: 2020 - 2023
+ SPDX-FileCopyrightText: 2020 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
  -->
@@ -43,7 +43,7 @@ SPDX-License-Identifier: EUPL-1.2
     </v-data-table>
     <DeleteDialog
       v-model="showDeleteDialog"
-      title="Delete TSM Linking"
+      title="Delete Data Linking"
       @cancel="closeDialog"
       @delete="deleteAndCloseDialog"
     >
