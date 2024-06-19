@@ -505,6 +505,7 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
                     "is_private": False,
                     "is_public": False,
                     "group_ids": ["1"],
+                    "model": "",
                 },
             }
         }
@@ -516,6 +517,20 @@ class TestKeepingManufacturerModelsUpToDateByDevices(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
         self.expect(db.session.query(ManufacturerModel).count()).to_equal(0)
+        # And now we want to update the model, so that we get one manufacturer
+        # model entry.
+        device_id = response.json["data"]["id"]
+        payload_update = {
+            "data": {"type": "device", "id": device_id, "attributes": {"model": "123"}}
+        }
+        with self.run_requests_as(super_user):
+            response = self.client.patch(
+                f"{self.url}/{device_id}",
+                data=json.dumps(payload_update),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(response.status_code).to_equal(200)
+        self.expect(db.session.query(ManufacturerModel).count()).to_equal(1)
 
     @fixtures.use(["super_user"])
     def test_dont_add_manufacturer_model_entry_without_name(self, super_user):
@@ -1220,6 +1235,7 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
                     "is_private": False,
                     "is_public": False,
                     "group_ids": ["1"],
+                    "model": "",
                 },
             }
         }
@@ -1231,6 +1247,25 @@ class TestKeepingManufacturerModelsUpToDateByPlatforms(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(201)
         self.expect(db.session.query(ManufacturerModel).count()).to_equal(0)
+
+        # And now we want to update the model, so that we get one manufacturer
+        # model entry.
+        platform_id = response.json["data"]["id"]
+        payload_update = {
+            "data": {
+                "type": "platform",
+                "id": platform_id,
+                "attributes": {"model": "123"},
+            }
+        }
+        with self.run_requests_as(super_user):
+            response = self.client.patch(
+                f"{self.url}/{platform_id}",
+                data=json.dumps(payload_update),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(response.status_code).to_equal(200)
+        self.expect(db.session.query(ManufacturerModel).count()).to_equal(1)
 
     @fixtures.use(["super_user"])
     def test_dont_add_manufacturer_model_entry_without_name(self, super_user):

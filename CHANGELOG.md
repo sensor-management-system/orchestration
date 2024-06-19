@@ -29,6 +29,7 @@ Fixed:
 - Fixed a problem when inserting small values like 0.05 (stating with 0.0) in some of the number fields
 - Added CSRF trusted origins for the IDL component
 - Updated IDL image, so that github accounts can be used again
+- Fixes a bug in the management of manufacturer model entries
 
 ## 1.15.1 - 2024-04-24
 

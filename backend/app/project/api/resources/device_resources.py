@@ -274,7 +274,9 @@ class DeviceDetail(ResourceDetail):
                     )
                     .first()
                 )
-                if not any(
+                # If we found one entry, but it has no information yet,
+                # we check if we should delete the old one.
+                if existing_manufacturer_model and not any(
                     [
                         existing_manufacturer_model.external_system_name,
                         existing_manufacturer_model.external_system_url,
