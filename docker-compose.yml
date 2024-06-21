@@ -65,7 +65,7 @@ services:
       PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile eduperson_principal_name email offline_access}
       SMS_BACKEND_URL: ${SMS_BACKEND_URL:-/backend/api/v1}
       PKCE_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-sms-client}
-      SMS_FRONTEND_URL: ${SMS_FRONTEND_URL:-http//localhost}
+      SMS_FRONTEND_URL: ${SMS_FRONTEND_URL:-http://localhost}
       PID_SERVICE_URL: ${PID_SERVICE_URL:-}
       PID_SERVICE_USER: ${PID_SERVICE_USER:-}
       PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD:-}
