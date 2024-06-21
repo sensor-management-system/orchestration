@@ -93,68 +93,27 @@ Run the following commands to set up the submodule:
   - `git submodule init`  
   - `git submodule update` 
 
-### Self-signed certificate creation
-At first, generate a self-signed certificate. You can use the python
-script `icessl/ice-ca-certs.py`, which requires the python library *zeroc-icecertutils*
-Make sure you execute the script inside the target folder `nginx/certs`.
-The self-signed certificate can be generated in the following ways:
-
-- Using `pip`:
-  ```shell
-  # In case you have an older pip version, upgrade pip beforehand,
-  # so that the build process with rust is supported.
-  pip install --upgrade pip`
-  pip install zeroc-icecertutils
-  
-  cd nginx/certs/
-  ../../icessl/ice-ca-certs.py
-  ```
-
-- Using `poetry`:
-  ```shell
-  poetry install
-  cd nginx/certs/
-  poetry run ../../icessl/ice-ca-certs.py
-  ```
-
-- Using `docker`:
-  ```
-  docker-compose -f docker-compose.icessl.yml up -d
-  mv icessl/server.* nginx/certs/
-  ```
-
 ### Run the application
-1. Copy all files ending with
+```
+docker compose up -d
+```
+
+Visit http://localhost
+
+Use one of the users specified in [keycloak/docs/Specification for sms.md](./keycloak/docs/Specification for sms.md) to login.
+
+#### If you want to change the default variables
+- Copy all files ending with
    ```env.template```. Fill the variables and rename it
    to ```env.dev```
-
-2. Start the containers and run them in background:
-
-```bash
-    docker-compose --env-file ./docker/env.dev  up -d
+```
+cp ./docker/env.template ./docker/env.dev
 ```
 
-3. In order to make sure that the search filter work, you have to create
-   the search index on the elastic search:
+- Start the containers and run them in background:
 
 ```bash
-docker-compose --env-file ./docker/env.dev exec backend python3 manage.py es reindex
-```
-
-This ensures that the search index can be used for full text search
-**AND** for keyword search (without it search for specific
-device types for example will not work).
-
-Please note: You don't have to run the `reindex` on every startup.
-It is important to run it initially and after each change in the structure of the
-search index as well (new fields to index for example).
-
-
-
-You can watch the output of the containers witch `docker-compose logs`:
-
-```bash
-docker-compose logs --follow 
+    docker compose --env-file ./docker/env.dev  up -d
 ```
 
 ## TSM Endpoints
@@ -204,33 +163,12 @@ that the check needs to be done just once for a group of devices or platforms.
 
 The permission to handle those information is bound to the `EXPORT_CONTROL_VO_LIST`
 env variable. It is a comma seperated list that points to the full qualified name
-of a virtual organization.
+of a virtual organization (VO). If you use a sub group of your VO it will look like this: `urn:geant:helmholtz.de:group:<VO Name>:<Group Name>#login.helmholtz.de`.
+The full name of the group muss be added to the `EXPORT_CONTROL_VO_LIST`.
 
 For the GFZ we have a `sensor-management-system-export-control` group within myprofile.
 This is visible as `urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de` within the Helmholtz AAI - and this is the value that is
 used in the `EXPORT_CONTROL_VO_LIST` variable.
-
-## Additional step UFZ developer for Frontend local development - Identity Provider
-
-You can't use `localhost` for local development to authenticate against an Identity Provider, but
-you can use `localhost.localdomain`
-Here's how you can do this on a Linux (Ubuntu) machine (feel free to search for your own operation
-system):
-
-- Adjust `hosts` file:
-    - sudo edit /etc/hosts
-    - add the following line: 127.0.0.1 localhost.localdomain
-    - save
-
-Application urls:
-
-__Backend:__  `https://{HOST}/backend`
-
-__Frontend:__ `https://{HOST}/`
-
-__Controlled Vocabulary:__ `https://{HOST}/cv` 
-
-__Minio Console:__ `https://{HOST}:8443/` 
 
 ## Restore the backups (gfz)
 
@@ -289,9 +227,9 @@ For the minio the restore is different:
   - Update the `./sql/preset-development-and-test-data.sql` file to your needs
     - __HINT__: If you use hard coded IDs make sure to update the corresponding sequences or you'll encounter problems 
   - run `./preset-database.sh`
+  - 
 ## How to add new environment variables to the project
 You have to look for many places. Keep in mind, that you always have look in the specific repository (e.g. `frontend` or `backend`) __and__ the orchestration repository 
-
 ### Frontend
 #### In frontend repository
 ##### Usage in code
