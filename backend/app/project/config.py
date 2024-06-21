@@ -80,6 +80,7 @@ class BaseConfig:
     SMS_VERSION = env("SMS_VERSION", "develop")
     PROXY_NETLOC_BLOCKLIST = env.list("PROXY_NETLOC_BLOCKLIST", [])
     EXPORT_CONTROL_VO_LIST = env.list("EXPORT_CONTROL_VO_LIST", [])
+    OIDC_TOKEN_ENDPOINT_FOR_FRONTEND = env.str("OIDC_TOKEN_ENDPOINT_FOR_FRONTEND", "")
 
 
 class DevelopmentConfig(BaseConfig):

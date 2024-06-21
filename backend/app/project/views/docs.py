@@ -64,6 +64,11 @@ def openapi_json():
         },
     ]
     token_endpoint = current_app.config.get("OIDC_TOKEN_ENDPOINT")
+    # In case the frontend needs another url to access the token endpoint.
+    # This are situations where a keycloak for example is part of the docker
+    # network (so we can use the service name) - which the frontend can't do.
+    if current_app.config.get("OIDC_TOKEN_ENDPOINT_FOR_FRONTEND"):
+        token_endpoint = current_app.config.get("OIDC_TOKEN_ENDPOINT_FOR_FRONTEND")
     authorization_endpoint = current_app.config.get("OIDC_AUTHORIZATION_ENDPOINT")
     term_of_use_url = (
         current_app.config.get("SMS_FRONTEND_URL", "") + "/info/terms-of-use"
