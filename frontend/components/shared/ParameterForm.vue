@@ -54,6 +54,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueUnitItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueUnitItem && valueUnitItem.uri" target="_blank" :href="valueUnitItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewUnitDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline

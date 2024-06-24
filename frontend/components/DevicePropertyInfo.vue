@@ -31,6 +31,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ compartmentDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.compartmentUri" target="_blank" :href="value.compartmentUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Sampling Media</label>
@@ -48,6 +53,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ samplingMediaDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.samplingMediaUri" target="_blank" :href="value.samplingMediaUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Measured Quantity</label>
@@ -65,6 +75,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ measuredQuantityDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.propertyUri" target="_blank" :href="value.propertyUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Aggregation Type</label>
@@ -82,6 +97,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ aggregationTypeDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.aggregationTypeUri" target="_blank" :href="value.aggregationTypeUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
     </v-row>
     <v-row>
@@ -101,6 +121,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ unitDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.unitUri" target="_blank" :href="value.unitUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Failure Value</label>
@@ -136,6 +161,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ accuracyUnitDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.accuracyUnitUri" target="_blank" :href="value.accuracyUnitUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Resolution</label>
@@ -157,6 +187,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ resolutionUnitDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.resolutionUnitUri" target="_blank" :href="value.resolutionUnitUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
     </v-row>
     <v-row>

@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -54,6 +54,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueCompartmentItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueCompartmentItem && valueCompartmentItem.uri" target="_blank" :href="valueCompartmentItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewCompartmentDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -118,6 +123,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueSamplingMediaItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueSamplingMediaItem && valueSamplingMediaItem.uri" target="_blank" :href="valueSamplingMediaItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewSamplingMediaDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -185,6 +195,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valuePropertyItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valuePropertyItem && valuePropertyItem.uri" target="_blank" :href="valuePropertyItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewPropertyDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -250,6 +265,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueAggregationTypeItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueAggregationTypeItem && valueAggregationTypeItem.uri" target="_blank" :href="valueAggregationTypeItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewAggregationTypeDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -317,6 +337,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueUnitItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueUnitItem && valueUnitItem.uri" target="_blank" :href="valueUnitItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon :disabled="!valuePropertyItem || !valuePropertyItem.id" @click="showNewMeasuredQuantityUnitDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -431,6 +456,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueAccuracyUnitItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueAccuracyUnitItem && valueAccuracyUnitItem.uri" target="_blank" :href="valueAccuracyUnitItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewUnitDialogForAccuracy = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -507,6 +537,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueResolutionUnitItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueResolutionUnitItem && valueResolutionUnitItem.uri" target="_blank" :href="valueResolutionUnitItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewUnitDialogForResolution = true">
                 <v-icon>
                   mdi-tooltip-plus-outline

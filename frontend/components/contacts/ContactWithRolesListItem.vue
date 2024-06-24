@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 - 2023
+SPDX-FileCopyrightText: 2022 - 2024
 - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
@@ -17,12 +17,32 @@ SPDX-License-Identifier: EUPL-1.2
         <v-tooltip v-if="roleDefinition(role, cvContactRoles)" right>
           <template #activator="{ on, attrs }">
             <div v-bind="attrs" v-on="on">
-              <v-badge :content="roleName(role, cvContactRoles)" inline />
+              <v-badge inline>
+                <template #badge>
+                  {{ roleName(role, cvContactRoles) }}
+                </template>
+              </v-badge>
+              <a v-if="role.roleUri" :href="role.roleUri" target="_blank" @click.stop>
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
             </div>
           </template>
           <span>{{ roleDefinition(role, cvContactRoles) }}</span>
         </v-tooltip>
-        <v-badge v-else :content="roleName(role, cvContactRoles)" inline />
+        <span v-else inline>
+          <v-badge inline>
+            <template #badge>
+              {{ roleName(role, cvContactRoles) }}
+            </template>
+          </v-badge>
+          <a v-if="role.roleUri" :href="role.roleUri" target="_blank" @click.stop>
+            <v-icon small>
+              mdi-open-in-new
+            </v-icon>
+          </a>
+        </span>
       </p>
     </template>
     <template #dot-menu-items>

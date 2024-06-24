@@ -130,6 +130,11 @@ SPDX-License-Identifier: EUPL-1.2
               </template>
               <span>{{ valueDeviceTypeItem.definition }}</span>
             </v-tooltip>
+            <a v-if="valueDeviceTypeItem && valueDeviceTypeItem.uri" target="_blank" :href="valueDeviceTypeItem.uri" style="line-height: 2;">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
             <v-btn icon @click="showNewDeviceTypeDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline
@@ -193,6 +198,11 @@ SPDX-License-Identifier: EUPL-1.2
               </template>
               <span>{{ valueManufacturerItem.definition }}</span>
             </v-tooltip>
+            <a v-if="valueManufacturerItem && valueManufacturerItem.uri" target="_blank" :href="valueManufacturerItem.uri" style="line-height: 2;">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
             <v-btn icon @click="showNewManufacturerDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline
@@ -282,6 +292,11 @@ SPDX-License-Identifier: EUPL-1.2
               </template>
               <span>{{ valueStatusItem.definition }}</span>
             </v-tooltip>
+            <a v-if="valueStatusItem && valueStatusItem.uri" target="_blank" :href="valueStatusItem.uri" style="line-height: 2;">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
             <v-btn icon @click="showNewStatusDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline

@@ -94,6 +94,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueSiteUsageItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueSiteUsageItem && valueSiteUsageItem.uri" target="_blank" :href="valueSiteUsageItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewSiteUsageDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -158,6 +163,11 @@ SPDX-License-Identifier: EUPL-1.2
                 </template>
                 <span>{{ valueSiteTypeItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueSiteTypeItem && valueSiteTypeItem.uri" target="_blank" :href="valueSiteTypeItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewSiteTypeDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline

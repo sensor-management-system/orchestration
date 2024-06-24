@@ -39,7 +39,59 @@ SPDX-License-Identifier: EUPL-1.2
             class="required"
             :rules="[rules.softwareTypeNotNull]"
             @input="setSoftwareType"
-          />
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="softwareType && softwareType.definition"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ softwareType.definition }}</span>
+              </v-tooltip>
+              <a v-if="actionCopy.softwareTypeUrl" target="_blank" :href="actionCopy.softwareTypeUrl" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
+            </template>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
+              </template>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </template>
+          </v-select>
         </v-form>
       </v-col>
     </v-row>
@@ -86,7 +138,7 @@ SPDX-License-Identifier: EUPL-1.2
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
-
+import { mapActions, mapState } from 'vuex'
 import { DateTime } from 'luxon'
 
 import { Attachment } from '@/models/Attachment'
@@ -98,6 +150,7 @@ import { protocolsInUrl } from '@/utils/urlHelpers'
 
 import CommonActionForm from '@/components/actions/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import { LoadSoftwareTypesAction, VocabularyState } from '@/store/vocabulary'
 
 /**
  * A class component for a form for Software update actions
@@ -107,6 +160,12 @@ import DateTimePicker from '@/components/DateTimePicker.vue'
   components: {
     CommonActionForm,
     DateTimePicker
+  },
+  methods: {
+    ...mapActions('vocabulary', ['loadSoftwareTypes'])
+  },
+  computed: {
+    ...mapState('vocabulary', ['softwareTypes'])
   }
 })
 // @ts-ignore
@@ -120,7 +179,8 @@ export default class SoftwareUpdateActionForm extends Vue {
     isUrl: this.isUrl
   }
 
-  private softwareTypes: SoftwareType[] = []
+  private softwareTypes!: VocabularyState['softwareTypes']
+  loadSoftwareTypes!: LoadSoftwareTypesAction
 
   /**
    * a SoftwareUpdateAction
@@ -151,11 +211,7 @@ export default class SoftwareUpdateActionForm extends Vue {
   readonly currentUserMail: string | null
 
   async fetch (): Promise<any> {
-    await this.fetchSoftwareTypes()
-  }
-
-  async fetchSoftwareTypes (): Promise<any> {
-    this.softwareTypes = await this.$api.softwareTypes.findAllPaginated()
+    await this.loadSoftwareTypes()
   }
 
   created () {
@@ -182,6 +238,14 @@ export default class SoftwareUpdateActionForm extends Vue {
     this.actionCopy.softwareTypeUrl = aSoftwareType?.uri || ''
     this.actionCopy.softwareTypeName = aSoftwareType?.name || ''
     this.$emit('input', this.actionCopy)
+  }
+
+  get softwareType (): SoftwareType | undefined {
+    let aSoftwareType: SoftwareType | undefined
+    if (this.actionCopy && this.actionCopy.softwareTypeUrl) {
+      aSoftwareType = this.softwareTypes.find(i => i.uri === this.actionCopy.softwareTypeUrl)
+    }
+    return aSoftwareType
   }
 
   setVersion (version: string) {

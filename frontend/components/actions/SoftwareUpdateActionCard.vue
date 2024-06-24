@@ -42,18 +42,43 @@ SPDX-License-Identifier: EUPL-1.2
         class="grey lighten-5 text--primary pt-2"
       >
         <v-row dense>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="3">
+            <label>
+              Software type
+            </label>
+            {{ value.softwareTypeName | orDefault }}
+            <v-tooltip v-if="softwareTypeDefinition" right>
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ softwareTypeDefinition }}</span>
+            </v-tooltip>
+            <a v-if="value.softwareTypeUrl" target="_blank" :href="value.softwareTypeUrl">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
+          </v-col>
+          <v-col cols="12" md="3">
             <label>
               Version
             </label>
             {{ value.version | orDefault }}
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="6">
             <label>
               Repository
             </label>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <span v-html="repositoryLink" />
+            <span v-if="value.repositoryUrl" v-html="repositoryLink" />
+            <span v-else>{{ null | orDefault }}</span>
           </v-col>
         </v-row>
         <label>Description</label>
@@ -70,6 +95,7 @@ SPDX-License-Identifier: EUPL-1.2
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { mapState } from 'vuex'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { protocolsInUrl } from '@/utils/urlHelpers'
@@ -78,6 +104,7 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
 import { Attachment } from '@/models/Attachment'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import { VocabularyState } from '@/store/vocabulary'
 
 /**
  * A class component for Software Update Action card
@@ -90,6 +117,9 @@ import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.v
   components: {
     BaseExpandableListItem,
     AttachmentsBlock
+  },
+  computed: {
+    ...mapState('vocabulary', ['softwareTypes'])
   }
 })
 // @ts-ignore
@@ -124,6 +154,8 @@ export default class SoftwareUpdateActionCard extends Vue {
     type: String
   })
   readonly target!: string
+
+  private softwareTypes!: VocabularyState['softwareTypes']
 
   /**
    * returns an URL as an link
@@ -162,6 +194,14 @@ export default class SoftwareUpdateActionCard extends Vue {
 
   openAttachment (attachment: Attachment) {
     this.$emit('open-attachment', attachment)
+  }
+
+  get softwareTypeDefinition (): string {
+    const softwareTypeIndex = this.softwareTypes.findIndex(t => t.uri === this.value.softwareTypeUrl)
+    if (softwareTypeIndex > -1) {
+      return this.softwareTypes[softwareTypeIndex].definition
+    }
+    return ''
   }
 }
 

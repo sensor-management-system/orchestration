@@ -44,10 +44,20 @@ SPDX-License-Identifier: EUPL-1.2
           <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
             <label>Usage</label>
             {{ value.siteUsageName | orDefault }}
+            <a v-if="value.siteUsageUri" target="_blank" :href="value.siteUsageUri">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
           </v-col>
           <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
             <label>Type</label>
             {{ value.siteTypeName | orDefault }}
+            <a v-if="value.siteTypeUri" target="_blank" :href="value.siteTypeUri">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
           </v-col>
         </v-row>
         <v-divider class="my-4" />
