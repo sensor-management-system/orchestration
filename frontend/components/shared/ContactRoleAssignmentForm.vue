@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2022
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -55,6 +55,11 @@ SPDX-License-Identifier: EUPL-1.2
               </template>
               <span>{{ selectedRole.definition }}</span>
             </v-tooltip>
+            <a v-if="selectedRole && selectedRole.uri" target="_blank" :href="selectedRole.uri" style="line-height: 2;">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
             <v-btn icon @click="showNewContactRoleDialog = true">
               <v-icon>
                 mdi-tooltip-plus-outline

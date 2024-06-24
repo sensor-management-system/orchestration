@@ -50,6 +50,7 @@ import {
   KIND_OF_ACTION_TYPE_STATIC_LOCATION_BEGIN,
   KIND_OF_ACTION_TYPE_STATIC_LOCATION_END, platformParameterChangeActionOption
 } from '@/models/ActionKind'
+import { SoftwareType } from '@/models/SoftwareType'
 
 export interface VocabularyState {
   manufacturers: Manufacturer[]
@@ -73,7 +74,8 @@ export interface VocabularyState {
   siteUsages: SiteUsage[],
   siteTypes: SiteType[],
   countries: Country[],
-  licenses: License[]
+  licenses: License[],
+  softwareTypes: SoftwareType[]
 }
 
 const state = (): VocabularyState => ({
@@ -98,7 +100,8 @@ const state = (): VocabularyState => ({
   siteUsages: [],
   siteTypes: [],
   countries: [],
-  licenses: []
+  licenses: [],
+  softwareTypes: []
 })
 
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
@@ -358,6 +361,7 @@ export type LoadSiteUsagesAction = () => Promise<void>
 export type LoadSiteTypesAction = () => Promise<void>
 export type LoadCountriesAction = () => Promise<void>
 export type LoadLicensesAction = () => Promise<void>
+export type LoadSoftwareTypesAction = () => Promise<void>
 export type AddDeviceTypeAction = ({ devicetype }: {devicetype: DeviceType}) => Promise<DeviceType>
 export type AddPlatformTypeAction = ({ platformtype }: {platformtype: PlatformType}) => Promise<PlatformType>
 export type AddManufacturerAction = ({ manufacturer }: { manufacturer: Manufacturer}) => Promise<Manufacturer>
@@ -445,6 +449,9 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadLicenses ({ commit }: { commit: Commit }): Promise<void> {
     commit('setLicenses', await this.$api.licenses.findAll())
+  },
+  async loadSoftwareTypes ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setSoftwareTypes', await this.$api.softwareTypes.findAll())
   },
   async addDevicetype ({ commit, state }: {commit: Commit, state: VocabularyState }, { devicetype }: {devicetype: DeviceType }): Promise<DeviceType> {
     const newDevicetype = await this.$api.deviceTypes.add(devicetype)
@@ -612,6 +619,9 @@ const mutations = {
   },
   setLicenses (state: VocabularyState, licenses: License[]) {
     state.licenses = licenses
+  },
+  setSoftwareTypes (state: VocabularyState, softwareTypes: SoftwareType[]) {
+    state.softwareTypes = softwareTypes
   }
 }
 

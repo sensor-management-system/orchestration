@@ -395,6 +395,15 @@ SPDX-License-Identifier: EUPL-1.2
             <v-icon>mdi-api</v-icon>
           </v-btn>
           <v-btn
+            v-if="cvLink"
+            :href="cvLink"
+            target="_blank"
+            icon
+            title="Controlled Vocabulary"
+          >
+            <v-icon>mdi-book-alphabet</v-icon>
+          </v-btn>
+          <v-btn
             href="mailto:gitlab-incoming+hub-terra-sms-orchestration-3268-issue-@hzdr.de"
             title="Request Support"
             icon
@@ -549,6 +558,13 @@ export default {
       let link = ''
       if (this.$fullContext.env.smsBackendUrl) {
         link = this.$fullContext.env.smsBackendUrl + '/openapi'
+      }
+      return link
+    },
+    cvLink () {
+      let link = ''
+      if (this.$fullContext.env.cvBackendUrl) {
+        link = this.$fullContext.env.cvBackendUrl
       }
       return link
     },

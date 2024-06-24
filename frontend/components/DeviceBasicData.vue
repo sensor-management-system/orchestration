@@ -74,6 +74,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ deviceTypeDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.deviceTypeUri" target="_blank" :href="value.deviceTypeUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Manufacturer</label>
@@ -91,6 +96,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ deviceManufacturerDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.manufacturerUri" target="_blank" :href="value.manufacturerUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Model</label>
@@ -118,6 +128,11 @@ SPDX-License-Identifier: EUPL-1.2
           </template>
           <span>{{ deviceStatusDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.statusUri" target="_blank" :href="value.statusUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
     </v-row>
     <v-divider class="my-4" />

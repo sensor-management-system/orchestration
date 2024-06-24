@@ -1,5 +1,9 @@
 <!--
- SPDX-FileCopyrightText: 2020 - 2024
+SPDX-FileCopyrightText: 2020 - 2024
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
 SPDX-License-Identifier: EUPL-1.2
  -->
@@ -235,6 +239,11 @@ SPDX-License-Identifier: EUPL-1.2
                     </template>
                     <span>{{ valueLicenseDefinition }}</span>
                   </v-tooltip>
+                  <a v-if="valueLicense && valueLicense.uri" target="_blank" :href="valueLicense.uri" style="line-height: 2;">
+                    <v-icon small>
+                      mdi-open-in-new
+                    </v-icon>
+                  </a>
                   <v-btn icon @click="showNewLicenseDialog = true">
                     <v-icon>
                       mdi-tooltip-plus-outline
