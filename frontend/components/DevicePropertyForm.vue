@@ -354,6 +354,7 @@ SPDX-License-Identifier: EUPL-1.2
               </template>
               <template v-else>
                 <v-list-item-content>
+                  <label v-if="isSuggestedUnitForMeasuredQuantity(data.item)">Suggested unit</label>
                   <v-list-item-title>
                     {{ data.item.name }}
                     <v-tooltip
@@ -1334,14 +1335,42 @@ export default class DevicePropertyForm extends mixins(Rules) {
   /**
    * returns a list of unit objects
    *
-   * When the property exists, restricts the list of units to those that have a
-   * relation to the selected property
+   * When the property exists, show those units first that are linked
+   * to the selected property via the measured quantity units
+   * so that they can be seen first.
    *
    * @returns {MeasuredQuantityUnit[]} list of units
    */
   get measuredQuantityUnitItems (): MeasuredQuantityUnit[] {
-  // restrict the list of measuredQuantityUnits based on the choosen property
-    return this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId))
+    // restrict the list of measuredQuantityUnits based on the choosen property
+    const suggestedEntries = this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId))
+    const unitIds = suggestedEntries.map(x => x.unitId)
+
+    const allOtherUnits = this.units.filter(x => !unitIds.includes(x.id)).map(unit => MeasuredQuantityUnit.createFromObject({
+      // We can't set the id here. This helps later to identify measured quantity units
+      // that we can suggest (as we have ids for their link betweeen the unit
+      // and the measured quantity). Here, we don't have it, so the id stays empty.
+      id: '',
+      name: unit.name,
+      uri: unit.uri,
+      definition: unit.definition,
+      defaultLimitMax: null,
+      defaultLimitMin: null,
+      unitId: unit.id,
+      measuredQuantityId: ''
+    }))
+    suggestedEntries.sort((a, b) => a.name.localeCompare(b.name))
+    return [
+      ...suggestedEntries,
+      ...allOtherUnits
+    ]
+  }
+
+  isSuggestedUnitForMeasuredQuantity (measuredQuantityUnit: MeasuredQuantityUnit) {
+    // If we have set an id for the measured quantity unit then we know
+    // that we have an entry in the database for it that links the
+    // unit & the measured quantity.
+    return !!measuredQuantityUnit.id
   }
 
   /**
