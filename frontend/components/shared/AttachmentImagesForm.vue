@@ -42,7 +42,8 @@ SPDX-License-Identifier: EUPL-1.2
                     <v-row align="center">
                       <v-col>
                         {{ image.attachment.label }}
-                      </v-col><v-col class="text-right">
+                      </v-col>
+                      <v-col class="text-right">
                         <span v-if="hover">
                           <v-btn
                             fab
@@ -100,7 +101,10 @@ SPDX-License-Identifier: EUPL-1.2
               :key="i"
               contain
               :src="getUrlForAttachment(image.attachment)"
-            />
+              @error="setAttachmentError(image.attachment)"
+            >
+              <ImageNotAvailable v-if="hasAttachmentError(image.attachment)" />
+            </v-carousel-item>
           </v-carousel>
         </v-hover>
 
@@ -117,8 +121,11 @@ import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
 import { Image, IAttachmentWithUrl } from '@/models/Image'
 import { Attachment, IAttachment } from '@/models/Attachment'
+import ImageNotAvailable from '@/components/shared/ImageNotAvailable.vue'
 
-@Component
+@Component({
+  components: { ImageNotAvailable }
+})
 export default class AttachmentImagesForm extends Vue {
   @Prop({
     default: [],
@@ -157,6 +164,7 @@ export default class AttachmentImagesForm extends Vue {
   private visibleImageIndex = 0
   private attachmentToAdd = null
   private fab = false
+  private attachmentErrors: {[idx: string]: boolean} = {}
 
   @Watch('value', { immediate: true, deep: true })
   async setUrlsForAttachments () {
@@ -267,6 +275,16 @@ export default class AttachmentImagesForm extends Vue {
 
   set images (value: Image[]) {
     this.$emit('input', value)
+  }
+
+  setAttachmentError (attachment: Attachment) {
+    if (!attachment.id) { return }
+    Vue.set(this.attachmentErrors, attachment.id, true)
+  }
+
+  hasAttachmentError (attachment: Attachment): boolean {
+    if (!attachment.id) { return true }
+    return this.attachmentErrors[attachment.id]
   }
 
   setVisibleImageIndex (value: number) {
