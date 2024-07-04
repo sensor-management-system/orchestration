@@ -22,7 +22,10 @@ SPDX-License-Identifier: EUPL-1.2
             :key="i"
             contain
             :src="getUrlForAttachment(image.attachment)"
-          />
+            @error="setAttachmentError(image.attachment)"
+          >
+            <ImageNotAvailable v-if="hasAttachmentError(image.attachment)" />
+          </v-carousel-item>
         </v-carousel>
       </v-col>
       <v-col
@@ -50,8 +53,13 @@ import { Vue, Prop, Component, Watch } from 'nuxt-property-decorator'
 
 import { Image, IAttachmentWithUrl } from '@/models/Image'
 import { Attachment } from '@/models/Attachment'
+import ImageNotAvailable from '@/components/shared/ImageNotAvailable.vue'
 
-@Component
+@Component({
+  components: {
+    ImageNotAvailable
+  }
+})
 export default class AttachmentImagesCarousel extends Vue {
   private urlsForAttachments: IAttachmentWithUrl[] = []
 
@@ -75,6 +83,18 @@ export default class AttachmentImagesCarousel extends Vue {
     type: Function
   })
   private proxyUrl!: (attachmentUrl: string) => Promise<string>
+
+  private attachmentErrors: {[idx: string]: boolean} = {}
+
+  setAttachmentError (attachment: Attachment) {
+    if (!attachment.id) { return }
+    Vue.set(this.attachmentErrors, attachment.id, true)
+  }
+
+  hasAttachmentError (attachment: Attachment): boolean {
+    if (!attachment.id) { return true }
+    return this.attachmentErrors[attachment.id]
+  }
 
   async created () {
     await this.setUrlsForAttachments()

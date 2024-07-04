@@ -17,6 +17,7 @@ Added:
 - Scripts to update cv related names from the latest entries in the controlled vocabulary
   as well as code to analyse for which entries we still miss to have links to CV
 - add more links from the frontend to the CV entries
+- show info if an image (URL attachment) is no longer available
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
