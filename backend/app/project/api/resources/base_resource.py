@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -15,6 +15,7 @@ from ...api import minio
 from ...extensions.instances import pidinst
 from ..helpers.db import save_to_db
 from ..models import (
+    ActivityLog,
     Configuration,
     ConfigurationAttachment,
     Contact,
@@ -122,6 +123,13 @@ def set_update_description_text_user_and_pidinst(obj_, msg):
     obj_.update_description = msg
     obj_.updated_by_id = g.user.id
     save_to_db(obj_)
+    new_log_entry = ActivityLog.create(
+        entity=obj_,
+        user=g.user,
+        description=msg,
+    )
+    save_to_db(new_log_entry)
+
     if pidinst.has_external_metadata(obj_):
         pidinst.update_external_metadata(obj_)
 

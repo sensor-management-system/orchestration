@@ -18,6 +18,7 @@ import { createAxios } from '@/utils/axiosHelper'
 import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { AutocompleteApi } from '@/services/sms/AutocompleteApi'
+import { ActivityApi } from '@/services/sms/ActivityApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 import { ConfigurationImageApi, DeviceImageApi, SiteImageApi, PlatformImageApi } from '@/services/sms/ImageApi'
 import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachmentApi'
@@ -165,6 +166,7 @@ export class Api {
   private readonly _aggregationTypeApi: AggregationTypeApi
   private readonly _actionCategoryApi: ActionCategoryApi
   private readonly _autocompleteApi: AutocompleteApi
+  private readonly _activityApi: ActivityApi
   private readonly _siteUsageApi: SiteUsageApi
   private readonly _siteTypeApi: SiteTypeApi
   private readonly _countryApi: CountryApi
@@ -471,6 +473,10 @@ export class Api {
     this._autocompleteApi = new AutocompleteApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/controller'
+    )
+
+    this._activityApi = new ActivityApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken)
     )
 
     // and here we can set settings for all the cv api calls
@@ -781,6 +787,10 @@ export class Api {
 
   get autocomplete (): AutocompleteApi {
     return this._autocompleteApi
+  }
+
+  get activities (): ActivityApi {
+    return this._activityApi
   }
 
   get cvContactRoles (): CvContactRoleApi {

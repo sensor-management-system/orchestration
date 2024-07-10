@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
@@ -15,6 +15,7 @@ but it is also a need to work properly with alembic
 (as this is configured to only look into this module
 to check for db changes).
 """
+from .activity_log import ActivityLog  # noqa: F401
 from .calibration_actions import (  # noqa: F401
     DeviceCalibrationAction,
     DevicePropertyCalibration,
