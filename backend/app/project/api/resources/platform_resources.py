@@ -28,6 +28,7 @@ from ..helpers.resource_mixin import (
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
 from ..models import (
+    ActivityLog,
     Configuration,
     Device,
     ManufacturerModel,
@@ -122,6 +123,13 @@ class PlatformList(CsvListMixin, ResourceList):
 
         save_to_db(platform)
 
+        new_log_entry = ActivityLog.create(
+            entity=platform,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         if platform.manufacturer_name and platform.model:
             existing_manufacturer_model = (
                 db.session.query(ManufacturerModel)
@@ -175,6 +183,13 @@ class PlatformDetail(ResourceDetail):
         msg = "update;basic data"
         platform.update_description = msg
         save_to_db(platform)
+
+        new_log_entry = ActivityLog.create(
+            entity=platform,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
 
         if pidinst.has_external_metadata(platform):
             pidinst.update_external_metadata(platform)
@@ -271,6 +286,11 @@ class PlatformDetail(ResourceDetail):
             super().delete(*args, **kwargs)
         except JsonApiException as e:
             raise ConflictError("Deletion failed for the platform.", str(e))
+
+        new_log_entry = ActivityLog.create(
+            entity=platform, user=g.user, description="delete;basic data", data={}
+        )
+        save_to_db(new_log_entry)
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)

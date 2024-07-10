@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -10,15 +10,18 @@
 
 import itertools
 
+from flask import g
 from flask_rest_jsonapi import ResourceDetail, ResourceList
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from ...extensions.instances import pidinst
 from ..datalayers.esalchemy import EsSqlalchemyDataLayer
+from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
 from ..models import (
+    ActivityLog,
     Configuration,
     ConfigurationContactRole,
     Contact,
@@ -101,6 +104,22 @@ class ContactList(ResourceList):
             if has_email:
                 raise ConflictError("E-Mail already used.")
 
+    def after_post(self, result):
+        """Add some more data to the new site."""
+        result_id = result[0]["data"]["id"]
+        contact = db.session.query(Contact).filter_by(id=result_id).first()
+
+        msg = "create;basic data"
+
+        new_log_entry = ActivityLog.create(
+            entity=contact,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
+        return result
+
     schema = ContactSchema
     decorators = (token_required,)
     data_layer = {
@@ -166,11 +185,22 @@ class ContactDetail(ResourceDetail):
         ):
             if pidinst.has_external_metadata(instrument):
                 pidinst.update_external_metadata(instrument)
+
+        contact = db.session.query(Contact).filter_by(id=contact_id).first()
+        msg = "update;basic data"
+        new_log_entry = ActivityLog.create(
+            entity=contact,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         return result
 
     def before_delete(self, args, kwargs):
         """Collect some tasks to run for the point after the deletion."""
         contact_id = kwargs["id"]
+        contact = db.session.query(Contact).filter_by(id=contact_id).first()
         instruments_with_external_metadata = []
         for instrument in itertools.chain(
             db.session.query(Device)
@@ -192,7 +222,14 @@ class ContactDetail(ResourceDetail):
             for instrument in instruments_with_external_metadata:
                 pidinst.update_external_metadata(instrument)
 
+        def store_deletion_in_activity_log():
+            new_log_entry = ActivityLog.create(
+                entity=contact, user=g.user, description="delete;basic data", data={}
+            )
+            save_to_db(new_log_entry)
+
         self.tasks_after_delete.append(run_updates)
+        self.tasks_after_delete.append(store_deletion_in_activity_log)
 
     def after_delete(self, *args, **kwargs):
         """Run some tasks after the deletion."""

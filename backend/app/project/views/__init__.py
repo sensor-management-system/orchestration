@@ -8,6 +8,7 @@
 
 """Various views for some more specific usecases."""
 
+from .activity_routes import activity_routes  # noqa: F401
 from .additional_configurations_routes import (
     additional_configuration_routes,
 )  # noqa: F401

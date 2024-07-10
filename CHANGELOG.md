@@ -18,6 +18,7 @@ Added:
   as well as code to analyse for which entries we still miss to have links to CV
 - add more links from the frontend to the CV entries
 - show info if an image (URL attachment) is no longer available
+- heatmap of days and activity within the system
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url

@@ -27,6 +27,7 @@ from ..helpers.resource_mixin import (
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
 from ..models import (
+    ActivityLog,
     Configuration,
     Device,
     DeviceContactRole,
@@ -122,6 +123,13 @@ class DeviceList(CsvListMixin, ResourceList):
 
         save_to_db(device)
 
+        new_log_entry = ActivityLog.create(
+            entity=device,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         if device.manufacturer_name and device.model:
             existing_manufacturer_model = (
                 db.session.query(ManufacturerModel)
@@ -180,6 +188,11 @@ class DeviceDetail(ResourceDetail):
             super().delete(*args, **kwargs)
         except JsonApiException as e:
             raise ConflictError("Deletion failed for the device.", str(e))
+
+        new_log_entry = ActivityLog.create(
+            entity=device, user=g.user, description="delete;basic data", data={}
+        )
+        save_to_db(new_log_entry)
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)
@@ -245,6 +258,13 @@ class DeviceDetail(ResourceDetail):
         device.update_description = msg
 
         save_to_db(device)
+
+        new_log_entry = ActivityLog.create(
+            entity=device,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
 
         if pidinst.has_external_metadata(device):
             pidinst.update_external_metadata(device)

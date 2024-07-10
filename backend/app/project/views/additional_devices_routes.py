@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -14,8 +14,9 @@ in the style /<model_entities>/<id>/<verb> as post requests.
 
 from flask import Blueprint, g
 
+from ..api.helpers.db import save_to_db
 from ..api.helpers.errors import ForbiddenError, UnauthorizedError
-from ..api.models import Device
+from ..api.models import ActivityLog, Device
 from ..api.models.base_model import db
 from ..api.permissions.rules import can_archive, can_restore, can_see
 from ..config import env
@@ -56,6 +57,12 @@ class ArchiveDeviceView(BaseView):
             device.updated_by_id = g.user.id
             db.session.add(device)
             db.session.commit()
+            new_log_entry = ActivityLog.create(
+                entity=device,
+                user=g.user,
+                description=device.update_description,
+            )
+            save_to_db(new_log_entry)
 
     def post(self):
         """Run the post request."""
@@ -90,6 +97,12 @@ class RestoreDeviceView(BaseView):
             device.updated_by_id = g.user.id
             db.session.add(device)
             db.session.commit()
+            new_log_entry = ActivityLog.create(
+                entity=device,
+                user=g.user,
+                description=device.update_description,
+            )
+            save_to_db(new_log_entry)
 
     def post(self):
         """Run the post request."""
