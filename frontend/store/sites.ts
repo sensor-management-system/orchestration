@@ -96,6 +96,7 @@ export type UpdateSiteAttachmentAction = (params: { siteId: string, attachment: 
 export type LoadSiteAttachmentsAction = (id: string) => Promise<void>
 export type LoadSiteAttachmentAction = (id: string) => Promise<void>
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
+export type CreatePidAction = (id: string | null) => Promise<string>
 export type ClearSiteAttachmentsAction = () => void
 export type SaveSiteAction = (site: Site) => Promise<Site>
 export type SaveSiteImagesAction = (params: {siteId: string, siteImages: Image[], siteCopyImages: Image[]}) => Promise<Image[]>
@@ -218,6 +219,10 @@ const actions: ActionTree<SitesState, RootState> = {
 
   saveSite (_, site: Site): Promise<Site> {
     return this.$api.sites.save(site)
+  },
+
+  createPid (_, id: string | null): Promise<string> {
+    return this.$api.pids.create(id, 'site')
   },
 
   async copySite (

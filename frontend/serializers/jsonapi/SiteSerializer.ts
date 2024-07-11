@@ -131,6 +131,8 @@ export class SiteSerializer {
       }
 
       result.archived = attributes.archived || false
+
+      result.persistentIdentifier = attributes.persistent_identifier || ''
     }
 
     const images = this.imageSerializer.convertJsonApiRelationshipsModelList(relationships, included)
@@ -224,8 +226,8 @@ export class SiteSerializer {
         site_type_name: site.siteTypeName,
         site_type_uri: site.siteTypeUri,
         website: site.website,
-        keywords: site.keywords
-
+        keywords: site.keywords,
+        persistent_identifier: site.persistentIdentifier === '' ? null : site.persistentIdentifier
         // these properties are set by the db, so we wont send anything related here:
         // archived
         // createdAt

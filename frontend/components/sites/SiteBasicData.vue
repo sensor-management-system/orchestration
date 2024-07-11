@@ -25,6 +25,13 @@ SPDX-License-Identifier: EUPL-1.2
         </v-row>
         <v-row>
           <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
+            <label>Persistent identifier (PID)</label>
+            <pid-tooltip
+              :value="value.persistentIdentifier"
+              show-button
+            />
+          </v-col>
+          <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
             <label>Label</label>
             {{ value.label }}
           </v-col>
@@ -145,6 +152,7 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { Site } from '@/models/Site'
+import PidTooltip from '@/components/shared/PidTooltip.vue'
 import SiteMap from '@/components/sites/SiteMap.vue'
 
 import VisibilityChip from '@/components/VisibilityChip.vue'
@@ -159,7 +167,8 @@ import { ProxyUrlAction } from '@/store/proxy'
     VisibilityChip,
     PermissionGroupChips,
     SiteMap,
-    AttachmentImagesCarousel
+    AttachmentImagesCarousel,
+    PidTooltip
   },
   computed: {
     ...mapState('sites', ['sites'])

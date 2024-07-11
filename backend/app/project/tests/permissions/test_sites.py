@@ -108,3 +108,32 @@ class TestSites(BaseTestCase):
                         content_type="application/vnd.api+json",
                     )
         self.assertEqual(response.status_code, 403)
+
+    def test_delete_with_pid_as_admin(self):
+        """Ensure we can't delete a site with a pid even if we are superuspers."""
+        site = Site(
+            label="test site",
+            is_public=False,
+            is_internal=True,
+            group_ids=["1"],
+            persistent_identifier="12345/SMS-111",
+        )
+        contact = Contact(
+            given_name="first",
+            family_name="contact",
+            email="first.contact@localhost",
+        )
+        super_user = User(
+            subject=contact.email,
+            contact=contact,
+            is_superuser=True,
+        )
+        db.session.add_all([site, contact, super_user])
+        db.session.commit()
+
+        with self.run_requests_as(super_user):
+            with self.client:
+                response = self.client.delete(
+                    f"{self.url}/{site.id}",
+                )
+        self.assertEqual(response.status_code, 403)

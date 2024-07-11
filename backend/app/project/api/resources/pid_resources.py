@@ -24,7 +24,7 @@ from ..helpers.errors import (
     NotFoundError,
     UnauthorizedError,
 )
-from ..models import Configuration, Device, Platform
+from ..models import Configuration, Device, Platform, Site
 from ..permissions.rules import can_edit
 
 
@@ -121,6 +121,11 @@ def get_instrument(instrument_instance: dict):
             db.session.query(Configuration)
             .filter_by(id=instrument_instance.get("id"))
             .first()
+        )
+        return instrument
+    elif instrument_instance.get("type") == "site":
+        instrument = (
+            db.session.query(Site).filter_by(id=instrument_instance.get("id")).first()
         )
         return instrument
     else:

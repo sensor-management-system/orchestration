@@ -35,6 +35,7 @@ export interface IAddress {
 
 export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo {
   id: string
+  persistentIdentifier: string
   label: string
   geometry: ILatLng[]
   description: string
@@ -67,6 +68,7 @@ export interface ISite extends IPermissionableMultipleGroups, IMetaCreationInfo 
 
 export class Site implements ISite, IVisible {
   private _id: string = ''
+  private _persistentIdentifier: string = ''
   private _label: string = ''
   private _geometry: ILatLng[] = []
   private _description: string = ''
@@ -101,6 +103,14 @@ export class Site implements ISite, IVisible {
 
   set id (id: string) {
     this._id = id
+  }
+
+  get persistentIdentifier (): string {
+    return this._persistentIdentifier
+  }
+
+  set persistentIdentifier (persistentIdentifier: string) {
+    this._persistentIdentifier = persistentIdentifier
   }
 
   get label (): string {
@@ -318,6 +328,7 @@ export class Site implements ISite, IVisible {
   static createFromObject (someObject: ISite): Site {
     const newObject = new Site()
     newObject.id = someObject.id
+    newObject.persistentIdentifier = someObject.persistentIdentifier
     newObject.label = someObject.label
     newObject.geometry = [...someObject.geometry]
     newObject.description = someObject.description

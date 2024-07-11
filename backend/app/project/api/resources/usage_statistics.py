@@ -68,10 +68,16 @@ class UsageStatistics(ResourceList):
                 .filter(Configuration.persistent_identifier.is_not(None))
                 .count()
             )
+            counts["site_pids"] = (
+                db.session.query(Site)
+                .filter(Site.persistent_identifier.is_not(None))
+                .count()
+            )
             counts["pids"] = (
                 counts["device_pids"]
                 + counts["platform_pids"]
                 + counts["configuration_pids"]
+                + counts["site_pids"]
             )
 
             counts["organizations"] = (

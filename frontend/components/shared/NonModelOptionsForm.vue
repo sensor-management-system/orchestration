@@ -30,6 +30,7 @@ import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
 import { Device } from '@/models/Device'
 import { Platform } from '@/models/Platform'
 import { Configuration } from '@/models/Configuration'
+import { Site } from '@/models/Site'
 
 export interface NonModelOptions {
     persistentIdentifierShouldBeCreated: boolean
@@ -47,7 +48,7 @@ export default class NonModelOptionsForm extends Vue {
     required: true,
     type: Object
   })
-  readonly entity!: Device | Platform | Configuration
+  readonly entity!: Device | Platform | Configuration | Site
 
   @Watch('entity.isPrivate', { immediate: true })
   // @ts-ignore
@@ -74,8 +75,8 @@ export default class NonModelOptionsForm extends Vue {
   }
 
   get isPrivate (): boolean {
-    if (this.entity instanceof Configuration) {
-      // There is no isPrivate for configurations.
+    if (this.entity instanceof Configuration || this.entity instanceof Site) {
+      // There is no isPrivate for configurations nor sites.
       return false
     }
     return this.entity.isPrivate

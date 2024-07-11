@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Florian Gransee <florian.gransee@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
@@ -315,23 +315,18 @@ class Pid:
                 },
             }
         ]
-        header = {
-            "Content-Type": "application/json",
-            "Authorization": 'Handle clientCert="true"',
-        }
         pid_uuid = str(uuid4())
         instrument_data.append(self.get_request_body_admin_part())
         json_body = {"values": instrument_data}
+        pid_entry = f"{self.pid_suffix}-{pid_uuid}"
+        url = f"{self.pid_service_url}/{self.pid_prefix}/{pid_entry}"
         try:
             response = requests.put(
-                url=f"{self.pid_service_url}{self.pid_prefix}/{self.pid_suffix}-{pid_uuid}",
-                cert=(self.pid_cert_file, self.pid_cert_key),
-                headers=header,
+                url=url,
                 json=json_body,
-                # Adding certificate verification is strongly advised but in this case when we try to access the handle
-                # API with verification we get a SSLCertVerificationError.
-                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
-                verify=False,
+                auth=requests.auth.HTTPBasicAuth(
+                    self.pid_service_user, self.pid_service_password
+                ),
             )
             response.raise_for_status()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:

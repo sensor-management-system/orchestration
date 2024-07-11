@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tim Eder <tim.eder@ufz.de>
@@ -25,6 +25,10 @@ SPDX-License-Identifier: EUPL-1.2
       :site-usages="siteUsages"
       :site-types="siteTypes"
       :country-names="countryNames"
+    />
+    <non-model-options-form
+      v-model="editOptions"
+      :entity="siteCopy"
     />
     <v-card-actions>
       <v-spacer />
@@ -54,7 +58,7 @@ import { mapActions, mapState, mapGetters } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { SitesState, LoadSiteAction, SaveSiteAction, LoadSiteAttachmentsAction, SaveSiteImagesAction } from '@/store/sites'
+import { SitesState, LoadSiteAction, SaveSiteAction, LoadSiteAttachmentsAction, SaveSiteImagesAction, CreatePidAction } from '@/store/sites'
 
 import { Site } from '@/models/Site'
 
@@ -65,12 +69,14 @@ import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue
 
 import { hasSelfIntersection } from '@/utils/mapHelpers'
 import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 
 @Component({
   components: {
     SaveAndCancelButtons,
     SiteBasicDataForm,
-    NavigationGuardDialog
+    NavigationGuardDialog,
+    NonModelOptionsForm
   },
   middleware: ['auth'],
   computed: {
@@ -79,7 +85,7 @@ import { LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountri
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
   },
   methods: {
-    ...mapActions('sites', ['saveSite', 'loadSite', 'loadSiteAttachments', 'saveSiteImages']),
+    ...mapActions('sites', ['saveSite', 'loadSite', 'loadSiteAttachments', 'saveSiteImages', 'createPid']),
     ...mapActions('vocabulary', ['loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -89,6 +95,9 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   private hasSaved: boolean = false
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
+  private editOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   site!: SitesState['site']
@@ -104,6 +113,7 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
   setLoading!: SetLoadingAction
   loadSiteAttachments!: LoadSiteAttachmentsAction
   saveSiteImages!: SaveSiteImagesAction
+  createPid!: CreatePidAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -195,6 +205,13 @@ export default class SiteEditBasicPage extends mixins(CheckEditAccess) {
     try {
       this.setLoading(true)
       const savedSite = await this.saveSite(this.siteCopy)
+      if (this.editOptions.persistentIdentifierShouldBeCreated) {
+        try {
+          savedSite.persistentIdentifier = await this.createPid(savedSite.id)
+        } catch (e) {
+          this.$store.commit('snackbar/setError', 'Creation of Persistent Identifier failed')
+        }
+      }
       await this.loadSite({
         siteId: savedSite.id,
         includeImages: true

@@ -602,6 +602,8 @@ deploy-gfz-staging:
     PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
+    PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
+    PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
     SMS_VERSION: ${CI_COMMIT_SHORT_SHA}
   before_script:
     - *docker_login_gitlab_registry
@@ -647,6 +649,8 @@ deploy-gfz-prod:
     PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
     TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
+    PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
+    PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
     SMS_VERSION: ${CI_COMMIT_TAG}
     MATTERMOST_RELEASE_NOTIFICATION_HOOK: ${MATTERMOST_RELEASE_NOTIFICATION_HOOK}
   before_script:
