@@ -29,6 +29,10 @@ SPDX-License-Identifier: EUPL-1.2
       fixed
       app
     >
+      <router-link to="/">
+        <v-img to="/" contain position="center left" height="6em" src="logos/ufz-sms_logo_primaer.svg" />
+      </router-link>
+      <v-divider />
       <v-list nav>
         <!-- Home -->
         <v-list-item to="/" exact nuxt>

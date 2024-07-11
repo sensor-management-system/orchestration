@@ -31,8 +31,8 @@ SPDX-License-Identifier: EUPL-1.2
         >
           <h1 class="text-h5">
             Welcome to the<br>
-            <span class="text-h4 font-weight-bold">Sensor Management System</span>
           </h1>
+          <v-img style="margin-left: -40px; margin-top: -20px; margin-bottom: -40px;" contain position="center left" height="10em" src="logos/ufz-sms_logo_weiss-transparent.svg" />
         </v-col>
       </v-row>
       <v-container class="mt-n20 px-12 pb-16">

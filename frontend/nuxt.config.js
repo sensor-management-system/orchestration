@@ -86,7 +86,13 @@ export default {
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: process.env.npm_package_description || '' }
+      { hid: 'description', name: 'description', content: 'An application to help scientists and technicans to manage sensors, measurement setups and campaigns.' },
+      { name: 'og:title', property: 'og:title', content: 'Sensor Management System' },
+      { name: 'og:site_name', property: 'og:site_name', content: 'Sensor Management System' },
+      { name: 'apple-mobile-web-app-title', content: 'Sensor Management System' },
+      { name: 'og-image', content: '/logos/ufz-sms_logo_name+abkuerzung_primaer.png' },
+      { name: 'og:description', property: 'og:description', content: 'An application to help scientists and technicans to manage sensors, measurement setups and campaigns.' }
+
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
