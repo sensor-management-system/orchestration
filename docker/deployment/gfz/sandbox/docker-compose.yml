@@ -169,6 +169,11 @@ services:
       B2INST_TOKEN: ${SMS_SANDBOX_B2INST_TOKEN}
       B2INST_URL: https://b2inst-test.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
+      PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+      PID_SERVICE_USER: ${PID_SERVICE_USER}
+      PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
+      PID_PREFIX: 20.500.14372
+      PID_SUFFIX: SMS-Sandbox
       TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
       EXPORT_CONTROL_VO_LIST: urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de
       # We only want to allow access to external resources via the proxy - not to internal ones

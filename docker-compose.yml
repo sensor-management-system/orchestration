@@ -72,6 +72,7 @@ services:
       SCHEMA_VERSION: ${SCHEMA_VERSION:-0.1}
       IDENTIFIER_TYPE: ${IDENTIFIER_TYPE:-Handler}
       PID_SUFFIX: ${PID_SUFFIX:-SMS}
+      PID_PREFIX: ${PID_PREFIX:-}
       TSM_ENDPOINTS: "${TSM_ENDPOINTS:-[{\"fields\": {\"name\": \"Demo TSM\", \"url\": \"http://localhost/tsmdl\"}, \"model\": \"TsmEndpoint\", \"pk\": 99}]}"
       B2INST_URL: ${B2INST_URL:-https://b2inst-test.gwdg.de}
       B2INST_COMMUNITY: ${B2INST_COMMUNITY:-DataHub-Helmholtz-RF-EE}

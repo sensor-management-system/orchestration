@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -251,6 +251,7 @@ class TestUsageStatistics(BaseTestCase):
                 "device_pids": 0,
                 "platform_pids": 0,
                 "configuration_pids": 0,
+                "site_pids": 0,
                 "pids": 0,
                 "uploads": 0,
                 "orcids": 0,
@@ -404,6 +405,28 @@ class TestUsageStatistics(BaseTestCase):
         data6 = response6.json
         self.assertEqual(data6["counts"]["pids"], 3)
         self.assertEqual(data6["counts"]["configuration_pids"], 1)
+
+        site1 = Site(label="Site1", is_public=True)
+        db.session.add(site1)
+        db.session.commit()
+
+        response7 = self.client.get(self.url + "?extended=true")
+        self.assertEqual(response7.status_code, 200)
+        data7 = response7.json
+        self.assertEqual(data7["counts"]["pids"], 3)
+        self.assertEqual(data7["counts"]["site_pids"], 0)
+
+        site2 = Site(
+            label="Site2", is_public=True, persistent_identifier="44444/4444444"
+        )
+        db.session.add(site2)
+        db.session.commit()
+
+        response8 = self.client.get(self.url + "?extended=true")
+        self.assertEqual(response8.status_code, 200)
+        data8 = response8.json
+        self.assertEqual(data8["counts"]["pids"], 4)
+        self.assertEqual(data8["counts"]["site_pids"], 1)
 
     def test_uploads(self):
         """Ensure we sum up the uploaded attachments."""

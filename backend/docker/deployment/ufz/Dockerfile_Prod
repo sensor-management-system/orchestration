@@ -26,7 +26,7 @@ ENV STATIC_URL $STATIC_URL_ARG
 ARG FLASK_DEBUG_ARG=0
 ENV FLASK_DEBUG $FLASK_DEBUG_ARG
 
-ARG ELASTICSEARCH_URL_ARG=https://webapp.ufz.de:443/sms/elasticsearch/
+ARG ELASTICSEARCH_URL_ARG=https://web.app.ufz.de:443/sms/elasticsearch/
 ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL_ARG
 
 ARG WELL_KNOWN_URL_ARG=https://login.helmholtz.de/oauth2/.well-known/openid-configuration
@@ -38,7 +38,7 @@ ENV OIDC_CLIENT_ID $OIDC_CLIENT_ID_ARG
 ARG OIDC_USERNAME_CLAIM_ARG=eduperson_principal_name
 ENV OIDC_USERNAME_CLAIM $OIDC_USERNAME_CLAIM_ARG
 
-ARG HTTP_ORIGINS_ARG=https://webapp.ufz.de
+ARG HTTP_ORIGINS_ARG=https://web.app.ufz.de
 ENV HTTP_ORIGINS $HTTP_ORIGINS_ARG
 
 ARG MINIO_ACCESS_KEY_ARG=sms
@@ -65,10 +65,10 @@ ENV CV_URL $CV_URL_ARG
 ARG IDL_URL_ARG=https://web.app.ufz.de/sms-idl/api/idl
 ENV IDL_URL $IDL_URL_ARG
 
-ARG SMS_FRONTEND_URL_ARG=https://webapp.ufz.de/sms
+ARG SMS_FRONTEND_URL_ARG=https://web.app.ufz.de/sms
 ENV SMS_FRONTEND_URL $SMS_FRONTEND_URL_ARG
 
-ARG SMS_BACKEND_URL_ARG=https://webapp.ufz.de/sms/backend/api/v1
+ARG SMS_BACKEND_URL_ARG=https://web.app.ufz.de/sms/backend/api/v1
 ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
 
 ARG TSM_ENDPOINTS_ARG='[{"fields": {"name": "UFZ", "url": "https://tsm.ufz.de/tsmdl"}, "model": "TsmEndpoint", "pk": 2}]'
@@ -82,6 +82,15 @@ ENV B2INST_COMMUNITY $B2INST_COMMUNITY_ARG
 
 ARG B2INST_URL_ARG=https://b2inst.gwdg.de
 ENV B2INST_URL $B2INST_URL_ARG
+
+ARG PID_SERVICE_URL_ARG=https://rz-vm561.gfz-potsdam.de:8000/api/handles
+ENV PID_SERVICE_URL $PID_SERVICE_URL_ARG
+
+ARG PID_SUFFIX_ARG=SMS
+ENV PID_SUFFIX $PID_SUFFIX_ARG
+
+ARG PID_PREFIX_ARG=20.500.14372
+ENV PID_PREFIX $PID_PREFIX_ARG
 
 ARG BUILD_DATE
 ARG VCS_REF

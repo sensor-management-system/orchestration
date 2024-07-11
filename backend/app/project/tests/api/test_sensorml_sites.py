@@ -79,7 +79,6 @@ class TestSensorMLSite(BaseTestCase):
         user = User(subject=contact.email, contact=contact)
         db.session.add_all([self.site, contact, user])
         db.session.commit()
-
         with self.run_requests_as(user):
             with self.client:
                 resp = self.client.get(f"{self.url}/{self.site.id}/sensorml")
@@ -853,6 +852,7 @@ class TestSensorMLSite(BaseTestCase):
         self.site.street_number = "123"
         self.site.building = "A70"
         self.site.room = "319"
+        self.site.persistent_identifier = "12345/test.abc.1234-4567"
 
         owner_name = "Owner"
         owner_uri = current_app.config["CV_URL"] + "/contactroles/4/"
@@ -882,3 +882,47 @@ class TestSensorMLSite(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         xml_text = resp.text
         self.schema.validate(xml_text)
+
+    def test_get_public_site_with_pid(self):
+        """Check that we give out the pid."""
+        self.site.persistent_identifier = "12345/test.abc.1234-4567"
+
+        db.session.add(self.site)
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.site.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_identification = root.find(
+            "{http://www.opengis.net/sensorml/2.0}identification"
+        )
+        sml_identifier_list = sml_identification.find(
+            "{http://www.opengis.net/sensorml/2.0}IdentifierList"
+        )
+        sml_identifiers = sml_identifier_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}identifier"
+        )
+        self.assertEqual(len(sml_identifiers), 1)
+        sml_identifier_pid = sml_identifiers[0]
+
+        self.assertEqual(
+            sml_identifier_pid.find(
+                "{http://www.opengis.net/sensorml/2.0}Term"
+            ).attrib.get("definition"),
+            "http://sensorml.com/ont/swe/property/Identifier",
+        )
+        self.assertEqual(
+            sml_identifier_pid.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            "handle",
+        )
+        self.assertEqual(
+            sml_identifier_pid.find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            self.site.persistent_identifier,
+        )

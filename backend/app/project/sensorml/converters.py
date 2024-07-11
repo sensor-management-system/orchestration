@@ -1714,6 +1714,7 @@ class SiteConverter:
             gml_location=self.gml_location(),
             sml_keywords=self.sml_keywords(),
             sml_contacts=self.sml_contacts(),
+            sml_identification=self.sml_identification(),
             sml_documentation=self.sml_documentation(),
             sml_classification=self.sml_classification(),
             sml_position=self.sml_position(),
@@ -1800,6 +1801,22 @@ class SiteConverter:
         if not sml_document_list:
             return None
         return SmlDocumentation(sml_document_list=sml_document_list)
+
+    def sml_identification(self) -> Optional[SmlIdentification]:
+        """Return the sml:identification."""
+        sml_identifier_list = []
+
+        if self.site.persistent_identifier:
+            sml_term = SmlTerm(
+                definition="http://sensorml.com/ont/swe/property/Identifier",
+                sml_label=SmlLabel(text="handle"),
+                sml_value=SmlValue(text=self.site.persistent_identifier),
+            )
+            sml_identifier = SmlIdentifier(sml_term=sml_term)
+            sml_identifier_list.append(sml_identifier)
+        if not sml_identifier_list:
+            return None
+        return SmlIdentification(sml_identifier_list=sml_identifier_list)
 
     def sml_classification(self) -> Optional[SmlClassification]:
         """Return the sml:classification."""

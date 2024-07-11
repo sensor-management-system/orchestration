@@ -26,6 +26,7 @@ class Site(
     """Model class for sites (areas of interest)."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    persistent_identifier = db.Column(db.String(256), nullable=True, unique=True)
     label = db.Column(db.String(256), nullable=True)
     geometry = db.Column(Geometry("POLYGON"), nullable=True)
     description = db.Column(db.Text, nullable=True)
@@ -78,6 +79,7 @@ class Site(
         filters in our full text search.
         """
         return {
+            "persistent_identifier": self.persistent_identifier,
             "label": self.label,
             # https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html#geo-polygon
             "geometry": geometry_to_wkt(self.geometry),
@@ -136,6 +138,7 @@ class Site(
             "aliases": {},
             "mappings": {
                 "properties": {
+                    "persistent_identifier": type_keyword_and_full_searchable,
                     "label": type_keyword_and_full_searchable,
                     # https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html#geo-polygon
                     "geometry": {"type": "geo_shape"},

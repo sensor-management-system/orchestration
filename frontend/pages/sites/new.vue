@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Maximilian Schaldach <maximilian.schaldach@ufz.de>
@@ -29,6 +29,10 @@ SPDX-License-Identifier: EUPL-1.2
         :site-types="siteTypes"
         :country-names="countryNames"
       />
+      <non-model-options-form
+        v-model="createOptions"
+        :entity="site"
+      />
       <v-card-actions>
         <v-spacer />
         <SaveAndCancelButtons
@@ -45,11 +49,12 @@ SPDX-License-Identifier: EUPL-1.2
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
+import NonModelOptionsForm, { NonModelOptions } from '@/components/shared/NonModelOptionsForm.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import SiteBasicDataForm from '@/components/sites/SiteBasicDataForm.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { Site } from '@/models/Site'
-import { SaveSiteAction, ClearSiteAttachmentsAction } from '@/store/sites'
+import { SaveSiteAction, ClearSiteAttachmentsAction, CreatePidAction } from '@/store/sites'
 import { SetTabsAction, SetTitleAction, SetShowBackButtonAction } from '@/store/appbar'
 import { LoadEpsgCodesAction, LoadSiteUsagesAction, LoadSiteTypesAction, VocabularyState, LoadCountriesAction, CountryNamesGetter } from '@/store/vocabulary'
 
@@ -57,7 +62,9 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
 
 @Component({
   components: {
-    SaveAndCancelButtons, SiteBasicDataForm
+    NonModelOptionsForm,
+    SaveAndCancelButtons,
+    SiteBasicDataForm
   },
   middleware: ['auth'],
   computed: {
@@ -65,7 +72,7 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
     ...mapState('vocabulary', ['siteUsages', 'siteTypes'])
   },
   methods: {
-    ...mapActions('sites', ['saveSite', 'clearSiteAttachments']),
+    ...mapActions('sites', ['saveSite', 'clearSiteAttachments', 'createPid']),
     ...mapActions('vocabulary', ['loadEpsgCodes', 'loadSiteUsages', 'loadSiteTypes', 'loadCountries']),
 
     ...mapActions('appbar', ['setTitle', 'setTabs', 'setShowBackButton']),
@@ -75,6 +82,10 @@ import { hasSelfIntersection } from '@/utils/mapHelpers'
 // @ts-ignore
 export default class SiteNewPage extends Vue {
   private site: Site = new Site()
+
+  private createOptions: NonModelOptions = {
+    persistentIdentifierShouldBeCreated: false
+  }
 
   // vuex definition for typescript check
   loadEpsgCodes!: LoadEpsgCodesAction
@@ -90,6 +101,7 @@ export default class SiteNewPage extends Vue {
   setLoading!: SetLoadingAction
   setShowBackButton!: SetShowBackButtonAction
   clearSiteAttachments!: ClearSiteAttachmentsAction
+  createPid!: CreatePidAction
 
   async created () {
     this.initializeAppBar()
@@ -125,6 +137,16 @@ export default class SiteNewPage extends Vue {
     try {
       this.setLoading(true)
       const savedSite = await this.saveSite(this.site)
+
+      this.$store.commit('snackbar/setSuccess', 'Site / Lab created')
+
+      if (this.createOptions.persistentIdentifierShouldBeCreated) {
+        try {
+          savedSite.persistentIdentifier = await this.createPid(savedSite.id)
+        } catch (e) {
+          this.$store.commit('snackbar/setError', 'Creation of Persistent Identifier failed')
+        }
+      }
 
       this.$store.commit('snackbar/setSuccess', 'Site / Lab created')
       this.$router.push('/sites/' + savedSite.id)

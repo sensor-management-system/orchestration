@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -8,7 +8,7 @@
 
 from flask import current_app
 
-from ...api.models import Configuration, Device, Platform
+from ...api.models import Configuration, Device, Platform, Site
 
 
 class Pidinst:
@@ -41,16 +41,22 @@ class Pidinst:
         self.b2inst.init_app(app)
         self.pid.init_app(app)
 
+    @property
+    def b2inst_support(self):
+        """Return the list of models for that we can apply b2inst."""
+        return [Device, Platform, Configuration]
+
     def create_pid(self, instrument):
         """Create a pid for the instrument."""
-        if self.b2inst.token:
+        sms_paths = {
+            Device: "devices",
+            Platform: "platforms",
+            Configuration: "configurations",
+            Site: "sites",
+        }
+        if self.b2inst.token and type(instrument) in self.b2inst_support:
             return self.b2inst.create_pid(instrument)
         else:
-            sms_paths = {
-                Device: "devices",
-                Platform: "platforms",
-                Configuration: "configurations",
-            }
             base_url = current_app.config["SMS_FRONTEND_URL"]
             url = f"{base_url}/{sms_paths[type(instrument)]}/{instrument.id}"
             return self.pid.create(url)
@@ -64,7 +70,7 @@ class Pidinst:
 
     def update_external_metadata(self, instrument, run_async=True):
         """Update the external metadata."""
-        if self.b2inst.token:
+        if self.b2inst.token and type(instrument) in self.b2inst_support:
             self.b2inst.update_external_metadata(instrument, run_async=run_async)
         else:
             pass

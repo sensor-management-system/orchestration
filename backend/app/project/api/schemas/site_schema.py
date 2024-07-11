@@ -23,6 +23,7 @@ class SiteSchema(Schema):
         self_view_many = "api.site_list"
 
     id = fields.Integer(as_string=True)
+    persistent_identifier = fields.Str(allow_none=True)
     label = fields.Str(allow_none=True)
     geometry = WktPolygonField(allow_none=True)
     description = fields.Str(allow_none=True)
