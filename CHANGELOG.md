@@ -20,6 +20,7 @@ Added:
 - show info if an image (URL attachment) is no longer available
 - heatmap of days and activity within the system
 - PIDs for sites
+- integrated sms logos
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
