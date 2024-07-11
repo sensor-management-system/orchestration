@@ -8,10 +8,10 @@ SPDX-FileCopyrightText: 2020 - 2023
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
-SPDX-License-Identifier: HEESIL-1.0
+SPDX-License-Identifier: EUPL-1.2
 -->
 
-# API for Sensor Management System SMS 
+# API for Sensor Management System SMS
 
 [![pipeline status](https://gitlab.hzdr.de/hub-terra/sms/backend/badges/master/pipeline.svg)](https://gitlab.hzdr.de/hub-terra/sms/backend/-/commits/master)
 [![version](https://img.shields.io/badge/version-v1.0-lightgrey.svg)](./README.md) [![python](https://img.shields.io/badge/python-3.7|3.8|3.9-blue.svg?style=?style=plastic&logo=python)](#)
@@ -26,10 +26,10 @@ RESTful API service in Python for managing sensor metadata using [flask](https:/
 
 ### Documentation
 
-This Project uses OpenAPI to describe both the service model (the API in general, endpoints, request 
+This Project uses OpenAPI to describe both the service model (the API in general, endpoints, request
 metadata like headers, authentication strategies, response metadata, etc.),
 and it also covers the HTTP request/response body using a bunch of keywords
-based on JSON Schema. 
+based on JSON Schema.
 
 [See Swagger file in gitlab](app/project/static/swagger.json)
 Or  navigate to **`$HOST/rdm/svm-api/v1/docs`**
@@ -42,7 +42,7 @@ Or  navigate to **`$HOST/rdm/svm-api/v1/docs`**
 - python 3.6+: Python Language supported and tested
 - Flask: Micro Python Web Framework, good for microservice development and python WSGI apps.
 - [OpenAPI](https://swagger.io/specification/) 3: specification to describe both the service model
-- [Flask-REST-JSONAPI](https://flask-rest-jsonapi.readthedocs.io/en/latest/index.html): 
+- [Flask-REST-JSONAPI](https://flask-rest-jsonapi.readthedocs.io/en/latest/index.html):
 flask plugin for JSON Schema to describe an instance of JSON data, like the a HTTP request
  or response.
 - [Docker](https://docs.docker.com/get-started/overview/): A containerization tool for better devops
@@ -58,7 +58,7 @@ map count for the virtual memory:
 sudo sysctl vm.max_map_count=262144
 ```
 
-### Migration 
+### Migration
 
 To generate migrations as SQL scripts, instead of running them against the database use `sqlmigrate`:
 
@@ -160,7 +160,7 @@ python manage.py users reactivate srcuserubject@ufz.de
 
 When writing changes to the models. Use migrations.
 
-```
+```bash
 # To generate a migration after doing a model update
 python manage.py db migrate
 
@@ -169,6 +169,19 @@ python manage.py db upgrade
 
 # To rollback
 python manage.py db downgrade
+```
+
+**Update of names with latest CV terms**
+
+When the user suggests a new term it can happen that the term
+needs renaming after the curation team decided to go with a
+slightly different name.
+
+With the following command we can update all the CV related entries
+with their latest terms from the CV:
+
+```bash
+python manage.py cv apply-current-terms-to-sms
 ```
 
 **loading of fixture data**
@@ -207,11 +220,11 @@ Please note:
 ## Deployment
 
 ### UFZ
-- The following environment variable secrets will be set by the admins of the kubernetes cluster (wombat) and are therefore not appearing in the Dockerfiles nor in the CI pipeline: 
+- The following environment variable secrets will be set by the admins of the kubernetes cluster (wombat) and are therefore not appearing in the Dockerfiles nor in the CI pipeline:
   - DATABASE_URL
   - MINIO_SECRET_KEY
   - SMS_IDL_TOKEN
-  - PID_SERVICE_PASSWORD 
+  - PID_SERVICE_PASSWORD
 
 ## Authors
 

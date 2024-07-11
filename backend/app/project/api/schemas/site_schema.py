@@ -2,7 +2,7 @@
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """Schema for the sites."""
 from marshmallow_jsonapi import fields
@@ -23,6 +23,7 @@ class SiteSchema(Schema):
         self_view_many = "api.site_list"
 
     id = fields.Integer(as_string=True)
+    persistent_identifier = fields.Str(allow_none=True)
     label = fields.Str(allow_none=True)
     geometry = WktPolygonField(allow_none=True)
     description = fields.Str(allow_none=True)

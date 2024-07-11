@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2023 - 2024
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
-SPDX-License-Identifier: HEESIL-1.0
+SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.16.0 (Unreleased)
 
@@ -13,10 +13,28 @@ Added:
 - visibility markers for export control information (public or export control only)
 - created at field for the manufacturer models in order to keep track when those were added to the system
 - extended openapi specs
+- multiple wildcard idl conventions are now supported
+- Scripts to update cv related names from the latest entries in the controlled vocabulary
+  as well as code to analyse for which entries we still miss to have links to CV
+- add more links from the frontend to the CV entries
+- show info if an image (URL attachment) is no longer available
+- heatmap of days and activity within the system
+- PIDs for sites
+
+Changed:
+- dialog to suggest new manfacturer entries now mentions RORs for the provenance url
+- the licenes of the system is now the EUPL-1.2
+- Renamed tsm linking to data linking
+- Related units are now suggested, but all units are selectable for measured quantities
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces
 - Fixed https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/issues/89
+- The "Open in new tab" of a device or platform in the mounting wizard (step 3) of a configuration now opens the correct URL (also when creating a new tsm linking)
+- Fixed a problem when inserting small values like 0.05 (stating with 0.0) in some of the number fields
+- Added CSRF trusted origins for the IDL component
+- Updated IDL image, so that github accounts can be used again
+- Fixes a bug in the management of manufacturer model entries
 
 ## 1.15.1 - 2024-04-24
 

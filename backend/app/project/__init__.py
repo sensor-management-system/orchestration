@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -7,7 +7,7 @@
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """Application for the sensor management system."""
 
@@ -40,6 +40,7 @@ from .extensions.instances import (
 )
 from .urls import api
 from .views import (
+    activity_routes,
     additional_configuration_routes,
     additional_devices_routes,
     additional_platforms_routes,
@@ -127,6 +128,7 @@ def create_app():
     health.add_check(health_check_pidinst_handler)
     app.add_url_rule(base_url + "/health", "health", view_func=lambda: health.run())
 
+    app.register_blueprint(activity_routes)
     app.register_blueprint(additional_devices_routes)
     app.register_blueprint(additional_platforms_routes)
     app.register_blueprint(additional_configuration_routes)

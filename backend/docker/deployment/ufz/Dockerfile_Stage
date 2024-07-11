@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -7,7 +7,7 @@
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 FROM python:3.11-slim-buster as base
 
@@ -26,7 +26,7 @@ ENV STATIC_URL $STATIC_URL_ARG
 ARG FLASK_DEBUG_ARG=1
 ENV FLASK_DEBUG $FLASK_DEBUG_ARG
 
-ARG ELASTICSEARCH_URL_ARG=https://webapp-stage.intranet.ufz.de:443/sms/elasticsearch/
+ARG ELASTICSEARCH_URL_ARG=https://web-intern-stage.app.ufz.de:443/sms/elasticsearch/
 ENV ELASTICSEARCH_URL $ELASTICSEARCH_URL_ARG
 
 ARG WELL_KNOWN_URL_ARG=https://login.helmholtz.de/oauth2/.well-known/openid-configuration
@@ -38,7 +38,7 @@ ENV OIDC_CLIENT_ID $OIDC_CLIENT_ID_ARG
 ARG OIDC_USERNAME_CLAIM_ARG=eduperson_principal_name
 ENV OIDC_USERNAME_CLAIM $OIDC_USERNAME_CLAIM_ARG
 
-ARG HTTP_ORIGINS_ARG=https://webapp-stage.intranet.ufz.de
+ARG HTTP_ORIGINS_ARG=https://web-intern-stage.app.ufz.de
 ENV HTTP_ORIGINS $HTTP_ORIGINS_ARG
 
 ARG MINIO_ACCESS_KEY_ARG=sms
@@ -62,7 +62,7 @@ ENV DOWNLOAD_ENDPOINT $DOWNLOAD_ENDPOINT_ARG
 ARG ALLOWED_MIME_TYPES_ARG=application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed
 ENV ALLOWED_MIME_TYPES $ALLOWED_MIME_TYPES_ARG
 
-ARG CV_URL_ARG=https://webapp-stage.intranet.ufz.de/sms/cv/api/v1
+ARG CV_URL_ARG=https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV CV_URL $CV_URL_ARG
 
 ARG IDL_URL_ARG=https://web.app.ufz.de/sms-idl/api/idl
@@ -71,10 +71,10 @@ ENV IDL_URL $IDL_URL_ARG
 ARG SMS_IDL_TOKEN_ARG
 ENV SMS_IDL_TOKEN $SMS_IDL_TOKEN_ARG
 
-ARG SMS_FRONTEND_URL_ARG=https://webapp-stage.intranet.ufz.de/sms
+ARG SMS_FRONTEND_URL_ARG=https://web-intern-stage.app.ufz.de/sms
 ENV SMS_FRONTEND_URL $SMS_FRONTEND_URL_ARG
 
-ARG SMS_BACKEND_URL_ARG=https://webapp-stage.intranet.ufz.de/sms/backend/api/v1
+ARG SMS_BACKEND_URL_ARG=https://web-intern-stage.app.ufz.de/sms/backend/api/v1
 ENV SMS_BACKEND_URL $SMS_BACKEND_URL_ARG
 
 ARG TSM_ENDPOINTS_ARG='[{"fields": {"name": "UFZ", "url": "https://tsm.intranet.ufz.de/tsmdl"}, "model": "TsmEndpoint", "pk": 2}]'
@@ -88,6 +88,15 @@ ENV B2INST_COMMUNITY $B2INST_COMMUNITY_ARG
 
 ARG B2INST_URL_ARG=https://b2inst-test.gwdg.de
 ENV B2INST_URL $B2INST_URL_ARG
+
+ARG PID_SERVICE_URL_ARG=https://rz-vm561.gfz-potsdam.de:8000/api/handles
+ENV PID_SERVICE_URL $PID_SERVICE_URL_ARG
+
+ARG PID_SUFFIX_ARG=SMS-Staging
+ENV PID_SUFFIX $PID_SUFFIX_ARG
+
+ARG PID_PREFIX_ARG=20.500.14372
+ENV PID_PREFIX $PID_PREFIX_ARG
 
 ARG BUILD_DATE
 ARG VCS_REF

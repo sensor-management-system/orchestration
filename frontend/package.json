@@ -58,7 +58,6 @@
     "test": "jest",
     "styleguide": "vue-styleguidist server --config styleguide.config.js",
     "styleguide:build": "vue-styleguidist build --config styleguide.config.js",
-    "licenseCheck": "ts-node ./scripts/licenseCheck.ts",
     "generate:license-list": "license-checker --production --customPath=licenseText --json > ./generated/licenses.json"
   },
   "dependencies": {
@@ -81,6 +80,7 @@
     "ufo": "^1.3.0",
     "vue": "^2.7.14",
     "vue-barcode-reader": "^1.0.3",
+    "vue-calendar-heatmap": "^0.8.4",
     "vue-cookie-law": "^1.13.3",
     "vue-qr": "^4.0.9",
     "vue-server-renderer": "^2.7.14",

@@ -6,7 +6,7 @@
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """PID resources."""
 import datetime
@@ -24,7 +24,7 @@ from ..helpers.errors import (
     NotFoundError,
     UnauthorizedError,
 )
-from ..models import Configuration, Device, Platform
+from ..models import Configuration, Device, Platform, Site
 from ..permissions.rules import can_edit
 
 
@@ -121,6 +121,11 @@ def get_instrument(instrument_instance: dict):
             db.session.query(Configuration)
             .filter_by(id=instrument_instance.get("id"))
             .first()
+        )
+        return instrument
+    elif instrument_instance.get("type") == "site":
+        instrument = (
+            db.session.query(Site).filter_by(id=instrument_instance.get("id")).first()
         )
         return instrument
     else:

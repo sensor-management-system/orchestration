@@ -1,31 +1,9 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2024
+- Maximilian Schaldach <maximilian.schaldach@ufz.de>
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
-Copyright (C) 2024
-- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
@@ -64,7 +42,8 @@ permissions and limitations under the Licence.
                     <v-row align="center">
                       <v-col>
                         {{ image.attachment.label }}
-                      </v-col><v-col class="text-right">
+                      </v-col>
+                      <v-col class="text-right">
                         <span v-if="hover">
                           <v-btn
                             fab
@@ -122,7 +101,10 @@ permissions and limitations under the Licence.
               :key="i"
               contain
               :src="getUrlForAttachment(image.attachment)"
-            />
+              @error="setAttachmentError(image.attachment)"
+            >
+              <ImageNotAvailable v-if="hasAttachmentError(image.attachment)" />
+            </v-carousel-item>
           </v-carousel>
         </v-hover>
 
@@ -139,8 +121,11 @@ import { Component, Vue, Prop, Watch } from 'nuxt-property-decorator'
 
 import { Image, IAttachmentWithUrl } from '@/models/Image'
 import { Attachment, IAttachment } from '@/models/Attachment'
+import ImageNotAvailable from '@/components/shared/ImageNotAvailable.vue'
 
-@Component
+@Component({
+  components: { ImageNotAvailable }
+})
 export default class AttachmentImagesForm extends Vue {
   @Prop({
     default: [],
@@ -179,6 +164,7 @@ export default class AttachmentImagesForm extends Vue {
   private visibleImageIndex = 0
   private attachmentToAdd = null
   private fab = false
+  private attachmentErrors: {[idx: string]: boolean} = {}
 
   @Watch('value', { immediate: true, deep: true })
   async setUrlsForAttachments () {
@@ -289,6 +275,16 @@ export default class AttachmentImagesForm extends Vue {
 
   set images (value: Image[]) {
     this.$emit('input', value)
+  }
+
+  setAttachmentError (attachment: Attachment) {
+    if (!attachment.id) { return }
+    Vue.set(this.attachmentErrors, attachment.id, true)
+  }
+
+  hasAttachmentError (attachment: Attachment): boolean {
+    if (!attachment.id) { return true }
+    return this.attachmentErrors[attachment.id]
   }
 
   setVisibleImageIndex (value: number) {

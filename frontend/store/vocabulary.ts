@@ -1,37 +1,14 @@
 /**
- * @license
- * Web client of the Sensor Management System software developed within
- * the Helmholtz DataHub Initiative by GFZ and UFZ.
+ * @license EUPL-1.2
+ * SPDX-FileCopyrightText: 2020 - 2023
+ * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+ * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+ * - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+ * - Tim Eder <tim.eder@ufz.de>
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
  *
- * Copyright (C) 2020 - 2023
- * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
- * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
- * - Tim Eder (UFZ, tim.eder@ufz.de)
- * - Helmholtz Centre Potsdam - GFZ German Research Centre for
- *   Geosciences (GFZ, https://www.gfz-potsdam.de)
- * - Helmholtz Centre for Environmental Research GmbH - UFZ
- *   (UFZ, https://www.ufz.de)
- *
- * Parts of this program were developed within the context of the
- * following publicly funded projects or measures:
- * - Helmholtz Earth and Environment DataHub
- *   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
- *
- * Licensed under the HEESIL, Version 1.0 or - as soon they will be
- * approved by the "Community" - subsequent versions of the HEESIL
- * (the "Licence").
- *
- * You may not use this work except in compliance with the Licence.
- *
- * You may obtain a copy of the Licence at:
- * https://gitext.gfz-potsdam.de/software/heesil
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the Licence is distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the Licence for the specific language governing
- * permissions and limitations under the Licence.
+ * SPDX-License-Identifier: EUPL-1.2
  */
 import { Commit, GetterTree, ActionTree } from 'vuex'
 import { RootState } from '@/store'
@@ -73,6 +50,7 @@ import {
   KIND_OF_ACTION_TYPE_STATIC_LOCATION_BEGIN,
   KIND_OF_ACTION_TYPE_STATIC_LOCATION_END, platformParameterChangeActionOption
 } from '@/models/ActionKind'
+import { SoftwareType } from '@/models/SoftwareType'
 
 export interface VocabularyState {
   manufacturers: Manufacturer[]
@@ -96,7 +74,8 @@ export interface VocabularyState {
   siteUsages: SiteUsage[],
   siteTypes: SiteType[],
   countries: Country[],
-  licenses: License[]
+  licenses: License[],
+  softwareTypes: SoftwareType[]
 }
 
 const state = (): VocabularyState => ({
@@ -121,7 +100,8 @@ const state = (): VocabularyState => ({
   siteUsages: [],
   siteTypes: [],
   countries: [],
-  licenses: []
+  licenses: [],
+  softwareTypes: []
 })
 
 export type ActionTypeItem = { id: string, name: string, uri: string, kind: string }
@@ -381,6 +361,7 @@ export type LoadSiteUsagesAction = () => Promise<void>
 export type LoadSiteTypesAction = () => Promise<void>
 export type LoadCountriesAction = () => Promise<void>
 export type LoadLicensesAction = () => Promise<void>
+export type LoadSoftwareTypesAction = () => Promise<void>
 export type AddDeviceTypeAction = ({ devicetype }: {devicetype: DeviceType}) => Promise<DeviceType>
 export type AddPlatformTypeAction = ({ platformtype }: {platformtype: PlatformType}) => Promise<PlatformType>
 export type AddManufacturerAction = ({ manufacturer }: { manufacturer: Manufacturer}) => Promise<Manufacturer>
@@ -468,6 +449,9 @@ const actions: ActionTree<VocabularyState, RootState> = {
   },
   async loadLicenses ({ commit }: { commit: Commit }): Promise<void> {
     commit('setLicenses', await this.$api.licenses.findAll())
+  },
+  async loadSoftwareTypes ({ commit }: { commit: Commit }): Promise<void> {
+    commit('setSoftwareTypes', await this.$api.softwareTypes.findAll())
   },
   async addDevicetype ({ commit, state }: {commit: Commit, state: VocabularyState }, { devicetype }: {devicetype: DeviceType }): Promise<DeviceType> {
     const newDevicetype = await this.$api.deviceTypes.add(devicetype)
@@ -635,6 +619,9 @@ const mutations = {
   },
   setLicenses (state: VocabularyState, licenses: License[]) {
     state.licenses = licenses
+  },
+  setSoftwareTypes (state: VocabularyState, softwareTypes: SoftwareType[]) {
+    state.softwareTypes = softwareTypes
   }
 }
 

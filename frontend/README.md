@@ -1,3 +1,13 @@
+<!--
+SPDX-FileCopyrightText: 2020 - 2024
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+
+SPDX-License-Identifier: EUPL-1.2
+-->
 # Sensor Management System
 
 > a system to manage sensors and platforms
@@ -9,7 +19,7 @@ Helmholtz DataHub Initiative by [GFZ](https://www.gfz-potsdam.de) and
 ## License
 
 The software is distributed within the Helmholtz DataHub Initiative under the
-**HEESIL License**. See [LICENSE](LICENSE).
+**EUPL**. See [LICENSE](../LICENSE/EUPL-1.2.txt).
 
 ## How to get started
 

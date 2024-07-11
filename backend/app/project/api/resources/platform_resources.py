@@ -5,7 +5,7 @@
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """Platform list resource."""
 
@@ -28,6 +28,7 @@ from ..helpers.resource_mixin import (
     set_default_permission_view_to_internal_if_not_exists_or_all_false,
 )
 from ..models import (
+    ActivityLog,
     Configuration,
     Device,
     ManufacturerModel,
@@ -122,6 +123,13 @@ class PlatformList(CsvListMixin, ResourceList):
 
         save_to_db(platform)
 
+        new_log_entry = ActivityLog.create(
+            entity=platform,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         if platform.manufacturer_name and platform.model:
             existing_manufacturer_model = (
                 db.session.query(ManufacturerModel)
@@ -176,6 +184,13 @@ class PlatformDetail(ResourceDetail):
         platform.update_description = msg
         save_to_db(platform)
 
+        new_log_entry = ActivityLog.create(
+            entity=platform,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         if pidinst.has_external_metadata(platform):
             pidinst.update_external_metadata(platform)
 
@@ -204,7 +219,9 @@ class PlatformDetail(ResourceDetail):
                     )
                     .first()
                 )
-                if not any(
+                # If we found one entry, but it has no information yet,
+                # we check if we should delete the old one.
+                if existing_manufacturer_model and not any(
                     [
                         existing_manufacturer_model.external_system_name,
                         existing_manufacturer_model.external_system_url,
@@ -269,6 +286,11 @@ class PlatformDetail(ResourceDetail):
             super().delete(*args, **kwargs)
         except JsonApiException as e:
             raise ConflictError("Deletion failed for the platform.", str(e))
+
+        new_log_entry = ActivityLog.create(
+            entity=platform, user=g.user, description="delete;basic data", data={}
+        )
+        save_to_db(new_log_entry)
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)

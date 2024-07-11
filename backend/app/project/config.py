@@ -8,7 +8,7 @@
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """Config for the app."""
 
@@ -80,6 +80,7 @@ class BaseConfig:
     SMS_VERSION = env("SMS_VERSION", "develop")
     PROXY_NETLOC_BLOCKLIST = env.list("PROXY_NETLOC_BLOCKLIST", [])
     EXPORT_CONTROL_VO_LIST = env.list("EXPORT_CONTROL_VO_LIST", [])
+    OIDC_TOKEN_ENDPOINT_FOR_FRONTEND = env.str("OIDC_TOKEN_ENDPOINT_FOR_FRONTEND", "")
 
 
 class DevelopmentConfig(BaseConfig):

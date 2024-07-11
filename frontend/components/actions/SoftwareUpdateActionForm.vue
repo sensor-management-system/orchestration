@@ -1,32 +1,10 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2020 - 2024
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
-Copyright (C) 2020, 2021
-- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Helmholtz Centre Potsdam - GFZ German Research Centre for
-  Geosciences (GFZ, https://www.gfz-potsdam.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
@@ -61,7 +39,59 @@ permissions and limitations under the Licence.
             class="required"
             :rules="[rules.softwareTypeNotNull]"
             @input="setSoftwareType"
-          />
+          >
+            <template #append-outer>
+              <v-tooltip
+                v-if="softwareType && softwareType.definition"
+                right
+              >
+                <template #activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    small
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle-outline
+                  </v-icon>
+                </template>
+                <span>{{ softwareType.definition }}</span>
+              </v-tooltip>
+              <a v-if="actionCopy.softwareTypeUrl" target="_blank" :href="actionCopy.softwareTypeUrl" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
+            </template>
+            <template #item="data">
+              <template v-if="(typeof data.item) !== 'object'">
+                <v-list-item-content>{{ data.item }}</v-list-item-content>
+              </template>
+              <template v-else>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ data.item.name }}
+                    <v-tooltip
+                      v-if="data.item.definition"
+                      bottom
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-icon
+                          color="primary"
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          mdi-help-circle-outline
+                        </v-icon>
+                      </template>
+                      <span>{{ data.item.definition }}</span>
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+            </template>
+          </v-select>
         </v-form>
       </v-col>
     </v-row>
@@ -108,7 +138,7 @@ permissions and limitations under the Licence.
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, Vue, Watch } from 'nuxt-property-decorator'
-
+import { mapActions, mapState } from 'vuex'
 import { DateTime } from 'luxon'
 
 import { Attachment } from '@/models/Attachment'
@@ -120,6 +150,7 @@ import { protocolsInUrl } from '@/utils/urlHelpers'
 
 import CommonActionForm from '@/components/actions/CommonActionForm.vue'
 import DateTimePicker from '@/components/DateTimePicker.vue'
+import { LoadSoftwareTypesAction, VocabularyState } from '@/store/vocabulary'
 
 /**
  * A class component for a form for Software update actions
@@ -129,6 +160,12 @@ import DateTimePicker from '@/components/DateTimePicker.vue'
   components: {
     CommonActionForm,
     DateTimePicker
+  },
+  methods: {
+    ...mapActions('vocabulary', ['loadSoftwareTypes'])
+  },
+  computed: {
+    ...mapState('vocabulary', ['softwareTypes'])
   }
 })
 // @ts-ignore
@@ -142,7 +179,8 @@ export default class SoftwareUpdateActionForm extends Vue {
     isUrl: this.isUrl
   }
 
-  private softwareTypes: SoftwareType[] = []
+  private softwareTypes!: VocabularyState['softwareTypes']
+  loadSoftwareTypes!: LoadSoftwareTypesAction
 
   /**
    * a SoftwareUpdateAction
@@ -173,11 +211,7 @@ export default class SoftwareUpdateActionForm extends Vue {
   readonly currentUserMail: string | null
 
   async fetch (): Promise<any> {
-    await this.fetchSoftwareTypes()
-  }
-
-  async fetchSoftwareTypes (): Promise<any> {
-    this.softwareTypes = await this.$api.softwareTypes.findAllPaginated()
+    await this.loadSoftwareTypes()
   }
 
   created () {
@@ -204,6 +238,14 @@ export default class SoftwareUpdateActionForm extends Vue {
     this.actionCopy.softwareTypeUrl = aSoftwareType?.uri || ''
     this.actionCopy.softwareTypeName = aSoftwareType?.name || ''
     this.$emit('input', this.actionCopy)
+  }
+
+  get softwareType (): SoftwareType | undefined {
+    let aSoftwareType: SoftwareType | undefined
+    if (this.actionCopy && this.actionCopy.softwareTypeUrl) {
+      aSoftwareType = this.softwareTypes.find(i => i.uri === this.actionCopy.softwareTypeUrl)
+    }
+    return aSoftwareType
   }
 
   setVersion (version: string) {

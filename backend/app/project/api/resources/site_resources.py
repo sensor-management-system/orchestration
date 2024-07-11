@@ -1,10 +1,11 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """Resource classes for the sites."""
+
 import os
 
 from flask import g, request
@@ -20,7 +21,7 @@ from ..datalayers.esalchemy import (
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError, ForbiddenError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
-from ..models import Configuration, Site, SiteContactRole
+from ..models import ActivityLog, Configuration, Site, SiteContactRole
 from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
@@ -96,6 +97,13 @@ class SiteList(ResourceList):
 
         save_to_db(site)
 
+        new_log_entry = ActivityLog.create(
+            entity=site,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         return result
 
     schema = SiteSchema
@@ -128,6 +136,13 @@ class SiteDetail(ResourceDetail):
         site.update_description = msg
         save_to_db(site)
 
+        new_log_entry = ActivityLog.create(
+            entity=site,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         return result
 
     def before_delete(self, args, kwargs):
@@ -157,6 +172,11 @@ class SiteDetail(ResourceDetail):
             raise e
         except JsonApiException as e:
             raise ConflictError("Deletion failed for the site.", str(e))
+
+        new_log_entry = ActivityLog.create(
+            entity=site, user=g.user, description="delete;basic data", data={}
+        )
+        save_to_db(new_log_entry)
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)

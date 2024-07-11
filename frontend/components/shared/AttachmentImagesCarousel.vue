@@ -1,31 +1,9 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2024
+- Maximilian Schaldach <maximilian.schaldach@ufz.de>
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
-Copyright (C) 2024
-- Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <v-container>
@@ -44,7 +22,10 @@ permissions and limitations under the Licence.
             :key="i"
             contain
             :src="getUrlForAttachment(image.attachment)"
-          />
+            @error="setAttachmentError(image.attachment)"
+          >
+            <ImageNotAvailable v-if="hasAttachmentError(image.attachment)" />
+          </v-carousel-item>
         </v-carousel>
       </v-col>
       <v-col
@@ -72,8 +53,13 @@ import { Vue, Prop, Component, Watch } from 'nuxt-property-decorator'
 
 import { Image, IAttachmentWithUrl } from '@/models/Image'
 import { Attachment } from '@/models/Attachment'
+import ImageNotAvailable from '@/components/shared/ImageNotAvailable.vue'
 
-@Component
+@Component({
+  components: {
+    ImageNotAvailable
+  }
+})
 export default class AttachmentImagesCarousel extends Vue {
   private urlsForAttachments: IAttachmentWithUrl[] = []
 
@@ -97,6 +83,18 @@ export default class AttachmentImagesCarousel extends Vue {
     type: Function
   })
   private proxyUrl!: (attachmentUrl: string) => Promise<string>
+
+  private attachmentErrors: {[idx: string]: boolean} = {}
+
+  setAttachmentError (attachment: Attachment) {
+    if (!attachment.id) { return }
+    Vue.set(this.attachmentErrors, attachment.id, true)
+  }
+
+  hasAttachmentError (attachment: Attachment): boolean {
+    if (!attachment.id) { return true }
+    return this.attachmentErrors[attachment.id]
+  }
 
   async created () {
     await this.setUrlsForAttachments()

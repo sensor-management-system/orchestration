@@ -1,36 +1,13 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2022 - 2024
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Tim Eder <tim.eder@ufz.de>
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
-Copyright (C) 2022 - 2024
-- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tim Eder (UFZ, tim.eder@ufz.de)
-- Tobias Kuhnert (UFZ, tobias.kuhnert@ufz.de)
-- Helmholtz Centre Potsdam - GFZ German Research Centre for
-  Geosciences (GFZ, https://www.gfz-potsdam.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <span>
@@ -56,7 +33,7 @@ permissions and limitations under the Licence.
             xl="3"
           >
             <v-text-field
-              v-model.number="mountActionInformationDTO.offsetX"
+              :value="mountActionInformationDTO.offsetX"
               data-role="textfield-offset-x"
               label="Offset (x)"
               type="number"
@@ -66,7 +43,7 @@ permissions and limitations under the Licence.
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
               @wheel.prevent
-              @input="update"
+              @change="updateNumericFieldNonNull($event, 'offsetX')"
             />
           </v-col>
           <v-col
@@ -75,7 +52,7 @@ permissions and limitations under the Licence.
             xl="3"
           >
             <v-text-field
-              v-model.number="mountActionInformationDTO.offsetY"
+              :value="mountActionInformationDTO.offsetY"
               data-role="textfield-offset-y"
               label="Offset (y)"
               type="number"
@@ -85,7 +62,7 @@ permissions and limitations under the Licence.
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
               @wheel.prevent
-              @input="update"
+              @change="updateNumericFieldNonNull($event, 'offsetY')"
             />
           </v-col>
           <v-col
@@ -94,7 +71,7 @@ permissions and limitations under the Licence.
             xl="3"
           >
             <v-text-field
-              v-model.number="mountActionInformationDTO.offsetZ"
+              :value="mountActionInformationDTO.offsetZ"
               data-role="textfield-offset-z"
               label="Offset (z)"
               type="number"
@@ -104,7 +81,7 @@ permissions and limitations under the Licence.
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
               @wheel.prevent
-              @input="update"
+              @change="updateNumericFieldNonNull($event, 'offsetZ')"
             />
           </v-col>
         </v-row>
@@ -193,24 +170,24 @@ permissions and limitations under the Licence.
         <v-row class="pb-0">
           <v-col cols="12" md="4">
             <v-text-field
-              v-model.number="mountActionInformationDTO.x"
+              :value="mountActionInformationDTO.x"
               label="Coordinate (x)"
               type="number"
               step="any"
               clearable
               @wheel.prevent
-              @change="update"
+              @change="updateNumericFieldNullable($event, 'x')"
             />
           </v-col>
           <v-col cols="12" md="4">
             <v-text-field
-              v-model.number="mountActionInformationDTO.y"
+              :value="mountActionInformationDTO.y"
               label="Coordinate (y)"
               type="number"
               step="any"
               clearable
               @wheel.prevent
-              @change="update"
+              @change="updateNumericFieldNullable($event, 'y')"
             />
           </v-col>
           <v-col cols="12" md="4">
@@ -228,13 +205,13 @@ permissions and limitations under the Licence.
         <v-row class="pb-0">
           <v-col cols="12" md="4" offset-md="4">
             <v-text-field
-              v-model.number="mountActionInformationDTO.z"
+              :value="mountActionInformationDTO.z"
               label="Coordinate (z)"
               type="number"
               step="any"
               clearable
               @wheel.prevent
-              @change="update"
+              @change="updateNumericFieldNullable($event, 'z')"
             />
           </v-col>
           <v-col cols="12" md="4">
@@ -326,6 +303,7 @@ import { Contact } from '@/models/Contact'
 
 import MountActionDateForm from '@/components/configurations/MountActionDateForm.vue'
 import { MountActionDateDTO, MountActionInformationDTO, IOffsets } from '@/utils/configurationInterfaces'
+import { parseFloatOrDefault, parseFloatOrNull } from '@/utils/numericsHelper'
 
 @Component({
   components: {
@@ -450,8 +428,18 @@ export default class MountActionDetailsForm extends mixins(Rules) {
     return []
   }
 
-  update () {
-    this.$emit('input', this.mountActionInformationDTO)
+  async updateNumericFieldNonNull (value: any, field: 'offsetX' | 'offsetY' | 'offsetZ') {
+    this.mountActionInformationDTO[field] = parseFloatOrDefault(value, 0.0)
+    await this.update()
+  }
+
+  async updateNumericFieldNullable (value: any, field: 'x' | 'y' | 'z') {
+    this.mountActionInformationDTO[field] = parseFloatOrNull(value)
+    await this.update()
+  }
+
+  async update () {
+    await this.$emit('input', this.mountActionInformationDTO)
   }
 
   get absoluteOffsets (): IOffsets {

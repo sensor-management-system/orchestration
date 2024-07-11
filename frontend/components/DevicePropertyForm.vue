@@ -1,32 +1,10 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2020 - 2024
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
-Copyright (C) 2020 - 2023
-- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Helmholtz Centre Potsdam - GFZ German Research Centre for
-  Geosciences (GFZ, https://www.gfz-potsdam.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
@@ -76,6 +54,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueCompartmentItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueCompartmentItem && valueCompartmentItem.uri" target="_blank" :href="valueCompartmentItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewCompartmentDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -140,6 +123,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueSamplingMediaItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueSamplingMediaItem && valueSamplingMediaItem.uri" target="_blank" :href="valueSamplingMediaItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewSamplingMediaDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -207,6 +195,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valuePropertyItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valuePropertyItem && valuePropertyItem.uri" target="_blank" :href="valuePropertyItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewPropertyDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -272,6 +265,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueAggregationTypeItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueAggregationTypeItem && valueAggregationTypeItem.uri" target="_blank" :href="valueAggregationTypeItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewAggregationTypeDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -339,6 +337,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueUnitItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueUnitItem && valueUnitItem.uri" target="_blank" :href="valueUnitItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon :disabled="!valuePropertyItem || !valuePropertyItem.id" @click="showNewMeasuredQuantityUnitDialog = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -351,6 +354,7 @@ permissions and limitations under the Licence.
               </template>
               <template v-else>
                 <v-list-item-content>
+                  <label v-if="isSuggestedUnitForMeasuredQuantity(data.item)">Suggested unit</label>
                   <v-list-item-title>
                     {{ data.item.name }}
                     <v-tooltip
@@ -383,7 +387,7 @@ permissions and limitations under the Licence.
             :disabled="readonly"
             type="number"
             step="any"
-            @input="update('failureValue', $event)"
+            @change="update('failureValue', $event)"
             @wheel.prevent
           />
         </v-col>
@@ -395,7 +399,7 @@ permissions and limitations under the Licence.
             :disabled="readonly"
             type="number"
             step="any"
-            @input="update('measuringRange.min', $event)"
+            @change="update('measuringRange.min', $event)"
             @wheel.prevent
           />
         </v-col>
@@ -407,7 +411,7 @@ permissions and limitations under the Licence.
             :disabled="readonly"
             type="number"
             step="any"
-            @input="update('measuringRange.max', $event)"
+            @change="update('measuringRange.max', $event)"
             @wheel.prevent
           />
         </v-col>
@@ -421,7 +425,7 @@ permissions and limitations under the Licence.
             :disabled="readonly"
             type="number"
             step="any"
-            @input="update('accuracy', $event)"
+            @change="update('accuracy', $event)"
             @wheel.prevent
           />
         </v-col>
@@ -453,6 +457,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueAccuracyUnitItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueAccuracyUnitItem && valueAccuracyUnitItem.uri" target="_blank" :href="valueAccuracyUnitItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewUnitDialogForAccuracy = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -497,7 +506,7 @@ permissions and limitations under the Licence.
             :disabled="readonly"
             type="number"
             step="any"
-            @input="update('resolution', $event)"
+            @change="update('resolution', $event)"
             @wheel.prevent
           />
         </v-col>
@@ -529,6 +538,11 @@ permissions and limitations under the Licence.
                 </template>
                 <span>{{ valueResolutionUnitItem.definition }}</span>
               </v-tooltip>
+              <a v-if="valueResolutionUnitItem && valueResolutionUnitItem.uri" target="_blank" :href="valueResolutionUnitItem.uri" style="line-height: 2;">
+                <v-icon small>
+                  mdi-open-in-new
+                </v-icon>
+              </a>
               <v-btn icon @click="showNewUnitDialogForResolution = true">
                 <v-icon>
                   mdi-tooltip-plus-outline
@@ -1321,14 +1335,42 @@ export default class DevicePropertyForm extends mixins(Rules) {
   /**
    * returns a list of unit objects
    *
-   * When the property exists, restricts the list of units to those that have a
-   * relation to the selected property
+   * When the property exists, show those units first that are linked
+   * to the selected property via the measured quantity units
+   * so that they can be seen first.
    *
    * @returns {MeasuredQuantityUnit[]} list of units
    */
   get measuredQuantityUnitItems (): MeasuredQuantityUnit[] {
-  // restrict the list of measuredQuantityUnits based on the choosen property
-    return this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId))
+    // restrict the list of measuredQuantityUnits based on the choosen property
+    const suggestedEntries = this.measuredQuantityUnits.filter(u => this.checkUriEndsWithId(this.value.propertyUri, u.measuredQuantityId))
+    const unitIds = suggestedEntries.map(x => x.unitId)
+
+    const allOtherUnits = this.units.filter(x => !unitIds.includes(x.id)).map(unit => MeasuredQuantityUnit.createFromObject({
+      // We can't set the id here. This helps later to identify measured quantity units
+      // that we can suggest (as we have ids for their link betweeen the unit
+      // and the measured quantity). Here, we don't have it, so the id stays empty.
+      id: '',
+      name: unit.name,
+      uri: unit.uri,
+      definition: unit.definition,
+      defaultLimitMax: null,
+      defaultLimitMin: null,
+      unitId: unit.id,
+      measuredQuantityId: ''
+    }))
+    suggestedEntries.sort((a, b) => a.name.localeCompare(b.name))
+    return [
+      ...suggestedEntries,
+      ...allOtherUnits
+    ]
+  }
+
+  isSuggestedUnitForMeasuredQuantity (measuredQuantityUnit: MeasuredQuantityUnit) {
+    // If we have set an id for the measured quantity unit then we know
+    // that we have an entry in the database for it that links the
+    // unit & the measured quantity.
+    return !!measuredQuantityUnit.id
   }
 
   /**

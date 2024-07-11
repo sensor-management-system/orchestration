@@ -1,32 +1,10 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2020 - 2024
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
-Copyright (C) 2020, 2021
-- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Helmholtz Centre Potsdam - GFZ German Research Centre for
-  Geosciences (GFZ, https://www.gfz-potsdam.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
@@ -53,6 +31,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ compartmentDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.compartmentUri" target="_blank" :href="value.compartmentUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Sampling Media</label>
@@ -70,6 +53,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ samplingMediaDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.samplingMediaUri" target="_blank" :href="value.samplingMediaUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Measured Quantity</label>
@@ -87,6 +75,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ measuredQuantityDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.propertyUri" target="_blank" :href="value.propertyUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Aggregation Type</label>
@@ -104,6 +97,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ aggregationTypeDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.aggregationTypeUri" target="_blank" :href="value.aggregationTypeUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
     </v-row>
     <v-row>
@@ -123,6 +121,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ unitDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.unitUri" target="_blank" :href="value.unitUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Failure Value</label>
@@ -158,6 +161,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ accuracyUnitDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.accuracyUnitUri" target="_blank" :href="value.accuracyUnitUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
       <v-col cols="12" md="3">
         <label>Resolution</label>
@@ -179,6 +187,11 @@ permissions and limitations under the Licence.
           </template>
           <span>{{ resolutionUnitDefinition }}</span>
         </v-tooltip>
+        <a v-if="value.resolutionUnitUri" target="_blank" :href="value.resolutionUnitUri">
+          <v-icon small>
+            mdi-open-in-new
+          </v-icon>
+        </a>
       </v-col>
     </v-row>
     <v-row>

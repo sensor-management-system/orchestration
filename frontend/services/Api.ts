@@ -1,37 +1,14 @@
 /**
- * @license
- * Web client of the Sensor Management System software developed within
- * the Helmholtz DataHub Initiative by GFZ and UFZ.
+ * @license EUPL-1.2
+ * SPDX-FileCopyrightText: 2020 - 2024
+ * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+ * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+ * - Tim Eder <tim.eder@ufz.de>
+ * - Maximilian Schaldach <maximilian.schaldach@ufz.de>
+ * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
  *
- * Copyright (C) 2020 - 2024
- * - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
- * - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- * - Tim Eder (UFZ, tim.eder@ufz.de)
- * - Maximilian Schaldach (UFZ, maximilian.schaldach@ufz.de)
- * - Helmholtz Centre Potsdam - GFZ German Research Centre for
- *   Geosciences (GFZ, https://www.gfz-potsdam.de)
- * - Helmholtz Centre for Environmental Research GmbH - UFZ
- *   (UFZ, https://www.ufz.de)
- *
- * Parts of this program were developed within the context of the
- * following publicly funded projects or measures:
- * - Helmholtz Earth and Environment DataHub
- *   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
- *
- * Licensed under the HEESIL, Version 1.0 or - as soon they will be
- * approved by the "Community" - subsequent versions of the HEESIL
- * (the "Licence").
- *
- * You may not use this work except in compliance with the Licence.
- *
- * You may obtain a copy of the Licence at:
- * https://gitext.gfz-potsdam.de/software/heesil
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the Licence is distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the Licence for the specific language governing
- * permissions and limitations under the Licence.
+ * SPDX-License-Identifier: EUPL-1.2
  */
 import { AxiosRequestConfig } from 'axios'
 
@@ -41,6 +18,7 @@ import { createAxios } from '@/utils/axiosHelper'
 import { PermissionGroup } from '@/models/PermissionGroup'
 
 import { AutocompleteApi } from '@/services/sms/AutocompleteApi'
+import { ActivityApi } from '@/services/sms/ActivityApi'
 import { ConfigurationApi } from '@/services/sms/ConfigurationApi'
 import { ConfigurationImageApi, DeviceImageApi, SiteImageApi, PlatformImageApi } from '@/services/sms/ImageApi'
 import { ConfigurationAttachmentApi } from '@/services/sms/ConfigurationAttachmentApi'
@@ -188,6 +166,7 @@ export class Api {
   private readonly _aggregationTypeApi: AggregationTypeApi
   private readonly _actionCategoryApi: ActionCategoryApi
   private readonly _autocompleteApi: AutocompleteApi
+  private readonly _activityApi: ActivityApi
   private readonly _siteUsageApi: SiteUsageApi
   private readonly _siteTypeApi: SiteTypeApi
   private readonly _countryApi: CountryApi
@@ -494,6 +473,10 @@ export class Api {
     this._autocompleteApi = new AutocompleteApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/controller'
+    )
+
+    this._activityApi = new ActivityApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken)
     )
 
     // and here we can set settings for all the cv api calls
@@ -804,6 +787,10 @@ export class Api {
 
   get autocomplete (): AutocompleteApi {
     return this._autocompleteApi
+  }
+
+  get activities (): ActivityApi {
+    return this._activityApi
   }
 
   get cvContactRoles (): CvContactRoleApi {

@@ -2,7 +2,7 @@
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """Set of rules what action is allowed on the entities."""
 import itertools
@@ -1634,6 +1634,8 @@ def can_change(entity, data):
 def can_delete(entity):
     """Return if the entity can be deleted."""
     if entity.archived:
+        return False
+    if entity.persistent_identifier:
         return False
     if g.user and g.user.is_superuser:
         return True

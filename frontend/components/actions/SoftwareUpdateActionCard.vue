@@ -1,32 +1,10 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2020 - 2023
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
-Copyright (C) 2020 - 2023
-- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Helmholtz Centre Potsdam - GFZ German Research Centre for
-  Geosciences (GFZ, https://www.gfz-potsdam.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <base-expandable-list-item expandable-color="grey lighten-5">
@@ -64,18 +42,43 @@ permissions and limitations under the Licence.
         class="grey lighten-5 text--primary pt-2"
       >
         <v-row dense>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="3">
+            <label>
+              Software type
+            </label>
+            {{ value.softwareTypeName | orDefault }}
+            <v-tooltip v-if="softwareTypeDefinition" right>
+              <template #activator="{ on, attrs }">
+                <v-icon
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  mdi-help-circle-outline
+                </v-icon>
+              </template>
+              <span>{{ softwareTypeDefinition }}</span>
+            </v-tooltip>
+            <a v-if="value.softwareTypeUrl" target="_blank" :href="value.softwareTypeUrl">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
+          </v-col>
+          <v-col cols="12" md="3">
             <label>
               Version
             </label>
             {{ value.version | orDefault }}
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="6">
             <label>
               Repository
             </label>
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <span v-html="repositoryLink" />
+            <span v-if="value.repositoryUrl" v-html="repositoryLink" />
+            <span v-else>{{ null | orDefault }}</span>
           </v-col>
         </v-row>
         <label>Description</label>
@@ -92,6 +95,7 @@ permissions and limitations under the Licence.
  * @author <marc.hanisch@gfz-potsdam.de>
  */
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { mapState } from 'vuex'
 
 import { dateToDateTimeString } from '@/utils/dateHelper'
 import { protocolsInUrl } from '@/utils/urlHelpers'
@@ -100,6 +104,7 @@ import { SoftwareUpdateAction } from '@/models/SoftwareUpdateAction'
 import AttachmentsBlock from '@/components/actions/AttachmentsBlock.vue'
 import { Attachment } from '@/models/Attachment'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
+import { VocabularyState } from '@/store/vocabulary'
 
 /**
  * A class component for Software Update Action card
@@ -112,6 +117,9 @@ import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.v
   components: {
     BaseExpandableListItem,
     AttachmentsBlock
+  },
+  computed: {
+    ...mapState('vocabulary', ['softwareTypes'])
   }
 })
 // @ts-ignore
@@ -146,6 +154,8 @@ export default class SoftwareUpdateActionCard extends Vue {
     type: String
   })
   readonly target!: string
+
+  private softwareTypes!: VocabularyState['softwareTypes']
 
   /**
    * returns an URL as an link
@@ -184,6 +194,14 @@ export default class SoftwareUpdateActionCard extends Vue {
 
   openAttachment (attachment: Attachment) {
     this.$emit('open-attachment', attachment)
+  }
+
+  get softwareTypeDefinition (): string {
+    const softwareTypeIndex = this.softwareTypes.findIndex(t => t.uri === this.value.softwareTypeUrl)
+    if (softwareTypeIndex > -1) {
+      return this.softwareTypes[softwareTypeIndex].definition
+    }
+    return ''
   }
 }
 

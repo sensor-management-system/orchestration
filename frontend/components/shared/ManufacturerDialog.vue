@@ -1,32 +1,10 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2022 - 2024
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
-Copyright (C) 2022 - 2023
-- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Helmholtz Centre Potsdam - GFZ German Research Centre for
-  Geosciences (GFZ, https://www.gfz-potsdam.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
@@ -64,7 +42,7 @@ permissions and limitations under the Licence.
               <v-col>
                 <v-textarea
                   v-model="suggestion.definition"
-                  label="Definition"
+                  label="Description"
                   rows="2"
                 />
               </v-col>
@@ -72,28 +50,20 @@ permissions and limitations under the Licence.
             <v-row>
               <v-col>
                 <v-text-field
-                  v-model="suggestion.provenance"
-                  label="Provenance"
-                />
-              </v-col>
-              <v-col>
-                <v-text-field
                   v-model="suggestion.provenanceUri"
-                  label="Provenance URI"
+                  label="ROR URL"
                 />
               </v-col>
             </v-row>
             <v-row class="mt-0">
               <v-col class="pt-0 pb-0">
-                <provenance-hint />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <v-text-field
-                  v-model="suggestion.category"
-                  label="Category"
-                />
+                <p class="text-caption">
+                  ROR is a global, community-led registry of open persistent Identifiers
+                  for research organizations.
+                  If you can find the organization in
+                  <a href="https://ror.org" target="_blank">https://ror.org</a>
+                  then feel free to add the url here.
+                </p>
               </v-col>
             </v-row>
             <v-row>
@@ -102,17 +72,6 @@ permissions and limitations under the Licence.
                   v-model="suggestion.note"
                   label="Note for the curator"
                   rows="2"
-                />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col>
-                <v-select
-                  v-model="suggestion.globalProvenanceId"
-                  :items="globalProvenances"
-                  label="Global provenance"
-                  item-value="id"
-                  clearable
                 />
               </v-col>
             </v-row>

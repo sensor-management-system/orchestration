@@ -1,10 +1,10 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 """Configuration resource classes."""
 
@@ -24,10 +24,8 @@ from ..datalayers.esalchemy import (
 from ..helpers.db import save_to_db
 from ..helpers.errors import ConflictError, ForbiddenError
 from ..helpers.resource_mixin import add_created_by_id, add_updated_by_id
+from ..models import ActivityLog, Configuration, ConfigurationContactRole, Site
 from ..models.base_model import db
-from ..models.configuration import Configuration
-from ..models.contact_role import ConfigurationContactRole
-from ..models.site import Site
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.configuration_schema import ConfigurationSchema
@@ -133,6 +131,13 @@ class ConfigurationList(ResourceList):
 
         save_to_db(configuration)
 
+        new_log_entry = ActivityLog.create(
+            entity=configuration,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         return result
 
     schema = ConfigurationSchema
@@ -174,6 +179,14 @@ class ConfigurationDetail(ResourceDetail):
         configuration.update_description = msg
 
         save_to_db(configuration)
+
+        new_log_entry = ActivityLog.create(
+            entity=configuration,
+            user=g.user,
+            description=msg,
+        )
+        save_to_db(new_log_entry)
+
         if pidinst.has_external_metadata(configuration):
             pidinst.update_external_metadata(configuration)
         return result
@@ -201,6 +214,11 @@ class ConfigurationDetail(ResourceDetail):
             raise e
         except JsonApiException as e:
             raise ConflictError("Deletion failed for the configuration.", str(e))
+
+        new_log_entry = ActivityLog.create(
+            entity=configuration, user=g.user, description="delete;basic data", data={}
+        )
+        save_to_db(new_log_entry)
 
         for url in urls:
             delete_attachments_in_minio_by_url(url)

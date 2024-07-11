@@ -1,35 +1,12 @@
 <!--
-Web client of the Sensor Management System software developed within the
-Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2020 - 2024
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Tim Eder <tim.eder@ufz.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
-Copyright (C) 2020-2024
-- Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-- Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-- Tim Eder (UFZ, tim.eder@ufz.de)
-- Helmholtz Centre Potsdam - GFZ German Research Centre for
-  Geosciences (GFZ, https://www.gfz-potsdam.de)
-- Helmholtz Centre for Environmental Research GmbH - UFZ
-  (UFZ, https://www.ufz.de)
-
-Parts of this program were developed within the context of the
-following publicly funded projects or measures:
-- Helmholtz Earth and Environment DataHub
-  (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
-Licensed under the HEESIL, Version 1.0 or - as soon they will be
-approved by the "Community" - subsequent versions of the HEESIL
-(the "Licence").
-
-You may not use this work except in compliance with the Licence.
-
-You may obtain a copy of the Licence at:
-https://gitext.gfz-potsdam.de/software/heesil
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the Licence is distributed on an "AS IS" basis,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the Licence for the specific language governing
-permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
@@ -47,6 +24,13 @@ permissions and limitations under the Licence.
           </v-col>
         </v-row>
         <v-row>
+          <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
+            <label>Persistent identifier (PID)</label>
+            <pid-tooltip
+              :value="value.persistentIdentifier"
+              show-button
+            />
+          </v-col>
           <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
             <label>Label</label>
             {{ value.label }}
@@ -67,10 +51,20 @@ permissions and limitations under the Licence.
           <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
             <label>Usage</label>
             {{ value.siteUsageName | orDefault }}
+            <a v-if="value.siteUsageUri" target="_blank" :href="value.siteUsageUri">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
           </v-col>
           <v-col cols="12" :md="siteImagesShouldBeRendered ? 12 : 6">
             <label>Type</label>
             {{ value.siteTypeName | orDefault }}
+            <a v-if="value.siteTypeUri" target="_blank" :href="value.siteTypeUri">
+              <v-icon small>
+                mdi-open-in-new
+              </v-icon>
+            </a>
           </v-col>
         </v-row>
         <v-divider class="my-4" />
@@ -158,6 +152,7 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { Site } from '@/models/Site'
+import PidTooltip from '@/components/shared/PidTooltip.vue'
 import SiteMap from '@/components/sites/SiteMap.vue'
 
 import VisibilityChip from '@/components/VisibilityChip.vue'
@@ -172,7 +167,8 @@ import { ProxyUrlAction } from '@/store/proxy'
     VisibilityChip,
     PermissionGroupChips,
     SiteMap,
-    AttachmentImagesCarousel
+    AttachmentImagesCarousel,
+    PidTooltip
   },
   computed: {
     ...mapState('sites', ['sites'])

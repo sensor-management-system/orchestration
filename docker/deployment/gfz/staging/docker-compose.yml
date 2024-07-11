@@ -3,7 +3,7 @@
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
 version : '3.3'
 
@@ -41,6 +41,7 @@ services:
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
       DJANGO_SECRET_KEY: ${IDL_SECRET_KEY}
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://rz-vm64.gfz-potsdam.de'
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'
@@ -156,6 +157,11 @@ services:
       B2INST_TOKEN: ${B2INST_TOKEN}
       B2INST_URL: https://b2inst-test.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
+      PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+      PID_SERVICE_USER: ${PID_SERVICE_USER}
+      PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
+      PID_PREFIX: 20.500.14372
+      PID_SUFFIX: SMS-Staging
       TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
       EXPORT_CONTROL_VO_LIST: urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de
       # We only want to allow access to extenral resources via the proxy - not to internal ones

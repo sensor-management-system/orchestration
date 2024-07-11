@@ -1,32 +1,11 @@
 <!--
- Web client of the Sensor Management System software developed within the
- Helmholtz DataHub Initiative by GFZ and UFZ.
+SPDX-FileCopyrightText: 2020 - 2024
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
- Copyright (C) 2020 - 2023
- - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
- - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
- - Helmholtz Centre Potsdam - GFZ German Research Centre for
-   Geosciences (GFZ, https://www.gfz-potsdam.de)
-
- Parts of this program were developed within the context of the
- following publicly funded projects or measures:
- - Helmholtz Earth and Environment DataHub
-   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-
- Licensed under the HEESIL, Version 1.0 or - as soon they will be
- approved by the "Community" - subsequent versions of the HEESIL
- (the "Licence").
-
- You may not use this work except in compliance with the Licence.
-
- You may obtain a copy of the Licence at:
- https://gitext.gfz-potsdam.de/software/heesil
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the Licence is distributed on an "AS IS" basis,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- implied. See the Licence for the specific language governing
- permissions and limitations under the Licence.
+SPDX-License-Identifier: EUPL-1.2
  -->
 <template>
   <div>
@@ -70,7 +49,7 @@
                   <v-list-item @click="update('endpoint', suggestedTsmEndpoint)">
                     <v-list-item-content>
                       <label>
-                        Suggested TSMDL Endpoint
+                        Suggested Data Endpoint
                         <v-tooltip top>
                           <template #activator="{ on }">
                             <v-icon
@@ -260,6 +239,11 @@
                     </template>
                     <span>{{ valueLicenseDefinition }}</span>
                   </v-tooltip>
+                  <a v-if="valueLicense && valueLicense.uri" target="_blank" :href="valueLicense.uri" style="line-height: 2;">
+                    <v-icon small>
+                      mdi-open-in-new
+                    </v-icon>
+                  </a>
                   <v-btn icon @click="showNewLicenseDialog = true">
                     <v-icon>
                       mdi-tooltip-plus-outline
@@ -308,7 +292,7 @@
                 :value="value.aggregationPeriod"
                 type="number"
                 step="any"
-                @input="update('aggregationPeriod', $event)"
+                @change="update('aggregationPeriod', $event)"
                 @wheel.prevent
               />
             </v-col>

@@ -2,37 +2,8 @@
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
-# SPDX-License-Identifier: HEESIL-1.0
+# SPDX-License-Identifier: EUPL-1.2
 
-# Web client of the Sensor Management System software developed within
-# the Helmholtz DataHub Initiative by GFZ and UFZ.
-# 
-# Copyright (C) 2020-2022
-# - Wilhelm Becker (GFZ, wilhelm.becker@gfz-potsdam.de)
-# - Nils Brinckmann (GFZ, nils.brinckmann@gfz-potsdam.de)
-# - Marc Hanisch (GFZ, marc.hanisch@gfz-potsdam.de)
-# - Helmholtz Centre Potsdam - GFZ German Research Centre for
-#   Geosciences (GFZ, https://www.gfz-potsdam.de)
-# 
-# Parts of this program were developed within the context of the
-# following publicly funded projects or measures:
-# - Helmholtz Earth and Environment DataHub
-#   (https://www.helmholtz.de/en/research/earth_and_environment/initiatives/#h51095)
-# 
-# Licensed under the HEESIL, Version 1.0 or - as soon they will be 
-# approved by the "Community" - subsequent versions of the HEESIL 
-# (the "Licence").
-# 
-# You may not use this work except in compliance with the Licence.
-# 
-# You may obtain a copy of the Licence at: 
-# https://gitext.gfz-potsdam.de/software/heesil
-# 
-# Unless required by applicable law or agreed to in writing, software 
-# distributed under the Licence is distributed on an "AS IS" basis, 
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or 
-# implied. See the Licence for the specific language governing 
-# permissions and limitations under the Licence.
 version : '3.3'
 
 services:
@@ -54,7 +25,7 @@ services:
       - nginx
 
   idl:
-    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.4
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.4.2
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'
@@ -69,6 +40,7 @@ services:
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
       DJANGO_SECRET_KEY: ${IDL_SECRET_KEY}
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sensors.gfz-potsdam.de https://sensor.gfz-potsdam.de https://rz-vm257.gfz-potsdam.de http://sensor.gfz-potsdam.de'
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin'
@@ -184,6 +156,11 @@ services:
       B2INST_TOKEN: ${B2INST_TOKEN}
       B2INST_URL: https://b2inst.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
+      PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+      PID_SERVICE_USER: ${PID_SERVICE_USER}
+      PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
+      PID_PREFIX: 20.500.14372
+      PID_SUFFIX: SMS
       TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
       EXPORT_CONTROL_VO_LIST: urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de
       # We only want to allow access to extenral resources via the proxy - not to internal ones

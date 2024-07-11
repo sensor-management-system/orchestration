@@ -10,8 +10,8 @@
       "url": "https://codebase.helmholtz.cloud/hub-terra/sms/orchestration"
     },
     "license": {
-      "url": "https://git.gfz-potsdam.de/rse/heesil",
-      "name": "HEESIL-license"
+      "url": "https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12",
+      "name": "EUPL"
     },
     "termsOfService": "{{ term_of_use_url }}"
   },
