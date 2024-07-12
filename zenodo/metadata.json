@@ -97,5 +97,27 @@
             "orcid": "https://orcid.org/0000-0002-9055-6904"
         }
     ],
-    "license": "eupl-1.2"
+    "license": "eupl-1.2",
+    "custom": {
+        "code:programmingLanguage": [
+            {
+                "id": "python",
+                "title": {
+                    "en": "Python"
+                }
+            },
+            {
+                "id": "typescript",
+                "title": {
+                    "en": "Typescript"
+                }
+            }
+        ],
+        "code:developmentStatus": {
+            "id": "active",
+            "title": {
+                "en": "Active"
+            }
+        }
+    }
 }
