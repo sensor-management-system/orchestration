@@ -10,7 +10,7 @@ SPDX-FileCopyrightText: 2021 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-# Sensor Management System
+![alt text](logos/RGB/PNG/ufz-sms_logo_name+abkuerzung_primaer.png "Sensor Management System"){width=50%}
 
 ## Description
 

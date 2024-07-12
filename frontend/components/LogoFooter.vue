@@ -18,9 +18,6 @@ SPDX-License-Identifier: EUPL-1.2
                 <a href="https://www.ufz.de/index.php?en=33573" target="_blank"><v-img contain height="4em" src="logos/UFZ_Logo_CMYK_EN.svg" /></a>
               </v-col>
               <v-col cols="2" class="align-self-center">
-                <a href="https://www.ufz.de/index.php?en=45348" target="_blank"><v-img contain height="3em" src="logos/RDM_fullcolor.svg" /></a>
-              </v-col>
-              <v-col cols="2" class="align-self-center">
                 <a href="https://www.gfz-potsdam.de/en/" target="_blank">
                   <v-img contain height="3em" src="logos/GFZ-Logo_eng_RGB.svg" />
                 </a>
@@ -31,12 +28,19 @@ SPDX-License-Identifier: EUPL-1.2
                 </a>
               </v-col>
               <v-col cols="2" class="align-self-center">
+                <a href="https://www.kit.edu/english" target="_blank"><v-img contain height="2em" src="logos/KIT-Logo.svg" /></a>
+              </v-col>
+              <v-col cols="2" class="align-self-center">
                 <a href="https://datahub.erde-und-umwelt.de/en/" target="_blank"><v-img contain height="2.5em" src="logos/datahublogo.svg" /></a>
               </v-col>
             </v-row>
           </v-col>
           <v-col align-self="center" class="body-2 footer-text" cols="12" md="3">
-            SMS, developed by <a href="https://www.gfz-potsdam.de/en/" target="_blank">GFZ,</a> <a href="https://www.fz-juelich.de/en/" target="_blank">FZJ</a> and <a href="https://www.ufz.de/index.php?en=45348" target="_blank">RDM</a> at <a href="https://www.ufz.de/index.php?en=33573" target="_blank">UFZ</a> as part of the <a href="https://datahub.erde-und-umwelt.de/en/" target="_blank">DataHub</a> initiative.
+            SMS, developed by <a href="https://www.gfz-potsdam.de/en/" target="_blank">GFZ,</a>
+            <a href="https://www.ufz.de/index.php?en=33573" target="_blank">UFZ,</a>
+            <a href="https://www.fz-juelich.de/en/" target="_blank">FZJ</a> and
+            <a href="https://www.kit.edu/english" target="_blank">KIT</a>
+            as part of the <a href="https://earth-data.de/" target="_blank">DataHub</a> initiative.
           </v-col>
         </v-row>
       </v-col>

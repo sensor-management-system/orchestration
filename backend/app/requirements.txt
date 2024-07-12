@@ -7,19 +7,19 @@
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: EUPL-1.2
-alembic==1.13.1
+alembic==1.13.2
 cachetools==5.3.3
-certifi==2024.2.2
+certifi==2024.6.2
 chardet==5.2.0
 cherrypicker==0.4.0
 click==8.1.7
-coverage==7.5.0
-cryptography==42.0.5
-elasticsearch==8.13.0
+coverage==7.5.4
+cryptography==42.0.8
+elasticsearch==8.14.0
 entrypoints==0.4
 environs==11.0.0
-Faker==25.0.1
-Flask-Cors==4.0.0
+Faker==26.0.0
+Flask-Cors==4.0.1
 Flask-Executor==1.0.0
 Flask-Migrate==4.0.7
 Flask-REST-JSONAPI==0.31.2
@@ -32,28 +32,28 @@ GeoAlchemy2==0.15.1
 gunicorn==22.0.0
 idna==3.7
 itsdangerous==2.2.0
-Jinja2==3.1.3
-Mako==1.3.3
+Jinja2==3.1.4
+Mako==1.3.5
 MarkupSafe==2.1.5
 marshmallow-jsonapi==0.24.0
-marshmallow==3.21.2
+marshmallow==3.21.3
 mccabe==0.7.0
 minio==7.2.7
 pandas==2.2.2
 psycopg2-binary==2.9.9
 py-healthcheck==1.10.1
-pycodestyle==2.11.1
+pycodestyle==2.12.0
 pycparser==2.22
 pycryptodomex==3.20.0
 python-dateutil==2.9.0.post0
 python-editor==1.0.4
-requests==2.31.0
+requests==2.32.3
 shapely==2.0.4
 six==1.16.0
 SQLAlchemy-Utils==0.41.2
 SQLAlchemy==1.4.50  # fixed
 stringcase==1.2.0
-tox==4.15.0
+tox==4.15.1
 Werkzeug==2.3.8  # fixed
 xmlschema==1.1.1  # fixed
-owslib==0.30.0
+owslib==0.31.0
