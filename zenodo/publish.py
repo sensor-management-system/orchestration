@@ -20,14 +20,17 @@ class Env:
     """Helper class to access the enviroment variables."""
 
     def str(self, key, default=None):
+        """Return the env variable as  a string."""
         return os.getenv(key, default)
 
     def int(self, key, default=None):
+        """Return the env variable as an integer."""
         if key in os.environ.keys():
             return int(os.environ[key])
         return default
 
     def bool(self, key, default=None):
+        """Return the env variable as a boolean."""
         if key in os.environ.keys():
             value = os.environ[key]
             if value.lower() in ["true", "yes"]:
@@ -86,7 +89,6 @@ class ZenodoApi:
 
     def update_metadata(self, id_, metadata):
         """Update the metadata for the deposition."""
-
         url = f"{self.base_url}/api/deposit/depositions/{id_}"
         data = {"metadata": metadata}
         response = requests.put(
@@ -103,6 +105,55 @@ class ZenodoApi:
         return response.json()
 
 
+class Handle:
+    """Class to talk with a handle server."""
+
+    def __init__(self, base_url, prefix, username, password):
+        """Init the instance."""
+        # base_url looks like this "https://rz-vm561.gfz-potsdam.de:8000/api/handles"
+        self.base_url = base_url
+        # prefix looks like this "20.500.14372"
+        self.prefix = prefix
+        self.username = username
+        self.password = password
+
+    def put(self, url, handle):
+        """Set the handle entry to point to the url."""
+        payload = {
+            "handle": f"{self.prefix}/{handle}",
+            "values": [
+                {
+                    "index": 1,
+                    "type": "URL",
+                    "data": {
+                        "format": "string",
+                        "value": url,
+                    },
+                },
+                {
+                    "index": 100,
+                    "type": "HS_ADMIN",
+                    "data": {
+                        "format": "admin",
+                        "value": {
+                            "handle": f"0.NA./{self.prefix}",
+                            "index": 200,
+                            "permissions": "011111110011",
+                        },
+                    },
+                },
+            ],
+        }
+        url = f"{self.base_url}/{self.prefix}/{handle}"
+        resp = requests.put(
+            url,
+            json=payload,
+            auth=requests.auth.HTTPBasicAuth(self.username, self.password),
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+
 def main():
     """Upload the sms data to zenodo and publish the information."""
     file_to_upload = sys.argv[1]
@@ -110,15 +161,34 @@ def main():
     zenodo_url = env.str("ZENODO_URL")
     zenodo_access_token = env.str("ZENODO_ACCESS_TOKEN")
     version = env.str("VERSION")
+    pid_prefix = env.str("PID_PREFIX")
+    pid_service_password = env.str("PID_SERVICE_PASSWORD")
+    pid_service_url = env.str("PID_SERVICE_URL")
+    pid_service_user = env.str("PID_SERVICE_USER")
     only_draft = env.bool("ONLY_DRAFT", default=False)
-    repository_url = env.str("REPOSITORY_URL", default="https://codebase.helmholtz.cloud/hub-terra/sms/orchestration")
+    repository_url = env.str(
+        "REPOSITORY_URL",
+        default="https://codebase.helmholtz.cloud/hub-terra/sms/orchestration",
+    )
+
+    # If we have the pid service available we set the handle entry for SMM-Repository.
+    # This way this will always point to our repo, even we move it.
+    if all([pid_service_user, pid_service_password, pid_service_url, pid_prefix]):
+        handle = Handle(
+            base_url=pid_service_url,
+            prefix=pid_prefix,
+            username=pid_service_user,
+            passowrd=pid_service_password,
+        )
+        handle.put(repository_url, "SMS-Repository")
+        repository_url = "https://hdl.handle.net/20.500.14372/SMS-Repository"
 
     zenodo_api = ZenodoApi(base_url=zenodo_url, access_token=zenodo_access_token)
 
     deposition = zenodo_api.create_deposition()
     deposition_id = deposition["id"]
 
-    upload_info = zenodo_api.upload_file(file_to_upload, deposition["links"]["bucket"])
+    zenodo_api.upload_file(file_to_upload, deposition["links"]["bucket"])
 
     metadata_file = pathlib.Path(__file__).parent / "metadata.json"
     with metadata_file.open() as infile:
@@ -137,9 +207,9 @@ def main():
             },
         }
     )
-    update_metadata_response = zenodo_api.update_metadata(deposition_id, metadata)
+    zenodo_api.update_metadata(deposition_id, metadata)
     if not only_draft:
-        publish_response = zenodo_api.publish_deposition(deposition_id)
+        zenodo_api.publish_deposition(deposition_id)
 
 
 if __name__ == "__main__":
