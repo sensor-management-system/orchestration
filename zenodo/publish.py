@@ -178,7 +178,7 @@ def main():
             base_url=pid_service_url,
             prefix=pid_prefix,
             username=pid_service_user,
-            passowrd=pid_service_password,
+            password=pid_service_password,
         )
         handle.put(repository_url, "SMS-Repository")
         repository_url = "https://hdl.handle.net/20.500.14372/SMS-Repository"
