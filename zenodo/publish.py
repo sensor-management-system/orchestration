@@ -131,6 +131,9 @@ def main():
         {
             "version": version,
             "description": description,
+            "custom": {
+                "code:codeRepository": "https://codebase.helmholtz.cloud/hub-terra/sms-orchestration",
+            },
         }
     )
     update_metadata_response = zenodo_api.update_metadata(deposition_id, metadata)
