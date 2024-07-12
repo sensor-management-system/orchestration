@@ -204,12 +204,18 @@ def main():
             "description": description,
         }
     )
-    metadata["custom"].update({
-        "code:codeRepository": repository_url,
-    })
+    metadata["custom"].update(
+        {
+            "code:codeRepository": repository_url,
+        }
+    )
     zenodo_api.update_metadata(deposition_id, metadata)
+
+    print(f"{zenodo_url}/uploads/{deposition_id}")
+
     if not only_draft:
         zenodo_api.publish_deposition(deposition_id)
+        print(f"{zenodo_url}/records/{deposition_id}")
 
 
 if __name__ == "__main__":
