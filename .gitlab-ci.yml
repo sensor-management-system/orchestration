@@ -863,6 +863,7 @@ publish-zenodo:
     ZENODO_URL: https://sandbox.zenodo.org
     ZENODO_ACCESS_TOKEN: ${ZENODO_SANDBOX_ACCESS_TOKEN}
     VERSION: $CI_COMMIT_SHORT_SHA
+    REPOSITORY_URL: $CI_PROJECT_URL
     ONLY_DRAFT: "yes"
   before_script:
     - apt-get update && apt-get install zip -y

@@ -111,6 +111,7 @@ def main():
     zenodo_access_token = env.str("ZENODO_ACCESS_TOKEN")
     version = env.str("VERSION")
     only_draft = env.bool("ONLY_DRAFT", default=False)
+    repository_url = env.str("REPOSITORY_URL", default="https://codebase.helmholtz.cloud/hub-terra/sms/orchestration")
 
     zenodo_api = ZenodoApi(base_url=zenodo_url, access_token=zenodo_access_token)
 
@@ -132,7 +133,7 @@ def main():
             "version": version,
             "description": description,
             "custom": {
-                "code:codeRepository": "https://codebase.helmholtz.cloud/hub-terra/sms-orchestration",
+                "code:codeRepository": repository_url,
             },
         }
     )
