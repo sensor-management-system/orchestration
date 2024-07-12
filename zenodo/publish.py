@@ -18,6 +18,7 @@ import requests
 
 class Env:
     """Helper class to access the enviroment variables."""
+
     def str(self, key, default=None):
         return os.getenv(key, default)
 
@@ -54,7 +55,9 @@ class ZenodoApi:
     def create_deposition(self):
         """Create a new deposition."""
         url = f"{self.base_url}/api/deposit/depositions"
-        response = requests.post(url, params={"access_token": self.access_token}, json={})
+        response = requests.post(
+            url, params={"access_token": self.access_token}, json={}
+        )
         response.raise_for_status()
         return response.json()
 
@@ -76,7 +79,7 @@ class ZenodoApi:
             response = requests.put(
                 f"{bucket_url}/{filename}",
                 data=fp,
-                params={"access_token": self.access_token}
+                params={"access_token": self.access_token},
             )
             response.raise_for_status()
             return response.json()
@@ -85,10 +88,10 @@ class ZenodoApi:
         """Update the metadata for the deposition."""
 
         url = f"{self.base_url}/api/deposit/depositions/{id_}"
-        data = {
-            "metadata": metadata
-        }
-        response = requests.put(url, params={"access_token": self.access_token}, json=data)
+        data = {"metadata": metadata}
+        response = requests.put(
+            url, params={"access_token": self.access_token}, json=data
+        )
         response.raise_for_status()
         return response.json()
 
@@ -98,7 +101,6 @@ class ZenodoApi:
         response = requests.post(url, params={"access_token": self.access_token})
         response.raise_for_status()
         return response.json()
-
 
 
 def main():
@@ -121,17 +123,20 @@ def main():
     with metadata_file.open() as infile:
         metadata = json.load(infile)
 
-    description_file = pathlib.Path(__file__).parent / "description.txt"
+    description_file = pathlib.Path(__file__).parent / "description.html"
     with description_file.open() as infile:
         description = infile.read()
 
-    metadata.update({
-        "version": version,
-        "description": description,
-    })
+    metadata.update(
+        {
+            "version": version,
+            "description": description,
+        }
+    )
     update_metadata_response = zenodo_api.update_metadata(deposition_id, metadata)
     if not only_draft:
         publish_response = zenodo_api.publish_deposition(deposition_id)
+
 
 if __name__ == "__main__":
     main()
