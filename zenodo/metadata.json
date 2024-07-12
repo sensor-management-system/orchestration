@@ -1,11 +1,6 @@
 {
     "title": "Sensor Management System",
     "upload_type": "software",
-    "communities": [
-        {
-            "id": "datahub"
-        }
-    ],
     "creators": [
         {
             "name": "Brinckmann, Nils",
