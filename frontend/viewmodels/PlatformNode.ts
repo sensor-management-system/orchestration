@@ -77,6 +77,10 @@ export class PlatformNode implements IConfigurationsTreeNodeWithChildren<Platfor
     this._disabled = isDisabled
   }
 
+  get label (): string {
+    return this.node.label
+  }
+
   canHaveChildren (): this is IConfigurationsTreeNodeWithChildren<PlatformMountAction> {
     return true
   }

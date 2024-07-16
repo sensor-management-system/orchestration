@@ -184,6 +184,7 @@ describe('TsmLinkingSerializer', () => {
         contact,
         contact,
         '',
+        '',
         ''
       )
       const tsmEndpoint = new TsmEndpoint()
@@ -279,6 +280,7 @@ describe('TsmLinkingSerializer', () => {
         '',
         contact,
         contact,
+        '',
         '',
         ''
       )

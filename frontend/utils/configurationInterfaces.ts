@@ -84,6 +84,7 @@ export interface IMountTimelineAction <T> {
   icon: string
   date: DateTime | null
   title: string
+  subtitle: string
   contact: IContact | null
   mountInfo: IMountInfo | null
   description: string
@@ -167,6 +168,10 @@ export class PlatformMountTimelineAction implements IMountTimelineAction<Platfor
     return this._mountAction.platform.shortName + ' mounted'
   }
 
+  get subtitle (): string {
+    return this._mountAction.label
+  }
+
   get contact (): IContact {
     return this._mountAction.beginContact
   }
@@ -237,6 +242,10 @@ export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMou
 
   get title (): string {
     return this._mountAction.device.shortName + ' mounted'
+  }
+
+  get subtitle (): string {
+    return this._mountAction.label
   }
 
   get contact (): IContact {
@@ -311,6 +320,10 @@ export class PlatformUnmountTimelineAction implements IMountTimelineAction<Platf
     return this._mountAction.platform.shortName + ' unmounted'
   }
 
+  get subtitle (): string {
+    return this._mountAction.label
+  }
+
   get contact (): IContact | null {
     return this._mountAction.endContact || this._mountAction.beginContact
   }
@@ -383,6 +396,10 @@ export class DeviceUnmountTimelineAction implements IMountTimelineAction<DeviceM
     return this._mountAction.device.shortName + ' unmounted'
   }
 
+  get subtitle (): string {
+    return this._mountAction.label
+  }
+
   get contact (): IContact | null {
     return this._mountAction.endContact || this._mountAction.beginContact
   }
@@ -451,6 +468,10 @@ export class StaticLocationBeginTimelineAction implements IStaticLocationTimelin
     return title
   }
 
+  get subtitle (): string {
+    return ''
+  }
+
   get description (): string|null {
     return this.staticLocationBeginAction.beginDescription
   }
@@ -504,6 +525,10 @@ export class StaticLocationEndTimelineAction implements IStaticLocationTimelineA
       title = title + ' - ' + this.staticLocationEndAction.label
     }
     return title
+  }
+
+  get subtitle (): string {
+    return ''
   }
 
   get description (): string | null {
@@ -561,6 +586,10 @@ export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimel
       title = title + ' - ' + this.dynamicLocationBeginAction.label
     }
     return title
+  }
+
+  get subtitle (): string {
+    return ''
   }
 
   get description (): string |null {
@@ -651,6 +680,10 @@ export class DynamicLocationEndTimelineAction implements IDynamicLocationTimelin
     return title
   }
 
+  get subtitle (): string {
+    return ''
+  }
+
   get description (): string | null {
     return this.dynamicLocationEndAction.endDescription
   }
@@ -729,6 +762,10 @@ export class GenericTimelineAction implements IGenericTimelineAction {
     return this.genericAction.actionTypeName
   }
 
+  get subtitle (): string {
+    return ''
+  }
+
   get description (): string | null {
     return this.genericAction.description
   }
@@ -783,6 +820,10 @@ export class ParameterChangeTimelineAction implements IGenericTimelineAction {
       title = this._parameterChangeAction.parameter.label + ' change'
     }
     return title
+  }
+
+  get subtitle (): string {
+    return ''
   }
 
   get description (): string | null {
@@ -843,6 +884,7 @@ export type MountActionInformationDTO = {
   endContact: IContact | null
   beginDescription: string
   endDescription: string | null
+  label: string
 }
 
 export interface IOffsets {

@@ -43,6 +43,8 @@ class PlatformMountActionSchema(Schema):
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)
 
+    label = fields.Str(allow_none=True)
+
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
 
@@ -145,6 +147,8 @@ class DeviceMountActionSchema(Schema):
     epsg_code = fields.Str(allow_none=True)
     elevation_datum_name = fields.Str(allow_none=True)
     elevation_datum_uri = fields.Str(allow_none=True)
+
+    label = fields.Str(allow_none=True)
 
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)

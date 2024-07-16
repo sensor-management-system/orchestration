@@ -49,6 +49,9 @@ SPDX-License-Identifier: EUPL-1.2
                   Name
                 </th>
                 <th class="text-left">
+                  Label
+                </th>
+                <th class="text-left">
                   Offsets (X | Y | Z)
                 </th>
                 <th class="text-left">
@@ -101,6 +104,7 @@ SPDX-License-Identifier: EUPL-1.2
                     :value="item.entity"
                   />
                 </td>
+                <td>{{ item.mountInfo.label | orDefault }}</td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
                 <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ | round(6) }})</td>
                 <td v-if="item.mountInfo.x !== null || item.mountInfo.y !== null || item.mountInfo.z !== null">
@@ -137,6 +141,7 @@ SPDX-License-Identifier: EUPL-1.2
                     :value="item.entity"
                   />
                 </td>
+                <td>{{ item.mountInfo.label | orDefault }}</td>
                 <td>({{ item.mountInfo.offsetX }} | {{ item.mountInfo.offsetY }} | {{ item.mountInfo.offsetZ }})</td>
                 <td>({{ getAbsoluteOffsets(item.mountInfo).offsetX | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetY | round(6) }} | {{ getAbsoluteOffsets(item.mountInfo).offsetZ | round(6) }})</td>
                 <td v-if="item.mountInfo.x !== null || item.mountInfo.y !== null || item.mountInfo.z !== null">

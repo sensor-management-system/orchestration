@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2022
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -32,6 +32,7 @@ export interface IMountAction {
   endContact: IContact | null
   beginDescription: string
   endDescription: string | null
+  label: string
 }
 
 /**
@@ -61,6 +62,7 @@ export class MountAction implements IMountAction {
   private _endContact: Contact | null = null
   private _beginDescription: string = ''
   private _endDescription: string | null = null
+  private _label: string = ''
 
   constructor (
     id: string,
@@ -79,7 +81,8 @@ export class MountAction implements IMountAction {
     beginContact: Contact,
     endContact: Contact | null,
     beginDescription: string,
-    endDescription: string | null
+    endDescription: string | null,
+    label: string
   ) {
     this._id = id
     this._parentPlatform = parentPlatform
@@ -98,6 +101,7 @@ export class MountAction implements IMountAction {
     this._endContact = endContact
     this._beginDescription = beginDescription
     this._endDescription = endDescription
+    this._label = label
   }
 
   get TYPE (): string {
@@ -236,6 +240,14 @@ export class MountAction implements IMountAction {
     return this._endDescription
   }
 
+  get label (): string {
+    return this._label
+  }
+
+  set label (newValue: string) {
+    this._label = newValue
+  }
+
   equals (action: IMountAction): boolean {
     return this.id === action.id && this.TYPE === action.TYPE
   }
@@ -258,7 +270,8 @@ export class MountAction implements IMountAction {
       Contact.createFromObject(otherAction.beginContact),
       otherAction.endContact ? Contact.createFromObject(otherAction.endContact) : null,
       otherAction.beginDescription,
-      otherAction.endDescription
+      otherAction.endDescription,
+      otherAction.label
     )
   }
 }

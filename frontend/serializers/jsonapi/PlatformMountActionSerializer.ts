@@ -55,8 +55,8 @@ export class PlatformMountActionSerializer {
         y: platformMountAction.y,
         z: platformMountAction.z,
         elevation_datum_name: platformMountAction.elevationDatumName,
-        elevation_datum_uri: platformMountAction.elevationDatumUri
-
+        elevation_datum_uri: platformMountAction.elevationDatumUri,
+        label: platformMountAction.label
       },
       relationships: {
         platform: {
@@ -199,7 +199,8 @@ export class PlatformMountActionSerializer {
       beginContact,
       endContact,
       attributes?.begin_description || '',
-      attributes?.end_description || ''
+      attributes?.end_description || '',
+      attributes?.label || ''
     )
 
     return platformMountAction

@@ -35,7 +35,8 @@ describe('DeviceMountActionBasicDataSerializer', () => {
           y: 51.1,
           z: 0.0,
           elevation_datum_name: 'MSL',
-          elevation_datum_uri: 'http://cv/el/1'
+          elevation_datum_uri: 'http://cv/el/1',
+          label: 'Mount'
         },
         id: '1'
       }
@@ -54,7 +55,8 @@ describe('DeviceMountActionBasicDataSerializer', () => {
         y: 51.1,
         z: 0.0,
         elevationDatumName: 'MSL',
-        elevationDatumUri: 'http://cv/el/1'
+        elevationDatumUri: 'http://cv/el/1',
+        label: 'Mount'
       })
 
       const serializer = new DeviceMountActionBasicDataSerializer()

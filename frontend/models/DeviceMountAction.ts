@@ -43,7 +43,8 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
     beginContact: Contact,
     endContact: Contact | null,
     beginDescription: string,
-    endDescription: string | null
+    endDescription: string | null,
+    label: string
   ) {
     super(
       id,
@@ -62,7 +63,8 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
       beginContact,
       endContact,
       beginDescription,
-      endDescription
+      endDescription,
+      label
     )
     this._device = device
     this._parentDevice = parentDevice
@@ -104,7 +106,8 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
       Contact.createFromObject(otherAction.beginContact),
       otherAction.endContact === null ? null : Contact.createFromObject(otherAction.endContact),
       otherAction.beginDescription,
-      otherAction.endDescription === null ? null : otherAction.endDescription
+      otherAction.endDescription === null ? null : otherAction.endDescription,
+      otherAction.label
     )
   }
 }

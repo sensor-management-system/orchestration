@@ -58,7 +58,8 @@ describe('DeviceMountActionSerializer', () => {
         beginContact: contact,
         endContact: null,
         beginDescription: 'Device mount',
-        endDescription: ''
+        endDescription: '',
+        label: 'Mount'
       })
     })
 
@@ -82,7 +83,8 @@ describe('DeviceMountActionSerializer', () => {
           y: null,
           z: null,
           elevation_datum_name: '',
-          elevation_datum_uri: ''
+          elevation_datum_uri: '',
+          label: 'Mount'
         },
         relationships: {
           device: {
@@ -130,7 +132,8 @@ describe('DeviceMountActionSerializer', () => {
         beginContact: contact,
         endContact: null,
         beginDescription: 'Device mount',
-        endDescription: ''
+        endDescription: '',
+        label: ''
       })
 
       const serializer = new DeviceMountActionSerializer()
@@ -152,7 +155,8 @@ describe('DeviceMountActionSerializer', () => {
           y: 52.1,
           z: 0.0,
           elevation_datum_name: 'MSL',
-          elevation_datum_uri: 'http://cv/el/1'
+          elevation_datum_uri: 'http://cv/el/1',
+          label: ''
         },
         relationships: {
           device: {
@@ -206,7 +210,8 @@ describe('DeviceMountActionSerializer', () => {
         beginContact: contact,
         endContact: null,
         beginDescription: 'Device mount',
-        endDescription: ''
+        endDescription: '',
+        label: ''
       })
 
       const serializer = new DeviceMountActionSerializer()
@@ -228,7 +233,8 @@ describe('DeviceMountActionSerializer', () => {
           y: null,
           z: null,
           elevation_datum_name: '',
-          elevation_datum_uri: ''
+          elevation_datum_uri: '',
+          label: ''
         },
         relationships: {
           device: {
@@ -282,7 +288,8 @@ describe('DeviceMountActionSerializer', () => {
           y: null,
           z: null,
           elevation_datum_name: '',
-          elevation_datum_uri: ''
+          elevation_datum_uri: '',
+          label: 'Mount'
         },
         relationships: {
           device: {
@@ -332,7 +339,8 @@ describe('DeviceMountActionSerializer', () => {
               y: 52.1,
               z: 0.0,
               elevation_datum_name: 'MSL',
-              elevation_datum_uri: 'http://cv/el/1'
+              elevation_datum_uri: 'http://cv/el/1',
+              label: 'Mount'
             },
             relationships: {
               parent_platform: {
@@ -382,7 +390,8 @@ describe('DeviceMountActionSerializer', () => {
               end_description: null,
               offset_x: 4.0,
               offset_z: 6.0,
-              begin_description: 'begin of another mount'
+              begin_description: 'begin of another mount',
+              label: null
             },
             relationships: {
               parent_platform: {
@@ -666,7 +675,8 @@ describe('DeviceMountActionSerializer', () => {
         contact,
         contact,
         'begin of mount',
-        'end of mount'
+        'end of mount',
+        'Mount'
       )
 
       const deviceMountAction2 = new DeviceMountAction(
@@ -688,7 +698,8 @@ describe('DeviceMountActionSerializer', () => {
         contact,
         null,
         'begin of another mount',
-        null
+        null,
+        ''
       )
 
       const deviceMountAction3 = new DeviceMountAction(
@@ -710,7 +721,8 @@ describe('DeviceMountActionSerializer', () => {
         contact,
         null,
         'begin of another mount',
-        null
+        null,
+        ''
       )
 
       const serializer = new DeviceMountActionSerializer()
@@ -740,6 +752,7 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[0].z).toBe(deviceMountAction1.z)
       expect(mountActions[0].elevationDatumName).toBe(deviceMountAction1.elevationDatumName)
       expect(mountActions[0].elevationDatumUri).toBe(deviceMountAction1.elevationDatumUri)
+      expect(mountActions[0].label).toBe(deviceMountAction1.label)
       // mount action 2
       expect(mountActions[1].id).toBe(deviceMountAction2.id)
       expect(mountActions[1].device.id).toBe(deviceMountAction2.device.id)
@@ -761,6 +774,7 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[1].z).toBeNull()
       expect(mountActions[1].elevationDatumName).toBe('')
       expect(mountActions[1].elevationDatumUri).toBe('')
+      expect(mountActions[1].label).toBe('')
 
       // mount action 3
       expect(mountActions[2].id).toBe(deviceMountAction3.id)
@@ -783,6 +797,7 @@ describe('DeviceMountActionSerializer', () => {
       expect(mountActions[2].z).toBeNull()
       expect(mountActions[2].elevationDatumName).toBe('')
       expect(mountActions[2].elevationDatumUri).toBe('')
+      expect(mountActions[2].label).toBe('')
     })
   })
 })

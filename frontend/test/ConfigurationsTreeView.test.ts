@@ -77,7 +77,8 @@ describe('ConfigurationsTreeView', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'Platform mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     }))
     node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -98,7 +99,8 @@ describe('ConfigurationsTreeView', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'Device mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })))
 
     const tree = ConfigurationsTree.fromArray([node])
@@ -132,7 +134,8 @@ describe('ConfigurationsTreeView', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'Platform mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     }))
     node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -153,7 +156,8 @@ describe('ConfigurationsTreeView', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'Device mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })))
 
     const tree = ConfigurationsTree.fromArray([node])
@@ -189,7 +193,8 @@ describe('ConfigurationsTreeView', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'Platform mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     }))
     node.getTree().push(new DeviceNode(DeviceMountAction.createFromObject({
       id: '',
@@ -210,7 +215,8 @@ describe('ConfigurationsTreeView', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'Device mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })))
 
     const tree = ConfigurationsTree.fromArray([node])

@@ -77,6 +77,10 @@ export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
     this._disabled = isDisabled
   }
 
+  get label (): string {
+    return this.node.label
+  }
+
   canHaveChildren (): this is IConfigurationsTreeNodeWithChildren<DeviceMountAction> {
     return true
   }

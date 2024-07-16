@@ -457,7 +457,8 @@ export default class MountWizard extends Vue {
         beginContact: Contact.createFromObject(mountInfo.beginContact!),
         endContact: mountInfo.endContact ? Contact.createFromObject(mountInfo.endContact) : null,
         beginDescription: mountInfo.beginDescription,
-        endDescription: mountInfo.endDescription
+        endDescription: mountInfo.endDescription,
+        label: mountInfo.label
       })
 
       await this.addDeviceMountAction({
@@ -505,7 +506,8 @@ export default class MountWizard extends Vue {
         beginContact: Contact.createFromObject(mountInfo.beginContact!),
         endContact: mountInfo.endContact ? Contact.createFromObject(mountInfo.endContact) : null,
         beginDescription: mountInfo.beginDescription,
-        endDescription: mountInfo.endDescription
+        endDescription: mountInfo.endDescription,
+        label: mountInfo.label
       })
 
       await this.addPlatformMountAction({
@@ -571,7 +573,8 @@ export default class MountWizard extends Vue {
         endDate: mountInfo.endDate,
         endContact: mountInfo.endContact,
         beginDescription: mountInfo.beginDescription,
-        endDescription: mountInfo.endDescription
+        endDescription: mountInfo.endDescription,
+        label: mountInfo.label
       })))
     }
     for (const entry of this.devicesToMount) {
@@ -596,7 +599,8 @@ export default class MountWizard extends Vue {
         endDate: mountInfo.endDate,
         endContact: mountInfo.endContact,
         beginDescription: mountInfo.beginDescription,
-        endDescription: mountInfo.endDescription
+        endDescription: mountInfo.endDescription,
+        label: mountInfo.label
       })))
     }
 
@@ -640,7 +644,8 @@ export default class MountWizard extends Vue {
           new Contact(),
           null,
           '',
-          null
+          null,
+          ''
         ),
         new MountAction(
           'parent node',
@@ -659,7 +664,8 @@ export default class MountWizard extends Vue {
           new Contact(),
           null,
           '',
-          null
+          null,
+          ''
         )
       )
       if (typeof error === 'object') {
@@ -706,7 +712,8 @@ export default class MountWizard extends Vue {
           y: null,
           z: null,
           elevationDatumName: '',
-          elevationDatumUri: ''
+          elevationDatumUri: '',
+          label: ''
         }
       }
     }

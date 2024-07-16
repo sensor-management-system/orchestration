@@ -41,7 +41,8 @@ describe('#sumOffsets', () => {
         beginDescription: 'Platform mount',
         endDate: null,
         endContact: null,
-        endDescription: null
+        endDescription: null,
+        label: ''
       })),
       new PlatformNode(PlatformMountAction.createFromObject({
         id: '',
@@ -61,7 +62,8 @@ describe('#sumOffsets', () => {
         beginDescription: 'Platform mount',
         endDate: null,
         endContact: null,
-        endDescription: null
+        endDescription: null,
+        label: ''
       })),
       new PlatformNode(PlatformMountAction.createFromObject({
         id: '',
@@ -81,7 +83,8 @@ describe('#sumOffsets', () => {
         beginDescription: 'Platform mount',
         endDate: null,
         endContact: null,
-        endDescription: null
+        endDescription: null,
+        label: ''
       }))
     ]
 
