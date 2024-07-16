@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -21,6 +21,11 @@ SPDX-License-Identifier: EUPL-1.2
           <v-card-title class="text--primary pt-0 pb-0">
             Mounted on {{ value.configuration.label }}
           </v-card-title>
+          <v-card-subtitle v-if="value.basicData.label" class="pt-2">
+            <div class="text-caption">
+              {{ value.basicData.label }}
+            </div>
+          </v-card-subtitle>
         </v-col>
       </v-row>
       <v-row v-show="!show && value.basicData.beginDescription" no-gutters>

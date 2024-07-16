@@ -21,6 +21,7 @@ Added:
 - heatmap of days and activity within the system
 - PIDs for sites
 - integrated sms logos
+- labels for the mounts
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url

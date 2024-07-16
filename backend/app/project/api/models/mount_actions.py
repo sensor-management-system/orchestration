@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -77,6 +77,7 @@ class PlatformMountAction(db.Model, AuditMixin):
         foreign_keys=[end_contact_id],
         backref=db.backref("platform_unmount_actions"),
     )
+    label = db.Column(db.String(256), nullable=True)
 
     def get_parent_search_entities(self):
         """Return the configuration as parent for the search."""
@@ -90,6 +91,7 @@ class PlatformMountAction(db.Model, AuditMixin):
             "begin_description": self.begin_description,
             "end_description": self.end_description,
             "platform": self.platform.to_search_entry(),
+            "label": self.label,
         }
 
     def get_parent(self):
@@ -182,6 +184,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         foreign_keys=[end_contact_id],
         backref=db.backref("device_unmount_actions"),
     )
+    label = db.Column(db.String(256), nullable=True)
 
     def get_parent_search_entities(self):
         """Return the configuration as parent for the search."""
@@ -195,6 +198,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
             "begin_description": self.begin_description,
             "end_description": self.end_description,
             "device": self.device.to_search_entry(),
+            "label": self.label,
         }
 
     def get_parent(self):

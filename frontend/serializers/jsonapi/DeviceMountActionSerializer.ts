@@ -60,7 +60,8 @@ export class DeviceMountActionSerializer {
         y: deviceMountAction.y,
         z: deviceMountAction.z,
         elevation_datum_name: deviceMountAction.elevationDatumName,
-        elevation_datum_uri: deviceMountAction.elevationDatumUri
+        elevation_datum_uri: deviceMountAction.elevationDatumUri,
+        label: deviceMountAction.label
       },
       relationships: {
         device: {
@@ -184,7 +185,8 @@ export class DeviceMountActionSerializer {
       beginContact,
       endContact,
       attributes?.begin_description || '',
-      attributes?.end_description || ''
+      attributes?.end_description || '',
+      attributes?.label || ''
     )
 
     return result

@@ -128,7 +128,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'First mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const mountActions = {
@@ -178,7 +179,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'First mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const platformMountAction2 = PlatformMountAction.createFromObject({
@@ -199,7 +201,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'Second mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const mountActions = {
@@ -256,7 +259,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'First mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const platformMountAction2 = PlatformMountAction.createFromObject({
@@ -277,7 +281,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'Second mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const deviceMountAction1 = DeviceMountAction.createFromObject({
@@ -299,7 +304,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'Device 1 mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const deviceMountAction2 = DeviceMountAction.createFromObject({
       id: '',
@@ -320,7 +326,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'Device 1 mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const mountActions = {
@@ -392,7 +399,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'First mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const platformMountAction2 = PlatformMountAction.createFromObject({
@@ -413,7 +421,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'Second mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const mountActions = {
@@ -468,7 +477,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'First mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const deviceMountAction1 = DeviceMountAction.createFromObject({
@@ -490,7 +500,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'second mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const mountActions = {
@@ -533,7 +544,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'First mount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const platformMountAction2 = PlatformMountAction.createFromObject({
@@ -554,7 +566,8 @@ describe('buildConfigurationTree', () => {
       beginContact: contact,
       endContact: null,
       beginDescription: 'First remount',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const mountActions = {

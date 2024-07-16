@@ -33,7 +33,8 @@ export class PlatformMountActionBasicDataSerializer {
       y: !isNaN(attributes?.y) ? attributes?.y : null,
       z: !isNaN(attributes?.z) ? attributes?.z : null,
       elevationDatumName: attributes?.elevation_datum_name || '',
-      elevationDatumUri: attributes?.elevation_datum_uri || ''
+      elevationDatumUri: attributes?.elevation_datum_uri || '',
+      label: attributes?.label || ''
     })
   }
 }

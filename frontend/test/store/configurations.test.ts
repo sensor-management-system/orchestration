@@ -72,7 +72,8 @@ describe('Configurations', () => {
         beginContact: contact,
         endContact: null,
         beginDescription: '',
-        endDescription: null
+        endDescription: null,
+        label: ''
       })
 
       mockState.deviceMountActionsIncludingDeviceInformation = [action]

@@ -407,11 +407,14 @@ class ConfigurationConverter:
         sml_event_list = []
 
         for event in self.configuration.device_mount_actions:
+            label = "DeviceMountAction"
+            if event.label:
+                label = event.label
             sml_classification = SmlClassification(
                 [
                     SmlClassifier(
                         sml_term=SmlTerm(
-                            sml_label=SmlLabel(text="DeviceMountAction"),
+                            sml_label=SmlLabel(text=label),
                             sml_value=SmlValue(text="DeviceMountAction"),
                             definition="DeviceMountAction",
                         )
@@ -445,11 +448,14 @@ class ConfigurationConverter:
             sml_event_list.append(sml_event)
 
         for event in self.configuration.platform_mount_actions:
+            label = "PlatformMountAction"
+            if event.label:
+                label = event.label
             sml_classification = SmlClassification(
                 [
                     SmlClassifier(
                         sml_term=SmlTerm(
-                            sml_label=SmlLabel(text="PlatformMountAction"),
+                            sml_label=SmlLabel(text=label),
                             sml_value=SmlValue(text="PlatformMountAction"),
                             definition="PlatformMountAction",
                         )
@@ -866,6 +872,8 @@ class DeviceConverter:
             label = f"Mounted to configuration {action.configuration.id}"
             if action.configuration.label:
                 label = f"Mounted to {action.configuration.label}"
+            if action.label:
+                label = action.label
             sml_classification = SmlClassification(
                 [
                     SmlClassifier(
@@ -1320,6 +1328,8 @@ class PlatformConverter:
             label = f"Mounted to configuration {action.configuration.id}"
             if action.configuration.label:
                 label = f"Mounted to {action.configuration.label}"
+            if action.label:
+                label = action.label
             sml_classification = SmlClassification(
                 [
                     SmlClassifier(

@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2021
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -39,7 +39,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const node = new PlatformNode(platformMountAction)
@@ -68,7 +69,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const firstNode = new PlatformNode(firstPlatformMountAction)
@@ -100,7 +102,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
 
     const node = new PlatformNode(platformMountAction)
@@ -128,7 +131,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const firstNode = new PlatformNode(firstPlatformMountAction)
 
@@ -151,7 +155,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'a second platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const secondNode = new PlatformNode(secondPlatformMountAction)
 
@@ -183,7 +188,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const firstNode = new PlatformNode(firstPlatformMountAction)
 
@@ -206,7 +212,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'a second platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const secondNode = new PlatformNode(secondPlatformMountAction)
 
@@ -238,7 +245,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const node = new PlatformNode(platformMountAction)
     const name = node.name
@@ -269,7 +277,8 @@ describe('PlatformNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a platform mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const node = new PlatformNode(platformMountAction)
     const name = node.name

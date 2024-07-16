@@ -51,7 +51,8 @@ describe('PlatformMountActionSerializer', () => {
         beginDate: date,
         endDate: null,
         beginDescription: 'Platform mount',
-        endDescription: ''
+        endDescription: '',
+        label: 'Mount'
       })
 
       const serializer = new PlatformMountActionSerializer()
@@ -73,7 +74,8 @@ describe('PlatformMountActionSerializer', () => {
           y: null,
           z: null,
           elevation_datum_name: '',
-          elevation_datum_uri: ''
+          elevation_datum_uri: '',
+          label: 'Mount'
         },
         relationships: {
           platform: {
@@ -119,7 +121,8 @@ describe('PlatformMountActionSerializer', () => {
         beginDate: date,
         endDate: null,
         beginDescription: 'Platform mount',
-        endDescription: ''
+        endDescription: '',
+        label: ''
       })
 
       const serializer = new PlatformMountActionSerializer()
@@ -141,7 +144,8 @@ describe('PlatformMountActionSerializer', () => {
           y: 5,
           z: 6,
           elevation_datum_name: 'MSL',
-          elevation_datum_uri: 'http://cv/el/1'
+          elevation_datum_uri: 'http://cv/el/1',
+          label: ''
         },
         relationships: {
           platform: {
@@ -191,7 +195,8 @@ describe('PlatformMountActionSerializer', () => {
         beginDate: date,
         endDate: null,
         beginDescription: 'Platform mount',
-        endDescription: ''
+        endDescription: '',
+        label: ''
       })
 
       const serializer = new PlatformMountActionSerializer()
@@ -214,7 +219,8 @@ describe('PlatformMountActionSerializer', () => {
           y: null,
           z: null,
           elevation_datum_name: '',
-          elevation_datum_uri: ''
+          elevation_datum_uri: '',
+          label: ''
         },
         relationships: {
           platform: {
@@ -263,7 +269,8 @@ describe('PlatformMountActionSerializer', () => {
               y: 52.1,
               z: 0.0,
               elevation_datum_name: 'MSL',
-              elevation_datum_uri: 'http://cv/el/1'
+              elevation_datum_uri: 'http://cv/el/1',
+              label: 'Mount'
             },
             relationships: {
               parent_platform: {
@@ -304,7 +311,8 @@ describe('PlatformMountActionSerializer', () => {
               end_description: 'end of mount',
               offset_x: 4.0,
               offset_z: 6.0,
-              begin_description: 'begin of mount'
+              begin_description: 'begin of mount',
+              label: null
             },
             relationships: {
               parent_platform: {
@@ -471,7 +479,8 @@ describe('PlatformMountActionSerializer', () => {
         contact,
         null,
         'begin of mount',
-        null
+        null,
+        'Mount'
       )
 
       const platformMountAction2 = new PlatformMountAction(
@@ -492,7 +501,8 @@ describe('PlatformMountActionSerializer', () => {
         contact,
         contact,
         'begin of mount',
-        'end of mount'
+        'end of mount',
+        ''
       )
 
       const serializer = new PlatformMountActionSerializer()
@@ -518,6 +528,7 @@ describe('PlatformMountActionSerializer', () => {
       expect(mountActions[0].z).toBe(platformMountAction1.z)
       expect(mountActions[0].elevationDatumName).toBe(platformMountAction1.elevationDatumName)
       expect(mountActions[0].elevationDatumUri).toBe(platformMountAction1.elevationDatumUri)
+      expect(mountActions[0].label).toBe(platformMountAction1.label)
       // mount action 2
       expect(mountActions[1].id).toBe(platformMountAction2.id)
       expect(mountActions[1].platform.id).toBe(platformMountAction2.platform.id)
@@ -540,6 +551,7 @@ describe('PlatformMountActionSerializer', () => {
       expect(mountActions[1].z).toBeNull()
       expect(mountActions[1].elevationDatumName).toBe('')
       expect(mountActions[1].elevationDatumUri).toBe('')
+      expect(mountActions[1].label).toBe(platformMountAction2.label)
     })
   })
 })

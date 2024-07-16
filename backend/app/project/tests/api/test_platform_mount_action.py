@@ -792,6 +792,7 @@ class TestPlatformMountAction(BaseTestCase):
                     "z": float(fake.coordinate()),
                     "end_date": end_date.__str__(),
                     "end_description": "Test PlatformUnmountAction",
+                    "label": "test",
                 },
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": platform.id}},
@@ -831,6 +832,9 @@ class TestPlatformMountAction(BaseTestCase):
         )
         self.expect(response["data"]["attributes"]["z"]).to_equal(
             data["data"]["attributes"]["z"]
+        )
+        self.expect(response["data"]["attributes"]["label"]).to_equal(
+            data["data"]["attributes"]["label"]
         )
 
     def test_update_platform_mount_action(self):

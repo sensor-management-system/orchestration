@@ -87,7 +87,8 @@ describe('MountActionDetailsForm', () => {
       contact1,
       null,
       'begin of mount',
-      null
+      null,
+      ''
     )
 
     return mount(MountActionDetailsForm, {

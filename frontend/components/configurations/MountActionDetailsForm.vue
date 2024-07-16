@@ -27,6 +27,16 @@ SPDX-License-Identifier: EUPL-1.2
           @input="update"
         />
         <v-row class="pb-0">
+          <v-col>
+            <v-text-field
+              v-model="mountActionInformationDTO.label"
+              label="Label"
+              :disabled="readonly"
+              @input="update"
+            />
+          </v-col>
+        </v-row>
+        <v-row class="pb-0">
           <v-col
             md="12"
             lg="4"

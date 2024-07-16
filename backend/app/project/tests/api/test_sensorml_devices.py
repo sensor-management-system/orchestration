@@ -2335,3 +2335,67 @@ class TestSensorMLDevice(BaseTestCase):
             .text,
             "yes",
         )
+
+    def test_get_public_device_with_mount_with_label(self):
+        """Check that we give out the device mount with an label."""
+        configuration = Configuration(label="Test config")
+        contact = Contact(given_name="Given", family_name="Fam", email="given@family")
+        device_mount = DeviceMountAction(
+            label="Special mount",
+            device=self.device,
+            configuration=configuration,
+            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_contact=contact,
+            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            begin_description="Mount of device on test config",
+        )
+
+        db.session.add_all([configuration, device_mount, contact])
+        db.session.commit()
+        with self.client:
+            resp = self.client.get(f"{self.url}/{self.device.id}/sensorml")
+
+        self.assertEqual(resp.status_code, 200)
+        xml_text = resp.text
+        self.schema.validate(xml_text)
+        root = xml.etree.ElementTree.fromstring(resp.text)
+        sml_history = root.find("{http://www.opengis.net/sensorml/2.0}history")
+        sml_event_list = sml_history.find(
+            "{http://www.opengis.net/sensorml/2.0}EventList"
+        )
+        sml_events = sml_event_list.findall(
+            "{http://www.opengis.net/sensorml/2.0}event"
+        )
+        self.assertEqual(len(sml_events), 1)
+
+        sml_mount_event = sml_events[0]
+
+        self.assertEqual(
+            sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .attrib.get("definition"),
+            "Mount",
+        )
+        self.assertEqual(
+            sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}label")
+            .text,
+            device_mount.label,
+        )
+        self.assertEqual(
+            sml_mount_event.find("{http://www.opengis.net/sensorml/2.0}Event")
+            .find("{http://www.opengis.net/sensorml/2.0}classification")
+            .find("{http://www.opengis.net/sensorml/2.0}ClassifierList")
+            .find("{http://www.opengis.net/sensorml/2.0}classifier")
+            .find("{http://www.opengis.net/sensorml/2.0}Term")
+            .find("{http://www.opengis.net/sensorml/2.0}value")
+            .text,
+            "Mount",
+        )

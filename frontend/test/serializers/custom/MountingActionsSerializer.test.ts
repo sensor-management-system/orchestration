@@ -215,6 +215,7 @@ describe('MountingActionsSerializer', () => {
           endDescription: '',
           beginDate: date1,
           endDate: null,
+          label: '',
           platform: Platform.createFromObject({
             id: '3',
             serialNumber: '000123',
@@ -269,6 +270,7 @@ describe('MountingActionsSerializer', () => {
           endDescription: '',
           beginDate: date2,
           endDate: null,
+          label: '',
           device: Device.createFromObject({
             id: '7',
             serialNumber: '100123',
@@ -532,6 +534,7 @@ describe('MountingActionsSerializer', () => {
           endDescription: '',
           beginDate: date2,
           endDate: null,
+          label: '',
           device: Device.createFromObject({
             id: '7',
             serialNumber: '100123',
@@ -588,6 +591,7 @@ describe('MountingActionsSerializer', () => {
           endDescription: '',
           beginDate: date1,
           endDate: null,
+          label: '',
           platform,
           parentPlatform: null
         })
@@ -822,6 +826,7 @@ describe('MountingActionsSerializer', () => {
           endDescription: '',
           beginDate: date2,
           endDate: null,
+          label: '',
           device: Device.createFromObject({
             id: '7',
             serialNumber: '100123',
@@ -878,6 +883,7 @@ describe('MountingActionsSerializer', () => {
           endDescription: '',
           beginDate: date1,
           endDate: null,
+          label: '',
           device: parentDevice,
           parentPlatform: null,
           parentDevice: null

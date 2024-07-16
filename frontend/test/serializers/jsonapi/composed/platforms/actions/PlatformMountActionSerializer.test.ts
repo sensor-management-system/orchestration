@@ -38,7 +38,8 @@ describe('PlatformMountActionSerializer', () => {
               y: 51.1,
               z: 0.0,
               elevation_datum_name: 'MSL',
-              elevation_datum_uri: 'http://cv/el/1'
+              elevation_datum_uri: 'http://cv/el/1',
+              label: 'Mount'
             },
             relationships: {
               begin_contact: {
@@ -69,7 +70,8 @@ describe('PlatformMountActionSerializer', () => {
               offset_y: 2,
               offset_z: 3,
               begin_description: 'Platform mount',
-              begin_date: '2020-03-01T12:00:00.000Z'
+              begin_date: '2020-03-01T12:00:00.000Z',
+              label: ''
             },
             relationships: {
               begin_contact: {
@@ -232,7 +234,8 @@ describe('PlatformMountActionSerializer', () => {
         y: 51.1,
         z: 0.0,
         elevationDatumName: 'MSL',
-        elevationDatumUri: 'http://cv/el/1'
+        elevationDatumUri: 'http://cv/el/1',
+        label: 'Mount'
       })
 
       const expectedPm2 = PlatformMountActionBasicData.createFromObject({
@@ -249,7 +252,8 @@ describe('PlatformMountActionSerializer', () => {
         y: null,
         z: null,
         elevationDatumName: '',
-        elevationDatumUri: ''
+        elevationDatumUri: '',
+        label: ''
       })
 
       const expectedResult = [

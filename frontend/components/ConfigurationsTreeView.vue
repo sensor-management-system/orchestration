@@ -29,6 +29,9 @@ SPDX-License-Identifier: EUPL-1.2
             :value="item.unpack().device"
             :extended="showDetailedNames || (showDetailedName && item === value)"
           />
+          <div v-if="item.label" class="text-caption grey--text text--darken-2">
+            {{ item.label }}
+          </div>
         </div>
         <div v-if="item.isPlatform()">
           {{ item.typeName }} -&nbsp;
@@ -36,6 +39,9 @@ SPDX-License-Identifier: EUPL-1.2
             :value="item.unpack().platform"
             :extended="showDetailedNames || (showDetailedName && item === value)"
           />
+          <div v-if="item.label" class="text-caption grey--text text--darken-2">
+            {{ item.label }}
+          </div>
         </div>
         <div v-if="item.isConfiguration()">
           Configuration - {{ getConfigurationLabel(item.unpack().configuration) }}
