@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2023
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -40,7 +40,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const node = new DeviceNode(deviceMountAction)
     expect(Object.is(node.unpack(), deviceMountAction)).toBeTruthy()
@@ -69,7 +70,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const firstNode = new DeviceNode(firstDeviceMountAction)
     const secondNode = DeviceNode.createFromObject(firstNode)
@@ -100,7 +102,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const node = new DeviceNode(deviceMountAction)
     expect(node.canHaveChildren()).toBeTruthy()
@@ -128,7 +131,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const firstNode = new DeviceNode(firstDeviceMountAction)
 
@@ -152,7 +156,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'a second device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const secondNode = new DeviceNode(secondDeviceMountAction)
 
@@ -185,7 +190,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const firstNode = new DeviceNode(firstDeviceMountAction)
 
@@ -209,7 +215,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'a second device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const secondNode = new DeviceNode(secondDeviceMountAction)
 
@@ -241,7 +248,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const node = new DeviceNode(deviceMountAction)
     const name = node.name
@@ -273,7 +281,8 @@ describe('DeviceNode', () => {
       beginDate: date,
       endDate: null,
       beginDescription: 'just a device mount action',
-      endDescription: ''
+      endDescription: '',
+      label: ''
     })
     const node = new DeviceNode(deviceMountAction)
     const name = node.name

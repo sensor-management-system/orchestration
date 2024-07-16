@@ -1,5 +1,10 @@
 <!--
- SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+- Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
 SPDX-License-Identifier: EUPL-1.2
  -->
@@ -48,6 +53,20 @@ SPDX-License-Identifier: EUPL-1.2
           :from="selectedDeviceAction.beginDate"
           :to="selectedDeviceAction.endDate"
         />
+      </v-col>
+    </v-row>
+    <v-row v-if="selectedDeviceAction.label" dense>
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        Mount label
+      </v-col>
+      <v-col
+        cols="8"
+        class="nowrap-truncate"
+      >
+        {{ selectedDeviceAction.label }}
       </v-col>
     </v-row>
     <v-row dense>

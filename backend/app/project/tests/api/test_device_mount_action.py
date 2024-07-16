@@ -131,6 +131,7 @@ class TestDeviceMountAction(BaseTestCase):
                     "z": float(fake.coordinate()),
                     "end_description": "Test DeviceUnMountAction",
                     "end_date": str(end_date),
+                    "label": "test",
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": device.id}},
@@ -170,6 +171,9 @@ class TestDeviceMountAction(BaseTestCase):
         )
         self.expect(response["data"]["attributes"]["z"]).to_equal(
             data["data"]["attributes"]["z"]
+        )
+        self.expect(response["data"]["attributes"]["label"]).to_equal(
+            data["data"]["attributes"]["label"]
         )
 
     def test_post_device_mount_action_with_parent_device(self):

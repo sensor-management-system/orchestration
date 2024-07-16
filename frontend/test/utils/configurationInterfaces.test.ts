@@ -45,7 +45,8 @@ describe('logicOrder', () => {
       contact,
       null,
       '',
-      null
+      null,
+      ''
     )
     const deviceMountAction = new DeviceMountAction(
       '2',
@@ -66,7 +67,8 @@ describe('logicOrder', () => {
       contact,
       null,
       '',
-      null
+      null,
+      ''
     )
 
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
@@ -102,7 +104,8 @@ describe('logicOrder', () => {
       contact,
       null,
       '',
-      null
+      null,
+      ''
     )
     const deviceMountAction = new DeviceMountAction(
       '2',
@@ -123,7 +126,8 @@ describe('logicOrder', () => {
       contact,
       null,
       '',
-      null
+      null,
+      ''
     )
 
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
@@ -155,7 +159,8 @@ describe('logicOrder', () => {
       contact,
       null,
       '',
-      null
+      null,
+      ''
     )
     const deviceMountAction = new DeviceMountAction(
       '2',
@@ -176,7 +181,8 @@ describe('logicOrder', () => {
       contact,
       null,
       '',
-      null
+      null,
+      ''
     )
 
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)

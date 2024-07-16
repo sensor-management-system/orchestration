@@ -36,6 +36,14 @@ SPDX-License-Identifier: EUPL-1.2
       </v-col>
     </v-row>
     <v-row dense>
+      <v-col cols="4" class="font-weight-medium">
+        Label:
+      </v-col>
+      <v-col cols="8">
+        {{ mountAction.label | orDefault }}
+      </v-col>
+    </v-row>
+    <v-row dense>
       <v-col
         cols="4"
         class="font-weight-medium"

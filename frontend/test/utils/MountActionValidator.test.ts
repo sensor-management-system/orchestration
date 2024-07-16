@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2023
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Tobias Kuhnert <tobias.kuhnert@ufz.de>
@@ -47,7 +47,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     const parentAction = new MountAction(
@@ -67,7 +68,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect an error
@@ -92,7 +94,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     const parentAction = new MountAction(
@@ -112,7 +115,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect an error
@@ -137,7 +141,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     const parentAction = new MountAction(
@@ -157,7 +162,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect an error
@@ -182,7 +188,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     const parentAction = new MountAction(
@@ -202,7 +209,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect an error
@@ -227,7 +235,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       null,
       'Start of mount',
-      null
+      null,
+      ''
     )
 
     const parentAction = new MountAction(
@@ -247,7 +256,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect an error
@@ -272,7 +282,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     const parentAction = new MountAction(
@@ -292,7 +303,8 @@ describe('#actionConflictsWith', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect no error
@@ -323,7 +335,8 @@ describe('#actionConflictsWithMultiple', () => {
         new Contact(),
         new Contact(),
         'Start of mount',
-        'End of mount'
+        'End of mount',
+        ''
       ),
       new MountAction(
         '4',
@@ -342,7 +355,8 @@ describe('#actionConflictsWithMultiple', () => {
         new Contact(),
         new Contact(),
         'Start of mount',
-        'End of mount'
+        'End of mount',
+        ''
       ),
       new MountAction(
         '5',
@@ -361,7 +375,8 @@ describe('#actionConflictsWithMultiple', () => {
         new Contact(),
         new Contact(),
         'Start of mount',
-        'End of mount'
+        'End of mount',
+        ''
       )
     ]
 
@@ -382,7 +397,8 @@ describe('#actionConflictsWithMultiple', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect an error
@@ -408,7 +424,8 @@ describe('#actionConflictsWithMultiple', () => {
         new Contact(),
         new Contact(),
         'Start of mount',
-        'End of mount'
+        'End of mount',
+        ''
       ),
       new MountAction(
         '4',
@@ -427,7 +444,8 @@ describe('#actionConflictsWithMultiple', () => {
         new Contact(),
         new Contact(),
         'Start of mount',
-        'End of mount'
+        'End of mount',
+        ''
       ),
       new MountAction(
         '5',
@@ -446,7 +464,8 @@ describe('#actionConflictsWithMultiple', () => {
         new Contact(),
         new Contact(),
         'Start of mount',
-        'End of mount'
+        'End of mount',
+        ''
       )
     ]
 
@@ -467,7 +486,8 @@ describe('#actionConflictsWithMultiple', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
 
     // we expect no error
@@ -500,7 +520,8 @@ describe('#nodeIsWithinParentRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const node = new PlatformNode(mountAction)
 
@@ -522,7 +543,8 @@ describe('#nodeIsWithinParentRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const parentNode = new PlatformNode(parentAction)
     parentNode.children = [node]
@@ -555,7 +577,8 @@ describe('#nodeIsWithinParentRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const node = new PlatformNode(mountAction)
 
@@ -577,7 +600,8 @@ describe('#nodeIsWithinParentRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const parentNode = new PlatformNode(parentAction)
     parentNode.children = [node]
@@ -614,7 +638,8 @@ describe('#nodeChildrenAreWithinRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const node = new PlatformNode(mountAction)
 
@@ -636,7 +661,8 @@ describe('#nodeChildrenAreWithinRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const anotherNode = new PlatformNode(anotherMountAction)
     node.children = [anotherNode]
@@ -659,7 +685,8 @@ describe('#nodeChildrenAreWithinRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const parentNode = new PlatformNode(parentAction)
     parentNode.children = [node]
@@ -694,7 +721,8 @@ describe('#nodeChildrenAreWithinRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const node = new PlatformNode(mountAction)
 
@@ -716,7 +744,8 @@ describe('#nodeChildrenAreWithinRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const anotherNode = new PlatformNode(anotherMountAction)
     node.children = [anotherNode]
@@ -739,7 +768,8 @@ describe('#nodeChildrenAreWithinRange', () => {
       new Contact(),
       new Contact(),
       'Start of mount',
-      'End of mount'
+      'End of mount',
+      ''
     )
     const parentNode = new PlatformNode(parentAction)
     parentNode.children = [node]
@@ -772,7 +802,8 @@ const failingMountActions: [string, MountAction][] = [
     new Contact(),
     new Contact(),
     'begin of mount',
-    'end of mount'
+    'end of mount',
+    ''
   )],
   ['begins and ends within', new MountAction(
     '1',
@@ -791,7 +822,8 @@ const failingMountActions: [string, MountAction][] = [
     new Contact(),
     new Contact(),
     'begin of mount',
-    'end of mount'
+    'end of mount',
+    ''
   )],
   ['begins within and ends after', new MountAction(
     '1',
@@ -810,7 +842,8 @@ const failingMountActions: [string, MountAction][] = [
     new Contact(),
     new Contact(),
     'begin of mount',
-    'end of mount'
+    'end of mount',
+    ''
   )],
   ['begins before and ends after', new MountAction(
     '1',
@@ -829,7 +862,8 @@ const failingMountActions: [string, MountAction][] = [
     new Contact(),
     new Contact(),
     'begin of mount',
-    'end of mount'
+    'end of mount',
+    ''
   )],
   ['has no end date and begins before', new MountAction(
     '1',
@@ -848,7 +882,8 @@ const failingMountActions: [string, MountAction][] = [
     new Contact(),
     new Contact(),
     'begin of mount',
-    'end of mount'
+    'end of mount',
+    ''
   )]
 ]
 const availabilities: Availability[] = [
@@ -893,7 +928,8 @@ describe('#isDevicePropertyUsedInDynamicLocationAction', () => {
       new Contact(),
       null,
       '',
-      null
+      null,
+      ''
     )
 
     const locationAction = new DynamicLocationAction()
@@ -932,7 +968,8 @@ describe('#isDevicePropertyUsedInDynamicLocationAction', () => {
       new Contact(),
       null,
       '',
-      null
+      null,
+      ''
     )
 
     const locationAction = new DynamicLocationAction()
@@ -972,6 +1009,7 @@ describe('#getRelatedDynamicLocationActions', () => {
       '',
       new Contact(),
       new Contact(),
+      '',
       '',
       ''
     )

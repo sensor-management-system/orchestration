@@ -31,6 +31,7 @@ export interface IDeviceMountActionBasicData {
   z: number | null
   elevationDatumName: string
   elevationDatumUri: string
+  label: string
 }
 
 export class DeviceMountActionBasicData implements IDeviceMountActionBasicData {
@@ -48,6 +49,7 @@ export class DeviceMountActionBasicData implements IDeviceMountActionBasicData {
   private _z: number | null = null
   private _elevationDatumName: string = ''
   private _elevationDatumUri: string = ''
+  private _label: string = ''
 
   constructor (
     id: string,
@@ -63,7 +65,8 @@ export class DeviceMountActionBasicData implements IDeviceMountActionBasicData {
     y: number | null,
     z: number | null,
     elevationDatumName: string,
-    elevationDatumUri: string
+    elevationDatumUri: string,
+    label: string
   ) {
     this._id = id
     this._beginDate = beginDate
@@ -79,6 +82,7 @@ export class DeviceMountActionBasicData implements IDeviceMountActionBasicData {
     this._z = z
     this._elevationDatumName = elevationDatumName
     this._elevationDatumUri = elevationDatumUri
+    this._label = label
   }
 
   get id (): string {
@@ -193,6 +197,14 @@ export class DeviceMountActionBasicData implements IDeviceMountActionBasicData {
     this._elevationDatumUri = newElevationDatumUri
   }
 
+  get label (): string {
+    return this._label
+  }
+
+  set label (newValue: string) {
+    this._label = newValue
+  }
+
   static createFromObject (otherAction: IDeviceMountActionBasicData): DeviceMountActionBasicData {
     return new DeviceMountActionBasicData(
       otherAction.id,
@@ -208,7 +220,8 @@ export class DeviceMountActionBasicData implements IDeviceMountActionBasicData {
       otherAction.y,
       otherAction.z,
       otherAction.elevationDatumName,
-      otherAction.elevationDatumUri
+      otherAction.elevationDatumUri,
+      otherAction.label
     )
   }
 }

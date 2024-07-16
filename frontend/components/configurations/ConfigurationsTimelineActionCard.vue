@@ -27,6 +27,11 @@ SPDX-License-Identifier: EUPL-1.2
             <v-card-title class="text--primary pt-0 pb-0">
               {{ action.title }}
             </v-card-title>
+            <v-card-subtitle v-if="action.subtitle" class="pt-2">
+              <div class="text-caption">
+                {{ action.subtitle }}
+              </div>
+            </v-card-subtitle>
           </v-col>
         </v-row>
         <v-row v-show="!show && action.description" no-gutters>

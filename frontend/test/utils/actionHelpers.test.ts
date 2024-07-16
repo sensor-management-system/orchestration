@@ -44,7 +44,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const deviceMountTimelineAction = new DeviceMountTimelineAction(deviceMount)
     const deviceUnmountTimelineAction = new DeviceUnmountTimelineAction(deviceMount)
@@ -77,7 +78,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const deviceMountTimelineAction = new DeviceMountTimelineAction(deviceMount)
     const deviceUnmountTimelineAction = new DeviceUnmountTimelineAction(deviceMount)
@@ -110,7 +112,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const deviceMount2 = DeviceMountAction.createFromObject({
       id: '124',
@@ -131,7 +134,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const deviceUnmountTimelineAction = new DeviceUnmountTimelineAction(deviceMount1)
     const deviceMountTimelineAction = new DeviceMountTimelineAction(deviceMount2)
@@ -164,7 +168,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const platformMount = PlatformMountAction.createFromObject({
       id: '124',
@@ -184,7 +189,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const deviceMountTimelineAction = new DeviceMountTimelineAction(deviceMount)
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
@@ -217,7 +223,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const platformMount = PlatformMountAction.createFromObject({
       id: '124',
@@ -237,7 +244,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const deviceUnmountTimelineAction = new DeviceUnmountTimelineAction(deviceMount)
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)
@@ -269,7 +277,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)
@@ -301,7 +310,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount)
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount)
@@ -333,7 +343,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const platformMount2 = PlatformMountAction.createFromObject({
       id: '124',
@@ -353,7 +364,8 @@ describe('sortActions', () => {
       endDescription: '',
       offsetX: 0,
       offsetY: 0,
-      offsetZ: 0
+      offsetZ: 0,
+      label: ''
     })
     const platformUnmountTimelineAction = new PlatformUnmountTimelineAction(platformMount1)
     const platformMountTimelineAction = new PlatformMountTimelineAction(platformMount2)

@@ -71,7 +71,8 @@ export class MountingActionsSerializer {
           parentPlatform,
           parentDevice,
           beginContact: contactsLookup[action.data.relationships.begin_contact.data.id],
-          endContact: endContact ?? null
+          endContact: endContact ?? null,
+          label: action.data.attributes.label || ''
 
         })
         const node = new DeviceNode(mountAction)
@@ -99,7 +100,8 @@ export class MountingActionsSerializer {
           platform,
           parentPlatform,
           beginContact: contactsLookup[action.data.relationships.begin_contact.data.id],
-          endContact: endContact ?? null
+          endContact: endContact ?? null,
+          label: action.data.attributes.label || ''
         })
         const node = new PlatformNode(mountAction)
         node.children = children

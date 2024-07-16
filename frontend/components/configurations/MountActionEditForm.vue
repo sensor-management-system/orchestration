@@ -161,7 +161,8 @@ export default class MountActionEditForm extends Vue {
       beginContact: this.value.beginContact,
       endContact: this.value.endContact,
       beginDescription: this.value.beginDescription,
-      endDescription: this.value.endDescription
+      endDescription: this.value.endDescription,
+      label: this.value.label
     }
   }
 
@@ -228,7 +229,8 @@ export default class MountActionEditForm extends Vue {
         Contact.createFromObject(mountActionInformationDTO.beginContact),
         mountActionInformationDTO.endContact ? Contact.createFromObject(mountActionInformationDTO.endContact) : null,
         mountActionInformationDTO.beginDescription,
-        mountActionInformationDTO.endDescription
+        mountActionInformationDTO.endDescription,
+        mountActionInformationDTO.label
       )
       newNode = new DeviceNode(newMountAction)
     } else {
@@ -250,7 +252,8 @@ export default class MountActionEditForm extends Vue {
         Contact.createFromObject(mountActionInformationDTO.beginContact),
         mountActionInformationDTO.endContact ? Contact.createFromObject(mountActionInformationDTO.endContact) : null,
         mountActionInformationDTO.beginDescription,
-        mountActionInformationDTO.endDescription
+        mountActionInformationDTO.endDescription,
+        mountActionInformationDTO.label
       )
       newNode = new PlatformNode(newMountAction)
     }

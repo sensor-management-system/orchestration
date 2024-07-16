@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2022
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -59,6 +59,10 @@ export class ConfigurationNode implements IConfigurationsTreeNodeWithChildren<Co
 
   set disabled (isDisabled: boolean) {
     this._disabled = isDisabled
+  }
+
+  get label (): string {
+    return this.node.label
   }
 
   canHaveChildren (): this is IConfigurationsTreeNodeWithChildren<ConfigurationMountAction> {

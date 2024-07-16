@@ -228,6 +228,7 @@ class Configuration(
                             "platform": {
                                 "properties": Platform.get_search_index_properties(),
                             },
+                            "label": type_text_full_searchable,
                         },
                     },
                     "device_mount_actions": {
@@ -237,6 +238,7 @@ class Configuration(
                             "device": {
                                 "properties": Device.get_search_index_properties(),
                             },
+                            "label": type_text_full_searchable,
                         },
                     },
                     "customfields": {

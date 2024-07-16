@@ -31,6 +31,7 @@ export interface IPlatformMountActionBasicData {
   z: number | null
   elevationDatumName: string
   elevationDatumUri: string
+  label: string
 }
 
 export class PlatformMountActionBasicData implements IPlatformMountActionBasicData {
@@ -48,6 +49,7 @@ export class PlatformMountActionBasicData implements IPlatformMountActionBasicDa
   private _z: number | null = null
   private _elevationDatumName: string = ''
   private _elevationDatumUri: string = ''
+  private _label: string = ''
 
   constructor (
     id: string,
@@ -63,7 +65,8 @@ export class PlatformMountActionBasicData implements IPlatformMountActionBasicDa
     y: number | null,
     z: number | null,
     elevationDatumName: string,
-    elevationDatumUri: string
+    elevationDatumUri: string,
+    label: string
   ) {
     this._id = id
     this._beginDate = beginDate
@@ -79,6 +82,7 @@ export class PlatformMountActionBasicData implements IPlatformMountActionBasicDa
     this._z = z
     this._elevationDatumName = elevationDatumName
     this._elevationDatumUri = elevationDatumUri
+    this._label = label
   }
 
   get id (): string {
@@ -193,6 +197,14 @@ export class PlatformMountActionBasicData implements IPlatformMountActionBasicDa
     this._elevationDatumUri = newElevationDatumUri
   }
 
+  get label (): string {
+    return this._label
+  }
+
+  set label (newValue: string) {
+    this._label = newValue
+  }
+
   static createFromObject (otherAction: IPlatformMountActionBasicData): PlatformMountActionBasicData {
     return new PlatformMountActionBasicData(
       otherAction.id,
@@ -208,7 +220,8 @@ export class PlatformMountActionBasicData implements IPlatformMountActionBasicDa
       otherAction.y,
       otherAction.z,
       otherAction.elevationDatumName,
-      otherAction.elevationDatumUri
+      otherAction.elevationDatumUri,
+      otherAction.label
     )
   }
 }

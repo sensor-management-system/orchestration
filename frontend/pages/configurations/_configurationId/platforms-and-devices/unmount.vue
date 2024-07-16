@@ -358,7 +358,8 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
       beginDescription: mountAction.beginDescription,
       endDate: this.selectedDate,
       endContact,
-      endDescription
+      endDescription,
+      label: mountAction.label
     })
     await this.updateDeviceMountAction({ configurationId: this.configurationId, deviceMountAction: mountActionWithEndDate })
   }
@@ -383,7 +384,8 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
       beginDescription: mountAction.beginDescription,
       endDate: this.selectedDate,
       endContact,
-      endDescription
+      endDescription,
+      label: mountAction.label
     })
     await this.updatePlatformMountAction({ configurationId: this.configurationId, platformMountAction: mountActionWithEndDate })
   }
