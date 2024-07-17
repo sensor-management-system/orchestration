@@ -23,6 +23,7 @@ SPDX-License-Identifier: EUPL-1.2
         @locationfound="onLocationFound"
       >
         <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+        <l-control-scale position="bottomleft" :imperial="true" :metric="true" :max-width="150" />
         <l-marker v-if="location" :lat-lng="location" />
         <v-btn
           v-if="!readonly"
