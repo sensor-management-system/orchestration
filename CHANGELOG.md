@@ -22,6 +22,7 @@ Added:
 - PIDs for sites
 - integrated sms logos
 - labels for the mounts
+- display scale on maps
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
