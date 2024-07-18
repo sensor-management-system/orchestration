@@ -169,6 +169,10 @@ export default class DevicePropertyEditPage extends mixins(CheckEditAccess) {
   }
 
   async save () {
+    if (!(this.$refs.propertyEditForm as Vue & { validateForm: () => boolean }).validateForm()) {
+      this.$store.commit('snackbar/setError', 'Please correct your input')
+      return
+    }
     try {
       this.setLoading(true)
       await this.updateDeviceMeasuredQuantity({
