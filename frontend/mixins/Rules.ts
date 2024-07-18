@@ -38,6 +38,12 @@ export class Rules extends Vue {
       return !!v || 'Required'
     },
     validUrl: (v: string) => v.match(/^https*:\/\//) !== null || v.match(/^ftp*:\/\//) !== null || 'URL not valid',
-    numeric: (v: any) => !isNaN(parseInt(v)) || 'Number expected'
+    numeric: (v: any) => !isNaN(parseInt(v)) || 'Number expected',
+    numericOrEmpty: (v: any) => {
+      if (v === '' || v === null || v === undefined) {
+        return true
+      }
+      return !isNaN(parseInt(v)) || 'Expected to be numeric or empty'
+    }
   }
 }

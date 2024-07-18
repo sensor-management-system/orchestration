@@ -23,6 +23,7 @@ Added:
 - integrated sms logos
 - labels for the mounts
 - display scale on maps
+- added validation to numeric fields of device measured quantities
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
