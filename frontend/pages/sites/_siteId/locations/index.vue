@@ -19,15 +19,21 @@ SPDX-License-Identifier: EUPL-1.2
         Select a marker on the map to show information about the location.
       </p>
     </v-alert>
-    <v-card id="map-wrap" style="height: 300px" class="mb-4">
+    <v-card
+      id="map-wrap"
+      :style="{ height: mapHeight + 'px'}"
+      :class="{mapHover: mapHovered, draggerHover: draggerHovered}"
+    >
       <no-ssr>
         <l-map
+          id="site-location-map"
           ref="map"
           :zoom="zoomLevel"
           :center="currentPosition"
-          style="z-index:0"
           :bounds="bounds"
           @click="resetSelection"
+          @mouseenter="onMapHoverBegin"
+          @mouseleave="onMapHoverEnd"
         >
           <l-tile-layer layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
           <l-polygon
@@ -58,6 +64,13 @@ SPDX-License-Identifier: EUPL-1.2
           />
         </l-map>
       </no-ssr>
+      <div
+        id="rezise-dragger"
+        @mousedown="initResize"
+        @mouseup="stopResize"
+        @mouseenter="onDraggerHoverBegin"
+        @mouseleave="onDraggerHoverEnd"
+      />
     </v-card>
     <v-card v-if="selectedLocationAction">
       <v-card-text class="text--primary">
@@ -189,6 +202,16 @@ export default class SiteLocations extends Vue {
   private selectedLocationAction: StaticLocationAction | null = null
   private selectedSite: Site | null = null
 
+  private minHeight: number = 200
+  private maxHeight: number = 800
+  private mapHeight: number = 300
+  private isResizing: Boolean = false
+
+  private mapHovered: Boolean = false
+  private draggerHovered: Boolean = false
+
+  private localStorageMapHeightKey = 'site-locations-map-height'
+
   // vuex definition for typescript check
   loadSite!: LoadSiteAction
   loadSiteConfigurations!: LoadSiteConfigurationsAction
@@ -197,6 +220,20 @@ export default class SiteLocations extends Vue {
   siteConfigurations!: SitesState['siteConfigurations']
   setLoading!: SetLoadingAction
   searchSites!: SearchSitesAction
+
+  created () {
+    const storedMapHeight = localStorage.getItem(this.localStorageMapHeightKey)
+    if (storedMapHeight) {
+      this.mapHeight = parseInt(storedMapHeight)
+    }
+    window.addEventListener('mousemove', this.doMapResize)
+    window.addEventListener('mouseup', this.stopResize)
+  }
+
+  destroyed () {
+    window.removeEventListener('mousemove', this.doMapResize)
+    window.removeEventListener('mouseup', this.stopResize)
+  }
 
   async fetch () {
     try {
@@ -297,5 +334,79 @@ export default class SiteLocations extends Vue {
     this.selectedLocationAction = null
     this.clickedOnPolygon = false
   }
+
+  initResize () {
+    this.isResizing = true
+    document.body.style.userSelect = 'none'
+  }
+
+  async doMapResize (event: MouseEvent) {
+    if (!this.isResizing || !this.$refs.map) { return }
+
+    const mapElement = this.$refs.map as Vue & {
+      mapObject: {
+        invalidateSize: () => void;
+      },
+      $el: HTMLElement
+    }
+    const newHeight = event.clientY - mapElement.$el.getBoundingClientRect().top
+
+    if (newHeight >= this.minHeight && newHeight <= this.maxHeight) {
+      this.mapHeight = newHeight
+      await mapElement.mapObject.invalidateSize()
+    }
+  }
+
+  stopResize () {
+    this.isResizing = false
+    document.body.style.userSelect = 'auto'
+    localStorage.setItem(this.localStorageMapHeightKey, String(this.mapHeight))
+  }
+
+  onMapHoverBegin () {
+    this.mapHovered = true
+  }
+
+  onMapHoverEnd () {
+    this.mapHovered = false
+  }
+
+  onDraggerHoverBegin () {
+    this.draggerHovered = true
+  }
+
+  onDraggerHoverEnd () {
+    this.draggerHovered = false
+  }
 }
 </script>
+<style scopen>
+#rezise-dragger {
+  height: 20px;
+  cursor: ns-resize;
+  width: 100%;
+  z-index: 1000;
+  position: relative;
+  bottom: 6px;
+}
+
+#map-wrap {
+  border-bottom: 2px solid transparent;
+  transition: border .3s;
+  padding-bottom: 4px;
+}
+
+#site-location-map {
+  z-index: 0;
+}
+
+#map-wrap.mapHover {
+  border-bottom: 2px solid #bbb;
+  transition: border .3s;
+}
+
+#map-wrap.draggerHover {
+  border-bottom: 2px solid black;
+  transition: border .3s;
+}
+</style>

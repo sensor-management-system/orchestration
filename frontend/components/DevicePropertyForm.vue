@@ -385,8 +385,7 @@ SPDX-License-Identifier: EUPL-1.2
             :value="value.failureValue"
             :readonly="readonly"
             :disabled="readonly"
-            type="number"
-            step="any"
+            :rules="[rules.numericOrEmpty]"
             @change="update('failureValue', $event)"
             @wheel.prevent
           />
@@ -397,8 +396,7 @@ SPDX-License-Identifier: EUPL-1.2
             :value="value.measuringRange.min"
             :readonly="readonly"
             :disabled="readonly"
-            type="number"
-            step="any"
+            :rules="[rules.numericOrEmpty]"
             @change="update('measuringRange.min', $event)"
             @wheel.prevent
           />
@@ -409,8 +407,7 @@ SPDX-License-Identifier: EUPL-1.2
             :value="value.measuringRange.max"
             :readonly="readonly"
             :disabled="readonly"
-            type="number"
-            step="any"
+            :rules="[rules.numericOrEmpty]"
             @change="update('measuringRange.max', $event)"
             @wheel.prevent
           />
@@ -423,8 +420,7 @@ SPDX-License-Identifier: EUPL-1.2
             :value="value.accuracy"
             :readonly="readonly"
             :disabled="readonly"
-            type="number"
-            step="any"
+            :rules="[rules.numericOrEmpty]"
             @change="update('accuracy', $event)"
             @wheel.prevent
           />
@@ -504,8 +500,7 @@ SPDX-License-Identifier: EUPL-1.2
             :value="value.resolution"
             :readonly="readonly"
             :disabled="readonly"
-            type="number"
-            step="any"
+            :rules="[rules.numericOrEmpty]"
             @change="update('resolution', $event)"
             @wheel.prevent
           />

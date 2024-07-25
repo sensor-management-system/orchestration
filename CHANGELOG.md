@@ -22,6 +22,9 @@ Added:
 - PIDs for sites
 - integrated sms logos
 - labels for the mounts
+- display scale on maps
+- added validation to numeric fields of device measured quantities
+- added a dragger at the bottom of maps to adjust the size of maps
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url

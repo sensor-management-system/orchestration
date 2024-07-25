@@ -11,18 +11,25 @@ SPDX-FileCopyrightText: 2020 - 2023
 SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
-  <div id="map-wrap" style="height: 300px">
+  <div
+    id="map-wrap"
+    :style="{ height: mapHeight + 'px'}"
+    :class="{mapHover: mapHovered, draggerHover: draggerHovered}"
+  >
     <no-ssr>
       <l-map
+        id="location-map"
         ref="map"
         :zoom="10"
         :center="currentMapCenter"
-        style="z-index:0"
         @click="setCoordinatesByMapClick"
         @ready="onReady"
         @locationfound="onLocationFound"
+        @mouseenter="onMapHoverBegin"
+        @mouseleave="onMapHoverEnd"
       >
         <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
+        <l-control-scale position="bottomleft" :imperial="true" :metric="true" :max-width="150" />
         <l-marker v-if="location" :lat-lng="location" />
         <v-btn
           v-if="!readonly"
@@ -40,6 +47,13 @@ SPDX-License-Identifier: EUPL-1.2
         </v-btn>
       </l-map>
     </no-ssr>
+    <div
+      id="rezise-dragger"
+      @mousedown="initResize"
+      @mouseup="stopResize"
+      @mouseenter="onDraggerHoverBegin"
+      @mouseleave="onDraggerHoverEnd"
+    />
   </div>
 </template>
 
@@ -48,9 +62,12 @@ import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 
 import { LatLng, LeafletMouseEvent, LocationEvent, Map } from 'leaflet'
 
+import { LControl } from 'vue2-leaflet'
 import { StationaryLocation } from '@/models/Location'
 
-@Component
+@Component({
+  components: { LControl }
+})
 export default class LocationMap extends Vue {
   @Prop({ required: true, type: Object })
   readonly value!: StationaryLocation
@@ -63,11 +80,34 @@ export default class LocationMap extends Vue {
   private currentMapCenter: LatLng = this.location ?? this.defaultMapCenter
   private currentMapCenterInitializedByLocation = false
 
+  private minHeight: number = 200
+  private maxHeight: number = 800
+  private mapHeight: number = 300
+  private isResizing: Boolean = false
+
+  private mapHovered: Boolean = false
+  private draggerHovered: Boolean = false
+
+  private localStorageMapHeightKey = 'location-map-height'
+
   created () {
     if (this.location !== null) {
       this.currentPosition = this.location
       this.currentMapCenterInitializedByLocation = true
     }
+
+    const storedMapHeight = localStorage.getItem(this.localStorageMapHeightKey)
+    if (storedMapHeight) {
+      this.mapHeight = parseInt(storedMapHeight)
+    }
+
+    window.addEventListener('mousemove', this.doMapResize)
+    window.addEventListener('mouseup', this.stopResize)
+  }
+
+  destroyed () {
+    window.removeEventListener('mousemove', this.doMapResize)
+    window.removeEventListener('mouseup', this.stopResize)
   }
 
   setCoordinatesByMapClick (event: LeafletMouseEvent) {
@@ -162,6 +202,50 @@ export default class LocationMap extends Vue {
       this.currentMapCenterInitializedByLocation = true
     }
   }
+
+  initResize () {
+    this.isResizing = true
+    document.body.style.userSelect = 'none'
+  }
+
+  async doMapResize (event: MouseEvent) {
+    if (!this.isResizing || !this.$refs.map) { return }
+
+    const mapElement = this.$refs.map as Vue & {
+          mapObject: {
+            invalidateSize: () => void;
+          },
+          $el: HTMLElement
+        }
+    const newHeight = event.clientY - mapElement.$el.getBoundingClientRect().top
+
+    if (newHeight >= this.minHeight && newHeight <= this.maxHeight) {
+      this.mapHeight = newHeight
+      await mapElement.mapObject.invalidateSize()
+    }
+  }
+
+  stopResize () {
+    this.isResizing = false
+    document.body.style.userSelect = 'auto'
+    localStorage.setItem(this.localStorageMapHeightKey, String(this.mapHeight))
+  }
+
+  onMapHoverBegin () {
+    this.mapHovered = true
+  }
+
+  onMapHoverEnd () {
+    this.mapHovered = false
+  }
+
+  onDraggerHoverBegin () {
+    this.draggerHovered = true
+  }
+
+  onDraggerHoverEnd () {
+    this.draggerHovered = false
+  }
 }
 </script>
 
@@ -173,4 +257,34 @@ export default class LocationMap extends Vue {
   bottom: 1.5em;
   margin: 1em;
 }
+
+#rezise-dragger {
+  height: 20px;
+  cursor: ns-resize;
+  width: 100%;
+  z-index: 1000;
+  position: relative;
+  bottom: 6px;
+}
+
+#map-wrap {
+  border-bottom: 2px solid transparent;
+  transition: border .3s;
+  padding-bottom: 4px;
+}
+
+#location-map {
+  z-index: 0;
+}
+
+#map-wrap.mapHover {
+  border-bottom: 2px solid #bbb;
+  transition: border .3s;
+}
+
+#map-wrap.draggerHover {
+  border-bottom: 2px solid black;
+  transition: border .3s;
+}
+
 </style>
