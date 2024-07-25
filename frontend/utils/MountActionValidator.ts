@@ -29,8 +29,8 @@ export enum MountActionValidationResultOp {
 }
 
 export interface IMountActionValidationResult {
-  property: keyof Pick<MountAction, 'beginDate' | 'endDate'>
-  targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'>
+  property: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
+  targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
   value: DateTime | null
   targetValue: DateTime | null
   op: MountActionValidationResultOp
@@ -41,8 +41,8 @@ export interface IMountActionValidationResult {
  * @implements IMountActionValidationResult
  */
 export class MountActionValidationResult implements IMountActionValidationResult {
-  public readonly property: keyof Pick<MountAction, 'beginDate' | 'endDate'>
-  public readonly targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'>
+  public readonly property: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
+  public readonly targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
   public readonly value: DateTime | null
   public readonly targetValue: DateTime | null
   public readonly op: MountActionValidationResultOp
@@ -115,8 +115,8 @@ export class MountActionValidator {
   public static actionConflictsWith (action: MountAction, otherAction: MountAction): boolean | IMountActionValidationResult {
     if (!(action.beginDate >= otherAction.beginDate)) {
       return new MountActionValidationResult({
-        property: 'beginDate',
-        targetProperty: 'beginDate',
+        property: 'mountDate',
+        targetProperty: 'mountDate',
         value: action.beginDate,
         targetValue: otherAction.beginDate,
         op: MountActionValidationResultOp.LESS_THAN
@@ -127,8 +127,8 @@ export class MountActionValidator {
     }
     if (!(action.beginDate <= otherAction.endDate)) {
       return new MountActionValidationResult({
-        property: 'beginDate',
-        targetProperty: 'endDate',
+        property: 'mountDate',
+        targetProperty: 'unmountDate',
         value: action.beginDate,
         targetValue: otherAction.endDate,
         op: MountActionValidationResultOp.GREATER_THAN
@@ -136,8 +136,8 @@ export class MountActionValidator {
     }
     if (action.endDate && !(action.endDate >= otherAction.beginDate)) {
       return new MountActionValidationResult({
-        property: 'endDate',
-        targetProperty: 'beginDate',
+        property: 'unmountDate',
+        targetProperty: 'mountDate',
         value: action.endDate,
         targetValue: otherAction.beginDate,
         op: MountActionValidationResultOp.LESS_THAN
@@ -145,8 +145,8 @@ export class MountActionValidator {
     }
     if (action.endDate && !(action.endDate <= otherAction.endDate)) {
       return new MountActionValidationResult({
-        property: 'endDate',
-        targetProperty: 'endDate',
+        property: 'unmountDate',
+        targetProperty: 'unmountDate',
         value: action.endDate,
         targetValue: otherAction.endDate,
         op: MountActionValidationResultOp.GREATER_THAN
@@ -154,8 +154,8 @@ export class MountActionValidator {
     }
     if (!action.endDate) {
       return new MountActionValidationResult({
-        property: 'endDate',
-        targetProperty: 'endDate',
+        property: 'unmountDate',
+        targetProperty: 'unmountDate',
         value: action.endDate,
         targetValue: otherAction.endDate,
         op: MountActionValidationResultOp.EMPTY
@@ -201,8 +201,8 @@ export class MountActionValidator {
       // ^ begin
       if (action.beginDate && !action.endDate && action.beginDate < availability.beginDate) {
         return new MountActionValidationResult({
-          property: 'endDate',
-          targetProperty: 'beginDate',
+          property: 'unmountDate',
+          targetProperty: 'mountDate',
           value: action.endDate,
           targetValue: availability.beginDate,
           op: MountActionValidationResultOp.EMPTY
@@ -213,8 +213,8 @@ export class MountActionValidator {
       //      ^ begin
       if (action.beginDate >= availability.beginDate && (!availability.endDate || action.beginDate <= availability.endDate)) {
         return new MountActionValidationResult({
-          property: 'beginDate',
-          targetProperty: 'beginDate',
+          property: 'mountDate',
+          targetProperty: 'mountDate',
           value: action.beginDate,
           targetValue: availability.beginDate,
           op: MountActionValidationResultOp.GREATER_THAN
@@ -225,8 +225,8 @@ export class MountActionValidator {
       //          ^ end
       if (action.endDate && action.endDate >= availability.beginDate && (!availability.endDate || action.endDate <= availability.endDate)) {
         return new MountActionValidationResult({
-          property: 'endDate',
-          targetProperty: 'beginDate',
+          property: 'unmountDate',
+          targetProperty: 'mountDate',
           value: action.endDate,
           targetValue: availability.beginDate,
           op: MountActionValidationResultOp.GREATER_THAN
@@ -237,8 +237,8 @@ export class MountActionValidator {
       // ^ begin       ^ end
       if (action.beginDate < availability.beginDate && action.endDate && availability.endDate && action.endDate > availability.endDate) {
         return new MountActionValidationResult({
-          property: 'endDate',
-          targetProperty: 'endDate',
+          property: 'unmountDate',
+          targetProperty: 'unmountDate',
           value: action.endDate,
           targetValue: availability.endDate,
           op: MountActionValidationResultOp.GREATER_THAN
@@ -307,7 +307,7 @@ export class MountActionValidator {
     // the time range of the dynamic location action must be within the time range of the mount action
     if (!(deviceMountAction.beginDate <= dynamicLocationAction.beginDate)) {
       return new MountActionValidationResult({
-        property: 'beginDate',
+        property: 'mountDate',
         targetProperty: 'beginDate',
         value: deviceMountAction.beginDate,
         targetValue: dynamicLocationAction.beginDate,
@@ -316,7 +316,7 @@ export class MountActionValidator {
     }
     if (!(deviceMountAction.endDate && (!dynamicLocationAction.endDate || deviceMountAction.endDate >= dynamicLocationAction.endDate))) {
       return new MountActionValidationResult({
-        property: 'endDate',
+        property: 'unmountDate',
         targetProperty: 'endDate',
         value: deviceMountAction.endDate,
         targetValue: dynamicLocationAction.endDate ? dynamicLocationAction.endDate : null,
@@ -325,7 +325,7 @@ export class MountActionValidator {
     }
     if (deviceMountAction.endDate && !dynamicLocationAction.endDate) {
       return new MountActionValidationResult({
-        property: 'endDate',
+        property: 'unmountDate',
         targetProperty: 'endDate',
         value: deviceMountAction.endDate,
         targetValue: null,

@@ -76,16 +76,16 @@ SPDX-License-Identifier: EUPL-1.2
                   Coordinates (X | Y | Z)
                 </th>
                 <th class="text-left">
-                  Description
+                  Mount description
                 </th>
                 <th class="text-left">
-                  Contact
+                  Mount contact
                 </th>
                 <th v-if="selectedEndDate !== null" class="text-left table-border-left">
-                  End description
+                  Unmount description
                 </th>
                 <th v-if="selectedEndDate !== null" class="text-left">
-                  End contact
+                  Unmount contact
                 </th>
               </tr>
             </thead>
