@@ -81,7 +81,7 @@ export default {
 
   validateMountingDates (startDate: DateTime | null, endDate: DateTime | null): boolean | string {
     if (startDate === null) {
-      return 'Start date is required'
+      return 'Mount date is required'
     }
     if (endDate === null) {
       return true
@@ -89,7 +89,7 @@ export default {
     if (startDate && startDate <= endDate) {
       return true
     }
-    return 'End date must be after start date'
+    return 'Unmount date must be after mount date'
   },
 
   validateInputForLocationType (v: string): boolean | string {

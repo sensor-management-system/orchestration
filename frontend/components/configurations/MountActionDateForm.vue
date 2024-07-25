@@ -21,8 +21,8 @@ SPDX-License-Identifier: EUPL-1.2
         <DateTimePicker
           v-model="valueCopy.beginDate"
           placeholder="e.g. 2000-01-31 12:00"
-          label="Select begin date"
-          hint="Start date"
+          label="Select mount date"
+          hint="Mount date"
           required
           class="required"
           :rules="[rules.required, additionalRules.validateMountingDates, ...beginDateRules]"
@@ -33,7 +33,7 @@ SPDX-License-Identifier: EUPL-1.2
         <DateTimePicker
           v-model="valueCopy.endDate"
           placeholder="Open End"
-          label="Select end date"
+          label="Select unmount date"
           :hint="!endRequired ? 'Optional. Leave blank for open end' : ''"
           :required="endRequired"
           :rules="[additionalRules.validateMountingDates, ...endDateRules]"

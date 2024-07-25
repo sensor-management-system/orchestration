@@ -675,7 +675,7 @@ describe('#validateMountingDates', () => {
     const startDate = null
     const endDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
     const actual = validateMountingDates(startDate, endDate)
-    expect(actual).toEqual('Start date is required')
+    expect(actual).toEqual('Mount date is required')
   })
   it('should return true if startDate is set and endDate is null', () => {
     const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
@@ -693,7 +693,7 @@ describe('#validateMountingDates', () => {
     const startDate = DateTime.fromISO('2023-06-02', { zone: 'UTC' })
     const endDate = DateTime.fromISO('2023-06-01', { zone: 'UTC' })
     const actual = validateMountingDates(startDate, endDate)
-    expect(actual).toEqual('End date must be after start date')
+    expect(actual).toEqual('Unmount date must be after mount date')
   })
 })
 

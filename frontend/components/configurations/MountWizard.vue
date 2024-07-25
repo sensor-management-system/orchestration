@@ -677,7 +677,7 @@ export default class MountWizard extends Vue {
             message += ' of configuration'
           }
         }
-        if (error.property === 'beginDate') {
+        if (error.property === 'mountDate') {
           this.beginDateErrorMessage = message
           this.endDateErrorMessage = ''
         } else {

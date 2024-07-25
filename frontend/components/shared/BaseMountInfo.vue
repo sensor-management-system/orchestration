@@ -15,7 +15,7 @@ SPDX-License-Identifier: EUPL-1.2
         cols="4"
         class="font-weight-medium"
       >
-        Begin date:
+        Mount date:
       </v-col>
       <v-col cols="8">
         {{ mountAction.beginDate | ISOToDateTimeString }} <span class="text-caption text--secondary">(UTC)</span>
@@ -26,7 +26,7 @@ SPDX-License-Identifier: EUPL-1.2
         cols="4"
         class="font-weight-medium"
       >
-        End date:
+        Unmount date:
       </v-col>
       <v-col v-if="mountAction.endDate" cols="8">
         {{ mountAction.endDate | ISOToDateTimeString }} <span class="text-caption text--secondary">(UTC)</span>
@@ -111,7 +111,7 @@ SPDX-License-Identifier: EUPL-1.2
         cols="4"
         class="font-weight-medium"
       >
-        Contact:
+        Mount contact:
       </v-col>
       <v-col
         cols="8"
@@ -125,7 +125,7 @@ SPDX-License-Identifier: EUPL-1.2
         cols="4"
         class="font-weight-medium"
       >
-        End contact:
+        Unmount contact:
       </v-col>
       <v-col cols="8">
         {{ mountAction.endContact }}
@@ -138,26 +138,23 @@ SPDX-License-Identifier: EUPL-1.2
         cols="4"
         class="font-weight-medium"
       >
-        Description
+        Mount description:
       </v-col>
       <v-col
         cols="8"
-        class="nowrap-truncate"
-        :title="mountAction.beginDescription.length > 25 ? mountAction.beginDescription : ''"
       >
-        {{ mountAction.beginDescription | shortenRight(25, '...') | orDefault }}
+        <expandable-text :value="mountAction.beginDescription"/>
       </v-col>
     </v-row>
     <v-row v-if="mountAction.endDescription" dense>
       <v-col
         cols="4"
         class="font-weight-medium"
-        :title="mountAction.endDescription.length > 25 ? mountAction.endDescription : ''"
       >
-        End description:
+        Unmount description:
       </v-col>
       <v-col cols="8">
-        {{ mountAction.endDescription | shortenRight(25, '...') | orDefault }}
+        <expandable-text :value="mountAction.endDescription"/>
       </v-col>
     </v-row>
     <v-row
@@ -207,7 +204,12 @@ import { IOffsets } from '@/utils/configurationInterfaces'
 import { ISOToDateTimeString } from '@/utils/dateHelper'
 import { removeTrailingSlash } from '@/utils/urlHelpers'
 
+import ExpandableText from '@/components/shared/ExpandableText.vue'
+
 @Component({
+  components: {
+    ExpandableText
+  },
   filters: {
     ISOToDateTimeString
   }
