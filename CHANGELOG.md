@@ -25,6 +25,7 @@ Added:
 - display scale on maps
 - added validation to numeric fields of device measured quantities
 - added a dragger at the bottom of maps to adjust the size of maps
+- loaddata command can update fields based on some unique criteria
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url

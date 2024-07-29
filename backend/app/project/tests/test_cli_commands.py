@@ -604,6 +604,122 @@ class TestCliCommands(BaseTestCase):
             self.assertEqual(reloaded_tsm_endpoint.name, "BAR")
             self.assertEqual(reloaded_tsm_endpoint.url, "https://bar")
 
+    def test_load_data_update_existing_by_unique_criteria(self):
+        """Ensure we can update existing data without knowing the primary key."""
+        with no_expire():
+            self.assertEqual(0, db.session.query(TsmEndpoint).count())
+            tsm_endpoint = TsmEndpoint(name="foo", url="https://foo")
+            db.session.add(tsm_endpoint)
+            db.session.commit()
+            data = [
+                {
+                    "fields": {
+                        "name": "foo",
+                        "url": "https://bar",
+                    },
+                    "model": "TsmEndpoint",
+                    "unique": ["name"],
+                },
+            ]
+            with tempfile.NamedTemporaryFile(mode="w+t") as temp_file:
+                json.dump(data, temp_file)
+                path = temp_file.name
+                temp_file.flush()
+                runner = CliRunner()
+                result = runner.invoke(
+                    loaddata,
+                    [path],
+                    env={"FLASK_APP": "manage"},
+                )
+            self.assertEqual(result.exit_code, 0)
+
+            self.assertEqual(1, db.session.query(TsmEndpoint).count())
+            reloaded_tsm_endpoint = (
+                db.session.query(TsmEndpoint).filter_by(name="foo").first()
+            )
+            self.assertEqual(reloaded_tsm_endpoint.url, "https://bar")
+
+    def test_load_data_insert_new_by_unique_criteria(self):
+        """Ensure we can insert new data without having a pk."""
+        with no_expire():
+            self.assertEqual(0, db.session.query(TsmEndpoint).count())
+            tsm_endpoint = TsmEndpoint(name="foo", url="https://foo")
+            db.session.add(tsm_endpoint)
+            db.session.commit()
+            data = [
+                {
+                    "fields": {
+                        "name": "bar",
+                        "url": "https://bar",
+                    },
+                    "model": "TsmEndpoint",
+                    "unique": ["name"],
+                },
+            ]
+            with tempfile.NamedTemporaryFile(mode="w+t") as temp_file:
+                json.dump(data, temp_file)
+                path = temp_file.name
+                temp_file.flush()
+                runner = CliRunner()
+                result = runner.invoke(
+                    loaddata,
+                    [path],
+                    env={"FLASK_APP": "manage"},
+                )
+            self.assertEqual(result.exit_code, 0)
+
+            self.assertEqual(2, db.session.query(TsmEndpoint).count())
+            reloaded_tsm_endpoint = (
+                db.session.query(TsmEndpoint).filter_by(name="bar").first()
+            )
+            self.assertEqual(reloaded_tsm_endpoint.url, "https://bar")
+
+    def test_load_data_error_if_unique_criteria_is_not_unique(self):
+        """Ensure don't change anything but raise an error if the unique criteria is not unique."""
+        with no_expire():
+            self.assertEqual(0, db.session.query(TsmEndpoint).count())
+            tsm_endpoint1 = TsmEndpoint(id=1, name="foo", url="https://foo1")
+            db.session.add(tsm_endpoint1)
+            tsm_endpoint2 = TsmEndpoint(id=2, name="foo", url="https://foo2")
+            db.session.add(tsm_endpoint2)
+            db.session.commit()
+            data = [
+                {
+                    "fields": {
+                        "name": "new",
+                        "url": "https://bar",
+                    },
+                    "model": "TsmEndpoint",
+                    "unique": ["name"],
+                },
+                {
+                    "fields": {
+                        "name": "foo",
+                        "url": "https://bar",
+                    },
+                    "model": "TsmEndpoint",
+                    "unique": ["name"],
+                },
+            ]
+            with tempfile.NamedTemporaryFile(mode="w+t") as temp_file:
+                json.dump(data, temp_file)
+                path = temp_file.name
+                temp_file.flush()
+                runner = CliRunner()
+                result = runner.invoke(
+                    loaddata,
+                    [path],
+                    env={"FLASK_APP": "manage"},
+                )
+            self.assertNotEqual(result.exit_code, 0)
+
+            # Nothing has changed.
+            self.assertEqual(2, db.session.query(TsmEndpoint).count())
+            reloaded_tsm_endpoint1 = db.session.get(TsmEndpoint, 1)
+            reloaded_tsm_endpoint2 = db.session.get(TsmEndpoint, 2)
+            self.assertEqual(reloaded_tsm_endpoint1.url, "https://foo1")
+            self.assertEqual(reloaded_tsm_endpoint2.url, "https://foo2")
+
     def test_load_data_empty_data(self):
         """Ensure we can run it without any data in it."""
         with no_expire():
