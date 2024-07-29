@@ -19,59 +19,39 @@ SPDX-License-Identifier: EUPL-1.2
         Select a marker on the map to show information about the location.
       </p>
     </v-alert>
-    <v-card
-      id="map-wrap"
-      :style="{ height: mapHeight + 'px'}"
-      :class="{mapHover: mapHovered, draggerHover: draggerHovered}"
+    <BaseMap
+      ref="map"
+      v-model="mapState"
+      height-storage-key="site-locations"
+      @click="resetSelection"
     >
-      <no-ssr>
-        <l-map
-          id="site-location-map"
-          ref="map"
-          :zoom="zoomLevel"
-          :center="currentPosition"
-          :bounds="bounds"
-          @click="resetSelection"
-          @mouseenter="onMapHoverBegin"
-          @mouseleave="onMapHoverEnd"
-        >
-          <l-tile-layer layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-          <l-polygon
-            v-if="showSitePolygon && polygon"
-            ref="polygon"
-            :lat-lngs="polygon"
-            :color="polylineColor"
-            :fill="true"
-          />
-          <l-marker
-            v-for="locationAction in staticLocationActions"
-            :key="locationAction.id"
-            :lat-lng="location(locationAction)"
-            @click="select(locationAction)"
-          >
-            <l-icon
-              :icon-url="locationAction === selectedLocationAction ? require(`~/assets/marker-icon-red.png`) : require(`~/assets/marker-icon.png`)"
-            />
-          </l-marker>
-          <l-polygon
-            v-for="site in innerSites"
-            :key="site.id"
-            :lat-lngs="polygonOfSite(site)"
-            :color="site === selectedSite ? innerSitePolygonColorSelected : innerSitePolygonColor"
-            :fill-color="site === selectedSite ? innerSitePolygonFillColorSelected : innerSitePolygonFillColor"
-            :fill="true"
-            @click="selectSite(site)"
-          />
-        </l-map>
-      </no-ssr>
-      <div
-        id="rezise-dragger"
-        @mousedown="initResize"
-        @mouseup="stopResize"
-        @mouseenter="onDraggerHoverBegin"
-        @mouseleave="onDraggerHoverEnd"
+      <l-polygon
+        v-if="showSitePolygon && polygon"
+        ref="polygon"
+        :lat-lngs="polygon"
+        :color="polylineColor"
+        :fill="true"
       />
-    </v-card>
+      <l-marker
+        v-for="locationAction in staticLocationActions"
+        :key="locationAction.id"
+        :lat-lng="location(locationAction)"
+        @click="select(locationAction)"
+      >
+        <l-icon
+          :icon-url="locationAction === selectedLocationAction ? require(`~/assets/marker-icon-red.png`) : require(`~/assets/marker-icon.png`)"
+        />
+      </l-marker>
+      <l-polygon
+        v-for="site in innerSites"
+        :key="site.id"
+        :lat-lngs="polygonOfSite(site)"
+        :color="site === selectedSite ? innerSitePolygonColorSelected : innerSitePolygonColor"
+        :fill-color="site === selectedSite ? innerSitePolygonFillColorSelected : innerSitePolygonFillColor"
+        :fill="true"
+        @click="selectSite(site)"
+      />
+    </BaseMap>
     <v-card v-if="selectedLocationAction">
       <v-card-text class="text--primary">
         <v-row>
@@ -165,7 +145,7 @@ SPDX-License-Identifier: EUPL-1.2
 import { Component, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
-import { LatLng, LatLngBounds, latLngBounds } from 'leaflet'
+import { LatLng, latLngBounds } from 'leaflet'
 
 import { Configuration } from '@/models/Configuration'
 import { StaticLocationAction } from '@/models/StaticLocationAction'
@@ -175,6 +155,7 @@ import HintCard from '@/components/HintCard.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { SitesState, LoadSiteAction, LoadSiteConfigurationsAction, SearchSitesAction } from '@/store/sites'
 import { Site } from '@/models/Site'
+import BaseMap, { MapState } from '@/components/shared/BaseMap.vue'
 
 @Component({
   methods: {
@@ -183,6 +164,7 @@ import { Site } from '@/models/Site'
   },
   computed: mapState('sites', ['site', 'siteConfigurations', 'sites']),
   components: {
+    BaseMap,
     HintCard
   }
 })
@@ -193,24 +175,15 @@ export default class SiteLocations extends Vue {
   private innerSitePolygonColorSelected: string = 'red'
   private innerSitePolygonFillColor: string = '#3388ff'
   private innerSitePolygonFillColorSelected: string = '#ff8833'
-  private zoomLevel = 10
   private showSitePolygon = true
   private clickedOnPolygon = false
 
-  private currentPosition: LatLng = new LatLng(-52, -12)
-  private bounds: LatLngBounds = latLngBounds([this.currentPosition])
+  private mapState: MapState = {
+    bounds: latLngBounds([new LatLng(-52, -12)])
+  }
+
   private selectedLocationAction: StaticLocationAction | null = null
   private selectedSite: Site | null = null
-
-  private minHeight: number = 200
-  private maxHeight: number = 800
-  private mapHeight: number = 300
-  private isResizing: Boolean = false
-
-  private mapHovered: Boolean = false
-  private draggerHovered: Boolean = false
-
-  private localStorageMapHeightKey = 'site-locations-map-height'
 
   // vuex definition for typescript check
   loadSite!: LoadSiteAction
@@ -220,20 +193,6 @@ export default class SiteLocations extends Vue {
   siteConfigurations!: SitesState['siteConfigurations']
   setLoading!: SetLoadingAction
   searchSites!: SearchSitesAction
-
-  created () {
-    const storedMapHeight = localStorage.getItem(this.localStorageMapHeightKey)
-    if (storedMapHeight) {
-      this.mapHeight = parseInt(storedMapHeight)
-    }
-    window.addEventListener('mousemove', this.doMapResize)
-    window.addEventListener('mouseup', this.stopResize)
-  }
-
-  destroyed () {
-    window.removeEventListener('mousemove', this.doMapResize)
-    window.removeEventListener('mouseup', this.stopResize)
-  }
 
   async fetch () {
     try {
@@ -249,17 +208,17 @@ export default class SiteLocations extends Vue {
       const locations = this.staticLocationActions.map((x: StaticLocationAction) => this.location(x)).filter(x => x !== null) as LatLng[]
       let boundsSetByData = false
       if (locations) {
-        this.bounds = latLngBounds(locations)
+        this.mapState.bounds = latLngBounds(locations)
         boundsSetByData = true
       }
       for (const innerSite of this.innerSites) {
         const polygonOfSite = this.polygonOfSite(innerSite)
         if (polygonOfSite) {
           if (!boundsSetByData) {
-            this.bounds = latLngBounds(polygonOfSite)
+            this.mapState.bounds = latLngBounds(polygonOfSite)
             boundsSetByData = true
-          } else {
-            this.bounds.extend(latLngBounds(polygonOfSite))
+          } else if (this.mapState.bounds) {
+            this.mapState.bounds.extend(latLngBounds(polygonOfSite))
           }
         }
       }
@@ -334,79 +293,5 @@ export default class SiteLocations extends Vue {
     this.selectedLocationAction = null
     this.clickedOnPolygon = false
   }
-
-  initResize () {
-    this.isResizing = true
-    document.body.style.userSelect = 'none'
-  }
-
-  async doMapResize (event: MouseEvent) {
-    if (!this.isResizing || !this.$refs.map) { return }
-
-    const mapElement = this.$refs.map as Vue & {
-      mapObject: {
-        invalidateSize: () => void;
-      },
-      $el: HTMLElement
-    }
-    const newHeight = event.clientY - mapElement.$el.getBoundingClientRect().top
-
-    if (newHeight >= this.minHeight && newHeight <= this.maxHeight) {
-      this.mapHeight = newHeight
-      await mapElement.mapObject.invalidateSize()
-    }
-  }
-
-  stopResize () {
-    this.isResizing = false
-    document.body.style.userSelect = 'auto'
-    localStorage.setItem(this.localStorageMapHeightKey, String(this.mapHeight))
-  }
-
-  onMapHoverBegin () {
-    this.mapHovered = true
-  }
-
-  onMapHoverEnd () {
-    this.mapHovered = false
-  }
-
-  onDraggerHoverBegin () {
-    this.draggerHovered = true
-  }
-
-  onDraggerHoverEnd () {
-    this.draggerHovered = false
-  }
 }
 </script>
-<style scopen>
-#rezise-dragger {
-  height: 20px;
-  cursor: ns-resize;
-  width: 100%;
-  z-index: 1000;
-  position: relative;
-  bottom: 6px;
-}
-
-#map-wrap {
-  border-bottom: 2px solid transparent;
-  transition: border .3s;
-  padding-bottom: 4px;
-}
-
-#site-location-map {
-  z-index: 0;
-}
-
-#map-wrap.mapHover {
-  border-bottom: 2px solid #bbb;
-  transition: border .3s;
-}
-
-#map-wrap.draggerHover {
-  border-bottom: 2px solid black;
-  transition: border .3s;
-}
-</style>
