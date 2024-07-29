@@ -173,7 +173,7 @@ export class PlatformMountTimelineAction implements IMountTimelineAction<Platfor
   }
 
   get contact (): IContact {
-    return this._mountAction.beginContact
+    return this._mountAction.beginContact!
   }
 
   get mountInfo (): IMountInfo {
@@ -249,7 +249,7 @@ export class DeviceMountTimelineAction implements IMountTimelineAction<DeviceMou
   }
 
   get contact (): IContact {
-    return this._mountAction.beginContact
+    return this._mountAction.beginContact!
   }
 
   get mountInfo (): IMountInfo {

@@ -73,7 +73,7 @@ export class DeviceMountActionSerializer {
         begin_contact: {
           data: {
             type: 'contact',
-            id: deviceMountAction.beginContact.id
+            id: deviceMountAction.beginContact!.id
           }
         },
 
