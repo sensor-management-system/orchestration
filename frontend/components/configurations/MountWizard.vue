@@ -601,7 +601,6 @@ export default class MountWizard extends Vue {
         label: mountInfo.label
       })))
     }
-
     return copyOfTheTree
   }
 

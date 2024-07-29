@@ -68,7 +68,7 @@ export class PlatformMountActionSerializer {
         begin_contact: {
           data: {
             type: 'contact',
-            id: platformMountAction.beginContact.id
+            id: platformMountAction.beginContact!.id
           }
         },
         configuration: {

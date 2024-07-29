@@ -28,7 +28,7 @@ export interface IMountAction {
   z: number | null
   elevationDatumName: string
   elevationDatumUri: string
-  beginContact: IContact
+  beginContact: IContact | null
   endContact: IContact | null
   beginDescription: string
   endDescription: string | null
@@ -58,7 +58,7 @@ export class MountAction implements IMountAction {
   private _z: number | null = null
   private _elevationDatumName: string = ''
   private _elevationDatumUri: string = ''
-  private _beginContact: Contact
+  private _beginContact: Contact | null = null
   private _endContact: Contact | null = null
   private _beginDescription: string = ''
   private _endDescription: string | null = null
@@ -78,7 +78,7 @@ export class MountAction implements IMountAction {
     z: number | null,
     elevationDatumName: string,
     elevationDatumUri: string,
-    beginContact: Contact,
+    beginContact: Contact | null,
     endContact: Contact | null,
     beginDescription: string,
     endDescription: string | null,
@@ -208,11 +208,11 @@ export class MountAction implements IMountAction {
     this._elevationDatumUri = newElevationDatumUri
   }
 
-  get beginContact (): Contact {
+  get beginContact (): Contact | null {
     return this._beginContact
   }
 
-  set beginContact (newContact: Contact) {
+  set beginContact (newContact: Contact | null) {
     this._beginContact = newContact
   }
 
@@ -267,7 +267,7 @@ export class MountAction implements IMountAction {
       otherAction.z,
       otherAction.elevationDatumName,
       otherAction.elevationDatumUri,
-      Contact.createFromObject(otherAction.beginContact),
+      otherAction.beginContact ? Contact.createFromObject(otherAction.beginContact) : null,
       otherAction.endContact ? Contact.createFromObject(otherAction.endContact) : null,
       otherAction.beginDescription,
       otherAction.endDescription,
