@@ -143,7 +143,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-col
         cols="8"
       >
-        <expandable-text :value="mountAction.beginDescription"/>
+        <expandable-text :value="mountAction.beginDescription" />
       </v-col>
     </v-row>
     <v-row v-if="mountAction.endDescription" dense>
@@ -154,7 +154,7 @@ SPDX-License-Identifier: EUPL-1.2
         Unmount description:
       </v-col>
       <v-col cols="8">
-        <expandable-text :value="mountAction.endDescription"/>
+        <expandable-text :value="mountAction.endDescription" />
       </v-col>
     </v-row>
     <v-row
