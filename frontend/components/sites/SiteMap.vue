@@ -11,60 +11,37 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
-    <div
-      id="mapContainer"
-      :style="{ height: mapHeight + 'px'}"
-      :class="{mapHover: mapHovered, draggerHover: draggerHovered}"
+    <BaseMap
+      ref="map"
+      v-model="mapState"
+      height-storage-key="site"
+      @click="addMarker"
+      @ready="onReady"
     >
-      <l-map
-        id="site-map"
-        ref="siteMap"
-        :zoom="zoomLevel"
-        :center="currentPosition"
-        :bounds="bounds"
-        @click="addMarker"
-        @ready="onReady"
-        @locationfound="onLocationFound"
-        @mouseenter="onMapHoverBegin"
-        @mouseleave="onMapHoverEnd"
-      >
-        <l-tile-layer url="https://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-        <l-control-scale position="bottomleft" :imperial="true" :metric="true" :max-width="150" />
-        <template v-if="!readonly">
-          <l-marker
-            v-for="(marker, index) in markers"
-            :key="index"
-            :draggable="!readonly"
-            :lat-lng="marker"
-            @update:latLng="updateMarker($event, index)"
-            @click="removeMarker(index)"
-          />
-        </template>
-        <l-polygon
-          ref="polygon"
-          :lat-lngs="polygon"
-          :color="polylineColor"
-          :fill="true"
+      <template v-if="!readonly">
+        <l-marker
+          v-for="(marker, index) in markers"
+          :key="index"
+          :draggable="!readonly"
+          :lat-lng="marker"
+          @update:latLng="updateMarker($event, index)"
+          @click="removeMarker(index)"
         />
-        <l-polygon
-          :lat-lngs="outer"
-          color="black"
-          dash-array="10"
-          :fill="false"
-          :stroke="true"
-        />
-        <v-geosearch
-          :options="geosearchOptions"
-        />
-      </l-map>
-      <div
-        id="rezise-dragger"
-        @mousedown="initResize"
-        @mouseup="stopResize"
-        @mouseenter="onDraggerHoverBegin"
-        @mouseleave="onDraggerHoverEnd"
+      </template>
+      <l-polygon
+        ref="polygon"
+        :lat-lngs="polygon"
+        :color="polylineColor"
+        :fill="true"
       />
-    </div>
+      <l-polygon
+        :lat-lngs="outer"
+        color="black"
+        dash-array="10"
+        :fill="false"
+        :stroke="true"
+      />
+    </BaseMap>
     <h4>Coordinates (WGS84)</h4>
     <div v-if="markers.length != 0 && markers.length < 3" class="text-subtitle-1 error--text">
       Please draw at least 3 markers.
@@ -114,12 +91,13 @@ SPDX-License-Identifier: EUPL-1.2
 import { Vue, Component, Prop, Watch } from 'nuxt-property-decorator'
 
 import { LMap, LMarker, LTileLayer, LPolygon, LControl } from 'vue2-leaflet'
-import { LatLng, LatLngBounds, latLngBounds, LocationEvent } from 'leaflet'
-import { OpenStreetMapProvider } from 'leaflet-geosearch'
+import { LatLng, latLngBounds, LocationEvent } from 'leaflet'
 import VGeosearch from '@/components/shared/Vue2LeafletGeosearch.vue'
+import BaseMap, { MapState } from '@/components/shared/BaseMap.vue'
 
 @Component({
   components: {
+    BaseMap,
     LMap,
     LTileLayer,
     LMarker,
@@ -144,61 +122,17 @@ export default class SiteMap extends Vue {
     type: Boolean
   }) readonly readonly!: boolean
 
-  private currentPosition: LatLng = new LatLng(52, 12)
-  private zoomLevel = 10
   private markers: LatLng[] = []
   private polygon: LatLng[] = []
   private polylineColor: string = 'green'
-  private bounds: LatLngBounds = latLngBounds([this.currentPosition])
-  private provider = new OpenStreetMapProvider()
 
-  private geosearchOptions = {
-    ref: 'searchControl',
-    provider: this.provider,
-    style: 'button',
-    autoComplete: true,
-    showMarker: false
-  }
-
-  private minHeight: number = 200
-  private maxHeight: number = 800
-  private mapHeight: number = 300
-  private isResizing: Boolean = false
-
-  private mapHovered: Boolean = false
-  private draggerHovered: Boolean = false
-
-  private localStorageMapHeightKey = 'site-map-height'
-
-  created () {
-    // This needs to be in the created hook as the map didn't resize correctly when this was in mounted()
-    const storedMapHeight = localStorage.getItem(this.localStorageMapHeightKey)
-    if (storedMapHeight) {
-      this.mapHeight = parseInt(storedMapHeight)
-    }
+  private mapState: MapState = {
+    bounds: latLngBounds([new LatLng(52, 12)])
   }
 
   mounted () {
-    if (this.location !== null) {
-      this.currentPosition = this.location
-    }
     this.markers = this.value
     this.polygon = this.markers
-
-    window.addEventListener('mousemove', this.doMapResize)
-    window.addEventListener('mouseup', this.stopResize)
-  }
-
-  destroyed () {
-    window.removeEventListener('mousemove', this.doMapResize)
-    window.removeEventListener('mouseup', this.stopResize)
-  }
-
-  get location (): LatLng | null {
-    if (this.value.length > 0) {
-      return new LatLng(52, 10)
-    }
-    return null
   }
 
   removeMarker (index: number) {
@@ -250,63 +184,15 @@ export default class SiteMap extends Vue {
 
   fitPolyline () {
     const bounds = latLngBounds(this.markers)
-    this.bounds = bounds
+    this.mapState.bounds = bounds
   }
 
-  onReady (mapObject: any) {
+  onReady () {
     if (this.value.length > 0) {
       this.fitPolyline()
     } else {
-      mapObject.locate()
+      (this.$refs.map as BaseMap).locate()
     }
-  }
-
-  onLocationFound (location: LocationEvent) {
-    this.currentPosition = location.latlng
-  }
-
-  initResize () {
-    this.isResizing = true
-    document.body.style.userSelect = 'none'
-  }
-
-  async doMapResize (event: MouseEvent) {
-    if (!this.isResizing || !this.$refs.siteMap) { return }
-
-    const mapElement = this.$refs.siteMap as Vue & {
-          mapObject: {
-            invalidateSize: () => void;
-          },
-          $el: HTMLElement
-        }
-    const newHeight = event.clientY - mapElement.$el.getBoundingClientRect().top
-
-    if (newHeight >= this.minHeight && newHeight <= this.maxHeight) {
-      this.mapHeight = newHeight
-      await mapElement.mapObject.invalidateSize()
-    }
-  }
-
-  stopResize () {
-    this.isResizing = false
-    document.body.style.userSelect = 'auto'
-    localStorage.setItem(this.localStorageMapHeightKey, String(this.mapHeight))
-  }
-
-  onMapHoverBegin () {
-    this.mapHovered = true
-  }
-
-  onMapHoverEnd () {
-    this.mapHovered = false
-  }
-
-  onDraggerHoverBegin () {
-    this.draggerHovered = true
-  }
-
-  onDraggerHoverEnd () {
-    this.draggerHovered = false
   }
 
   @Watch('value', { immediate: true })
@@ -316,36 +202,3 @@ export default class SiteMap extends Vue {
   }
 }
 </script>
-
-<style scoped>
-@import '~/assets/leaflet-geosearch@2.6.0.css';
-
-#rezise-dragger {
-  height: 20px;
-  cursor: ns-resize;
-  width: 100%;
-  z-index: 1000;
-  position: relative;
-  bottom: 10px;
-}
-#mapContainer {
-  border-bottom: 2px solid transparent;
-  transition: border .3s;
-  padding-bottom: 4px;
-}
-
-#site-map {
-  z-index: 0;
-}
-
-#mapContainer.mapHover {
-  border-bottom: 2px solid #bbb;
-  transition: border .3s;
-}
-
-#mapContainer.draggerHover {
-  border-bottom: 2px solid black;
-  transition: border .3s;
-}
-
-</style>
