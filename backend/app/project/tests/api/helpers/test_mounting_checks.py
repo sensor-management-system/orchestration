@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -833,6 +833,38 @@ class TestDeviceMountActionValidator(BaseTestCase):
             ]
             for information in expected_information:
                 self.assertIn(information, str_exception)
+
+    def test_validate_update_works_for_child_mount_with_existing_end_date(self):
+        """Ensure we allow to set the end date after the end date of the child."""
+        existing_parent_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        existing_device_mount_action1 = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device1,
+            parent_device=self.device2,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(year=2025, month=1, day=1, tzinfo=pytz.UTC),
+        )
+        db.session.add_all(
+            [
+                existing_parent_mount_action1,
+                existing_device_mount_action1,
+            ]
+        )
+        db.session.commit()
+        payload = {
+            "attributes": {
+                "end_date": "2028-01-01T00:00:00Z",
+            }
+        }
+        DeviceMountActionValidator().validate_update(
+            payload, existing_parent_mount_action1.id
+        )
 
     def test_validate_update_both_parent_and_device(self):
         """Ensure we don't allow to patch so that both parents are set at the same time."""
