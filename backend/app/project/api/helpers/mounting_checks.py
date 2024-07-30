@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -664,7 +664,7 @@ class DeviceMountActionValidator(AbstractMountActionValidator):
                     )
                     # Or is just the time range of the child mount
                     # no longer covered?
-                    or not expected_date_time_range.covers(existing_date_time_range)
+                    or not expected_date_time_range.covers(check_date_time_range)
                 ):
                     return mount_action
         return None

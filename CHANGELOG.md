@@ -44,6 +44,7 @@ Fixed:
 - Updated IDL image, so that github accounts can be used again
 - Fixes a bug in the management of manufacturer model entries
 - Fixed bug when deleting contact in mount wizard step 4 "Add mount information" [MR391](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/391)
+- Bug on validating time span ranges on device mounts with child mounts
 
 ## 1.15.1 - 2024-04-24
 
