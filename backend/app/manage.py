@@ -301,6 +301,34 @@ def loaddata(fixture_file, skip_missing_file, skip_empty_file):
 
     We can update the fields based on the value of the `label` entry.
 
+    Another option is to use references for entries that were previously
+    inserted/updated.
+
+    [
+      {
+        "model": "ManufacturerModel",
+        "unique": ["manufacturer_name", "model"],
+        "fields": {
+          "manufacturer_name": "GFZ",
+          "model": "custom"
+        },
+        "result": "gfz_entry"
+      },
+      {
+        "model": "ExportControl",
+        "unique": ["manufacturer_model"],
+        "references": {
+          "manufacturer_model": "gfz_entry"
+        },
+        "fields": {
+          "dual_use": false
+        }
+      }
+    ]
+
+    result defines the name that we can use to reference the entry later, while
+    references lets us use the concrete value for a field.
+    This way we can set foreign key values.
     """
     from project.api import models
 
@@ -315,45 +343,69 @@ def loaddata(fixture_file, skip_missing_file, skip_empty_file):
     # Read the file
     with path.open() as infile:
         # Only support for json files.
-        entries = json.load(infile)
+        fixture_list_entries = json.load(infile)
     # And put the entries in the database.
-    for entry in entries:
-        model = getattr(models, entry["model"])
+    reference_table = {}
+
+    def set_fields(db_entry, fixture_list_entry):
+        for field_name, value in fixture_list_entry["fields"].items():
+            setattr(db_entry, field_name, value)
+        for field_name, reference_key in fixture_list_entry.get(
+            "references", {}
+        ).items():
+            setattr(db_entry, field_name, reference_table[reference_key])
+
+    for fixture_list_entry in fixture_list_entries:
+        model = getattr(models, fixture_list_entry["model"])
         # If we have a primary key, everything is easy.
-        pk_value = entry.get("pk")
-        unique = entry.get("unique")
+        pk_value = fixture_list_entry.get("pk")
+        unique = fixture_list_entry.get("unique")
+        stored_db_entry = None
         if pk_value:
-            existing_entry = db.session.get(model, pk_value)
-            if existing_entry:
-                for key, value in entry["fields"].items():
-                    setattr(existing_entry, key, value)
-                db.session.add(existing_entry)
+            existing_db_entry = db.session.get(model, pk_value)
+            if existing_db_entry:
+                set_fields(existing_db_entry, fixture_list_entry)
+                db.session.add(existing_db_entry)
+                stored_db_entry = existing_db_entry
             else:
-                new_entry = model(**entry["fields"])
+                new_db_entry = model()
+                set_fields(new_db_entry, fixture_list_entry)
                 # No support for composed primary keys at the moment.
                 pk_field = model.__mapper__.primary_key[0].name
-                setattr(new_entry, pk_field, pk_value)
-                db.session.add(new_entry)
+                setattr(new_db_entry, pk_field, pk_value)
+                db.session.add(new_db_entry)
+                stored_db_entry = new_db_entry
         elif unique:
             # If we don't have the id (because we might don't know), we still want
             # to be able to insert or update based on a unique setting.
             # (So we could overwrite data based on a name attribute).
             query = db.session.query(model)
+
             for key in unique:
-                value = entry["fields"][key]
+                if key in fixture_list_entry["fields"].keys():
+                    value = fixture_list_entry["fields"][key]
+                elif key in fixture_list_entry["references"].keys():
+                    value = reference_table[fixture_list_entry["references"][key]]
                 filter_dict = {key: value}
                 query = query.filter_by(**filter_dict)
-            count_of_existing_entries = query.count()
-            if count_of_existing_entries not in [0, 1]:
-                raise Exception(f"Not unique for {entry}")
-            existing_entry = query.first()
-            if existing_entry:
-                for key, value in entry["fields"].items():
-                    setattr(existing_entry, key, value)
-                db.session.add(existing_entry)
+            count_of_existing_db_entries = query.count()
+            if count_of_existing_db_entries not in [0, 1]:
+                raise Exception(f"Not unique for {fixture_list_entry}")
+            existing_db_entry = query.first()
+            if existing_db_entry:
+                set_fields(existing_db_entry, fixture_list_entry)
+                db.session.add(existing_db_entry)
+                stored_db_entry = existing_db_entry
             else:
-                new_entry = model(**entry["fields"])
-                db.session.add(new_entry)
+                new_db_entry = model()
+                set_fields(new_db_entry, fixture_list_entry)
+                db.session.add(new_db_entry)
+                stored_db_entry = new_db_entry
+
+        if stored_db_entry:
+            if fixture_list_entry.get("result"):
+                reference_table[fixture_list_entry["result"]] = stored_db_entry
+
     db.session.commit()
 
 
