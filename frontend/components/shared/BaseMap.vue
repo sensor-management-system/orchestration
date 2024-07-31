@@ -254,7 +254,7 @@ export default class BaseMap extends Vue {
     this.mapState.center = center
   }
 
-  @Emit('update')
+  @Emit('input')
   @Watch('mapState', { deep: true })
   update () {
     return this.mapState
