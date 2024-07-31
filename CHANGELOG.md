@@ -34,6 +34,7 @@ Changed:
 - Related units are now suggested, but all units are selectable for measured quantities
 - Harmonized field-titles "Begin description" & "End description" of the mount information
 - Improved the validation performance of the "mount information step" when mounting a platform/device on a configuration [MR389](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/389) 
+- improved messages for cases that mount edits can't be done
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces

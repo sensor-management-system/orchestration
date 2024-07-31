@@ -299,7 +299,7 @@ export default class MountActionEditForm extends Vue {
     // validate children
     const error2 = validator.nodeChildrenAreWithinRange(selected)
     if (typeof error2 === 'object') {
-      const message = MountActionValidator.buildErrorMessage(error2) + (error2.op !== MountActionValidationResultOp.EMPTY ? ' of parent' : '')
+      const message = MountActionValidator.buildErrorMessage(error2) + (error2.op === MountActionValidationResultOp.NOT_EMPTY ? ' as child mounts where not unmounted' : ' of child mount')
       if (error2.property === 'mountDate') {
         this.beginDateErrorMessage = message
         this.endDateErrorMessage = ''
