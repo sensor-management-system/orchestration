@@ -31,6 +31,8 @@ from project.api.models import (
     Contact,
     Device,
     DeviceContactRole,
+    ExportControl,
+    ManufacturerModel,
     Platform,
     PlatformContactRole,
     Site,
@@ -719,6 +721,97 @@ class TestCliCommands(BaseTestCase):
             reloaded_tsm_endpoint2 = db.session.get(TsmEndpoint, 2)
             self.assertEqual(reloaded_tsm_endpoint1.url, "https://foo1")
             self.assertEqual(reloaded_tsm_endpoint2.url, "https://foo2")
+
+    def test_load_data_referencing_is_possible(self):
+        """Ensure we can use references between the entries."""
+        with no_expire():
+            self.assertEqual(0, db.session.query(ManufacturerModel).count())
+            self.assertEqual(0, db.session.query(ExportControl).count())
+            existing_manufacturer_model = ManufacturerModel(
+                manufacturer_name="TRUEBENER GmbH", model="SMT100"
+            )
+            db.session.add(existing_manufacturer_model)
+            existing_export_control = ExportControl(
+                manufacturer_model=existing_manufacturer_model, dual_use=False
+            )
+            db.session.add(existing_export_control)
+            db.session.commit()
+            data = [
+                {
+                    "model": "ManufacturerModel",
+                    "unique": ["manufacturer_name", "model"],
+                    "fields": {
+                        "manufacturer_name": "TRUEBENER GmbH",
+                        "model": "SMT100",
+                    },
+                    "result": "truebener_smt_100",
+                },
+                {
+                    "model": "ManufacturerModel",
+                    "unique": ["manufacturer_name", "model"],
+                    "fields": {
+                        "manufacturer_name": "GFZ",
+                        "model": "Custom",
+                    },
+                    "result": "gfz_custom",
+                },
+                {
+                    "model": "ExportControl",
+                    "unique": ["manufacturer_model"],
+                    "fields": {
+                        "dual_use": False,
+                        "internal_note": "no dual use according to manufacturer",
+                    },
+                    "references": {
+                        "manufacturer_model": "truebener_smt_100",
+                    },
+                },
+                {
+                    "model": "ExportControl",
+                    "unique": ["manufacturer_model"],
+                    "fields": {
+                        "internal_note": "Still unknown",
+                    },
+                    "references": {
+                        "manufacturer_model": "gfz_custom",
+                    },
+                },
+            ]
+            with tempfile.NamedTemporaryFile(mode="w+t") as temp_file:
+                json.dump(data, temp_file)
+                path = temp_file.name
+                temp_file.flush()
+                runner = CliRunner()
+                result = runner.invoke(
+                    loaddata,
+                    [path],
+                    env={"FLASK_APP": "manage"},
+                )
+
+            self.assertEqual(result.exit_code, 0)
+
+            reloaded_existing_export_control = (
+                db.session.query(ExportControl)
+                .filter_by(manufacturer_model_id=existing_manufacturer_model.id)
+                .first()
+            )
+
+            self.assertEqual(reloaded_existing_export_control.dual_use, False)
+            self.assertEqual(
+                reloaded_existing_export_control.internal_note,
+                "no dual use according to manufacturer",
+            )
+            reloaded_new_export_control = (
+                db.session.query(ExportControl)
+                .join(ManufacturerModel)
+                .filter(
+                    ManufacturerModel.manufacturer_name == "GFZ",
+                    ManufacturerModel.model == "Custom",
+                )
+                .first()
+            )
+            self.assertEqual(reloaded_new_export_control.dual_use, None)
+            self.assertEqual(reloaded_new_export_control.internal_note, "Still unknown")
 
     def test_load_data_empty_data(self):
         """Ensure we can run it without any data in it."""
