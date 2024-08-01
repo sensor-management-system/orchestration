@@ -6,7 +6,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.16.0 (Unreleased)
+
+## 1.16.1 (Unreleased)
+
+## 1.16.0 - 2024-08-01
 
 Added:
 - added possibility to edit location actions from the actions tab of a configuration
@@ -35,6 +38,7 @@ Changed:
 - Harmonized field-titles "Begin description" & "End description" of the mount information
 - Improved the validation performance of the "mount information step" when mounting a platform/device on a configuration [MR389](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/389) 
 - improved messages for cases that mount edits can't be done
+- Revised README.md and moved institute-specific information to separate directory
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces
