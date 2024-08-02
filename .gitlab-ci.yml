@@ -4,8 +4,10 @@
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 # - Norman Ziegner <norman.ziegner@ufz.de>
+# - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+# - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -272,19 +274,25 @@ test-openapi:
         - .gitlab-ci.yml
 
 
-build-deploy-image-nginx-gfz-staging:
+build-deploy-image-nginx-gfz-fzj-staging:
   stage: build
   extends: .docker_build
   variables:
-    CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
+    CLIENT_ID_GFZ: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
+    CLIENT_ID_FZJ: ${FZJ_STAGING_HIFIS_OIDC_CLIENT_ID}
   script:
     - |
         docker build --tag "$CI_REGISTRY_IMAGE/nginx:gfz-latest" -f docker/build/nginx/gfz/staging/Dockerfile \
-          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID_GFZ \
           --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
           --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
           .
-    - docker push "$CI_REGISTRY_IMAGE/nginx:gfz-latest"
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:fzj-latest" -f docker/build/nginx/fzj/staging/Dockerfile \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID_FZJ \
+          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+          --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
+          .
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/nginx"
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -348,6 +356,31 @@ build-deploy-image-nginx-gfz-prod:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
+build-deploy-image-nginx-fzj-dev:
+  stage: build
+  extends: .docker_build
+  variables:
+    CLIENT_ID: ${FZJ_DEV_HIFIS_OIDC_CLIENT_ID}
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:fzj-${CI_COMMIT_TAG:-dev-latest}" -f docker/build/nginx/fzj/dev/Dockerfile \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+          --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+          .
+    - docker push "$CI_REGISTRY_IMAGE/nginx:fzj-${CI_COMMIT_TAG:-dev-latest}"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
 build-deploy-image-nginx-ufz-staging:
   stage: build
   extends: .docker_build
@@ -363,14 +396,14 @@ build-deploy-image-nginx-ufz-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
-build-deploy-image-backend-gfz-staging:
+build-deploy-image-backend-gfz-fzj-staging:
   stage: build
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" -f backend/Dockerfile \
+        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-${CI_COMMIT_TAG:-staging-latest}" -f backend/Dockerfile \
           backend
-    - docker push "$CI_REGISTRY_IMAGE/backend:gfz-latest"
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/backend"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
@@ -379,6 +412,22 @@ build-deploy-image-backend-gfz-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
+build-deploy-image-backend-fzj-dev:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/backend:fzj-${CI_COMMIT_TAG:-dev-latest}"  -f backend/Dockerfile \
+          backend
+    - docker push "$CI_REGISTRY_IMAGE/backend:fzj-${CI_COMMIT_TAG:-dev-latest}"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+      
 build-deploy-image-backend-gfz-prod:
   stage: build
   extends: .docker_build
@@ -698,6 +747,43 @@ deploy-gfz-sandbox:
     - if: '$GFZ_SANDBOX_HOOK_URL && $CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
+deploy-fzj-staging:
+  stage: deploy
+  environment:
+    name: fzj-staging
+    url: https://sms-staging.ibg3container.ibg.kfa-juelich.de
+  tags:
+    - fzj
+    - staging
+  image: alpine:latest
+  script:
+    - wget -q --post-data "" "$FZJ_STAGING_HOOK_URL"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$FZJ_STAGING_HOOK_URL && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+
+deploy-fzj-dev:
+  stage: deploy
+  environment:
+    name: fzj-dev
+    url: https://sms-dev.ibg3container.ibg.kfa-juelich.de
+  tags:
+    - fzj
+    - dev
+  image: alpine:latest
+  script:
+    - wget -q --post-data "" "$FZJ_DEV_HOOK_URL"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$FZJ_DEV_HOOK_URL && $CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
 
 build-ufz-backend-image-staging:
   stage: build
