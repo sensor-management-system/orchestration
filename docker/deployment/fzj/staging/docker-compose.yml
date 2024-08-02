@@ -1,0 +1,194 @@
+# SPDX-FileCopyrightText: 2021 - 2024
+# - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
+# - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
+# - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+# - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+version : '3.3'
+
+services:
+  smsnginx:
+    image: registry.hzdr.de/hub-terra/sms/orchestration/nginx:fzj-latest
+    restart: unless-stopped
+    ports:
+      - 10443:443
+    volumes:
+      - /etc/ssl/ibg3container_ibg_kfa-juelich_de.pem:/etc/ssl/default.crt:ro
+      - /etc/ssl/private/ibg3container_ibg_kfa-juelich_de.key:/etc/ssl/private/default.key:ro
+      - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
+      - /etc/ssl/ibg3container_ibg_kfa-juelich_de-chain.cer:/etc/ssl/chain.pem:ro
+      - backend-static-files:/usr/share/nginx/html/static/backend:ro
+      - idl-static-files:/usr/share/nginx/html/static/idl:ro
+    networks:
+      - reverseproxy
+      - nginx
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.smsnginx.rule=Host(`sms-staging.ibg3container.ibg.kfa-juelich.de`)"
+      - "traefik.http.routers.smsnginx.entrypoints=websecure"
+      - "traefik.http.services.smsnginx.loadbalancer.server.port=80"
+#     - "traefik.http.services.smsnginx.loadbalancer.server.scheme=https"
+      - "traefik.http.routers.smsnginx.service=smsnginx"
+      - "traefik.http.routers.smsnginx.tls=true"
+      - "traefik.docker.network=reverseproxy"
+
+  idl:
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest
+    restart: unless-stopped
+    ports:
+      - 18000:80 
+    environment:
+      DJANGO_DEBUG: 'false'
+      DJANGO_ALLOWED_HOSTS: 'sms-staging.ibg3container.ibg.kfa-juelich.de idl'
+      DJANGO_BASE_PATH: idl/
+      DJANGO_STATIC_URL: /static/idl/
+      DJANGO_STATIC_ROOT: /static/idl/
+      DJANGO_DB_ENGINE: django.db.backends.postgresql
+      DJANGO_DB_NAME: idl
+      DJANGO_DB_USER: $IDL_DB_USER
+      DJANGO_DB_PASSWORD: $IDL_DB_PASSWORD
+      DJANGO_DB_HOST: idl-db
+      DJANGO_DB_PORT: 5432
+      DJANGO_SECRET_KEY: ${IDL_SECRET_KEY}
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sms-staging.ibg3container.ibg.kfa-juelich.de'
+      IDL_TOKEN: $IDL_TOKEN
+      OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
+      VO_ADMIN_CONVENTIONS: '*:fzj-sms-admin'
+      VO_MEMBER_CONVENTIONS: 'fzj:*,*:fzj-sms-member'
+    volumes:
+      - idl-static-files:/static/idl
+    networks:
+      - nginx
+      - idl-db
+
+  idl-db:
+    image: postgres:12-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: $IDL_DB_PASSWORD
+      POSTGRES_USER: $IDL_DB_USER
+      POSTGRES_DB: idl
+    volumes:
+      - "idl-db-data:/var/lib/postgresql/data"
+    shm_size: 128M
+    networks:
+      - idl-db
+
+  elastic-search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+      - cluster.routing.allocation.disk.threshold_enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - backend
+  
+  minio:
+    image: minio/minio:RELEASE.2021-07-12T02-44-53Z
+    restart: unless-stopped
+    volumes:
+      - minio-data:/data/minio
+    networks:
+      - nginx
+      - backend
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    #      To deactivate the console
+    #      MINIO_BROWSER: "off"
+    command: server /data/minio --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://minio:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  backend-db:
+    image: postgis/postgis:12-3.3-alpine
+    restart: unless-stopped
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_PASSWORD: $BACKEND_DB_PASSWORD
+      POSTGRES_USER: $BACKEND_DB_USER
+      POSTGRES_DB: backend
+    volumes:
+      - "backend-db-data:/var/lib/postgresql/data"
+    shm_size: 128M
+    networks:
+      - backend
+
+  backend:
+    image: registry.hzdr.de/hub-terra/sms/orchestration/backend:fzj-latest
+    restart: unless-stopped
+    ports:
+      - 15000:5000
+    environment:
+      URL_PREFIX: /backend/api/v1
+      STATIC_URL: /static/backend
+      APP_SETTINGS: project.config.ProductionConfig
+      DATABASE_URL: postgresql://${BACKEND_DB_USER}:${BACKEND_DB_PASSWORD}@backend-db:5432/backend
+      OIDC_USERNAME_CLAIM: eduperson_principal_name
+      WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: sms-attachments
+      MINIO_ENDPOINT: minio:9000
+      DOWNLOAD_ENDPOINT: https://sms-staging.ibg3container.ibg.kfa-juelich.de
+      SECRET_KEY: ${BACKEND_SECRET_KEY}
+      ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
+      ELASTICSEARCH_URL: http://elastic-search:9200
+      HTTP_ORIGINS: ${HTTP_ORIGINS}
+      SMS_IDL_TOKEN: $IDL_TOKEN
+      IDL_URL: http://idl:8000/idl/api/idl
+      CV_URL: https://sms-cv.helmholtz.cloud/sms/cv/api/v1
+      SMS_BACKEND_URL: /backend/api/v1
+      PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
+      PKCE_SCOPES: profile openid email eduperson_principal_name
+      INSTITUTE: fzj
+      SMS_FRONTEND_URL: https://sms-staging.ibg3container.ibg.kfa-juelich.de
+      SMS_VERSION: ${SMS_VERSION}
+      B2INST_TOKEN: ${B2INST_TOKEN}
+      B2INST_URL: https://b2inst-test.gwdg.de
+      B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
+      TSMDL_API_URL: https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1
+      TSM_ENDPOINTS: '[{"fields": {"name": "FZJ", "url": "https://decoupling-api.ibg3container.ibg.kfa-juelich.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 3}]'
+      PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+      PID_SERVICE_USER: ${PID_SERVICE_USER}
+      PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
+      PID_PREFIX: 20.500.14372
+      PID_SUFFIX: SMS-Staging
+      CLIENT_ID: ${CLIENT_ID}
+
+    depends_on:
+      - backend-db
+    volumes:
+      - backend-static-files:/usr/src/app/project/static
+    networks:
+      - backend
+      - nginx
+
+volumes:
+  idl-db-data:
+  idl-static-files:
+  elasticsearch-data:
+  minio-data:
+  backend-db-data:
+  backend-static-files:
+networks:
+  nginx:
+  backend:
+  idl-db:
+  reverseproxy:
+    external: true
