@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.16.1 (Unreleased)
+## 1.16.2 (Unreleased)
+
+## 1.16.1 - 2024-08-06
 
 Fixed:
 - favicon can now be loaded for sms instances, which don't run under root path
