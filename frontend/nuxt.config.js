@@ -95,7 +95,7 @@ export default {
 
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: `${process.env.BASE_URL || '/'}favicon.ico` }
     ]
   },
   /*
