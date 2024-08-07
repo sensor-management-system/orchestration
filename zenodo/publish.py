@@ -183,6 +183,9 @@ def main():
         handle.put(repository_url, "SMS-Repository")
         repository_url = "https://hdl.handle.net/20.500.14372/SMS-Repository"
 
+        handle.put("https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/blob/main/README.md", "SMS-Readme")
+        handle.put("https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home", "SMS-Wiki")
+
     zenodo_api = ZenodoApi(base_url=zenodo_url, access_token=zenodo_access_token)
 
     deposition = zenodo_api.create_deposition()
