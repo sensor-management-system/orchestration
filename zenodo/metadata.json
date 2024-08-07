@@ -103,6 +103,7 @@
         }
     ],
     "license": "eupl-1.2",
+    "language": "eng",
     "custom": {
         "code:programmingLanguage": [
             {
