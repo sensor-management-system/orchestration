@@ -13,7 +13,8 @@
             "orcid": "https://orcid.org/0000-0001-8159-3888"
         },
         {
-            "name": "Alhaj Taha, Kotyba"
+            "name": "Alhaj Taha, Kotyba",
+            "affiliation": "Helmholtz Centre for Environmental Research"
         },
         {
             "name": "Kuhnert, Tobias",
@@ -35,17 +36,21 @@
         },
         {
             "name": "Sielaff, Daniel",
+            "affiliation": "Helmholtz Centre for Environmental Research",
             "orcid": "https://orcid.org/0009-0002-8606-9385"
         },
         {
             "name": "Eder, Tim",
+            "affiliation": "Helmholtz Centre for Environmental Research",
             "orcid": "https://orcid.org/0009-0005-1965-931X"
         },
         {
-            "name": "Nendel, Luca Johannes"
+            "name": "Nendel, Luca Johannes",
+            "affiliation": "Helmholtz Centre for Environmental Research"
         },
         {
             "name": "Ziegner, Norman",
+            "affiliation": "Helmholtz Centre for Environmental Research",
             "orcid": "https://orcid.org/0000-0001-7579-216X"
         },
         {
@@ -68,10 +73,12 @@
             "orcid": "https://orcid.org/0000-0003-1252-9107"
         },
         {
-            "name": "Pongratz, Erik"
+            "name": "Pongratz, Erik",
+            "affiliation": "Helmholtz Centre for Environmental Research"
         },
         {
             "name": "Ecker, Dirk",
+            "affiliation": "Forschungszentrum Jülich",
             "orcid": "https://orcid.org/0000-0003-4241-9208"
         },
         {
@@ -91,6 +98,7 @@
         },
         {
             "name": "Rosin, Vivien",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
             "orcid": "https://orcid.org/0009-0003-9261-6696"
         },
         {
@@ -99,6 +107,7 @@
         },
         {
             "name": "Breier, Jannes",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
             "orcid": "https://orcid.org/0000-0002-9055-6904"
         }
     ],
