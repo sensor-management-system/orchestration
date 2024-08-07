@@ -22,36 +22,13 @@
             "orcid": "https://orcid.org/0009-0002-3854-3417"
         },
         {
-            "name": "Hanisch, Marc",
-            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
-            "orcid": "https://orcid.org/0000-0001-5272-4674"
-        },
-        {
-            "name": "Schaldach, Maximilian",
-            "affiliation": "Helmholtz Centre for Environmental Research"
-        },
-        {
-            "name": "Gransee, Florian",
-            "affiliation": "Helmholtz Centre for Environmental Research"
-        },
-        {
-            "name": "Sielaff, Daniel",
+            "name": "Abbrent, Martin",
             "affiliation": "Helmholtz Centre for Environmental Research",
-            "orcid": "https://orcid.org/0009-0002-8606-9385"
+            "orcid": "https://orcid.org/0000-0003-1252-9107"
         },
         {
-            "name": "Eder, Tim",
-            "affiliation": "Helmholtz Centre for Environmental Research",
-            "orcid": "https://orcid.org/0009-0005-1965-931X"
-        },
-        {
-            "name": "Nendel, Luca Johannes",
-            "affiliation": "Helmholtz Centre for Environmental Research"
-        },
-        {
-            "name": "Ziegner, Norman",
-            "affiliation": "Helmholtz Centre for Environmental Research",
-            "orcid": "https://orcid.org/0000-0001-7579-216X"
+            "name": "Becker, Wilhelm",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences"
         },
         {
             "name": "Bohring, Hannes",
@@ -59,22 +36,14 @@
             "orcid": "https://orcid.org/0009-0007-5103-5886"
         },
         {
-            "name": "Moorthy, Rubankumar",
-            "affiliation": "Forschungszentrum Jülich",
-            "orcid": "https://orcid.org/0000-0002-3567-1475"
+            "name": "Breier, Jannes",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
+            "orcid": "https://orcid.org/0000-0002-9055-6904"
         },
         {
-            "name": "Becker, Wilhelm",
-            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences"
-        },
-        {
-            "name": "Abbrent, Martin",
+            "name": "Bumberger, Jan",
             "affiliation": "Helmholtz Centre for Environmental Research",
-            "orcid": "https://orcid.org/0000-0003-1252-9107"
-        },
-        {
-            "name": "Pongratz, Erik",
-            "affiliation": "Helmholtz Centre for Environmental Research"
+            "orcid": "https://orcid.org/0000-0003-3780-8663"
         },
         {
             "name": "Ecker, Dirk",
@@ -82,19 +51,41 @@
             "orcid": "https://orcid.org/0000-0003-4241-9208"
         },
         {
+            "name": "Eder, Tim",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0009-0005-1965-931X"
+        },
+        {
+            "name": "Gransee, Florian",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Hanisch, Marc",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
+            "orcid": "https://orcid.org/0000-0001-5272-4674"
+        },
+        {
             "name": "Lorenz, Christof",
             "affiliation": "Karlsruhe Institute of Technology",
             "orcid": "https://orcid.org/0000-0001-5590-5470"
         },
         {
+            "name": "Moorthy, Rubankumar",
+            "affiliation": "Forschungszentrum Jülich",
+            "orcid": "https://orcid.org/0000-0002-3567-1475"
+        },
+        {
+            "name": "Nendel, Luca Johannes",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Pongratz, Erik",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
             "name": "Remmler, Paul",
             "affiliation": "Helmholtz Centre for Environmental Research",
             "orcid": "https://orcid.org/0000-0001-8900-9009"
-        },
-        {
-            "name": "Schäfer, David",
-            "affiliation": "Helmholtz Centre for Environmental Research",
-            "orcid": "https://orcid.org/0000-0003-4517-6459"
         },
         {
             "name": "Rosin, Vivien",
@@ -106,14 +97,23 @@
             "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences"
         },
         {
-            "name": "Breier, Jannes",
-            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
-            "orcid": "https://orcid.org/0000-0002-9055-6904"
+            "name": "Schaldach, Maximilian",
+            "affiliation": "Helmholtz Centre for Environmental Research"
         },
         {
-            "name": "Bumberger, Jan",
+            "name": "Schäfer, David",
             "affiliation": "Helmholtz Centre for Environmental Research",
-            "orcid": "https://orcid.org/0000-0003-3780-8663"
+            "orcid": "https://orcid.org/0000-0003-4517-6459"
+        },
+        {
+            "name": "Sielaff, Daniel",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0009-0002-8606-9385"
+        },
+        {
+            "name": "Ziegner, Norman",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0000-0001-7579-216X"
         }
     ],
     "license": "eupl-1.2",
