@@ -109,6 +109,11 @@
             "name": "Breier, Jannes",
             "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
             "orcid": "https://orcid.org/0000-0002-9055-6904"
+        },
+        {
+            "name": "Bumberger, Jan",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0000-0003-3780-8663"
         }
     ],
     "license": "eupl-1.2",
