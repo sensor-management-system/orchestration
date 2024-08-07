@@ -20,7 +20,7 @@ SPDX-License-Identifier: EUPL-1.2
           <v-autocomplete
             v-model="contact"
             :items="contacts"
-            label="Contact"
+            label="Unmount contact"
             required
             :disabled="readonly"
             :rules="[rules.required]"
@@ -31,7 +31,7 @@ SPDX-License-Identifier: EUPL-1.2
         <v-col cols="12" md="12">
           <v-textarea
             v-model="description"
-            label="Description"
+            label="Unmount description"
             rows="3"
             :disabled="readonly"
           />

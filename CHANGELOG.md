@@ -6,7 +6,15 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.16.0 (Unreleased)
+
+## 1.16.2 (Unreleased)
+
+## 1.16.1 - 2024-08-06
+
+Fixed:
+- favicon can now be loaded for sms instances, which don't run under root path
+
+## 1.16.0 - 2024-08-01
 
 Added:
 - added possibility to edit location actions from the actions tab of a configuration
@@ -25,12 +33,17 @@ Added:
 - display scale on maps
 - added validation to numeric fields of device measured quantities
 - added a dragger at the bottom of maps to adjust the size of maps
+- loaddata command can update fields based on some unique criteria
 
 Changed:
 - dialog to suggest new manfacturer entries now mentions RORs for the provenance url
 - the licenes of the system is now the EUPL-1.2
 - Renamed tsm linking to data linking
 - Related units are now suggested, but all units are selectable for measured quantities
+- Harmonized field-titles "Begin description" & "End description" of the mount information
+- Improved the validation performance of the "mount information step" when mounting a platform/device on a configuration [MR389](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/389) 
+- improved messages for cases that mount edits can't be done
+- Revised README.md and moved institute-specific information to separate directory
 
 Fixed:
 - SensorML validation for unit name values that contain whitespaces
@@ -40,6 +53,8 @@ Fixed:
 - Added CSRF trusted origins for the IDL component
 - Updated IDL image, so that github accounts can be used again
 - Fixes a bug in the management of manufacturer model entries
+- Fixed bug when deleting contact in mount wizard step 4 "Add mount information" [MR391](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/391)
+- Bug on validating time span ranges on device mounts with child mounts
 
 ## 1.15.1 - 2024-04-24
 

@@ -286,7 +286,7 @@ export default class MountActionEditForm extends Vue {
     const error1 = validator.nodeIsWithinParentRange(selected)
     if (typeof error1 === 'object') {
       const message = MountActionValidator.buildErrorMessage(error1) + (error1.op !== MountActionValidationResultOp.EMPTY ? ' of parent' : '')
-      if (error1.property === 'beginDate') {
+      if (error1.property === 'mountDate') {
         this.beginDateErrorMessage = message
         this.endDateErrorMessage = ''
       } else {
@@ -299,8 +299,8 @@ export default class MountActionEditForm extends Vue {
     // validate children
     const error2 = validator.nodeChildrenAreWithinRange(selected)
     if (typeof error2 === 'object') {
-      const message = MountActionValidator.buildErrorMessage(error2) + (error2.op !== MountActionValidationResultOp.EMPTY ? ' of parent' : '')
-      if (error2.property === 'beginDate') {
+      const message = MountActionValidator.buildErrorMessage(error2) + (error2.op === MountActionValidationResultOp.NOT_EMPTY ? ' as child mounts where not unmounted' : ' of child mount')
+      if (error2.property === 'mountDate') {
         this.beginDateErrorMessage = message
         this.endDateErrorMessage = ''
       } else {
@@ -335,7 +335,7 @@ export default class MountActionEditForm extends Vue {
     const error3 = MountActionValidator.actionAvailableIn(selected.unpack(), availabilitiesWithoutSelectedMountAction)
     if (typeof error3 === 'object') {
       const message = MountActionValidator.buildErrorMessage(error3) + (error3.op !== MountActionValidationResultOp.EMPTY ? ' of next mounting action' : '')
-      if (error3.property === 'beginDate') {
+      if (error3.property === 'mountDate') {
         this.beginDateErrorMessage = message
         this.endDateErrorMessage = ''
       } else {
@@ -351,7 +351,7 @@ export default class MountActionEditForm extends Vue {
       const error4 = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(selected.unpack(), dynamicLocationActions)
       if (typeof error4 === 'object') {
         const message = MountActionValidator.buildErrorMessage(error4) + ' of dynamic location action'
-        if (error4.property === 'beginDate') {
+        if (error4.property === 'mountDate') {
           this.beginDateErrorMessage = message
           this.endDateErrorMessage = ''
         } else {

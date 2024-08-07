@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2022
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Tobias Kuhnert <tobias.kuhnert@ufz.de>
@@ -25,12 +25,13 @@ import { DynamicLocationAction } from '@/models/DynamicLocationAction'
 export enum MountActionValidationResultOp {
   GREATER_THAN = '>',
   LESS_THAN = '<',
-  EMPTY = 'empty'
+  EMPTY = 'empty',
+  NOT_EMPTY = 'not empty'
 }
 
 export interface IMountActionValidationResult {
-  property: keyof Pick<MountAction, 'beginDate' | 'endDate'>
-  targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'>
+  property: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
+  targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
   value: DateTime | null
   targetValue: DateTime | null
   op: MountActionValidationResultOp
@@ -41,8 +42,8 @@ export interface IMountActionValidationResult {
  * @implements IMountActionValidationResult
  */
 export class MountActionValidationResult implements IMountActionValidationResult {
-  public readonly property: keyof Pick<MountAction, 'beginDate' | 'endDate'>
-  public readonly targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'>
+  public readonly property: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
+  public readonly targetProperty: keyof Pick<MountAction, 'beginDate' | 'endDate'> | 'mountDate' | 'unmountDate'
   public readonly value: DateTime | null
   public readonly targetValue: DateTime | null
   public readonly op: MountActionValidationResultOp
@@ -81,6 +82,9 @@ export class MountActionValidator {
     if (error.op === op.EMPTY) {
       return toWords(error.property) + ' must not be empty'
     }
+    if (error.op === op.NOT_EMPTY) {
+      return toWords(error.property) + ' must be empty'
+    }
     if (error.op === op.GREATER_THAN) {
       return toWords(error.property) + ' (' + toDateString(error.value) + ')' + ' must be before ' + toWords(error.targetProperty) + ' (' + toDateString(error.targetValue) + ')'
     }
@@ -112,54 +116,109 @@ export class MountActionValidator {
    * @param {MountAction} otherAction - an action to validate against
    * @returns {boolean | IMountActionValidationResult} returns `false` if the timeranges do not intersect, otherwise an error object
    */
-  public static actionConflictsWith (action: MountAction, otherAction: MountAction): boolean | IMountActionValidationResult {
+  public static actionConflictsWith (action: MountAction, otherAction: MountAction, perspective: 'child' | 'parent' = 'child'): boolean | IMountActionValidationResult {
     if (!(action.beginDate >= otherAction.beginDate)) {
-      return new MountActionValidationResult({
-        property: 'beginDate',
-        targetProperty: 'beginDate',
-        value: action.beginDate,
-        targetValue: otherAction.beginDate,
-        op: MountActionValidationResultOp.LESS_THAN
-      })
+      if (perspective === 'child') {
+        return new MountActionValidationResult({
+          property: 'mountDate',
+          targetProperty: 'mountDate',
+          value: action.beginDate,
+          targetValue: otherAction.beginDate,
+          op: MountActionValidationResultOp.LESS_THAN
+        })
+      }
+      if (perspective === 'parent') {
+        return new MountActionValidationResult({
+          property: 'mountDate',
+          targetProperty: 'mountDate',
+          value: otherAction.beginDate,
+          targetValue: action.beginDate,
+          op: MountActionValidationResultOp.GREATER_THAN
+        })
+      }
     }
     if (!otherAction.endDate) {
       return false
     }
     if (!(action.beginDate <= otherAction.endDate)) {
-      return new MountActionValidationResult({
-        property: 'beginDate',
-        targetProperty: 'endDate',
-        value: action.beginDate,
-        targetValue: otherAction.endDate,
-        op: MountActionValidationResultOp.GREATER_THAN
-      })
+      if (perspective === 'child') {
+        return new MountActionValidationResult({
+          property: 'mountDate',
+          targetProperty: 'unmountDate',
+          value: action.beginDate,
+          targetValue: otherAction.endDate,
+          op: MountActionValidationResultOp.GREATER_THAN
+        })
+      }
+      if (perspective === 'parent') {
+        return new MountActionValidationResult({
+          property: 'unmountDate',
+          targetProperty: 'mountDate',
+          value: otherAction.endDate,
+          targetValue: action.beginDate,
+          op: MountActionValidationResultOp.LESS_THAN
+        })
+      }
     }
     if (action.endDate && !(action.endDate >= otherAction.beginDate)) {
-      return new MountActionValidationResult({
-        property: 'endDate',
-        targetProperty: 'beginDate',
-        value: action.endDate,
-        targetValue: otherAction.beginDate,
-        op: MountActionValidationResultOp.LESS_THAN
-      })
+      if (perspective === 'child') {
+        return new MountActionValidationResult({
+          property: 'unmountDate',
+          targetProperty: 'mountDate',
+          value: action.endDate,
+          targetValue: otherAction.beginDate,
+          op: MountActionValidationResultOp.LESS_THAN
+        })
+      }
+      if (perspective === 'parent') {
+        return new MountActionValidationResult({
+          property: 'mountDate',
+          targetProperty: 'unmountDate',
+          value: otherAction.beginDate,
+          targetValue: action.endDate,
+          op: MountActionValidationResultOp.GREATER_THAN
+        })
+      }
     }
     if (action.endDate && !(action.endDate <= otherAction.endDate)) {
-      return new MountActionValidationResult({
-        property: 'endDate',
-        targetProperty: 'endDate',
-        value: action.endDate,
-        targetValue: otherAction.endDate,
-        op: MountActionValidationResultOp.GREATER_THAN
-      })
+      if (perspective === 'child') {
+        return new MountActionValidationResult({
+          property: 'unmountDate',
+          targetProperty: 'unmountDate',
+          value: action.endDate,
+          targetValue: otherAction.endDate,
+          op: MountActionValidationResultOp.GREATER_THAN
+        })
+      }
+      if (perspective === 'parent') {
+        return new MountActionValidationResult({
+          property: 'unmountDate',
+          targetProperty: 'unmountDate',
+          value: otherAction.endDate,
+          targetValue: action.endDate,
+          op: MountActionValidationResultOp.LESS_THAN
+        })
+      }
     }
     if (!action.endDate) {
-      return new MountActionValidationResult({
-        property: 'endDate',
-        targetProperty: 'endDate',
-        value: action.endDate,
-        targetValue: otherAction.endDate,
-        op: MountActionValidationResultOp.EMPTY
-      })
+      if (perspective === 'child') {
+        return new MountActionValidationResult({
+          property: 'unmountDate',
+          targetProperty: 'unmountDate',
+          value: action.endDate,
+          targetValue: otherAction.endDate,
+          op: MountActionValidationResultOp.EMPTY
+        })
+      }
+      if (perspective === 'parent') {
+        return new MountActionValidationResult({
+          property: 'unmountDate',
+          targetProperty: 'unmountDate',
+          value: otherAction.endDate,
+          targetValue: action.endDate,
+          op: MountActionValidationResultOp.NOT_EMPTY
+        })
+      }
     }
     return false
   }
@@ -176,7 +235,7 @@ export class MountActionValidator {
    */
   public static actionConflictsWithMultiple (action: MountAction, otherActions: MountAction[]): boolean | MountActionValidationResult {
     for (const otherAction of otherActions) {
-      const result = MountActionValidator.actionConflictsWith(otherAction, action)
+      const result = MountActionValidator.actionConflictsWith(otherAction, action, 'parent')
       if (result !== false) {
         return result // we can stop with the first negative test
       }
@@ -201,8 +260,8 @@ export class MountActionValidator {
       // ^ begin
       if (action.beginDate && !action.endDate && action.beginDate < availability.beginDate) {
         return new MountActionValidationResult({
-          property: 'endDate',
-          targetProperty: 'beginDate',
+          property: 'unmountDate',
+          targetProperty: 'mountDate',
           value: action.endDate,
           targetValue: availability.beginDate,
           op: MountActionValidationResultOp.EMPTY
@@ -213,8 +272,8 @@ export class MountActionValidator {
       //      ^ begin
       if (action.beginDate >= availability.beginDate && (!availability.endDate || action.beginDate <= availability.endDate)) {
         return new MountActionValidationResult({
-          property: 'beginDate',
-          targetProperty: 'beginDate',
+          property: 'mountDate',
+          targetProperty: 'mountDate',
           value: action.beginDate,
           targetValue: availability.beginDate,
           op: MountActionValidationResultOp.GREATER_THAN
@@ -225,8 +284,8 @@ export class MountActionValidator {
       //          ^ end
       if (action.endDate && action.endDate >= availability.beginDate && (!availability.endDate || action.endDate <= availability.endDate)) {
         return new MountActionValidationResult({
-          property: 'endDate',
-          targetProperty: 'beginDate',
+          property: 'unmountDate',
+          targetProperty: 'mountDate',
           value: action.endDate,
           targetValue: availability.beginDate,
           op: MountActionValidationResultOp.GREATER_THAN
@@ -237,8 +296,8 @@ export class MountActionValidator {
       // ^ begin       ^ end
       if (action.beginDate < availability.beginDate && action.endDate && availability.endDate && action.endDate > availability.endDate) {
         return new MountActionValidationResult({
-          property: 'endDate',
-          targetProperty: 'endDate',
+          property: 'unmountDate',
+          targetProperty: 'unmountDate',
           value: action.endDate,
           targetValue: availability.endDate,
           op: MountActionValidationResultOp.GREATER_THAN
@@ -307,7 +366,7 @@ export class MountActionValidator {
     // the time range of the dynamic location action must be within the time range of the mount action
     if (!(deviceMountAction.beginDate <= dynamicLocationAction.beginDate)) {
       return new MountActionValidationResult({
-        property: 'beginDate',
+        property: 'mountDate',
         targetProperty: 'beginDate',
         value: deviceMountAction.beginDate,
         targetValue: dynamicLocationAction.beginDate,
@@ -316,7 +375,7 @@ export class MountActionValidator {
     }
     if (!(deviceMountAction.endDate && (!dynamicLocationAction.endDate || deviceMountAction.endDate >= dynamicLocationAction.endDate))) {
       return new MountActionValidationResult({
-        property: 'endDate',
+        property: 'unmountDate',
         targetProperty: 'endDate',
         value: deviceMountAction.endDate,
         targetValue: dynamicLocationAction.endDate ? dynamicLocationAction.endDate : null,
@@ -325,7 +384,7 @@ export class MountActionValidator {
     }
     if (deviceMountAction.endDate && !dynamicLocationAction.endDate) {
       return new MountActionValidationResult({
-        property: 'endDate',
+        property: 'unmountDate',
         targetProperty: 'endDate',
         value: deviceMountAction.endDate,
         targetValue: null,

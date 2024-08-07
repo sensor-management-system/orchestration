@@ -12,7 +12,7 @@
 
 import { DateTime } from 'luxon'
 
-import { MountActionValidationResult, MountActionValidator } from '@/utils/MountActionValidator'
+import { MountActionValidationResult, MountActionValidationResultOp, MountActionValidator } from '@/utils/MountActionValidator'
 
 import { PlatformMountAction } from '@/models/PlatformMountAction'
 import { Platform } from '@/models/Platform'
@@ -73,7 +73,22 @@ describe('#actionConflictsWith', () => {
     )
 
     // we expect an error
-    expect(MountActionValidator.actionConflictsWith(mountAction, parentAction)).toBeInstanceOf(MountActionValidationResult)
+    const resultChildPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction)
+    expect(resultChildPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultChildPerspective).toHaveProperty('property', 'mountDate')
+    expect(resultChildPerspective).toHaveProperty('targetProperty', 'mountDate')
+    expect(resultChildPerspective).toHaveProperty('op', MountActionValidationResultOp.LESS_THAN)
+    expect(resultChildPerspective).toHaveProperty('value', mountAction.beginDate)
+    expect(resultChildPerspective).toHaveProperty('targetValue', parentAction.beginDate)
+
+    const resultParentPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction, 'parent')
+    expect(resultParentPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultParentPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultParentPerspective).toHaveProperty('property', 'mountDate')
+    expect(resultParentPerspective).toHaveProperty('targetProperty', 'mountDate')
+    expect(resultParentPerspective).toHaveProperty('op', MountActionValidationResultOp.GREATER_THAN)
+    expect(resultParentPerspective).toHaveProperty('value', parentAction.beginDate)
+    expect(resultParentPerspective).toHaveProperty('targetValue', mountAction.beginDate)
   })
   it('should return an error if start date is after the end date of the parent', () => {
     const parentPlatform = new Platform()
@@ -120,7 +135,21 @@ describe('#actionConflictsWith', () => {
     )
 
     // we expect an error
-    expect(MountActionValidator.actionConflictsWith(mountAction, parentAction)).toBeInstanceOf(MountActionValidationResult)
+    const resultChildPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction)
+    expect(resultChildPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultChildPerspective).toHaveProperty('property', 'mountDate')
+    expect(resultChildPerspective).toHaveProperty('targetProperty', 'unmountDate')
+    expect(resultChildPerspective).toHaveProperty('op', MountActionValidationResultOp.GREATER_THAN)
+    expect(resultChildPerspective).toHaveProperty('value', mountAction.beginDate)
+    expect(resultChildPerspective).toHaveProperty('targetValue', parentAction.endDate)
+
+    const resultParentPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction, 'parent')
+    expect(resultParentPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultParentPerspective).toHaveProperty('property', 'unmountDate')
+    expect(resultParentPerspective).toHaveProperty('targetProperty', 'mountDate')
+    expect(resultParentPerspective).toHaveProperty('op', MountActionValidationResultOp.LESS_THAN)
+    expect(resultParentPerspective).toHaveProperty('value', parentAction.endDate)
+    expect(resultParentPerspective).toHaveProperty('targetValue', mountAction.beginDate)
   })
   it('should return an error if end date is before the start date of the parent', () => {
     const parentPlatform = new Platform()
@@ -167,7 +196,23 @@ describe('#actionConflictsWith', () => {
     )
 
     // we expect an error
-    expect(MountActionValidator.actionConflictsWith(mountAction, parentAction)).toBeInstanceOf(MountActionValidationResult)
+    const resultChildPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction)
+    expect(resultChildPerspective).toBeInstanceOf(MountActionValidationResult)
+    // As the mount of the child is before the begin of the parent, we
+    // have the error message already for the mount.
+    expect(resultChildPerspective).toHaveProperty('property', 'mountDate')
+    expect(resultChildPerspective).toHaveProperty('targetProperty', 'mountDate')
+    expect(resultChildPerspective).toHaveProperty('op', MountActionValidationResultOp.LESS_THAN)
+    expect(resultChildPerspective).toHaveProperty('value', mountAction.beginDate)
+    expect(resultChildPerspective).toHaveProperty('targetValue', parentAction.beginDate)
+
+    const resultParentPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction, 'parent')
+    expect(resultParentPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultParentPerspective).toHaveProperty('property', 'mountDate')
+    expect(resultParentPerspective).toHaveProperty('targetProperty', 'mountDate')
+    expect(resultParentPerspective).toHaveProperty('op', MountActionValidationResultOp.GREATER_THAN)
+    expect(resultParentPerspective).toHaveProperty('value', parentAction.beginDate)
+    expect(resultParentPerspective).toHaveProperty('targetValue', mountAction.beginDate)
   })
   it('should return an error if end date is after the end date of parent', () => {
     const parentPlatform = new Platform()
@@ -214,7 +259,21 @@ describe('#actionConflictsWith', () => {
     )
 
     // we expect an error
-    expect(MountActionValidator.actionConflictsWith(mountAction, parentAction)).toBeInstanceOf(MountActionValidationResult)
+    const resultChildPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction)
+    expect(resultChildPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultChildPerspective).toHaveProperty('property', 'unmountDate')
+    expect(resultChildPerspective).toHaveProperty('targetProperty', 'unmountDate')
+    expect(resultChildPerspective).toHaveProperty('op', MountActionValidationResultOp.GREATER_THAN)
+    expect(resultChildPerspective).toHaveProperty('value', mountAction.endDate)
+    expect(resultChildPerspective).toHaveProperty('targetValue', parentAction.endDate)
+
+    const resultParentPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction, 'parent')
+    expect(resultParentPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultParentPerspective).toHaveProperty('property', 'unmountDate')
+    expect(resultParentPerspective).toHaveProperty('targetProperty', 'unmountDate')
+    expect(resultParentPerspective).toHaveProperty('op', MountActionValidationResultOp.LESS_THAN)
+    expect(resultParentPerspective).toHaveProperty('value', parentAction.endDate)
+    expect(resultParentPerspective).toHaveProperty('targetValue', mountAction.endDate)
   })
   it('should return an error if open end but parent has an end date', () => {
     const parentPlatform = new Platform()
@@ -261,7 +320,21 @@ describe('#actionConflictsWith', () => {
     )
 
     // we expect an error
-    expect(MountActionValidator.actionConflictsWith(mountAction, parentAction)).toBeInstanceOf(MountActionValidationResult)
+    const resultChildPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction)
+    expect(resultChildPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultChildPerspective).toHaveProperty('property', 'unmountDate')
+    expect(resultChildPerspective).toHaveProperty('targetProperty', 'unmountDate')
+    expect(resultChildPerspective).toHaveProperty('op', MountActionValidationResultOp.EMPTY)
+    expect(resultChildPerspective).toHaveProperty('value', mountAction.endDate)
+    expect(resultChildPerspective).toHaveProperty('targetValue', parentAction.endDate)
+
+    const resultParentPerspective = MountActionValidator.actionConflictsWith(mountAction, parentAction, 'parent')
+    expect(resultParentPerspective).toBeInstanceOf(MountActionValidationResult)
+    expect(resultParentPerspective).toHaveProperty('property', 'unmountDate')
+    expect(resultParentPerspective).toHaveProperty('targetProperty', 'unmountDate')
+    expect(resultParentPerspective).toHaveProperty('op', MountActionValidationResultOp.NOT_EMPTY)
+    expect(resultParentPerspective).toHaveProperty('value', parentAction.endDate)
+    expect(resultParentPerspective).toHaveProperty('targetValue', mountAction.endDate)
   })
   it('should not return an error if time range is in parent time range', () => {
     const parentPlatform = new Platform()
@@ -402,7 +475,13 @@ describe('#actionConflictsWithMultiple', () => {
     )
 
     // we expect an error
-    expect(MountActionValidator.actionConflictsWithMultiple(parentAction, mountActions)).toBeInstanceOf(MountActionValidationResult)
+    const result = MountActionValidator.actionConflictsWithMultiple(parentAction, mountActions)
+    expect(result).toBeInstanceOf(MountActionValidationResult)
+    expect(result).toHaveProperty('property', 'mountDate')
+    expect(result).toHaveProperty('targetProperty', 'mountDate')
+    expect(result).toHaveProperty('op', MountActionValidationResultOp.GREATER_THAN)
+    expect(result).toHaveProperty('value', parentAction.beginDate)
+    expect(result).toHaveProperty('targetValue', mountActions[1].beginDate)
   })
   it('should not return an error if all actions are within the parent time range', () => {
     const parentPlatform = new Platform()
@@ -553,7 +632,13 @@ describe('#nodeIsWithinParentRange', () => {
     const validator = new MountActionValidator(tree)
 
     // we expect an error
-    expect(validator.nodeIsWithinParentRange(node)).toBeInstanceOf(MountActionValidationResult)
+    const result = validator.nodeIsWithinParentRange(node)
+    expect(result).toBeInstanceOf(MountActionValidationResult)
+    expect(result).toHaveProperty('property', 'mountDate')
+    expect(result).toHaveProperty('targetProperty', 'mountDate')
+    expect(result).toHaveProperty('op', MountActionValidationResultOp.LESS_THAN)
+    expect(result).toHaveProperty('value', mountAction.beginDate)
+    expect(result).toHaveProperty('targetValue', parentAction.beginDate)
   })
   it('should return true if the timerange of a node is within the timerange of its parent node', () => {
     const parentPlatform = new Platform()
@@ -695,8 +780,21 @@ describe('#nodeChildrenAreWithinRange', () => {
     const validator = new MountActionValidator(tree)
 
     // we expect an error no matter what level the faulty child is on
-    expect(validator.nodeChildrenAreWithinRange(parentNode)).toBeInstanceOf(MountActionValidationResult)
-    expect(validator.nodeChildrenAreWithinRange(node)).toBeInstanceOf(MountActionValidationResult)
+    const resultForParentNode = validator.nodeChildrenAreWithinRange(parentNode)
+    expect(resultForParentNode).toBeInstanceOf(MountActionValidationResult)
+    expect(resultForParentNode).toHaveProperty('property', 'mountDate')
+    expect(resultForParentNode).toHaveProperty('targetProperty', 'mountDate')
+    expect(resultForParentNode).toHaveProperty('op', MountActionValidationResultOp.GREATER_THAN)
+    expect(resultForParentNode).toHaveProperty('value', parentAction.beginDate)
+    expect(resultForParentNode).toHaveProperty('targetValue', anotherMountAction.beginDate)
+
+    const resultForNode = validator.nodeChildrenAreWithinRange(node)
+    expect(resultForNode).toBeInstanceOf(MountActionValidationResult)
+    expect(resultForNode).toHaveProperty('property', 'mountDate')
+    expect(resultForNode).toHaveProperty('targetProperty', 'mountDate')
+    expect(resultForNode).toHaveProperty('op', MountActionValidationResultOp.GREATER_THAN)
+    expect(resultForNode).toHaveProperty('value', mountAction.beginDate)
+    expect(resultForNode).toHaveProperty('targetValue', anotherMountAction.beginDate)
   })
   it('should return true if the timeranges of all children of a node are within the timerange of this node', () => {
     const parentPlatform = new Platform()

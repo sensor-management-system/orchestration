@@ -143,8 +143,8 @@ SPDX-License-Identifier: EUPL-1.2
       </v-stepper-content>
 
       <v-stepper-step
+        :rules="[() => isMountInformationStepValid]"
         :editable="selectedDevices.length > 0 || selectedPlatforms.length > 0"
-        :rules="[()=>validateAllForms()]"
         :complete="platformsToMount.length > 0 || devicesToMount.length > 0"
         step="4"
       >
@@ -158,30 +158,25 @@ SPDX-License-Identifier: EUPL-1.2
             v-model="devicesToMount"
             prefix="devices-mount-info"
             :parent-offsets="parentOffsets"
-            @input="validateAllForms"
           />
           <mount-wizard-mount-form
             ref="mountActionMountPlatformsForm"
             v-model="platformsToMount"
             prefix="platforms-mount-info"
             :parent-offsets="parentOffsets"
-            @input="validateAllForms"
           />
           <v-row class="mb-6">
             <v-btn
               color="primary"
-              :disabled="!validateAllForms()"
-              @click="step++"
+              @click="validateMountInformationStep"
             >
               Continue
             </v-btn>
           </v-row>
         </v-container>
       </v-stepper-content>
-
       <v-stepper-step
-        :editable="validateAllForms() && (devicesToMount.length > 0 || platformsToMount.length > 0)"
-        :rules="[() => validateAllForms() && (devicesToMount.length > 0 || platformsToMount.length > 0)]"
+        :editable="isSubmitStepEditable"
         step="5"
       >
         Submit
@@ -307,6 +302,9 @@ export default class MountWizard extends Vue {
   private endDateErrorMessage: string = ''
 
   private parentOffsets: IOffsets = { offsetX: 0, offsetY: 0, offsetZ: 0 }
+
+  private isMountInformationStepValid = true
+  private hasMountInformationStepBeenValidated = false
 
   // vuex definition for typescript check
   contacts!: ContactsState['contacts']
@@ -603,8 +601,15 @@ export default class MountWizard extends Vue {
         label: mountInfo.label
       })))
     }
-
     return copyOfTheTree
+  }
+
+  validateMountInformationStep () {
+    this.isMountInformationStepValid = this.validateAllForms()
+    this.hasMountInformationStepBeenValidated = true
+    if (this.isMountInformationStepValid) {
+      this.step++
+    }
   }
 
   validateAllForms (): boolean {
@@ -677,7 +682,7 @@ export default class MountWizard extends Vue {
             message += ' of configuration'
           }
         }
-        if (error.property === 'beginDate') {
+        if (error.property === 'mountDate') {
           this.beginDateErrorMessage = message
           this.endDateErrorMessage = ''
         } else {
@@ -736,6 +741,10 @@ export default class MountWizard extends Vue {
       }
     }
     return null
+  }
+
+  get isSubmitStepEditable () {
+    return (this.hasMountInformationStepBeenValidated && this.isMountInformationStepValid) && (this.devicesToMount.length > 0 || this.platformsToMount.length > 0)
   }
 
   clearSelection () {
