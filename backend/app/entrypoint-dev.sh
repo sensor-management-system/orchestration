@@ -28,7 +28,7 @@ pip install --no-cache-dir -r requirements.txt
 python manage.py db upgrade
 
 # create and load TSM endpoint fixture
-if [ ! -z ${TSM_ENDPOINTS+x} ]; then
+if [ ! -z ${TSM_ENDPOINTS} ]; then
     echo $TSM_ENDPOINTS > /tmp/tsm_endpoint_fixture.json
     python manage.py loaddata /tmp/tsm_endpoint_fixture.json --skip-empty-file
 fi

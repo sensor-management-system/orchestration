@@ -23,7 +23,7 @@ WORKERS=$(( 2 * $CPUS + 1 ))
 python3 manage.py db upgrade
 
 # create and load TSM endpoint fixture
-if [ ! -z ${TSM_ENDPOINTS+x} ]; then
+if [ ! -z ${TSM_ENDPOINTS} ]; then
     echo $TSM_ENDPOINTS > /tmp/tsm_endpoint_fixture.json
     python3 manage.py loaddata /tmp/tsm_endpoint_fixture.json
 fi

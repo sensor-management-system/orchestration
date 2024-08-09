@@ -337,7 +337,9 @@ def loaddata(fixture_file, skip_missing_file, skip_empty_file):
     # Same fast tests to ensure we can skip loading the data.
     if skip_missing_file and not path.exists():
         return
-    if skip_empty_file and path.stat().st_size == 0:
+    # It the file is just touched, then it is completely empty.
+    # Or there might be just a new line.
+    if skip_empty_file and path.stat().st_size in [0, 1]:
         return
 
     # Read the file
