@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.16.2 (Unreleased)
 
+Fixed:
+- loaddata command is now more robust according to files with just a new line
+
 ## 1.16.1 - 2024-08-06
 
 Fixed:
