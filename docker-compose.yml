@@ -36,8 +36,6 @@ services:
     working_dir: /usr/src/app
     volumes:
       - './backend/app:/usr/src/app'
-    ports:
-      - "5000:5000"
     environment:
       SMS_VERSION: ${SMS_VERSION:-develop}
       FLASK_DEBUG: ${FLASK_DEBUG:-1}
@@ -173,7 +171,7 @@ services:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw
     command: >
-      bash -c "npm install
+      bash -c "npm ci
       && npm run dev"
 
   minio:
