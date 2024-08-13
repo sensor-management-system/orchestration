@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Fixed:
 - loaddata command is now more robust according to files with just a new line
+- startup for M2 Mac OS with docker desktop was improved
 
 ## 1.16.1 - 2024-08-06
 
