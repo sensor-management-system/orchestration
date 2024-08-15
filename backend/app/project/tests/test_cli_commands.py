@@ -875,6 +875,22 @@ class TestCliCommands(BaseTestCase):
                 )
                 self.assertEqual(result.exit_code, 0)
 
+    def test_load_data_empty_file_ignore_just_new_line_terminated(self):
+        """Ensure we can ignore it if the file has just the new line termination."""
+        with no_expire():
+            self.assertEqual(0, db.session.query(TsmEndpoint).count())
+            with tempfile.NamedTemporaryFile(mode="w+t") as temp_file:
+                path = temp_file.name
+                with open(path, "w") as outfile:
+                    outfile.write("\n")
+                runner = CliRunner()
+                result = runner.invoke(
+                    loaddata,
+                    [path, "--skip-empty-file"],
+                    env={"FLASK_APP": "manage"},
+                )
+                self.assertEqual(result.exit_code, 0)
+
     def test_load_data_missing_file_ignore(self):
         """Ensure we can ignore it if the file doesn't exists."""
         with no_expire():

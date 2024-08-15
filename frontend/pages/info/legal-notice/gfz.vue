@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -30,7 +30,7 @@ SPDX-License-Identifier: EUPL-1.2
         Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ<br>
         Telegrafenberg<br>
         14473 Potsdam, Germany<br>
-        Tel.: +49 331 288 0<br>
+        Tel.: +49 331 6264 0<br>
         Website: <a href="https://www.gfz-potsdam.de" target="_blank">www.gfz-potsdam.de</a>
       </p>
     </section>
@@ -84,9 +84,7 @@ SPDX-License-Identifier: EUPL-1.2
       </h2>
       <p>
         The following third-party software is used within the scope of this web application <br>
-        <NuxtLink to="/info/licenses/">
-          Licenses
-        </NuxtLink>
+        <NuxtLink to="/info/licenses/">Licenses</NuxtLink>.
       </p>
     </section>
     <section class="mb-6">
