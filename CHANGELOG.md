@@ -13,6 +13,9 @@ Fixed:
 - loaddata command is now more robust according to files with just a new line
 - startup for M2 Mac OS with docker desktop was improved
 
+Changed:
+- Cleanup of unused docker images on GFZ servers is now done via `docker image prune`
+
 ## 1.16.1 - 2024-08-06
 
 Fixed:
