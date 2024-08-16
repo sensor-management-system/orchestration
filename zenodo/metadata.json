@@ -114,6 +114,15 @@
             "name": "Ziegner, Norman",
             "affiliation": "Helmholtz Centre for Environmental Research",
             "orcid": "https://orcid.org/0000-0001-7579-216X"
+        },
+        {
+            "name": "Ertl, Benjamin",
+            "affiliation": "Karlsruhe Institute of Technology"
+        },
+        {
+            "name": "Loup, Ulrich",
+            "affiliation": "Forschungszentrum Jülich",
+            "orcid": "https://orcid.org/0009-0005-1370-6226"
         }
     ],
     "license": "eupl-1.2",
