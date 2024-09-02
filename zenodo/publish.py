@@ -64,6 +64,15 @@ class ZenodoApi:
         response.raise_for_status()
         return response.json()
 
+    def create_new_version(self, existing_deposition_id):
+        """Create a new version of an existing deposition."""
+        url = f"{self.base_url}/api/deposit/depositions/{existing_deposition_id}/actions/newversion"
+        response = requests.post(
+            url, params={"access_token": self.access_token}, json={}
+        )
+        response.raise_for_status()
+        return response.json()
+
     def get_optional_deposition(self, id_):
         """Return the deposition for the id or None if we can't find it."""
         url = f"{self.base_url}/api/deposit/depositions/{id_}"
@@ -166,6 +175,7 @@ def main():
     pid_service_url = env.str("PID_SERVICE_URL")
     pid_service_user = env.str("PID_SERVICE_USER")
     only_draft = env.bool("ONLY_DRAFT", default=False)
+    existing_deposition_id = env.str("EXISTING_DEPOSITION_ID")
     repository_url = env.str(
         "REPOSITORY_URL",
         default="https://codebase.helmholtz.cloud/hub-terra/sms/orchestration",
@@ -188,7 +198,10 @@ def main():
 
     zenodo_api = ZenodoApi(base_url=zenodo_url, access_token=zenodo_access_token)
 
-    deposition = zenodo_api.create_deposition()
+    if not existing_deposition_id:
+        deposition = zenodo_api.create_deposition()
+    else:
+        deposition = zenodo_api.create_new_version(existing_deposition_id)
     deposition_id = deposition["id"]
 
     zenodo_api.upload_file(file_to_upload, deposition["links"]["bucket"])
