@@ -56,6 +56,10 @@
             "orcid": "https://orcid.org/0009-0005-1965-931X"
         },
         {
+            "name": "Ertl, Benjamin",
+            "affiliation": "Karlsruhe Institute of Technology"
+        },
+        {
             "name": "Gransee, Florian",
             "affiliation": "Helmholtz Centre for Environmental Research"
         },
@@ -68,6 +72,11 @@
             "name": "Lorenz, Christof",
             "affiliation": "Karlsruhe Institute of Technology",
             "orcid": "https://orcid.org/0000-0001-5590-5470"
+        },
+        {
+            "name": "Loup, Ulrich",
+            "affiliation": "Forschungszentrum Jülich",
+            "orcid": "https://orcid.org/0009-0005-1370-6226"
         },
         {
             "name": "Moorthy, Rubankumar",
@@ -115,15 +124,6 @@
             "affiliation": "Helmholtz Centre for Environmental Research",
             "orcid": "https://orcid.org/0000-0001-7579-216X"
         },
-        {
-            "name": "Ertl, Benjamin",
-            "affiliation": "Karlsruhe Institute of Technology"
-        },
-        {
-            "name": "Loup, Ulrich",
-            "affiliation": "Forschungszentrum Jülich",
-            "orcid": "https://orcid.org/0009-0005-1370-6226"
-        }
     ],
     "license": "eupl-1.2",
     "language": "eng",
