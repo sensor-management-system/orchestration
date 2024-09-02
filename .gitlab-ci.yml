@@ -12,8 +12,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 stages:
-  - publish
-  - afterpublish
   - buildtest
   - check
   - extract
@@ -22,6 +20,7 @@ stages:
   - backup
   - release
   - deploy
+  - publish
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -960,15 +959,15 @@ publish-zenodo-staging:
   script:
     - zip -r sms-v${VERSION}.zip ./*
     - python3 zenodo/publish.py sms-v${VERSION}.zip
-  #rules:
-  #  - if: '$CI_PIPELINE_SOURCE == "schedule"'
-  #    when: never
-  #  - if: '$CI_PIPELINE_SOURCE == "pipeline"'
-  #    when: never
-  #  - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-  #    when: always
-  #  - if: '$CI_COMMIT_TAG'
-  #    when: always
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_TAG'
+      when: always
 
 publish-zenodo-prod:
   stage: publish
@@ -998,9 +997,3 @@ publish-zenodo-prod:
       when: never
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
-
-die-after-publish:
-  stage: afterpublish
-  image: python:3.11-slim-buster
-  script:
-    - exit 1
