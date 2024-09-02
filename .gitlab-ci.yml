@@ -667,7 +667,7 @@ deploy-gfz-staging:
     - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/staging/docker-compose.yml up -d
-    - docker rmi $(docker images -q -f dangling=true) || true
+    - docker image prune --all --force
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
@@ -715,7 +715,7 @@ deploy-gfz-prod:
     - docker volume rm ${COMPOSE_PROJECT_NAME}_backend-static-files || echo "Skip deleting the static backend files volume"
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml pull
     - docker compose -f docker/deployment/gfz/prod/docker-compose.yml up -d
-    - docker rmi $(docker images -q -f dangling=true) || true
+    - docker image prune --all --force
     # Curl is already installed on the deployment machine
     - >
       curl \
