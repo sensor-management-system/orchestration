@@ -951,7 +951,7 @@ publish-zenodo-staging:
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
     PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
     PID_PREFIX: 20.500.14372
-    ONLY_DRAFT: "yes"
+    ONLY_DRAFT: "no"
     EXISTING_DEPOSITION_ID: 105369
   before_script:
     - apt-get update && apt-get install zip -y
@@ -982,7 +982,7 @@ publish-zenodo-prod:
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
     PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
     PID_PREFIX: 20.500.14372
-    ONLY_DRAFT: "yes"
+    ONLY_DRAFT: "no"
     EXISTING_DEPOSITION_ID: 13329926
   before_script:
     - apt-get update && apt-get install zip -y
