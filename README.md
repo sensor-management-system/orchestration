@@ -12,6 +12,8 @@ SPDX-License-Identifier: EUPL-1.2
 
 ![alt text](logos/RGB/PNG/ufz-sms_logo_name+abkuerzung_primaer.png "Sensor Management System"){width=50%}
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13329925.svg)](https://doi.org/10.5281/zenodo.13329925)
+
 # Helmholtz Earth & Environment Sensor Management System
 
 The Sensor Management System (SMS) allows the comprehensive
