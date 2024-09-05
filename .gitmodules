@@ -7,4 +7,4 @@
 # SPDX-License-Identifier: EUPL-1.2
 [submodule "sms-cv"]
 	path = sms-cv
-	url = ../sms-cv.git
+	url = git@codebase.helmholtz.cloud:hub-terra/sms/sms-cv.git

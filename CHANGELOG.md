@@ -15,6 +15,7 @@ Fixed:
 
 Changed:
 - Cleanup of unused docker images on GFZ servers is now done via `docker image prune`
+- Usage of the absolute url to checkout the git submodule for the CV
 
 ## 1.16.1 - 2024-08-06
 
