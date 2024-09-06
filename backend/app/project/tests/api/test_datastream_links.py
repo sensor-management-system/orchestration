@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -609,6 +609,243 @@ class TestDatastreamLinks(BaseTestCase):
         self.assertEqual(resp2.status_code, 200)
         self.assertEqual(len(resp1.json["data"]), 1)
         self.assertEqual(len(resp2.json["data"]), 1)
+        self.assertEqual(resp1.json["data"][0]["id"], str(linking1.id))
+        self.assertEqual(resp2.json["data"][0]["id"], str(linking2.id))
+
+    def test_get_elements_filtered_by_tsm_endpoint_id(self):
+        """Ensure we can get a filtered list for a tsm endpoint id."""
+        configuration1 = Configuration(
+            label="c1", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        configuration2 = Configuration(
+            label="c2", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        device1 = Device(short_name="d1", is_public=True, is_internal=False)
+        device2 = Device(short_name="d2", is_public=True, is_internal=False)
+        begin_contact = Contact(
+            given_name="begin", family_name="contact", email="begin.contact@localhost"
+        )
+        mount1 = DeviceMountAction(
+            configuration=configuration1,
+            device=device1,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        mount2 = DeviceMountAction(
+            configuration=configuration2,
+            device=device2,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        property1 = DeviceProperty(device=device1, property_name="prop1")
+        property2 = DeviceProperty(device=device2, property_name="prop2")
+        tsm_endpoint1 = TsmEndpoint(name="tsm1", url="https://somewhere")
+        tsm_endpoint2 = TsmEndpoint(name="tsm2", url="https://somewhereelse")
+
+        linking1 = DatastreamLink(
+            device_mount_action=mount1,
+            device_property=property1,
+            tsm_endpoint=tsm_endpoint1,
+            datasource_id="1",
+            thing_id="1",
+            datastream_id="1",
+        )
+        linking2 = DatastreamLink(
+            device_mount_action=mount2,
+            device_property=property2,
+            tsm_endpoint=tsm_endpoint2,
+            datasource_id="2",
+            thing_id="2",
+            datastream_id="2",
+        )
+        db.session.add_all(
+            [
+                configuration1,
+                configuration2,
+                device1,
+                device2,
+                begin_contact,
+                mount1,
+                mount2,
+                property1,
+                property2,
+                tsm_endpoint1,
+                tsm_endpoint2,
+                linking1,
+                linking2,
+            ]
+        )
+        db.session.commit()
+        url1 = f"{base_url}/datastream-links?filter[tsm_endpoint_id]={tsm_endpoint1.id}"
+        url2 = f"{base_url}/datastream-links?filter[tsm_endpoint_id]={tsm_endpoint2.id}"
+        url3 = f"{base_url}/datastream-links?filter[tsm_endpoint_id]=1234567890"
+        resp1 = self.client.get(url1)
+        resp2 = self.client.get(url2)
+        resp3 = self.client.get(url3)
+        self.assertEqual(resp1.status_code, 200)
+        self.assertEqual(resp2.status_code, 200)
+        self.assertEqual(resp3.status_code, 200)
+        self.assertEqual(len(resp1.json["data"]), 1)
+        self.assertEqual(len(resp2.json["data"]), 1)
+        self.assertEqual(len(resp3.json["data"]), 0)
+        self.assertEqual(resp1.json["data"][0]["id"], str(linking1.id))
+        self.assertEqual(resp2.json["data"][0]["id"], str(linking2.id))
+
+    def test_get_elements_filtered_by_device_mount_action_id(self):
+        """Ensure we can get a filtered list for a device mount action id."""
+        configuration1 = Configuration(
+            label="c1", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        configuration2 = Configuration(
+            label="c2", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        device1 = Device(short_name="d1", is_public=True, is_internal=False)
+        device2 = Device(short_name="d2", is_public=True, is_internal=False)
+        begin_contact = Contact(
+            given_name="begin", family_name="contact", email="begin.contact@localhost"
+        )
+        mount1 = DeviceMountAction(
+            configuration=configuration1,
+            device=device1,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        mount2 = DeviceMountAction(
+            configuration=configuration2,
+            device=device2,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        property1 = DeviceProperty(device=device1, property_name="prop1")
+        property2 = DeviceProperty(device=device2, property_name="prop2")
+        tsm_endpoint1 = TsmEndpoint(name="tsm1", url="https://somewhere")
+        tsm_endpoint2 = TsmEndpoint(name="tsm2", url="https://somewhereelse")
+
+        linking1 = DatastreamLink(
+            device_mount_action=mount1,
+            device_property=property1,
+            tsm_endpoint=tsm_endpoint1,
+            datasource_id="1",
+            thing_id="1",
+            datastream_id="1",
+        )
+        linking2 = DatastreamLink(
+            device_mount_action=mount2,
+            device_property=property2,
+            tsm_endpoint=tsm_endpoint2,
+            datasource_id="2",
+            thing_id="2",
+            datastream_id="2",
+        )
+        db.session.add_all(
+            [
+                configuration1,
+                configuration2,
+                device1,
+                device2,
+                begin_contact,
+                mount1,
+                mount2,
+                property1,
+                property2,
+                tsm_endpoint1,
+                tsm_endpoint2,
+                linking1,
+                linking2,
+            ]
+        )
+        db.session.commit()
+        url1 = f"{base_url}/datastream-links?filter[device_mount_action_id]={mount1.id}"
+        url2 = f"{base_url}/datastream-links?filter[device_mount_action_id]={mount2.id}"
+        url3 = f"{base_url}/datastream-links?filter[device_mount_action_id]=1234567890"
+        resp1 = self.client.get(url1)
+        resp2 = self.client.get(url2)
+        resp3 = self.client.get(url3)
+        self.assertEqual(resp1.status_code, 200)
+        self.assertEqual(resp2.status_code, 200)
+        self.assertEqual(resp3.status_code, 200)
+        self.assertEqual(len(resp1.json["data"]), 1)
+        self.assertEqual(len(resp2.json["data"]), 1)
+        self.assertEqual(len(resp3.json["data"]), 0)
+        self.assertEqual(resp1.json["data"][0]["id"], str(linking1.id))
+        self.assertEqual(resp2.json["data"][0]["id"], str(linking2.id))
+
+    def test_get_elements_filtered_by_device_property_id(self):
+        """Ensure we can get a filtered list for a device property id."""
+        configuration1 = Configuration(
+            label="c1", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        configuration2 = Configuration(
+            label="c2", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        device1 = Device(short_name="d1", is_public=True, is_internal=False)
+        device2 = Device(short_name="d2", is_public=True, is_internal=False)
+        begin_contact = Contact(
+            given_name="begin", family_name="contact", email="begin.contact@localhost"
+        )
+        mount1 = DeviceMountAction(
+            configuration=configuration1,
+            device=device1,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        mount2 = DeviceMountAction(
+            configuration=configuration2,
+            device=device2,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        property1 = DeviceProperty(device=device1, property_name="prop1")
+        property2 = DeviceProperty(device=device2, property_name="prop2")
+        tsm_endpoint1 = TsmEndpoint(name="tsm1", url="https://somewhere")
+        tsm_endpoint2 = TsmEndpoint(name="tsm2", url="https://somewhereelse")
+
+        linking1 = DatastreamLink(
+            device_mount_action=mount1,
+            device_property=property1,
+            tsm_endpoint=tsm_endpoint1,
+            datasource_id="1",
+            thing_id="1",
+            datastream_id="1",
+        )
+        linking2 = DatastreamLink(
+            device_mount_action=mount2,
+            device_property=property2,
+            tsm_endpoint=tsm_endpoint2,
+            datasource_id="2",
+            thing_id="2",
+            datastream_id="2",
+        )
+        db.session.add_all(
+            [
+                configuration1,
+                configuration2,
+                device1,
+                device2,
+                begin_contact,
+                mount1,
+                mount2,
+                property1,
+                property2,
+                tsm_endpoint1,
+                tsm_endpoint2,
+                linking1,
+                linking2,
+            ]
+        )
+        db.session.commit()
+        url1 = f"{base_url}/datastream-links?filter[device_property_id]={property1.id}"
+        url2 = f"{base_url}/datastream-links?filter[device_property_id]={property2.id}"
+        url3 = f"{base_url}/datastream-links?filter[device_property_id]=1234567890"
+        resp1 = self.client.get(url1)
+        resp2 = self.client.get(url2)
+        resp3 = self.client.get(url3)
+        self.assertEqual(resp1.status_code, 200)
+        self.assertEqual(resp2.status_code, 200)
+        self.assertEqual(resp3.status_code, 200)
+        self.assertEqual(len(resp1.json["data"]), 1)
+        self.assertEqual(len(resp2.json["data"]), 1)
+        self.assertEqual(len(resp3.json["data"]), 0)
         self.assertEqual(resp1.json["data"][0]["id"], str(linking1.id))
         self.assertEqual(resp2.json["data"][0]["id"], str(linking2.id))
 
