@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.16.2 (Unreleased)
 
+Added:
+- improved filter options for get list endpoint of datastream links
+
 Fixed:
 - loaddata command is now more robust according to files with just a new line
 - startup for M2 Mac OS with docker desktop was improved
