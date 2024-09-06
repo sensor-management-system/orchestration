@@ -71,7 +71,7 @@ in the Helmholtz Gitlab.
 There is also a mirrored version https://github.com/sensor-management-system/orchestration
 on GitHub.
 
-In case you of problems, please use https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/issues/new
+In case you have problems or questions, please use https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/issues/new
 to create an issue.
 
 ## Used By
