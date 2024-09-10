@@ -783,10 +783,17 @@ export default class MountWizard extends Vue {
 
   isSelectedNodeAlreadyArchived (): boolean {
     if (this.selectedNode !== null) {
-      if (this.selectedNode.isPlatform() && this.selectedNode.unpack().platform.archived) {
-        return true
+      if (this.selectedNode.isPlatform()) {
+        const unpacked = this.selectedNode.unpack() as PlatformMountAction
+        if (unpacked.platform.archived) {
+          return true
+        }
       }
-      if (this.selectedNode.isDevice() && this.selectedNode.unpack().device.archived) {
+      if (this.selectedNode.isDevice()) {
+        const unpacked = this.selectedNode.unpack() as DeviceMountAction
+        if (unpacked.device.archived) {
+          return true
+        }
         return true
       }
     }

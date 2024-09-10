@@ -14,7 +14,7 @@
 
 import { multiLineString } from '@turf/helpers'
 import { lineToPolygon } from '@turf/turf'
-import kinks from '@turf/kinks'
+import { kinks } from '@turf/kinks'
 import { ILatLng } from '@/models/Site'
 
 export function hasSelfIntersection (coords: ILatLng[]): boolean {
