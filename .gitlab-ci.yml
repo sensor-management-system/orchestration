@@ -20,6 +20,7 @@ stages:
   - backup
   - release
   - deploy
+  - publish
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -936,4 +937,64 @@ build-ufz-orchestration-nginx-image:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
     - if: '$CI_COMMIT_TAG'
+      when: always
+
+publish-zenodo-staging:
+  stage: publish
+  image: python:3.11-slim-buster
+  variables:
+    # We start here on the sandbox
+    ZENODO_URL: https://sandbox.zenodo.org
+    ZENODO_ACCESS_TOKEN: ${ZENODO_SANDBOX_ACCESS_TOKEN}
+    VERSION: $CI_COMMIT_SHORT_SHA
+    REPOSITORY_URL: $CI_PROJECT_URL
+    PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
+    PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
+    PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+    PID_PREFIX: 20.500.14372
+    ONLY_DRAFT: "no"
+    EXISTING_DEPOSITION_ID: 105369
+  before_script:
+    - apt-get update && apt-get install zip -y
+    - pip3 install requests
+  script:
+    - zip -r sms-v${VERSION}.zip ./*
+    - python3 zenodo/publish.py sms-v${VERSION}.zip
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_TAG'
+      when: always
+
+publish-zenodo-prod:
+  stage: publish
+  image: python:3.11-slim-buster
+  variables:
+    # We start here on the sandbox
+    ZENODO_URL: https://zenodo.org
+    ZENODO_ACCESS_TOKEN: ${ZENODO_PROD_ACCESS_TOKEN}
+    VERSION: $CI_COMMIT_TAG
+    REPOSITORY_URL: $CI_PROJECT_URL
+    PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
+    PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
+    PID_SERVICE_URL: https://rz-vm561.gfz-potsdam.de:8000/api/handles
+    PID_PREFIX: 20.500.14372
+    ONLY_DRAFT: "no"
+    EXISTING_DEPOSITION_ID: 13329926
+  before_script:
+    - apt-get update && apt-get install zip -y
+    - pip3 install requests
+  script:
+    - zip -r sms-v${VERSION}.zip ./*
+    - python3 zenodo/publish.py sms-v${VERSION}.zip
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always

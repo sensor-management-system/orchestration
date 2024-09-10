@@ -1,0 +1,152 @@
+{
+    "title": "Sensor Management System - SMS",
+    "upload_type": "software",
+    "communities": [
+        {
+            "identifier": "datahub"
+        }
+    ],
+    "creators": [
+        {
+            "name": "Brinckmann, Nils",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
+            "orcid": "https://orcid.org/0000-0001-8159-3888"
+        },
+        {
+            "name": "Alhaj Taha, Kotyba",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Kuhnert, Tobias",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0009-0002-3854-3417"
+        },
+        {
+            "name": "Abbrent, Martin",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0000-0003-1252-9107"
+        },
+        {
+            "name": "Becker, Wilhelm",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences"
+        },
+        {
+            "name": "Bohring, Hannes",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0009-0007-5103-5886"
+        },
+        {
+            "name": "Breier, Jannes",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
+            "orcid": "https://orcid.org/0000-0002-9055-6904"
+        },
+        {
+            "name": "Bumberger, Jan",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0000-0003-3780-8663"
+        },
+        {
+            "name": "Ecker, Dirk",
+            "affiliation": "Forschungszentrum Jülich",
+            "orcid": "https://orcid.org/0000-0003-4241-9208"
+        },
+        {
+            "name": "Eder, Tim",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0009-0005-1965-931X"
+        },
+        {
+            "name": "Ertl, Benjamin",
+            "affiliation": "Karlsruhe Institute of Technology"
+        },
+        {
+            "name": "Gransee, Florian",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Hanisch, Marc",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
+            "orcid": "https://orcid.org/0000-0001-5272-4674"
+        },
+        {
+            "name": "Lorenz, Christof",
+            "affiliation": "Karlsruhe Institute of Technology",
+            "orcid": "https://orcid.org/0000-0001-5590-5470"
+        },
+        {
+            "name": "Loup, Ulrich",
+            "affiliation": "Forschungszentrum Jülich",
+            "orcid": "https://orcid.org/0009-0005-1370-6226"
+        },
+        {
+            "name": "Moorthy, Rubankumar",
+            "affiliation": "Forschungszentrum Jülich",
+            "orcid": "https://orcid.org/0000-0002-3567-1475"
+        },
+        {
+            "name": "Nendel, Luca Johannes",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Pongratz, Erik",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Remmler, Paul",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0000-0001-8900-9009"
+        },
+        {
+            "name": "Rosin, Vivien",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences",
+            "orcid": "https://orcid.org/0009-0003-9261-6696"
+        },
+        {
+            "name": "Schaeffer, Marie",
+            "affiliation": "Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences"
+        },
+        {
+            "name": "Schaldach, Maximilian",
+            "affiliation": "Helmholtz Centre for Environmental Research"
+        },
+        {
+            "name": "Schäfer, David",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0000-0003-4517-6459"
+        },
+        {
+            "name": "Sielaff, Daniel",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0009-0002-8606-9385"
+        },
+        {
+            "name": "Ziegner, Norman",
+            "affiliation": "Helmholtz Centre for Environmental Research",
+            "orcid": "https://orcid.org/0000-0001-7579-216X"
+        }
+    ],
+    "license": "eupl-1.2",
+    "language": "eng",
+    "custom": {
+        "code:programmingLanguage": [
+            {
+                "id": "python",
+                "title": {
+                    "en": "Python"
+                }
+            },
+            {
+                "id": "typescript",
+                "title": {
+                    "en": "Typescript"
+                }
+            }
+        ],
+        "code:developmentStatus": {
+            "id": "active",
+            "title": {
+                "en": "Active"
+            }
+        }
+    }
+}
