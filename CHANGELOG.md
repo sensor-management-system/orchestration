@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Added:
 - improved filter options for get list endpoint of datastream links
+- page to show basic information about one datastream link
 
 Fixed:
 - loaddata command is now more robust according to files with just a new line
