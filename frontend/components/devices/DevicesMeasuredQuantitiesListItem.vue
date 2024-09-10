@@ -19,6 +19,9 @@ SPDX-License-Identifier: EUPL-1.2
     </template>
     <template #default>
       {{ computedTitle }}
+      <span class="text-caption text--disabled font-weight-light">
+        (ID: {{ measuredQuantity.id }})
+      </span>
     </template>
     <template #expandable>
       <DevicePropertyInfo
