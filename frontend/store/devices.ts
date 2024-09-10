@@ -137,7 +137,7 @@ const getters: GetterTree<DevicesState, RootState> = {
     return getDistinctYearsOfActions(getters.actions)
   },
   filteredActions: (_state: DevicesState, getters) => (filter: DeviceFilter): DeviceActions => {
-    const filteredActions = filterActions(getters.actions, filter)
+    const filteredActions = filterActions(getters.actions, filter) as DeviceActions
 
     const sortedFilteredActions = sortActions(filteredActions) as DeviceActions
 

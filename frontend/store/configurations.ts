@@ -198,7 +198,7 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
     return getDistinctYearsOfActions(getters.actions)
   },
   filteredActions: (_state: ConfigurationsState, getters) => (filter: ConfigurationFilter): ITimelineAction[] => {
-    const filteredActions = filterActions(getters.actions, filter)
+    const filteredActions = filterActions(getters.actions, filter) as ITimelineAction[]
     const sortedFilteredActions = sortActions(filteredActions) as ITimelineAction[]
 
     // @ts-ignore

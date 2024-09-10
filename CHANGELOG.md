@@ -10,6 +10,8 @@ SPDX-License-Identifier: EUPL-1.2
 ## 1.16.2 (Unreleased)
 
 Added:
+- improved filter options for get list endpoint of datastream links
+- page to show basic information about one datastream link
 - automatic creation of publication ready zenodo depositions
 
 Fixed:
@@ -18,6 +20,7 @@ Fixed:
 
 Changed:
 - Cleanup of unused docker images on GFZ servers is now done via `docker image prune`
+- Usage of the absolute url to checkout the git submodule for the CV
 
 ## 1.16.1 - 2024-08-06
 

@@ -84,6 +84,7 @@ SPDX-License-Identifier: EUPL-1.2
       </h2>
       <p>
         The following third-party software is used within the scope of this web application <br>
+        <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
         <NuxtLink to="/info/licenses/">Licenses</NuxtLink>.
       </p>
     </section>

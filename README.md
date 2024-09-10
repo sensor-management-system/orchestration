@@ -10,7 +10,9 @@ SPDX-FileCopyrightText: 2021 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-![alt text](logos/RGB/PNG/ufz-sms_logo_name+abkuerzung_primaer.png "Sensor Management System"){width=50%}
+![alt text](logos/RGB/PNG/ufz-sms_logo_name+abkuerzung_primaer_50_percent.png "Sensor Management System")
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13329925.svg)](https://doi.org/10.5281/zenodo.13329925)
 
 # Helmholtz Earth & Environment Sensor Management System
 
@@ -59,6 +61,18 @@ and customization possibilities due to the use of common standards.
 - [Vivien Rosin](https://orcid.org/0009-0003-9261-6696)
 - Marie Schaeffer
 - [Jannes Breier](https://orcid.org/0000-0002-9055-6904)
+
+## Development
+
+The development of this project takes place in
+https://codebase.helmholtz.cloud/hub-terra/sms/orchestration
+in the Helmholtz Gitlab.
+
+There is also a mirrored version https://github.com/sensor-management-system/orchestration
+on GitHub.
+
+In case you have problems or questions, please use https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/issues/new
+to create an issue.
 
 ## Used By
 
@@ -141,6 +155,12 @@ and re-start the container using
 ```bash
 docker compose --env-file ./docker/env.dev  up -d
 ```
+
+## User documentation
+
+In the [wiki](https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home)
+we wrote some information on how the users can interact with the system, the structure
+of the different pages and some best practices.
 
 ## FAQ
 
@@ -228,3 +248,7 @@ The full name of the group muss be added to the `EXPORT_CONTROL_VO_LIST`.
 For the GFZ we have a `sensor-management-system-export-control` group within myprofile.
 This is visible as `urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de` within the Helmholtz AAI - and this is the value that is
 used in the `EXPORT_CONTROL_VO_LIST` variable.
+
+## How to cite
+
+> Brinckmann, N., Alhaj Taha, K., Kuhnert, T., Abbrent, M., Becker, W., Bohring, H., Breier, J., Bumberger, J., Ecker, D., Eder, T., Gransee, F., Hanisch, M., Lorenz, C., Moorthy, R., Nendel, L. J., Pongratz, E., Remmler, P., Rosin, V., Schaeffer, M., … Ziegner, N. (2024). Sensor Management System - SMS (1.16.1). Zenodo. [https://doi.org/10.5281/zenodo.13329926](https://doi.org/10.5281/zenodo.13329926)

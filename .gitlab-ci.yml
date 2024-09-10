@@ -24,6 +24,7 @@ stages:
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_FORCE_HTTPS: "true"
   ALLOWED_MIME_TYPES: "application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed"
   UFZ_LATEST_IMAGE: $CI_REGISTRY_IMAGE:ufz-latest
   UFZ_RELEASE_TAG_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
@@ -91,7 +92,7 @@ check-reuse-compliance:
 
 check-lint-frontend:
   stage: check
-  image: node:18.18.0-buster
+  image: node:20.17.0-bullseye
   before_script:
     - cd frontend
     - node -v
@@ -116,7 +117,7 @@ check-lint-frontend:
 
 check-build-frontend:
   stage: check
-  image: node:18.18.0-buster
+  image: node:20.17.0-bullseye
   before_script:
     - cd frontend
     - node -v
@@ -192,7 +193,7 @@ extract-openapi:
 
 test-frontend-unit-tests:
   stage: test
-  image: node:18.18.0-buster
+  image: node:20.17.0-bullseye
   before_script:
     - cd frontend
     - node -v
