@@ -880,4 +880,8 @@ export class Api {
   get proxy (): ProxyApi {
     return this._proxyApi
   }
+
+  get tsmLinkings (): TsmLinkingApi {
+    return this._tsmLinkingApi
+  }
 }
