@@ -137,7 +137,7 @@ services:
       - db
 
   frontend:
-    image: node:18.18.0-buster
+    image: node:20.17.0-bullseye
     container_name: sms_frontend
     working_dir: /home/node/
     user: "node"

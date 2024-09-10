@@ -234,44 +234,50 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
       this.nodeCanBeUnmounted = false
       return false
     }
-    if (node.isPlatform()) {
-      if (node.canHaveChildren() && node.children.length > 0) {
-        this.errorMessage = 'The selected platform still has mounted platforms or devices. Please unmount them first.'
-        this.nodeCanBeUnmounted = false
-        return false
+
+    if (this.selectedNode !== null) {
+      if (node.isPlatform()) {
+        const unpacked = this.selectedNode.unpack() as PlatformMountAction
+        if (node.canHaveChildren() && node.children.length > 0) {
+          this.errorMessage = 'The selected platform still has mounted platforms or devices. Please unmount them first.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
+        if (unpacked.platform.archived) {
+          this.errorMessage = 'The selected platform is archived. Please restore it first.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
+        if (unpacked.parentPlatform && unpacked.parentPlatform?.archived) {
+          this.errorMessage = 'The parent platform is archived. Please restore it first.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
       }
-      if (node.unpack().platform.archived) {
-        this.errorMessage = 'The selected platform is archived. Please restore it first.'
-        this.nodeCanBeUnmounted = false
-        return false
+      if (node.isDevice()) {
+        const unpacked = this.selectedNode.unpack() as DeviceMountAction
+        if (node.canHaveChildren() && node.children.length > 0) {
+          this.errorMessage = 'The selected device still has mounted sub devices. Please unmount them first.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
+        if (unpacked.device.archived) {
+          this.errorMessage = 'The selected device is archived. Please restore it first.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
+        if (unpacked.parentPlatform && unpacked.parentPlatform?.archived) {
+          this.errorMessage = 'The parent platform is archived. Please restore it first.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
+        if (unpacked.parentDevice && unpacked.parentDevice?.archived) {
+          this.errorMessage = 'The parent device is archived. Please restore it first.'
+          this.nodeCanBeUnmounted = false
+          return false
+        }
       }
-      if (node.unpack().parentPlatform && node.unpack().parentPlatform?.archived) {
-        this.errorMessage = 'The parent platform is archived. Please restore it first.'
-        this.nodeCanBeUnmounted = false
-        return false
-      }
-    }
-    if (node.isDevice()) {
-      if (node.canHaveChildren() && node.children.length > 0) {
-        this.errorMessage = 'The selected device still has mounted sub devices. Please unmount them first.'
-        this.nodeCanBeUnmounted = false
-        return false
-      }
-      if (node.unpack().device.archived) {
-        this.errorMessage = 'The selected device is archived. Please restore it first.'
-        this.nodeCanBeUnmounted = false
-        return false
-      }
-      if (node.unpack().parentPlatform && node.unpack().parentPlatform?.archived) {
-        this.errorMessage = 'The parent platform is archived. Please restore it first.'
-        this.nodeCanBeUnmounted = false
-        return false
-      }
-      if (node.unpack().parentDevice && node.unpack().parentDevice?.archived) {
-        this.errorMessage = 'The parent device is archived. Please restore it first.'
-        this.nodeCanBeUnmounted = false
-        return false
-      }
+
       // check device mount actions against dynamic location actions
       // load the full action (with device properties)
       await this.loadDeviceMountAction(node.unpack().id)

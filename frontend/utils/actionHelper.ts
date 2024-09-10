@@ -88,7 +88,7 @@ export function getDistinctContactsOfActions (actions: IActionCommonDetails[]) {
 
 export function getDistinctYearsOfActions (actions: IActionKind[] | IDateCompareable[]) {
   // @ts-ignore
-  const genericActionEndYears = actions.filter((action: IActionKind) => {
+  const genericActionEndYears = actions.filter((action: IActionKind): action is GenericAction => {
     if (action.kind === KIND_OF_ACTION_TYPE_GENERIC_ACTION) {
       const genericAction = action as GenericAction
       if (genericAction.endDate) {

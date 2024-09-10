@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-FROM node:18.18.0-buster as js-builder
+FROM node:20.17.0-bullseye as js-builder
 
 # First the urls for sms backend, cv backend
 ARG SMS_BACKEND_URL_ARG

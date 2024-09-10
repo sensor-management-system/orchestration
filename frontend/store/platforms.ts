@@ -164,7 +164,7 @@ const getters: GetterTree<PlatformsState, RootState> = {
     return getDistinctYearsOfActions(getters.actions)
   },
   filteredActions: (_state: PlatformsState, getters) => (filter: PlatformFilter): PlatformActions => {
-    const filteredActions = filterActions(getters.actions, filter)
+    const filteredActions = filterActions(getters.actions, filter) as PlatformActions
 
     const sortedFilteredActions = sortActions(filteredActions) as PlatformActions
 

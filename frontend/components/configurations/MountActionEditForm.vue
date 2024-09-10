@@ -315,11 +315,13 @@ export default class MountActionEditForm extends Vue {
     let ids: (string | null)[]
 
     if (selected.isDevice()) {
+      const unpacked = selected.unpack() as DeviceMountAction
       loadAvailabilities = this.loadDeviceAvailabilities
-      ids = [selected.unpack().device.id]
+      ids = [unpacked.device.id]
     } else {
+      const unpacked = selected.unpack() as PlatformMountAction
       loadAvailabilities = this.loadPlatformAvailabilities
-      ids = [selected.unpack().platform.id]
+      ids = [unpacked.platform.id]
     }
 
     await loadAvailabilities({
@@ -347,8 +349,9 @@ export default class MountActionEditForm extends Vue {
 
     // check device mount actions against dynamic location actions
     if (selected.isDevice()) {
+      const unpacked = selected.unpack() as DeviceMountAction
       const dynamicLocationActions = this.getRelatedDynamicLocationActions()
-      const error4 = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(selected.unpack(), dynamicLocationActions)
+      const error4 = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(unpacked, dynamicLocationActions)
       if (typeof error4 === 'object') {
         const message = MountActionValidator.buildErrorMessage(error4) + ' of dynamic location action'
         if (error4.property === 'mountDate') {
