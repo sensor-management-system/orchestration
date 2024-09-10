@@ -13,6 +13,7 @@ Added:
 - improved filter options for get list endpoint of datastream links
 - page to show basic information about one datastream link
 - automatic creation of versions for zenodo publication
+- frontend shows ids of measured quantities
 
 Fixed:
 - loaddata command is now more robust according to files with just a new line
