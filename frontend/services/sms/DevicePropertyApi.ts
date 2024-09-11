@@ -56,4 +56,16 @@ export class DevicePropertyApi {
       })
     })
   }
+
+  async getDeviceId (devicePropertyId: string): Promise<string> {
+    const url = `${this.basePath}/${devicePropertyId}`
+    const rawResponse = await this.axiosApi.get(url)
+    const rawData = rawResponse.data
+    const data = rawData.data
+    const relationships = data.relationships
+    const deviceRelationship = relationships.device
+    const deviceData = deviceRelationship.data
+    const deviceId = deviceData.id
+    return deviceId
+  }
 }

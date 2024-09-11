@@ -14,6 +14,8 @@ Added:
 - page to show basic information about one datastream link
 - automatic creation of versions for zenodo publication
 - frontend shows ids of measured quantities
+- frontend can now open and focus on a selected measured quantities by a given url
+- page to lookup the by the measured quantity id
 
 Fixed:
 - loaddata command is now more robust according to files with just a new line

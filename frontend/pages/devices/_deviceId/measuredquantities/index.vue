@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -29,6 +29,8 @@ SPDX-License-Identifier: EUPL-1.2
     >
       <template #list-item="{item,index}">
         <DevicesMeasuredQuantitiesListItem
+          :id="`deviceMeasuredQuantity${item.id}`"
+          :ref="`deviceMeasuredQuantitiesListItem${item.id}`"
           :measured-quantity="item"
           :index="index"
           :device-id="deviceId"
@@ -150,6 +152,31 @@ export default class DevicePropertyShowPage extends Vue {
   loadDeviceMeasuredQuantities!: LoadDeviceMeasuredQuantitiesAction
   deleteDeviceMeasuredQuantity!: DeleteDeviceMeasuredQuantityAction
   setLoading!: SetLoadingAction
+
+  mounted () {
+    // In case we are asked to focus for one specific measured quantity, we
+    // want this tab to be open.
+    const focusId = this.$route.query.focus || ''
+    if (focusId) {
+      const entry = this.$refs[`deviceMeasuredQuantitiesListItem${focusId}`]
+      if (entry) {
+        (entry as Vue & { open: () => void }).open()
+        // And Focus on that entry.
+        setTimeout(
+          () => {
+            this.$vuetify.goTo(
+              `#deviceMeasuredQuantity${focusId}`
+            )
+          },
+          100
+        )
+      }
+      // and remove the parameter
+      const query = Object.assign({}, this.$route.query)
+      delete query.focus
+      this.$router.replace({ query })
+    }
+  }
 
   get deviceId (): string {
     return this.$route.params.deviceId
