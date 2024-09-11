@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2022
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
@@ -115,5 +115,9 @@ export default class BaseExpandableListItem extends Vue {
   private backgroundColor!: string
 
   private show: boolean = false
+
+  public open () {
+    this.show = true
+  }
 }
 </script>

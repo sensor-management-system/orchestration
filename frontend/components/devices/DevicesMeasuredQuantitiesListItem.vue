@@ -9,6 +9,7 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <base-expandable-list-item
+    ref="baseExpandableListItem"
     expandable-color="grey lighten-5"
   >
     <template #dot-menu-items>
@@ -141,6 +142,10 @@ export default class DevicesMeasuredQuantitiesListItem extends Vue {
       return `#${this.index + 1} - ${this.measuredQuantity}`
     }
     return ''
+  }
+
+  open () {
+    return (this.$refs.baseExpandableListItem as Vue & { open: () => void }).open()
   }
 }
 </script>
