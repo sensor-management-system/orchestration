@@ -794,7 +794,6 @@ export default class MountWizard extends Vue {
         if (unpacked.device.archived) {
           return true
         }
-        return true
       }
     }
     return false
