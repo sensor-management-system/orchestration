@@ -51,7 +51,7 @@ SPDX-License-Identifier: EUPL-1.2
               <v-col>
                 <v-text-field
                   v-model="suggestion.provenanceUri"
-                  label="ROR URL"
+                  label="ROR URL / Weblink"
                 />
               </v-col>
             </v-row>
@@ -73,6 +73,14 @@ SPDX-License-Identifier: EUPL-1.2
                   label="Note for the curator"
                   rows="2"
                 />
+              </v-col>
+            </v-row>
+            <v-row class="mt-0">
+              <v-col class="pt-0 pb-0">
+                <p class="text-caption">
+                  Please provide information if your manufacturer is a brand (of another manufacturer)
+                  or if it is an old company/manufacturer name that has since changed.
+                </p>
               </v-col>
             </v-row>
           </v-form>

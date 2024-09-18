@@ -16,6 +16,7 @@ Added:
 - frontend shows ids of measured quantities
 - frontend can now open and focus on a selected measured quantities by a given url
 - page to lookup the by the measured quantity id
+- more labels and notes on suggestion dialog for new manufacturers
 
 Fixed:
 - loaddata command is now more robust according to files with just a new line
