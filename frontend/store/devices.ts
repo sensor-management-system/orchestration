@@ -188,6 +188,7 @@ export type AddDeviceCalibrationAction = (params: { deviceId: string, calibratio
 export type AddDeviceContactRoleAction = (params: { deviceId: string, contactRole: ContactRole }) => Promise<void>
 export type AddDeviceCustomFieldAction = (params: { deviceId: string, deviceCustomField: CustomTextField }) => Promise<CustomTextField>
 export type AddDeviceGenericAction = (params: { deviceId: string, genericAction: GenericAction }) => Promise<GenericAction>
+export type AddDeviceImageAction = (params: { deviceId: string, deviceImage: Image }) => Promise<Image>
 export type AddDeviceMeasuredQuantityAction = (params: { deviceId: string, deviceMeasuredQuantity: DeviceProperty }) => Promise<DeviceProperty>
 export type AddDeviceParameterAction = (params: { deviceId: string, parameter: Parameter }) => Promise<Parameter>
 export type AddDeviceParameterChangeActionAction = (params: { parameterId: string, action: ParameterChangeAction }) => Promise<ParameterChangeAction>

@@ -28,6 +28,11 @@ import { removeTrailingSlash } from '@/utils/urlHelpers'
 @Component
 export class AttachmentsMixin extends Vue {
   /**
+   * valid file type extensions for attachment images
+   */
+  public validImageExtensions = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp']
+
+  /**
    * returns a filename from a full filepath
    *
    * @return {string} the filename
