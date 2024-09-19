@@ -1,9 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
 - Tim Eder <tim.eder@ufz.de>
+- Maximilian Schaldach <maximilian.schaldach@ufz.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
 SPDX-License-Identifier: EUPL-1.2
@@ -78,6 +79,18 @@ SPDX-License-Identifier: EUPL-1.2
             />
           </v-col>
         </v-row>
+        <v-row>
+          <v-col>
+            <v-checkbox
+              v-model="imageWillBeCreated"
+              :disabled="!attachmentCanBeUsedAsImage"
+              label="Show the attachment as an image on the Basic Data tab."
+              :hint="createImageHint"
+              persistent-hint
+              @change="imageShouldBeCreatedExplicitChoiceChanged"
+            />
+          </v-col>
+        </v-row>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -110,13 +123,19 @@ import { Component, Vue, mixins, Watch } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { AddConfigurationAttachmentAction, LoadConfigurationAttachmentsAction } from '@/store/configurations'
+import {
+  AddConfigurationAttachmentAction,
+  AddConfigurationImageAction,
+  LoadConfigurationAction,
+  LoadConfigurationAttachmentsAction
+} from '@/store/configurations'
 
 import UploadConfig from '@/config/uploads'
 
 import { IUploadResult } from '@/services/sms/UploadApi'
 
 import { Attachment } from '@/models/Attachment'
+import { Image } from '@/models/Image'
 
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
@@ -124,26 +143,30 @@ import { SetLoadingAction } from '@/store/progressindicator'
 
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 @Component({
   components: { AutocompleteTextInput, SaveAndCancelButtons },
   middleware: ['auth'],
   methods: {
-    ...mapActions('configurations', ['addConfigurationAttachment', 'loadConfigurationAttachments']),
+    ...mapActions('configurations', ['addConfigurationAttachment', 'loadConfigurationAttachments', 'loadConfiguration', 'addConfigurationImage']),
     ...mapActions('files', ['uploadFile']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
-export default class ConfigurationAttachmentAddPage extends mixins(Rules, UploadRules, CheckEditAccess) {
+export default class ConfigurationAttachmentAddPage extends mixins(Rules, UploadRules, CheckEditAccess, AttachmentsMixin) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
+  private imageShouldBeCreatedExplicitChoice: boolean = true
 
   // vuex definition for typescript check
   uploadFile!: (file: File) => Promise<IUploadResult>
   addConfigurationAttachment!: AddConfigurationAttachmentAction
   loadConfigurationAttachments!: LoadConfigurationAttachmentsAction
   setLoading!: SetLoadingAction
+  loadConfiguration!: LoadConfigurationAction
+  addConfigurationImage!: AddConfigurationImageAction
 
   /**
    * route to which the user is redirected when he is not allowed to access the page
@@ -180,6 +203,14 @@ export default class ConfigurationAttachmentAddPage extends mixins(Rules, Upload
     return this.$route.params.configurationId
   }
 
+  get imageWillBeCreated () {
+    return this.imageShouldBeCreatedExplicitChoice && this.attachmentCanBeUsedAsImage
+  }
+
+  imageShouldBeCreatedExplicitChoiceChanged (shouldBeCreated: boolean) {
+    this.imageShouldBeCreatedExplicitChoice = shouldBeCreated
+  }
+
   async add () {
     if (!(this.$refs.attachmentsForm as Vue & { validate: () => boolean }).validate()) {
       return
@@ -198,18 +229,57 @@ export default class ConfigurationAttachmentAddPage extends mixins(Rules, Upload
         theFailureCanBeFromUpload = false
       }
 
-      await this.addConfigurationAttachment({
+      const newConfigurationAttachment = await this.addConfigurationAttachment({
         configurationId: this.configurationId,
         attachment: this.attachment
       })
       this.loadConfigurationAttachments(this.configurationId)
       this.$store.commit('snackbar/setSuccess', 'New attachment added')
+
+      if (this.imageWillBeCreated) {
+        const newConfigurationImage: Image = Image.createFromObject({
+          id: '',
+          attachment: newConfigurationAttachment,
+          // Order index is set to the current timestamp by the API,
+          // so the new image will be inserted at the end of existing images
+          orderIndex: null
+        })
+        try {
+          await this.addConfigurationImage({
+            configurationId: this.configurationId,
+            configurationImage: newConfigurationImage
+          })
+          this.loadConfiguration(this.configurationId)
+        } catch (error: any) {
+          this.$store.commit(
+            'snackbar/setError',
+            'Failed to add an attachment as image'
+          )
+        }
+      }
+
       this.$router.push('/configurations/' + this.configurationId + '/attachments')
     } catch (error: any) {
       this.handleError(error, theFailureCanBeFromUpload)
     } finally {
       this.setLoading(false)
     }
+  }
+
+  get attachmentCanBeUsedAsImage (): boolean {
+    if (this.attachmentType === 'file') {
+      if (!this.file) { return false }
+      return this.validImageExtensions.some(extension => this.file?.name.endsWith(extension))
+    }
+    return this.validImageExtensions.some(extension => this.attachment.url.endsWith(extension))
+  }
+
+  get createImageHint (): string {
+    if (this.attachmentType === 'file' && !this.file) { return '' }
+    if (this.attachmentType === 'url' && !this.attachment.url) { return '' }
+    return this.attachmentCanBeUsedAsImage
+      ? 'You can adjust the position or disable it when editing the Basic Data.'
+      : 'This attachment can\'t be used for images in the Basic Data Tab.'
   }
 
   private handleError (error: any, theFailureCanBeFromUpload: boolean) {

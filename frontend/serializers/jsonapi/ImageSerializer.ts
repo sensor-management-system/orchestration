@@ -113,9 +113,9 @@ abstract class AbstractImageSerializer implements IImageSerializer {
       }
     }
 
-    const orderedImages = images.sort((a, b) => a.orderIndex < b.orderIndex ? -1 : 1)
-
-    return orderedImages
+    return images.sort(
+      (a, b) => !!a.orderIndex && !!b.orderIndex && a.orderIndex < b.orderIndex ? -1 : 1
+    )
   }
 
   convertModelToJsonApiData (entityImage: IImage, relationId: string): IJsonApiEntityWithOptionalId {

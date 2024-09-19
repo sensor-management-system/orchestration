@@ -42,7 +42,7 @@ function executeTestsForType (type: string) {
         expect(models.length).toEqual(5)
 
         const orderIndices = models.map(i => i.orderIndex)
-        expect(orderIndices.sort((a, b) => a < b ? -1 : 1)).toEqual(orderIndices)
+        expect(orderIndices.sort((a, b) => !!a && !!b && a < b ? -1 : 1)).toEqual(orderIndices)
       })
 
       it(`should create an ordered list of related ${imageTypePlural}`, () => {

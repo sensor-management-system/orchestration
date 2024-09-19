@@ -399,6 +399,7 @@ export type FilteredActionsGetter = (filter: ConfigurationFilter) => ITimelineAc
 
 type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 
+export type AddConfigurationImageAction = (params: { configurationId: string, configurationImage: Image }) => Promise<Image>
 export type DeleteConfigurationImageAction = (imageId: string) => Promise<void>
 export type SaveConfigurationImagesAction = (params: {configurationId: string, configurationImages: Image[], configurationCopyImages: Image[]}) => Promise<Image[]>
 export type SetSelectedDateAction = (params: DateTime | null) => void

@@ -1,8 +1,10 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+- Maximilian Schaldach <maximilian.schaldach@ufz.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -76,6 +78,18 @@ SPDX-License-Identifier: EUPL-1.2
             />
           </v-col>
         </v-row>
+        <v-row>
+          <v-col>
+            <v-checkbox
+              v-model="imageWillBeCreated"
+              :disabled="!attachmentCanBeUsedAsImage"
+              label="Show the attachment as an image on the Basic Data tab."
+              :hint="createImageHint"
+              persistent-hint
+              @change="imageShouldBeCreatedExplicitChoiceChanged"
+            />
+          </v-col>
+        </v-row>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -109,38 +123,48 @@ import { mapActions } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
 
-import { AddDeviceAttachmentAction, LoadDeviceAttachmentsAction } from '@/store/devices'
+import {
+  AddDeviceAttachmentAction,
+  AddDeviceImageAction,
+  LoadDeviceAction,
+  LoadDeviceAttachmentsAction
+} from '@/store/devices'
 
 import UploadConfig from '@/config/uploads'
 
 import { IUploadResult } from '@/services/sms/UploadApi'
 
 import { Attachment } from '@/models/Attachment'
+import { Image } from '@/models/Image'
 
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
 import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
+import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 
 @Component({
   components: { AutocompleteTextInput, SaveAndCancelButtons },
   middleware: ['auth'],
   methods: {
-    ...mapActions('devices', ['addDeviceAttachment', 'loadDeviceAttachments']),
+    ...mapActions('devices', ['addDeviceAttachment', 'loadDeviceAttachments', 'addDeviceImage', 'loadDevice']),
     ...mapActions('files', ['uploadFile']),
     ...mapActions('progressindicator', ['setLoading'])
   }
 })
-export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, CheckEditAccess) {
+export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, CheckEditAccess, AttachmentsMixin) {
   private attachment: Attachment = new Attachment()
   private attachmentType: string = 'file'
   private file: File | null = null
+  private imageShouldBeCreatedExplicitChoice: boolean = true
 
   // vuex definition for typescript check
   uploadFile!: (file: File) => Promise<IUploadResult>
   addDeviceAttachment!: AddDeviceAttachmentAction
   loadDeviceAttachments!: LoadDeviceAttachmentsAction
+  loadDevice!: LoadDeviceAction
+  addDeviceImage!: AddDeviceImageAction
   setLoading!: SetLoadingAction
 
   /**
@@ -178,6 +202,14 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
     return this.$route.params.deviceId
   }
 
+  get imageWillBeCreated () {
+    return this.imageShouldBeCreatedExplicitChoice && this.attachmentCanBeUsedAsImage
+  }
+
+  imageShouldBeCreatedExplicitChoiceChanged (shouldBeCreated: boolean) {
+    this.imageShouldBeCreatedExplicitChoice = shouldBeCreated
+  }
+
   async add () {
     if (!(this.$refs.attachmentsForm as Vue & { validate: () => boolean }).validate()) {
       return
@@ -196,21 +228,60 @@ export default class DeviceAttachmentAddPage extends mixins(Rules, UploadRules, 
         theFailureCanBeFromUpload = false
       }
 
-      await this.addDeviceAttachment({
+      const newDeviceAttachment = await this.addDeviceAttachment({
         deviceId: this.deviceId,
         attachment: this.attachment
       })
       this.loadDeviceAttachments(this.deviceId)
       this.$store.commit('snackbar/setSuccess', 'New attachment added')
+
+      if (this.imageWillBeCreated) {
+        const newDeviceImage: Image = Image.createFromObject({
+          id: '',
+          attachment: newDeviceAttachment,
+          // Order index is set to the current timestamp by the API,
+          // so the new image will be inserted at the end of existing images
+          orderIndex: null
+        })
+        try {
+          await this.addDeviceImage({ deviceId: this.deviceId, deviceImage: newDeviceImage })
+          this.loadDevice({
+            deviceId: this.deviceId,
+            includeImages: true
+          })
+        } catch (error: any) {
+          this.$store.commit(
+            'snackbar/setError',
+            'Failed to add an attachment as image'
+          )
+        }
+      }
+
       this.$router.push('/devices/' + this.deviceId + '/attachments')
     } catch (error: any) {
-      this.handelError(error, theFailureCanBeFromUpload)
+      this.handleError(error, theFailureCanBeFromUpload)
     } finally {
       this.setLoading(false)
     }
   }
 
-  private handelError (error: any, theFailureCanBeFromUpload: boolean) {
+  get attachmentCanBeUsedAsImage (): boolean {
+    if (this.attachmentType === 'file') {
+      if (!this.file) { return false }
+      return this.validImageExtensions.some(extension => this.file?.name.endsWith(extension))
+    }
+    return this.validImageExtensions.some(extension => this.attachment.url.endsWith(extension))
+  }
+
+  get createImageHint (): string {
+    if (this.attachmentType === 'file' && !this.file) { return '' }
+    if (this.attachmentType === 'url' && !this.attachment.url) { return '' }
+    return this.attachmentCanBeUsedAsImage
+      ? 'You can adjust the position or disable it when editing the Basic Data.'
+      : 'This attachment can\'t be used for images in the Basic Data Tab.'
+  }
+
+  private handleError (error: any, theFailureCanBeFromUpload: boolean) {
     let message = 'Failed to save an attachment'
 
     if (theFailureCanBeFromUpload && error.response?.data?.errors?.length) {

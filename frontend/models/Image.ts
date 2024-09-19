@@ -14,20 +14,20 @@ export interface IAttachmentWithUrl {
 }
 export interface IImage {
   id: string
-  orderIndex: number
+  orderIndex: number | null
   attachment: IAttachment | null
 }
 
 export class Image implements IImage {
   private _id: string = ''
-  private _orderIndex: number = 0
+  private _orderIndex: number | null = null
   private _attachment: Attachment | null = null
 
-  get orderIndex (): number {
+  get orderIndex (): number | null {
     return this._orderIndex
   }
 
-  set orderIndex (value: number) {
+  set orderIndex (value: number | null) {
     this._orderIndex = value
   }
 
@@ -50,7 +50,7 @@ export class Image implements IImage {
   static createFromObject (someObject: IImage): Image {
     const result = new Image()
     result.id = someObject.id
-    result.orderIndex = someObject.orderIndex ?? 0
+    result.orderIndex = someObject.orderIndex
     result.attachment = someObject.attachment ? Attachment.createFromObject(someObject.attachment) : null
     return result
   }

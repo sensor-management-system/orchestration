@@ -213,6 +213,7 @@ export type AddPlatformAttachmentAction = (params: {
   platformId: string,
   attachment: Attachment
 }) => Promise<Attachment>
+export type AddPlatformImageAction = (params: { platformId: string, platformImage: Image }) => Promise<Image>
 export type AddPlatformContactRoleAction = (params: { platformId: string, contactRole: ContactRole }) => Promise<void>
 export type AddPlatformGenericActionAction = (params: {
   platformId: string,

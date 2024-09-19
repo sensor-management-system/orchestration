@@ -99,6 +99,7 @@ export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
 export type CreatePidAction = (id: string | null) => Promise<string>
 export type ClearSiteAttachmentsAction = () => void
 export type SaveSiteAction = (site: Site) => Promise<Site>
+export type AddSiteImageAction = (params: { siteId: string, siteImage: Image }) => Promise<Image>
 export type SaveSiteImagesAction = (params: {siteId: string, siteImages: Image[], siteCopyImages: Image[]}) => Promise<Image[]>
 export type CopySiteAction = (params: {site: Site, copyContacts: boolean, copyAttachments: boolean, originalSiteId: string}) => Promise<string>
 export type DeleteSiteAction = (id: string) => Promise<void>
