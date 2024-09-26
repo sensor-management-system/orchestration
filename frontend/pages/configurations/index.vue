@@ -447,8 +447,7 @@ export default class SearchConfigurationsPage extends Vue {
         this.loadConfigurationsStates(),
         this.loadPermissionGroups(),
         this.loadProjects(),
-        this.loadCampaigns(),
-        this.searchSites()
+        this.loadCampaigns()
       ])
       await this.initSearchQueryParams()
       await this.runInitialSearch()

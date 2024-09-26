@@ -17,6 +17,7 @@ Added:
 - frontend can now open and focus on a selected measured quantities by a given url
 - page to lookup the by the measured quantity id
 - more labels and notes on suggestion dialog for new manufacturers
+- "sites&labs" page has a map which shows listed sites and a button to show a specific listed site on the map
 - possibility to automatically render a created image attachment on the Basic data page
 
 Fixed:

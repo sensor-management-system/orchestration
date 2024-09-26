@@ -10,6 +10,7 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <base-expandable-list-item
+    :ref="`base-expandable-list-item-site-${site.id}`"
     :expandable-color="site.archived ? 'brown lighten-3' : 'grey lighten-5'"
     :background-color="site.archived ? 'brown lighten-4 ' : 'white'"
   >
@@ -31,6 +32,7 @@ SPDX-License-Identifier: EUPL-1.2
       <slot name="dot-menu-items" />
     </template>
     <template #actions>
+      <slot name="show-on-map" />
       <v-btn
         :to="detailLink"
         color="primary"
@@ -324,6 +326,11 @@ export default class SitesListItem extends Vue {
       params = '?' + (new URLSearchParams({ from: this.from })).toString()
     }
     return `/sites/${this.site.id}${params}`
+  }
+
+  public open (): void {
+    const baseListItemRef = this.$refs[`base-expandable-list-item-site-${this.site.id}`] as Vue & { open: () => void}
+    baseListItemRef.open()
   }
 }
 </script>
