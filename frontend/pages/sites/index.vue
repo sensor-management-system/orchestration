@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tim Eder <tim.eder@ufz.de>
+- Tobias Kuhnert <tobias.kuhnert@ufz.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
@@ -143,23 +144,100 @@ SPDX-License-Identifier: EUPL-1.2
     </div>
 
     <div v-if="sites.length > 0">
-      <v-row no-gutters class="mt-10">
-        <v-col
-          cols="12"
-          md="3"
-        >
-          <v-subheader>
-            <FoundEntries v-model="totalCount" entity-name="site / lab" entity-name-plural="sites & labs" />
-            <v-spacer />
-
-            <template v-if="sites.length > 0" />
-          </v-subheader>
-        </v-col>
-
+      <v-row>
         <v-col
           cols="12"
           md="6"
+          lg="6"
+          xl="6"
+          :order="mapIsAboveTheList ? 2: 1"
         >
+          <v-row no-gutters class="mt-10">
+            <v-col
+              cols="12"
+              md="3"
+            >
+              <v-subheader>
+                <FoundEntries v-model="totalCount" entity-name="site / lab" entity-name-plural="sites & labs" />
+                <v-spacer />
+
+                <template v-if="sites.length > 0" />
+              </v-subheader>
+            </v-col>
+
+            <v-col
+              cols="12"
+              md="6"
+            >
+              <v-pagination
+                v-model="page"
+                :disabled="isLoading"
+                :length="totalPages"
+                :total-visible="7"
+                @input="runSearch"
+              />
+            </v-col>
+            <v-col
+              cols="12"
+              md="3"
+              class="flex-grow-1 flex-shrink-0"
+            >
+              <v-subheader>
+                <page-size-select
+                  v-model="size"
+                  :items="pageSizeItems"
+                  label="Items per page"
+                />
+              </v-subheader>
+            </v-col>
+          </v-row>
+          <BaseList :list-items="sites">
+            <template #list-item="{ item }">
+              <SitesListItem
+                :id="`site-search-page-${item.id}`"
+                :key="item.id"
+                :ref="`ref-site-search-page-${item.id}`"
+                :site="item"
+                from="searchResult"
+              >
+                <template
+                  v-if="item.geometry.length>0"
+                  #show-on-map
+                >
+                  <v-btn
+                    icon
+                    @click.stop.prevent
+                    @click="showOnMap(item)"
+                  >
+                    <v-icon>mdi-map-marker-radius-outline</v-icon>
+                  </v-btn>
+                </template>
+                <template
+                  #dot-menu-items
+                >
+                  <DotMenuActionSensorML
+                    @click="openSensorMLDialog(item)"
+                  />
+                  <DotMenuActionCopy
+                    v-if="$auth.loggedIn"
+                    :path="copyLink(item.id)"
+                  />
+                  <DotMenuActionArchive
+                    v-if="canArchiveEntity(item)"
+                    @click="initArchiveDialog(item)"
+                  />
+                  <DotMenuActionRestore
+                    v-if="canRestoreEntity(item)"
+                    @click="runRestoreSite(item)"
+                  />
+                  <DotMenuActionDelete
+                    v-if="$auth.loggedIn && canDeleteEntity(item)"
+                    @click="initDeleteDialog(item)"
+                  />
+                </template>
+              </SitesListItem>
+            </template>
+          </BaseList>
           <v-pagination
             v-model="page"
             :disabled="isLoading"
@@ -170,58 +248,42 @@ SPDX-License-Identifier: EUPL-1.2
         </v-col>
         <v-col
           cols="12"
-          md="3"
-          class="flex-grow-1 flex-shrink-0"
+          md="6"
+          lg="6"
+          xl="6"
+          :order="mapIsAboveTheList ? 1: 2"
         >
-          <v-subheader>
-            <page-size-select
-              v-model="size"
-              :items="pageSizeItems"
-              label="Items per page"
-            />
-          </v-subheader>
-        </v-col>
-      </v-row>
-      <BaseList :list-items="sites">
-        <template #list-item="{ item }">
-          <SitesListItem
-            :key="item.id"
-            :site="item"
-            from="searchResult"
+          <SiteOverviewMap
+            id="siteOverviewMap"
+            ref="siteOverviewMap"
+            :value="sites"
+            class="site-overview-map-sticky"
+            @siteSelected="openSiteListItem"
           >
-            <template
-              #dot-menu-items
-            >
+            <template #popup-additonal-actions="{site}">
               <DotMenuActionSensorML
-                @click="openSensorMLDialog(item)"
+                @click="openSensorMLDialog(site)"
               />
               <DotMenuActionCopy
                 v-if="$auth.loggedIn"
-                :path="copyLink(item.id)"
+                :path="copyLink(site.id)"
               />
               <DotMenuActionArchive
-                v-if="canArchiveEntity(item)"
-                @click="initArchiveDialog(item)"
+                v-if="canArchiveEntity(site)"
+                @click="initArchiveDialog(site)"
               />
               <DotMenuActionRestore
-                v-if="canRestoreEntity(item)"
-                @click="runRestoreSite(item)"
+                v-if="canRestoreEntity(site)"
+                @click="runRestoreSite(site)"
               />
               <DotMenuActionDelete
-                v-if="$auth.loggedIn && canDeleteEntity(item)"
-                @click="initDeleteDialog(item)"
+                v-if="$auth.loggedIn && canDeleteEntity(site)"
+                @click="initDeleteDialog(site)"
               />
             </template>
-          </SitesListItem>
-        </template>
-      </BaseList>
-      <v-pagination
-        v-model="page"
-        :disabled="isLoading"
-        :length="totalPages"
-        :total-visible="7"
-        @input="runSearch"
-      />
+          </SiteOverviewMap>
+        </v-col>
+      </v-row>
     </div>
     <SiteDeleteDialog
       v-model="showDeleteDialog"
@@ -250,7 +312,13 @@ import { Route } from 'vue-router'
 
 import { mapState, mapActions, mapGetters } from 'vuex'
 
-import { SetActiveTabAction, SetTabsAction, SetTitleAction, SetBackToAction, SetShowBackButtonAction } from '@/store/appbar'
+import {
+  SetActiveTabAction,
+  SetTabsAction,
+  SetTitleAction,
+  SetBackToAction,
+  SetShowBackButtonAction
+} from '@/store/appbar'
 
 import { Site } from '@/models/Site'
 
@@ -304,9 +372,11 @@ import { SiteType } from '@/models/SiteType'
 import FoundEntries from '@/components/shared/FoundEntries.vue'
 import { Visibility } from '@/models/Visibility'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
+import SiteOverviewMap from '@/components/sites/SiteOverviewMap.vue'
 
 @Component({
   components: {
+    SiteOverviewMap,
     FoundEntries,
     BaseList,
     SitesListItem,
@@ -760,9 +830,35 @@ export default class SearchSitesPage extends Vue {
     const params = '?' + (new URLSearchParams({ from: 'searchResult' })).toString()
     return `/sites/new${params}`
   }
+
+  showOnMap (site: Site) {
+    this.$vuetify.goTo('#siteOverviewMap');
+    (this.$refs.siteOverviewMap as Vue & { selectAndShowOnMap: (site: Site) => void }).selectAndShowOnMap(site)
+  }
+
+  openSiteListItem (site: Site) {
+    if (!this.mapIsAboveTheList) {
+      this.$vuetify.goTo(`#site-search-page-${site.id}`)
+      const siteListRef = this.$refs[`ref-site-search-page-${site.id}`] as Vue & { open: () => void }
+      siteListRef.open()
+    }
+  }
+
+  get mapIsAboveTheList (): boolean {
+    const breakPointsWithTheMapAbove = ['xs', 'sm']
+    if (breakPointsWithTheMapAbove.includes(this.$vuetify.breakpoint.name)) {
+      return true
+    }
+    return false
+  }
 }
 </script>
 
 <style lang="scss">
 @import "@/assets/styles/_search.scss";
+
+.site-overview-map-sticky {
+  position: sticky;
+  top: 12vh; /* Keeps the map at the top when scrolling */
+}
 </style>

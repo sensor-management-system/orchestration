@@ -15,6 +15,7 @@
 import { multiLineString } from '@turf/helpers'
 import { lineToPolygon } from '@turf/turf'
 import { kinks } from '@turf/kinks'
+import { LatLng } from 'leaflet'
 import { ILatLng } from '@/models/Site'
 
 export function hasSelfIntersection (coords: ILatLng[]): boolean {
@@ -29,4 +30,18 @@ export function hasSelfIntersection (coords: ILatLng[]): boolean {
   } else {
     return false
   }
+}
+
+export function calculatePolygonArea (coords: LatLng[]) {
+  // Shoelace formula to calculate the area of a polygon
+  let area = 0
+  const n = coords.length
+  for (let i = 0; i < n; i++) {
+    const x1 = coords[i].lat
+    const y1 = coords[i].lng
+    const x2 = coords[(i + 1) % n].lat
+    const y2 = coords[(i + 1) % n].lng
+    area += x1 * y2 - y1 * x2
+  }
+  return Math.abs(area / 2)
 }
