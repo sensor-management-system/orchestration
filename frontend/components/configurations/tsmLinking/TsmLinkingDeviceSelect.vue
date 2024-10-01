@@ -187,8 +187,9 @@ export default class TsmLinkingDeviceSelect extends Vue {
 }
 </script>
 
-<style scoped>
-.no-boxshadow {
+<style>
+/* Only works without scoped style tag */
+.no-boxshadow > .v-card{
   box-shadow: none !important;
 }
 </style>
