@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Martin Abbrent <martin.abbrent@ufz.de>
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
@@ -653,4 +653,14 @@ api.route(
     ExportControlAttachmentDetail,
     "export_control_attachment_detail",
     "/export-control-attachments/<int:id>",
+)
+api.route(
+    InvolvedDeviceForDatastreamLinkList,
+    "involved_device_for_datastream_link_list",
+    "/involved-devices-for-datastream-links",
+)
+api.route(
+    InvolvedDeviceForDatastreamLinkDetail,
+    "involved_device_for_datastream_link_detail",
+    "/involved-devices-for-datastream-links/<int:id>",
 )

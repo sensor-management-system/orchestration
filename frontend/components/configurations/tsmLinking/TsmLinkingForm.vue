@@ -297,6 +297,12 @@ SPDX-License-Identifier: EUPL-1.2
               />
             </v-col>
           </v-row>
+          <v-row>
+            <v-col>
+              <label>Involved devices</label>
+              <tsm-linking-device-select v-model="selectedDevices" :linkings="[value]" :devices="devicesWithoutCurrent" />
+            </v-col>
+          </v-row>
         </v-container>
       </v-card>
     </v-form>
@@ -332,6 +338,9 @@ import { TsmEndpoint } from '@/models/TsmEndpoint'
 import { License } from '@/models/License'
 import { VocabularyState } from '@/store/vocabulary'
 import { CvSelectItem, ICvSelectItem } from '@/models/CvSelectItem'
+import { Device } from '@/models/Device'
+import TsmLinkingDeviceSelect from '@/components/configurations/tsmLinking/TsmLinkingDeviceSelect.vue'
+import { TsmLinkingInvolvedDevice } from '@/models/TsmLinkingInvolvedDevice'
 
 type LicenseComboboxValue = License | string | undefined
 
@@ -339,7 +348,8 @@ type LicenseComboboxValue = License | string | undefined
   components: {
     Combobox,
     DateTimePicker,
-    LicenseDialog
+    LicenseDialog,
+    TsmLinkingDeviceSelect
   },
   computed: {
     ...mapState('tsmLinking', ['datastreams', 'datasources', 'things', 'linkings', 'tsmEndpoints']),
@@ -362,6 +372,36 @@ export default class TsmLinkingForm extends mixins(Rules) {
     type: Object
   })
   readonly selectedDeviceActionPropertyCombination!: TsmDeviceMountPropertyCombination
+
+  @Prop({
+    required: true,
+    type: Array
+  })
+  private devices!: Device[]
+
+  get selectedDevices (): Device[] {
+    return this.value.filterInvolvedDevices(this.devices)
+  }
+
+  set selectedDevices (newSelectedDevices: Device[]) {
+    const newObj = TsmLinking.createFromObject(this.value)
+    const newInvolvedDevices = []
+    let orderIndex = 0
+    for (const device of newSelectedDevices) {
+      newInvolvedDevices.push(TsmLinkingInvolvedDevice.createFromObject({
+        id: null,
+        deviceId: device.id,
+        orderIndex
+      }))
+      orderIndex += 1
+    }
+    newObj.involvedDevices = newInvolvedDevices
+    this.$emit('input', newObj)
+  }
+
+  get devicesWithoutCurrent (): Device[] {
+    return this.devices.filter(d => d.id !== this.value.deviceMountAction?.device.id)
+  }
 
   private isLoadingDatasource = false
   private isLoadingThing = false

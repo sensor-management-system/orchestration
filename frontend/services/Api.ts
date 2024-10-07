@@ -64,6 +64,7 @@ import { StaticLocationActionApi } from '@/services/sms/StaticLocationActionApi'
 import { StatisticsApi } from '@/services/sms/StatisticsApi'
 import { TsmEndpointApi } from '@/services/sms/TsmEndpointApi'
 import { TsmLinkingApi } from '@/services/sms/TsmLinkingApi'
+import { TsmLinkingInvolvedDeviceApi } from '@/services/sms/TsmLinkingInvolvedDeviceApi'
 import { UploadApi } from '@/services/sms/UploadApi'
 import { UserInfoApi } from '@/services/sms/UserInfoApi'
 import { UserModificationApi } from '@/services/sms/UserModificationApi'
@@ -143,6 +144,7 @@ export class Api {
   private readonly _statisticsApi: StatisticsApi
   private readonly _pidApi: PidApi
 
+  private readonly _tsmLinkingInvolvedDevicesApi: TsmLinkingInvolvedDeviceApi
   private readonly _tsmLinkingApi: TsmLinkingApi
   private readonly _tsmdlDatastreamApi: TsmdlDatastreamApi
   private readonly _tsmdlDatasourceApi: TsmdlDatasourceApi
@@ -287,9 +289,14 @@ export class Api {
       createAxios(smsBaseUrl, smsConfig, getIdToken),
       '/controller/configurations'
     )
+    this._tsmLinkingInvolvedDevicesApi = new TsmLinkingInvolvedDeviceApi(
+      createAxios(smsBaseUrl, smsConfig, getIdToken),
+      '/involved-devices-for-datastream-links'
+    )
     this._tsmLinkingApi = new TsmLinkingApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),
-      '/datastream-links'
+      '/datastream-links',
+      this._tsmLinkingInvolvedDevicesApi
     )
     this._configurationApi = new ConfigurationApi(
       createAxios(smsBaseUrl, smsConfig, getIdToken),

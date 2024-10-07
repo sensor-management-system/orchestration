@@ -27,6 +27,9 @@ SPDX-License-Identifier: EUPL-1.2
           </v-icon>
         </a>
       </template>
+      <template #[`item.involvedDevices`]="{ item }">
+        {{ item.involvedDevices | sparseJoin }}
+      </template>
       <template #[`item.actions`]="{ item }">
         <v-icon
           v-if="$auth.loggedIn && canModifyEntity(configuration)"
@@ -65,7 +68,7 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import TsmLinkingBasicDataTable from '@/components/configurations/tsmLinking/TsmLinkingBasicDataTable.vue'
 import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
@@ -99,6 +102,12 @@ import { SetLoadingAction } from '@/store/progressindicator'
   }
 })
 export default class TsmLinkingOverviewTable extends Vue {
+  @Prop({
+    required: true,
+    type: Array
+  })
+  private devices!: Device[]
+
   private headers = [
     {
       text: 'TSM::Datasource::Thing::Datastream',
@@ -125,7 +134,14 @@ export default class TsmLinkingOverviewTable extends Vue {
     }, {
       text: 'Aggregation',
       value: 'aggregationText'
-    }, { text: 'Actions', value: 'actions', sortable: false }
+    }, {
+      text: 'Involved devices',
+      value: 'involvedDevices'
+    }, {
+      text: 'Actions',
+      value: 'actions',
+      sortable: false
+    }
   ]
 
   private itemToDelete: TsmLinking | null = null
@@ -160,7 +176,8 @@ export default class TsmLinkingOverviewTable extends Vue {
         tsmEndpoint: linking.tsmEndpoint,
         licenseName: linking.licenseName,
         licenseUri: linking.licenseUri,
-        aggregationText: linking.aggregationText
+        aggregationText: linking.aggregationText,
+        involvedDevices: linking.filterInvolvedDevices(this.devices)
       }
     })
   }

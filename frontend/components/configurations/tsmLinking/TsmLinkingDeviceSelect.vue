@@ -121,6 +121,10 @@ export default class TsmLinkingDeviceSelect extends Vue {
   // vuex definition for typescript check
   canModifyEntity!: CanModifyEntityGetter
 
+  created () {
+    this.selectedItems = this.value.map(x => Device.createFromObject(x))
+  }
+
   get filteredItems () {
     return this.devices.filter((device: Device) => {
       return this.searchFields.some((searchField) => {

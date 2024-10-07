@@ -34,6 +34,7 @@ SPDX-License-Identifier: EUPL-1.2
         ref="tsmLinkingForm"
         v-model="editLinking"
         :selected-device-action-property-combination="selectedDeviceActionMeasuredQuantities"
+        :devices="availableDevices"
       />
     </v-card>
 
@@ -58,7 +59,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { RawLocation } from 'vue-router'
 
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
@@ -78,6 +79,7 @@ import {
 import TsmLinkingFormItemHeader from '@/components/configurations/tsmLinking/TsmLinkingFormItemHeader.vue'
 import NavigationGuardDialog from '@/components/shared/NavigationGuardDialog.vue'
 import { LoadLicensesAction } from '@/store/vocabulary'
+import { AvailableDevicesGetter } from '@/store/configurations'
 
 @Component({
   components: {
@@ -89,7 +91,8 @@ import { LoadLicensesAction } from '@/store/vocabulary'
   middleware: ['auth'],
   computed: {
     ...mapState('tsmLinking', ['linking']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapGetters('configurations', ['availableDevices'])
   },
   methods: {
     ...mapActions('tsmLinking', [
@@ -117,6 +120,7 @@ export default class TsmLinkingEditPage extends Vue {
   loadLicenses!: LoadLicensesAction
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  availableDevices!: AvailableDevicesGetter
 
   async created () {
     this.editLinking = TsmLinking.createFromObject(this.linking!)

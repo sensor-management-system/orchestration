@@ -62,6 +62,9 @@ from .generic_actions import (  # noqa: F401
     GenericDeviceAction,
     GenericPlatformAction,
 )
+from .involved_device_for_datastream_link import (  # noqa: F401
+    InvolvedDeviceForDatastreamLink
+)
 from .manufacturer_model import ManufacturerModel  # noqa: F401
 from .mount_actions import DeviceMountAction, PlatformMountAction  # noqa: F401
 from .platform import Platform  # noqa: F401

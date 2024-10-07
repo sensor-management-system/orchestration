@@ -13,38 +13,19 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Component, mixins } from 'nuxt-property-decorator'
-import { mapState, mapActions } from 'vuex'
+import { mapState } from 'vuex'
 
 import CheckEditAccess from '@/mixins/CheckEditAccess'
-
-import { SetLoadingAction } from '@/store/progressindicator'
-import { LoadDeviceMountActionsIncludingDeviceInformationAction } from '@/store/configurations'
 
 @Component({
   computed: {
     ...mapState('configurations', ['configuration'])
-  },
-  methods: {
-    ...mapActions('configurations', ['loadDeviceMountActionsIncludingDeviceInformation']),
-    ...mapActions('progressindicator', ['setLoading'])
   }
 })
 export default class ConfigurationNewTsmLinkingPageParent extends mixins(CheckEditAccess) {
-  // vuex definition for typescript check
-  loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
-  setLoading!: SetLoadingAction
-
-  async created () {
-    try {
-      this.setLoading(true)
-      // reset new linkings to remove cached data
-      this.$store.commit('tsmLinking/setNewLinkings', [])
-      await this.loadDeviceMountActionsIncludingDeviceInformation(this.configurationId)
-    } catch (e) {
-      this.$store.commit('snackbar/setError', 'Loading device mount actions failed')
-    } finally {
-      this.setLoading(false)
-    }
+  created () {
+    // reset new linkings to remove cached data
+    this.$store.commit('tsmLinking/setNewLinkings', [])
   }
 
   get configurationId (): string {

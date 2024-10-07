@@ -385,6 +385,10 @@ export class Device implements IDevice, IVisible {
     return 'device'
   }
 
+  toString (): string {
+    return this._shortName
+  }
+
   static createFromObject (someObject: IDevice): Device {
     const newObject = new Device()
 

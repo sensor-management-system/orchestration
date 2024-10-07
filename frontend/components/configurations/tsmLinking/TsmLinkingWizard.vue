@@ -65,6 +65,7 @@ SPDX-License-Identifier: EUPL-1.2
         <TsmLinkingInformation
           ref="tsmLinkingInformation"
           :device-action-property-combinations="selectedDeviceActionPropertyCombinations"
+          :devices="availableDevices"
         />
         <v-btn
           color="primary"
@@ -87,6 +88,7 @@ SPDX-License-Identifier: EUPL-1.2
       >
         <TsmLinkingReview
           :tsm-linkings="newLinkings"
+          :devices="availableDevices"
         >
           <template #save>
             <slot name="save" />
@@ -99,10 +101,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 import TsmLinkingMeasuredQuantitySelect from '@/components/configurations/tsmLinking/TsmLinkingMeasuredQuantitySelect.vue'
-import { Device } from '@/models/Device'
 import TsmLinkingInformation from '@/components/configurations/tsmLinking/TsmLinkingInformation.vue'
 import TsmLinkingReview from '@/components/configurations/tsmLinking/TsmLinkingReview.vue'
 import TsmLinkingDeviceMountActionSelect
@@ -111,8 +112,7 @@ import {
   TsmDeviceMountPropertyCombination,
   TsmDeviceMountPropertyCombinationList
 } from '@/utils/configurationInterfaces'
-import { ConfigurationsState } from '@/store/configurations'
-import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { AvailableDevicesGetter, ConfigurationsState } from '@/store/configurations'
 import { ITsmLinkingState } from '@/store/tsmLinking'
 
 @Component({
@@ -124,7 +124,8 @@ import { ITsmLinkingState } from '@/store/tsmLinking'
   },
   computed: {
     ...mapState('configurations', ['deviceMountActionsIncludingDeviceInformation', 'configuration']),
-    ...mapState('tsmLinking', ['linkings', 'newLinkings'])
+    ...mapState('tsmLinking', ['linkings', 'newLinkings']),
+    ...mapGetters('configurations', ['availableDevices'])
   }
 })
 export default class TsmLinkingAddStepperPage extends Vue {
@@ -135,17 +136,7 @@ export default class TsmLinkingAddStepperPage extends Vue {
   // vuex definition for typescript check
   newLinkings!: ITsmLinkingState['newLinkings']
   deviceMountActionsIncludingDeviceInformation!: ConfigurationsState['deviceMountActionsIncludingDeviceInformation']
-
-  get availableDevices (): Device[] {
-    const devices = this.deviceMountActionsIncludingDeviceInformation.map((mountAction: DeviceMountAction) => {
-      return mountAction.device
-    })
-
-    const uniqueDevices = [...new Map(devices.map((device: Device) =>
-      [device.id, device])).values()]
-
-    return uniqueDevices
-  }
+  availableDevices!: AvailableDevicesGetter
 
   get stepTwoIsSelectable (): boolean {
     return this.selectedDeviceActionPropertyCombinations.length > 0

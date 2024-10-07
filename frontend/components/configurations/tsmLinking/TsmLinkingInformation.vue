@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
           :key="`${selectedDeviceActionMeasuredQuantities.action.id}-${selectedMeasuredQuantity.id}`"
           :selected-device-action-measured-quantities="selectedDeviceActionMeasuredQuantities"
           :selected-measured-quantity="selectedMeasuredQuantity"
+          :devices="devices"
           @input="update($event)"
         />
       </template>
@@ -32,6 +33,7 @@ import {
 import { TsmLinking } from '@/models/TsmLinking'
 import { ITsmLinkingState } from '@/store/tsmLinking'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { Device } from '@/models/Device'
 
 @Component({
   components: { TsmLinkingFormItem, BaseExpandableListItem },
@@ -46,6 +48,12 @@ export default class TsmLinkingInformation extends Vue {
     type: Array
   })
   private deviceActionPropertyCombinations!: TsmDeviceMountPropertyCombinationList
+
+  @Prop({
+    required: true,
+    type: Array
+  })
+  private devices!: Device[]
 
   private isValid = false
 
