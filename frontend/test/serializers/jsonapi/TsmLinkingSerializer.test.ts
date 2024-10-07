@@ -21,6 +21,7 @@ import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Contact } from '@/models/Contact'
 import { TsmEndpoint } from '@/models/TsmEndpoint'
+import { TsmLinkingInvolvedDevice } from '@/models/TsmLinkingInvolvedDevice'
 
 function withName<X extends TsmdlEntity> (arg: X, name: string) {
   arg.name = name
@@ -84,7 +85,8 @@ describe('TsmLinkingSerializer', () => {
         endDate: DateTime.utc(2021, 1, 1, 0, 0, 0, 0),
         licenseName: 'CCBY',
         licenseUri: 'https://sensors.gfz-potsdam.de/cv/api/v1/licenses/1',
-        aggregationPeriod: 180
+        aggregationPeriod: 180,
+        involvedDevices: []
       })
       const serializer = new TsmLinkingSerializer()
       const result = serializer.convertJsonApiDataToModel(jsonApiData, [])
@@ -147,10 +149,128 @@ describe('TsmLinkingSerializer', () => {
         endDate: null,
         licenseName: '',
         licenseUri: '',
-        aggregationPeriod: null
+        aggregationPeriod: null,
+        involvedDevices: []
       })
       const serializer = new TsmLinkingSerializer()
       const result = serializer.convertJsonApiDataToModel(jsonApiData, [])
+      expect(result).toEqual(expectedResult)
+    })
+    it('should be able to include involved devices', () => {
+      const jsonApiData = {
+        id: '123',
+        type: 'datastream_link',
+        attributes: {
+          begin_date: '2020-01-01T00:00:00.000Z',
+          end_date: '2021-01-01T00:00:00.000Z',
+          datastream_id: 'stream_123',
+          datastream_name: '123 stream',
+          datasource_id: 'source_123',
+          datasource_name: '123 source',
+          thing_id: 'thing_123',
+          thing_name: '123 thing',
+          license_name: 'CCBY',
+          license_uri: 'https://sensors.gfz-potsdam.de/cv/api/v1/licenses/1',
+          aggregation_period: 180
+        },
+        relationships: {
+          device_property: {
+            data: {
+              id: '1',
+              type: 'device_property'
+            }
+          },
+          device_mount_action: {
+            data: {
+              id: '2',
+              type: 'device_mount_action'
+            }
+          },
+          tsm_endpoint: {
+            data: {
+              id: '3',
+              type: 'tsm_endpoint'
+            }
+          },
+          involved_devices: {
+            data: [
+              {
+                id: '4',
+                type: 'involved_device_for_datastream_link'
+              },
+              {
+                id: '5',
+                type: 'involved_device_for_datastream_link'
+              }
+            ]
+          }
+        }
+      }
+      const included = [
+        {
+          type: 'involved_device_for_datastream_link',
+          id: '4',
+          attributes: {
+            order_index: 1
+          },
+          relationships: {
+            device: {
+              data: {
+                id: '7',
+                type: 'device'
+              }
+            }
+          }
+        },
+        {
+          type: 'involved_device_for_datastream_link',
+          id: '5',
+          attributes: {
+            order_index: 2
+          },
+          relationships: {
+            device: {
+              data: {
+                id: '8',
+                type: 'device'
+              }
+            }
+          }
+        }
+      ]
+
+      const expectedResult = TsmLinking.createFromObject({
+        id: '123',
+        configurationId: '',
+        // The relationships are set, but we don't include the entry.
+        // So it stays null.
+        deviceMountAction: null,
+        device: null,
+        deviceProperty: null,
+        tsmEndpoint: null,
+        datastream: withName(new TsmdlDatastream('stream_123'), '123 stream'),
+        datasource: withName(new TsmdlDatasource('source_123'), '123 source'),
+        thing: withName(new TsmdlThing('thing_123'), '123 thing'),
+        startDate: DateTime.utc(2020, 1, 1, 0, 0, 0, 0),
+        endDate: DateTime.utc(2021, 1, 1, 0, 0, 0, 0),
+        licenseName: 'CCBY',
+        licenseUri: 'https://sensors.gfz-potsdam.de/cv/api/v1/licenses/1',
+        aggregationPeriod: 180,
+        involvedDevices: [
+          TsmLinkingInvolvedDevice.createFromObject({
+            id: '4',
+            orderIndex: 1,
+            deviceId: '7'
+          }),
+          TsmLinkingInvolvedDevice.createFromObject({
+            id: '5',
+            orderIndex: 2,
+            deviceId: '8'
+          })
+        ]
+      })
+      const serializer = new TsmLinkingSerializer()
+      const result = serializer.convertJsonApiDataToModel(jsonApiData, included)
       expect(result).toEqual(expectedResult)
     })
   })
@@ -206,7 +326,8 @@ describe('TsmLinkingSerializer', () => {
         endDate: DateTime.utc(2021, 1, 1, 0, 0, 0, 0),
         licenseName: 'CCBY',
         licenseUri: 'https://sensors.gfz-potsdam.de/cv/api/v1/licenses/1',
-        aggregationPeriod: 180
+        aggregationPeriod: 180,
+        involvedDevices: []
       })
 
       const expectedResult = {
@@ -303,7 +424,8 @@ describe('TsmLinkingSerializer', () => {
         endDate: null,
         licenseName: '',
         licenseUri: '',
-        aggregationPeriod: null
+        aggregationPeriod: null,
+        involvedDevices: []
       })
 
       const expectedResult = {

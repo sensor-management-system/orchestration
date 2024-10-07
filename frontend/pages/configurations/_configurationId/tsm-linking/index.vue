@@ -24,20 +24,30 @@ SPDX-License-Identifier: EUPL-1.2
         </v-btn>
       </v-card-actions>
     </v-card>
-    <TsmLinkingOverviewTable />
+    <TsmLinkingOverviewTable :devices="availableDevices" />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, InjectReactive, Vue } from 'nuxt-property-decorator'
+import { mapActions, mapGetters } from 'vuex'
 import TsmLinkingOverviewTable from '@/components/configurations/tsmLinking/TsmLinkingOverviewTable.vue'
+import { AvailableDevicesGetter } from '@/store/configurations'
 
 @Component({
-  components: { TsmLinkingOverviewTable }
+  components: { TsmLinkingOverviewTable },
+  computed: {
+    ...mapGetters('configurations', ['availableDevices'])
+  },
+  methods: {
+    ...mapActions('configurations', ['loadDeviceMountActionsIncludingDeviceInformation'])
+  }
 })
 export default class ConfigurationShowTsmLinkingPage extends Vue {
   @InjectReactive()
     editable!: boolean
+
+  availableDevices!: AvailableDevicesGetter
 
   get configurationId (): string {
     return this.$route.params.configurationId

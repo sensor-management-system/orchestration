@@ -16,6 +16,7 @@ SPDX-License-Identifier: EUPL-1.2
         ref="tsmLinkingFormItemForm"
         v-model="newLinking"
         :selected-device-action-property-combination="selectedDeviceActionMeasuredQuantities"
+        :devices="devices"
         @input="update"
       />
     </template>
@@ -30,6 +31,7 @@ import { TsmLinking } from '@/models/TsmLinking'
 import TsmLinkingFormItemHeader from '@/components/configurations/tsmLinking/TsmLinkingFormItemHeader.vue'
 import { TsmDeviceMountPropertyCombination } from '@/utils/configurationInterfaces'
 import { DeviceProperty } from '@/models/DeviceProperty'
+import { Device } from '@/models/Device'
 
 @Component({
   components: { TsmLinkingFormItemHeader, TsmLinkingForm, BaseExpandableListItem }
@@ -44,6 +46,12 @@ export default class TsmLinkingFormItem extends Vue {
     required: true
   })
     selectedMeasuredQuantity!: DeviceProperty
+
+  @Prop({
+    required: true,
+    type: Array
+  })
+  private devices!: Device[]
 
   private newLinking: TsmLinking = new TsmLinking()
 

@@ -90,3 +90,13 @@ class DatastreamLinkSchema(Schema):
         id_field="id",
         required=True,
     )
+    involved_devices = Relationship(
+        related_view="api.involved_device_for_datastream_link_list",
+        related_view_kwargs={"id": "<id>"},
+        include_resource_linkage=True,
+        many=True,
+        allow_none=True,
+        schema="InvolvedDeviceForDatastreamLinkSchema",
+        type_="involved_device_for_datastream_link",
+        id_field="id",
+    )

@@ -169,6 +169,7 @@ const state = (): ConfigurationsState => ({
 export type TimelineActionsGetter = ITimelineAction[]
 export type AvailableContactsOfActionsGetter = string[]
 export type AvailableYearsOfActionsGetter = number[]
+export type AvailableDevicesGetter = Device[]
 
 export type ConfigurationFilter = {selectedActionTypes: IOptionsForActionType[], selectedYears: number[], selectedContacts: string[]}
 
@@ -383,6 +384,16 @@ const getters: GetterTree<ConfigurationsState, RootState> = {
   configurationParametersSortedAlphabetically: (state: ConfigurationsState): Parameter[] => {
     // @ts-ignore
     return state.configurationParameters.toSorted((a: Parameter, b: Parameter) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
+  },
+  availableDevices: (state: ConfigurationsState): Device[] => {
+    const devices = state.deviceMountActionsIncludingDeviceInformation.map((mountAction: DeviceMountAction) => {
+      return mountAction.device
+    })
+
+    const uniqueDevices = [...new Map(devices.map((device: Device) =>
+      [device.id, device])).values()]
+
+    return uniqueDevices
   }
 }
 

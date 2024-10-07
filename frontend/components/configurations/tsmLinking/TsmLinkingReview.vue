@@ -27,6 +27,7 @@ SPDX-License-Identifier: EUPL-1.2
                 <th>Date range</th>
                 <th>License</th>
                 <th>Aggregation</th>
+                <th>Involved devices</th>
               </tr>
             </thead>
             <tbody>
@@ -67,6 +68,7 @@ SPDX-License-Identifier: EUPL-1.2
                   </a>
                 </td>
                 <td>{{ formLinking.aggregationText }}</td>
+                <td>{{ formLinking.filterInvolvedDevices(devices) | sparseJoin }} </td>
               </tr>
             </tbody>
           </v-simple-table>
@@ -85,6 +87,7 @@ import { Component, Prop, Vue } from 'nuxt-property-decorator'
 import { generatePropertyTitle } from '@/utils/stringHelpers'
 import TsmLinkingDates from '@/components/configurations/tsmLinking/TsmLinkingDates.vue'
 import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
+import { Device } from '@/models/Device'
 
 @Component({
   components: { ExtendedItemName, TsmLinkingDates },
@@ -96,6 +99,12 @@ export default class TsmLinkingReview extends Vue {
     type: Array
   })
   private tsmLinkings!: []
+
+  @Prop({
+    required: true,
+    type: Array
+  })
+  private devices!: Device[]
 }
 </script>
 

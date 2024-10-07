@@ -22,10 +22,12 @@ import { mapActions } from 'vuex'
 import { LoadConfigurationTsmLinkingsAction, LoadTsmEndpointsAction } from '@/store/tsmLinking'
 import { LoadLicensesAction } from '@/store/vocabulary'
 import { SetLoadingAction } from '@/store/progressindicator'
+import { LoadDeviceMountActionsIncludingDeviceInformationAction } from '@/store/configurations'
 
 @Component({
   middleware: ['auth'],
   methods: {
+    ...mapActions('configurations', ['loadDeviceMountActionsIncludingDeviceInformation']),
     ...mapActions('tsmLinking', ['loadConfigurationTsmLinkings', 'loadTsmEndpoints']),
     ...mapActions('vocabulary', ['loadLicenses']),
     ...mapActions('progressindicator', ['setLoading'])
@@ -37,6 +39,7 @@ export default class ConfigurationTsmLinking extends Vue {
   loadTsmEndpoints!: LoadTsmEndpointsAction
   loadLicenses!: LoadLicensesAction
   setLoading!: SetLoadingAction
+  loadDeviceMountActionsIncludingDeviceInformation!: LoadDeviceMountActionsIncludingDeviceInformationAction
 
   async created () {
     try {
@@ -44,7 +47,9 @@ export default class ConfigurationTsmLinking extends Vue {
       await Promise.all([
         this.loadConfigurationTsmLinkings(this.configurationId),
         this.loadTsmEndpoints(),
-        this.loadLicenses()
+        this.loadLicenses(),
+        this.loadDeviceMountActionsIncludingDeviceInformation(this.configurationId)
+
       ])
     } catch (e) {
       this.$store.commit('snackbar/setError', 'Failed to fetch linkings')

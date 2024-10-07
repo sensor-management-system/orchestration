@@ -19,6 +19,7 @@ Added:
 - more labels and notes on suggestion dialog for new manufacturers
 - "sites&labs" page has a map which shows listed sites and a button to show a specific listed site on the map
 - possibility to automatically render a created image attachment on the Basic data page
+- devices that are involved in the measurement (loggers, multiplexers) can now be added to the datastream link
 
 Fixed:
 - loaddata command is now more robust according to files with just a new line

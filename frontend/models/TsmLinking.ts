@@ -16,6 +16,7 @@ import { DeviceMountAction } from '@/models/DeviceMountAction'
 import { Device } from '@/models/Device'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { TsmEndpoint } from '@/models/TsmEndpoint'
+import { TsmLinkingInvolvedDevice } from '@/models/TsmLinkingInvolvedDevice'
 
 export interface ITsmLinking {
   id: string
@@ -32,6 +33,7 @@ export interface ITsmLinking {
   licenseUri: string
   licenseName: string
   aggregationPeriod: number | null
+  involvedDevices: TsmLinkingInvolvedDevice[]
 }
 export class TsmLinking implements ITsmLinking {
   private _id: string = ''
@@ -48,6 +50,7 @@ export class TsmLinking implements ITsmLinking {
   private _licenseUri: string = ''
   private _licenseName: string = ''
   private _aggregationPeriod: number | null = null
+  private _involvedDevices: TsmLinkingInvolvedDevice[] = []
 
   get id (): string {
     return this._id
@@ -161,6 +164,29 @@ export class TsmLinking implements ITsmLinking {
     this._aggregationPeriod = newAggregationPeriod
   }
 
+  get involvedDevices (): TsmLinkingInvolvedDevice[] {
+    return this._involvedDevices
+  }
+
+  set involvedDevices (newInvolvedDevices: TsmLinkingInvolvedDevice[]) {
+    this._involvedDevices = newInvolvedDevices
+  }
+
+  filterInvolvedDevices (devices: Device[]): Device[] {
+    const result = []
+    const involvedDevices = this.involvedDevices.map(d =>
+      TsmLinkingInvolvedDevice.createFromObject(d)
+    )
+    involvedDevices.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))
+    for (const involvedDevice of involvedDevices) {
+      const idx = devices.findIndex(d => d.id === involvedDevice.deviceId)
+      if (idx > -1) {
+        result.push(devices[idx])
+      }
+    }
+    return result
+  }
+
   get aggregationText (): string {
     if (!this.aggregationPeriod) {
       return ''
@@ -189,6 +215,7 @@ export class TsmLinking implements ITsmLinking {
     result.licenseName = someObject.licenseName
     result.licenseUri = someObject.licenseUri
     result.aggregationPeriod = someObject.aggregationPeriod
+    result.involvedDevices = someObject.involvedDevices.map(d => TsmLinkingInvolvedDevice.createFromObject(d))
     return result
   }
 }

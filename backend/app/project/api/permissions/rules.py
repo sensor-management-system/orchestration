@@ -9,6 +9,7 @@ import itertools
 
 from flask import g
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import aliased
 
 from ...extensions.instances import idl
 from ..datalayers.esalchemy import AndFilter, OrFilter, TermEqualsExactStringFilter
@@ -47,6 +48,7 @@ from ..models import (
     GenericDeviceActionAttachment,
     GenericPlatformAction,
     GenericPlatformActionAttachment,
+    InvolvedDeviceForDatastreamLink,
     Platform,
     PlatformAttachment,
     PlatformContactRole,
@@ -764,6 +766,63 @@ def filter_visible(query):
     return filter_visible.delegate(
         DeviceMountAction, query.join(DatastreamLink.device_mount_action)
     )
+
+
+# InvolvedDeviceForDatastreamLink
+@can_see.register(InvolvedDeviceForDatastreamLink)
+def can_see(entity):
+    """Return if the entity can be seen."""
+    return can_see(entity.datastream_link) and can_see(entity.device)
+
+
+@can_create.register(InvolvedDeviceForDatastreamLink)
+def can_create(type_, data):
+    """Return if the type with the data can be created."""
+    datastream_link_id = data.get("datastream_link")
+    return can_edit(
+        db.session.query(DatastreamLink)
+        .filter(DatastreamLink.id == datastream_link_id)
+        .first()
+    )
+
+
+@can_edit.register(InvolvedDeviceForDatastreamLink)
+def can_edit(entity):
+    """Return if the entity can be edited."""
+    return can_edit(entity.datastream_link)
+
+
+@can_change.register(InvolvedDeviceForDatastreamLink)
+def can_change(entity, data):
+    """Return if we can change the entity accordingly."""
+    if data.get("datastream_link"):
+        if not can_edit(
+            db.session.query(DatastreamLink)
+            .filter(DatastreamLink.id == data["datastream_link"])
+            .first()
+        ):
+            return False
+    return True
+
+
+@can_delete.register(InvolvedDeviceForDatastreamLink)
+def can_delete(entity):
+    """Return if the entity can be deleted."""
+    return can_edit(entity.datastream_link)
+
+
+@filter_visible.register(InvolvedDeviceForDatastreamLink)
+def filter_visible(query):
+    """Filter the query based on the visibility settings."""
+    query = filter_visible.delegate(
+        DatastreamLink, query.join(InvolvedDeviceForDatastreamLink.datastream_link)
+    )
+    device_involved = aliased(Device)
+    query = filter_visible.delegate(
+        Device,
+        query.join(InvolvedDeviceForDatastreamLink.device.of_type(device_involved)),
+    )
+    return query
 
 
 # Device

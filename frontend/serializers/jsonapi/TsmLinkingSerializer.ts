@@ -13,6 +13,7 @@ import { DeviceSerializer } from '@/serializers/jsonapi/DeviceSerializer'
 import { DevicePropertySerializer } from '@/serializers/jsonapi/DevicePropertySerializer'
 import { DeviceMountActionSerializer } from '@/serializers/jsonapi/DeviceMountActionSerializer'
 import { TsmEndpointSerializer } from '@/serializers/jsonapi/TsmEndpointSerializer'
+import { TsmLinkingInvolvedDeviceSerializer } from '@/serializers/jsonapi/TsmLinkingInvolvedDeviceSerializer'
 
 import {
   IJsonApiEntity,
@@ -31,12 +32,14 @@ import { TsmdlDatastream } from '@/models/TsmdlDatastream'
 import { TsmdlDatasource } from '@/models/TsmdlDatasource'
 import { TsmdlThing } from '@/models/TsmdlThing'
 import { TsmEndpoint } from '@/models/TsmEndpoint'
+import { TsmLinkingInvolvedDevice } from '@/models/TsmLinkingInvolvedDevice'
 
 export class TsmLinkingSerializer {
   private deviceMountActionSerializer: DeviceMountActionSerializer = new DeviceMountActionSerializer()
   private deviceSerializer: DeviceSerializer = new DeviceSerializer()
   private devicePropertySerializer: DevicePropertySerializer = new DevicePropertySerializer()
   private tsmEndpointSerializer: TsmEndpointSerializer = new TsmEndpointSerializer()
+  private tsmLinkingInvolvedDeviceSerializer: TsmLinkingInvolvedDeviceSerializer = new TsmLinkingInvolvedDeviceSerializer()
 
   convertJsonApiObjectToModel (jsonApiObject: IJsonApiEntityEnvelope): TsmLinking {
     const included = jsonApiObject.included || []
@@ -58,6 +61,7 @@ export class TsmLinkingSerializer {
     const deviceMountActionLookup: { [idx: string]: DeviceMountAction } = {}
     const devicePropertyLookup: { [idx: string]: DeviceProperty } = {}
     const tsmEndpointLookup: { [idx: string]: TsmEndpoint } = {}
+    const involvedDevicesLookup: { [idx: string]: TsmLinkingInvolvedDevice } = {}
 
     const attributes = jsonApiData.attributes
     const relationships = jsonApiData.relationships || {}
@@ -109,6 +113,10 @@ export class TsmLinkingSerializer {
           tsmEndpointLookup[tsmEndpoint.id] = tsmEndpoint
         }
       }
+      if (includedEntry.type === 'involved_device_for_datastream_link') {
+        const involvedDevice = this.tsmLinkingInvolvedDeviceSerializer.convertJsonApiDataToModel(includedEntry)
+        involvedDevicesLookup[includedEntry.id] = involvedDevice
+      }
     }
 
     const deviceMountActionRelationship = relationships.device_mount_action as IJsonApiRelationships
@@ -139,6 +147,15 @@ export class TsmLinkingSerializer {
     tsmLinking.deviceMountAction = deviceMountAction
     tsmLinking.deviceProperty = deviceProperty
     tsmLinking.tsmEndpoint = tsmEndpoint
+
+    const involvedDevices = []
+    if (relationships.involved_devices && relationships.involved_devices.data) {
+      for (const entry of (relationships.involved_devices.data as IJsonApiEntityWithoutDetails[])) {
+        const involvedDevice = involvedDevicesLookup[entry.id]
+        involvedDevices.push(involvedDevice)
+      }
+    }
+    tsmLinking.involvedDevices = involvedDevices
 
     return tsmLinking
   }
