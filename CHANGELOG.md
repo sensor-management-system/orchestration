@@ -24,6 +24,7 @@ Fixed:
 - loaddata command is now more robust according to files with just a new line
 - startup for M2 Mac OS with docker desktop was improved
 - typo in validation message when setting the unmount date for a parent platform
+- don't try to check platform mounts for usage in dynamic location actions
 
 Changed:
 - Cleanup of unused docker images on GFZ servers is now done via `docker image prune`

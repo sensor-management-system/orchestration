@@ -276,22 +276,21 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
           this.nodeCanBeUnmounted = false
           return false
         }
-      }
-
-      // check device mount actions against dynamic location actions
-      // load the full action (with device properties)
-      await this.loadDeviceMountAction(node.unpack().id)
-      if (this.deviceMountAction) {
-        // get all dynamic location actions that use properties of the current device mount action
-        const dynamicLocationActions = MountActionValidator.getRelatedDynamicLocationActions(this.deviceMountAction, this.configurationDynamicLocationActions)
-        // create a new device mount action with the selected end date
-        const newDeviceMountAction = DeviceMountAction.createFromObject(this.deviceMountAction)
-        newDeviceMountAction.endDate = this.selectedDate
-        const error = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(newDeviceMountAction, dynamicLocationActions)
-        if (typeof error === 'object') {
-          this.errorMessage = 'The selected device is still referenced by a dynamic location. Please stop it first.'
-          this.nodeCanBeUnmounted = false
-          return false
+        // check device mount actions against dynamic location actions
+        // load the full action (with device properties)
+        await this.loadDeviceMountAction(node.unpack().id)
+        if (this.deviceMountAction) {
+          // get all dynamic location actions that use properties of the current device mount action
+          const dynamicLocationActions = MountActionValidator.getRelatedDynamicLocationActions(this.deviceMountAction, this.configurationDynamicLocationActions)
+          // create a new device mount action with the selected end date
+          const newDeviceMountAction = DeviceMountAction.createFromObject(this.deviceMountAction)
+          newDeviceMountAction.endDate = this.selectedDate
+          const error = MountActionValidator.isDeviceMountActionCompatibleWithMultipleDynamicLocationActions(newDeviceMountAction, dynamicLocationActions)
+          if (typeof error === 'object') {
+            this.errorMessage = 'The selected device is still referenced by a dynamic location. Please stop it first.'
+            this.nodeCanBeUnmounted = false
+            return false
+          }
         }
       }
     }
