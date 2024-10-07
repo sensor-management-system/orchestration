@@ -44,7 +44,7 @@ SPDX-License-Identifier: EUPL-1.2
       <h2 class="mb-1">
         Authorized representatives
       </h2>
-      <p>The GFZ is legally represented by Prof. Dr. Susanne Buiter (Chairperson of the Board and Scientific Executive Director) and Dr. Stefan Schwartze (Administrative Executive Director).</p>
+      <p>The GFZ is legally represented by Prof. Dr. Susanne Buiter (Scientific Executive Director and Spokesperson of the Executive Board) and Marco Kupzig (Administrative Executive Director, ad interim).</p>
     </section>
     <section class="mb-6">
       <h2 class="mb-1">
