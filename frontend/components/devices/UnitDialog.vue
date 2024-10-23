@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 - 2023
+SPDX-FileCopyrightText: 2022 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -47,8 +47,8 @@ SPDX-License-Identifier: EUPL-1.2
                 />
               </v-col>
             </v-row>
-            <v-row class="mt-0">
-              <v-col class="pt-0 pb-0">
+            <v-row>
+              <v-col>
                 <v-text-field
                   v-model="unit.provenance"
                   label="Provenance"
@@ -63,7 +63,32 @@ SPDX-License-Identifier: EUPL-1.2
             </v-row>
             <v-row>
               <v-col>
-                <provenance-hint />
+                <v-text-field
+                  v-model="unit.provenanceTerm"
+                  label="Provenance term"
+                />
+              </v-col>
+              <v-col>
+                <v-text-field
+                  v-model="unit.ucumCaseSensitiveSymbol"
+                  label="UCUM c/s"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col>
+                <provenance-hint>
+                  To fill out the provenance please note the origin of the term.
+                  Perhaps there is a relevant vocabulary
+                  (<a href="http://vocab.nerc.ac.uk/" target="_blank">NERC</a>,
+                  <a href="http://vocabulary.odm2.org/" target="_blank">ODM2</a>,
+                  <a href="https://en.wikipedia.org/" target="_blank">Wiki</a>, etc.) that contains the term.
+                  If it's a term used in your scientific discipline, you can note that as well.
+                  In the field <em>Provenance URI</em> you can enter the link to the origin of the term.
+
+                  For the units <a href="https://ucum.org/ucum" target="_blank">UCUM</a> is a good source for terms.
+                  It helps for the curation process to include the case sensitive symbol (c/s).
+                </provenance-hint>
               </v-col>
             </v-row>
             <v-row>
