@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.16.2 (Unreleased)
+## 1.16.3 (Unreleased)
+
+## 1.16.2 - 2024-10-23
 
 Added:
 - improved filter options for get list endpoint of datastream links
