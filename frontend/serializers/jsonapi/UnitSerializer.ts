@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2022
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -27,6 +27,8 @@ export class UnitSerializer {
     const definition = jsonApiData.attributes.definition
     const provenance = jsonApiData.attributes.provenance || ''
     const provenanceUri = jsonApiData.attributes.provenance_uri || ''
+    const provenanceTerm = jsonApiData.attributes.provenance_term || ''
+    const ucumCaseSensitiveSymbol = jsonApiData.attributes.ucum_case_sensitive_symbol || ''
     const category = jsonApiData.attributes.category || ''
     const note = jsonApiData.attributes.note || ''
 
@@ -45,6 +47,8 @@ export class UnitSerializer {
       definition,
       provenance,
       provenanceUri,
+      provenanceTerm,
+      ucumCaseSensitiveSymbol,
       category,
       note,
       uri: url,
@@ -58,6 +62,8 @@ export class UnitSerializer {
       definition: unit.definition,
       provenance: unit.provenance,
       provenance_uri: unit.provenanceUri,
+      provenance_term: unit.provenanceTerm,
+      ucum_case_sensitive_symbol: unit.ucumCaseSensitiveSymbol,
       category: unit.category,
       note: unit.note
     }

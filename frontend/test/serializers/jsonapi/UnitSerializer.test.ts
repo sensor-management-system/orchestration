@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2022
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -20,7 +20,9 @@ describe('UnitSerializer', () => {
             definition: 'Unit 1',
             note: null,
             provenance: 'ONE_PER_METER',
+            provenance_term: '1/m',
             provenance_uri: null,
+            ucum_case_sensitive_symbol: 'One/m',
             status: 'ACCEPTED',
             term: '1/m'
           },
@@ -41,7 +43,9 @@ describe('UnitSerializer', () => {
             definition: 'Unit 2',
             note: 'note',
             provenance: 'ONE_PER_TIME',
+            provenance_term: null,
             provenance_uri: 'uri',
+            ucum_case_sensitive_symbol: null,
             status: 'ACCEPTED',
             term: '1/t'
           },
@@ -76,7 +80,9 @@ describe('UnitSerializer', () => {
         category: '',
         note: '',
         provenance: 'ONE_PER_METER',
+        provenanceTerm: '1/m',
         provenanceUri: '',
+        ucumCaseSensitiveSymbol: 'One/m',
         globalProvenanceId: null
       })
 
@@ -88,7 +94,9 @@ describe('UnitSerializer', () => {
         category: 'cat',
         note: 'note',
         provenance: 'ONE_PER_TIME',
+        provenanceTerm: '',
         provenanceUri: 'uri',
+        ucumCaseSensitiveSymbol: '',
         globalProvenanceId: '1'
       })
 
@@ -113,6 +121,8 @@ describe('UnitSerializer', () => {
         note: 'note',
         provenance: 'ONE_PER_TIME',
         provenanceUri: 'uri',
+        provenanceTerm: '1/t',
+        ucumCaseSensitiveSymbol: 'One/time',
         globalProvenanceId: '1'
       })
 
@@ -125,6 +135,8 @@ describe('UnitSerializer', () => {
           note: 'note',
           provenance: 'ONE_PER_TIME',
           provenance_uri: 'uri',
+          provenance_term: '1/t',
+          ucum_case_sensitive_symbol: 'One/time',
           term: '1/t'
         },
         relationships: {

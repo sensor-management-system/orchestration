@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2022
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -13,7 +13,9 @@ export interface IUnit {
   uri: string
   definition: string
   provenance: string
+  provenanceTerm: string
   provenanceUri: string
+  ucumCaseSensitiveSymbol: string
   category: string
   note: string
   globalProvenanceId: string | null
@@ -25,7 +27,9 @@ export class Unit implements IUnit {
   private _uri: string = ''
   private _definition: string = ''
   private _provenance: string = ''
+  private _provenanceTerm: string = ''
   private _provenanceUri: string = ''
+  private _ucumCaseSenstiveSymbol: string = ''
   private _category: string = ''
   private _note: string = ''
   private _globalProvenanceId: string | null = null
@@ -70,12 +74,28 @@ export class Unit implements IUnit {
     this._provenance = newProvenance
   }
 
+  get provenanceTerm (): string {
+    return this._provenanceTerm
+  }
+
+  set provenanceTerm (newProvenanceTerm: string) {
+    this._provenanceTerm = newProvenanceTerm
+  }
+
   get provenanceUri (): string {
     return this._provenanceUri
   }
 
   set provenanceUri (newProvenanceUri: string) {
     this._provenanceUri = newProvenanceUri
+  }
+
+  get ucumCaseSensitiveSymbol (): string {
+    return this._ucumCaseSenstiveSymbol
+  }
+
+  set ucumCaseSensitiveSymbol (newUcumCaseSensitiveSymbol: string) {
+    this._ucumCaseSenstiveSymbol = newUcumCaseSensitiveSymbol
   }
 
   get category (): string {
@@ -122,7 +142,9 @@ export class Unit implements IUnit {
     newObject.name = someObject.name
     newObject.definition = someObject.definition
     newObject.provenance = someObject.provenance
+    newObject.provenanceTerm = someObject.provenanceTerm
     newObject.provenanceUri = someObject.provenanceUri
+    newObject.ucumCaseSensitiveSymbol = someObject.ucumCaseSensitiveSymbol
     newObject.category = someObject.category
     newObject.note = someObject.note
     newObject.uri = someObject.uri
