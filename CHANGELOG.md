@@ -9,6 +9,10 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.16.3 (Unreleased)
 
+Added:
+
+- fullscreen image preview and delimiters on image overview
+
 ## 1.16.2 - 2024-10-23
 
 Added:
