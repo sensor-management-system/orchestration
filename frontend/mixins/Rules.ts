@@ -15,6 +15,13 @@
 
 import { Vue, Component } from 'nuxt-property-decorator'
 
+export interface IRules {
+  required: (v: any) => string | boolean
+  validUrl: (v: string) => string | boolean
+  numeric: (v: any) => string | boolean
+  numericOrEmpty: (v: any) => string | boolean
+}
+
 /**
  * A mixin component for standard form validation rules
  * @extends Vue
@@ -27,7 +34,7 @@ export class Rules extends Vue {
    * @property {function} required - triggers when value is empty
    * @property {function} validUrl - triggers when value does not start with http(s):// or ftp://
    */
-  private rules: Object = {
+  rules: IRules = {
     required: (v: any) => {
       switch (typeof v) {
         case 'string':

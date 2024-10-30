@@ -10,8 +10,8 @@ SPDX-License-Identifier: EUPL-1.2
 ## 1.16.3 (Unreleased)
 
 Added:
-
-- fullscreen image preview and delimiters on image overview
+- common form component for attachments ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/439))
+- fullscreen image preview and delimiters on image overview ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/431))
 
 ## 1.16.2 - 2024-10-23
 
