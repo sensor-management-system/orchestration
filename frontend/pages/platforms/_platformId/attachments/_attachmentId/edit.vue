@@ -19,53 +19,7 @@ SPDX-License-Identifier: EUPL-1.2
         @save="save"
       />
     </v-card-actions>
-    <v-card>
-      <v-card-text
-        class="py-2 px-3"
-      >
-        <div class="d-flex align-center">
-          <span class="text-caption">
-            {{ filename(valueCopy) }}<span v-if="valueCopy.createdAt && valueCopy.isUpload">,
-              uploaded at {{ valueCopy.createdAt | toUtcDateTimeString }}
-            </span>
-          </span>
-        </div>
-        <v-row
-          no-gutters
-        >
-          <v-col cols="8" class="text-subtitle-1">
-            <v-icon>
-              {{ filetypeIcon(valueCopy) }}
-            </v-icon>
-            <v-form ref="attachmentsEditForm" class="pb-2" @submit.prevent>
-              <v-text-field
-                v-model="valueCopy.url"
-                :label="valueCopy.isUpload ? 'File': 'URL'"
-                required
-                class="required"
-                type="url"
-                placeholder="https://"
-                :rules="valueCopy.isUpload ? [] : [rules.required, rules.validUrl]"
-                :disabled="valueCopy.isUpload"
-              />
-              <autocomplete-text-input
-                v-model="valueCopy.label"
-                label="Label"
-                required
-                class="required"
-                endpoint="attachment-labels"
-                :rules="[rules.required]"
-              />
-              <v-textarea
-                v-model="valueCopy.description"
-                label="Description"
-                rows="3"
-              />
-            </v-form>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
+    <AttachmentBasicDataForm ref="attachmentsEditForm" v-model="valueCopy" />
   </div>
 </template>
 
@@ -90,13 +44,14 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 import { AttachmentsMixin } from '@/mixins/AttachmentsMixin'
 import { Rules } from '@/mixins/Rules'
+import AttachmentBasicDataForm from '@/components/shared/AttachmentBasicDataForm.vue'
 
 /**
  * A class component that displays a single attached file
  * @extends Vue
  */
 @Component({
-  components: { AutocompleteTextInput, SaveAndCancelButtons },
+  components: { AttachmentBasicDataForm, AutocompleteTextInput, SaveAndCancelButtons },
   middleware: ['auth'],
   computed: {
     ...mapState('platforms', ['platformAttachment']),
@@ -165,7 +120,7 @@ export default class AttachmentEditPage extends mixins(Rules, AttachmentsMixin, 
   }
 
   async save () {
-    if (!(this.$refs.attachmentsEditForm as Vue & { validate: () => boolean }).validate()) {
+    if (!(this.$refs.attachmentsEditForm as AttachmentBasicDataForm & { validateForm: () => boolean }).validateForm()) {
       this.$store.commit('snackbar/setError', 'Please correct your input')
       return
     }
