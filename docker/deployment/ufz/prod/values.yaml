@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: 2024 Hannes Bohring <hannes.bohring@ufz.de>
+# SPDX-FileCopyrightText: 2024 Helmholtz Centre for Environmental Research GmbH - UFZ
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+sms:
+
+  sms-backend:
+    enabled: true
+
+    nginx:
+      image:
+        tag: "ufz-backend-1.16.2"
+
+    backend:
+      image:
+        tag: "ufz-prod-1.16.2"
+
+  sms-frontend:
+    enabled: true
+    image:
+      repository: "registry.hzdr.de/hub-terra/sms/orchestration/frontend"
+      tag: "ufz-prod-1.16.2"
+
+  sms-idl:
+    enabled: true
+    image:
+      repository: "registry.hzdr.de/hub-terra/sms/gfz-idl/backend"
+      tag: "0.4.2"
+
+  sms-cv:
+    # dont deploy sms-cv, because it is already deployed on Desy-Rancher
+    enabled: false
+
+  # dont deploy local DBs ##############################################################
+  sms-backend-db:
+    enabled: false
+
+  sms-cv-db:
+    enabled: false
