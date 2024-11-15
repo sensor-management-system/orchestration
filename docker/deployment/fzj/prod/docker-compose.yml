@@ -2,6 +2,8 @@
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
+# - Juergen Sorg <j.sorg@fz-juelich.de>
+# - Ulrich Loup <u.loup@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 #
@@ -10,14 +12,10 @@
 version : '3.3'
 
 services:
-  smsnginx:
-    image: registry.hzdr.de/hub-terra/sms/orchestration/nginx:fzj-latest
+  nginx:
+    image: registry.hzdr.de/hub-terra/sms/orchestration/nginx:fzj-prod-latest
     restart: unless-stopped
     volumes:
-      - /etc/ssl/ibg3container_ibg_kfa-juelich_de.pem:/etc/ssl/default.crt:ro
-      - /etc/ssl/private/ibg3container_ibg_kfa-juelich_de.key:/etc/ssl/private/default.key:ro
-      - /etc/ssl/dhparam.pem:/etc/ssl/dhparam.pem:ro
-      - /etc/ssl/ibg3container_ibg_kfa-juelich_de-chain.cer:/etc/ssl/chain.pem:ro
       - backend-static-files:/usr/share/nginx/html/static/backend:ro
       - idl-static-files:/usr/share/nginx/html/static/idl:ro
     networks:
@@ -25,12 +23,12 @@ services:
       - nginx
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.smsnginx.rule=Host(`sms-staging.ibg3container.ibg.kfa-juelich.de`)"
-      - "traefik.http.routers.smsnginx.entrypoints=websecure"
-      - "traefik.http.services.smsnginx.loadbalancer.server.port=80"
-#     - "traefik.http.services.smsnginx.loadbalancer.server.scheme=https"
-      - "traefik.http.routers.smsnginx.service=smsnginx"
-      - "traefik.http.routers.smsnginx.tls=true"
+      - "traefik.http.routers.nginx.rule=Host(`sms.earth-data.fz-juelich.de`)"
+      - "traefik.http.routers.nginx.entrypoints=websecure"
+      - "traefik.http.services.nginx.loadbalancer.server.port=80"
+#     - "traefik.http.services.nginx.loadbalancer.server.scheme=https"
+      - "traefik.http.routers.nginx.service=nginx"
+      - "traefik.http.routers.nginx.tls=true"
       - "traefik.docker.network=reverseproxy"
 
   idl:
@@ -38,7 +36,7 @@ services:
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'
-      DJANGO_ALLOWED_HOSTS: 'sms-staging.ibg3container.ibg.kfa-juelich.de idl'
+      DJANGO_ALLOWED_HOSTS: 'sms.earth-data.fz-juelich.de idl'
       DJANGO_BASE_PATH: idl/
       DJANGO_STATIC_URL: /static/idl/
       DJANGO_STATIC_ROOT: /static/idl/
@@ -48,8 +46,7 @@ services:
       DJANGO_DB_PASSWORD: $IDL_DB_PASSWORD
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
-      DJANGO_SECRET_KEY: ${IDL_SECRET_KEY}
-      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sms-staging.ibg3container.ibg.kfa-juelich.de'
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sms.earth-data.fz-juelich.de'
       IDL_TOKEN: $IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login-dev.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:fzj-sms-admin'
@@ -79,7 +76,8 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+      - "ES_JAVA_OPTS=-Xms4g -Xmx4g -Dlog4j2.formatMsgNoLookups=true"
       - cluster.routing.allocation.disk.threshold_enabled=false
     ulimits:
       memlock:
@@ -89,7 +87,7 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - backend
-  
+
   minio:
     image: minio/minio:RELEASE.2021-07-12T02-44-53Z
     restart: unless-stopped
@@ -124,7 +122,7 @@ services:
       - backend
 
   backend:
-    image: registry.hzdr.de/hub-terra/sms/orchestration/backend:fzj-latest
+    image: registry.hzdr.de/hub-terra/sms/orchestration/backend:fzj-prod-latest
     restart: unless-stopped
     environment:
       URL_PREFIX: /backend/api/v1
@@ -137,7 +135,7 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: sms-attachments
       MINIO_ENDPOINT: minio:9000
-      DOWNLOAD_ENDPOINT: https://sms-staging.ibg3container.ibg.kfa-juelich.de
+      DOWNLOAD_ENDPOINT: https://sms.earth-data.fz-juelich.de
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
@@ -149,7 +147,7 @@ services:
       PKCE_CLIENT_ID: ${PKCE_CLIENT_ID}
       PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: fzj
-      SMS_FRONTEND_URL: https://sms-staging.ibg3container.ibg.kfa-juelich.de
+      SMS_FRONTEND_URL: https://sms.earth-data.fz-juelich.de
       SMS_VERSION: ${SMS_VERSION}
       B2INST_TOKEN: ${B2INST_TOKEN}
       B2INST_URL: https://b2inst-test.gwdg.de
@@ -160,7 +158,7 @@ services:
       PID_SERVICE_USER: ${PID_SERVICE_USER}
       PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
       PID_PREFIX: 20.500.14372
-      PID_SUFFIX: SMS-Staging
+      PID_SUFFIX: SMS-Prod
       CLIENT_ID: ${CLIENT_ID}
 
     depends_on:
@@ -184,3 +182,4 @@ networks:
   idl-db:
   reverseproxy:
     external: true
+
