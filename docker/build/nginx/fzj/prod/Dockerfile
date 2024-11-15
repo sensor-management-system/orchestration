@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2021 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
+# - Juergen Sorg <j.sorg@fz-juelich.de>
+# - Ulrich Loup <u.loup@fz-juelich.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 # - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 #
@@ -37,7 +39,7 @@ ENV NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME 1800000
 
 ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
 
-ARG SMS_VERSION_ARG=develop
+ARG SMS_VERSION_ARG=prod
 ENV SMS_VERSION $SMS_VERSION_ARG
 
 RUN mkdir /smsfrontend
