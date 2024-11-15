@@ -1,6 +1,3 @@
-import { DateTime } from 'luxon'
-import { Configuration } from '@/models/Configuration'
-
 /**
  * @license EUPL-1.2
  * SPDX-FileCopyrightText: 2022 - 2024
@@ -11,13 +8,16 @@ import { Configuration } from '@/models/Configuration'
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
+
+import { DateTime } from 'luxon'
+
 export interface IAvailability {
   id: string
   available: boolean
   beginDate?: DateTime
   endDate?: DateTime
   configurationID?: string
-  configuration?: Configuration
+  configurationLabel?: string
   mountID?: string
 }
 
@@ -27,7 +27,7 @@ export class Availability implements IAvailability {
   private _beginDate?: DateTime
   private _endDate?: DateTime
   private _configurationID?: string = ''
-  private _configuration?: Configuration
+  private _configurationLabel?: string = ''
   private _mountID?: string = ''
 
   get id (): string {
@@ -70,12 +70,12 @@ export class Availability implements IAvailability {
     this._configurationID = newConfiguration
   }
 
-  get configuration (): Configuration | undefined {
-    return this._configuration
+  get configurationLabel (): string | undefined {
+    return this._configurationLabel
   }
 
-  set configuration (newConfiguration: Configuration | undefined) {
-    this._configuration = newConfiguration
+  set configurationLabel (newConfigurationLabel: string | undefined) {
+    this._configurationLabel = newConfigurationLabel
   }
 
   get mountID (): string | undefined {
@@ -95,7 +95,7 @@ export class Availability implements IAvailability {
       newObject.beginDate = someObject.beginDate
       newObject.endDate = someObject.endDate
       newObject.configurationID = someObject.configurationID
-      newObject.configuration = someObject.configuration
+      newObject.configurationLabel = someObject.configurationLabel
       newObject.mountID = someObject.mountID
     }
 

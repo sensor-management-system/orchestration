@@ -13,6 +13,9 @@ Added:
 - common form component for attachments ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/439))
 - fullscreen image preview and delimiters on image overview ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/431))
 
+Fixed:
+- Problem on non refreshing messages if a device or platform is not available to be mounted ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/451))
+
 ## 1.16.2 - 2024-10-23
 
 Added:
