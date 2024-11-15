@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2022
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Tim Eder <tim.eder@ufz.de>
@@ -28,7 +28,8 @@ export class AvailabilitySerializer {
     if (!jsonApiData.available) {
       newAvailability.beginDate = stringToDate(jsonApiData.begin_date)
       newAvailability.endDate = stringToDate(jsonApiData.end_date)
-      newAvailability.configurationID = jsonApiData.configuration
+      newAvailability.configurationID = jsonApiData.configuration_id
+      newAvailability.configurationLabel = jsonApiData.configuration_label
       newAvailability.mountID = jsonApiData.mount
     }
 

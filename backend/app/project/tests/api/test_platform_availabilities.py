@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -276,7 +276,8 @@ class TestPlatformAvailabilities(BaseTestCase):
                 "id": str(platform.id),
                 "available": False,
                 "mount": str(platform_mount_action_2.id),
-                "configuration": str(self.configuration.id),
+                "configuration_id": str(self.configuration.id),
+                "configuration_label": self.configuration.label,
                 "begin_date": "2023-01-01T00:00:00+00:00",
                 "end_date": "2026-01-01T00:00:00+00:00",
             }
@@ -306,7 +307,8 @@ class TestPlatformAvailabilities(BaseTestCase):
                 "id": str(platform.id),
                 "available": False,
                 "mount": str(platform_mount_action_1.id),
-                "configuration": str(self.configuration.id),
+                "configuration_id": str(self.configuration.id),
+                "configuration_label": self.configuration.label,
                 "begin_date": "2021-01-01T00:00:00+00:00",
                 "end_date": "2022-01-30T00:00:00+00:00",
             },
@@ -314,7 +316,8 @@ class TestPlatformAvailabilities(BaseTestCase):
                 "id": str(platform.id),
                 "available": False,
                 "mount": str(platform_mount_action_2.id),
-                "configuration": str(self.configuration.id),
+                "configuration_id": str(self.configuration.id),
+                "configuration_label": self.configuration.label,
                 "begin_date": "2023-01-01T00:00:00+00:00",
                 "end_date": "2026-01-01T00:00:00+00:00",
             },
@@ -383,7 +386,8 @@ class TestPlatformAvailabilities(BaseTestCase):
                 "id": str(available_platform_2.id),
                 "available": False,
                 "mount": str(platform_mount_action_2.id),
-                "configuration": str(self.configuration.id),
+                "configuration_id": str(self.configuration.id),
+                "configuration_label": self.configuration.label,
                 "begin_date": "2022-03-01T00:00:00+00:00",
                 "end_date": "2022-12-30T00:00:00+00:00",
             },

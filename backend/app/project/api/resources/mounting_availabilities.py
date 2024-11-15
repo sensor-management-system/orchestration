@@ -29,7 +29,8 @@ class AvailableObjectSchema(Schema):
     id = fields.Str()
     available = fields.Boolean()
     mount = fields.Str()
-    configuration = fields.Str()
+    configuration_id = fields.Str()
+    configuration_label = fields.Str()
     begin_date = fields.DateTime()
     end_date = fields.DateTime()
 
@@ -73,7 +74,8 @@ class DeviceAvailabilities(ResourceList):
                     "id": device_mount.device.id,
                     "available": False,
                     "mount": device_mount.id,
-                    "configuration": device_mount.configuration.id,
+                    "configuration_id": device_mount.configuration.id,
+                    "configuration_label": device_mount.configuration.label,
                     "begin_date": device_mount.begin_date,
                     "end_date": device_mount.end_date,
                 }
@@ -130,7 +132,8 @@ class PlatformAvailabilities(ResourceList):
                     "id": platform_mount.platform.id,
                     "available": False,
                     "mount": platform_mount.id,
-                    "configuration": platform_mount.configuration.id,
+                    "configuration_id": platform_mount.configuration.id,
+                    "configuration_label": platform_mount.configuration.label,
                     "begin_date": platform_mount.begin_date,
                     "end_date": platform_mount.end_date,
                 }
