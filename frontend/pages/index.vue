@@ -137,6 +137,11 @@ SPDX-License-Identifier: EUPL-1.2
                     If you don't have an account, you can browse and view all datasets.<br>
                     If you're already registered, you can login above.
                   </p>
+                  <p>
+                    Good places to get started are our
+                    <a href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home" target="_blank" style="text-decoration: none">Wiki Page</a>
+                    and the <a href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/SMS%20Tutorial%20Videos" target="_blank" style="text-decoration: none">Tutorial Videos</a>.
+                  </p>
                 </v-card-text>
               </v-col>
               <v-col cols="4">

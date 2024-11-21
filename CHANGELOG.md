@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Added:
 - common form component for attachments ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/439))
 - fullscreen image preview and delimiters on image overview ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/431))
+- hint for wiki on landing page ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/453))
 
 Fixed:
 - Problem on non refreshing messages if a device or platform is not available to be mounted ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/451))
