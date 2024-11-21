@@ -146,7 +146,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-col cols="12" md="9">
         <label>Website</label>
         {{ value.website | orDefault }}
-        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+        <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
           <v-icon
             small
           >
@@ -183,7 +183,7 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'nuxt-property-decorator'
+import { Component, Prop, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 
 import {
@@ -210,6 +210,7 @@ import PidTooltip from '@/components/shared/PidTooltip.vue'
 import AttachmentImagesCarousel from '@/components/shared/AttachmentImagesCarousel.vue'
 import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import VisibilityChip from '@/components/VisibilityChip.vue'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
@@ -229,7 +230,7 @@ import VisibilityChip from '@/components/VisibilityChip.vue'
     ...mapActions('proxy', ['proxyUrl'])
   }
 })
-export default class PlatformBasicData extends Vue {
+export default class PlatformBasicData extends mixins(ExternalUrlLinkMixin) {
   public readonly NO_TYPE: string = 'Unknown type'
 
   @Prop({

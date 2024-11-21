@@ -15,6 +15,7 @@ Added:
 
 Fixed:
 - Problem on non refreshing messages if a device or platform is not available to be mounted ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/451))
+- Problem that links without http or https prefix are not linked correctly ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/452))
 
 ## 1.16.2 - 2024-10-23
 

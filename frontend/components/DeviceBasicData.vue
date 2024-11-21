@@ -146,7 +146,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-col cols="12" md="9">
         <label>Website</label>
         {{ value.website | orDefault }}
-        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+        <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
           <v-icon
             small
           >
@@ -183,7 +183,7 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, Prop } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 
 import { Device } from '@/models/Device'
@@ -200,6 +200,7 @@ import VisibilityChip from '@/components/VisibilityChip.vue'
 import { DownloadAttachmentAction } from '@/store/devices'
 import { ProxyUrlAction } from '@/store/proxy'
 import { createDeviceUrn } from '@/modelUtils/urnBuilders'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
@@ -214,7 +215,7 @@ import { createDeviceUrn } from '@/modelUtils/urnBuilders'
     ...mapActions('proxy', ['proxyUrl'])
   }
 })
-export default class DeviceBasicData extends Vue {
+export default class DeviceBasicData extends mixins(ExternalUrlLinkMixin) {
   private states: Status[] = []
   private manufacturers: Manufacturer[] = []
   private deviceTypes: DeviceType[] = []
@@ -315,12 +316,6 @@ export default class DeviceBasicData extends Vue {
   get deviceImagesShouldBeRendered () {
     return this.value.images.length > 0
   }
-
-  /**
-   * copies the PID-URL to the clipboard and changes the tooltip's text and color
-   *
-   * @returns {void}
-   */
 }
 </script>
 

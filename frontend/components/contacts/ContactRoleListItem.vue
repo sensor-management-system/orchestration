@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 - 2023
+SPDX-FileCopyrightText: 2022 - 2024
 - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
@@ -128,7 +128,7 @@ SPDX-License-Identifier: EUPL-1.2
           class="nowrap-truncate"
         >
           {{ contact.website | orDefault }}
-          <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
+          <a v-if="contact.website.length > 0" :href="ensureHttpOrHttpsPrefix(contact.website)" target="_blank">
             <v-icon
               small
             >
@@ -195,19 +195,20 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, Prop } from 'nuxt-property-decorator'
 import { Contact } from '@/models/Contact'
 import { ContactRole } from '@/models/ContactRole'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import { CvContactRole } from '@/models/CvContactRole'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
     BaseExpandableListItem
   }
 })
-export default class ContactRoleListItem extends Vue {
+export default class ContactRoleListItem extends mixins(ExternalUrlLinkMixin) {
   @Prop({
     type: Object,
     required: true

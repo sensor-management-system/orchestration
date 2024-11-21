@@ -87,7 +87,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-col cols="12" md="9">
         <label>Website</label>
         {{ value.website | orDefault }}
-        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+        <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
           <v-icon
             small
           >
@@ -148,7 +148,7 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, Prop } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { Site } from '@/models/Site'
@@ -161,6 +161,7 @@ import PermissionGroupChips from '@/components/PermissionGroupChips.vue'
 
 import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store/sites'
 import { ProxyUrlAction } from '@/store/proxy'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
@@ -178,7 +179,7 @@ import { ProxyUrlAction } from '@/store/proxy'
     ...mapActions('proxy', ['proxyUrl'])
   }
 })
-export default class SiteBasicData extends Vue {
+export default class SiteBasicData extends mixins(ExternalUrlLinkMixin) {
   @Prop({
     default: () => new Site(),
     required: true,
