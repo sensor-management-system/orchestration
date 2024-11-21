@@ -20,7 +20,7 @@ sms:
 #      repository: "registry.hzdr.de/hub-terra/sms/orchestration/frontend"
       repository: "registry.hzdr.de/tobias.kuhnert/sms-generic-frontend-image"
 #      tag: "ufz-staging-1.16.2"
-      tag: "0.0.1"
+      tag: "0.1.0"
 
   # dont deploy IDL - Stage-SMS uses Prod-IDL
   sms-idl:
