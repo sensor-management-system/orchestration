@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
@@ -132,7 +132,7 @@ SPDX-License-Identifier: EUPL-1.2
             :value="contact.website | orDefault"
             :shorten-at="35"
           />
-          <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
+          <a v-if="contact.website.length > 0" :href="ensureHttpOrHttpsPrefix(contact.website)" target="_blank">
             <v-icon
               small
             >
@@ -199,12 +199,13 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, Prop } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
 
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import ExpandableText from '@/components/shared/ExpandableText.vue'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
@@ -212,7 +213,7 @@ import ExpandableText from '@/components/shared/ExpandableText.vue'
     ExpandableText
   }
 })
-export default class ContactsListItem extends Vue {
+export default class ContactsListItem extends mixins(ExternalUrlLinkMixin) {
   @Prop({
     required: true,
     type: Object

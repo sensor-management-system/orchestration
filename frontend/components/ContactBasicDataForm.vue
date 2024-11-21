@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 - 2023
+SPDX-FileCopyrightText: 2022 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tim Eder <tim.eder@ufz.de>
@@ -77,7 +77,7 @@ SPDX-License-Identifier: EUPL-1.2
           :disabled="true"
         >
           <template slot="append">
-            <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+            <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
               <v-icon
                 small
               >
@@ -95,7 +95,7 @@ SPDX-License-Identifier: EUPL-1.2
           @input="update('website', $event)"
         >
           <template slot="append">
-            <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+            <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
               <v-icon
                 small
               >
@@ -169,13 +169,14 @@ import Validator from '@/utils/validator'
 import { isValidOrcid } from '@/utils/orcidHelpers'
 
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
     AutocompleteTextInput
   }
 })
-export default class ContactBasicDataForm extends mixins(Rules) {
+export default class ContactBasicDataForm extends mixins(Rules, ExternalUrlLinkMixin) {
   @Prop({
     required: true,
     type: Contact

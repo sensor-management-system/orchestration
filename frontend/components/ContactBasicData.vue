@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2022 - 2023
+SPDX-FileCopyrightText: 2022 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tim Eder <tim.eder@ufz.de>
@@ -38,7 +38,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-col cols="12" md="9">
         <label>Website</label>
         {{ value.website | orDefault }}
-        <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+        <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
           <v-icon
             small
           >
@@ -70,12 +70,13 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'nuxt-property-decorator'
+import { Component, mixins, Prop } from 'nuxt-property-decorator'
 
 import { Contact } from '@/models/Contact'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component
-export default class ContactBasicData extends Vue {
+export default class ContactBasicData extends mixins(ExternalUrlLinkMixin) {
   @Prop({
     default: () => new Contact(),
     required: true,

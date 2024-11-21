@@ -361,7 +361,7 @@ SPDX-License-Identifier: EUPL-1.2
           @input="update('website', $event)"
         >
           <template slot="append">
-            <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+            <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
               <v-icon
                 small
               >
@@ -479,6 +479,7 @@ import Validator from '@/utils/validator'
 import { LoadDevicetypesAction, LoadEquipmentstatusAction, LoadManufacturersAction, VocabularyState } from '@/store/vocabulary'
 import { DownloadAttachmentAction, DevicesState } from '@/store/devices'
 import { ProxyUrlAction } from '@/store/proxy'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 type StatusSelectValue = Status | string | undefined
 type DeviceTypeSelectValue = DeviceType | string | undefined
@@ -505,7 +506,7 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
     AttachmentImagesForm
   }
 })
-export default class DeviceBasicDataForm extends mixins(Rules) {
+export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMixin) {
   private permissionGroups: PermissionGroup[] = []
   private userInfo: DetailedUserInfo | null = null
   private entityName: string = 'device'

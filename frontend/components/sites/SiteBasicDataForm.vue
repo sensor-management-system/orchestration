@@ -243,7 +243,7 @@ SPDX-License-Identifier: EUPL-1.2
             @input="update('website', $event)"
           >
             <template slot="append">
-              <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+              <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
                 <v-icon
                   small
                 >
@@ -433,6 +433,7 @@ import { DownloadAttachmentAction, SearchSitesAction, SitesState } from '@/store
 import { ProxyUrlAction } from '@/store/proxy'
 import { VocabularyState } from '@/store/vocabulary'
 import { Image } from '@/models/Image'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 interface INameAndUri {
   name: string
   uri: string
@@ -461,7 +462,7 @@ type SiteTypeComboboxValue = SiteType | string | undefined
     ...mapState('sites', ['sites', 'siteAttachments'])
   }
 })
-export default class SiteBasicDataForm extends mixins(Rules) {
+export default class SiteBasicDataForm extends mixins(Rules, ExternalUrlLinkMixin) {
   private showNewSiteUsageDialog = false
   private showNewSiteTypeDialog = false
   private states: Status[] = []

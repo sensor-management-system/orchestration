@@ -357,7 +357,7 @@ SPDX-License-Identifier: EUPL-1.2
           @input="update('website', $event)"
         >
           <template slot="append">
-            <a v-if="value.website.length > 0" :href="value.website" target="_blank">
+            <a v-if="value.website.length > 0" :href="ensureHttpOrHttpsPrefix(value.website)" target="_blank">
               <v-icon
                 small
               >
@@ -472,6 +472,7 @@ import Validator from '@/utils/validator'
 import { LoadEquipmentstatusAction, LoadManufacturersAction, LoadPlatformtypesAction, VocabularyState } from '@/store/vocabulary'
 import { DownloadAttachmentAction, PlatformsState } from '@/store/platforms'
 import { ProxyUrlAction } from '@/store/proxy'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 type StatusSelectValue = Status | string | undefined
 type PlatformTypeSelectValue = PlatformType | string | undefined
@@ -499,7 +500,7 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
     ...mapActions('proxy', ['proxyUrl'])
   }
 })
-export default class PlatformBasicDataForm extends mixins(Rules) {
+export default class PlatformBasicDataForm extends mixins(Rules, ExternalUrlLinkMixin) {
   private permissionGroups: PermissionGroup[] = []
   private isPermissionGroupsLoaded: boolean = false
   private userInfo: DetailedUserInfo | null = null

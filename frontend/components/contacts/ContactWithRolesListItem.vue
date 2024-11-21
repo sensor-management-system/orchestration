@@ -160,7 +160,7 @@ SPDX-License-Identifier: EUPL-1.2
             :value="contact.website | orDefault"
             :shorten-at="35"
           />
-          <a v-if="contact.website.length > 0" :href="contact.website" target="_blank">
+          <a v-if="contact.website.length > 0" :href="ensureHttpOrHttpsPrefix(contact.website)" target="_blank">
             <v-icon
               small
             >
@@ -237,6 +237,7 @@ import ExpandableText from '@/components/shared/ExpandableText.vue'
 import { CvContactRole } from '@/models/CvContactRole'
 import { RoleNameMixin } from '@/mixins/RoleNameMixin'
 import { ContactRole } from '@/models/ContactRole'
+import { ExternalUrlLinkMixin } from '@/mixins/ExternalUrlLinkMixin'
 
 @Component({
   components: {
@@ -244,7 +245,7 @@ import { ContactRole } from '@/models/ContactRole'
     ExpandableText
   }
 })
-export default class ContactWithRolesListItem extends mixins(RoleNameMixin) {
+export default class ContactWithRolesListItem extends mixins(RoleNameMixin, ExternalUrlLinkMixin) {
   @Prop({
     type: Object,
     required: true
