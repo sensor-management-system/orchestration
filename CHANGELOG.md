@@ -6,8 +6,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
+## 1.16.4 (Unreleased)
 
-## 1.16.3 (Unreleased)
+## 1.16.3 - 2024-11-28
 
 Added:
 - common form component for attachments ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/439))
