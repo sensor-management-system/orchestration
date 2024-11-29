@@ -17,8 +17,8 @@ sms:
   sms-frontend:
     enabled: true
     image:
-      repository: "registry.hzdr.de/hub-terra/sms/orchestration/frontend"
-      tag: "ufz-staging-1.16.3"
+      repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
+      tag: "latest"
     volumeMounts: {}
 
   # dont deploy IDL - Stage-SMS uses Prod-IDL
