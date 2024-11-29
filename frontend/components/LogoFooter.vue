@@ -11,7 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
   <v-container fluid class="pa-0">
     <v-row no-gutters>
       <v-col>
-        <v-row class="image-footer elevation-4" :class="{'mb-10' : !isLandingPage, 'pb-16' : $vuetify.breakpoint.smAndDown}">
+        <v-row class="image-footer elevation-4 mb-10" :class="{'pb-16' : $vuetify.breakpoint.smAndDown}">
           <v-col cols="10" md="9">
             <v-row class="d-flex justify-space-around justify-center align-center">
               <v-col cols="2" class="align-self-center">
@@ -49,15 +49,10 @@ SPDX-License-Identifier: EUPL-1.2
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'nuxt-property-decorator'
+import { Vue, Component } from 'nuxt-property-decorator'
 
 @Component
-// @ts-ignore
-export default class LogoFooter extends Vue {
-@Prop({
-  default: false
-})isLandingPage!: boolean
-}
+export default class LogoFooter extends Vue {}
 </script>
 <style lang="scss">
   @import '~vuetify/src/styles/styles.sass';

@@ -264,8 +264,8 @@ SPDX-License-Identifier: EUPL-1.2
         <nuxt />
       </v-container>
     </v-main>
-    <v-footer v-if="!isLandingPage" app absolute padless>
-      <logo-footer :is-landing-page="isLandingPage" />
+    <v-footer app absolute padless inset>
+      <logo-footer />
     </v-footer>
     <v-footer
       class="link-footer"
@@ -274,7 +274,6 @@ SPDX-License-Identifier: EUPL-1.2
       app
       padless
     >
-      <logo-footer v-if="isLandingPage" :is-landing-page="isLandingPage" class="logo-footer__landing" />
       <cookie-law
         button-text="Okay"
         button-class="v-btn v-btn--is-elevated v-btn--has-bg v-size--default primary"

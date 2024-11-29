@@ -8,6 +8,12 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.16.4 (Unreleased)
 
+Fixed:
+- Problem with truncated items in navigation drawer ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/465))
+
+Changed:
+- detached footer on landing page, navigation drawer and footer sharing screen width ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/465))
+
 ## 1.16.3 - 2024-11-28
 
 Added:
