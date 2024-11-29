@@ -105,8 +105,6 @@ SPDX-License-Identifier: EUPL-1.2
 import { Component, Vue, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapGetters } from 'vuex'
 
-import UploadConfig from '@/config/uploads'
-
 import { Rules } from '@/mixins/Rules'
 import { UploadRules } from '@/mixins/UploadRules'
 
@@ -143,7 +141,8 @@ export default class ExportControlAttachmentAddPage extends mixins(Rules, Upload
   loadExportControlAttachments!: LoadExportControlAttachmentsAction
 
   get mimeTypeList (): string {
-    return UploadConfig.allowedMimeTypes.join(',')
+    const mimeTypes = process.env.allowedMimeTypesString || ''
+    return mimeTypes
   }
 
   get manufacturerModelId (): string {

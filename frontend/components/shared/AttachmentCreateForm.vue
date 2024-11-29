@@ -89,8 +89,6 @@ SPDX-License-Identifier: EUPL-1.2
 <script lang="ts">
 import { Component, Vue, mixins, Prop } from 'nuxt-property-decorator'
 
-import UploadConfig from '@/config/uploads'
-
 import { Attachment } from '@/models/Attachment'
 
 import AutocompleteTextInput from '@/components/shared/AutocompleteTextInput.vue'
@@ -124,7 +122,8 @@ export default class AttachmentCreateForm extends mixins(Rules, UploadRules, Att
    * @return {string} a list of MimeTypes
    */
   get mimeTypeList (): string {
-    return UploadConfig.allowedMimeTypes.join(',')
+    const mimeTypes = process.env.allowedMimeTypesString || ''
+    return mimeTypes
   }
 
   validateForm (): boolean {

@@ -65,7 +65,6 @@
     "@nuxtjs/auth-next": "^5.0.0-1667386184.dfbbb54",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/dotenv": "^1.4.2",
-    "@nuxtjs/pwa": "^3.3.5",
     "@turf/helpers": "^7.1.0",
     "@turf/kinks": "^7.1.0",
     "@turf/turf": "^7.1.0",
