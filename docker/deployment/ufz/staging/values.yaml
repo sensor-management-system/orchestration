@@ -19,7 +19,6 @@ sms:
     image:
       repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
       tag: "latest"
-    volumeMounts: {}
 
   # dont deploy IDL - Stage-SMS uses Prod-IDL
   sms-idl:
