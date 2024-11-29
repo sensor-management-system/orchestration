@@ -17,7 +17,9 @@ import { OpenIDConnectScheme } from '~auth/runtime'
 export default class CustomOIDCScheme extends OpenIDConnectScheme {
   constructor ($auth, options, ...defaults) {
     super($auth, options, ...defaults)
-    this.options.scope = options.scope
+    // added split here as the scope is passed via new env replacement method
+    // the scope is passed as a white-space separated string in NUXT_ENV_SCOPE_ENV_PLACEHOLDER
+    this.options.scope = options.scope.split(' ')
   }
 
   // Fetch the userInfo from the user-info endpoint
@@ -39,7 +41,9 @@ export default class CustomOIDCScheme extends OpenIDConnectScheme {
     }
     this.$auth.setUser(data)
 
+    const intervalTime = process.env.refreshInterval || 30 * 60 * 1000
     // activate token refresh after a certain amount of time
+
     if (!checkExpiration.refreshTokenExpired) {
       const intervalId = setInterval(() => {
         this.$auth.refreshTokens()
@@ -47,7 +51,7 @@ export default class CustomOIDCScheme extends OpenIDConnectScheme {
             this.$auth.ctx.store.commit('snackbar/setError', 'Error while refreshing tokens!')
             clearInterval(intervalId)
           })
-      }, process.env.NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME || 30 * 60 * 1000) // time in milliseconds when to start the token refresh
+      }, intervalTime) // time in milliseconds when to start the token refresh
     }
 
     // Fetch user info

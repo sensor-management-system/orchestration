@@ -941,6 +941,48 @@ build-ufz-orchestration-nginx-image:
     - if: '$CI_COMMIT_TAG'
       when: always
 
+build-generic-frontend-image-latest:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+      docker build --tag "$CI_REGISTRY_IMAGE/generic-frontend:latest" -f frontend/docker/generic-image/Dockerfile \
+        --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
+        .
+    - docker push "$CI_REGISTRY_IMAGE/generic-frontend:latest"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always  
+      
+build-generic-frontend-image-versioned:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+      docker build --tag "$CI_REGISTRY_IMAGE/generic-frontend:$CI_COMMIT_TAG" -f frontend/docker/generic-image/Dockerfile \
+        --build-arg SMS_VERSION_ARG=$CI_COMMIT_TAG \
+        .
+    - docker push "$CI_REGISTRY_IMAGE/generic-frontend:$CI_COMMIT_TAG"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
 publish-zenodo-staging:
   stage: publish
   image: python:3.11-slim-buster

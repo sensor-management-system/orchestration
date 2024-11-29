@@ -15,46 +15,52 @@
 
 // eslint-disable-next-line
 import colors from 'vuetify/es5/util/colors'
-import fs from 'fs'
-import path from 'path'
+
+// Env variable definition
+
+const NUXT_ENV_OIDC_REFRESH_TOKEN = process.env.NUXT_ENV_OIDC_REFRESH_TOKEN || 'NUXT_ENV_OIDC_REFRESH_TOKEN_ENV_PLACEHOLDER'
+const NUXT_ENV_OIDC_REFRESH_EXPIRE = process.env.NUXT_ENV_OIDC_REFRESH_EXPIRE || 'NUXT_ENV_OIDC_REFRESH_EXPIRE_ENV_PLACEHOLDER'
+const NUXT_ENV_OIDC_RESPONSE_TYPE = process.env.NUXT_ENV_OIDC_RESPONSE_TYPE || 'NUXT_ENV_OIDC_RESPONSE_TYPE_ENV_PLACEHOLDER'
+const NUXT_ENV_OIDC_GRANT_TYPE = process.env.NUXT_ENV_OIDC_GRANT_TYPE || 'NUXT_ENV_OIDC_GRANT_TYPE_ENV_PLACEHOLDER'
+const NUXT_ENV_CLIENT_ID = process.env.NUXT_ENV_CLIENT_ID || 'NUXT_ENV_CLIENT_ID_ENV_PLACEHOLDER'
+const NUXT_ENV_SCOPE = process.env.NUXT_ENV_SCOPE || 'NUXT_ENV_SCOPE_ENV_PLACEHOLDER'
+const NUXT_ENV_OIDC_CHALLANGE = process.env.NUXT_ENV_OIDC_CHALLANGE || 'NUXT_ENV_OIDC_CHALLANGE_ENV_PLACEHOLDER'
+const NUXT_ENV_OIDC_WELL_KNOWN = process.env.NUXT_ENV_OIDC_WELL_KNOWN || 'NUXT_ENV_OIDC_WELL_KNOWN_ENV_PLACEHOLDER'
+
+const BASE_URL = process.env.BASE_URL || 'BASE_URL_ENV_PLACEHOLDER'
+const SMS_BACKEND_URL = process.env.SMS_BACKEND_URL || 'SMS_BACKEND_URL_ENV_PLACEHOLDER'
+const CV_BACKEND_URL = process.env.CV_BACKEND_URL || 'CV_BACKEND_URL_ENV_PLACEHOLDER'
+const IDL_SYNC_URL = process.env.IDL_SYNC_URL || 'IDL_SYNC_URL_ENV_PLACEHOLDER'
+const INSTITUTE = process.env.INSTITUTE || 'INSTITUTE_ENV_PLACEHOLDER'
+const NUXT_ENV_PID_BASE_URL = process.env.NUXT_ENV_PID_BASE_URL || 'NUXT_ENV_PID_BASE_URL_ENV_PLACEHOLDER'
+
+const NUXT_ENV_MATOMO_SITE_ID = process.env.NUXT_ENV_MATOMO_SITE_ID || 'NUXT_ENV_MATOMO_SITE_ID_ENV_PLACEHOLDER'
+const NUXT_ENV_MATOMO_URL = process.env.NUXT_ENV_MATOMO_URL || 'NUXT_ENV_MATOMO_URL_ENV_PLACEHOLDER'
+const NUXT_ENV_MATOMO_TRACKER_URL = process.env.NUXT_ENV_MATOMO_TRACKER_URL || 'NUXT_ENV_MATOMO_TRACKER_URL_ENV_PLACEHOLDER'
+const NUXT_ENV_MATOMO_SCRIPT_URL = process.env.NUXT_ENV_MATOMO_SCRIPT_URL || 'NUXT_ENV_MATOMO_SCRIPT_URL_ENV_PLACEHOLDER'
+
+const NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME = process.env.NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME || 'NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME_ENV_PLACEHOLDER'
+
+const NUXT_ENV_ALLOWED_MIMETYPES = process.env.NUXT_ENV_ALLOWED_MIMETYPES || 'NUXT_ENV_ALLOWED_MIMETYPES_ENV_PLACEHOLDER'
 
 const server = {
   port: 3000,
   host: '0.0.0.0'
 }
 
-const oidcEndpoints = {
-  configuration: process.env.NUXT_ENV_OIDC_WELL_KNOWN,
-  logout: false
-}
-
-const oAuthEndpoints = {
-  authorization: process.env.NUXT_ENV_AUTHORITY,
-  token: process.env.NUXT_ENV_OIDC_TOKEN,
-  userInfo: process.env.NUXT_ENV_OIDC_USER_INFO,
-  logout: undefined
-}
-
-if (!process.env.STAY_WITH_HTTP || process.env.STAY_WITH_HTTP !== 'true') {
-  server.https = {
-    key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
-    cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
-  }
-}
-
 const matomoModule = []
-if (process.env.NUXT_ENV_MATOMO_SITE_ID) {
+if (NUXT_ENV_MATOMO_SITE_ID) {
   const config = {
-    siteId: process.env.NUXT_ENV_MATOMO_SITE_ID
+    siteId: NUXT_ENV_MATOMO_SITE_ID
   }
-  if (process.env.NUXT_ENV_MATOMO_URL) {
-    config.matomoUrl = process.env.NUXT_ENV_MATOMO_URL
+  if (NUXT_ENV_MATOMO_URL) {
+    config.matomoUrl = NUXT_ENV_MATOMO_URL
   }
-  if (process.env.NUXT_ENV_MATOMO_TRACKER_URL) {
-    config.trackerUrl = process.env.NUXT_ENV_MATOMO_TRACKER_URL
+  if (NUXT_ENV_MATOMO_TRACKER_URL) {
+    config.trackerUrl = NUXT_ENV_MATOMO_TRACKER_URL
   }
-  if (process.env.NUXT_ENV_MATOMO_SCRIPT_URL) {
-    config.scriptUrl = process.env.NUXT_ENV_MATOMO_SCRIPT_URL
+  if (NUXT_ENV_MATOMO_SCRIPT_URL) {
+    config.scriptUrl = NUXT_ENV_MATOMO_SCRIPT_URL
   }
   matomoModule.push([
     'nuxt-matomo', config
@@ -71,12 +77,14 @@ export default {
   target: 'server',
   env: {
     version: process.env.npm_package_version,
-    basePath: process.env.BASE_URL || '/',
-    smsBackendUrl: process.env.SMS_BACKEND_URL || 'http://localhost:5000/rdm/svm-api/v1',
-    cvBackendUrl: process.env.CV_BACKEND_URL || 'http://localhost:5001/api',
-    idlSyncUrl: process.env.IDL_SYNC_URL || '',
-    institute: process.env.INSTITUTE || '',
-    pidBaseUrl: process.env.NUXT_ENV_PID_BASE_URL || ''
+    basePath: BASE_URL,
+    smsBackendUrl: SMS_BACKEND_URL,
+    cvBackendUrl: CV_BACKEND_URL,
+    idlSyncUrl: IDL_SYNC_URL,
+    institute: INSTITUTE,
+    pidBaseUrl: NUXT_ENV_PID_BASE_URL,
+    refreshInterval: NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME,
+    allowedMimeTypesString: NUXT_ENV_ALLOWED_MIMETYPES
   },
   /*
   ** Headers of the page
@@ -95,7 +103,7 @@ export default {
 
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: `${process.env.BASE_URL || '/'}favicon.ico` }
+      { rel: 'icon', type: 'image/x-icon', href: `${BASE_URL + '/'}favicon.ico` }
     ]
   },
   /*
@@ -132,7 +140,6 @@ export default {
     '@nuxtjs/auth-next',
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
-    '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv',
     'nuxt-leaflet',
@@ -144,12 +151,6 @@ export default {
   ** See https://axios.nuxtjs.org/options
   */
   axios: {
-  },
-  // PWA module configuration: https://go.nuxtjs.dev/pwa
-  pwa: {
-    manifest: {
-      lang: 'en'
-    }
   },
   /*
   ** vuetify module configuration
@@ -177,7 +178,7 @@ export default {
   build: {
   },
   router: {
-    base: process.env.BASE_URL || '/',
+    base: BASE_URL,
     middleware: [
       'institute-pages',
       'login-success'
@@ -194,30 +195,30 @@ export default {
     },
     strategies: {
       customStrategy: {
-        // ToDo: Set customOIDCScheme as default, when every deployment uses the customOIDCScheme
-        scheme: process.env.NUXT_ENV_OIDC_SCHEME ? '~/config/auth/schemes/customOIDCScheme' : '~/config/auth/schemes/customScheme',
-        // ToDo: Remove the oAuth endpoint configuration, when every deployment uses the customOIDCScheme
-        endpoints: process.env.NUXT_ENV_OIDC_SCHEME ? oidcEndpoints : oAuthEndpoints,
+        scheme: '~/config/auth/schemes/customOIDCScheme',
+        endpoints: {
+          configuration: NUXT_ENV_OIDC_WELL_KNOWN,
+          logout: false
+        },
         token: {
-          // ToDo: Set Access token as default, when every deployment uses the customOIDCScheme
-          property: process.env.NUXT_ENV_OIDC_SCHEME ? 'access_token' : 'id_token',
+          property: 'access_token',
           type: 'Bearer',
           maxAge: 3600
         },
         refreshToken: {
-          property: process.env.NUXT_ENV_OIDC_REFRESH_TOKEN || false,
+          property: NUXT_ENV_OIDC_REFRESH_TOKEN,
           // GFZ Refresh token refresh time is not fetched from the server response.
           // This leads us into setting this time via env variable
-          maxAge: process.env.NUXT_ENV_OIDC_REFRESH_EXPIRE || 60 * 60 * 24 * 30
+          maxAge: NUXT_ENV_OIDC_REFRESH_EXPIRE
         },
-        responseType: process.env.NUXT_ENV_OIDC_RESPONSE_TYPE || 'id_token',
-        grantType: process.env.NUXT_ENV_OIDC_GRANT_TYPE || 'implicit',
+        responseType: NUXT_ENV_OIDC_RESPONSE_TYPE,
+        grantType: NUXT_ENV_OIDC_GRANT_TYPE,
         accessType: undefined,
         logoutRedirectUri: undefined,
-        clientId: process.env.NUXT_ENV_CLIENT_ID,
-        scope: process.env.NUXT_ENV_SCOPE ? process.env.NUXT_ENV_SCOPE.split(' ') : [],
+        clientId: NUXT_ENV_CLIENT_ID,
+        scope: NUXT_ENV_SCOPE,
         state: 'UNIQUE_AND_NON_GUESSABLE',
-        codeChallengeMethod: process.env.NUXT_ENV_OIDC_CHALLANGE || '',
+        codeChallengeMethod: NUXT_ENV_OIDC_CHALLANGE,
         responseMode: '',
         acrValues: ''
       }

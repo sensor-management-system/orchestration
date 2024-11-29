@@ -15,8 +15,6 @@
 
 import { Vue, Component } from 'nuxt-property-decorator'
 
-import UploadConfig from '@/config/uploads'
-
 /**
  * A mixin component for standard form validation rules for uploads
  * @extends Vue
@@ -39,8 +37,10 @@ export class UploadRules extends Vue {
       if (f === null) {
         return true
       }
-
-      const mimeTypeIndex = UploadConfig.allowedMimeTypes.indexOf(f.type)
+      const mimeTypeArray: string[] = process.env.allowedMimeTypesString
+        ? process.env.allowedMimeTypesString.split(',')
+        : []
+      const mimeTypeIndex = mimeTypeArray.indexOf(f.type)
       if (mimeTypeIndex < 0) {
         if (f.type) {
           return '' + f.type + ' is not supported'
