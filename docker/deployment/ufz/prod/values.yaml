@@ -10,17 +10,17 @@ sms:
 
     nginx:
       image:
-        tag: "ufz-backend-1.16.3"
+        tag: "ufz-backend-1.17.0"
 
     backend:
       image:
-        tag: "ufz-prod-1.16.3"
+        tag: "ufz-prod-1.17.0"
 
   sms-frontend:
     enabled: true
     image:
-      repository: "registry.hzdr.de/hub-terra/sms/orchestration/frontend"
-      tag: "ufz-prod-1.16.3"
+      repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
+      tag: "1.17.0"
 
   sms-idl:
     enabled: true
