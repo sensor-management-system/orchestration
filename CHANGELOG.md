@@ -7,6 +7,8 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.16.4 (Unreleased)
+Added:
+- UX improvements (winter only) ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/469))
 
 Fixed:
 - Problem with truncated items in navigation drawer ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/465))
