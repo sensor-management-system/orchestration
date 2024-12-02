@@ -8,17 +8,17 @@ sms:
   sms-backend:
     nginx:
       image:
-        tag: "ufz-backend-1.16.3"
+        tag: "ufz-backend-1.17.0"
 
     backend:
       image:
-        tag: "ufz-staging-1.16.3"
+        tag: "ufz-staging-1.17.0"
 
   sms-frontend:
     enabled: true
     image:
       repository: "registry.hzdr.de/hub-terra/sms/orchestration/generic-frontend"
-      tag: "latest"
+      tag: "1.17.0"
 
   # dont deploy IDL - Stage-SMS uses Prod-IDL
   sms-idl:
