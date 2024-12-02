@@ -6,7 +6,12 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.17.1 (Unreleased)
+## 1.17.2 (Unreleased)
+
+## 1.17.1 - 2024-12-02
+
+Fixed:
+- Base url parameter on GFZ systems ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/470))
 
 ## 1.17.0 - 2024-12-02
 Added:
