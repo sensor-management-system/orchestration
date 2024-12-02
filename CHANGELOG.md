@@ -6,8 +6,11 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.16.4 (Unreleased)
+## 1.17.1 (Unreleased)
+
+## 1.17.0 - 2024-12-02
 Added:
+- new generic frontend image, can be used to set the environment variables during runtime ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/441))  
 - UX improvements (winter only) ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/469))
 
 Fixed:
