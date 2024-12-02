@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <v-app>
+    <SnowOverlay v-if="isLandingPage" />
     <div>
       <ProgressIndicator
         :value="isLoading"
@@ -442,9 +443,11 @@ import QrCodeDialog from '@/components/QrCodeDialog.vue'
 import QrCodeReaderDialog from '@/components/QrCodeReaderDialog.vue'
 
 import { saveCurrentRoute } from '@/utils/loginHelpers'
+import SnowOverlay from '@/components/SnowOverlay.vue'
 
 export default {
   components: {
+    SnowOverlay,
     AppBarTitle,
     AppBarTabsExtension,
     CookieLaw,
