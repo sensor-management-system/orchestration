@@ -26,8 +26,10 @@ sms:
         server_name  localhost;
         root /usr/share/nginx/html/;
 
-        location /sms {          
-          try_files $uri $uri/ /index.html;
+        location /sms {
+            alias /usr/share/nginx/html;
+            index index.html;
+            try_files $uri $uri/ /index.html;
         }
       }
   
