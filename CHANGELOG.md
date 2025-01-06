@@ -7,6 +7,8 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.17.2 (Unreleased)
+Added:
+- Footer section pages (Legal notice, Privacy policy and Terms of use) for FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/455))
 
 ## 1.17.1 - 2024-12-02
 

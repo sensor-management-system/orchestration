@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
@@ -13,10 +13,9 @@ SPDX-License-Identifier: EUPL-1.2
     <h1 class="mb-3">
       Privacy policy
     </h1>
-    <p>We reserve the right to update or modify this Privacy policy for the demo version at any time. Any changes will be posted on this page, and it is your responsibility to review this Privacy policy periodically.</p>
-    <p>Please refer to the <a href="https://www.fz-juelich.de/en/privacy-policy" target="_blank"> FZJ General Data Privacy Statement</a>.</p>
+    <p>Please refer to the <a href="https://www.fz-juelich.de/en/privacy-policy" target="_blank"> Forschungszentrum Jülich Privacy Policy</a>.</p>
     <h2 class="mb-1">
-      Addendum to general data privacy statement
+      Addendum to the Forschungszentrum Jülich Privacy Policy
     </h2>
     <h3 class="mb-2">
       VI. Contact form and e-mail contact

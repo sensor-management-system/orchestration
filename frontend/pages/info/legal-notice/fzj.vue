@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2023
+SPDX-FileCopyrightText: 2020 - 2024
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
@@ -14,14 +14,14 @@ SPDX-License-Identifier: EUPL-1.2
       <h1 class="mb-3">
         Legal information / provider identification
       </h1>
-      <p>This instance of the Sensor Management System is for internal testing purposes only. The user has no right of availability or functionality of the system as well as no right of correctness or completeness of the data provided. The data-management team always aims to provide a highly available and functioning system, though.</p>
+      <p>Imprint according to § 5 DDG (Digital Services Act) and § 18 RStV (German Interstate Treaty on Broadcasting)</p>
     </section>
     <section class="mb-6">
       <h2 class="mb-1">
         Provider
       </h2>
       <p>
-        The provider of the internet presence <a href="https://ibg3sms.ibg.kfa-juelich.de/">ibg3sms.ibg.kfa-juelich.de</a> is the <a href="https://www.fz-juelich.de/en" target="_blank">Forschungszentrum Jülich</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
+        The provider of the internet presence <a href="https://sms.earth-data.fz-juelich.de/">sms.earth-data.fz-juelich.de</a> is <a href="https://www.fz-juelich.de/en" target="_blank">Forschungszentrum Jülich</a>. This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
       </p>
     </section>
     <section class="mb-6">
@@ -32,8 +32,33 @@ SPDX-License-Identifier: EUPL-1.2
         Forschungszentrum Jülich GmbH<br>
         Wilhelm-Johnen-Straße<br>
         52428 Jülich, Germany<br>
-        Tel.:  +49 2461 61 0<br>
-        Website: <a href="https://www.fz-juelich.de/en/ibg/ibg-3" target="_blank">www.fz-juelich.de/en/ibg/ibg-3</a>
+        Website: <a href="https://www.fz-juelich.de" target="_blank">www.fz-juelich.de/</a>
+      </p>
+    </section>
+    <section class="mb-6">
+      <h2 class="mb-1">
+        Legal form
+      </h2>
+      <p>The Forschungszentrum Jülich (FZJ) is a corporation governed by Public Law. The FZJ is member of the <a href="https://www.helmholtz.de" target="_blank">Helmholtz-Gemeinschaft Deutscher Forschungszentren e.V. (Helmholtz Association of German Research Centres)</a>.</p>
+    </section>
+    <section class="mb-6">
+      <h2 class="mb-1">
+        Authorized representatives
+      </h2>
+      <p>The FZJ is legally represented by Prof. Dr. Astrid Lambrecht (Chair of the Board of Directors) and Karsten Beneke (Vice-Chairman).</p>
+    </section>
+    <section class="mb-6">
+      <h2 class="mb-1">
+        Value Added Tax ID
+      </h2>
+      <p>Value Added Tax ID No. in accordance with § 27 a of the German VAT Law (Umsatzsteuergesetz): DE 122624631.</p>
+    </section>
+    <section class="mb-6">
+      <h2 class="mb-1">
+        Editorship
+      </h2>
+      <p>
+      This is a user self-service platform. Responsible for the contents are the users.
       </p>
     </section>
     <section class="mb-6">
