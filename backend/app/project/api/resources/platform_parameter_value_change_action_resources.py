@@ -17,7 +17,6 @@ from ..permissions.rules import filter_visible
 from ..schemas.platform_parameter_value_change_action_schema import (
     PlatformParameterValueChangeActionSchema,
 )
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_platform_set_update_description_and_update_pidinst,
@@ -65,7 +64,6 @@ class PlatformParameterValueChangeActionList(ResourceList):
         return result
 
     schema = PlatformParameterValueChangeActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformParameterValueChangeAction,
@@ -118,7 +116,6 @@ class PlatformParameterValueChangeActionDetail(ResourceDetail):
         set_update_description_text_user_and_pidinst(platform_parameter.platform, msg)
 
     schema = PlatformParameterValueChangeActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformParameterValueChangeAction,

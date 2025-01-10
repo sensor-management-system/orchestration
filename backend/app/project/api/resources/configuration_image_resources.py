@@ -16,7 +16,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.configuration_image_schema import ConfigurationImageSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_configuration_set_update_description_and_update_pidinst,
@@ -87,7 +86,6 @@ class ConfigurationImageList(ResourceList):
         return result
 
     schema = ConfigurationImageSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationImage,
@@ -172,7 +170,6 @@ class ConfigurationImageDetail(ResourceDetail):
         )
 
     schema = ConfigurationImageSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationImage,

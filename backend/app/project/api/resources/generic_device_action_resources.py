@@ -24,7 +24,6 @@ from ..resources.base_resource import (
     set_update_description_text_user_and_pidinst,
 )
 from ..schemas.generic_actions_schema import GenericDeviceActionSchema
-from ..token_checker import token_required
 
 
 class GenericDeviceActionList(ResourceList):
@@ -71,7 +70,6 @@ class GenericDeviceActionList(ResourceList):
         return result
 
     schema = GenericDeviceActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": GenericDeviceAction,
@@ -132,7 +130,6 @@ class GenericDeviceActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = GenericDeviceActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": GenericDeviceAction,

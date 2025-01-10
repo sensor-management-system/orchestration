@@ -21,7 +21,6 @@ from ..permissions.rules import filter_visible
 from ..schemas.configuration_parameter_value_change_action_schema import (
     ConfigurationParameterValueChangeActionSchema,
 )
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_configuration_set_update_description_and_update_pidinst,
@@ -75,7 +74,6 @@ class ConfigurationParameterValueChangeActionList(ResourceList):
         return result
 
     schema = ConfigurationParameterValueChangeActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationParameterValueChangeAction,
@@ -132,7 +130,6 @@ class ConfigurationParameterValueChangeActionDetail(ResourceDetail):
         )
 
     schema = ConfigurationParameterValueChangeActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationParameterValueChangeAction,

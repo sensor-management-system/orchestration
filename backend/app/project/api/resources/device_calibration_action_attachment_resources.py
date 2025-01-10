@@ -16,7 +16,6 @@ from ..permissions.rules import filter_visible
 from ..schemas.calibration_action_attachment_schema import (
     DeviceCalibrationAttachmentSchema,
 )
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
 
 
@@ -29,7 +28,6 @@ class DeviceCalibrationAttachmentList(ResourceList):
         return query_
 
     schema = DeviceCalibrationAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceCalibrationAttachment,
@@ -48,6 +46,5 @@ class DeviceCalibrationAttachmentDetail(ResourceDetail):
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DeviceCalibrationAttachmentSchema
-    decorators = (token_required,)
     data_layer = {"session": db.session, "model": DeviceCalibrationAttachment}
     permission_classes = [DelegateToCanFunctions]

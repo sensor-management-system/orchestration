@@ -16,7 +16,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.platform_image_schema import PlatformImageSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_platform_set_update_description_and_update_pidinst,
@@ -81,7 +80,6 @@ class PlatformImageList(ResourceList):
         return result
 
     schema = PlatformImageSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformImage,
@@ -154,7 +152,6 @@ class PlatformImageDetail(ResourceDetail):
         set_update_description_text_user_and_pidinst(platform_image.platform, msg)
 
     schema = PlatformImageSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformImage,

@@ -23,7 +23,6 @@ from ..models.device_attachment import DeviceAttachment
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.device_attachment_schema import DeviceAttachmentSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
@@ -106,7 +105,6 @@ class DeviceAttachmentList(ResourceList):
         return result
 
     schema = DeviceAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceAttachment,
@@ -180,7 +178,6 @@ class DeviceAttachmentDetail(ResourceDetail):
         return final_result
 
     schema = DeviceAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceAttachment,

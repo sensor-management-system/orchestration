@@ -162,12 +162,6 @@ class Configuration(
                         "format": "strict_date_optional_time",
                     },
                     "keywords": type_keyword_and_full_searchable,
-                    "platforms": {
-                        "properties": Platform.get_search_index_properties(),
-                    },
-                    "devices": {
-                        "properties": Device.get_search_index_properties(),
-                    },
                     "configuration_contact_roles": {
                         "properties": {
                             "role_name": type_keyword_and_full_searchable,

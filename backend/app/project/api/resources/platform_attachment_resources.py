@@ -23,7 +23,6 @@ from ..models.platform_attachment import PlatformAttachment
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.platform_attachment_schema import PlatformAttachmentSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
@@ -98,7 +97,6 @@ class PlatformAttachmentList(ResourceList):
         add_created_by_id(data)
 
     schema = PlatformAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformAttachment,
@@ -172,7 +170,6 @@ class PlatformAttachmentDetail(ResourceDetail):
         return final_result
 
     schema = PlatformAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformAttachment,

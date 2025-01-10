@@ -257,7 +257,11 @@ class TestDatastreamLinks(BaseTestCase):
         payload = {
             "data": {
                 "type": "datastream_link",
-                "attributes": {},
+                "attributes": {
+                    "datasource_id": "123",
+                    "thing_id": "456",
+                    "datastream_id": "789",
+                },
                 "relationships": {
                     "device_mount_action": {
                         "data": {

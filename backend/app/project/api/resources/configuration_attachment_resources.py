@@ -20,7 +20,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.configuration_attachment_schema import ConfigurationAttachmentSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
@@ -94,7 +93,6 @@ class ConfigurationAttachmentList(ResourceList):
         return result
 
     schema = ConfigurationAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationAttachment,
@@ -167,7 +165,6 @@ class ConfigurationAttachmentDetail(ResourceDetail):
         return final_result
 
     schema = ConfigurationAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationAttachment,

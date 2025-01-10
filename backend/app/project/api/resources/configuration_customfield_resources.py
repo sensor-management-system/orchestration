@@ -16,7 +16,6 @@ from ..models.configuration_customfield import ConfigurationCustomField
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.configuration_customfield_schema import ConfigurationCustomFieldSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_configuration_set_update_description_and_update_pidinst,
@@ -74,7 +73,6 @@ class ConfigurationCustomFieldList(ResourceList):
         return result
 
     schema = ConfigurationCustomFieldSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationCustomField,
@@ -134,7 +132,6 @@ class ConfigurationCustomFieldDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = ConfigurationCustomFieldSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationCustomField,

@@ -26,7 +26,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.site_schema import SiteSchema
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
@@ -107,7 +106,6 @@ class SiteList(ResourceList):
         return result
 
     schema = SiteSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Site,
@@ -189,7 +187,6 @@ class SiteDetail(ResourceDetail):
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = SiteSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Site,

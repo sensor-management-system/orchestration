@@ -16,7 +16,6 @@ from ..permissions.rules import filter_visible
 from ..schemas.generic_action_attachment_schema import (
     GenericPlatformActionAttachmentSchema,
 )
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
 
 
@@ -28,7 +27,6 @@ class GenericPlatformActionAttachmentList(ResourceList):
         return filter_visible(self.session.query(self.model))
 
     schema = GenericPlatformActionAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": GenericPlatformActionAttachment,
@@ -47,6 +45,5 @@ class GenericPlatformActionAttachmentDetail(ResourceDetail):
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = GenericPlatformActionAttachmentSchema
-    decorators = (token_required,)
     data_layer = {"session": db.session, "model": GenericPlatformActionAttachment}
     permission_classes = [DelegateToCanFunctions]

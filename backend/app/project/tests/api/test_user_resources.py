@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+"""Tests for the user resources."""
+
 import json
 
 from project import base_url
@@ -12,9 +14,7 @@ from project.tests.models.test_user_model import add_user
 
 
 class TestUserServices(BaseTestCase):
-    """
-    Test User Services
-    """
+    """Test class for the user resources."""
 
     url = base_url + "/users"
     object_type = "user"
@@ -48,7 +48,7 @@ class TestUserServices(BaseTestCase):
                 data=json.dumps(data),
                 content_type="application/vnd.api+json",
             )
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 405)
 
     def test_fail_post_a_contact_authentificated(self):
         """Ensure using post request will fail."""
@@ -68,7 +68,6 @@ class TestUserServices(BaseTestCase):
 
     def test_fail_patch_a_contact_anonymous(self):
         """Ensure using patch request will fail."""
-
         user = add_user()
         user_data = {
             "data": {
@@ -84,11 +83,10 @@ class TestUserServices(BaseTestCase):
                 data=json.dumps(user_data),
                 content_type="application/vnd.api+json",
             )
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 405)
 
     def test_fail_patch_a_contact_authentificated(self):
         """Ensure using patch request will fail."""
-
         user = add_user()
         user_data = {
             "data": {
@@ -109,18 +107,16 @@ class TestUserServices(BaseTestCase):
 
     def test_fail_delete_a_contact_anonymous(self):
         """Ensure using delete request will fail."""
-
         user = add_user()
         with self.client:
             response = self.client.delete(
                 f"{self.url}/{user.id}",
                 content_type="application/vnd.api+json",
             )
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 405)
 
     def test_fail_delete_a_contact_authenticated(self):
         """Ensure using delete request will fail."""
-
         user = add_user()
         with self.client:
             response = self.client.delete(

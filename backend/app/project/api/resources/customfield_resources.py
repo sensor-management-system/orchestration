@@ -17,7 +17,6 @@ from ..models.device import Device
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.customfield_schema import CustomFieldSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_device_set_update_description_and_update_pidinst,
@@ -73,7 +72,6 @@ class CustomFieldList(ResourceList):
         return result
 
     schema = CustomFieldSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": CustomField,
@@ -130,7 +128,6 @@ class CustomFieldDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = CustomFieldSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": CustomField,

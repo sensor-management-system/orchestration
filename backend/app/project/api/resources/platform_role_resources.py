@@ -19,7 +19,6 @@ from ..models.contact_role import PlatformContactRole
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.role import PlatformRoleSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_platform_set_update_description_and_update_pidinst,
@@ -84,7 +83,6 @@ class PlatformRoleList(ResourceList):
         return result
 
     schema = PlatformRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformContactRole,
@@ -177,7 +175,6 @@ class PlatformRoleDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = PlatformRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformContactRole,

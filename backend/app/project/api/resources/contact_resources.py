@@ -34,7 +34,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.contact_schema import ContactSchema
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
 
 
@@ -121,7 +120,6 @@ class ContactList(ResourceList):
         return result
 
     schema = ContactSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Contact,
@@ -238,7 +236,6 @@ class ContactDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = ContactSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Contact,

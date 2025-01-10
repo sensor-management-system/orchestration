@@ -19,7 +19,6 @@ from ..models.device import Device
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.calibration_actions_schema import DeviceCalibrationActionSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_device_set_update_description_and_update_pidinst,
@@ -71,7 +70,6 @@ class DeviceCalibrationActionList(ResourceList):
         return result
 
     schema = DeviceCalibrationActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceCalibrationAction,
@@ -129,7 +127,6 @@ class DeviceCalibrationActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = DeviceCalibrationActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceCalibrationAction,

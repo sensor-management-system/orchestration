@@ -18,7 +18,6 @@ from ..permissions.rules import filter_visible
 from ..schemas.software_update_action_attachment_schema import (
     PlatformSoftwareUpdateActionAttachmentSchema,
 )
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
 
 
@@ -30,7 +29,6 @@ class PlatformSoftwareUpdateActionAttachmentList(ResourceList):
         return filter_visible(self.session.query(self.model))
 
     schema = PlatformSoftwareUpdateActionAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformSoftwareUpdateActionAttachment,
@@ -49,7 +47,6 @@ class PlatformSoftwareUpdateActionAttachmentDetail(ResourceDetail):
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = PlatformSoftwareUpdateActionAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformSoftwareUpdateActionAttachment,

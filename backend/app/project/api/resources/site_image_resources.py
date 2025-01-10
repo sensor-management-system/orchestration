@@ -16,7 +16,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.site_image_schema import SiteImageSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_site_set_update_description_and_update_pidinst,
@@ -77,7 +76,6 @@ class SiteImageList(ResourceList):
         return result
 
     schema = SiteImageSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": SiteImage,
@@ -148,7 +146,6 @@ class SiteImageDetail(ResourceDetail):
         set_update_description_text_user_and_pidinst(site_image.site, msg)
 
     schema = SiteImageSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": SiteImage,

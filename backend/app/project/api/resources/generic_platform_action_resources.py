@@ -19,7 +19,6 @@ from ..models.platform import Platform
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.generic_actions_schema import GenericPlatformActionSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_platform_set_update_description_and_update_pidinst,
@@ -71,7 +70,6 @@ class GenericPlatformActionList(ResourceList):
         return result
 
     schema = GenericPlatformActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": GenericPlatformAction,
@@ -132,7 +130,6 @@ class GenericPlatformActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = GenericPlatformActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": GenericPlatformAction,

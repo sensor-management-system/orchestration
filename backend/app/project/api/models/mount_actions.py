@@ -12,7 +12,7 @@ from ..models.mixin import AuditMixin, IndirectSearchableMixin
 from .base_model import db
 
 
-class PlatformMountAction(db.Model, AuditMixin):
+class PlatformMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
     """Mount of a platform on a configuration."""
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -90,7 +90,7 @@ class PlatformMountAction(db.Model, AuditMixin):
         return {
             "begin_description": self.begin_description,
             "end_description": self.end_description,
-            "platform": self.platform.to_search_entry(),
+            "platform": self.platform.to_search_entry(include_relationships=False),
             "label": self.label,
         }
 
@@ -197,7 +197,7 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         return {
             "begin_description": self.begin_description,
             "end_description": self.end_description,
-            "device": self.device.to_search_entry(),
+            "device": self.device.to_search_entry(include_relationships=False),
             "label": self.label,
         }
 
