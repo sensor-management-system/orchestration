@@ -53,9 +53,9 @@ class Platform(
     keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
     country = db.Column(db.String(256), nullable=True)
 
-    def to_search_entry(self):
+    def to_search_entry(self, include_relationships=True):
         """Convert the model to a dict to store it in a full text search."""
-        return {
+        result = {
             "short_name": self.short_name,
             "long_name": self.long_name,
             "description": self.description,
@@ -69,19 +69,6 @@ class Platform(
             "inventory_number": self.inventory_number,
             "serial_number": self.serial_number,
             "persistent_identifier": self.persistent_identifier,
-            "attachments": [a.to_search_entry() for a in self.platform_attachments],
-            "platform_contact_roles": [
-                pcr.to_search_entry() for pcr in self.platform_contact_roles
-            ],
-            "generic_actions": [
-                g.to_search_entry() for g in self.generic_platform_actions
-            ],
-            "software_update_actions": [
-                s.to_search_entry() for s in self.platform_software_update_actions
-            ],
-            "platform_parameters": [
-                p.to_search_entry() for p in self.platform_parameters
-            ],
             "is_internal": self.is_internal,
             "is_public": self.is_public,
             "is_private": self.is_private,
@@ -91,6 +78,28 @@ class Platform(
             "keywords": self.keywords,
             "country": self.country,
         }
+        if include_relationships:
+            result.update(
+                {
+                    "attachments": [
+                        a.to_search_entry() for a in self.platform_attachments
+                    ],
+                    "platform_contact_roles": [
+                        pcr.to_search_entry() for pcr in self.platform_contact_roles
+                    ],
+                    "generic_actions": [
+                        g.to_search_entry() for g in self.generic_platform_actions
+                    ],
+                    "software_update_actions": [
+                        s.to_search_entry()
+                        for s in self.platform_software_update_actions
+                    ],
+                    "platform_parameters": [
+                        p.to_search_entry() for p in self.platform_parameters
+                    ],
+                }
+            )
+        return result
 
     def get_parent_search_entities(self):
         """Get the parents where this here is included in the search index."""

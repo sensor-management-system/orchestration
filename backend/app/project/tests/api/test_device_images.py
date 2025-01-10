@@ -617,7 +617,9 @@ class TestDeviceImageServices(BaseTestCase):
                 },
             }
         }
-        resp = self.client.post(self.url, data=json.dumps(payload))
+        resp = self.client.post(
+            self.url, data=json.dumps(payload), content_type="application/vnd.api+json"
+        )
         self.expect(resp.status_code).to_equal(401)
 
     @fixtures.use(["user1", "attachment1_of_public_device1_in_group1"])

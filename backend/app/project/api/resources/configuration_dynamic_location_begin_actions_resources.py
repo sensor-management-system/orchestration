@@ -30,7 +30,6 @@ from ..permissions.rules import filter_visible
 from ..schemas.configuration_dynamic_location_actions_schema import (
     ConfigurationDynamicLocationBeginActionSchema,
 )
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_configuration_set_update_description_and_update_pidinst,
@@ -135,7 +134,6 @@ class ConfigurationDynamicLocationBeginActionList(ResourceList):
         return result
 
     schema = ConfigurationDynamicLocationBeginActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationDynamicLocationBeginAction,
@@ -206,7 +204,6 @@ class ConfigurationDynamicLocationBeginActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = ConfigurationDynamicLocationBeginActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationDynamicLocationBeginAction,

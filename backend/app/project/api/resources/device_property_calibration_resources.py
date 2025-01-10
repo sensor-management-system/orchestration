@@ -23,7 +23,6 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..resources.base_resource import check_if_object_not_found
 from ..schemas.calibration_actions_schema import DevicePropertyCalibrationSchema
-from ..token_checker import token_required
 
 
 class DevicePropertyCalibrationList(ResourceList):
@@ -93,7 +92,6 @@ class DevicePropertyCalibrationList(ResourceList):
         return query_
 
     schema = DevicePropertyCalibrationSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,
@@ -112,7 +110,6 @@ class DevicePropertyCalibrationDetail(ResourceDetail):
         check_if_object_not_found(self._data_layer.model, kwargs)
 
     schema = DevicePropertyCalibrationSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DevicePropertyCalibration,

@@ -629,7 +629,9 @@ class TestPlatformImageServices(BaseTestCase):
                 },
             }
         }
-        resp = self.client.post(self.url, data=json.dumps(payload))
+        resp = self.client.post(
+            self.url, data=json.dumps(payload), content_type="application/vnd.api+json"
+        )
         self.expect(resp.status_code).to_equal(401)
 
     @fixtures.use(["user1", "attachment1_of_public_platform1_in_group1"])
@@ -1609,7 +1611,9 @@ class TestPlatformImageServices(BaseTestCase):
         self, user1, image1_of_attachment1_of_public_platform1_in_group1
     ):
         """Ensure that we can delete if we are member of a group."""
-        group_ids = image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids
+        group_ids = (
+            image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids
+        )
         with self.run_requests_as(user1):
             with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
                 mock.return_value = UserAccount(
@@ -1638,7 +1642,9 @@ class TestPlatformImageServices(BaseTestCase):
         self, user1, image1_of_attachment1_of_public_platform1_in_group1
     ):
         """Ensure that we can delete if we are admin of a group."""
-        group_ids = image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids
+        group_ids = (
+            image1_of_attachment1_of_public_platform1_in_group1.platform.group_ids
+        )
         with self.run_requests_as(user1):
             with patch.object(idl, "get_all_permission_groups_for_a_user") as mock:
                 mock.return_value = UserAccount(

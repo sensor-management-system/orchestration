@@ -26,6 +26,8 @@ from project.api.models import (
     Platform,
     PlatformMountAction,
     TsmEndpoint,
+    User,
+    mixin,
 )
 from project.api.models.base_model import db
 from project.extensions.instances import pidinst
@@ -1760,3 +1762,68 @@ class TestDeviceMountAction(BaseTestCase):
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id
             )
+
+    def test_add_to_index_on_post(self):
+        """Ensure we update the elasticsearch index after the post - and how often."""
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+        db.session.add_all([contact, super_user])
+        first_configuration = None
+        first_device = None
+        for i in range(1000):
+            c = Configuration(label=f"c{i}", is_public=True, is_internal=False)
+            d = Device(
+                short_name=f"d{i}", is_public=True, is_internal=False, is_private=False
+            )
+            db.session.add_all([c, d])
+            if first_configuration is None:
+                first_configuration = c
+            if first_device is None:
+                first_device = d
+
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "device_mount_action",
+                "attributes": {
+                    "begin_date": "2022-06-08T07:25:00.782000",
+                    "begin_description": "test",
+                },
+                "relationships": {
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": first_configuration.id,
+                        },
+                    },
+                    "device": {
+                        "data": {
+                            "type": "device",
+                            "id": first_device.id,
+                        },
+                    },
+                    "begin_contact": {
+                        "data": {
+                            "type": "contact",
+                            "id": contact.id,
+                        }
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            with patch.object(mixin, "add_to_index") as mock:
+                resp = self.client.post(
+                    self.url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
+                mock.assert_called()
+                for call_args in mock.call_args_list:
+                    self.assertEqual(call_args.args[0], "configuration")
+                    self.assertEqual(call_args.args[1].id, first_configuration.id)
+        self.assertEqual(resp.status_code, 201)

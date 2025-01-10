@@ -24,7 +24,6 @@ from ..resources.base_resource import (
     set_update_description_text_user_and_pidinst,
 )
 from ..schemas.software_update_action_schema import PlatformSoftwareUpdateActionSchema
-from ..token_checker import token_required
 
 
 class PlatformSoftwareUpdateActionList(ResourceList):
@@ -72,7 +71,6 @@ class PlatformSoftwareUpdateActionList(ResourceList):
         return result
 
     schema = PlatformSoftwareUpdateActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,
@@ -133,7 +131,6 @@ class PlatformSoftwareUpdateActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = PlatformSoftwareUpdateActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformSoftwareUpdateAction,

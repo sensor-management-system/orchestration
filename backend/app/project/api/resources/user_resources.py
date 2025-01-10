@@ -14,7 +14,6 @@ from ..helpers.errors import MethodNotAllowed
 from ..models.base_model import db
 from ..models.user import User
 from ..schemas.user_schema import UserSchema
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
 
 
@@ -31,7 +30,6 @@ class UserList(ResourceList):
         raise MethodNotAllowed("This endpoint is readonly!")
 
     schema = UserSchema
-    decorators = (token_required,)
     data_layer = {"session": db.session, "model": User}
 
 
@@ -56,7 +54,6 @@ class UserDetail(ResourceDetail):
         raise MethodNotAllowed("This endpoint is readonly!")
 
     schema = UserSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": User,

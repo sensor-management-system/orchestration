@@ -343,7 +343,9 @@ class TestSiteApi(BaseTestCase):
         }
 
         resp = self.client.patch(
-            f"{self.sites_url}/{self.public_site.id}", json=payload
+            f"{self.sites_url}/{self.public_site.id}",
+            json=payload,
+            content_type="application/vnd.api+json",
         )
         self.assertEqual(resp.status_code, 401)
 

@@ -24,7 +24,6 @@ from ..resources.base_resource import (
     set_update_description_text_user_and_pidinst,
 )
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
-from ..token_checker import token_required
 
 
 class GenericConfigurationActionList(ResourceList):
@@ -73,7 +72,6 @@ class GenericConfigurationActionList(ResourceList):
         return result
 
     schema = GenericConfigurationActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": GenericConfigurationAction,
@@ -131,7 +129,6 @@ class GenericConfigurationActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = GenericConfigurationActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": GenericConfigurationAction,

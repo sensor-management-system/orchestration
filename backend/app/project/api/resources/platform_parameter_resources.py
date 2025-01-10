@@ -16,7 +16,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.platform_parameter_schema import PlatformParameterSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_platform_set_update_description_and_update_pidinst,
@@ -57,7 +56,6 @@ class PlatformParameterList(ResourceList):
         return result
 
     schema = PlatformParameterSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformParameter,
@@ -100,7 +98,6 @@ class PlatformParameterDetail(ResourceDetail):
         set_update_description_text_user_and_pidinst(platform_paramater.platform, msg)
 
     schema = PlatformParameterSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformParameter,

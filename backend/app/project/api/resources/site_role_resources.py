@@ -17,7 +17,6 @@ from ..models.contact_role import SiteContactRole
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.role import SiteRoleSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_site_set_update_description_and_update_pidinst,
@@ -73,7 +72,6 @@ class SiteRoleList(ResourceList):
         return result
 
     schema = SiteRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": SiteContactRole,
@@ -162,7 +160,6 @@ class SiteRoleDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = SiteRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": SiteContactRole,

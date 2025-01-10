@@ -452,12 +452,14 @@ class TestConfigurationParameterValueChangeActionServices(BaseTestCase):
         public_configuration2_in_group1,
     ):
         """Ensure we can prefilter by configuration."""
-        url1 = "/".join([
-            base_url,
-            "configurations",
-            str(public_configuration1_in_group1.id),
-            "configuration-parameter-value-change-actions"
-        ])
+        url1 = "/".join(
+            [
+                base_url,
+                "configurations",
+                str(public_configuration1_in_group1.id),
+                "configuration-parameter-value-change-actions",
+            ]
+        )
         resp1 = self.client.get(url1)
         self.expect(resp1.status_code).to_equal(200)
         self.expect(resp1.json["data"]).to_have_length(1)
@@ -465,12 +467,14 @@ class TestConfigurationParameterValueChangeActionServices(BaseTestCase):
             str(value1_of_parameter1_of_public_configuration1_in_group1.id)
         )
 
-        url2 = "/".join([
-            base_url,
-            "configurations",
-            str(public_configuration2_in_group1.id),
-            "configuration-parameter-value-change-actions"
-        ])
+        url2 = "/".join(
+            [
+                base_url,
+                "configurations",
+                str(public_configuration2_in_group1.id),
+                "configuration-parameter-value-change-actions",
+            ]
+        )
         resp2 = self.client.get(url2)
         self.expect(resp2.status_code).to_equal(200)
         self.expect(resp2.json["data"]).to_have_length(1)
@@ -514,7 +518,9 @@ class TestConfigurationParameterValueChangeActionServices(BaseTestCase):
                 },
             }
         }
-        resp = self.client.post(self.url, data=json.dumps(payload))
+        resp = self.client.post(
+            self.url, data=json.dumps(payload), content_type="application/vnd.api+json"
+        )
         self.expect(resp.status_code).to_equal(401)
 
     @fixtures.use(

@@ -20,7 +20,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.site_attachment_schema import SiteAttachmentSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     delete_attachments_in_minio_by_url,
@@ -84,7 +83,6 @@ class SiteAttachmentList(ResourceList):
         return result
 
     schema = SiteAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": SiteAttachment,
@@ -155,7 +153,6 @@ class SiteAttachmentDetail(ResourceDetail):
         return final_result
 
     schema = SiteAttachmentSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": SiteAttachment,

@@ -27,6 +27,7 @@ from project.api.models import (
     PlatformMountAction,
     Site,
     User,
+    mixin,
 )
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
@@ -1205,7 +1206,7 @@ class TestConfigurationsService(BaseTestCase):
                     "keywords": ["word1", "word2"],
                     "is_public": True,
                     "is_internal": False,
-                    "cfg_permission_group": "123"
+                    "cfg_permission_group": "123",
                 },
             }
         }
@@ -1222,3 +1223,54 @@ class TestConfigurationsService(BaseTestCase):
         configuration = db.session.query(Configuration).filter_by(id=result_id).first()
         self.assertEqual(["word1", "word2"], configuration.keywords)
         self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])
+
+    def test_add_to_index_on_patch(self):
+        """Ensure we update the elasticsearch index after the patch."""
+        configuration = Configuration(label="c", is_public=True, is_internal=False)
+        db.session.add(configuration)
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "configuration",
+                "id": str(configuration.id),
+                "attributes": {
+                    "description": "Some description added",
+                },
+            }
+        }
+
+        with self.run_requests_as(self.super_user):
+            with patch.object(mixin, "add_to_index") as mock:
+                resp = self.client.patch(
+                    f"{self.configurations_url}/{configuration.id}",
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
+                mock.assert_called()
+                for call_args in mock.call_args_list:
+                    self.assertEqual(call_args.args[0], "configuration")
+                    self.assertEqual(call_args.args[1].id, configuration.id)
+
+            self.assertEqual(resp.status_code, 200)
+            payload = {
+                "data": {
+                    "type": "configuration",
+                    "id": str(configuration.id),
+                    "attributes": {
+                        "description": "different description",
+                    },
+                }
+            }
+
+            with patch.object(mixin, "add_to_index") as mock:
+                resp = self.client.patch(
+                    f"{self.configurations_url}/{configuration.id}",
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
+                mock.assert_called()
+                for call_args in mock.call_args_list:
+                    self.assertEqual(call_args.args[0], "configuration")
+                    self.assertEqual(call_args.args[1].id, configuration.id)
+            self.assertEqual(resp.status_code, 200)

@@ -19,7 +19,6 @@ from ..models.contact_role import DeviceContactRole
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.role import DeviceRoleSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_device_set_update_description_and_update_pidinst,
@@ -84,7 +83,6 @@ class DeviceRoleList(ResourceList):
         return result
 
     schema = DeviceRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceContactRole,
@@ -174,7 +172,6 @@ class DeviceRoleDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = DeviceRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceContactRole,

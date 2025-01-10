@@ -29,7 +29,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.configuration_schema import ConfigurationSchema
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 
 
@@ -141,7 +140,6 @@ class ConfigurationList(ResourceList):
         return result
 
     schema = ConfigurationSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Configuration,
@@ -227,7 +225,6 @@ class ConfigurationDetail(ResourceDetail):
         return final_result
 
     schema = ConfigurationSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Configuration,

@@ -30,7 +30,6 @@ from ..resources.base_resource import (
     set_update_description_text_user_and_pidinst,
 )
 from ..schemas.mount_actions_schema import PlatformMountActionSchema
-from ..token_checker import token_required
 
 
 class PlatformMountActionList(ResourceList):
@@ -113,7 +112,6 @@ class PlatformMountActionList(ResourceList):
         return result
 
     schema = PlatformMountActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformMountAction,
@@ -179,7 +177,6 @@ class PlatformMountActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = PlatformMountActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": PlatformMountAction,

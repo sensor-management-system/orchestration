@@ -19,7 +19,6 @@ from ..models.contact_role import ConfigurationContactRole
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.role import ConfigurationRoleSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_configuration_set_update_description_and_update_pidinst,
@@ -82,7 +81,6 @@ class ConfigurationRoleList(ResourceList):
         return result
 
     schema = ConfigurationRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationContactRole,
@@ -181,7 +179,6 @@ class ConfigurationRoleDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = ConfigurationRoleSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": ConfigurationContactRole,

@@ -39,7 +39,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.device_schema import DeviceSchema
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from .mixins.csv_export import CsvListMixin
 
@@ -147,7 +146,6 @@ class DeviceList(CsvListMixin, ResourceList):
         return result
 
     schema = DeviceSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Device,
@@ -344,7 +342,6 @@ class DeviceDetail(ResourceDetail):
         return result
 
     schema = DeviceSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Device,

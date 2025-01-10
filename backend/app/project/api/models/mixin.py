@@ -16,6 +16,7 @@ import pytz
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.orm.base import object_state
 
 from ..helpers.errors import ConflictError
 from ..helpers.memorize import memorize
@@ -33,6 +34,19 @@ def utc_now():
     """Return the datetime in utc."""
     now = datetime.utcnow()
     return pytz.utc.localize(now)
+
+
+def is_modified(instance):
+    """Return true if the object was modified."""
+    # This is based on parts of the session.is_modified method that sqlalchemy
+    # delivers us.
+    # However, this method sometimes returns false negative results, that
+    # will stop us from updating the elasticsearch entries.
+    # When we rely on the object state it seems to work.
+    # See as well:
+    # https://github.com/sqlalchemy/sqlalchemy/blob/rel_1_4_54/lib/sqlalchemy/orm/session.py#L3917
+    state = object_state(instance)
+    return state.modified
 
 
 class CreatedMixin:
@@ -266,13 +280,23 @@ class SearchableMixin:
         # And we want to store the payload here as well
         session._search_add = []
 
-        for obj in itertools.chain(session._changes["add"], session._changes["update"]):
+        for obj in session._changes["add"]:
             for searchable in cls.yield_searchables(obj):
                 session._search_add.append(
                     SearchModelWithEntry(
                         model=searchable, entry=searchable.to_search_entry()
                     )
                 )
+
+        for obj in session._changes["update"]:
+            if is_modified(obj):
+                # only if there are real changes in the obj
+                for searchable in cls.yield_searchables(obj):
+                    session._search_add.append(
+                        SearchModelWithEntry(
+                            model=searchable, entry=searchable.to_search_entry()
+                        )
+                    )
         for obj in session._changes["delete"]:
             # We really don't want the direct searchables that are deleted
             # but we want every associated one

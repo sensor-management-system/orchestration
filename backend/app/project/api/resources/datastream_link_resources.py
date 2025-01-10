@@ -17,7 +17,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.datastream_link_schema import DatastreamLinkSchema
-from ..token_checker import token_required
 from .base_resource import (
     check_if_object_not_found,
     query_configuration_set_update_description_and_update_pidinst,
@@ -91,7 +90,6 @@ class DatastreamLinkList(ResourceList):
         return result
 
     schema = DatastreamLinkSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DatastreamLink,
@@ -160,7 +158,6 @@ class DatastreamLinkDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = DatastreamLinkSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DatastreamLink,

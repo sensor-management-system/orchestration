@@ -53,9 +53,9 @@ class Device(
     keywords = db.Column(MutableList.as_mutable(db.ARRAY(db.String)), nullable=True)
     country = db.Column(db.String(256), nullable=True)
 
-    def to_search_entry(self):
+    def to_search_entry(self, include_relationships=True):
         """Convert the model to an dict to store in the full text search."""
-        return {
+        result = {
             "short_name": self.short_name,
             "long_name": self.long_name,
             "description": self.description,
@@ -71,19 +71,6 @@ class Device(
             "device_type_uri": self.device_type_uri,
             "status_name": self.status_name,
             "status_uri": self.status_uri,
-            "attachments": [a.to_search_entry() for a in self.device_attachments],
-            "device_contact_roles": [
-                dcr.to_search_entry() for dcr in self.device_contact_roles
-            ],
-            "properties": [p.to_search_entry() for p in self.device_properties],
-            "customfields": [c.to_search_entry() for c in self.customfields],
-            "generic_actions": [
-                g.to_search_entry() for g in self.generic_device_actions
-            ],
-            "software_update_actions": [
-                s.to_search_entry() for s in self.device_software_update_actions
-            ],
-            "device_parameters": [p.to_search_entry() for p in self.device_parameters],
             "is_internal": self.is_internal,
             "is_public": self.is_public,
             "is_private": self.is_private,
@@ -93,6 +80,31 @@ class Device(
             "keywords": self.keywords,
             "country": self.country,
         }
+
+        if include_relationships:
+            result.update(
+                {
+                    "attachments": [
+                        a.to_search_entry() for a in self.device_attachments
+                    ],
+                    "device_contact_roles": [
+                        dcr.to_search_entry() for dcr in self.device_contact_roles
+                    ],
+                    "properties": [p.to_search_entry() for p in self.device_properties],
+                    "customfields": [c.to_search_entry() for c in self.customfields],
+                    "generic_actions": [
+                        g.to_search_entry() for g in self.generic_device_actions
+                    ],
+                    "software_update_actions": [
+                        s.to_search_entry() for s in self.device_software_update_actions
+                    ],
+                    "device_parameters": [
+                        p.to_search_entry() for p in self.device_parameters
+                    ],
+                }
+            )
+
+        return result
 
     def get_parent_search_entities(self):
         """Get the parents where this here is included in the search index."""

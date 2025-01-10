@@ -10,6 +10,10 @@ SPDX-License-Identifier: EUPL-1.2
 Added:
 - Footer section pages (Legal notice, Privacy policy and Terms of use) for FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/455))
 
+Fixed:
+- Time amount for adding/updating mount actions was reduced by updating less entries
+  in the elastic search ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/479))
+
 ## 1.17.1 - 2024-12-02
 
 Fixed:

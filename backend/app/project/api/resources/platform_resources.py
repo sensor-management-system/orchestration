@@ -40,7 +40,6 @@ from ..models.base_model import db
 from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.platform_schema import PlatformSchema
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from .mixins.csv_export import CsvListMixin
 
@@ -146,7 +145,6 @@ class PlatformList(CsvListMixin, ResourceList):
         return result
 
     schema = PlatformSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Platform,
@@ -349,7 +347,6 @@ class PlatformDetail(ResourceDetail):
             self.platform_model_before_patch = platform.model
 
     schema = PlatformSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": Platform,

@@ -21,7 +21,6 @@ from ..permissions.rules import filter_visible
 from ..schemas.involved_device_for_datastream_link_schema import (
     InvolvedDeviceForDatastreamLinkSchema,
 )
-from ..token_checker import token_required
 from .base_resource import check_if_object_not_found
 
 
@@ -69,7 +68,6 @@ class InvolvedDeviceForDatastreamLinkList(ResourceList):
         ensure_create_doesnt_introduce_conflicts(self.model, data)
 
     schema = InvolvedDeviceForDatastreamLinkSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": InvolvedDeviceForDatastreamLink,
@@ -101,7 +99,6 @@ class InvolvedDeviceForDatastreamLinkDetail(ResourceDetail):
         ensure_update_doesnt_introduce_conflicts(object_)
 
     schema = InvolvedDeviceForDatastreamLinkSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": InvolvedDeviceForDatastreamLink,

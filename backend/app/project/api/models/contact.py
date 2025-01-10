@@ -136,18 +136,17 @@ class Contact(db.Model, AuditMixin, SearchableMixin, IndirectSearchableMixin):
         # We don't refer to the contact roles, as they are part of the index
         # for the device/platform/configuration.
         result = []
-        # TODO: Check if this contact_device_roles name stays to refer back
-        # to the DeviceContactRole model
         for device_contact_role in self.contact_device_roles:
             device = device_contact_role.device
             result.append(device)
-        # TODO: Again check the backref
         for platform_contact_role in self.contact_platform_roles:
             platform = platform_contact_role.platform
             result.append(platform)
-        # TODO: Again check the backref
         for configuration_contact_role in self.contact_configuration_roles:
             configuration = configuration_contact_role.configuration
             result.append(configuration)
+        for site_contact_role in self.contact_site_roles:
+            site = site_contact_role.site
+            result.append(site)
 
         return result

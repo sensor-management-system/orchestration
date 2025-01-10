@@ -25,7 +25,6 @@ from ..resources.base_resource import (
     set_update_description_text_user_and_pidinst,
 )
 from ..schemas.mount_actions_schema import DeviceMountActionSchema
-from ..token_checker import token_required
 
 
 class DeviceMountActionList(ResourceList):
@@ -100,7 +99,6 @@ class DeviceMountActionList(ResourceList):
         return result
 
     schema = DeviceMountActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
@@ -169,7 +167,6 @@ class DeviceMountActionDetail(ResourceDetail):
         return super().after_delete(*args, **kwargs)
 
     schema = DeviceMountActionSchema
-    decorators = (token_required,)
     data_layer = {
         "session": db.session,
         "model": DeviceMountAction,
