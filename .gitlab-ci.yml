@@ -533,6 +533,8 @@ backup-gfz-staging:
       docker compose -f docker/deployment/gfz/staging/docker-compose.yml \
         run -T --entrypoint '/backup.py' \
         --rm \
+        -e S3_EXTERNAL_BACKUP_ACCESS_KEY=$S3_EXTERNAL_BACKUP_ACCESS_KEY \
+        -e S3_EXTERNAL_BACKUP_SECRET_KEY=$S3_EXTERNAL_BACKUP_SECRET_KEY \
         mc
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
@@ -601,6 +603,8 @@ backup-gfz-prod:
       docker compose -f docker/deployment/gfz/prod/docker-compose.yml \
         run -T --entrypoint '/backup.py' \
         --rm \
+        -e S3_EXTERNAL_BACKUP_ACCESS_KEY=$S3_EXTERNAL_BACKUP_ACCESS_KEY \
+        -e S3_EXTERNAL_BACKUP_SECRET_KEY=$S3_EXTERNAL_BACKUP_SECRET_KEY \
         mc
     - >
       docker compose -f docker/deployment/gfz/prod/docker-compose.yml \
