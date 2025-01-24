@@ -8,11 +8,12 @@ FROM minio/mc:RELEASE.2023-02-16T19-20-11Z
 
 RUN \
     microdnf update --nodocs && \
-    microdnf install tar gzip findutils && \
-    microdnf clean all
+    microdnf install tar gzip findutils python3 && \
+    microdnf clean all && \
+    pip3 install requests boto3==1.23.10
 
-COPY ./minio_backup.sh /backup.sh
-RUN chmod +x /backup.sh
+COPY ./minio_backup.py /backup.py
+RUN chmod +x /backup.py
 
 COPY ./create_bucket.sh /create_bucket.sh
 RUN chmod +x /create_bucket.sh

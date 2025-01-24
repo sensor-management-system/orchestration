@@ -14,6 +14,9 @@ Fixed:
 - Time amount for adding/updating mount actions was reduced by updating less entries
   in the elastic search ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/479))
 
+Changed:
+- MinIO GFZ backup goes now into the central s3 storage([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/482)
+
 ## 1.17.1 - 2024-12-02
 
 Fixed:

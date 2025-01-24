@@ -120,6 +120,7 @@ services:
       MINIO_ROOT_USER: ${SMS_SANDBOX_MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${SMS_SANDBOX_MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: ${SMS_SANDBOX_MINIO_BUCKET_NAME}
+      S3_EXTERNAL_BACKUP_BUCKET_NAME: dog.sms-files.sms-sandbox-backup
     depends_on:
       - minio
     networks:
