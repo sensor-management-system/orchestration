@@ -3,7 +3,9 @@
  * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+ * - Maximilian Schaldach <maximilian.schaldach@ufz.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
@@ -26,6 +28,7 @@ export class ConfigurationNode implements IConfigurationsTreeNodeWithChildren<Co
   private tree: ConfigurationsTree = new ConfigurationsTree()
   private _disabled: boolean = false
   private _id: string | null = ''
+  private _errors: string[] = []
 
   static readonly ID_PREFIX = 'ConfigurationNode-'
 
@@ -59,6 +62,34 @@ export class ConfigurationNode implements IConfigurationsTreeNodeWithChildren<Co
 
   set disabled (isDisabled: boolean) {
     this._disabled = isDisabled
+  }
+
+  get errors (): string[] {
+    return this._errors
+  }
+
+  set errors (errors: string[]) {
+    this._errors = errors
+  }
+
+  addError (error: string) {
+    this.errors.push(error)
+  }
+
+  removeErrors () {
+    this.errors = []
+  }
+
+  get hasErrors (): boolean {
+    return this.errors.length > 0
+  }
+
+  get hasChildErrors (): boolean {
+    return this.childrenWithErrors.length > 0
+  }
+
+  get childrenWithErrors (): Array<ConfigurationsTreeNode> {
+    return this.tree.getAllNodesAsList()?.filter(child => child.hasErrors) ?? []
   }
 
   get label (): string {

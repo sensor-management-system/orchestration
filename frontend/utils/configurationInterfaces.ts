@@ -78,7 +78,7 @@ export interface IDynamicLocationInfo {
   elevationDatumName: string
 }
 
-export interface IMountTimelineAction <T> {
+export interface IMountTimelineAction<T> {
   key: string
   color: string
   icon: string
@@ -135,7 +135,12 @@ export interface IGenericTimelineAction {
 
 }
 
-export type ITimelineAction = IMountTimelineAction<PlatformMountAction> | IMountTimelineAction<DeviceMountAction>| IStaticLocationTimelineAction | IDynamicLocationTimelineAction | IGenericTimelineAction
+export type ITimelineAction =
+  IMountTimelineAction<PlatformMountAction>
+  | IMountTimelineAction<DeviceMountAction>
+  | IStaticLocationTimelineAction
+  | IDynamicLocationTimelineAction
+  | IGenericTimelineAction
 
 export class PlatformMountTimelineAction implements IMountTimelineAction<PlatformMountAction> {
   private _mountAction: PlatformMountAction
@@ -472,7 +477,7 @@ export class StaticLocationBeginTimelineAction implements IStaticLocationTimelin
     return ''
   }
 
-  get description (): string|null {
+  get description (): string | null {
     return this.staticLocationBeginAction.beginDescription
   }
 
@@ -592,7 +597,7 @@ export class DynamicLocationBeginTimelineAction implements IDynamicLocationTimel
     return ''
   }
 
-  get description (): string |null {
+  get description (): string | null {
     return this.dynamicLocationBeginAction.beginDescription
   }
 
