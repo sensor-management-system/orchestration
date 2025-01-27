@@ -256,7 +256,7 @@ SPDX-License-Identifier: EUPL-1.2
           <a
             target="_blank"
             style="text-decoration: none"
-            href="https://myprofile.gfz-potsdam.de/"
+            href="https://myprofile.gfz.de/"
           >
             MyProfile groups
             <v-icon small>
@@ -279,7 +279,7 @@ SPDX-License-Identifier: EUPL-1.2
               <a
                 target="_blank"
                 style="text-decoration: none"
-                href="https://myprofile.gfz-potsdam.de/"
+                href="https://myprofile.gfz.de/"
               >
                 MyProfile
                 <v-icon small>

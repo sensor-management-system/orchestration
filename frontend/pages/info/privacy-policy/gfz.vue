@@ -11,7 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
     <h1 class="mb-3">
       Privacy Policy
     </h1>
-    <p>Please refer to the <a href="https://www.gfz-potsdam.de/en/data-protection/" target="_blank">GFZ General Data Privacy Statement</a>.</p>
+    <p>Please refer to the <a href="https://www.gfz.de/en/data-protection/" target="_blank">GFZ General Data Privacy Statement</a>.</p>
     <h2 class="mb-1">
       Addendum to General Data Privacy Statement
     </h2>
