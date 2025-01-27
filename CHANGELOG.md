@@ -9,6 +9,7 @@ SPDX-License-Identifier: EUPL-1.2
 ## 1.17.2 (Unreleased)
 Added:
 - Footer section pages (Legal notice, Privacy policy and Terms of use) for FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/455))
+- Devices and platforms can now be unmounted recursively, including proper validation of nodes serving as future parent nodes ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/440))
 
 Fixed:
 - Time amount for adding/updating mount actions was reduced by updating less entries

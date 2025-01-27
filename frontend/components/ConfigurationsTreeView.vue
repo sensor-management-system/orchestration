@@ -23,7 +23,7 @@ SPDX-License-Identifier: EUPL-1.2
       return-object
     >
       <template #label="{item}">
-        <div v-if="item.isDevice()">
+        <div v-if="item.isDevice()" :class="{'error--text': hasErrorOrChildErrors(item)}">
           {{ item.typeName }} -&nbsp;
           <extended-item-name
             :value="item.unpack().device"
@@ -33,7 +33,7 @@ SPDX-License-Identifier: EUPL-1.2
             {{ item.label }}
           </div>
         </div>
-        <div v-if="item.isPlatform()">
+        <div v-if="item.isPlatform()" :class="{'error--text': hasErrorOrChildErrors(item)}">
           {{ item.typeName }} -&nbsp;
           <extended-item-name
             :value="item.unpack().platform"
@@ -48,14 +48,19 @@ SPDX-License-Identifier: EUPL-1.2
         </div>
       </template>
       <template #prepend="{ item }">
-        <v-icon v-if="item.isPlatform()">
+        <v-icon v-if="item.isPlatform()" :class="{'error--text': hasErrorOrChildErrors(item)}">
           mdi-rocket-outline
         </v-icon>
-        <v-icon v-if="item.isDevice()">
+        <v-icon v-if="item.isDevice()" :class="{'error--text': hasErrorOrChildErrors(item)}">
           mdi-network-outline
         </v-icon>
         <v-icon v-if="item.isConfiguration()">
           mdi-file-cog
+        </v-icon>
+      </template>
+      <template #append="{ item }">
+        <v-icon v-if="item.hasErrors" class="error--text">
+          mdi-alert
         </v-icon>
       </template>
     </v-treeview>
@@ -205,6 +210,10 @@ export default class ConfigurationsTreeView extends Vue {
       label += ')'
     }
     return label
+  }
+
+  hasErrorOrChildErrors (item: ConfigurationsTreeNode): boolean {
+    return item.hasErrors || item.hasChildErrors
   }
 
   @Watch('tree', {

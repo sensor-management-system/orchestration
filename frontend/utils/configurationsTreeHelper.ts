@@ -13,6 +13,12 @@
 
 import { ConfigurationsTreeNode } from '@/viewmodels/ConfigurationsTreeNode'
 import { IOffsets } from '@/utils/configurationInterfaces'
+import { PlatformMountAction } from '@/models/PlatformMountAction'
+import { Platform } from '@/models/Platform'
+import { Device } from '@/models/Device'
+import { ConfigurationMountAction } from '@/viewmodels/ConfigurationMountAction'
+import { DeviceMountAction } from '@/models/DeviceMountAction'
+import { Configuration } from '@/models/Configuration'
 
 /**
  * sums the offsets of all nodes in an array
@@ -32,4 +38,23 @@ export function sumOffsets (nodes: ConfigurationsTreeNode[]): IOffsets {
     result.offsetZ += node.unpack().offsetZ
   })
   return result
+}
+
+export function getEntityByConfigurationsTreeNode (node: ConfigurationsTreeNode): Platform|Device|Configuration|null {
+  if (!node) {
+    return null
+  }
+  if (node.isPlatform()) {
+    const unpacked: PlatformMountAction = node.unpack() as PlatformMountAction
+    return unpacked.platform
+  }
+  if (node.isDevice()) {
+    const unpacked: DeviceMountAction = node.unpack() as DeviceMountAction
+    return unpacked.device
+  }
+  if (node.isConfiguration()) {
+    const unpacked: ConfigurationMountAction = node.unpack() as ConfigurationMountAction
+    return unpacked.configuration
+  }
+  return null
 }
