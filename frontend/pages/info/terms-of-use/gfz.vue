@@ -14,10 +14,10 @@ SPDX-License-Identifier: EUPL-1.2
       </h1>
       <p class="block">
         By using the offered services at <a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a>
-        (“Services”) you agree to the following terms of use of Helmholtz Centre Potsdam – GFZ German Research
-        Centre for Geosciences (“GFZ”), a Public Law Foundation under the laws of the Federal State of
+        (“Services”) you agree to the following terms of use of GFZ Helmholtz Centre for Geosciences
+        (“GFZ”), a Public Law Foundation under the laws of the Federal State of
         Brandenburg/Germany, Telegrafenberg, 14473 Potsdam, Germany,
-        Mail: <a href="mailto:datahub-support@gfz-potsdam.de">datahub-support@gfz-potsdam.de</a>
+        Mail: <a href="mailto:datahub-support@gfz-potsdam.de">datahub-support@gfz.de</a>
       </p>
     </section>
     <section class="mb-6">
