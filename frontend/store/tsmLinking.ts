@@ -5,6 +5,7 @@
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Tobias Kuhnert <tobias.kuhnert@ufz.de>
  * - Erik Pongratz <erik.pongratz@ufz.de>
+ * - Maximilian Schaldach <maximilian.schaldach@ufz.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
  *
@@ -171,7 +172,11 @@ export type LoadDatastreamsForDatasourceAndThingAction = ({
   endpoint,
   datasource,
   thing
-}: { endpoint: TsmEndpoint, datasource: TsmdlDatasource, thing: TsmdlThing }) => Promise<void>
+}: {
+  endpoint: TsmEndpoint,
+  datasource: TsmdlDatasource,
+  thing: TsmdlThing
+}) => Promise<void>
 export type LoadConfigurationTsmLinkingsAction = (configurationId: string) => Promise<void>
 export type AddConfigurationTsmLinkingAction = (tsmLinking: TsmLinking) => Promise<string>
 export type UpdateConfigurationTsmLinkingAction = (tsmLinking: TsmLinking) => Promise<string>
@@ -185,7 +190,11 @@ export type LoadOneThingAction = ({
   endpoint,
   datasource,
   thingId
-}: { endpoint: TsmEndpoint, datasource: TsmdlDatasource, thingId: string }) => Promise<TsmdlThing>
+}: {
+  endpoint: TsmEndpoint,
+  datasource: TsmdlDatasource,
+  thingId: string
+}) => Promise<TsmdlThing>
 export type LoadOneDatastreamAction = ({
   endpoint,
   datasource,

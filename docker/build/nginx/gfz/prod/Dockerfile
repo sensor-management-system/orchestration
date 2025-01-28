@@ -9,6 +9,7 @@ FROM node:20.17.0-bullseye as js-builder
 # First the urls for sms backend and cv backend
 ENV BASE_URL /
 ENV SMS_BACKEND_URL /backend/api/v1
+ENV SMS_FRONTEND_URL https://sensors.gfz-potsdam.de/
 ENV CV_BACKEND_URL https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV IDL_SYNC_URL /idl/api/hifis/sync-groups
 

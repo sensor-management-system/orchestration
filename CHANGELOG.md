@@ -6,10 +6,14 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.17.2 (Unreleased)
+## 1.17.3 (Unreleased)
+
+## 1.17.2 - 2025-01-28
+
 Added:
 - Footer section pages (Legal notice, Privacy policy and Terms of use) for FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/455))
 - Devices and platforms can now be unmounted recursively, including proper validation of nodes serving as future parent nodes ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/440))
+- Buttons for linked Datasources/Things/Datastreams navigating to their respective resources within an STA instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/381))
 
 Fixed:
 - Time amount for adding/updating mount actions was reduced by updating less entries

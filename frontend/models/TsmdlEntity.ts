@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2023
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Maximilian Schaldach <maximilian.schaldach@ufz.de>
@@ -13,6 +13,7 @@ export interface ITsmdlEntity{
   name: string
   description: string
   properties: Object
+  staLink: string
 }
 
 export class TsmdlEntity implements ITsmdlEntity {
@@ -20,6 +21,7 @@ export class TsmdlEntity implements ITsmdlEntity {
   private _id: string = ''
   private _name: string = ''
   private _properties: Object = {}
+  private _staLink: string = ''
 
   constructor (
     id: string = ''
@@ -59,12 +61,21 @@ export class TsmdlEntity implements ITsmdlEntity {
     this._properties = value
   }
 
+  get staLink (): string {
+    return this._staLink
+  }
+
+  set staLink (value: string) {
+    this._staLink = value
+  }
+
   static createFromObject (someObject: ITsmdlEntity): TsmdlEntity {
     const result = new TsmdlEntity()
     result.id = someObject.id ?? ''
     result.name = someObject.name ?? ''
     result.description = someObject.description ?? ''
     result.properties = someObject.properties ?? {}
+    result.staLink = someObject.staLink ?? ''
     return result
   }
 }
