@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2023
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Maximilian Schaldach <maximilian.schaldach@ufz.de>
@@ -15,7 +15,8 @@ interface TsdmlApiResponse {
   '@iot.id': string,
   name: string,
   description: string,
-  properties: Object
+  properties: Object,
+  sta_endpoint?: string
 }
 
 export class TsmdlDatasourceSerializer extends TsmdlEntitySerializer {
@@ -24,6 +25,14 @@ export class TsmdlDatasourceSerializer extends TsmdlEntitySerializer {
   }
 
   convertJsonApiEntityToModel (jsonApiData: TsdmlApiResponse): TsmdlDatasource {
-    return super.convertJsonApiEntityToModel(jsonApiData)
+    const tsmdlDatasource = new TsmdlDatasource()
+
+    tsmdlDatasource.id = jsonApiData['@iot.id'].toString()
+    tsmdlDatasource.name = jsonApiData.name || ''
+    tsmdlDatasource.description = jsonApiData.description || ''
+    tsmdlDatasource.properties = jsonApiData.properties || {}
+    tsmdlDatasource.staLink = jsonApiData.sta_endpoint?.replace(/\/$/, '') ?? ''
+
+    return tsmdlDatasource
   }
 }

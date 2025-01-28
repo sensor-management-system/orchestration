@@ -38,13 +38,20 @@ import { DeviceParameterApi } from '@/services/sms/DeviceParameterApi'
 import { DeviceParameterChangeActionApi } from '@/services/sms/DeviceParameterChangeActionApi'
 import { DevicePropertyApi } from '@/services/sms/DevicePropertyApi'
 import { DeviceSoftwareUpdateActionApi } from '@/services/sms/DeviceSoftwareUpdateActionApi'
-import { DeviceSoftwareUpdateActionAttachmentApi, PlatformSoftwareUpdateActionAttachmentApi } from '@/services/sms/SoftwareUpdateActionAttachmentApi'
+import {
+  DeviceSoftwareUpdateActionAttachmentApi,
+  PlatformSoftwareUpdateActionAttachmentApi
+} from '@/services/sms/SoftwareUpdateActionAttachmentApi'
 import { DynamicLocationActionApi } from '@/services/sms/DynamicLocationActionApi'
 import { ExportControlAttachmentApi } from '@/services/sms/ExportControlAttachmentApi'
 import { ExportControlApi } from '@/services/sms/ExportControlApi'
 import { GenericConfigurationActionApi } from '@/services/sms/GenericConfigurationActionApi'
 import { GenericDeviceActionApi } from '@/services/sms/GenericDeviceActionApi'
-import { GenericDeviceActionAttachmentApi, GenericPlatformActionAttachmentApi, GenericConfigurationActionAttachmentApi } from '@/services/sms/GenericActionAttachmentApi'
+import {
+  GenericDeviceActionAttachmentApi,
+  GenericPlatformActionAttachmentApi,
+  GenericConfigurationActionAttachmentApi
+} from '@/services/sms/GenericActionAttachmentApi'
 import { GenericPlatformActionApi } from '@/services/sms/GenericPlatformActionApi'
 import { LocationActionTimepointControllerApi } from '@/services/sms/LocationActionTimepointControllerApi'
 import { ManufacturerModelApi } from '@/services/sms/ManufacturerModelApi'
@@ -94,6 +101,7 @@ import { UnitApi } from '@/services/cv/UnitApi'
 import { TsmdlDatastreamApi } from '@/services/tsmdl/DatastreamApi'
 import { TsmdlDatasourceApi } from '@/services/tsmdl/DatasourceApi'
 import { TsmdlThingApi } from '@/services/tsmdl/ThingApi'
+import { StaDatastreamApi, StaThingApi } from '@/services/sta/StaApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -151,6 +159,9 @@ export class Api {
   private readonly _tsmdlThingApi: TsmdlThingApi
 
   private readonly _tsmEndpointApi: TsmEndpointApi
+
+  private readonly _staThingApi: StaThingApi
+  private readonly _staDatastreamApi: StaDatastreamApi
 
   private readonly _manufacturerApi: ManufacturerApi
   private readonly _platformTypeApi: PlatformTypeApi
@@ -594,6 +605,17 @@ export class Api {
       '/tsm-endpoints'
     )
 
+    // and here we can set settings for all the sta api calls
+    const staConfig: AxiosRequestConfig = {
+      headers: {}
+    }
+    this._staThingApi = new StaThingApi(
+      createAxios(undefined, staConfig)
+    )
+    this._staDatastreamApi = new StaDatastreamApi(
+      createAxios(undefined, staConfig)
+    )
+
     this._elevationDatumApi = new ElevationDatumApi()
     this._epsgCodeApi = new EpsgCodeApi()
 
@@ -890,5 +912,13 @@ export class Api {
 
   get tsmLinkings (): TsmLinkingApi {
     return this._tsmLinkingApi
+  }
+
+  get staThings (): StaThingApi {
+    return this._staThingApi
+  }
+
+  get staDatastreams (): StaDatastreamApi {
+    return this._staDatastreamApi
   }
 }

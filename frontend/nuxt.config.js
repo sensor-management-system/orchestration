@@ -28,6 +28,7 @@ const NUXT_ENV_OIDC_CHALLANGE = process.env.NUXT_ENV_OIDC_CHALLANGE || 'NUXT_ENV
 const NUXT_ENV_OIDC_WELL_KNOWN = process.env.NUXT_ENV_OIDC_WELL_KNOWN || 'NUXT_ENV_OIDC_WELL_KNOWN_ENV_PLACEHOLDER'
 
 const BASE_URL = process.env.BASE_URL || 'BASE_URL_ENV_PLACEHOLDER'
+const SMS_FRONTEND_URL = process.env.SMS_FRONTEND_URL || 'SMS_FRONTEND_URL_ENV_PLACEHOLDER'
 const SMS_BACKEND_URL = process.env.SMS_BACKEND_URL || 'SMS_BACKEND_URL_ENV_PLACEHOLDER'
 const CV_BACKEND_URL = process.env.CV_BACKEND_URL || 'CV_BACKEND_URL_ENV_PLACEHOLDER'
 const IDL_SYNC_URL = process.env.IDL_SYNC_URL || 'IDL_SYNC_URL_ENV_PLACEHOLDER'
@@ -78,6 +79,7 @@ export default {
   env: {
     version: process.env.npm_package_version,
     basePath: BASE_URL,
+    smsFrontendUrl: SMS_FRONTEND_URL,
     smsBackendUrl: SMS_BACKEND_URL,
     cvBackendUrl: CV_BACKEND_URL,
     idlSyncUrl: IDL_SYNC_URL,

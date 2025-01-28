@@ -1,6 +1,6 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2023
+ * SPDX-FileCopyrightText: 2020 - 2024
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Maximilian Schaldach <maximilian.schaldach@ufz.de>
@@ -31,6 +31,7 @@ export class TsmdlEntitySerializer {
     tsmdlEntity.name = jsonApiData.name || ''
     tsmdlEntity.description = jsonApiData.description || ''
     tsmdlEntity.properties = jsonApiData.properties || {}
+    tsmdlEntity.staLink = ''
 
     return tsmdlEntity
   }

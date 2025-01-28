@@ -58,7 +58,7 @@ SPDX-License-Identifier: EUPL-1.2
         Editorship
       </h2>
       <p>
-      This is a user self-service platform. Responsible for the contents are the users.
+        This is a user self-service platform. Responsible for the contents are the users.
       </p>
     </section>
     <section class="mb-6">
