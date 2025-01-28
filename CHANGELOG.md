@@ -20,9 +20,8 @@ Fixed:
   in the elastic search ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/479))
 
 Changed:
-- MinIO GFZ backup goes now into the central s3 storage ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/482)
-- Usage of hte new GFZ name & logo ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/484)
-
+- MinIO GFZ backup goes now into the central s3 storage ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/482))
+- Usage of the new GFZ name & logo ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/484))
 ## 1.17.1 - 2024-12-02
 
 Fixed:
