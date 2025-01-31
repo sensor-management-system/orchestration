@@ -703,7 +703,7 @@ export default class MountWizard extends Vue {
       return {
         entity,
         mountInfo: {
-          beginContact: this.currentUserAsContact || new Contact(),
+          beginContact: this.currentUserAsContact,
           beginDate: this.selectedDate,
           endContact: this.selectedEndDate ? this.currentUserAsContact : null,
           endDate: this.selectedEndDate || null,

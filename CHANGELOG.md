@@ -8,6 +8,9 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.17.3 (Unreleased)
 
+Fixed:
+- problem on validation of mount contact when mounting devices or platforms ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/490))
+
 ## 1.17.2 - 2025-01-28
 
 Added:
