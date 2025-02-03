@@ -127,7 +127,7 @@ SPDX-License-Identifier: EUPL-1.2
       <p>
         You can find information on data protection in our
         <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
-        <NuxtLink to="/info/privacy-policy/">Privacy policy</NuxtLink>.<br/>
+        <NuxtLink to="/info/privacy-policy/">Privacy policy</NuxtLink>.<br>
         Should you have any further questions about data protection, please contact our <a href="mailto:Datenschutz@gfz.de">Data Protection Officer</a>.
         If you would like to find out more about the concepts and technical implementation of our IT security, please contact our <a href="mailto:itsec-web@gfz.de">Information Security Officer</a>.
       </p>
