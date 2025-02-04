@@ -21,7 +21,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="parameterChangeActionForm"
       v-model="parameterChangeAction"
       :parameters="configurationParameters"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -58,7 +58,10 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     SaveAndCancelButtons,
     ParameterChangeActionForm
   },
-  computed: mapState('configurations', ['chosenKindOfConfigurationAction', 'configurationParameters', 'configurationPresetParameter']),
+  computed: {
+    ...mapState('configurations', ['chosenKindOfConfigurationAction', 'configurationParameters', 'configurationPresetParameter']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('configurations', ['addConfigurationParameterChangeAction', 'loadAllConfigurationActions']),
     ...mapActions('progressindicator', ['setLoading'])

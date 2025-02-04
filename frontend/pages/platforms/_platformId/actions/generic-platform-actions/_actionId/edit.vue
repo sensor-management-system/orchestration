@@ -31,7 +31,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="genericPlatformActionForm"
       v-model="action"
       :attachments="platformAttachments"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
 
     <v-card-actions>
@@ -74,7 +74,8 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
   middleware: ['auth'],
   computed: {
     ...mapState('platforms', ['platformGenericAction', 'platformAttachments']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapState('permissions', ['userInfo'])
   },
   methods: {
     ...mapActions('platforms', ['loadPlatformGenericAction', 'loadAllPlatformActions', 'loadPlatformAttachments', 'updatePlatformGenericAction']),

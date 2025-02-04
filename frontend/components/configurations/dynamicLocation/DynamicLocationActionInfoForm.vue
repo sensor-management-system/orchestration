@@ -69,7 +69,7 @@ SPDX-License-Identifier: EUPL-1.2
                   @change="update(constList.beginContact, $event)"
                 />
               </v-col>
-              <v-col v-if="currentUserMail" align-self="center">
+              <v-col v-if="currentUserContactId" align-self="center">
                 <v-btn small @click="selectCurrentUserAsContact(constList.typeBeginContact)">
                   {{ labelForSelectMeButton }}
                 </v-btn>
@@ -111,7 +111,7 @@ SPDX-License-Identifier: EUPL-1.2
                   @change="update(constList.endContact, $event)"
                 />
               </v-col>
-              <v-col v-if="currentUserMail" align-self="center">
+              <v-col v-if="currentUserContactId" align-self="center">
                 <v-btn small @click="selectCurrentUserAsContact(constList.typeEndContact)">
                   {{ labelForSelectMeButton }}
                 </v-btn>
@@ -143,11 +143,13 @@ import { Rules } from '@/mixins/Rules'
 import { ContactsState } from '@/store/contacts'
 import { Contact } from '@/models/Contact'
 import { ElevationDatum } from '@/models/ElevationDatum'
+import { PermissionsState } from '@/store/permissions'
 
 @Component({
   computed: {
     ...mapState('vocabulary', ['epsgCodes', 'elevationData']),
-    ...mapState('contacts', ['contacts'])
+    ...mapState('contacts', ['contacts']),
+    ...mapState('permissions', ['userInfo'])
   }
 })
 export default class DynamicLocationActionInfoForm extends mixins(Rules) {
@@ -175,9 +177,10 @@ export default class DynamicLocationActionInfoForm extends mixins(Rules) {
   epsgCodes!: VocabularyState['epsgCodes']
   elevationData!: VocabularyState['elevationData']
   contacts!: ContactsState['contacts']
+  userInfo!: PermissionsState['userInfo']
 
-  get currentUserMail (): string | null {
-    return this.$auth.user?.email as string | null
+  get currentUserContactId (): string | null {
+    return this.userInfo?.contactId as string | null
   }
 
   get elevationDatum (): string {
@@ -226,8 +229,8 @@ export default class DynamicLocationActionInfoForm extends mixins(Rules) {
   }
 
   selectCurrentUserAsContact (type: string) {
-    if (this.currentUserMail) {
-      const foundUser = this.contacts.find((c: Contact) => c.email === this.currentUserMail)
+    if (this.currentUserContactId) {
+      const foundUser = this.contacts.find((c: Contact) => c.id === this.currentUserContactId)
       if (foundUser) {
         this.update(type, foundUser)
         return

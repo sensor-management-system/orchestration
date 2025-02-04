@@ -22,7 +22,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="softwareUpdateActionForm"
       v-model="softwareUpdateAction"
       :attachments="platformAttachments"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -60,7 +60,10 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     SaveAndCancelButtons,
     SoftwareUpdateActionForm
   },
-  computed: mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
+  computed: {
+    ...mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('platforms', ['addPlatformSoftwareUpdateAction', 'loadAllPlatformActions']),
     ...mapActions('progressindicator', ['setLoading'])

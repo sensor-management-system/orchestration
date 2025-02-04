@@ -52,6 +52,7 @@ import { IOffsets, MountActionInformationDTO } from '@/utils/configurationInterf
 
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
 import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
+import { PermissionsState } from '@/store/permissions'
 
 @Component({
   components: {
@@ -60,7 +61,8 @@ import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
   },
   filters: { dateToDateTimeStringHHMM },
   computed: {
-    ...mapState('contacts', ['contacts'])
+    ...mapState('contacts', ['contacts']),
+    ...mapState('permissions', ['userInfo'])
   }
 })
 export default class MountWizardMountForm extends Vue {
@@ -87,17 +89,18 @@ export default class MountWizardMountForm extends Vue {
   @InjectReactive() selectedEndDate!: DateTime | null
 
   contacts!: ContactsState['contacts']
+  userInfo!: PermissionsState['userInfo']
 
-  get currentUserMail (): string | null {
-    if (this.$auth.user && this.$auth.user.email) {
-      return this.$auth.user.email as string
+  get currentUserContactId (): string | null {
+    if (this.userInfo && this.userInfo.contactId) {
+      return this.userInfo.contactId
     }
     return null
   }
 
   get currentUserAsContact (): Contact | null {
-    if (this.currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
+    if (this.currentUserContactId) {
+      const userIndex = this.contacts.findIndex(c => c.id === this.currentUserContactId)
       if (userIndex > -1) {
         return this.contacts[userIndex]
       }

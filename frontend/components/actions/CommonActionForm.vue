@@ -146,7 +146,7 @@ export default class CommonActionForm extends Vue {
     required: false,
     type: String
   })
-  readonly currentUserMail!: string | null
+  readonly currentUserContactId!: string | null
 
   @Prop({
     default: false,
@@ -232,8 +232,8 @@ export default class CommonActionForm extends Vue {
    *
    */
   selectCurrentUserAsContact () {
-    if (this.currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
+    if (this.currentUserContactId) {
+      const userIndex = this.contacts.findIndex(c => c.id === this.currentUserContactId)
       if (userIndex > -1) {
         this.contact = this.contacts[userIndex]
         return

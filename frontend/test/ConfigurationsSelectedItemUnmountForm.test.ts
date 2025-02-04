@@ -19,6 +19,7 @@ import ConfigurationsSelectedItemUnmountForm from '@/components/ConfigurationsSe
 import { Contact } from '@/models/Contact'
 
 const contact = new Contact()
+contact.id = '123'
 contact.email = 'aa@bb.cc'
 
 Vue.use(Vuetify)
@@ -34,7 +35,7 @@ describe('ConfigurationsSelectedItemUnmountForm', () => {
       propsData: {
         readonly: false,
         contacts: [contact],
-        currentUserMail: 'aa@bb.cc'
+        currentUserContactId: contact.id
       },
       data () {
         return {

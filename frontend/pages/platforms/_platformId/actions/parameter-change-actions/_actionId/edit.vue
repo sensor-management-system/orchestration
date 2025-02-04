@@ -29,7 +29,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="platformParameterChangeActionForm"
       v-model="action"
       :parameters="platformParameters"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
 
     <v-card-actions>
@@ -70,7 +70,10 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed: mapState('platforms', ['platformParameterChangeAction', 'platformParameters']),
+  computed: {
+    ...mapState('platforms', ['platformParameterChangeAction', 'platformParameters']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('platforms', ['loadPlatformParameterChangeAction', 'loadAllPlatformActions', 'loadPlatformParameters', 'updatePlatformParameterChangeAction']),
     ...mapActions('progressindicator', ['setLoading'])

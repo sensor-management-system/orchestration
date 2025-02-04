@@ -54,7 +54,7 @@ SPDX-License-Identifier: EUPL-1.2
       hide-attachments
       :value="actionCopy"
       :rules="[rules.contactNotNull]"
-      :current-user-mail="currentUserMail"
+      :current-user-contact-id="currentUserContactId"
       @input="updateCommonFields"
     />
   </div>
@@ -116,7 +116,7 @@ export default class ParameterChangeActionForm extends Vue {
     type: String,
     required: false
   })
-  readonly currentUserMail!: string | null
+  readonly currentUserContactId!: string | null
 
   created () {
     this.createActionCopy(this.value)
