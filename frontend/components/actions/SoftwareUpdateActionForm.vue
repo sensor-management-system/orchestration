@@ -126,7 +126,7 @@ SPDX-License-Identifier: EUPL-1.2
       :value="actionCopy"
       :attachments="attachments"
       :rules="[rules.contactNotNull]"
-      :current-user-mail="currentUserMail"
+      :current-user-contact-id="currentUserContactId"
       @input="updateCommonFields"
     />
   </div>
@@ -208,7 +208,7 @@ export default class SoftwareUpdateActionForm extends Vue {
     type: String
   })
   // @ts-ignore
-  readonly currentUserMail: string | null
+  readonly currentUserContactId: string | null
 
   async fetch (): Promise<any> {
     await this.loadSoftwareTypes()

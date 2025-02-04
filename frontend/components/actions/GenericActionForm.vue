@@ -41,7 +41,7 @@ SPDX-License-Identifier: EUPL-1.2
       :value="actionCopy"
       :attachments="attachments"
       :rules="[rules.contactNotNull]"
-      :current-user-mail="currentUserMail"
+      :current-user-contact-id="currentUserContactId"
       @input="updateCommonFields"
     />
   </div>
@@ -110,7 +110,7 @@ export default class GenericActionForm extends Vue {
     type: String
   })
   // @ts-ignore
-  readonly currentUserMail: string | null
+  readonly currentUserContactId: string | null
 
   created () {
     // create a copy of the original value on which all operations will be applied

@@ -87,15 +87,15 @@ export default class ConfigurationsSelectedItemUnmountForm extends mixins(Rules)
     type: String
   })
   // @ts-ignore
-  readonly currentUserMail: string | null
+  readonly currentUserContactId: string | null
 
   created () {
     this.contact = this.currentUserAsMountContact
   }
 
   get currentUserAsMountContact (): Contact | null {
-    if (this.currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
+    if (this.currentUserContactId) {
+      const userIndex = this.contacts.findIndex(c => c.id === this.currentUserContactId)
       if (userIndex > -1) {
         return this.contacts[userIndex]
       }

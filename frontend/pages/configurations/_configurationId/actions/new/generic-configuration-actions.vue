@@ -23,7 +23,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="genericConfigurationActionForm"
       v-model="genericConfigurationAction"
       :attachments="configurationAttachments"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -58,7 +58,10 @@ import { SetLoadingAction } from '@/store/progressindicator'
 @Component({
   middleware: ['auth'],
   components: { SaveAndCancelButtons, GenericActionForm },
-  computed: mapState('configurations', ['configurationAttachments', 'chosenKindOfConfigurationAction']),
+  computed: {
+    ...mapState('configurations', ['configurationAttachments', 'chosenKindOfConfigurationAction']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('configurations', ['addConfigurationGenericAction', 'loadAllConfigurationActions']),
     ...mapActions('progressindicator', ['setLoading'])

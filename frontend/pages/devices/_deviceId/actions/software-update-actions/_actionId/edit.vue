@@ -29,7 +29,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="softwareUpdateActionForm"
       v-model="action"
       :attachments="deviceAttachments"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -73,7 +73,8 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
   middleware: ['auth'],
   computed: {
     ...mapState('devices', ['deviceSoftwareUpdateAction', 'deviceAttachments']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapState('permissions', ['userInfo'])
   },
   methods: {
     ...mapActions('devices', ['loadDeviceSoftwareUpdateAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'updateDeviceSoftwareUpdateAction']),

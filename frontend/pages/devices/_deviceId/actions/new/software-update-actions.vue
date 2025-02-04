@@ -22,7 +22,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="softwareUpdateActionForm"
       v-model="softwareUpdateAction"
       :attachments="deviceAttachments"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -57,7 +57,10 @@ import { SetLoadingAction } from '@/store/progressindicator'
 @Component({
   middleware: ['auth'],
   components: { SaveAndCancelButtons, SoftwareUpdateActionForm },
-  computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
+  computed: {
+    ...mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('devices', ['addDeviceSoftwareUpdateAction', 'loadAllDeviceActions']),
     ...mapActions('progressindicator', ['setLoading'])

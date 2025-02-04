@@ -31,7 +31,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="genericConfigurationActionForm"
       v-model="action"
       :attachments="configurationAttachments"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
 
     <v-card-actions>
@@ -75,7 +75,8 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
   middleware: ['auth'],
   computed: {
     ...mapState('configurations', ['configurationGenericAction', 'configurationAttachments']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapState('permissions', ['userInfo'])
   },
   methods: {
     ...mapActions('configurations', ['loadConfigurationGenericAction', 'loadAllConfigurationActions', 'loadConfigurationAttachments', 'updateConfigurationGenericAction']),

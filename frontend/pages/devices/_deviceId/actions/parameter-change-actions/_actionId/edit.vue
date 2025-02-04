@@ -29,7 +29,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="deviceParameterChangeActionForm"
       v-model="action"
       :parameters="deviceParameters"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
 
     <v-card-actions>
@@ -71,7 +71,10 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
   },
   scrollToTop: true,
   middleware: ['auth'],
-  computed: mapState('devices', ['deviceParameterChangeAction', 'deviceParameters']),
+  computed: {
+    ...mapState('devices', ['deviceParameterChangeAction', 'deviceParameters']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('devices', ['loadDeviceParameterChangeAction', 'loadAllDeviceActions', 'loadDeviceParameters', 'updateDeviceParameterChangeAction']),
     ...mapActions('progressindicator', ['setLoading'])

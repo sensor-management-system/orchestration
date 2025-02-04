@@ -23,7 +23,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="genericPlatformActionForm"
       v-model="genericPlatformAction"
       :attachments="platformAttachments"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -58,7 +58,10 @@ import { SetLoadingAction } from '@/store/progressindicator'
 @Component({
   middleware: ['auth'],
   components: { SaveAndCancelButtons, GenericActionForm },
-  computed: mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
+  computed: {
+    ...mapState('platforms', ['platformAttachments', 'chosenKindOfPlatformAction']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('platforms', ['addPlatformGenericAction', 'loadAllPlatformActions']),
     ...mapActions('progressindicator', ['setLoading'])

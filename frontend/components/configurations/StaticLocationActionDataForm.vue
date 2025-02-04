@@ -145,7 +145,7 @@ SPDX-License-Identifier: EUPL-1.2
               @change="update('beginContact', $event)"
             />
           </v-col>
-          <v-col v-if="currentUserMail" cols="12" md="1" align-self="center">
+          <v-col v-if="currentUserContactId" cols="12" md="1" align-self="center">
             <v-btn small @click="selectCurrentUserAsContact(typeBeginContact)">
               {{ labelForSelectMeButton }}
             </v-btn>
@@ -191,7 +191,7 @@ SPDX-License-Identifier: EUPL-1.2
               @change="update('endContact', $event)"
             />
           </v-col>
-          <v-col v-if="currentUserMail" cols="12" md="1" align-self="center">
+          <v-col v-if="currentUserContactId" cols="12" md="1" align-self="center">
             <v-btn small @click="selectCurrentUserAsContact(typeEndContact)">
               {{ labelForSelectMeButton }}
             </v-btn>
@@ -227,6 +227,7 @@ import { Contact } from '@/models/Contact'
 import Validator from '@/utils/validator'
 import { Rules } from '@/mixins/Rules'
 import { parseFloatOrNull } from '@/utils/numericsHelper'
+import { PermissionsState } from '@/store/permissions'
 
 @Component({
   components: {
@@ -237,7 +238,8 @@ import { parseFloatOrNull } from '@/utils/numericsHelper'
     ...mapState('vocabulary', ['epsgCodes', 'elevationData']),
     ...mapState('contacts', ['contacts']),
     ...mapGetters('configurations', ['locationActionTimepointsExceptPassedIdAndType']),
-    ...mapState('configurations', ['configuration'])
+    ...mapState('configurations', ['configuration']),
+    ...mapState('permissions', ['userInfo'])
   }
 })
 export default class StaticLocationActionDataForm extends mixins(Rules) {
@@ -258,9 +260,10 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
   contacts!: ContactsState['contacts']
   configuration!: ConfigurationsState['configuration']
   locationActionTimepointsExceptPassedIdAndType!: LocationActionTimepointsExceptPassedIdAndTypeTypeGetter
+  userInfo!: PermissionsState['userInfo']
 
-  get currentUserMail (): string | null {
-    return this.$auth.user?.email as string | null
+  get currentUserContactId (): string | null {
+    return this.userInfo?.contactId as string | null
   }
 
   get elevationDatum (): string {
@@ -336,8 +339,8 @@ export default class StaticLocationActionDataForm extends mixins(Rules) {
   }
 
   selectCurrentUserAsContact (type: string) {
-    if (this.currentUserMail) {
-      const foundUser = this.contacts.find((c: Contact) => c.email === this.currentUserMail)
+    if (this.currentUserContactId) {
+      const foundUser = this.contacts.find((c: Contact) => c.id === this.currentUserContactId)
       if (foundUser) {
         this.update(type, foundUser)
         return

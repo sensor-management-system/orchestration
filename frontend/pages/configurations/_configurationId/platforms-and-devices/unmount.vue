@@ -121,7 +121,7 @@ SPDX-License-Identifier: EUPL-1.2
                   v-if="selectedNode"
                   :node="selectedNode"
                   :contacts="contacts"
-                  :current-user-mail="currentUserMail"
+                  :current-user-contact-id="currentUserContactId"
                   @unmount="unmount"
                 />
               </v-container>
@@ -172,6 +172,7 @@ import { dateToDateTimeString } from '@/utils/dateHelper'
 import BaseExpandableListItem from '@/components/shared/BaseExpandableListItem.vue'
 import ExpandableContent from '@/components/shared/ExpandableContent.vue'
 import { UnmountActionValidator } from '@/utils/UnmountActionValidator'
+import { PermissionsState } from '@/store/permissions'
 
 @Component({
   components: {
@@ -194,7 +195,8 @@ import { UnmountActionValidator } from '@/utils/UnmountActionValidator'
     ),
     ...mapState('contacts', ['contacts']),
     ...mapState('progressindicator', ['isLoading']),
-    ...mapGetters('configurations', ['mountActionDateItems'])
+    ...mapGetters('configurations', ['mountActionDateItems']),
+    ...mapState('permissions', ['userInfo'])
   },
   methods: {
     dateToDateTimeString,
@@ -233,6 +235,7 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
 
   isLoading!: LoadingSpinnerState['isLoading']
   setLoading!: SetLoadingAction
+  userInfo!: PermissionsState['userInfo']
 
   private root: ConfigurationsTreeNode | null = null
   private validator: UnmountActionValidator | null = null
@@ -337,9 +340,9 @@ export default class ConfigurationUnMountPlatformsAndDevicesPage extends mixins(
     return this.$route.params.configurationId
   }
 
-  get currentUserMail (): string | null {
-    if (this.$auth.user && this.$auth.user.email) {
-      return this.$auth.user.email as string
+  get currentUserContactId (): string | null {
+    if (this.userInfo && this.userInfo.contactId) {
+      return this.userInfo.contactId
     }
     return null
   }

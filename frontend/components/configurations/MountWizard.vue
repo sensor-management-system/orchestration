@@ -255,6 +255,7 @@ import ConfigurationsTreeView from '@/components/ConfigurationsTreeView.vue'
 import { SetLoadingAction } from '@/store/progressindicator'
 import MountActionDetailsForm from '@/components/configurations/MountActionDetailsForm.vue'
 import { DeviceNode } from '@/viewmodels/DeviceNode'
+import { PermissionsState } from '@/store/permissions'
 
 @Component({
   components: {
@@ -268,7 +269,8 @@ import { DeviceNode } from '@/viewmodels/DeviceNode'
   },
   computed: {
     ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate']),
-    ...mapState('contacts', ['contacts'])
+    ...mapState('contacts', ['contacts']),
+    ...mapState('permissions', ['userInfo'])
   },
   methods: {
     ...mapActions('devices', ['clearDeviceAvailabilities']),
@@ -317,6 +319,7 @@ export default class MountWizard extends Vue {
   clearDeviceAvailabilities!: ClearDeviceAvailabilitiesAction
   clearPlatformAvailabilities!: ClearPlatformAvailabilitiesAction
   setLoading!: SetLoadingAction
+  userInfo!: PermissionsState['userInfo']
 
   async created () {
     this.syncedHasSaved = false
@@ -726,16 +729,10 @@ export default class MountWizard extends Vue {
     this.platformsToMount = this.selectedPlatforms.map(i => createNew<Platform>(i))
   }
 
-  get currentUserMail (): string | null {
-    if (this.$auth.user && this.$auth.user.email) {
-      return this.$auth.user.email as string
-    }
-    return null
-  }
-
   get currentUserAsContact (): Contact | null {
-    if (this.currentUserMail) {
-      const userIndex = this.contacts.findIndex(c => c.email === this.currentUserMail)
+    if (this.userInfo && this.userInfo.contactId) {
+      const contactId = this.userInfo.contactId
+      const userIndex = this.contacts.findIndex(c => c.id === contactId)
       if (userIndex > -1) {
         return this.contacts[userIndex]
       }

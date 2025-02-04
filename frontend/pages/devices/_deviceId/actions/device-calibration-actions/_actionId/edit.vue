@@ -30,7 +30,7 @@ SPDX-License-Identifier: EUPL-1.2
       v-model="action"
       :attachments="deviceAttachments"
       :measured-quantities="deviceMeasuredQuantities"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
 
     <v-card-actions>
@@ -75,7 +75,8 @@ import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator
   middleware: ['auth'],
   computed: {
     ...mapState('devices', ['deviceCalibrationAction', 'deviceAttachments', 'deviceMeasuredQuantities']),
-    ...mapState('progressindicator', ['isLoading'])
+    ...mapState('progressindicator', ['isLoading']),
+    ...mapState('permissions', ['userInfo'])
   },
   methods: {
     ...mapActions('devices', ['loadDeviceCalibrationAction', 'loadAllDeviceActions', 'loadDeviceAttachments', 'loadDeviceMeasuredQuantities', 'updateDeviceCalibrationAction']),

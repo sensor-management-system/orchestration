@@ -21,7 +21,7 @@ SPDX-License-Identifier: EUPL-1.2
       ref="parameterChangeActionForm"
       v-model="parameterChangeAction"
       :parameters="deviceParameters"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -59,7 +59,10 @@ import { SetLoadingAction } from '@/store/progressindicator'
     SaveAndCancelButtons,
     ParameterChangeActionForm
   },
-  computed: mapState('devices', ['chosenKindOfDeviceAction', 'deviceParameters', 'devicePresetParameter']),
+  computed: {
+    ...mapState('devices', ['chosenKindOfDeviceAction', 'deviceParameters', 'devicePresetParameter']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('devices', ['addDeviceParameterChangeAction', 'loadAllDeviceActions']),
     ...mapActions('progressindicator', ['setLoading'])

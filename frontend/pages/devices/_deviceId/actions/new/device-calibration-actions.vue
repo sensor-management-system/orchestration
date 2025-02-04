@@ -23,7 +23,7 @@ SPDX-License-Identifier: EUPL-1.2
       v-model="deviceCalibrationAction"
       :attachments="deviceAttachments"
       :measured-quantities="deviceMeasuredQuantities"
-      :current-user-mail="$auth.user.email"
+      :current-user-contact-id="userInfo.contactId"
     />
     <v-card-actions>
       <v-spacer />
@@ -61,7 +61,10 @@ import SaveAndCancelButtons from '@/components/shared/SaveAndCancelButtons.vue'
     SaveAndCancelButtons,
     DeviceCalibrationActionForm
   },
-  computed: mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction', 'deviceMeasuredQuantities']),
+  computed: {
+    ...mapState('devices', ['deviceAttachments', 'chosenKindOfDeviceAction', 'deviceMeasuredQuantities']),
+    ...mapState('permissions', ['userInfo'])
+  },
   methods: {
     ...mapActions('devices', ['addDeviceCalibrationAction', 'loadAllDeviceActions']),
     ...mapActions('progressindicator', ['setLoading'])
