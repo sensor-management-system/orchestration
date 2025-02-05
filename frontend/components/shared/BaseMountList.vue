@@ -174,8 +174,8 @@ export default class BaseMountList extends Vue {
     }
 
     let beginString = ''
-    if (!availability.beginDate?.isValid) {
-      beginString = `from ${dateToString(availability.endDate as DateTime)}`
+    if (availability.beginDate?.isValid) {
+      beginString = `from ${dateToString(availability.beginDate as DateTime)}`
     }
 
     return `Used in configuration "${configString}" ${beginString} ${endString}`
