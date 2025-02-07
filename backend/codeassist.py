@@ -177,7 +177,7 @@ def organization_names():
         @functools.wraps(f)
         def wrapper(url):
             if not tmp.exists():
-                tmp.mdir()
+                tmp.mkdir()
 
             base_name = pathlib.Path(url).name
             temp_file = tmp / base_name
@@ -262,7 +262,7 @@ def organization_names():
                                 organizations[scope_text] = name
 
     for key in organizations:
-        organizations[key] = organizations[key].encode("latin1").decode("utf8")
+        organizations[key] = organizations[key]
 
     output_file = (
         pathlib.Path(__file__).parent
