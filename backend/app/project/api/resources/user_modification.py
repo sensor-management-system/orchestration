@@ -8,7 +8,6 @@
 
 import datetime
 
-import pytz
 from flask import g
 from flask_rest_jsonapi import ResourceList
 
@@ -71,4 +70,4 @@ class AcceptTermsOfUse(ResourceList):
 
     def get_current_time(self):
         """Get the current datetime (helper method for easier mocking)."""
-        return datetime.datetime.now(tz=pytz.utc)
+        return datetime.datetime.now(datetime.timezone.utc)

@@ -10,8 +10,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -225,7 +223,7 @@ def create_value1_of_parameter1_of_public_configuration1_in_group1(
     """Create a parameter value on public_configuration1."""
     result = ConfigurationParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         configuration_parameter=parameter1_of_public_configuration1_in_group1,
@@ -245,7 +243,7 @@ def create_value1_of_parameter1_of_public_configuration2_in_group1(
     """Create a parameter value on public_configuration2."""
     result = ConfigurationParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         configuration_parameter=parameter1_of_public_configuration2_in_group1,
@@ -266,7 +264,7 @@ def create_value1_of_parameter1_of_internal_configuration1_in_group1(
     """Create a parameter value on internal_configuration1."""
     result = ConfigurationParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         configuration_parameter=parameter1_of_internal_configuration1_in_group1,

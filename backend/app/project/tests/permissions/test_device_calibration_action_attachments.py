@@ -10,8 +10,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Contact,
@@ -57,14 +55,14 @@ class TestDeviceCalibrationActionAttachments(BaseTestCase):
             device=device1,
             contact=contact,
             current_calibration_date=datetime.datetime(
-                2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc
+                2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
             ),
         )
         action2 = DeviceCalibrationAction(
             device=device2,
             contact=contact,
             current_calibration_date=datetime.datetime(
-                2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc
+                2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
             ),
         )
         attachment1 = DeviceAttachment(

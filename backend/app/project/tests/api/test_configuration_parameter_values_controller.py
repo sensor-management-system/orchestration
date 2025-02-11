@@ -7,8 +7,6 @@
 """Tests for the configuration parameter value controller."""
 import datetime
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -188,7 +186,7 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
             url,
             query_string={
                 "timepoint": datetime.datetime(
-                    2023, 5, 3, 12, 47, 0, tzinfo=pytz.utc
+                    2023, 5, 3, 12, 47, 0, tzinfo=datetime.timezone.utc
                 ).isoformat()
             },
         )
@@ -204,7 +202,7 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
                 url,
                 query_string={
                     "timepoint": datetime.datetime(
-                        2023, 5, 3, 12, 16, 0, tzinfo=pytz.utc
+                        2023, 5, 3, 12, 16, 0, tzinfo=datetime.timezone.utc
                     ).isoformat()
                 },
             )
@@ -233,7 +231,7 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
             url,
             query_string={
                 "timepoint": datetime.datetime(
-                    2023, 5, 3, 12, 47, 0, tzinfo=pytz.utc
+                    2023, 5, 3, 12, 47, 0, tzinfo=datetime.timezone.utc
                 ).isoformat()
             },
         )
@@ -263,7 +261,7 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
             url2,
             query_string={
                 "timepoint": datetime.datetime(
-                    2023, 5, 3, 12, 47, 0, tzinfo=pytz.utc
+                    2023, 5, 3, 12, 47, 0, tzinfo=datetime.timezone.utc
                 ).isoformat()
             },
         )
@@ -289,14 +287,14 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         change1 = ConfigurationParameterValueChangeAction(
             configuration_parameter=parameter,
             value="123",
-            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
         change2 = ConfigurationParameterValueChangeAction(
             configuration_parameter=parameter,
             value="456",
-            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
@@ -305,11 +303,21 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
 
         url = f"{base_url}/controller/configurations/{public_configuration1.id}/parameter-values"
         expected_results = {
-            datetime.datetime(2020, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): None,
-            datetime.datetime(2022, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "123",
-            datetime.datetime(2023, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2023, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2022, 12, 31, 23, 59, 59, 999, tzinfo=pytz.utc): "123",
+            datetime.datetime(
+                2020, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): None,
+            datetime.datetime(
+                2022, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "123",
+            datetime.datetime(
+                2023, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2023, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2022, 12, 31, 23, 59, 59, 999, tzinfo=datetime.timezone.utc
+            ): "123",
         }
         for timepoint, expected_result in expected_results.items():
             response = self.client.get(
@@ -352,7 +360,9 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
     ):
         """Ensure we extract the values for the timepoint without any mounts."""
         url = f"{base_url}/controller/configurations/{public_configuration1.id}/parameter-values"
-        timepoint = datetime.datetime(2023, 5, 3, 15, 12, 0, 0, tzinfo=pytz.utc)
+        timepoint = datetime.datetime(
+            2023, 5, 3, 15, 12, 0, 0, tzinfo=datetime.timezone.utc
+        )
         response = self.client.get(
             url,
             query_string={
@@ -373,9 +383,13 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         mount = DeviceMountAction(
             device=public_device1,
             configuration=public_configuration1,
-            begin_date=datetime.datetime(2019, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2019, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact1,
-            end_date=datetime.datetime(2038, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            end_date=datetime.datetime(
+                2038, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             end_contact=contact1,
         )
         parameter = DeviceParameter(
@@ -388,25 +402,35 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         change1 = DeviceParameterValueChangeAction(
             device_parameter=parameter,
             value="123",
-            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
         change2 = DeviceParameterValueChangeAction(
             device_parameter=parameter,
             value="456",
-            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
         db.session.add_all([mount, parameter, change1, change2])
         url = f"{base_url}/controller/configurations/{public_configuration1.id}/parameter-values"
         expected_results = {
-            datetime.datetime(2020, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): None,
-            datetime.datetime(2022, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "123",
-            datetime.datetime(2023, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2023, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2022, 12, 31, 23, 59, 59, 999, tzinfo=pytz.utc): "123",
+            datetime.datetime(
+                2020, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): None,
+            datetime.datetime(
+                2022, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "123",
+            datetime.datetime(
+                2023, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2023, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2022, 12, 31, 23, 59, 59, 999, tzinfo=datetime.timezone.utc
+            ): "123",
         }
         for timepoint, expected_result in expected_results.items():
             response = self.client.get(
@@ -438,7 +462,9 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         response = self.client.get(
             url,
             query_string={
-                "timepoint": datetime.datetime(1990, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                "timepoint": datetime.datetime(
+                    1990, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                ),
             },
         )
         self.expect(response.status_code).to_equal(200)
@@ -447,7 +473,9 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         response = self.client.get(
             url,
             query_string={
-                "timepoint": datetime.datetime(2090, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                "timepoint": datetime.datetime(
+                    2090, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                ),
             },
         )
         self.expect(response.status_code).to_equal(200)
@@ -464,9 +492,13 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         mount = PlatformMountAction(
             platform=public_platform1,
             configuration=public_configuration1,
-            begin_date=datetime.datetime(2019, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2019, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact1,
-            end_date=datetime.datetime(2038, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            end_date=datetime.datetime(
+                2038, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             end_contact=contact1,
         )
         parameter = PlatformParameter(
@@ -479,25 +511,35 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         change1 = PlatformParameterValueChangeAction(
             platform_parameter=parameter,
             value="123",
-            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
         change2 = PlatformParameterValueChangeAction(
             platform_parameter=parameter,
             value="456",
-            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
         db.session.add_all([mount, parameter, change1, change2])
         url = f"{base_url}/controller/configurations/{public_configuration1.id}/parameter-values"
         expected_results = {
-            datetime.datetime(2020, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): None,
-            datetime.datetime(2022, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "123",
-            datetime.datetime(2023, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2023, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2022, 12, 31, 23, 59, 59, 999, tzinfo=pytz.utc): "123",
+            datetime.datetime(
+                2020, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): None,
+            datetime.datetime(
+                2022, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "123",
+            datetime.datetime(
+                2023, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2023, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2022, 12, 31, 23, 59, 59, 999, tzinfo=datetime.timezone.utc
+            ): "123",
         }
         for timepoint, expected_result in expected_results.items():
             response = self.client.get(
@@ -529,7 +571,9 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         response = self.client.get(
             url,
             query_string={
-                "timepoint": datetime.datetime(1990, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                "timepoint": datetime.datetime(
+                    1990, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                ),
             },
         )
         self.expect(response.status_code).to_equal(200)
@@ -538,7 +582,9 @@ class TestControllerConfigurationParameterValues(BaseTestCase):
         response = self.client.get(
             url,
             query_string={
-                "timepoint": datetime.datetime(2090, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                "timepoint": datetime.datetime(
+                    2090, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                ),
             },
         )
         self.expect(response.status_code).to_equal(200)

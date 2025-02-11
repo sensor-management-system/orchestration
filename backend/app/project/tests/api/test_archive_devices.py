@@ -9,8 +9,6 @@
 import datetime
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import Configuration, Contact, Device, DeviceMountAction, User
 from project.api.models.base_model import db
@@ -261,7 +259,9 @@ class TestArchiveDevice(BaseTestCase):
             configuration=self.configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(device_mount_action)
         db.session.commit()
@@ -280,15 +280,21 @@ class TestArchiveDevice(BaseTestCase):
             configuration=self.configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2012, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2012, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(device_mount_action)
         db.session.commit()
         with patch.object(
             AllMountsOfDeviceAreFinishedInThePast, "_get_current_date_time"
         ) as mock:
-            mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
+            mock.return_value = datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            )
             with self.run_requests_as(self.super_user):
                 response = self.client.post(
                     f"{self.devices_url}/{self.public_device.id}/archive"
@@ -305,7 +311,9 @@ class TestArchiveDevice(BaseTestCase):
             configuration=self.configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(parent_mount_action)
         db.session.commit()
@@ -325,8 +333,12 @@ class TestArchiveDevice(BaseTestCase):
             configuration=self.configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2012, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2012, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(parent_mount_action)
         db.session.commit()
@@ -334,7 +346,9 @@ class TestArchiveDevice(BaseTestCase):
             AllUsagesAsParentDeviceInDeviceMountsFinishedInThePast,
             "_get_current_date_time",
         ) as mock:
-            mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
+            mock.return_value = datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            )
             with self.run_requests_as(self.super_user):
                 response = self.client.post(
                     f"{self.devices_url}/{self.public_device.id}/archive"

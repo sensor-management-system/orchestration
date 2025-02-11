@@ -10,8 +10,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Contact,
@@ -248,7 +246,7 @@ def create_value1_of_parameter1_of_public_device1_in_group1(
     """Create a parameter value on public_device1."""
     result = DeviceParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         device_parameter=parameter1_of_public_device1_in_group1,
@@ -268,7 +266,7 @@ def create_value1_of_parameter1_of_public_device2_in_group1(
     """Create a parameter value on public_device2."""
     result = DeviceParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         device_parameter=parameter1_of_public_device2_in_group1,
@@ -288,7 +286,7 @@ def create_value1_of_parameter1_of_internal_device1_in_group1(
     """Create a parameter value on internal_device1."""
     result = DeviceParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         device_parameter=parameter1_of_internal_device1_in_group1,
@@ -308,7 +306,7 @@ def create_value1_of_parameter1_of_private_device_of_user1(
     """Create a parameter value on private_device1."""
     result = DeviceParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         device_parameter=parameter1_of_private_device_of_user1,

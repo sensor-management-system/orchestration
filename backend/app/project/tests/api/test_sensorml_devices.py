@@ -11,7 +11,6 @@ import pathlib
 import pickle
 import xml
 
-import pytz
 from flask import current_app
 
 from project import base_url
@@ -947,7 +946,9 @@ class TestSensorMLDevice(BaseTestCase):
         change_action = DeviceParameterValueChangeAction(
             device_parameter=parameter,
             contact=contact,
-            date=datetime.datetime(2023, 5, 3, 10, 00, 00, tzinfo=pytz.utc),
+            date=datetime.datetime(
+                2023, 5, 3, 10, 00, 00, tzinfo=datetime.timezone.utc
+            ),
             value="42",
             description="The answer to everything - and the start temperature for the fan.",
         )
@@ -1368,9 +1369,13 @@ class TestSensorMLDevice(BaseTestCase):
         device_mount = DeviceMountAction(
             device=self.device,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
-            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            end_date=datetime.datetime(
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
+            ),
             begin_description="Mount of device on test config",
         )
 
@@ -1466,7 +1471,9 @@ class TestSensorMLDevice(BaseTestCase):
         device_mount = DeviceMountAction(
             device=self.device,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
             begin_description="Mount of device on test config",
         )
@@ -1509,7 +1516,9 @@ class TestSensorMLDevice(BaseTestCase):
         device_mount = DeviceMountAction(
             device=self.device,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
         )
 
@@ -1548,7 +1557,9 @@ class TestSensorMLDevice(BaseTestCase):
         device_mount = DeviceMountAction(
             device=self.device,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
         )
 
@@ -1589,10 +1600,10 @@ class TestSensorMLDevice(BaseTestCase):
         calibration_action = DeviceCalibrationAction(
             device=self.device,
             current_calibration_date=datetime.datetime(
-                year=2022, month=12, day=24, tzinfo=pytz.utc
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
             ),
             next_calibration_date=datetime.datetime(
-                year=2022, month=12, day=25, tzinfo=pytz.utc
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
             ),
             contact=contact,
             formula="x+y",
@@ -1672,10 +1683,10 @@ class TestSensorMLDevice(BaseTestCase):
         calibration_action = DeviceCalibrationAction(
             device=self.device,
             current_calibration_date=datetime.datetime(
-                year=2022, month=12, day=24, tzinfo=pytz.utc
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
             ),
             next_calibration_date=datetime.datetime(
-                year=2022, month=12, day=25, tzinfo=pytz.utc
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
             ),
             contact=contact,
             formula="x+y",
@@ -1719,8 +1730,12 @@ class TestSensorMLDevice(BaseTestCase):
         device_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
         device_action = GenericDeviceAction(
             device=self.device,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
-            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             action_type_name="Device Maintenance",
@@ -1819,7 +1834,9 @@ class TestSensorMLDevice(BaseTestCase):
         device_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
         device_action = GenericDeviceAction(
             device=self.device,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             action_type_name="Device Maintenance",
@@ -1864,7 +1881,9 @@ class TestSensorMLDevice(BaseTestCase):
         device_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
         device_action = GenericDeviceAction(
             device=self.device,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             action_type_name="Device Maintenance",
             action_type_uri=device_maintenance_uri,
@@ -1904,7 +1923,9 @@ class TestSensorMLDevice(BaseTestCase):
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")
         device_action = GenericDeviceAction(
             device=self.device,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             action_type_name="Device Maintenance",
         )
@@ -1946,7 +1967,9 @@ class TestSensorMLDevice(BaseTestCase):
         firmware_uri = current_app.config["CV_URL"] + "/softwaretypes/1/"
         update_action = DeviceSoftwareUpdateAction(
             device=self.device,
-            update_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            update_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             software_type_name="Firmware",
@@ -2026,7 +2049,9 @@ class TestSensorMLDevice(BaseTestCase):
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")
         update_action = DeviceSoftwareUpdateAction(
             device=self.device,
-            update_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            update_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             software_type_name="Firmware",
@@ -2126,8 +2151,12 @@ class TestSensorMLDevice(BaseTestCase):
         device_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
         device_action = GenericDeviceAction(
             device=self.device,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
-            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
+            ),
             contact=contact1,
             description="Some desc",
             action_type_name="Device Maintenance",
@@ -2344,9 +2373,13 @@ class TestSensorMLDevice(BaseTestCase):
             label="Special mount",
             device=self.device,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
-            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            end_date=datetime.datetime(
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
+            ),
             begin_description="Mount of device on test config",
         )
 

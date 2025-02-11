@@ -10,9 +10,8 @@
 
 import collections
 import itertools
-from datetime import datetime
+from datetime import datetime, timezone
 
-import pytz
 import sqlalchemy
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.mutable import MutableList
@@ -32,8 +31,7 @@ from .base_model import db
 
 def utc_now():
     """Return the datetime in utc."""
-    now = datetime.utcnow()
-    return pytz.utc.localize(now)
+    return datetime.now(timezone.utc)
 
 
 def is_modified(instance):

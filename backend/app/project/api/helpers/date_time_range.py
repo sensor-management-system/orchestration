@@ -6,7 +6,7 @@
 
 """Datetime range tools."""
 
-import pytz
+from datetime import timezone
 
 
 class DateTimeRange:
@@ -14,10 +14,21 @@ class DateTimeRange:
 
     @staticmethod
     def tz_aware(date):
-        """Help to handle timezone aware datetimes."""
-        if not date or date.tzinfo is not None:
+        """
+        Ensure a datetime is timezone-aware by adding UTC timezone if naive.
+
+        Args:
+            date: A datetime object that may or may not have timezone info
+
+        Returns:
+            datetime: The input datetime with UTC timezone if it was naive,
+                     unchanged if already had timezone, or None if input was None
+        """
+        if not date:
+            return None
+        if date.tzinfo is not None:
             return date
-        return pytz.utc.localize(date)
+        return date.replace(tzinfo=timezone.utc)
 
     def __init__(self, begin_date, end_date=None):
         """

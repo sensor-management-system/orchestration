@@ -13,7 +13,6 @@ import json
 import os
 from unittest.mock import patch
 
-import pytz
 from flask import current_app
 
 from project import base_url
@@ -1140,7 +1139,9 @@ class TestConfigurationsService(BaseTestCase):
         value = ConfigurationParameterValueChangeAction(
             configuration_parameter=parameter,
             contact=self.super_user.contact,
-            date=datetime.datetime(2023, 5, 2, 15, 30, 00, tzinfo=pytz.utc),
+            date=datetime.datetime(
+                2023, 5, 2, 15, 30, 00, tzinfo=datetime.timezone.utc
+            ),
             value="3",
         )
         db.session.add_all([visible_configuration, parameter, value])

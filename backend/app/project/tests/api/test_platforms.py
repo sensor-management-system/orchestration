@@ -13,7 +13,6 @@ import json
 import os
 from unittest.mock import patch
 
-import pytz
 from flask import current_app
 
 from project import base_url
@@ -350,7 +349,9 @@ class TestPlatformServices(BaseTestCase):
         value = PlatformParameterValueChangeAction(
             platform_parameter=parameter,
             contact=self.super_user.contact,
-            date=datetime.datetime(2023, 5, 2, 15, 30, 00, tzinfo=pytz.utc),
+            date=datetime.datetime(
+                2023, 5, 2, 15, 30, 00, tzinfo=datetime.timezone.utc
+            ),
             value="3",
         )
         db.session.add_all([visible_platform, parameter, value])
@@ -433,7 +434,9 @@ class TestPlatformServices(BaseTestCase):
             configuration=configuration,
             platform=platform,
             begin_contact=user.contact,
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             offset_x=0,
             offset_y=0,
             offset_z=0,

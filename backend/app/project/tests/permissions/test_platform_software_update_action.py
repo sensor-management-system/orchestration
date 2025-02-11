@@ -11,8 +11,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction, User
 from project.api.models.base_model import db
@@ -318,7 +316,9 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         action = PlatformSoftwareUpdateAction(
             platform=platform1,
             contact=contact,
-            update_date=datetime.datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            update_date=datetime.datetime(
+                2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             software_type_name="OS",
             software_type_uri="something",
         )

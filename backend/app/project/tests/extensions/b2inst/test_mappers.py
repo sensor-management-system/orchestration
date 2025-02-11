@@ -9,8 +9,6 @@
 import datetime
 from unittest import TestCase
 
-import pytz
-
 from project.api.models import (
     Configuration,
     ConfigurationContactRole,
@@ -912,8 +910,12 @@ class TestB2InstConfigurationMapper(BaseTestCase):
         configuration = Configuration(
             label="Example configuration",
             description="example description",
-            start_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
-            end_date=datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            start_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         contact1 = Contact(
             given_name="A",
@@ -966,7 +968,9 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             device=device,
             configuration=configuration,
             begin_contact=device_contact,
-            begin_date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         device_property = DeviceProperty(
             device=device,
@@ -993,7 +997,9 @@ class TestB2InstConfigurationMapper(BaseTestCase):
             platform=platform,
             configuration=configuration,
             begin_contact=device_contact,
-            begin_date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [
@@ -1272,11 +1278,15 @@ class TestB2InstDraftMapper(TestCase):
             MeasuredVariable=["Soil moisture"],
             Date=[
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="Commissioned",
                 ),
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="DeCommissioned",
                 ),
             ],
@@ -1448,11 +1458,15 @@ class TestB2InstDraftMapper(TestCase):
             MeasuredVariable=["Soil moisture"],
             Date=[
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="Commissioned",
                 ),
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="DeCommissioned",
                 ),
             ],
@@ -1609,11 +1623,15 @@ class TestB2InstDraftMapper(TestCase):
             MeasuredVariable=[],
             Date=[
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="Commissioned",
                 ),
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="DeCommissioned",
                 ),
             ],

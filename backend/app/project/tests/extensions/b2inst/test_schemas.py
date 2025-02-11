@@ -9,8 +9,6 @@
 import datetime
 from unittest import TestCase
 
-import pytz
-
 from project.extensions.b2inst import schemas
 
 
@@ -200,7 +198,7 @@ class TestB2InstDate(TestCase):
     def test_dict(self):
         """Test the dict method."""
         date = schemas.B2InstDate(
-            Date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            Date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             dateType="Commissioned",
         )
 
@@ -247,7 +245,9 @@ class TestB2InstDraftPost(TestCase):
             MeasuredVariable=["temperature", "voltage"],
             Date=[
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="Commissioned",
                 )
             ],
@@ -321,7 +321,9 @@ class TestB2InstDraftPost(TestCase):
             MeasuredVariable=[],
             Date=[
                 schemas.B2InstDate(
-                    Date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+                    Date=datetime.datetime(
+                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     dateType="Commissioned",
                 )
             ],
