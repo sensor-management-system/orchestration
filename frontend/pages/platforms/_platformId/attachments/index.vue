@@ -181,7 +181,6 @@ export default class PlatformAttachmentShowPage extends Vue {
 
       // update attachment previews
       try {
-        this.loadPlatformAttachments(this.platformId)
         await this.loadPlatformAttachments(this.platformId)
         this.loadPlatform({
           platformId: this.platformId,
@@ -190,7 +189,7 @@ export default class PlatformAttachmentShowPage extends Vue {
           includeUpdatedBy: true
         })
       } catch (_error) {
-        this.$store.commit('snackbar/setWarning', 'Failed to load device')
+        this.$store.commit('snackbar/setWarning', 'Failed to load platform')
       }
     } catch (_error) {
       this.$store.commit('snackbar/setError', 'Failed to delete attachment')

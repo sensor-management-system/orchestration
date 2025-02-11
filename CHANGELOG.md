@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 Fixed:
 - problem on validation of mount contact when mounting devices or platforms ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/490))
 - corrected string when a device or platform is not available for mounting ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/495))  
+- corrected error message and removed duplicated loading of platform attachments([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/498))
 
 Changed:
 - mechanism to find the contact of the current user uses now the contact id of the user info object ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/491))
