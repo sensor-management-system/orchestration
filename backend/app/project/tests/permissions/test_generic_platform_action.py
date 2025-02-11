@@ -8,10 +8,8 @@
 
 """Tests for the generic platform action api."""
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import patch
-
-import pytz
 
 from project import base_url, db
 from project.api.models import Contact, GenericPlatformAction, Platform, User
@@ -324,7 +322,7 @@ class TestGenericPlatformActionPermissions(BaseTestCase):
         action = GenericPlatformAction(
             platform=platform1,
             contact=contact,
-            begin_date=datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime(2022, 12, 24, 0, 0, 0, tzinfo=timezone.utc),
             action_type_name="Something",
             action_type_uri="something",
         )

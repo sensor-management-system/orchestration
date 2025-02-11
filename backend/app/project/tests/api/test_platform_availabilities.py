@@ -10,8 +10,6 @@
 
 import datetime
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -58,7 +56,7 @@ class TestPlatformAvailabilities(BaseTestCase):
             begin_description=fake.text(),
             begin_contact=self.u.contact,
             begin_date=begin_date
-            or datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            or datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             end_date=end_date,
             end_description=fake.text(),
             end_contact=self.u.contact,
@@ -123,8 +121,8 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(1970, 1, 1, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(1970, 1, 12, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc),
+                    "to": datetime.datetime(1970, 1, 12, tzinfo=datetime.timezone.utc),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -134,8 +132,12 @@ class TestPlatformAvailabilities(BaseTestCase):
     def test_get_one_platform_is_available_for_mount(self):
         """Ensure we get a one platform available."""
         available_platform, _ = self.mount_a_platform(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 1, 30, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         for _ in range(3):
             self.mount_a_platform()
@@ -143,8 +145,12 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2025, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -162,8 +168,12 @@ class TestPlatformAvailabilities(BaseTestCase):
     def test_get_one_platform_is_available_for_mount_without_end_date_in_query(self):
         """Ensure we get a one platform available."""
         available_platform, _ = self.mount_a_platform(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 1, 30, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         for _ in range(3):
             self.mount_a_platform()
@@ -171,7 +181,9 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -189,19 +201,31 @@ class TestPlatformAvailabilities(BaseTestCase):
     def test_get_no_platform_available(self):
         """Ensure we get a one platform entry for the mount."""
         unavailable_platform_1, _ = self.mount_a_platform(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 1, 30, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         unavailable_platform_2, _ = self.mount_a_platform(
-            begin_date=datetime.datetime(2022, 1, 13, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 1, 13, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 1, 30, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         with self.run_requests_as(self.u):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2022, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2022, 1, 15, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -235,8 +259,12 @@ class TestPlatformAvailabilities(BaseTestCase):
     def test_platform_with_multiple_mounting_actions(self):
         """Ensure get a platform with multiple mounting actions."""
         platform, platform_mount_action_1 = self.mount_a_platform(
-            begin_date=datetime.datetime(2021, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2021, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 1, 30, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         platform_mount_action_2 = PlatformMountAction(
             configuration=self.configuration,
@@ -246,8 +274,12 @@ class TestPlatformAvailabilities(BaseTestCase):
             offset_z=fake.pyint(),
             begin_description=fake.text(),
             begin_contact=self.u.contact,
-            begin_date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2026, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2026, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             end_description=fake.text(),
             end_contact=self.u.contact,
         )
@@ -257,8 +289,12 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2024, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2026, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2024, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2026, 1, 15, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -288,8 +324,12 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2026, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2026, 1, 15, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -328,8 +368,12 @@ class TestPlatformAvailabilities(BaseTestCase):
     def test_filter_one_or_multiple_platforms(self):
         """Test that we can filter for specific platforms."""
         available_platform, platform_mount_action_1 = self.mount_a_platform(
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 1, 30, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 1, 30, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         for _ in range(4):
             self.mount_a_platform()
@@ -338,8 +382,12 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2025, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )
@@ -352,8 +400,12 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2025, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": available_platform.id,
                 },
             )
@@ -366,15 +418,23 @@ class TestPlatformAvailabilities(BaseTestCase):
 
         # With more than one id
         available_platform_2, platform_mount_action_2 = self.mount_a_platform(
-            begin_date=datetime.datetime(2022, 3, 1, 0, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 12, 30, 0, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 3, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 12, 30, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         with self.run_requests_as(self.u):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2025, 12, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2025, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": f"{available_platform.id},{available_platform_2.id}",
                 },
             )
@@ -409,8 +469,12 @@ class TestPlatformAvailabilities(BaseTestCase):
             response = self.client.get(
                 self.url,
                 query_string={
-                    "from": datetime.datetime(2021, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
-                    "to": datetime.datetime(2025, 1, 15, 0, 0, 0, tzinfo=pytz.UTC),
+                    "from": datetime.datetime(
+                        2021, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
+                    "to": datetime.datetime(
+                        2025, 1, 15, 0, 0, 0, tzinfo=datetime.timezone.utc
+                    ),
                     "ids": ",".join([str(x.id) for x in db.session.query(Platform)]),
                 },
             )

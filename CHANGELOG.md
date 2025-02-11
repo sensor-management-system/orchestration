@@ -15,6 +15,7 @@ Fixed:
 Changed:
 - mechanism to find the contact of the current user uses now the contact id of the user info object ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/491))
 - updated default organization name for GFZ users ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/492))
+- Removed usage of pytz ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/496))
 
 ## 1.17.2 - 2025-01-28
 

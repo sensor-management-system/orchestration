@@ -11,8 +11,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -1353,7 +1351,9 @@ class TestMountDevicePermissions(BaseTestCase):
         mount = DeviceMountAction(
             configuration=configuration1,
             device=device,
-            begin_date=datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
         )
         user = User(
@@ -1429,7 +1429,9 @@ class TestMountDevicePermissions(BaseTestCase):
         mount = DeviceMountAction(
             configuration=configuration,
             device=device1,
-            begin_date=datetime.datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 12, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
         )
         user = User(

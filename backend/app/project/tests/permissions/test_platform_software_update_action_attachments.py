@@ -9,8 +9,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Contact,
@@ -55,14 +53,18 @@ class TestPlatformSoftwarUpdateActionAttachments(BaseTestCase):
         action1 = PlatformSoftwareUpdateAction(
             platform=platform1,
             contact=contact,
-            update_date=datetime.datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            update_date=datetime.datetime(
+                2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             software_type_name="OS",
             software_type_uri="something",
         )
         action2 = PlatformSoftwareUpdateAction(
             platform=platform2,
             contact=contact,
-            update_date=datetime.datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            update_date=datetime.datetime(
+                2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             software_type_name="OS",
             software_type_uri="something",
         )

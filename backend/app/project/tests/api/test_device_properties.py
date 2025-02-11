@@ -13,7 +13,6 @@ import json
 import time
 from unittest.mock import patch
 
-import pytz
 from flask import current_app
 
 from project import base_url
@@ -644,8 +643,12 @@ class TestDevicePropertyDeletion(BaseTestCase):
             configuration=configuration,
             device=self.device,
             begin_contact=self.contact,
-            begin_date=datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
-            end_date=datetime.datetime(2023, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2023, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         tsm_endpoint = TsmEndpoint(url="https://somewhere", name="Somewhere")
         datastream_link = DatastreamLink(
@@ -680,8 +683,12 @@ class TestDevicePropertyDeletion(BaseTestCase):
             configuration=configuration,
             device=self.device,
             begin_contact=self.contact,
-            begin_date=datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
-            end_date=datetime.datetime(2023, 1, 1, 12, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2023, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         location = ConfigurationDynamicLocationBeginAction(
             configuration=configuration,
@@ -703,7 +710,7 @@ class TestDevicePropertyDeletion(BaseTestCase):
             device=self.device,
             contact=self.contact,
             current_calibration_date=datetime.datetime(
-                2022, 1, 1, 12, 0, 0, tzinfo=pytz.utc
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
             ),
         )
         property_calibration = DevicePropertyCalibration(
@@ -875,7 +882,9 @@ class TestDevicePropertyDeletion(BaseTestCase):
             offset_x=0,
             offset_y=0,
             offset_z=0,
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
 
         db.session.add_all([device, configuration, contact, device_mount_action])
@@ -936,7 +945,9 @@ class TestDevicePropertyDeletion(BaseTestCase):
             offset_x=0,
             offset_y=0,
             offset_z=0,
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
 
         db.session.add_all([device, configuration, contact, device_mount_action])
@@ -1002,7 +1013,9 @@ class TestDevicePropertyDeletion(BaseTestCase):
             offset_x=0,
             offset_y=0,
             offset_z=0,
-            begin_date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
 
         db.session.add_all([device, configuration, contact, device_mount_action])

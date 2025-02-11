@@ -10,8 +10,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Contact,
@@ -250,7 +248,7 @@ def create_value1_of_parameter1_of_public_platform1_in_group1(
     """Create a parameter value on public_platform1."""
     result = PlatformParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         platform_parameter=parameter1_of_public_platform1_in_group1,
@@ -270,7 +268,7 @@ def create_value1_of_parameter1_of_public_platform2_in_group1(
     """Create a parameter value on public_platform2."""
     result = PlatformParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         platform_parameter=parameter1_of_public_platform2_in_group1,
@@ -290,7 +288,7 @@ def create_value1_of_parameter1_of_internal_platform1_in_group1(
     """Create a parameter value on internal_platform1."""
     result = PlatformParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         platform_parameter=parameter1_of_internal_platform1_in_group1,
@@ -310,7 +308,7 @@ def create_value1_of_parameter1_of_private_platform_of_user1(
     """Create a parameter value on private_platform1."""
     result = PlatformParameterValueChangeAction(
         contact=contact1,
-        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=pytz.utc),
+        date=datetime.datetime(2023, 2, 28, 23, 59, 00, tzinfo=datetime.timezone.utc),
         value="3",
         description="The value 3",
         platform_parameter=parameter1_of_private_platform_of_user1,

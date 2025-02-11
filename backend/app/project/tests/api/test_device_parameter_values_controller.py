@@ -7,8 +7,6 @@
 """Tests for the device parameter value controller."""
 import datetime
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Contact,
@@ -191,7 +189,7 @@ class TestControllerDeviceParameterValues(BaseTestCase):
             url,
             query_string={
                 "timepoint": datetime.datetime(
-                    2023, 5, 3, 12, 47, 0, tzinfo=pytz.utc
+                    2023, 5, 3, 12, 47, 0, tzinfo=datetime.timezone.utc
                 ).isoformat()
             },
         )
@@ -207,7 +205,7 @@ class TestControllerDeviceParameterValues(BaseTestCase):
                 url,
                 query_string={
                     "timepoint": datetime.datetime(
-                        2023, 5, 3, 12, 16, 0, tzinfo=pytz.utc
+                        2023, 5, 3, 12, 16, 0, tzinfo=datetime.timezone.utc
                     ).isoformat()
                 },
             )
@@ -223,7 +221,7 @@ class TestControllerDeviceParameterValues(BaseTestCase):
                 url,
                 query_string={
                     "timepoint": datetime.datetime(
-                        2023, 5, 3, 12, 16, 0, tzinfo=pytz.utc
+                        2023, 5, 3, 12, 16, 0, tzinfo=datetime.timezone.utc
                     ).isoformat()
                 },
             )
@@ -249,7 +247,7 @@ class TestControllerDeviceParameterValues(BaseTestCase):
                 url,
                 query_string={
                     "timepoint": datetime.datetime(
-                        2023, 5, 3, 12, 16, 0, tzinfo=pytz.utc
+                        2023, 5, 3, 12, 16, 0, tzinfo=datetime.timezone.utc
                     ).isoformat()
                 },
             )
@@ -278,7 +276,7 @@ class TestControllerDeviceParameterValues(BaseTestCase):
             url,
             query_string={
                 "timepoint": datetime.datetime(
-                    2023, 5, 3, 12, 47, 0, tzinfo=pytz.utc
+                    2023, 5, 3, 12, 47, 0, tzinfo=datetime.timezone.utc
                 ).isoformat()
             },
         )
@@ -308,7 +306,7 @@ class TestControllerDeviceParameterValues(BaseTestCase):
             url2,
             query_string={
                 "timepoint": datetime.datetime(
-                    2023, 5, 3, 12, 47, 0, tzinfo=pytz.utc
+                    2023, 5, 3, 12, 47, 0, tzinfo=datetime.timezone.utc
                 ).isoformat()
             },
         )
@@ -334,14 +332,14 @@ class TestControllerDeviceParameterValues(BaseTestCase):
         change1 = DeviceParameterValueChangeAction(
             device_parameter=parameter,
             value="123",
-            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2022, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
         change2 = DeviceParameterValueChangeAction(
             device_parameter=parameter,
             value="456",
-            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=pytz.utc),
+            date=datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
             contact=contact1,
             description="",
         )
@@ -350,11 +348,21 @@ class TestControllerDeviceParameterValues(BaseTestCase):
 
         url = f"{base_url}/controller/devices/{public_device1.id}/parameter-values"
         expected_results = {
-            datetime.datetime(2020, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): None,
-            datetime.datetime(2022, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "123",
-            datetime.datetime(2023, 2, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2023, 1, 1, 0, 0, 0, 0, tzinfo=pytz.utc): "456",
-            datetime.datetime(2022, 12, 31, 23, 59, 59, 999, tzinfo=pytz.utc): "123",
+            datetime.datetime(
+                2020, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): None,
+            datetime.datetime(
+                2022, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "123",
+            datetime.datetime(
+                2023, 2, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2023, 1, 1, 0, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ): "456",
+            datetime.datetime(
+                2022, 12, 31, 23, 59, 59, 999, tzinfo=datetime.timezone.utc
+            ): "123",
         }
         for timepoint, expected_result in expected_results.items():
             response = self.client.get(

@@ -9,8 +9,6 @@
 import datetime
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -233,7 +231,9 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(device_mount_action)
         db.session.commit()
@@ -252,8 +252,12 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2012, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2012, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(device_mount_action)
         db.session.commit()
@@ -261,7 +265,9 @@ class TestArchiveConfiguration(BaseTestCase):
             AllDeviceMountsForConfigurationAreFinishedInThePast,
             "_get_current_date_time",
         ) as mock:
-            mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
+            mock.return_value = datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            )
             with self.run_requests_as(self.super_user):
                 response = self.client.post(
                     f"{self.configurations_url}/{self.public_configuration.id}/archive"
@@ -277,7 +283,9 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(platform_mount_action)
         db.session.commit()
@@ -296,8 +304,12 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Mount without end",
-            begin_date=datetime.datetime(2012, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2012, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(platform_mount_action)
         db.session.commit()
@@ -305,7 +317,9 @@ class TestArchiveConfiguration(BaseTestCase):
             AllPlatformMountsForConfigurationAreFinishedInThePast,
             "_get_current_date_time",
         ) as mock:
-            mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
+            mock.return_value = datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            )
             with self.run_requests_as(self.super_user):
                 response = self.client.post(
                     f"{self.configurations_url}/{self.public_configuration.id}/archive"
@@ -320,7 +334,9 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Location without end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(static_location)
         db.session.commit()
@@ -338,8 +354,12 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Location with end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(static_location)
         db.session.commit()
@@ -347,7 +367,9 @@ class TestArchiveConfiguration(BaseTestCase):
             AllStaticLocationsForConfigurationAreFinishedInThePast,
             "_get_current_date_time",
         ) as mock:
-            mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
+            mock.return_value = datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            )
             with self.run_requests_as(self.super_user):
                 response = self.client.post(
                     f"{self.configurations_url}/{self.public_configuration.id}/archive"
@@ -362,7 +384,9 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Location with end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(dynamic_location)
         db.session.commit()
@@ -380,8 +404,12 @@ class TestArchiveConfiguration(BaseTestCase):
             configuration=self.public_configuration,
             begin_contact=self.normal_user.contact,
             begin_description="Location with end",
-            begin_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2022, 9, 8, 12, 0, 0, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2022, 9, 8, 12, 0, 0, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(dynamic_location)
         db.session.commit()
@@ -389,7 +417,9 @@ class TestArchiveConfiguration(BaseTestCase):
             AllDynamicLocationsForConfigurationAreFinishedInThePast,
             "_get_current_date_time",
         ) as mock:
-            mock.return_value = datetime.datetime(2022, 1, 1, 12, 0, 0, tzinfo=pytz.UTC)
+            mock.return_value = datetime.datetime(
+                2022, 1, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+            )
             with self.run_requests_as(self.super_user):
                 response = self.client.post(
                     f"{self.configurations_url}/{self.public_configuration.id}/archive"

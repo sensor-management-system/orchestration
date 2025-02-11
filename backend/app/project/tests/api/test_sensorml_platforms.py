@@ -11,7 +11,6 @@ import pathlib
 import pickle
 import xml
 
-import pytz
 from flask import current_app
 
 from project import base_url
@@ -843,7 +842,9 @@ class TestSensorMLPlatform(BaseTestCase):
         change_action = PlatformParameterValueChangeAction(
             platform_parameter=parameter,
             contact=contact,
-            date=datetime.datetime(2023, 5, 3, 10, 00, 00, tzinfo=pytz.utc),
+            date=datetime.datetime(
+                2023, 5, 3, 10, 00, 00, tzinfo=datetime.timezone.utc
+            ),
             value="42",
             description="The answer to everything - and the start temperature for the fan.",
         )
@@ -1019,9 +1020,13 @@ class TestSensorMLPlatform(BaseTestCase):
         platform_mount = PlatformMountAction(
             platform=self.platform,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
-            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            end_date=datetime.datetime(
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
+            ),
             begin_description="Mount of platform on test config",
         )
 
@@ -1117,7 +1122,9 @@ class TestSensorMLPlatform(BaseTestCase):
         platform_mount = PlatformMountAction(
             platform=self.platform,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
             begin_description="Mount of platform on test config",
         )
@@ -1160,7 +1167,9 @@ class TestSensorMLPlatform(BaseTestCase):
         platform_mount = PlatformMountAction(
             platform=self.platform,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
         )
 
@@ -1199,7 +1208,9 @@ class TestSensorMLPlatform(BaseTestCase):
         platform_mount = PlatformMountAction(
             platform=self.platform,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
         )
 
@@ -1240,8 +1251,12 @@ class TestSensorMLPlatform(BaseTestCase):
         platform_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
         platform_action = GenericPlatformAction(
             platform=self.platform,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
-            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             action_type_name="Platform Maintenance",
@@ -1341,7 +1356,9 @@ class TestSensorMLPlatform(BaseTestCase):
         platform_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
         platform_action = GenericPlatformAction(
             platform=self.platform,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             action_type_name="Platform Maintenance",
@@ -1387,7 +1404,9 @@ class TestSensorMLPlatform(BaseTestCase):
         platform_maintenance_uri = current_app.config["CV_URL"] + "/actiontypes/5/"
         platform_action = GenericPlatformAction(
             platform=self.platform,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             action_type_name="Platform Maintenance",
             action_type_uri=platform_maintenance_uri,
@@ -1427,7 +1446,9 @@ class TestSensorMLPlatform(BaseTestCase):
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")
         platform_action = GenericPlatformAction(
             platform=self.platform,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             action_type_name="Platform Maintenance",
         )
@@ -1469,7 +1490,9 @@ class TestSensorMLPlatform(BaseTestCase):
         firmware_uri = current_app.config["CV_URL"] + "/softwaretypes/1/"
         update_action = PlatformSoftwareUpdateAction(
             platform=self.platform,
-            update_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            update_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             software_type_name="Firmware",
@@ -1549,7 +1572,9 @@ class TestSensorMLPlatform(BaseTestCase):
         contact = Contact(given_name="Given", family_name="Fam", email="given@family")
         update_action = PlatformSoftwareUpdateAction(
             platform=self.platform,
-            update_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            update_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             contact=contact,
             description="Some desc",
             software_type_name="Firmware",
@@ -1797,9 +1822,13 @@ class TestSensorMLPlatform(BaseTestCase):
             label="Special mount",
             platform=self.platform,
             configuration=configuration,
-            begin_date=datetime.datetime(year=2022, month=12, day=24, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                year=2022, month=12, day=24, tzinfo=datetime.timezone.utc
+            ),
             begin_contact=contact,
-            end_date=datetime.datetime(year=2022, month=12, day=25, tzinfo=pytz.utc),
+            end_date=datetime.datetime(
+                year=2022, month=12, day=25, tzinfo=datetime.timezone.utc
+            ),
             begin_description="Mount of platform on test config",
         )
 

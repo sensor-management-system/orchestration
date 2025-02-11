@@ -10,8 +10,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Contact,
@@ -1523,13 +1521,17 @@ class TestDeviceParameterServices(BaseTestCase):
         value1 = DeviceParameterValueChangeAction(
             device_parameter=parameter1_of_public_device1_in_group1,
             contact=contact1,
-            date=datetime.datetime(2023, 5, 2, 15, 30, 00, tzinfo=pytz.utc),
+            date=datetime.datetime(
+                2023, 5, 2, 15, 30, 00, tzinfo=datetime.timezone.utc
+            ),
             value="3",
         )
         value2 = DeviceParameterValueChangeAction(
             device_parameter=parameter1_of_public_device1_in_group1,
             contact=contact1,
-            date=datetime.datetime(2023, 5, 2, 19, 30, 00, tzinfo=pytz.utc),
+            date=datetime.datetime(
+                2023, 5, 2, 19, 30, 00, tzinfo=datetime.timezone.utc
+            ),
             value="42",
         )
         db.session.add_all([value1, value2])
@@ -1559,7 +1561,9 @@ class TestDeviceParameterServices(BaseTestCase):
         value1 = DeviceParameterValueChangeAction(
             device_parameter=parameter1_of_public_device1_in_group1,
             contact=super_user.contact,
-            date=datetime.datetime(2023, 5, 2, 15, 30, 00, tzinfo=pytz.utc),
+            date=datetime.datetime(
+                2023, 5, 2, 15, 30, 00, tzinfo=datetime.timezone.utc
+            ),
             value="3",
         )
         db.session.add(value1)

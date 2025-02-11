@@ -60,6 +60,7 @@ and customization possibilities due to the use of common standards.
 - [Paul Remmler](https://orcid.org/0000-0001-8900-9009)
 - [Vivien Rosin](https://orcid.org/0009-0003-9261-6696)
 - Marie Schaeffer
+- [Florian Obsersteiner](https://orcid.org/0000-0002-7327-8893)
 - [Jannes Breier](https://orcid.org/0000-0002-9055-6904)
 
 ## Development

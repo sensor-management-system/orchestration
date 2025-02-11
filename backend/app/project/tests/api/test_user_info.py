@@ -12,7 +12,6 @@ import json
 from unittest import skipIf
 from unittest.mock import patch
 
-import pytz
 from flask import current_app
 
 from project import base_url
@@ -197,7 +196,7 @@ class TestUserinfo(BaseTestCase):
             subject="dummy",
             contact=contact,
             terms_of_use_agreement_date=datetime.datetime(
-                2023, 2, 28, 12, 0, 0, tzinfo=pytz.utc
+                2023, 2, 28, 12, 0, 0, tzinfo=datetime.timezone.utc
             ),
         )
         db.session.add_all([contact, user])

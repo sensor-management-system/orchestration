@@ -6,10 +6,8 @@
 
 """Tests for the generic configuration actions api."""
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import patch
-
-import pytz
 
 from project import base_url, db
 from project.api.models import Configuration, Contact, GenericConfigurationAction, User
@@ -332,7 +330,7 @@ class TestGenericConfigurationActionPermissions(BaseTestCase):
             configuration=configuration1,
             action_type_name="fancy action",
             action_type_uri="something",
-            begin_date=datetime(2022, 12, 1, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime(2022, 12, 1, 0, 0, 0, tzinfo=timezone.utc),
             contact=contact,
         )
         user = User(

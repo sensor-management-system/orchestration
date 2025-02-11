@@ -9,8 +9,6 @@
 import datetime
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import Contact, User
 from project.api.models.base_model import db
@@ -86,7 +84,9 @@ class TestAcceptTermsOfUse(BaseTestCase):
 
         user_id = user.id
 
-        new_aggreement_date = datetime.datetime(2023, 2, 28, 12, 0, 0, tzinfo=pytz.utc)
+        new_aggreement_date = datetime.datetime(
+            2023, 2, 28, 12, 0, 0, tzinfo=datetime.timezone.utc
+        )
         with self.run_requests_as(user):
             with patch.object(AcceptTermsOfUse, "get_current_time") as mock:
                 mock.return_value = new_aggreement_date

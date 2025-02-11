@@ -9,8 +9,6 @@ import datetime
 import json
 from unittest.mock import patch
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -53,14 +51,18 @@ class TestGenericConfigurationActionAttachments(BaseTestCase):
         action1 = GenericConfigurationAction(
             configuration=configuration1,
             contact=contact,
-            begin_date=datetime.datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             action_type_name="Something",
             action_type_uri="something",
         )
         action2 = GenericConfigurationAction(
             configuration=configuration2,
             contact=contact,
-            begin_date=datetime.datetime(2022, 12, 24, 0, 0, 0, tzinfo=pytz.utc),
+            begin_date=datetime.datetime(
+                2022, 12, 24, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
             action_type_name="Something",
             action_type_uri="something",
         )

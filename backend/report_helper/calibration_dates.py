@@ -24,7 +24,6 @@ import webbrowser
 
 import dateutil.parser
 import jinja2
-import pytz
 import requests
 
 URL = "https://sensors.gfz-potsdam.de"
@@ -329,7 +328,7 @@ def main():
     devices = sms.get_devices(filtered_groups)
     rows = []
 
-    now = datetime.datetime.now(pytz.utc)
+    now = datetime.datetime.now(datetime.timezone.utc)
 
     permission_group_lookup = {p.id: p for p in permission_groups}
     contact_lookup = {c.id: c for c in contacts}

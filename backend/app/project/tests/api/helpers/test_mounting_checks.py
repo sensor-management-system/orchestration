@@ -15,8 +15,6 @@ we check if modifications here are valid or not.
 """
 import datetime
 
-import pytz
-
 from project.api.helpers.errors import ConflictError, NotFoundError
 from project.api.helpers.mounting_checks import (
     DeviceMountActionValidator,
@@ -96,8 +94,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2030, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2030, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_device_mount_action)
         db.session.commit()
@@ -125,8 +127,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2030, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2030, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_device_mount_action)
         db.session.commit()
@@ -154,8 +160,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2030, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2030, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_device_mount_action)
         db.session.commit()
@@ -191,7 +201,9 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_device_mount_action)
         db.session.commit()
@@ -243,7 +255,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -271,7 +287,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent device is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -283,7 +303,9 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -308,7 +330,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -320,7 +346,9 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_parent_mount_action)
         db.session.commit()
@@ -345,7 +373,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent device is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -356,8 +388,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -382,7 +418,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -393,8 +433,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_parent_mount_action)
         db.session.commit()
@@ -419,7 +463,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent device is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -430,7 +478,9 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -458,7 +508,9 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_parent_mount_action)
         db.session.commit()
@@ -486,13 +538,17 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_platform_mount_action = PlatformMountAction(
             configuration=self.configuration2,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [existing_device_mount_action, existing_platform_mount_action]
@@ -529,7 +585,9 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_device_mount_action)
         db.session.commit()
@@ -597,15 +655,23 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action2 = DeviceMountAction(
             configuration=self.configuration2,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2025, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2025, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [existing_device_mount_action1, existing_device_mount_action2]
@@ -645,16 +711,24 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [existing_device_mount_action1, existing_platform_mount_action1]
@@ -674,7 +748,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -701,16 +779,24 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [existing_device_mount_action1, existing_parent_mount_action1]
@@ -730,7 +816,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent device is not mounted",
-            str(datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -757,14 +847,18 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [
@@ -840,15 +934,21 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2025, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2025, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [
@@ -872,20 +972,26 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_platform_mount_action = PlatformMountAction(
             configuration=self.configuration2,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         new_mount = DeviceMountAction(
             configuration=self.configuration2,
             device=self.device1,
             parent_device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [existing_device_mount_action, existing_platform_mount_action, new_mount]
@@ -912,12 +1018,16 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         dynamic_location_begin = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
             x_property=x_coord,
         )
         db.session.add_all(
@@ -998,37 +1108,53 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         dynamic_location_begin1 = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
             x_property=x_coord,
-            end_date=datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(
+                year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
             end_contact=self.contact1,
         )
         dynamic_location_begin2 = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2024, month=2, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2024, month=2, day=1, tzinfo=datetime.timezone.utc
+            ),
             y_property=x_coord,
-            end_date=datetime.datetime(year=2025, month=1, day=1, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(
+                year=2025, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
             end_contact=self.contact1,
         )
         dynamic_location_begin3 = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2025, month=2, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2025, month=2, day=1, tzinfo=datetime.timezone.utc
+            ),
             y_property=x_coord,
-            end_date=datetime.datetime(year=2026, month=1, day=1, tzinfo=pytz.UTC),
+            end_date=datetime.datetime(
+                year=2026, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
             end_contact=self.contact1,
         )
         db.session.add_all(
@@ -1076,14 +1202,18 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_device=self.device2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [
@@ -1115,12 +1245,16 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         dynamic_location_begin = ConfigurationDynamicLocationBeginAction(
             configuration=self.configuration1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
             x_property=x_coord,
         )
         db.session.add_all(
@@ -1146,7 +1280,9 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_device_mount_action1)
         db.session.commit()
@@ -1158,14 +1294,20 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action2 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
             end_date=None,
         )
         payload_dict = {"attributes": {}}
@@ -1185,8 +1327,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         payload_dict = {
             "attributes": {
@@ -1200,11 +1346,11 @@ class TestDeviceMountActionValidator(BaseTestCase):
         )
         self.assertEqual(
             time_range.begin_date,
-            datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
+            datetime.datetime(year=2024, month=1, day=1, tzinfo=datetime.timezone.utc),
         )
         self.assertEqual(
             time_range.end_date,
-            datetime.datetime(year=2026, month=1, day=1, tzinfo=pytz.UTC),
+            datetime.datetime(year=2026, month=1, day=1, tzinfo=datetime.timezone.utc),
         )
 
     def test_extract_updated_begin_and_end_dates_none_end_date_from_payload(self):
@@ -1213,8 +1359,12 @@ class TestDeviceMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             device=self.device1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         payload_dict = {
             "attributes": {
@@ -1228,7 +1378,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
         )
         self.assertEqual(
             time_range.begin_date,
-            datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
+            datetime.datetime(year=2024, month=1, day=1, tzinfo=datetime.timezone.utc),
         )
         self.assertEqual(time_range.end_date, None)
 
@@ -1286,8 +1436,12 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2030, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2030, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -1313,8 +1467,12 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2030, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2030, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -1352,7 +1510,9 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -1404,7 +1564,11 @@ class TestPlatformMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -1416,7 +1580,9 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -1441,7 +1607,11 @@ class TestPlatformMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -1452,8 +1622,12 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             platform=self.platform2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -1478,7 +1652,11 @@ class TestPlatformMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -1489,7 +1667,9 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration2,
             platform=self.platform2,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -1522,7 +1702,9 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action)
         db.session.commit()
@@ -1590,15 +1772,23 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_platform_mount_action2 = PlatformMountAction(
             configuration=self.configuration2,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2025, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2025, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [existing_platform_mount_action1, existing_platform_mount_action2]
@@ -1638,16 +1828,24 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_platform_mount_action2 = PlatformMountAction(
             configuration=self.configuration1,
             platform=self.platform2,
             parent_platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(year=2023, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                year=2023, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [existing_platform_mount_action1, existing_platform_mount_action2]
@@ -1667,7 +1865,11 @@ class TestPlatformMountActionValidator(BaseTestCase):
         str_exception = str(context.exception)
         expected_information = [
             "Parent platform is not mounted",
-            str(datetime.datetime(year=2024, month=1, day=1, tzinfo=pytz.UTC)),
+            str(
+                datetime.datetime(
+                    year=2024, month=1, day=1, tzinfo=datetime.timezone.utc
+                )
+            ),
         ]
         for information in expected_information:
             self.assertIn(information, str_exception)
@@ -1694,14 +1896,18 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [
@@ -1788,14 +1994,18 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_device_mount_action1 = DeviceMountAction(
             configuration=self.configuration1,
             device=self.device1,
             parent_platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [
@@ -1823,14 +2033,18 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         existing_platform_mount_action2 = PlatformMountAction(
             configuration=self.configuration1,
             platform=self.platform2,
             parent_platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add_all(
             [
@@ -1858,7 +2072,9 @@ class TestPlatformMountActionValidator(BaseTestCase):
             configuration=self.configuration1,
             platform=self.platform1,
             begin_contact=self.contact1,
-            begin_date=datetime.datetime(year=2022, month=1, day=1, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
         )
         db.session.add(existing_platform_mount_action1)
         db.session.commit()
@@ -1887,7 +2103,13 @@ class TestPlatformMountActionValidator2(BaseTestCase):
             begin_contact=contact,
             end_contact=None,
             begin_date=datetime.datetime(
-                year=2022, month=8, day=19, hour=9, minute=8, second=57, tzinfo=pytz.UTC
+                year=2022,
+                month=8,
+                day=19,
+                hour=9,
+                minute=8,
+                second=57,
+                tzinfo=datetime.timezone.utc,
             ),
             begin_description="",
             offset_x=0,
@@ -1901,10 +2123,22 @@ class TestPlatformMountActionValidator2(BaseTestCase):
             begin_contact=contact,
             end_contact=contact,
             begin_date=datetime.datetime(
-                year=2022, month=8, day=19, hour=9, minute=9, second=17, tzinfo=pytz.UTC
+                year=2022,
+                month=8,
+                day=19,
+                hour=9,
+                minute=9,
+                second=17,
+                tzinfo=datetime.timezone.utc,
             ),
             end_date=datetime.datetime(
-                year=2022, month=8, day=19, hour=9, minute=9, second=35, tzinfo=pytz.UTC
+                year=2022,
+                month=8,
+                day=19,
+                hour=9,
+                minute=9,
+                second=35,
+                tzinfo=datetime.timezone.utc,
             ),
             begin_description="",
             end_description="",

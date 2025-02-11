@@ -10,8 +10,6 @@
 
 import datetime
 
-import pytz
-
 from project import base_url
 from project.api.models import (
     Configuration,
@@ -66,7 +64,9 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
         """Ensure we get an entry for an existing location action."""
         configuration_static_location_begin_action = (
             ConfigurationStaticLocationBeginAction(
-                begin_date=datetime.datetime(2021, 10, 31, 10, 0, 0, tzinfo=pytz.UTC),
+                begin_date=datetime.datetime(
+                    2021, 10, 31, 10, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 begin_description="test configuration_static_location_begin_action",
                 label="somewhere",
                 x=20.0,
@@ -100,7 +100,9 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
         """Ensure we get an entry for an existing dynamic location action."""
         configuration_dynamic_location_begin_action = (
             ConfigurationDynamicLocationBeginAction(
-                begin_date=datetime.datetime(2021, 10, 31, 10, 0, 0, tzinfo=pytz.UTC),
+                begin_date=datetime.datetime(
+                    2021, 10, 31, 10, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 begin_description="test configuration_location_begin_action",
                 label="flexible",
                 configuration=self.configuration,
@@ -128,7 +130,9 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
         """Ensure that a list of location actions is ordered by begin date."""
         configuration_static_location_begin_action = (
             ConfigurationStaticLocationBeginAction(
-                begin_date=datetime.datetime(2021, 10, 31, 10, 0, 0, tzinfo=pytz.UTC),
+                begin_date=datetime.datetime(
+                    2021, 10, 31, 10, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 begin_description="test configuration_static_location_begin_action",
                 x=20.0,
                 y=20.0,
@@ -142,7 +146,9 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
         )
         configuration_static_location_begin_action1 = (
             ConfigurationStaticLocationBeginAction(
-                begin_date=datetime.datetime(2011, 11, 25, 10, 0, 0, tzinfo=pytz.UTC),
+                begin_date=datetime.datetime(
+                    2011, 11, 25, 10, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 begin_description="test configuration_static_location_begin_action",
                 x=21.0,
                 y=21.0,
@@ -155,7 +161,9 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
             )
         )
         configuration_dynamic_location_action = ConfigurationDynamicLocationBeginAction(
-            begin_date=datetime.datetime(2024, 1, 13, 22, 56, 57, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2024, 1, 13, 22, 56, 57, tzinfo=datetime.timezone.utc
+            ),
             begin_description="Test dynamic locatiion begin",
             configuration=self.configuration,
             begin_contact=self.u.contact,
@@ -198,8 +206,12 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
         """Ensure that a list of location actions can include end dates."""
         configuration_static_location_begin_action = (
             ConfigurationStaticLocationBeginAction(
-                begin_date=datetime.datetime(2021, 10, 31, 10, 0, 0, tzinfo=pytz.UTC),
-                end_date=datetime.datetime(2021, 11, 1, 12, 0, 0, tzinfo=pytz.UTC),
+                begin_date=datetime.datetime(
+                    2021, 10, 31, 10, 0, 0, tzinfo=datetime.timezone.utc
+                ),
+                end_date=datetime.datetime(
+                    2021, 11, 1, 12, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 begin_description="test configuration_static_location_begin_action",
                 end_description="end",
                 x=20.0,
@@ -215,8 +227,12 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
         )
         configuration_static_location_begin_action1 = (
             ConfigurationStaticLocationBeginAction(
-                begin_date=datetime.datetime(2011, 11, 25, 10, 0, 0, tzinfo=pytz.UTC),
-                end_date=datetime.datetime(2011, 11, 26, 12, 0, 0, tzinfo=pytz.UTC),
+                begin_date=datetime.datetime(
+                    2011, 11, 25, 10, 0, 0, tzinfo=datetime.timezone.utc
+                ),
+                end_date=datetime.datetime(
+                    2011, 11, 26, 12, 0, 0, tzinfo=datetime.timezone.utc
+                ),
                 begin_description="test configuration_static_location_begin_action",
                 end_description="end",
                 x=21.0,
@@ -231,8 +247,12 @@ class TestControllerConfigurationsLocationActions(BaseTestCase):
             )
         )
         configuration_dynamic_location_action = ConfigurationDynamicLocationBeginAction(
-            begin_date=datetime.datetime(2024, 1, 13, 22, 56, 57, tzinfo=pytz.UTC),
-            end_date=datetime.datetime(2025, 12, 25, 1, 1, 2, tzinfo=pytz.UTC),
+            begin_date=datetime.datetime(
+                2024, 1, 13, 22, 56, 57, tzinfo=datetime.timezone.utc
+            ),
+            end_date=datetime.datetime(
+                2025, 12, 25, 1, 1, 2, tzinfo=datetime.timezone.utc
+            ),
             begin_description="Test dynamic locatiion begin",
             end_description="Test dynamic location end",
             configuration=self.configuration,
