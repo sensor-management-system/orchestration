@@ -56,21 +56,21 @@ export type KindOfConfigurationAction =
 
 export const deviceParameterChangeActionOption: DeviceActionOptionType = {
   id: 'parameter_change_action',
-  name: 'Parameter Value Change',
+  name: 'Parameter value change',
   uri: '',
   kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
 }
 
 export const platformParameterChangeActionOption: PlatformActionOptionType = {
   id: 'parameter_change_action',
-  name: 'Parameter Value Change',
+  name: 'Parameter value change',
   uri: '',
   kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
 }
 
 export const configurationParameterChangeActionOption: ConfigurationActionOptionType = {
   id: 'parameter_change_action',
-  name: 'Parameter Value Change',
+  name: 'Parameter value change',
   uri: '',
   kind: KIND_OF_ACTION_TYPE_PARAMETER_CHANGE_ACTION
 }

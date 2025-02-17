@@ -9,8 +9,8 @@ SPDX-License-Identifier: EUPL-1.2
 <template>
   <div>
     <v-select
-      value="Device Calibration"
-      :items="['Device Calibration']"
+      value="Device calibration"
+      :items="['Device calibration']"
       :item-text="(x) => x"
       disabled
       label="Action Type"
