@@ -9,8 +9,8 @@ SPDX-License-Identifier: EUPL-1.2
 <template>
   <div>
     <v-select
-      value="Software Update"
-      :items="['Software Update']"
+      value="Software update"
+      :items="['Software update']"
       :item-text="(x) => x"
       disabled
       label="Action Type"

@@ -186,10 +186,10 @@ export default class SoftwareUpdateActionCard extends Vue {
       if (this.target) {
         name = this.target + ' '
       }
-      name += 'Software Update'
+      name += 'Software update'
       return name
     }
-    return this.value.softwareTypeName + ' Update'
+    return this.value.softwareTypeName + ' update'
   }
 
   openAttachment (attachment: Attachment) {

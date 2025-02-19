@@ -18,6 +18,7 @@ Changed:
 - updated default organization name for GFZ users ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/492))
 - Removed usage of pytz ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/496))
 - Removed deprecated code for creating old ufz frontend image ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/487))
+- Action names defined in the SMS follow the same structure as for the CV with only one upper case letter ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/501))
 
 ## 1.17.2 - 2025-01-28
 

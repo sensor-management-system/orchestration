@@ -147,7 +147,7 @@ const getters: GetterTree<VocabularyState, RootState> = {
     return [
       {
         id: 'software_update',
-        name: 'Software Update',
+        name: 'Software update',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
@@ -166,20 +166,20 @@ const getters: GetterTree<VocabularyState, RootState> = {
     return [
       {
         id: 'software_update',
-        name: 'Software Update',
+        name: 'Software update',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
       platformParameterChangeActionOption,
       {
         id: 'platform_mount',
-        name: 'Platform Mount',
+        name: 'Platform mount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_PLATFORM_MOUNT
       },
       {
         id: 'platform_unmount',
-        name: 'Platform Unmount',
+        name: 'Platform unmount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT
       },
@@ -197,13 +197,13 @@ const getters: GetterTree<VocabularyState, RootState> = {
     return [
       {
         id: 'device_calibration',
-        name: 'Device Calibration',
+        name: 'Device calibration',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
       },
       {
         id: 'software_update',
-        name: 'Software Update',
+        name: 'Software update',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
@@ -222,26 +222,26 @@ const getters: GetterTree<VocabularyState, RootState> = {
     return [
       {
         id: 'device_calibration',
-        name: 'Device Calibration',
+        name: 'Device calibration',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DEVICE_CALIBRATION
       },
       {
         id: 'software_update',
-        name: 'Software Update',
+        name: 'Software update',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_SOFTWARE_UPDATE
       },
       deviceParameterChangeActionOption,
       {
         id: 'device_mount',
-        name: 'Device Mount',
+        name: 'Device mount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DEVICE_MOUNT
       },
       {
         id: 'device_unmount',
-        name: 'Device Unmount',
+        name: 'Device unmount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DEVICE_UNMOUNT
       },
@@ -272,50 +272,50 @@ const getters: GetterTree<VocabularyState, RootState> = {
     return [
       {
         id: 'device_mount',
-        name: 'Device Mount',
+        name: 'Device mount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DEVICE_MOUNT
       },
       {
         id: 'device_unmount',
-        name: 'Device Unmount',
+        name: 'Device unmount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DEVICE_UNMOUNT
       },
       {
         id: 'platform_mount',
-        name: 'Platform Mount',
+        name: 'Platform mount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_PLATFORM_MOUNT
       },
       {
         id: 'platform_unmount',
-        name: 'Platform Unmount',
+        name: 'Platform unmount',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_PLATFORM_UNMOUNT
       },
       configurationParameterChangeActionOption,
       {
         id: 'dynamic_location_begin',
-        name: 'Dynamic Location Begin',
+        name: 'Dynamic location begin',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_BEGIN
       },
       {
         id: 'dynamic_location_end',
-        name: 'Dynamic Location End',
+        name: 'Dynamic location end',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_DYNAMIC_LOCATION_END
       },
       {
         id: 'static_location_begin',
-        name: 'Static Location Begin',
+        name: 'Static location begin',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_STATIC_LOCATION_BEGIN
       },
       {
         id: 'static_location_end',
-        name: 'Static Location End',
+        name: 'Static location end',
         uri: '',
         kind: KIND_OF_ACTION_TYPE_STATIC_LOCATION_END
       },

@@ -9,8 +9,8 @@ SPDX-License-Identifier: EUPL-1.2
 <template>
   <div>
     <v-select
-      value="Parameter Value Change"
-      :items="['Parameter Value Change']"
+      value="Parameter value change"
+      :items="['Parameter value change']"
       :item-text="(x) => x"
       disabled
       label="Action Type"
