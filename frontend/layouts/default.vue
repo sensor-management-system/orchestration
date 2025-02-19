@@ -244,6 +244,22 @@ SPDX-License-Identifier: EUPL-1.2
             </template>
           </v-alert>
           <v-alert
+            :value="hasInfo"
+            type="info"
+            dismissable
+            elevation="12"
+            transition="scale-transition"
+          >
+            {{ info }}
+            <template #close>
+              <v-btn icon small color="white" @click="closeInfo">
+                <v-icon small>
+                  mdi-close
+                </v-icon>
+              </v-btn>
+            </template>
+          </v-alert>
+          <v-alert
             :value="hasError"
             type="error"
             color="red"
@@ -514,6 +530,19 @@ export default {
         }
       }
     },
+    info () {
+      return this.$store.state.snackbar.info
+    },
+    hasInfo: {
+      get () {
+        return this.$store.state.snackbar.info !== ''
+      },
+      set (newValue) {
+        if (!newValue) {
+          this.$store.commit('snackbar/clearInfo')
+        }
+      }
+    },
     warning () {
       return this.$store.state.snackbar.warning
     },
@@ -636,6 +665,9 @@ export default {
     closeWarning () {
       this.$store.commit('snackbar/clearWarning')
     },
+    closeInfo () {
+      this.$store.commit('snackbar/clearInfo')
+    },
     onChangeTab (tab) {
       this.$store.commit('appbar/setActiveTab', tab)
     },
@@ -680,6 +712,6 @@ export default {
     top: 5px;
     left: 50%;
     transform: translate(-50%, 0);
-    z-index: 99;
+    z-index: 2401; /* display in v-dialog */
   }
 </style>

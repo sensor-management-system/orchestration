@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
       persistent
       scrollable
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-title>Suggest new action type</v-card-title>
         <v-card-text>
           <p>
@@ -50,6 +50,10 @@ SPDX-License-Identifier: EUPL-1.2
                   required
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
+                />
+                <SimilarTermsList
+                  :search="suggestion.name"
+                  :terms="specificActionTypes"
                 />
               </v-col>
             </v-row>
@@ -140,6 +144,7 @@ import { Rules } from '@/mixins/Rules'
 import { ActionType } from '@/models/ActionType'
 import { AddActiontypeAction, LoadGlobalProvenancesAction, LoadActionCategoriesAction, VocabularyState } from '@/store/vocabulary'
 import { ActionTypeApiFilterType, ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API_FILTER_PLATFORM, ACTION_TYPE_API_FILTER_CONFIGURATION } from '@/services/cv/ActionTypeApi'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -150,6 +155,7 @@ import { ActionTypeApiFilterType, ACTION_TYPE_API_FILTER_DEVICE, ACTION_TYPE_API
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })

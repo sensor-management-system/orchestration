@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
       persistent
       scrollable
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-title>Suggest new measured quantity</v-card-title>
         <v-card-text>
           <p>
@@ -24,7 +24,8 @@ SPDX-License-Identifier: EUPL-1.2
             A curator reviews your contribution before accepting it and including it in the full controlled vocabulary.
           </p>
           <p>
-            In order to give the curator the opportunity to contact you, we will send your e-mail address with this request.
+            In order to give the curator the opportunity to contact you, we will send your e-mail address with this
+            request.
           </p>
           <v-form ref="suggestionForm" @submit.prevent>
             <v-row>
@@ -38,6 +39,7 @@ SPDX-License-Identifier: EUPL-1.2
                   required
                   class="required"
                   :rules="[rules.required]"
+                  @change="validateForm"
                 />
               </v-col>
             </v-row>
@@ -62,7 +64,19 @@ SPDX-License-Identifier: EUPL-1.2
                   label="Term"
                   required
                   class="required"
+                  :disabled="!suggestion.samplingMediaId"
+                  :hint="suggestion.samplingMediaId ? 'Please select a sampling medium' : null"
                   :rules="[rules.required, notInExistingNames]"
+                />
+                <SimilarTermsList
+                  :search="suggestion.name"
+                  :terms="properties"
+                  :properties-filtered-by="samplingMedia"
+                  filtered-property-key="samplingMediaId"
+                  filtered-property-name="sampling medium"
+                  :filtered-property-value="suggestion.samplingMediaId"
+                  filtered-property-name-plural="sampling media"
+                  @reuse="fillFromExistingEntry"
                 />
               </v-col>
             </v-row>
@@ -151,7 +165,13 @@ import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { Property } from '@/models/Property'
-import { AddPropertyAction, LoadAggregationtypesAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
+import {
+  AddPropertyAction,
+  LoadAggregationtypesAction,
+  LoadGlobalProvenancesAction,
+  VocabularyState
+} from '@/store/vocabulary'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -162,6 +182,7 @@ import { AddPropertyAction, LoadAggregationtypesAction, LoadGlobalProvenancesAct
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })
@@ -206,6 +227,13 @@ export default class CvPropertyDialog extends mixins(Rules) {
     this.$emit('input', value)
   }
 
+  @Watch('showDialog')
+  clearSnackbarInfo (showDialog: boolean) {
+    if (!showDialog) {
+      this.$store.commit('snackbar/clearInfo')
+    }
+  }
+
   async fetchRelated () {
     try {
       await Promise.all([this.loadGlobalProvenances(), this.loadAggregationtypes()])
@@ -218,11 +246,17 @@ export default class CvPropertyDialog extends mixins(Rules) {
     this.suggestion = new Property()
   }
 
-  notInExistingNames (term: string| null): boolean | string {
+  notInExistingNames (term: string | null): boolean | string {
     if (!term) {
       return true
     }
-    if (this.properties.find(x => x.name === term)) {
+    const propertyWithSimilarTerm = this.properties.find(x => x.name === term)
+    if (!propertyWithSimilarTerm) {
+      return true
+    }
+    // A property with similar name but different sampling medium (e.g. 'Abundance' for 'Plants' and 'Animals')
+    // allows the user to add such existing names for other sampling media.
+    if (this.suggestion.samplingMediaId && this.suggestion.samplingMediaId === propertyWithSimilarTerm?.samplingMediaId) {
       return 'Term is already part of the controlled vocabulary'
     }
     return true
@@ -250,6 +284,18 @@ export default class CvPropertyDialog extends mixins(Rules) {
       this.setLoading(false)
       this.resetInputs()
     }
+  }
+
+  fillFromExistingEntry (entry: Property) {
+    this.suggestion.name = entry.name
+    this.suggestion.definition = entry.definition
+    this.suggestion.category = entry.category
+    this.suggestion.aggregationTypeId = entry.aggregationTypeId
+    this.suggestion.globalProvenanceId = entry.globalProvenanceId
+    this.suggestion.provenance = entry.provenance
+    this.suggestion.provenanceUri = entry.provenanceUri
+    const samplingMediumName = this.samplingMedia.find(s => s.id === entry.samplingMediaId)?.name ?? ''
+    this.suggestion.note = `Reused ${entry.name} (${samplingMediumName}): ${entry.uri}`
   }
 
   @Watch('value')

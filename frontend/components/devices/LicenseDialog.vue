@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
       persistent
       scrollable
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-title>Suggest new license</v-card-title>
         <v-card-text>
           <p>
@@ -36,6 +36,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
+                <SimilarTermsList :search="newLicense.name" :terms="properties" />
               </v-col>
             </v-row>
             <v-row>
@@ -124,6 +125,7 @@ import { Rules } from '@/mixins/Rules'
 import { License } from '@/models/License'
 import { AddLicenseAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
 import { SetLoadingAction } from '@/store/progressindicator'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -134,6 +136,7 @@ import { SetLoadingAction } from '@/store/progressindicator'
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })

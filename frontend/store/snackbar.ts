@@ -10,14 +10,16 @@
 export interface ISnackbarStore {
   error: string,
   success: string,
-  warning: string
+  warning: string,
+  info: string
 }
 
 const state = () => {
   return {
     error: '',
     success: '',
-    warning: ''
+    warning: '',
+    info: ''
   }
 }
 
@@ -28,6 +30,9 @@ const mutations = {
   setSuccess (state: ISnackbarStore, success: string) {
     state.success = success
   },
+  setInfo (state: ISnackbarStore, info: string) {
+    state.info = info
+  },
   setWarning (state: ISnackbarStore, warning: string) {
     state.warning = warning
   },
@@ -36,6 +41,9 @@ const mutations = {
   },
   clearSuccess (state: ISnackbarStore) {
     state.success = ''
+  },
+  clearInfo (state: ISnackbarStore) {
+    state.info = ''
   },
   clearWarning (state: ISnackbarStore) {
     state.warning = ''

@@ -8,6 +8,9 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.17.3 (Unreleased)
 
+Added:
+- Fuzzy matching mechanism to help with reducting cv suggestions for already existing cv entries ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/428))
+
 Fixed:
 - problem on validation of mount contact when mounting devices or platforms ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/490))
 - corrected string when a device or platform is not available for mounting ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/495))  

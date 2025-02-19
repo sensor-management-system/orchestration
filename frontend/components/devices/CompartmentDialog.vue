@@ -36,6 +36,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
+                <SimilarTermsList :terms="compartments" :search="suggestion.name" />
               </v-col>
             </v-row>
             <v-row>
@@ -124,6 +125,7 @@ import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { Compartment } from '@/models/Compartment'
 import { AddCompartmentAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -134,6 +136,7 @@ import { AddCompartmentAction, LoadGlobalProvenancesAction, VocabularyState } fr
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })

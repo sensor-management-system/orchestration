@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
       persistent
       scrollable
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-title>Suggest new manufacturer</v-card-title>
         <v-card-text>
           <p>
@@ -36,6 +36,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
+                <SimilarTermsList :search="suggestion.name" :terms="manufacturers" />
               </v-col>
             </v-row>
             <v-row>
@@ -110,6 +111,7 @@ import { Component, Prop, Vue, Watch, mixins } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { SetLoadingAction } from '@/store/progressindicator'
 import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 import { Rules } from '@/mixins/Rules'
 import { Manufacturer } from '@/models/Manufacturer'
 import { AddManufacturerAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
@@ -123,7 +125,7 @@ import { AddManufacturerAction, LoadGlobalProvenancesAction, VocabularyState } f
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
-    ProvenanceHint
+    ProvenanceHint, SimilarTermsList
   }
 })
 export default class ManufacturerDialog extends mixins(Rules) {
