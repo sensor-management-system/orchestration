@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
       persistent
       scrollable
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-title>Suggest new platform type</v-card-title>
         <v-card-text>
           <p>
@@ -36,6 +36,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
+                <SimilarTermsList :search="newPlatformType.name" :terms="platformtypes" />
               </v-col>
             </v-row>
             <v-row>
@@ -124,6 +125,7 @@ import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { PlatformType } from '@/models/PlatformType'
 import { AddPlatformTypeAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -134,6 +136,7 @@ import { AddPlatformTypeAction, LoadGlobalProvenancesAction, VocabularyState } f
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })

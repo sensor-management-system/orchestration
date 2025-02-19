@@ -36,6 +36,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
+                <SimilarTermsList :search="suggestion.name" :terms="equipmentstatus" />
               </v-col>
             </v-row>
             <v-row>
@@ -124,6 +125,7 @@ import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { Status } from '@/models/Status'
 import { AddEquipmentstatusAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -134,6 +136,7 @@ import { AddEquipmentstatusAction, LoadGlobalProvenancesAction, VocabularyState 
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })

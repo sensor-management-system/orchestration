@@ -16,7 +16,7 @@ SPDX-License-Identifier: EUPL-1.2
       persistent
       scrollable
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-title>Suggest new site / lab usage</v-card-title>
         <v-card-text>
           <p>
@@ -38,6 +38,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
+                <SimilarTermsList :search="suggestion.name" :terms="siteUsages" />
               </v-col>
             </v-row>
             <v-row>
@@ -126,6 +127,7 @@ import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { SiteUsage } from '@/models/SiteUsage'
 import { AddSiteUsageAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -136,6 +138,7 @@ import { AddSiteUsageAction, LoadGlobalProvenancesAction, VocabularyState } from
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })

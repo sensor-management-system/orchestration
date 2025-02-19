@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
       persistent
       scrollable
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-title>Suggest new unit</v-card-title>
         <v-card-text>
           <p>
@@ -36,6 +36,7 @@ SPDX-License-Identifier: EUPL-1.2
                   class="required"
                   :rules="[rules.required, notInExistingNames]"
                 />
+                <SimilarTermsList :terms="units" :search="unit.name" :n-gram-length="2" />
               </v-col>
             </v-row>
             <v-row>
@@ -149,6 +150,7 @@ import ProvenanceHint from '@/components/shared/ProvenanceHint.vue'
 import { Rules } from '@/mixins/Rules'
 import { Unit } from '@/models/Unit'
 import { AddUnitAction, LoadGlobalProvenancesAction, VocabularyState } from '@/store/vocabulary'
+import SimilarTermsList from '@/components/shared/SimilarTermsList.vue'
 
 @Component({
   computed: {
@@ -159,6 +161,7 @@ import { AddUnitAction, LoadGlobalProvenancesAction, VocabularyState } from '@/s
     ...mapActions('progressindicator', ['setLoading'])
   },
   components: {
+    SimilarTermsList,
     ProvenanceHint
   }
 })
