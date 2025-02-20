@@ -1,0 +1,368 @@
+# SPDX-FileCopyrightText: 2025
+# - Florian Obersteiner <florian.obersteiner@kit.edu>
+# - Karlsruhe Institute of Technology (KIT, https://www.kit.edu/)
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+# KIT PRODUCTION
+services:
+    elastic-search:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+        container_name: sms_es
+        environment:
+            - discovery.type=single-node
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m -Dlog4j2.formatMsgNoLookups=true"
+            - cluster.routing.allocation.disk.threshold_enabled=false
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        volumes:
+            - "esdata01:/usr/share/elasticsearch/data"
+        networks:
+            - sms
+
+    idl:
+        image: "registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest"
+        container_name: idl
+        restart: unless-stopped
+        environment:
+            DJANGO_DEBUG: "true"
+            DJANGO_ALLOWED_HOSTS: "https://sms.atmohub.kit.edu backend idl"
+            DJANGO_BASE_PATH: idl/
+            DJANGO_STATIC_URL: /static/idl/
+            DJANGO_STATIC_ROOT: /static/idl/
+            DJANGO_DB_ENGINE: django.db.backends.postgresql
+            DJANGO_DB_NAME: idl
+            DJANGO_DB_USER: ${IDL_DB_USER}
+            DJANGO_DB_PASSWORD: ${IDL_DB_PASSWORD}
+            DJANGO_DB_HOST: idl-db
+            DJANGO_DB_PORT: 5432
+            IDL_TOKEN: ${SMS_IDL_TOKEN}
+            OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
+            VO_ADMIN_CONVENTIONS: ${VO_ADMIN_CONVENTIONS:-'*:kit-sms-admin'}
+            VO_MEMBER_CONVENTIONS: ${VO_MEMBER_CONVENTIONS:-'kit:*,*:kit-sms-member'}
+        volumes:
+            - "idl-static-files:/static/idl"
+        networks:
+            - sms
+        depends_on:
+            idl-db:
+                condition: service_healthy
+
+    idl-db:
+        # TODO : KIT uses older version; main is on 14.1 - can/should this be upgraded?
+        image: postgres:12-alpine
+        container_name: sms_idl_db
+        restart: unless-stopped
+        environment:
+            POSTGRES_PASSWORD: ${IDL_DB_PASSWORD}
+            POSTGRES_USER: ${IDL_DB_USER}
+            POSTGRES_DB: idl
+        volumes:
+            - "idl-db-data:/var/lib/postgresql/data"
+        shm_size: 128M
+        networks:
+            - sms
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${IDL_DB_USER}"]
+            interval: 30s
+            timeout: 5s
+            retries: 5
+
+    backend:
+        image: python:3.11-slim-buster
+        restart: unless-stopped
+        container_name: sms_backend
+        working_dir: /usr/src/app
+        volumes:
+            - "${SMS_BASEPATH}/orchestration/backend/app:/usr/src/app"
+        environment:
+            SMS_VERSION: ${SMS_VERSION:-develop}
+            FLASK_DEBUG: ${FLASK_DEBUG:-1}
+            URL_PREFIX: ${URL_PREFIX:-/backend/api/v1}
+            STATIC_URL: ${STATIC_URL:-/static/backend}
+            APP_SETTINGS: ${APP_SETTINGS:-project.config.DevelopmentConfig}
+            ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elastic-search:9200}
+            DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5433/db_dev}
+            DATABASE_TEST_URL: ${DATABASE_TEST_URL:-postgresql://postgres:postgres@db:5433/db_test}
+            OIDC_USERNAME_CLAIM: ${OIDC_USERNAME_CLAIM:-eduperson_principal_name}
+            HTTP_ORIGINS: ${HTTP_ORIGINS:-http://localhost}
+            WELL_KNOWN_URL: ${WELL_KNOWN_URL}
+            MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
+            MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minio123}
+            MINIO_SECURE: ${MINIO_SECURE:-False}
+            MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-sms-attachments}
+            MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+            DOWNLOAD_ENDPOINT: ${DOWNLOAD_ENDPOINT:-https://localhost.localdomain}
+            ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES:-application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed}
+            IDL_URL: ${IDL_URL}
+            SMS_IDL_TOKEN: ${SMS_IDL_TOKEN}
+            CV_URL: ${CV_URL}
+            INSTITUTE: ${INSTITUTE:-kit}
+            PKCE_SCOPES: ${NUXT_ENV_SCOPE:-openid profile eduperson_principal_name email offline_access}
+            SMS_BACKEND_URL: ${SMS_BACKEND_URL:-https://localhost.localdomain/backend/api/v1}
+            PKCE_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-sensormanagement_atmohub}
+            SMS_FRONTEND_URL: ${SMS_FRONTEND_URL:-https://localhost.localdomain}
+            PID_SERVICE_URL: ${PID_SERVICE_URL:-http://vm04.pid.gwdg.de:8081/handles/21.T11998/}
+            PID_SERVICE_USER: ${PID_SERVICE_USER}
+            PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
+            SCHEMA_VERSION: ${SCHEMA_VERSION:-0.1}
+            IDENTIFIER_TYPE: ${IDENTIFIER_TYPE:-Handler}
+            PID_SUFFIX: ${PID_SUFFIX:-SMS}
+            TSM_ENDPOINTS: '[{"fields": {"name": "KIT IFU", "url": "https://tsmdl-api.imk-ifu.kit.edu"}, "model": "TsmEndpoint", "pk": 4}]'
+            # TSM_ENDPOINTS: '${TSM_ENDPOINTS:-[{"fields": {"name": "Demo TSM", "url": "http://localhost/tsmdl"}, "model": "TsmEndpoint", "pk": 99}]}'
+            B2INST_URL: https://b2inst.gwdg.de
+            B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
+            B2INST_TOKEN: ${B2INST_TOKEN}
+            EXPORT_CONTROL_VO_LIST: ${EXPORT_CONTROL_VO_LIST:-}
+            # Most of the OIDC related entries are extracted using the well known url.
+            # In cases with an external auth server, this works fine for all the data,
+            # as both the backend service and the frontend (if we return links in documents)
+            # can access this server.
+            # For cases where the frontend can't access this server (local keycloak in
+            # the docker compose for example), we need an extra env variable to
+            # let the backend know which url to give to the frontend.
+            OIDC_TOKEN_ENDPOINT_FOR_FRONTEND: ${OIDC_TOKEN_ENDPOINT_FOR_FRONTEND:-http://localhost/keycloak/realms/local-dev/protocol/openid-connect/token}
+        depends_on:
+            - db
+            # - keycloak
+        entrypoint: /usr/src/app/entrypoint-dev.sh
+        networks:
+            - sms
+
+    db:
+        image: postgis/postgis:12-3.3-alpine
+        container_name: sms_db
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+        volumes:
+            - "${SMS_BASEPATH}/orchestration/backend/app/project/db/create.sql:/docker-entrypoint-initdb.d/create.sql"
+            - "db-data:/var/lib/postgresql/data"
+        networks:
+            - sms
+        command: -p 5433
+
+    frontend:
+        image: node:20.17.0-bullseye
+        container_name: sms_frontend
+        working_dir: /home/node/
+        user: "node"
+        networks:
+            - sms
+        environment:
+            SMS_VERSION: ${SMS_VERSION:-develop}
+            BASE_URL: ${BASE_URL:-/}
+            SMS_BACKEND_URL: ${SMS_BACKEND_URL:-/backend/api/v1}
+            CV_BACKEND_URL: ${CV_BACKEND_URL:-/cv/api/v1}
+            NUXT_ENV_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-sms-client}
+            # We reuse here the variable defined for the backend
+            NUXT_ENV_OIDC_WELL_KNOWN: ${WELL_KNOWN_URL:-https://webapp.ufz.de/idp/oidc/v1/.well-known/openid-configuration}
+            STAY_WITH_HTTP: ${STAY_WITH_HTTP:-true }
+            NUXT_ENV_ALLOWED_MIMETYPES: ${ALLOWED_MIME_TYPES:-application/x-abiword,application/x-freearc,application/vnd.amazon.ebook,image/bmp,application/x-bzip,application/x-bzip2,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,application/gzip,image/gif,text/html,image/vnd.microsoft.icon,text/calendar,image/jpeg,application/json,application/ld+json,application/vnd.oasis.opendocument.presentation,application/vnd.oasis.opendocument.spreadsheet,application/vnd.oasis.opendocument.text,image/png,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.rar,application/rtf,image/svg+xml,application/x-tar,image/tiff,image/tiff,text/plain,image/webp,application/xhtml+xml,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/xml,application/vnd.mozilla.xul+xml,application/zip,application/x-7z-compressed}
+            NUXT_ENV_SCOPE: ${NUXT_ENV_SCOPE:-openid profile eduperson_principal_name email offline_access}
+            NUXT_ENV_OIDC_SCHEME: ${NUXT_ENV_OIDC_SCHEME}
+            NUXT_ENV_OIDC_REFRESH_TOKEN: ${NUXT_ENV_OIDC_REFRESH_TOKEN}
+            NUXT_ENV_OIDC_REFRESH_EXPIRE: ${NUXT_ENV_OIDC_REFRESH_EXPIRE}
+            NUXT_ENV_OIDC_RESPONSE_TYPE: ${NUXT_ENV_OIDC_RESPONSE_TYPE}
+            NUXT_ENV_OIDC_GRANT_TYPE: ${NUXT_ENV_OIDC_GRANT_TYPE}
+            NUXT_ENV_OIDC_CHALLANGE: ${NUXT_ENV_OIDC_CHALLANGE}
+            NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME: ${NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME}
+            NUXT_ENV_OIDC_LOGIN_PARAMS: ${NUXT_ENV_OIDC_LOGIN_PARAMS}
+            NUXT_ENV_PID_BASE_URL: ${NUXT_ENV_PID_BASE_URL}
+            INSTITUTE: ${INSTITUTE:-kit}
+            IDL_SYNC_URL: ${IDL_SYNC_URL}
+        volumes:
+            - "${SMS_BASEPATH}/orchestration/frontend/:/home/node/"
+            - "${SMS_BASEPATH}/orchestration/frontend/dist:/home/node/dist/:rw"
+        command: sh -c "npm ci && npm run build && npm run start"
+
+    minio:
+        image: minio/minio:RELEASE.2021-08-05T22-01-19Z
+        container_name: sms_minio
+        volumes:
+            - "minio-data:/data/minio"
+        networks:
+            - sms
+        environment:
+            MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-admin}
+            MINIO_ROOT_PASSWORD: ${minio_user_password:-minio123}
+        # To deactivate the console
+        # MINIO_BROWSER: "off"
+        command: server /data/minio --console-address ":9001"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://minio:9000/minio/health/live"]
+            interval: 30s
+            timeout: 20s
+            retries: 3
+
+    createbuckets:
+        image: minio/mc:RELEASE.2023-02-16T19-20-11Z
+        container_name: sms_mc
+        depends_on:
+            - minio
+        networks:
+            - sms
+        # Make a Bucket using minio client mc
+        # https://docs.min.io/docs/minio-client-complete-guid
+        entrypoint: >
+            /bin/sh -c "
+            until curl -f http://minio:9000/minio/health/live; do sleep 5; done;
+            /usr/bin/mc  alias set minio http://minio:9000 ${MINIO_ACCESS_KEY:-admin} ${MINIO_SECRET_KEY:-minio123} --api S3v4;
+            /usr/bin/mc mb --quiet minio/${MINIO_BUCKET_NAME:-sms-attachments};
+            /usr/bin/mc anonymous set download minio/${MINIO_BUCKET_NAME:-sms-attachments};
+            exit 0;
+            "
+
+    nginx:
+        image: nginx:1.20-alpine
+        container_name: sms_web
+        ports:
+            - 80:80
+            - 443:443
+            - 8443:8443
+        networks:
+            - sms
+        volumes:
+            - "${SMS_BASEPATH}/config/nginx/certs:/etc/nginx/ssl:ro"
+            - "${SMS_BASEPATH}/config/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
+            - "${SMS_BASEPATH}/config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
+            - "${SMS_BASEPATH}/orchestration/frontend/dist:/etc/nginx/html"
+            - "${SMS_BASEPATH}/orchestration/backend/app/project/static:/usr/share/nginx/html/static/backend:ro"
+            - "static-files:/usr/share/nginx/html/static/cv:ro"
+            - "idl-static-files:/usr/share/nginx/html/static/idl:ro"
+        depends_on:
+            # - keycloak
+            - idl
+            - frontend
+            - minio
+            - backend
+
+###
+# PLACEHOLDER: time series management decoupling layer
+###
+# tsmdl:
+#     image: "registry.hzdr.de/hub-terra/sms/tsmdl-mock:latest"
+#     networks:
+#         - sms
+
+###
+# UNUSED: local CV
+###
+# vocabulary:
+#     image: python:3.11-alpine
+#     container_name: sms_cv
+#     working_dir: /usr/cv/app
+#     volumes:
+#         - "${SMS_BASEPATH}/orchestration/sms-cv/src:/usr/cv/app"
+#         - "static-files:/static/cv"
+#     ports:
+#         - 8000:8000
+#     environment:
+#     CV_BASE_URL: ${CV_BASE_URL:-cv/}
+#     STATIC_URL: ${CV_STATIC_URL:-/static/cv/}
+#     STATIC_ROOT: ${CV_STATIC_ROOT:-/static/cv/}
+#     DEBUG: ${DEBUG:-1}
+#     SECRET_KEY: ${SECRET_KEY:-TopSecret}
+#     SQL_ENGINE: ${SQL_ENGINE:-django.db.backends.postgresql_psycopg2}
+#     SQL_DATABASE: ${SQL_DATABASE:-postgres}
+#     SQL_USER: ${SQL_USER:-postgres}
+#     SQL_PASSWORD: ${SQL_PASSWORD:-postgres}
+#     SQL_HOST: ${SQL_HOST:-db}
+#     SQL_PORT: ${SQL_PORT:-5433}
+#     CORS_ORIGIN_WHITELIST: ${CORS_ORIGIN_WHITELIST:-http://localhost}
+#     EMAIL_HOST: ${EMAIL_HOST:-}
+#     OIDC_WELL_KNOWN_URLS: "${WELL_KNOWN_URLS_CV:-http://nginx/keycloak/realms/local-dev/.well-known/openid-configuration}"
+#     entrypoint: ${SMS_BASEPATH}/orchestration/entrypoint-dev.sh
+#     networks:
+#         - sms
+#     depends_on:
+#         - db
+
+###
+# UNUSED: local id/access management
+###
+# keycloak:
+#   image: "quay.io/keycloak/keycloak:24.0.3"
+#   container_name: sms_keycloak
+#   expose:
+#     - "${KEYCLOAK_PORT:-8080}"
+#   user: "${KEYCLOAK_UID:-1000}:${KEYCLOAK_GID:-1000}"
+#   networks:
+#     - sms
+#   environment:
+#     KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+#     KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+#     KC_DB: ${KC_DB:-postgres}
+#     KC_DB_URL_DATABASE: ${KC_DB_URL_DATABASE:-keycloak}
+#     KC_DB_SCHEMA: ${KC_DB_SCHEMA:-public}
+#     KC_DB_URL: ${KC_DB_URL:-jdbc:postgresql://keycloak-db/keycloak}
+#     KC_DB_USERNAME: ${KC_DB_USERNAME:-keycloak}
+#     KC_DB_PASSWORD: ${KC_DB_PASSWORD:-password}
+#     KC_HTTP_RELATIVE_PATH: ${KC_HTTP_RELATIVE_PATH:-/keycloak}
+#     KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-xforwarded}
+#     KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT:-false}
+#     KC_HOSTNAME_URL: ${KC_HOSTNAME_URL:-http://localhost/keycloak}
+#   volumes:
+#     - "${SMS_BASEPATH}/orchestration/keycloak/keycloak-init.json:/opt/keycloak/data/import/keycloak-init.json"
+#   command:
+#     - start-dev
+#     - --import-realm
+#     - --http-port=${KEYCLOAK_PORT:-8080}
+#   depends_on:
+#     - keycloak-db
+#
+# keycloak-db:
+#   image: "postgres:14-alpine"
+#   environment:
+#     POSTGRES_DB: ${KEYCLOAK_DB_POSTGRES_DB:-keycloak}
+#     POSTGRES_USER: ${KEYCLOAK_DB_POSTGRES_USER:-keycloak}
+#     POSTGRES_PASSWORD: ${KEYCLOAK_DB_POSTGRES_PASSWORD:-password}
+#   networks:
+#     - sms
+#   volumes:
+#     - "keycloak-data:/var/lib/postgresql/data/"
+
+volumes:
+    esdata01:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ${SMS_BASEPATH}/volumes/esdata01
+    minio-data:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ${SMS_BASEPATH}/volumes/minio-data
+    static-files:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ${SMS_BASEPATH}/volumes/static-files
+    idl-static-files:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ${SMS_BASEPATH}/volumes/idl-static-files
+    idl-db-data:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ${SMS_BASEPATH}/volumes/idl-db-data
+    db-data:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ${SMS_BASEPATH}/volumes/db-data
+
+networks:
+    sms:
+        name: sms-docker-network

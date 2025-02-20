@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""CLI commands for the flask maange.py."""
+"""CLI commands for the flask manage.py."""
 
 import json
 import os
@@ -19,7 +19,6 @@ import click
 import coverage
 import requests
 from flask.cli import FlaskGroup
-
 from project import create_app
 from project.api.helpers.errors import ErrorResponse
 from project.api.models import Contact, User
@@ -286,7 +285,7 @@ def loaddata(fixture_file, skip_missing_file, skip_empty_file):
     """
     Load data from a json fixture file into the database.
 
-    Should mimik the behaviour of the django loaddata command,
+    Should mimic the behaviour of the django loaddata command,
     but uses Model names ("TsmEndpoint") instead of the django
     like table names that are composed by app & plural name
     ("app_tsm_endpoints").
@@ -326,7 +325,7 @@ def loaddata(fixture_file, skip_missing_file, skip_empty_file):
       }
     ]
 
-    result defines the name that we can use to reference the entry later, while
+    The result defines the name that we can use to reference the entry later, while
     references lets us use the concrete value for a field.
     This way we can set foreign key values.
     """
@@ -334,18 +333,27 @@ def loaddata(fixture_file, skip_missing_file, skip_empty_file):
 
     path = pathlib.Path(fixture_file)
 
-    # Same fast tests to ensure we can skip loading the data.
+    # Some fast tests to ensure we can skip loading the data.
     if skip_missing_file and not path.exists():
         return
-    # It the file is just touched, then it is completely empty.
+
+    # If the file is just touched, then it is completely empty.
     # Or there might be just a new line.
     if skip_empty_file and path.stat().st_size in [0, 1]:
         return
 
     # Read the file
     with path.open() as infile:
+        content = infile.read()
+
+    try:
         # Only support for json files.
-        fixture_list_entries = json.load(infile)
+        fixture_list_entries = json.loads(content)
+    except json.decoder.JSONDecodeError as e:
+        app.logger.warning("failed to load json, content:")
+        app.logger.warning(content)
+        raise e
+
     # And put the entries in the database.
     reference_table = {}
 
@@ -512,7 +520,6 @@ def import_manufacturer_models():
 def import_manufacturer_models_from_gipp():
     """Import the manufacturer models from GIPP."""
     import requests
-
     from project.api.models import ManufacturerModel
     from project.api.models.base_model import db
 
