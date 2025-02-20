@@ -12,6 +12,8 @@ methods, we need to add some extra endpoints
 in the style /<model_entities>/<id>/<verb> as post requests.
 """
 
+import json
+
 from flask import Blueprint, g
 
 from ..api.helpers.db import save_to_db
@@ -19,7 +21,9 @@ from ..api.helpers.errors import ForbiddenError, UnauthorizedError
 from ..api.models import ActivityLog, Platform
 from ..api.models.base_model import db
 from ..api.permissions.rules import can_archive, can_restore, can_see
+from ..api.schemas.platform_schema import PlatformSchema
 from ..config import env
+from ..extensions.instances import mqtt
 from ..restframework.preconditions.platforms import (
     AllMountsOfPlatformAreFinishedInThePast,
     AllUsagesAsParentPlatformInDeviceMountsFinishedInThePast,
@@ -66,6 +70,10 @@ class ArchivePlatformView(BaseView):
             )
             save_to_db(new_log_entry)
 
+            mqtt.publish(
+                "sms/patch-platform", json.dumps(PlatformSchema().dump(platform))
+            )
+
     def post(self):
         """Run the post request."""
         if not g.user:
@@ -105,6 +113,9 @@ class RestorePlatformView(BaseView):
                 description=platform.update_description,
             )
             save_to_db(new_log_entry)
+            mqtt.publish(
+                "sms/patch-platform", json.dumps(PlatformSchema().dump(platform))
+            )
 
     def post(self):
         """Run the post request."""

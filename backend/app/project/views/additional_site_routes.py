@@ -12,6 +12,8 @@ methods, we need to add some extra endpoints
 in the style /<model_entities>/<id>/<verb> as post requests.
 """
 
+import json
+
 from flask import Blueprint, g
 
 from ..api.helpers.db import save_to_db
@@ -19,7 +21,9 @@ from ..api.helpers.errors import ForbiddenError, UnauthorizedError
 from ..api.models import ActivityLog, Site
 from ..api.models.base_model import db
 from ..api.permissions.rules import can_archive, can_restore, can_see
+from ..api.schemas.site_schema import SiteSchema
 from ..config import env
+from ..extensions.instances import mqtt
 from ..restframework.shortcuts import get_object_or_404
 from ..restframework.views.classbased import BaseView, class_based_view
 
@@ -55,6 +59,8 @@ class ArchiveSiteView(BaseView):
                 description=site.update_description,
             )
             save_to_db(new_log_entry)
+
+            mqtt.publish("sms/patch-site", json.dumps(SiteSchema().dump(site)))
 
     def post(self):
         """Run the post request."""
@@ -92,6 +98,7 @@ class RestoreSiteView(BaseView):
                 description=site.update_description,
             )
             save_to_db(new_log_entry)
+            mqtt.publish("sms/patch-site", json.dumps(SiteSchema().dump(site)))
 
     def post(self):
         """Run the post request."""

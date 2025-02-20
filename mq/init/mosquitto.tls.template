@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2024
+# - Joost Hemmen <joost.hemmen@ufz.de>
+# - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+#
+# SPDX-License-Identifier: EUPL-1.2
+keyfile /etc/mosquitto/certs/server.key
+certfile /etc/mosquitto/certs/server.crt
+cafile /etc/mosquitto/certs/ca.crt
+require_certificate ${MQTT_TLS_REQUIRE_CERT}

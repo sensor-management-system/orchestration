@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -23,9 +23,10 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..resources.base_resource import check_if_object_not_found
 from ..schemas.calibration_actions_schema import DevicePropertyCalibrationSchema
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DevicePropertyCalibrationList(ResourceList):
+class DevicePropertyCalibrationList(MqttNotificationMixin, ResourceList):
     """List resource for device property calibrations (get, post)."""
 
     def query(self, view_kwargs):
@@ -102,7 +103,7 @@ class DevicePropertyCalibrationList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DevicePropertyCalibrationDetail(ResourceDetail):
+class DevicePropertyCalibrationDetail(MqttNotificationMixin, ResourceDetail):
     """Detail resource for the device property calibrations (get, delete, patch)."""
 
     def before_get(self, args, kwargs):

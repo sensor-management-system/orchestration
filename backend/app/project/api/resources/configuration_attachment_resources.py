@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -26,9 +26,10 @@ from .base_resource import (
     query_configuration_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ConfigurationAttachmentList(ResourceList):
+class ConfigurationAttachmentList(MqttNotificationMixin, ResourceList):
     """List resource for configuration attachments."""
 
     def query(self, view_kwargs):
@@ -104,7 +105,7 @@ class ConfigurationAttachmentList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ConfigurationAttachmentDetail(ResourceDetail):
+class ConfigurationAttachmentDetail(MqttNotificationMixin, ResourceDetail):
     """Resource for ConfigurationAttachments."""
 
     def before_get(self, args, kwargs):

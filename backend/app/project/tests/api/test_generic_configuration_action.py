@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -14,6 +14,7 @@ import os
 from project import base_url
 from project.api.models import Configuration, Contact, GenericConfigurationAction
 from project.api.models.base_model import db
+from project.extensions.instances import mqtt
 from project.tests.base import (
     BaseTestCase,
     fake,
@@ -106,6 +107,17 @@ class TestGenericConfigurationAction(BaseTestCase):
             db.session.query(Configuration).filter_by(id=configuration.id).first()
         )
         self.assertEqual(configuration.update_description, "create;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-generic-configuration-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("generic_configuration_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            "Test GenericConfigurationAction"
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_generic_configuration_action(self):
         """Update GenericConfigurationAction."""
@@ -129,6 +141,17 @@ class TestGenericConfigurationAction(BaseTestCase):
             db.session.query(Configuration).filter_by(id=configuration_id).first()
         )
         self.assertEqual(configuration.update_description, "update;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-generic-configuration-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("generic_configuration_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal("updated")
+        self.expect(
+            notification_data["relationships"]["configuration"]["data"]["id"]
+        ).to_equal(str(configuration.id))
 
     def test_delete_generic_configuration_action(self):
         """Delete GenericConfigurationAction."""
@@ -141,6 +164,19 @@ class TestGenericConfigurationAction(BaseTestCase):
             db.session.query(Configuration).filter_by(id=configuration_id).first()
         )
         self.assertEqual(configuration.update_description, "delete;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-generic-configuration-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "generic_configuration_action",
+                    "id": str(configuration_action.id),
+                }
+            }
+        )
 
     def test_filtered_by_configuration(self):
         """Ensure that I can prefilter by a specific configuration."""

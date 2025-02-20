@@ -21,9 +21,10 @@ from .base_resource import (
     query_configuration_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ConfigurationImageList(ResourceList):
+class ConfigurationImageList(MqttNotificationMixin, ResourceList):
     """Resource class for the list endpoint for configuration images."""
 
     def query(self, view_kwargs):
@@ -97,7 +98,7 @@ class ConfigurationImageList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ConfigurationImageDetail(ResourceDetail):
+class ConfigurationImageDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for the configuration images."""
 
     def before_get(self, args, kwargs):

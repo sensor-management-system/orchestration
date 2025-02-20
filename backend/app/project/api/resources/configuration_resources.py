@@ -30,9 +30,10 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.configuration_schema import ConfigurationSchema
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ConfigurationList(ResourceList):
+class ConfigurationList(MqttNotificationMixin, ResourceList):
     """
     Resource for the configuration list endpoint.
 
@@ -153,7 +154,7 @@ class ConfigurationList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ConfigurationDetail(ResourceDetail):
+class ConfigurationDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource class for the configurations.
 

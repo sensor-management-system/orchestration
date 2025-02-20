@@ -1,17 +1,19 @@
-# SPDX-FileCopyrightText: 2022
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
 """Tests for the archivation of sites."""
+
+import json
 from unittest.mock import patch
 
 from project import base_url
 from project.api.models import Configuration, Contact, Site, User
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.extensions.instances import idl, mqtt
 from project.tests.base import BaseTestCase
 
 
@@ -156,6 +158,17 @@ class TestArchiveSite(BaseTestCase):
         self.assertTrue(reloaded_site.archived)
         self.assertEqual(reloaded_site.update_description, "archive;basic data")
         self.assertEqual(reloaded_site.updated_by_id, self.normal_user.id)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-site")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("site")
+        self.expect(notification_data["attributes"]["archived"]).to_equal(True)
+        self.expect(notification_data["attributes"]["label"]).to_equal(
+            self.public_site.label
+        )
 
     def test_post_superuser(self):
         """Ensure that we can set the archived flag super user."""

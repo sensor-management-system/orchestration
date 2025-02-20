@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,8 +8,11 @@
 
 """Tests for the platform software update actions api."""
 
+import json
+
 from project import base_url, db
 from project.api.models import Contact, Platform, PlatformSoftwareUpdateAction
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_platform_software_update_action_attachment_model,
@@ -86,6 +89,19 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # Reload
         platform = db.session.query(Platform).filter_by(id=platform.id).first()
         self.assertEqual(platform.update_description, "create;software update action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-platform-software-update-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "platform_software_update_action"
+        )
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            "Test platform_software_update_action"
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_platform_software_update_action(self):
         """Update PlatformSoftwareUpdateAction."""
@@ -111,6 +127,19 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
             .first()
         )
         self.assertEqual(platform.update_description, "update;software update action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-platform-software-update-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "platform_software_update_action"
+        )
+        self.expect(notification_data["attributes"]["description"]).to_equal("updated")
+        self.expect(notification_data["attributes"]["repository_url"]).to_equal(
+            platform_software_update_action.repository_url
+        )
 
     def test_delete_platform_software_update_action(self):
         """Test the deletion of a simple platform software update action."""
@@ -123,6 +152,19 @@ class TestPlatformSoftwareUpdateAction(BaseTestCase):
         # Reload
         platform = db.session.query(Platform).filter_by(id=platform_id).first()
         self.assertEqual(platform.update_description, "delete;software update action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-platform-software-update-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "platform_software_update_action",
+                    "id": str(platform_software_update_action.id),
+                }
+            }
+        )
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""

@@ -18,7 +18,7 @@ from flask import current_app
 from project import base_url
 from project.api.models import Configuration, Contact, Platform, PlatformMountAction
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import (
@@ -836,6 +836,16 @@ class TestPlatformMountAction(BaseTestCase):
         self.expect(response["data"]["attributes"]["label"]).to_equal(
             data["data"]["attributes"]["label"]
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-platform-mount-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform_mount_action")
+        self.expect(notification_data["attributes"]["end_description"]).to_equal(
+            "Test PlatformUnmountAction"
+        )
 
     def test_update_platform_mount_action(self):
         """Update PlatformMountAction."""
@@ -866,6 +876,19 @@ class TestPlatformMountAction(BaseTestCase):
         msg = "update;platform mount action"
         self.assertEqual(
             msg, result_platform_mount_action.configuration.update_description
+        )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-platform-mount-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform_mount_action")
+        self.expect(notification_data["attributes"]["begin_description"]).to_equal(
+            "updated",
+        )
+        self.expect(notification_data["attributes"]["end_description"]).to_equal(
+            mount_platform_action.end_description
         )
 
     def test_update_platform_mount_action_set_end_contact_to_none(self):
@@ -925,6 +948,19 @@ class TestPlatformMountAction(BaseTestCase):
         )
         msg = "delete;platform mount action"
         self.assertEqual(msg, related_configuration.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-platform-mount-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "platform_mount_action",
+                    "id": str(mount_platform_action.id),
+                }
+            }
+        )
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""

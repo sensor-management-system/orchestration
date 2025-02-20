@@ -482,6 +482,78 @@ build-deploy-image-mc-gfz-prod:
     - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
       when: always
 
+build-deploy-image-mq-init-gfz-sandbox:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build \
+          --tag $CI_REGISTRY_IMAGE/mq_init:gfz-${CI_COMMIT_TAG}" \
+          --tag $CI_REGISTRY_IMAGE/mq_init:gfz-sandbox-latest" \
+          -f docker/build/mq_init/gfz/Dockerfile \
+          .
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/mq_init"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
+build-deploy-image-mq-db-gfz-sandbox:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build \
+          --tag $CI_REGISTRY_IMAGE/mq_db:gfz-${CI_COMMIT_TAG}" \
+          --tag $CI_REGISTRY_IMAGE/mq_db:gfz-sandbox-latest" \
+          -f docker/build/mq_db/gfz/Dockerfile \
+          .
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/mq_db"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
+build-deploy-image-mq-staging:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build \
+          --tag "$CI_REGISTRY_IMAGE/mq:latest" \
+          --build-arg MOSQUITTO_VERSION=2.0.19 \
+          --build-arg DEBIAN_IMAGE=stable-slim \
+          mq
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/mq"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+
+build-deploy-image-mq-prod:
+  stage: build
+  extends: .docker_build
+  script:
+    - |
+        docker build \
+          --tag "$CI_REGISTRY_IMAGE/mq:${CI_COMMIT_TAG}" \
+          --tag "$CI_REGISTRY_IMAGE/mq:latest" \
+          --tag "$CI_REGISTRY_IMAGE/mq:gfz-sandbox-latest" \
+          --build-arg MOSQUITTO_VERSION=2.0.19 \
+          --build-arg DEBIAN_IMAGE=stable-slim \
+          mq
+    - docker push --all-tags "$CI_REGISTRY_IMAGE/mq"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
 backup-gfz-staging:
   stage: backup
   environment:
@@ -651,6 +723,11 @@ deploy-gfz-staging:
     PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
     SMS_VERSION: ${CI_COMMIT_SHORT_SHA}
+    MQTT_USERNAME: ${GFZ_STAGING_MQTT_USERNAME}
+    MQTT_PASSWORD: ${GFZ_STAGING_MQTT_PASSWORD}
+    MQTT_AUTH_DB: ${GFZ_STAGING_MQTT_AUTH_DB}
+    MQTT_AUTH_USER: ${GFZ_STAGING_MQTT_AUTH_USER}
+    MQTT_AUTH_PASSWORD: ${GFZ_STAGING_MQTT_AUTH_PASSWORD}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -699,6 +776,11 @@ deploy-gfz-prod:
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
     SMS_VERSION: ${CI_COMMIT_TAG}
     MATTERMOST_RELEASE_NOTIFICATION_HOOK: ${MATTERMOST_RELEASE_NOTIFICATION_HOOK}
+    MQTT_USERNAME: ${GFZ_PROD_MQTT_USERNAME}
+    MQTT_PASSWORD: ${GFZ_PROD_MQTT_PASSWORD}
+    MQTT_AUTH_DB: ${GFZ_PROD_MQTT_AUTH_DB}
+    MQTT_AUTH_USER: ${GFZ_PROD_MQTT_AUTH_USER}
+    MQTT_AUTH_PASSWORD: ${GFZ_PROD_MQTT_AUTH_PASSWORD}
   before_script:
     - *docker_login_gitlab_registry
   script:
@@ -962,7 +1044,6 @@ publish-zenodo-prod:
   stage: publish
   image: python:3.11-slim-buster
   variables:
-    # We start here on the sandbox
     ZENODO_URL: https://zenodo.org
     ZENODO_ACCESS_TOKEN: ${ZENODO_PROD_ACCESS_TOKEN}
     VERSION: $CI_COMMIT_TAG

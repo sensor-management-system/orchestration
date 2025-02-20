@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -20,9 +20,10 @@ from ..schemas.software_update_action_attachment_schema import (
     DeviceSoftwareUpdateActionAttachmentSchema,
 )
 from .base_resource import check_if_object_not_found
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DeviceSoftwareUpdateActionAttachmentList(ResourceList):
+class DeviceSoftwareUpdateActionAttachmentList(MqttNotificationMixin, ResourceList):
     """List resource class for the device software update action attachments."""
 
     def query(self, view_kwargs):
@@ -38,7 +39,9 @@ class DeviceSoftwareUpdateActionAttachmentList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DeviceSoftwareUpdateActionAttachmentDetail(ResourceDetail):
+class DeviceSoftwareUpdateActionAttachmentDetail(
+    MqttNotificationMixin, ResourceDetail
+):
     """Detail resource class for the device software update action attachments."""
 
     def before_get(self, args, kwargs):

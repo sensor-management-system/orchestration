@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Florian Gransee <florian.gransee@ufz.de>
@@ -10,12 +10,13 @@
 
 """PID resources."""
 import datetime
+import json
 
 from flask import g, request
 from flask_rest_jsonapi import ResourceDetail, ResourceList
 
 from ... import db
-from ...extensions.instances import pidinst
+from ...extensions.instances import mqtt, pidinst
 from ..helpers.errors import (
     BadRequestError,
     ConflictError,
@@ -26,6 +27,10 @@ from ..helpers.errors import (
 )
 from ..models import Configuration, Device, Platform, Site
 from ..permissions.rules import can_edit
+from ..schemas.configuration_schema import ConfigurationSchema
+from ..schemas.device_schema import DeviceSchema
+from ..schemas.platform_schema import PlatformSchema
+from ..schemas.site_schema import SiteSchema
 
 
 class PidList(ResourceList):
@@ -76,6 +81,16 @@ class PidList(ResourceList):
 
         db.session.add(instrument)
         db.session.commit()
+
+        topic_and_schema_by_type = {
+            Device: ("sms/patch-device", DeviceSchema),
+            Platform: ("sms/patch-platform", PlatformSchema),
+            Configuration: ("sms/patch-configuration", ConfigurationSchema),
+            Site: ("sms/patch-site", SiteSchema),
+        }
+        topic, schema = topic_and_schema_by_type.get(type(instrument), (None, None))
+        if topic and schema:
+            mqtt.publish(topic, json.dumps(schema().dump(instrument)))
 
         response = {"pid": persistent_identifier}
         return response

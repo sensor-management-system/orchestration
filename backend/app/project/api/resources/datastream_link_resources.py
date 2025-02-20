@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -21,6 +21,7 @@ from .base_resource import (
     check_if_object_not_found,
     query_configuration_set_update_description_and_update_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
 def ensure_create_doesnt_introduce_conflicts(model, data):
@@ -45,7 +46,7 @@ def ensure_update_doesnt_introduce_conflicts(object_):
         )
 
 
-class DatastreamLinkList(ResourceList):
+class DatastreamLinkList(MqttNotificationMixin, ResourceList):
     """List resource for datastream links (get, post)."""
 
     def query(self, view_kwargs):
@@ -101,7 +102,7 @@ class DatastreamLinkList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DatastreamLinkDetail(ResourceDetail):
+class DatastreamLinkDetail(MqttNotificationMixin, ResourceDetail):
     """Detail resource for datastream links (get, patch, delete)."""
 
     def before_get(self, args, kwargs):

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -24,9 +24,10 @@ from ..resources.base_resource import (
     set_update_description_text_user_and_pidinst,
 )
 from ..schemas.generic_actions_schema import GenericConfigurationActionSchema
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class GenericConfigurationActionList(ResourceList):
+class GenericConfigurationActionList(MqttNotificationMixin, ResourceList):
     """List resource for the generic configuration actions (get & post)."""
 
     def before_create_object(self, data, *args, **kwargs):
@@ -80,7 +81,7 @@ class GenericConfigurationActionList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class GenericConfigurationActionDetail(ResourceDetail):
+class GenericConfigurationActionDetail(MqttNotificationMixin, ResourceDetail):
     """Detail resources for generic configuration actions (get, delete, patch)."""
 
     def before_get(self, args, kwargs):

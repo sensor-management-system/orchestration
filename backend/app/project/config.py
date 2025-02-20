@@ -81,6 +81,12 @@ class BaseConfig:
     PROXY_NETLOC_BLOCKLIST = env.list("PROXY_NETLOC_BLOCKLIST", [])
     EXPORT_CONTROL_VO_LIST = env.list("EXPORT_CONTROL_VO_LIST", [])
     OIDC_TOKEN_ENDPOINT_FOR_FRONTEND = env.str("OIDC_TOKEN_ENDPOINT_FOR_FRONTEND", "")
+    MQTT_BROKER_URL = env("MQTT_BROKER_URL", "mq")
+    MQTT_BROKER_PORT = env.int("MQTT_BROKER_PORT", 1883)
+    MQTT_USERNAME = env("MQTT_USERNAME", None)
+    MQTT_PASSWORD = env("MQTT_PASSWORD", None)
+    MQTT_KEEPALIVE = env.int("MQTT_KEEPALIVE", 5)
+    MQTT_TLS_ENABLED = env.bool("MQTT_TLS_ENABLED", False)
 
 
 class DevelopmentConfig(BaseConfig):

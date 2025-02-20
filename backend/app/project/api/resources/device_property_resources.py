@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Luca Johannes Nendel <luca-johannes.nendel@ufz.de>
@@ -33,9 +33,10 @@ from .base_resource import (
     query_device_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DevicePropertyList(ResourceList):
+class DevicePropertyList(MqttNotificationMixin, ResourceList):
     """
     List resource for device properties.
 
@@ -103,7 +104,7 @@ class DevicePropertyList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DevicePropertyDetail(ResourceDetail):
+class DevicePropertyDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource class for device properties.
 

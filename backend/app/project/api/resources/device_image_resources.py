@@ -21,9 +21,10 @@ from .base_resource import (
     query_device_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DeviceImageList(ResourceList):
+class DeviceImageList(MqttNotificationMixin, ResourceList):
     """Resource class for the list endpoint for device images."""
 
     def query(self, view_kwargs):
@@ -89,7 +90,7 @@ class DeviceImageList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DeviceImageDetail(ResourceDetail):
+class DeviceImageDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for the device images."""
 
     def before_get(self, args, kwargs):

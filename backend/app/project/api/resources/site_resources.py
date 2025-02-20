@@ -27,9 +27,10 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.site_schema import SiteSchema
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class SiteList(ResourceList):
+class SiteList(MqttNotificationMixin, ResourceList):
     """List resource for sites (get all, post)."""
 
     def query(self, view_kwargs):
@@ -119,7 +120,7 @@ class SiteList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class SiteDetail(ResourceDetail):
+class SiteDetail(MqttNotificationMixin, ResourceDetail):
     """Detail resource for sites (get one, patch, delete)."""
 
     def before_patch(self, args, kwargs, data):

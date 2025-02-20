@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,13 +8,14 @@
 
 """Tests for the generic device actions api."""
 
+import json
 import os
 from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, Device, GenericDeviceAction
 from project.api.models.mixin import utc_now
-from project.extensions.instances import idl
+from project.extensions.instances import idl, mqtt
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -65,6 +66,17 @@ class TestGenericDeviceAction(BaseTestCase):
             device_id = result["data"]["relationships"]["device"]["data"]["id"]
             device = db.session.query(Device).filter_by(id=device_id).first()
             self.assertEqual(device.update_description, "create;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-generic-device-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("generic_device_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            data["data"]["attributes"]["description"]
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def make_generic_device_action_data(self):
         """
@@ -85,20 +97,14 @@ class TestGenericDeviceAction(BaseTestCase):
         db.session.add(device)
         db.session.commit()
         userinfo = generate_userinfo_data()
-        contact_data = {
-            "data": {
-                "type": "contact",
-                "attributes": {
-                    "given_name": userinfo["given_name"],
-                    "family_name": userinfo["family_name"],
-                    "email": userinfo["email"],
-                    "website": fake.url(),
-                },
-            }
-        }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
+            website=fake.url(),
         )
+        db.session.add(contact)
+        db.session.commit()
         data = {
             "data": {
                 "type": self.object_type,
@@ -112,9 +118,7 @@ class TestGenericDeviceAction(BaseTestCase):
                 },
                 "relationships": {
                     "device": {"data": {"type": "device", "id": device.id}},
-                    "contact": {
-                        "data": {"type": "contact", "id": contact["data"]["id"]}
-                    },
+                    "contact": {"data": {"type": "contact", "id": contact.id}},
                 },
             }
         }
@@ -140,12 +144,13 @@ class TestGenericDeviceAction(BaseTestCase):
             )
             db.session.add(contact)
             db.session.commit()
+            new_description = fake.paragraph(nb_sentences=3)
             new_data = {
                 "data": {
                     "type": self.object_type,
                     "id": generic_device_action["data"]["id"],
                     "attributes": {
-                        "description": fake.paragraph(nb_sentences=3),
+                        "description": new_description,
                         "action_type_name": fake.lexify(
                             text="Random type: ??????????", letters="ABCDE"
                         ),
@@ -166,6 +171,19 @@ class TestGenericDeviceAction(BaseTestCase):
             device_id = result["data"]["relationships"]["device"]["data"]["id"]
             device = db.session.query(Device).filter_by(id=device_id).first()
             self.assertEqual(device.update_description, "update;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-generic-device-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("generic_device_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            new_description
+        )
+        self.expect(
+            notification_data["relationships"]["device"]["data"]["id"]
+        ).to_equal(str(device.id))
 
     def test_delete_generic_device_action(self):
         """Ensure a generic_device_action can be deleted."""
@@ -190,6 +208,19 @@ class TestGenericDeviceAction(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             device = db.session.query(Device).filter_by(id=device_id).first()
             self.assertEqual(device.update_description, "delete;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-generic-device-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "generic_device_action",
+                    "id": str(obj["data"]["id"]),
+                }
+            }
+        )
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""

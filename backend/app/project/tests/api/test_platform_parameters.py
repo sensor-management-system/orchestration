@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -20,7 +20,7 @@ from project.api.models import (
 )
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.extensions.instances import idl, mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
@@ -721,6 +721,15 @@ class TestPlatformParameterServices(BaseTestCase):
         self.expect(reloaded_platform.update_description).to_equal(
             "create;platform parameter"
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-platform-parameter")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform_parameter")
+        self.expect(notification_data["attributes"]["label"]).to_equal("specialvalue")
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     @fixtures.use(["user1", "public_platform1_in_group1"])
     def test_post_admin(self, user1, public_platform1_in_group1):
@@ -1117,6 +1126,19 @@ class TestPlatformParameterServices(BaseTestCase):
         self.expect(reloaded_platform.update_description).to_equal(
             "update;platform parameter"
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-platform-parameter")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform_parameter")
+        self.expect(notification_data["attributes"]["label"]).to_equal(
+            "super specialvalue"
+        )
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            "some value"
+        )
 
     @fixtures.use(
         [
@@ -1435,6 +1457,19 @@ class TestPlatformParameterServices(BaseTestCase):
         )
         self.expect(reloaded_platform.update_description).to_equal(
             "delete;platform parameter"
+        )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-platform-parameter")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "platform_parameter",
+                    "id": str(parameter1_of_public_platform1_in_group1.id),
+                }
+            }
         )
 
     @fixtures.use(

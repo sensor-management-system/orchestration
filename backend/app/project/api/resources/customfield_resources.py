@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -22,9 +22,10 @@ from .base_resource import (
     query_device_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class CustomFieldList(ResourceList):
+class CustomFieldList(MqttNotificationMixin, ResourceList):
     """
     List resource for custom fields.
 
@@ -80,7 +81,7 @@ class CustomFieldList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class CustomFieldDetail(ResourceDetail):
+class CustomFieldDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource for custom fields.
 

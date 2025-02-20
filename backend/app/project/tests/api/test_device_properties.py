@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -30,7 +30,7 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
 
 
@@ -128,6 +128,17 @@ class TestDevicePropertyServices(BaseTestCase):
         )
         msg = "create;measured quantity"
         self.assertEqual(msg, device_property.device.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-device-property")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_property")
+        self.expect(notification_data["attributes"]["sampling_media_name"]).to_equal(
+            "air"
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_post_device_property_api_missing_device(self):
         """Ensure that we don't add a device property with missing device."""
@@ -310,6 +321,7 @@ class TestDevicePropertyServices(BaseTestCase):
         device_property1 = DeviceProperty(
             label="property 1",
             property_name="device_property1",
+            sampling_media_name="air",
             device=device1,
         )
         db.session.add(device_property1)
@@ -346,65 +358,19 @@ class TestDevicePropertyServices(BaseTestCase):
         self.assertEqual(device_property_reloaded.device_id, device2.id)
         msg = "update;measured quantity"
         self.assertEqual(msg, device_property_reloaded.device.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
 
-    def test_delete_device_property_api(self):
-        """Ensure that we can delete a device property."""
-        device1 = Device(
-            short_name="Just a device",
-            manufacturer_name=fake.company(),
-            is_public=True,
-            is_private=False,
-            is_internal=False,
+        self.expect(call_args[0]).to_equal("sms/patch-device-property")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_property")
+        self.expect(notification_data["attributes"]["property_name"]).to_equal(
+            "device_property2"
         )
-        db.session.add(device1)
-        db.session.commit()
-        device_property1 = DeviceProperty(
-            label="property 1",
-            property_name="device_property1",
-            device=device1,
+        self.expect(notification_data["attributes"]["sampling_media_name"]).to_equal(
+            "air"
         )
-        db.session.add(device_property1)
-        db.session.commit()
-
-        with self.client:
-            response = self.client.get(
-                base_url + "/devices/" + str(device1.id) + "/device-properties",
-                content_type="application/vnd.api+json",
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(len(response.get_json()["data"]), 1)
-
-        #     response = self.client.delete(
-        #         base_url + "/device-properties/" + str(device_property1.id),
-        #         headers=create_token(),
-        #     )
-        #
-        #     # I would expect a 204 (no content), but 200 is good as well
-        #     self.assertTrue(response.status_code in [200, 204])
-        #
-        #     response = self.client.get(
-        #         base_url + "/devices/" + str(device1.id) + "/device-properties",
-        #         content_type="application/vnd.api+json",
-        #     )
-        #     self.assertEqual(response.status_code, 200)
-        #     self.assertEqual(len(response.get_json()["data"]), 0)
-        #
-        # count_device_properties = (
-        #     db.session.query(DeviceProperty)
-        #     .filter_by(
-        #         device_id=device1.id,
-        #     )
-        #     .count()
-        # )
-        # self.assertEqual(count_device_properties, 0)
-        access_headers = create_token()
-        with self.client:
-            response = self.client.delete(
-                base_url + "/devices/" + str(device1.id) + "/device-properties",
-                content_type="application/vnd.api+json",
-                headers=access_headers,
-            )
-        self.assertNotEqual(response.status_code, 200)
 
     def test_http_response_not_found(self):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
@@ -1044,3 +1010,39 @@ class TestDevicePropertyDeletion(BaseTestCase):
                 self.assertEqual(
                     update_external_metadata.call_args.args[0].id, configuration.id
                 )
+
+    def test_delete_triggers_mqtt_notification(
+        self,
+    ):
+        """Ensure that we can delete a device property and publish the notification via mqtt."""
+        device1 = Device(
+            short_name="Just a device",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        device_property1 = DeviceProperty(
+            label="device property1",
+            property_name="device_property1",
+            description="Device property 1",
+            accuracy_unit_name="%",
+            accuracy_unit_uri="https://sensors.gfz-potsdam.de/cv/api/v1/units/1",
+            device=device1,
+        )
+        db.session.add_all([device1, device_property1])
+        db.session.commit()
+
+        with self.run_requests_as(self.super_user):
+            resp = self.client.delete(
+                f"{self.url}/{device_property1.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-device-property")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {"data": {"type": "device_property", "id": str(device_property1.id)}}
+        )

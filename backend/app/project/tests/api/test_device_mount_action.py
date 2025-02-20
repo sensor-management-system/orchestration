@@ -30,7 +30,7 @@ from project.api.models import (
     mixin,
 )
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_configurations_model import generate_configuration_model
 from project.tests.models.test_mount_actions_model import add_mount_device_action_model
@@ -177,6 +177,16 @@ class TestDeviceMountAction(BaseTestCase):
         self.expect(response["data"]["attributes"]["label"]).to_equal(
             data["data"]["attributes"]["label"]
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-device-mount-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_mount_action")
+        self.expect(notification_data["attributes"]["end_description"]).to_equal(
+            "Test DeviceUnMountAction"
+        )
 
     def test_post_device_mount_action_with_parent_device(self):
         """Create DeviceMountAction with a parent device."""
@@ -301,6 +311,19 @@ class TestDeviceMountAction(BaseTestCase):
         self.assertEqual(
             msg, result_device_mount_action.configuration.update_description
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-device-mount-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_mount_action")
+        self.expect(notification_data["attributes"]["begin_description"]).to_equal(
+            "updated",
+        )
+        self.expect(notification_data["attributes"]["end_description"]).to_equal(
+            mount_device_action.end_description
+        )
 
     def test_delete_device_mount_action(self):
         """Delete DeviceMountAction should fail without permission."""
@@ -325,6 +348,14 @@ class TestDeviceMountAction(BaseTestCase):
         )
         msg = "delete;device mount action"
         self.assertEqual(msg, related_configuration.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-device-mount-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {"data": {"type": "device_mount_action", "id": str(mount_device_action.id)}}
+        )
 
     def test_delete_device_mount_action_with_datastream(self):
         """Ensure we can't delete a device mount that is associated with a datastream."""

@@ -18,6 +18,7 @@ class TestMarshmallowJsonApiToOpenApiMapper(BaseTestCase):
 
     def setUp(self):
         """Create some test schema class that is used for mapping."""
+        super().setUp()
 
         class TestSchema(Schema):
             """Test schema class for the device parameters."""

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,6 +8,8 @@
 
 """Tests for the api for device calibration attachments."""
 
+import json
+
 from project import base_url, db
 from project.api.models import (
     Contact,
@@ -15,6 +17,7 @@ from project.api.models import (
     DeviceAttachment,
     DeviceCalibrationAction,
 )
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_attachment_model import (
     add_device_calibration_attachment,
@@ -121,6 +124,17 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-device-calibration-attachment")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_calibration_attachment")
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(device_calibration_action.id))
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_generic_device_action_attachment(self):
         """Update DeviceCalibrationAttachment."""
@@ -156,12 +170,33 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-device-calibration-attachment")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_calibration_attachment")
+        self.expect(
+            notification_data["relationships"]["attachment"]["data"]["id"]
+        ).to_equal(str(attachment.id))
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(device_calibration_attachment.action_id))
 
     def test_delete_generic_device_action_attachment(self):
         """Delete DeviceCalibrationAttachment."""
         dca = add_device_calibration_attachment()
         _ = super().delete_object(
             url=f"{self.url}/{dca.id}",
+        )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-device-calibration-attachment")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {"data": {"type": "device_calibration_attachment", "id": str(dca.id)}}
         )
 
     def test_http_response_not_found(self):

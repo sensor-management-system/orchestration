@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -22,9 +22,10 @@ from .base_resource import (
     query_site_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class SiteRoleList(ResourceList):
+class SiteRoleList(MqttNotificationMixin, ResourceList):
     """
     List resource for site contact roles.
 
@@ -80,7 +81,7 @@ class SiteRoleList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class SiteRoleDetail(ResourceDetail):
+class SiteRoleDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource for site contact roles.
 

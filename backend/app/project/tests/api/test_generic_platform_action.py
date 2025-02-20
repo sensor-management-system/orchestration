@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,13 +8,14 @@
 
 """Tests for the generic platform action api."""
 
+import json
 import os
 from unittest.mock import patch
 
 from project import base_url, db
 from project.api.models import Contact, GenericPlatformAction, Platform
 from project.api.models.mixin import utc_now
-from project.extensions.instances import idl
+from project.extensions.instances import idl, mqtt
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -68,20 +69,13 @@ class TestGenericPlatformAction(BaseTestCase):
         db.session.add(platform)
         db.session.commit()
         userinfo = generate_userinfo_data()
-        contact_data = {
-            "data": {
-                "type": "contact",
-                "attributes": {
-                    "given_name": userinfo["given_name"],
-                    "family_name": userinfo["family_name"],
-                    "email": userinfo["email"],
-                    "website": fake.url(),
-                },
-            }
-        }
-        contact = super().add_object(
-            url=self.contact_url, data_object=contact_data, object_type="contact"
+        contact = Contact(
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            email=userinfo["email"],
         )
+        db.session.add(contact)
+        db.session.commit()
         data = {
             "data": {
                 "type": self.object_type,
@@ -96,7 +90,7 @@ class TestGenericPlatformAction(BaseTestCase):
                 "relationships": {
                     "platform": {"data": {"type": "platform", "id": platform.id}},
                     "contact": {
-                        "data": {"type": "contact", "id": contact["data"]["id"]}
+                        "data": {"type": "contact", "id": contact.id},
                     },
                 },
             }
@@ -120,6 +114,19 @@ class TestGenericPlatformAction(BaseTestCase):
             ]["id"]
             platform = db.session.query(Platform).filter_by(id=platform_id).first()
             self.assertEqual(platform.update_description, "create;action")
+
+            # And ensure that we trigger the mqtt.
+            mqtt.mqtt.publish.assert_called_once()
+            call_args = mqtt.mqtt.publish.call_args[0]
+
+            self.expect(call_args[0]).to_equal("sms/post-generic-platform-action")
+            notification_data = json.loads(call_args[1])["data"]
+            self.expect(notification_data["type"]).to_equal("generic_platform_action")
+            self.expect(notification_data["attributes"]["description"]).to_equal(
+                generic_platform_action_data["data"]["attributes"]["description"]
+            )
+            self.expect(str).of(notification_data["id"]).to_match(r"\d+")
+
             userinfo = generate_userinfo_data()
             contact = Contact(
                 given_name=userinfo["given_name"],
@@ -128,12 +135,13 @@ class TestGenericPlatformAction(BaseTestCase):
             )
             db.session.add(contact)
             db.session.commit()
+            new_description = fake.paragraph(nb_sentences=2)
             new_data = {
                 "data": {
                     "type": self.object_type,
                     "id": generic_platform_action["data"]["id"],
                     "attributes": {
-                        "description": fake.paragraph(nb_sentences=2),
+                        "description": new_description,
                         "action_type_name": fake.lexify(
                             text="Random type: ??????????", letters="ABCDE"
                         ),
@@ -154,6 +162,19 @@ class TestGenericPlatformAction(BaseTestCase):
             platform_id = result["data"]["relationships"]["platform"]["data"]["id"]
             platform = db.session.query(Platform).filter_by(id=platform_id).first()
             self.assertEqual(platform.update_description, "update;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-generic-platform-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("generic_platform_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            new_description
+        )
+        self.expect(
+            notification_data["relationships"]["platform"]["data"]["id"]
+        ).to_equal(str(platform.id))
 
     def test_delete_generic_platform_action(self):
         """Ensure a generic_platform_action can be deleted."""
@@ -178,6 +199,19 @@ class TestGenericPlatformAction(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             platform = db.session.query(Platform).filter_by(id=platform_id).first()
             self.assertEqual(platform.update_description, "delete;action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-generic-platform-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "generic_platform_action",
+                    "id": str(obj["data"]["id"]),
+                }
+            }
+        )
 
     def test_filtered_by_platform(self):
         """Ensure that I can prefilter by a specific platform."""

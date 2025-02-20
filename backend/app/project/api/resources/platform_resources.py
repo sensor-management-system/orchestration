@@ -42,9 +42,10 @@ from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.platform_schema import PlatformSchema
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from .mixins.csv_export import CsvListMixin
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class PlatformList(CsvListMixin, ResourceList):
+class PlatformList(MqttNotificationMixin, CsvListMixin, ResourceList):
     """
     Resource for the platform list endpoint.
 
@@ -158,7 +159,7 @@ class PlatformList(CsvListMixin, ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class PlatformDetail(ResourceDetail):
+class PlatformDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource for the platforms.
 

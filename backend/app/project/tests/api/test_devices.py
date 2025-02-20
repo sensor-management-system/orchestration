@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -29,9 +29,10 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import (
     BaseTestCase,
+    Fixtures,
     create_token,
     fake,
     generate_userinfo_data,
@@ -49,6 +50,46 @@ from project.tests.models.test_software_update_actions_model import (
 from project.tests.models.test_user_model import add_user
 from project.tests.permissions.test_platforms import IDL_USER_ACCOUNT
 from project.tests.read_from_json import extract_data_from_json_file
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_device1_in_group1", scope=lambda: db.session)
+def create_public_device1_in_group1():
+    """Create a public device that uses group 1 for permission management."""
+    result = Device(
+        short_name="public device1",
+        is_private=False,
+        is_internal=False,
+        is_public=True,
+        group_ids=["1"],
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestDeviceService(BaseTestCase):
@@ -102,6 +143,7 @@ class TestDeviceService(BaseTestCase):
                 headers={"Authorization": "Bearer abcdefghij"},
             )
         self.assertEqual(response.status_code, 401)
+        self.assertFalse(mqtt.mqtt.publish.called)
 
     def test_add_device_contacts_relationship(self):
         """Ensure a new relationship between a device & contact can be created."""
@@ -798,6 +840,14 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(["word1", "word2"], device.keywords)
         self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])
 
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+        self.assertEqual(call_args[0], "sms/post-device")
+        notification_data = json.loads(call_args[1])["data"]
+        self.assertEqual(notification_data["type"], "device")
+        self.assertEqual(notification_data["attributes"]["short_name"], "A test device")
+
     def test_countries(self):
         """Ensure that we can set a country."""
         with self.run_requests_as(self.super_user):
@@ -832,4 +882,57 @@ class TestDeviceService(BaseTestCase):
         self.assertEqual(get_one_response.status_code, 200)
         self.assertEqual(
             get_one_response.json["data"]["attributes"]["country"], "Germany"
+        )
+
+    @fixtures.use(["super_user", "public_device1_in_group1"])
+    def test_patch_triggers_mqtt_notification(
+        self, super_user, public_device1_in_group1
+    ):
+        """Ensure that we can patch a device and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.device_url}/{public_device1_in_group1.id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "device",
+                            "id": str(public_device1_in_group1.id),
+                            "attributes": {"long_name": "fancy long name"},
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-device")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device")
+        self.expect(notification_data["attributes"]["long_name"]).to_equal(
+            "fancy long name"
+        )
+        self.expect(notification_data["attributes"]["short_name"]).to_equal(
+            public_device1_in_group1.short_name
+        )
+
+    @fixtures.use(["super_user", "public_device1_in_group1"])
+    def test_delete_triggers_mqtt_notification(
+        self, super_user, public_device1_in_group1
+    ):
+        """Ensure that we can delete a device and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.delete(
+                f"{self.device_url}/{public_device1_in_group1.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-device")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {"data": {"type": "device", "id": str(public_device1_in_group1.id)}}
         )
