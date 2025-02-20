@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -16,8 +16,62 @@ from flask import current_app
 from project import base_url
 from project.api.models import Configuration, ConfigurationContactRole, Contact, User
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.extensions.instances import mqtt, pidinst
+from project.tests.base import BaseTestCase, Fixtures, fake, generate_userinfo_data
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_configuration1_in_group1", scope=lambda: db.session)
+def create_public_configuration1_in_group1():
+    """Create a public configuration that uses group 1 for permission management."""
+    result = Configuration(
+        label="public configuration1",
+        is_internal=False,
+        is_public=True,
+        cfg_permission_group="1",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("configuration_contact", scope=lambda: db.session)
+@fixtures.use(["public_configuration1_in_group1", "super_user_contact"])
+def create_configuration_contact(public_configuration1_in_group1, super_user_contact):
+    """Create a contact for the configuration."""
+    result = ConfigurationContactRole(
+        contact=super_user_contact,
+        configuration=public_configuration1_in_group1,
+        role_uri="http://localhost/cv/roles/1",
+        role_name="Owner",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 def add_a_contact():
@@ -86,8 +140,9 @@ class TestConfigurationContactRolesServices(BaseTestCase):
         """Ensure post a configuration_contact_role behaves correctly."""
         contact = add_a_contact()
         configuration = add_a_configuration()
+        role_name = fake.pystr()
         attributes = {
-            "role_name": fake.pystr(),
+            "role_name": role_name,
             "role_uri": fake.url(),
         }
         relationships = {
@@ -114,6 +169,15 @@ class TestConfigurationContactRolesServices(BaseTestCase):
             db.session.query(Configuration).filter_by(id=configuration_id).first()
         )
         self.assertEqual(configuration.update_description, "create;contact")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-configuration-contact-role")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("configuration_contact_role")
+        self.expect(notification_data["attributes"]["role_name"]).to_equal(role_name)
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_a_contact_role(self):
         """Ensure update configuration_contact_role behaves correctly."""
@@ -458,3 +522,59 @@ class TestConfigurationContactRolesServices(BaseTestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 0)
+
+    @fixtures.use(["super_user", "configuration_contact"])
+    def test_patch_triggers_mqtt_notification(
+        self,
+        super_user,
+        configuration_contact,
+    ):
+        """Ensure that we can patch a configuration contact and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.url}/{configuration_contact.id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "configuration_contact_role",
+                            "id": str(configuration_contact.id),
+                            "attributes": {"role_name": "PI"},
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-configuration-contact-role")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("configuration_contact_role")
+        self.expect(notification_data["attributes"]["role_name"]).to_equal("PI")
+        self.expect(notification_data["attributes"]["role_uri"]).to_equal(
+            configuration_contact.role_uri
+        )
+
+    @fixtures.use(["super_user", "configuration_contact"])
+    def test_delete_triggers_mqtt_notification(self, super_user, configuration_contact):
+        """Ensure that we can delete a configuration contact and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.delete(
+                f"{self.url}/{configuration_contact.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-configuration-contact-role")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "configuration_contact_role",
+                    "id": str(configuration_contact.id),
+                }
+            }
+        )

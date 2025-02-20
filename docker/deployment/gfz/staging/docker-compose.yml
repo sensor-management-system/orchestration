@@ -167,6 +167,9 @@ services:
       EXPORT_CONTROL_VO_LIST: urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de
       # We only want to allow access to extenral resources via the proxy - not to internal ones
       PROXY_NETLOC_BLOCKLIST: 127.0.0.1,localhost,backend-db,backend,minio,elastic-search,idl-db,idl,nginx
+      MQTT_BROKER_URL: mq
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
     depends_on:
       - backend-db
     volumes:
@@ -174,6 +177,63 @@ services:
     networks:
       - backend
       - nginx
+      - mq
+
+  mq:
+    image: ${CI_REGISTRY_IMAGE}/mq:latest
+    restart: unless-stopped
+    ports:
+      - 8883:8883
+    volumes:
+      - mq-config:/etc/mosquitto
+      - mq-data:/var/lib/mosquitto
+    networks:
+      - mq
+    depends_on:
+      mq_db:
+        condition: service_started
+      mq_init:
+        condition: service_completed_successfully
+
+  mq_init:
+    image: python:3.12-alpine
+    depends_on:
+      mq_db:
+        condition: service_started
+    environment:
+      MQTT_CLIENT_EXPIRATION: 7d
+      MQTT_CLIENT_PERSISTENCE: "true"
+      MQTT_TLS: "false"
+      MQTT_TLS_REQUIRE_CERT: "false"
+      MQ_LOG_TYPE: warning
+      MQ_PG_DB: ${MQTT_AUTH_DB}
+      MQ_PG_HOST: mq_db
+      MQ_PG_PORT: 5432
+      MQ_PG_USER: ${MQTT_AUTH_USER}
+      MQ_PG_PASSWORD: ${MQTT_AUTH_PASSWORD}
+      MQTT_BACKEND_USER: ${MQTT_USERNAME}
+      MQTT_BACKEND_PASSWORD: ${MQTT_PASSWORD}
+    networks:
+      - mq
+    volumes:
+      - mq-config:/etc/mosquitto
+      - ./mq/init:/etc/mq_init:ro
+    command: sh /etc/mq_init/setup-mosquitto.sh
+
+  mq_db:
+    image: postgres:15-alpine
+    user: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${MQTT_AUTH_USER}
+      POSTGRES_PASSWORD: ${MQTT_AUTH_PASSWORD}
+      POSTGRES_DB: ${MQTT_AUTH_DB}
+    volumes:
+      - ./mq/db/mqtt_auth.sql:/docker-entrypoint-initdb.d/10_mqtt_auth.sql
+      - mq-db-data:/var/lib/postgresql/data
+    shm_size: 128M
+    networks:
+      - mq
 
 volumes:
   idl-db-data:
@@ -182,7 +242,11 @@ volumes:
   minio-data:
   backend-db-data:
   backend-static-files:
+  mq-db-data:
+  mq-config:
+  mq-data:
 networks:
   nginx:
   backend:
   idl-db:
+  mq:

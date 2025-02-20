@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -17,9 +17,10 @@ from ..schemas.calibration_action_attachment_schema import (
     DeviceCalibrationAttachmentSchema,
 )
 from .base_resource import check_if_object_not_found
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DeviceCalibrationAttachmentList(ResourceList):
+class DeviceCalibrationAttachmentList(MqttNotificationMixin, ResourceList):
     """List resource for device calibration attachments."""
 
     def query(self, view_kwargs):
@@ -38,7 +39,7 @@ class DeviceCalibrationAttachmentList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DeviceCalibrationAttachmentDetail(ResourceDetail):
+class DeviceCalibrationAttachmentDetail(MqttNotificationMixin, ResourceDetail):
     """Detail resource for device calibration attachments."""
 
     def before_get(self, args, kwargs):

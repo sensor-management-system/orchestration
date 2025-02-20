@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,6 +8,8 @@
 
 """Tests for the api usage for platform software update action attachments."""
 
+import json
+
 from project import base_url
 from project.api.models import (
     Contact,
@@ -16,6 +18,7 @@ from project.api.models import (
     PlatformSoftwareUpdateAction,
 )
 from project.api.models.base_model import db
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_software_update_actions_attachment_model import (
     add_platform_software_update_action_attachment_model,
@@ -127,6 +130,21 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/post-platform-software-update-action-attachment"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "platform_software_update_action_attachment"
+        )
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(platform_software_update_action.id))
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_platform_software_update_action_attachment(self):
         """Update PlatformSoftwareUpdateActionAttachment."""
@@ -164,6 +182,23 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/patch-platform-software-update-action-attachment"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "platform_software_update_action_attachment"
+        )
+        self.expect(
+            notification_data["relationships"]["attachment"]["data"]["id"]
+        ).to_equal(str(attachment.id))
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(platform_software_update_action_attachment.action_id))
 
     def test_delete_platform_software_update_action_attachment(self):
         """Delete PlatformSoftwareUpdateActionAttachment."""
@@ -172,6 +207,21 @@ class TestPlatformSoftwareUpdateActionAttachment(BaseTestCase):
         )
         _ = super().delete_object(
             url=f"{self.url}/{platform_software_update_action_attachment.id}",
+        )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/delete-platform-software-update-action-attachment"
+        )
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "platform_software_update_action_attachment",
+                    "id": str(platform_software_update_action_attachment.id),
+                }
+            }
         )
 
     def test_http_response_not_found(self):

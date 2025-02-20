@@ -21,6 +21,7 @@ environs==11.0.0
 Faker==30.8.1
 Flask-Cors==5.0.0
 Flask-Executor==1.0.0
+Flask-MQTT==1.1.1
 Flask-Migrate==4.0.7
 Flask-REST-JSONAPI==0.31.2
 Flask-SQLAlchemy==2.5.1  # fixed
@@ -39,6 +40,7 @@ marshmallow-jsonapi==0.24.0
 marshmallow==3.23.0
 mccabe==0.7.0
 minio==7.2.10
+paho-mqtt==1.6.1
 pandas==2.2.3
 psycopg2-binary==2.9.10
 py-healthcheck==1.10.1

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023
+# SPDX-FileCopyrightText: 2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -12,10 +12,10 @@ from unittest.mock import patch
 from flask import url_for
 
 from project import base_url
-from project.api.models import Configuration, Contact, Device, Platform, User
+from project.api.models import Configuration, Contact, Device, Platform, Site, User
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, pidinst
+from project.extensions.instances import idl, mqtt, pidinst
 from project.tests.base import BaseTestCase
 
 
@@ -75,6 +75,17 @@ class SetupMixin:
             cfg_permission_group="123",
         )
         db.session.add(self.public_configuration)
+        db.session.commit()
+
+    def setup_public_site_in_group_123(self):
+        """Set a public site up."""
+        self.public_site = Site(
+            label="public_site_in_group_123",
+            is_public=True,
+            is_internal=False,
+            group_ids=["123"],
+        )
+        db.session.add(self.public_site)
         db.session.commit()
 
 
@@ -204,7 +215,7 @@ class TestPids(BaseTestCase, SetupMixin):
         self.assertEqual(resp.status_code, 409)
 
     def test_post_pid_for_device(self):
-        """Ensure we get a pid for a devices."""
+        """Ensure we get a pid for a device."""
         self.setup_super_user()
         self.setup_public_device_in_group_123()
 
@@ -230,9 +241,22 @@ class TestPids(BaseTestCase, SetupMixin):
             reloaded_device.update_description, "create;persistent identifier"
         )
         self.assertEqual(reloaded_device.updated_by, self.super_user)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-device")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device")
+        self.expect(notification_data["attributes"]["persistent_identifier"]).to_equal(
+            persistent_identifier
+        )
+        self.expect(notification_data["attributes"]["short_name"]).to_equal(
+            self.public_device.short_name
+        )
 
     def test_post_pid_for_private_device(self):
-        """Ensure we don't get a pid for a private devices."""
+        """Ensure we don't get a pid for a private device."""
         self.setup_super_user()
         self.setup_public_device_in_group_123()
         private_device = self.public_device
@@ -254,7 +278,7 @@ class TestPids(BaseTestCase, SetupMixin):
         self.assertEqual(resp.status_code, 409)
 
     def test_post_pid_for_platform(self):
-        """Ensure we get a pid for a platforms."""
+        """Ensure we get a pid for a platform."""
         self.setup_super_user()
         self.setup_public_platform_in_group_123()
 
@@ -280,9 +304,22 @@ class TestPids(BaseTestCase, SetupMixin):
             reloaded_platform.update_description, "create;persistent identifier"
         )
         self.assertEqual(reloaded_platform.updated_by, self.super_user)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-platform")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform")
+        self.expect(notification_data["attributes"]["persistent_identifier"]).to_equal(
+            persistent_identifier
+        )
+        self.expect(notification_data["attributes"]["short_name"]).to_equal(
+            self.public_platform.short_name
+        )
 
     def test_post_pid_for_private_platform(self):
-        """Ensure we don't get a pid for a private platforms."""
+        """Ensure we don't get a pid for a private platform."""
         self.setup_super_user()
         self.setup_public_platform_in_group_123()
         private_platform = self.public_platform
@@ -306,7 +343,7 @@ class TestPids(BaseTestCase, SetupMixin):
         self.assertEqual(resp.status_code, 409)
 
     def test_post_pid_for_configuration(self):
-        """Ensure we get a pid for a configurations."""
+        """Ensure we get a pid for a configuration."""
         self.setup_super_user()
         self.setup_public_configuration_in_group_123()
 
@@ -339,6 +376,57 @@ class TestPids(BaseTestCase, SetupMixin):
             reloaded_configuration.update_description, "create;persistent identifier"
         )
         self.assertEqual(reloaded_configuration.updated_by, self.super_user)
+
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-configuration")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("configuration")
+        self.expect(notification_data["attributes"]["persistent_identifier"]).to_equal(
+            persistent_identifier
+        )
+        self.expect(notification_data["attributes"]["label"]).to_equal(
+            self.public_configuration.label
+        )
+
+    def test_post_pid_for_site(self):
+        """Ensure we get a pid for a site."""
+        self.setup_super_user()
+        self.setup_public_site_in_group_123()
+
+        payload = {"instrument_instance": {"type": "site", "id": self.public_site.id}}
+        persistent_identifier = "42/1234567890"
+        with self.run_requests_as(self.super_user):
+            with patch.object(pidinst, "create_pid") as mock:
+                mock.return_value = persistent_identifier
+                resp = self.client.post(
+                    self.pid_url,
+                    data=json.dumps(payload),
+                    content_type="application/vnd.api+json",
+                )
+        self.assertEqual(resp.status_code, 200)
+        reloaded_site = db.session.query(Site).filter_by(id=self.public_site.id).first()
+
+        self.assertEqual(reloaded_site.persistent_identifier, persistent_identifier)
+        self.assertEqual(
+            reloaded_site.update_description, "create;persistent identifier"
+        )
+        self.assertEqual(reloaded_site.updated_by, self.super_user)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-site")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("site")
+        self.expect(notification_data["attributes"]["persistent_identifier"]).to_equal(
+            persistent_identifier
+        )
+        self.expect(notification_data["attributes"]["label"]).to_equal(
+            self.public_site.label
+        )
 
     def test_openapi(self):
         """Ensure the openapi contains the pid endpoint."""

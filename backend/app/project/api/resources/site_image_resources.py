@@ -21,9 +21,10 @@ from .base_resource import (
     query_site_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class SiteImageList(ResourceList):
+class SiteImageList(MqttNotificationMixin, ResourceList):
     """Resource class for the list endpoint for site images."""
 
     def query(self, view_kwargs):
@@ -87,7 +88,7 @@ class SiteImageList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class SiteImageDetail(ResourceDetail):
+class SiteImageDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for the site images."""
 
     def before_get(self, args, kwargs):

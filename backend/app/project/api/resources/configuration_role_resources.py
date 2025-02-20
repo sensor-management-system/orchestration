@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -24,9 +24,10 @@ from .base_resource import (
     query_configuration_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ConfigurationRoleList(ResourceList):
+class ConfigurationRoleList(MqttNotificationMixin, ResourceList):
     """
     List resource for configuration contact roles.
 
@@ -89,7 +90,7 @@ class ConfigurationRoleList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ConfigurationRoleDetail(ResourceDetail):
+class ConfigurationRoleDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource for configuration contact roles.
 

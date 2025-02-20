@@ -179,6 +179,9 @@ services:
       EXPORT_CONTROL_VO_LIST: urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de
       # We only want to allow access to external resources via the proxy - not to internal ones
       PROXY_NETLOC_BLOCKLIST: 127.0.0.1,localhost,backend-db,backend,minio,elastic-search,idl-db,idl,nginx,traefik
+      MQTT_BROKER_URL: mq
+      MQTT_USERNAME: ${SMS_SANDBOX_MQTT_USERNAME}
+      MQTT_PASSWORD: ${SMS_SANDBOX_MQTT_PASSWORD}
     depends_on:
       - backend-db
     labels:
@@ -194,6 +197,59 @@ services:
       - nginx
       - traefik
 
+  mq:
+    image: ${CI_REGISTRY_IMAGE}/mq:gfz-sandbox-latest
+    restart: unless-stopped
+    ports:
+      - 8883:8883
+    volumes:
+      - mq-config:/etc/mosquitto
+      - mq-data:/var/lib/mosquitto
+    networks:
+      - mq
+    depends_on:
+      mq_db:
+        condition: service_started
+      mq_init:
+        condition: service_completed_successfully
+
+  mq_init:
+    image: registry.hzdr.de/hub-terra/sms/orchestration/mq_init:gfz-sandbox-latest
+    depends_on:
+      mq_db:
+        condition: service_started
+    environment:
+      MQTT_CLIENT_EXPIRATION: 7d
+      MQTT_CLIENT_PERSISTENCE: "true"
+      MQTT_TLS: "false"
+      MQTT_TLS_REQUIRE_CERT: "false"
+      MQ_LOG_TYPE: warning
+      MQ_PG_DB: ${SMS_SANDBOX_MQTT_AUTH_DB}
+      MQ_PG_HOST: mq_db
+      MQ_PG_PORT: 5432
+      MQ_PG_USER: ${SMS_SANDBOX_MQTT_AUTH_USER}
+      MQ_PG_PASSWORD: ${SMS_SANDBOX_MQTT_AUTH_PASSWORD}
+      MQTT_BACKEND_USER: ${SMS_SANDBOX_MQTT_USERNAME}
+      MQTT_BACKEND_PASSWORD: ${SMS_SANDBOX_MQTT_PASSWORD}
+    networks:
+      - mq
+    volumes:
+      - mq-config:/etc/mosquitto
+
+  mq_db:
+    image: registry.hzdr.de/hub-terra/sms/orchestration/mq_db:gfz-sandbox-latest
+    user: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${SMS_SANDBOX_MQTT_AUTH_USER}
+      POSTGRES_PASSWORD: ${SMS_SANDBOX_MQTT_AUTH_PASSWORD}
+      POSTGRES_DB: ${SMS_SANDBOX_MQTT_AUTH_DB}
+    volumes:
+      - mq-db-data:/var/lib/postgresql/data
+    shm_size: 128M
+    networks:
+      - mq
+
 volumes:
   idl-db-data:
   idl-static-files:
@@ -201,10 +257,13 @@ volumes:
   minio-data:
   backend-db-data:
   backend-static-files:
+  mq-config:
+  mq-data:
 networks:
   nginx:
   traefik:
     external: true
   backend:
   idl-db:
+  mq:
 

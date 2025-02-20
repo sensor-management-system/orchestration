@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2020 - 2023
+# SPDX-FileCopyrightText: 2020 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -12,8 +12,10 @@ import datetime
 import functools
 import json
 import os
+import re
 import time
 from contextlib import contextmanager
+from unittest.mock import patch
 
 import flask_jwt_extended
 from faker import Faker
@@ -275,6 +277,15 @@ class Expectation:
         self.test_case = test_case
         self.value = value
 
+    def of(self, other_value):
+        """
+        Use the given value as argument to an already wrapped function.
+
+        The idea is to run something like
+        self.expect(json.loads).of("{}").to_equal({})
+        """
+        return Expectation(self.test_case, self.value(other_value))
+
     def to_equal(self, expected_value):
         """Raise an assertion if the value is not equal the expected value."""
         self.test_case.assertEqual(self.value, expected_value)
@@ -312,6 +323,13 @@ class Expectation:
             self.test_case.fail("Not a datetime string")
         return self
 
+    def to_match(self, pattern, flags=0):
+        """Raise an assertion if the value doesn't match the pattern."""
+        self.test_case.assertTrue(
+            re.match(pattern=pattern, string=self.value, flags=flags)
+        )
+        return self
+
     def to_be_greater_than(self, expected_smaller_value):
         """Raise an assertion if the value is not greater then the other one."""
         self.test_case.assertTrue(self.value > expected_smaller_value)
@@ -323,10 +341,6 @@ class Expectation:
     def map(self, f, *args, **kwargs):
         """Run a function and return an Expectation object with the result."""
         return Expectation(self, f(self.value, *args, **kwargs))
-
-    def of(self, value_for_function):
-        """Use the argument as parameter for a function and expect for that."""
-        return Expectation(self.test_case, self.value(value_for_function))
 
     @property
     def not_(self):
@@ -394,6 +408,10 @@ class BaseTestCase(TestCase, ExpectMixin):
             LoginMechanismByTestJwt(),
             LoginMechanismBySettingUserDirectly(self.get_current_user),
         ]
+        # We need to add a mock for the mqtt.init_app. So that it doesn't
+        # try to connect to a real message queue for our tests.
+        self.patch_for_mqtt_init_app = patch("flask_mqtt.Mqtt.init_app")
+        self.patch_for_mqtt_init_app.start()
         return app
 
     def force_login(self, user):
@@ -434,6 +452,12 @@ class BaseTestCase(TestCase, ExpectMixin):
 
         # We start every test without being logged in
         self.logout()
+        # And we need to mock the mqtt.publish method, in order not to
+        # publish to a real queue within our tests.
+        # By mocking it per test case, we can easier test that we
+        # wrote our information out (in this small scope).
+        self.patch_for_mqtt_publish = patch("flask_mqtt.Mqtt.publish")
+        self.patch_for_mqtt_publish.start()
 
     def tearDown(self):
         """
@@ -447,6 +471,8 @@ class BaseTestCase(TestCase, ExpectMixin):
         db.drop_all()
 
         self.logout()
+        # To reduce the scope of the mqtt.publish mock.
+        self.patch_for_mqtt_publish.stop()
 
     def add_object(self, url, data_object, object_type):
         """Ensure a new object can be added to the database."""

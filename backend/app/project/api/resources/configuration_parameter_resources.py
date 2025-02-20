@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText:  2023
+# SPDX-FileCopyrightText:  2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -21,9 +21,10 @@ from .base_resource import (
     query_configuration_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ConfigurationParameterList(ResourceList):
+class ConfigurationParameterList(MqttNotificationMixin, ResourceList):
     """Resource class for the configuration parameter list."""
 
     def query(self, view_kwargs):
@@ -71,7 +72,7 @@ class ConfigurationParameterList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ConfigurationParameterDetail(ResourceDetail):
+class ConfigurationParameterDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for the configuration parameter details."""
 
     def before_get(self, args, kwargs):

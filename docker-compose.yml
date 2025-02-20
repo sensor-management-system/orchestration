@@ -84,6 +84,12 @@ services:
       # the docker compose for example), we need an extra env variable to
       # let the backend know which url to give to the frontend.
       OIDC_TOKEN_ENDPOINT_FOR_FRONTEND: ${OIDC_TOKEN_ENDPOINT_FOR_FRONTEND:-http://localhost/keycloak/realms/local-dev/protocol/openid-connect/token}
+      MQTT_USERNAME: ${MQTT_BACKEND_USER:-sms_backend_user}
+      MQTT_PASSWORD: ${MQTT_BACKEND_PASSWORD:-changeme}
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL:-mq}
+      MQTT_BROKER_PORT: ${MQTT_BROKER_PORT:-1883}
+      MQTT_KEEPALIVE: ${MQTT_KEEPALIVE:-5}
+      MQTT_TLS_ENABLED: ${MQTT_TLS_ENABLED:-false}
     depends_on:
       - db
       - keycloak
@@ -239,7 +245,72 @@ services:
       - minio
       - vocabulary
       - backend
-        
+
+  mq:
+    build:
+      context: 'mq'
+      args:
+        MOSQUITTO_VERSION: "${MOSQUITTO_VERSION:-2.0.19}"
+        DEBIAN_IMAGE: "${DEBIAN_IMAGE:-stable-slim}"
+    container_name: sms_mq
+    ports:
+      - 8883:8883
+    volumes:
+      - mq-config:/etc/mosquitto
+      - mq-data:/var/lib/mosquitto
+      # replace the following files with your certificates
+      - ${MQTT_SERVER_KEY:-/tmp/server.key}:/etc/mosquitto/certs/server.key:ro
+      - ${MQTT_SERVER_CRT:-/tmp/server.crt}:/etc/mosquitto/certs/server.crt:ro
+      - ${MQTT_CA_CRT:-/tmp/ca.crt}:/etc/mosquitto/certs/ca.crt:ro
+    networks:
+      - sms
+    depends_on:
+      mq_db:
+        condition: service_started
+      mq_init:
+        condition: service_completed_successfully
+
+  mq_init:
+    image: python:3.12-alpine
+    container_name: sms_mq_init
+    depends_on:
+      mq_db:
+        condition: service_started
+    environment:
+      MQTT_CLIENT_EXPIRATION: ${MQTT_CLIENT_EXPIRATION:-7d}
+      MQTT_CLIENT_PERSISTENCE: ${MQTT_CLIENT_PERSISTENCE:-true}
+      MQTT_TLS: ${MQTT_TLS:-false}
+      MQTT_TLS_REQUIRE_CERT: ${MQTT_TLS_REQUIRE_CERT:-false}
+      MQ_LOG_TYPE: all
+      MQ_PG_DB: ${MQ_PG_DB:-postgres}
+      MQ_PG_HOST: ${MQ_PG_HOST:-mq_db}
+      MQ_PG_PORT: ${MQ_PG_PORT:-5432}
+      MQ_PG_USER: ${MQ_PG_USER:-mq_db}
+      MQ_PG_PASSWORD: ${MQ_PG_PASSWORD:-23r4q94323ßj9}
+      MQTT_BACKEND_USER: ${MQTT_BACKEND_USER:-sms_backend_user}
+      MQTT_BACKEND_PASSWORD: ${MQTT_BACKEND_PASSWORD:-changeme}
+    networks:
+      - sms
+    volumes:
+      - mq-config:/etc/mosquitto
+      - ./mq/init:/etc/mq_init:ro
+    command: sh /etc/mq_init/setup-mosquitto.sh
+
+  mq_db:
+   image: postgres:15-alpine
+   container_name: sms_mq_db
+   user: postgres
+   ports:
+      - 5434:5432
+   environment:
+      POSTGRES_USER: ${MQ_PG_USER:-mq_db}
+      POSTGRES_PASSWORD: ${MQ_PG_PASSWORD:-23r4q94323ßj9}
+      POSTGRES_DB: ${MQ_PG_DB:-postgres}
+   volumes:
+     - ./mq/db/mqtt_auth.sql:/docker-entrypoint-initdb.d/10_mqtt_auth.sql
+   networks:
+      - sms
+
   keycloak:
     image: "quay.io/keycloak/keycloak:24.0.3"
     container_name: sms_keycloak
@@ -344,6 +415,8 @@ volumes:
   idl_dev_db_data: {}
   keycloak-data:
   idl-static-files: {}
+  mq-config: {}
+  mq-data: {}
 
 networks:
   sms:

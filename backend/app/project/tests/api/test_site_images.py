@@ -13,7 +13,7 @@ from project import base_url
 from project.api.models import Contact, Site, SiteAttachment, SiteImage, User
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.extensions.instances import idl, mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
@@ -477,6 +477,7 @@ class TestSiteImageServices(BaseTestCase):
             content_type="application/vnd.api+json",
         )
         self.expect(resp.status_code).to_equal(401)
+        self.expect(mqtt.mqtt.publish.called).to_equal(False)
 
     @fixtures.use(["user1", "attachment1_of_public_site1_in_group1"])
     def test_post_member(self, user1, attachment1_of_public_site1_in_group1):
@@ -530,6 +531,13 @@ class TestSiteImageServices(BaseTestCase):
         # Reason here is that the images can be seen as basic data.
         # At least they are on the panel in the sms frontend.
         self.expect(reloaded_site.update_description).to_equal("update;basic data")
+        # And we want to ensure that we called the mqtt interface.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+        self.expect(call_args[0]).to_equal("sms/post-site-image")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("site_image")
+        self.expect(notification_data["attributes"]["order_index"]).to_equal(10)
 
     @fixtures.use(["user1", "attachment1_of_public_site1_in_group1"])
     def test_post_admin(self, user1, attachment1_of_public_site1_in_group1):
@@ -969,6 +977,13 @@ class TestSiteImageServices(BaseTestCase):
         # Reason here is that the images can be seen as basic data.
         # At least they are on the panel in the sms frontend.
         self.expect(reloaded_site.update_description).to_equal("update;basic data")
+        # And we want to ensure that we called the mqtt interface.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+        self.expect(call_args[0]).to_equal("sms/patch-site-image")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("site_image")
+        self.expect(notification_data["attributes"]["order_index"]).to_equal(20)
 
     @fixtures.use(["user1", "image1_of_attachment1_of_public_site1_in_group1"])
     def test_patch_for_public_site_admin(
@@ -1276,6 +1291,19 @@ class TestSiteImageServices(BaseTestCase):
         # Reason here is that the images can be seen as basic data.
         # At least they are on the panel in the sms frontend.
         self.expect(reloaded_site.update_description).to_equal("update;basic data")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-site-image")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "site_image",
+                    "id": str(image1_of_attachment1_of_public_site1_in_group1.id),
+                }
+            }
+        )
 
     @fixtures.use(["user1", "image1_of_attachment1_of_public_site1_in_group1"])
     def test_delete_for_public_site_admin(

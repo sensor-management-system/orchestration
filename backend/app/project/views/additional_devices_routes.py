@@ -11,6 +11,7 @@ As we can't add a new verb like 'archive' in the http
 methods, we need to add some extra endpoints
 in the style /<model_entities>/<id>/<verb> as post requests.
 """
+import json
 
 from flask import Blueprint, g
 
@@ -19,7 +20,9 @@ from ..api.helpers.errors import ForbiddenError, UnauthorizedError
 from ..api.models import ActivityLog, Device
 from ..api.models.base_model import db
 from ..api.permissions.rules import can_archive, can_restore, can_see
+from ..api.schemas.device_schema import DeviceSchema
 from ..config import env
+from ..extensions.instances import mqtt
 from ..restframework.preconditions.devices import (
     AllMountsOfDeviceAreFinishedInThePast,
     AllUsagesAsParentDeviceInDeviceMountsFinishedInThePast,
@@ -64,6 +67,8 @@ class ArchiveDeviceView(BaseView):
             )
             save_to_db(new_log_entry)
 
+            mqtt.publish("sms/patch-device", json.dumps(DeviceSchema().dump(device)))
+
     def post(self):
         """Run the post request."""
         if not g.user:
@@ -103,6 +108,7 @@ class RestoreDeviceView(BaseView):
                 description=device.update_description,
             )
             save_to_db(new_log_entry)
+            mqtt.publish("sms/patch-device", json.dumps(DeviceSchema().dump(device)))
 
     def post(self):
         """Run the post request."""

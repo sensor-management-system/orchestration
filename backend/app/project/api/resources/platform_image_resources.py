@@ -21,9 +21,10 @@ from .base_resource import (
     query_platform_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class PlatformImageList(ResourceList):
+class PlatformImageList(MqttNotificationMixin, ResourceList):
     """Resource class for the list endpoint for platform images."""
 
     def query(self, view_kwargs):
@@ -91,7 +92,7 @@ class PlatformImageList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class PlatformImageDetail(ResourceDetail):
+class PlatformImageDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for the platform images."""
 
     def before_get(self, args, kwargs):

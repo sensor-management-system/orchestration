@@ -25,9 +25,10 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.export_control_schema import ExportControlSchema
 from .base_resource import check_if_object_not_found
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ExportControlList(ResourceList):
+class ExportControlList(MqttNotificationMixin, ResourceList):
     """Resource class for the list endpoint for export control data."""
 
     def query(self, view_kwargs):
@@ -126,7 +127,7 @@ class ExportControlList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ExportControlDetail(ResourceDetail):
+class ExportControlDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for the detail endpoint for export control data."""
 
     def before_get(self, args, kwargs):

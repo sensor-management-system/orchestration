@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -10,16 +10,79 @@
 import json
 
 from project import base_url
+from project.api.models import Configuration, ConfigurationCustomField, Contact, User
 from project.api.models.base_model import db
-from project.api.models.configuration import Configuration
-from project.api.models.configuration_customfield import ConfigurationCustomField
-from project.tests.base import BaseTestCase, create_token, fake, query_result_to_list
+from project.extensions.instances import mqtt
+from project.tests.base import (
+    BaseTestCase,
+    Fixtures,
+    create_token,
+    fake,
+    query_result_to_list,
+)
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_configuration1_in_group1", scope=lambda: db.session)
+def create_public_configuration1_in_group1():
+    """Create a public configuration that uses group 1 for permission management."""
+    result = Configuration(
+        label="public configuration1",
+        is_internal=False,
+        is_public=True,
+        cfg_permission_group="1",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register(
+    "customfield1_of_public_configuration1_in_group1", scope=lambda: db.session
+)
+@fixtures.use(["public_configuration1_in_group1"])
+def create_customfield1_of_public_configuration1_in_group1(
+    public_configuration1_in_group1,
+):
+    """Create an customfield for the public configuration."""
+    result = ConfigurationCustomField(
+        configuration=public_configuration1_in_group1,
+        key="https://gfz-potsdam.de",
+        value="GFZ",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestConfigurationCustomFieldServices(BaseTestCase):
     """Test configuration customfields."""
 
-    url = base_url + "/configuration_customfields"
+    url = base_url + "/configuration-customfields"
 
     def test_post_configuration_customfield_api(self):
         """Ensure that we can add a custom field."""
@@ -478,3 +541,102 @@ class TestConfigurationCustomFieldServices(BaseTestCase):
         """Make sure that the backend responds with 404 HTTP-Code if a resource was not found."""
         url = f"{self.url}/{fake.random_int()}"
         _ = super().http_code_404_when_resource_not_found(url)
+
+    @fixtures.use(["super_user", "public_configuration1_in_group1"])
+    def test_post_triggers_mqtt_notification(
+        self, super_user, public_configuration1_in_group1
+    ):
+        """Ensure that we can post a customfield and publish the notification via mqtt."""
+        payload = {
+            "data": {
+                "type": "configuration_customfield",
+                "attributes": {
+                    "key": "GFZ",
+                    "value": "https://gfz-potsdam.de",
+                },
+                "relationships": {
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": str(public_configuration1_in_group1.id),
+                        }
+                    }
+                },
+            }
+        }
+        with self.run_requests_as(super_user):
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(201)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-configuration-customfield")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("configuration_customfield")
+        self.expect(notification_data["attributes"]["key"]).to_equal("GFZ")
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
+
+    @fixtures.use(["super_user", "customfield1_of_public_configuration1_in_group1"])
+    def test_patch_triggers_mqtt_notification(
+        self, super_user, customfield1_of_public_configuration1_in_group1
+    ):
+        """Ensure that we can patch a customfield and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.url}/{customfield1_of_public_configuration1_in_group1.id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "configuration_customfield",
+                            "id": str(
+                                customfield1_of_public_configuration1_in_group1.id
+                            ),
+                            "attributes": {"value": "website"},
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-configuration-customfield")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("configuration_customfield")
+        self.expect(notification_data["attributes"]["value"]).to_equal("website")
+        self.expect(notification_data["attributes"]["key"]).to_equal(
+            customfield1_of_public_configuration1_in_group1.key
+        )
+
+    @fixtures.use(["super_user", "customfield1_of_public_configuration1_in_group1"])
+    def test_delete_triggers_mqtt_notification(
+        self,
+        super_user,
+        customfield1_of_public_configuration1_in_group1,
+    ):
+        """Ensure that we can delete a customfield and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.delete(
+                f"{self.url}/{customfield1_of_public_configuration1_in_group1.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-configuration-customfield")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "configuration_customfield",
+                    "id": str(customfield1_of_public_configuration1_in_group1.id),
+                }
+            }
+        )

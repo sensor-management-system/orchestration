@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -12,6 +12,7 @@ import json
 
 from project import base_url, db
 from project.api.models import ConfigurationAttachment
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, create_token, fake
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_configuration_action_model,
@@ -100,6 +101,21 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/post-generic-configuration-action-attachment"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "generic_configuration_action_attachment"
+        )
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(generic_configuration_action.id))
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_generic_configuration_action_attachment(self):
         """Update GenericConfigurationActionAttachment."""
@@ -134,6 +150,23 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/patch-generic-configuration-action-attachment"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "generic_configuration_action_attachment"
+        )
+        self.expect(
+            notification_data["relationships"]["attachment"]["data"]["id"]
+        ).to_equal(str(attachment.id))
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(action_attachment.action_id))
 
     def test_delete_generic_configuration_action_attachment(self):
         """Delete GenericConfigurationActionAttachment."""
@@ -143,6 +176,20 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
         )
         _ = super().delete_object(
             url=f"{self.url}/{action_attachment.id}",
+        )
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/delete-generic-configuration-action-attachment"
+        )
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "generic_configuration_action_attachment",
+                    "id": str(action_attachment.id),
+                }
+            }
         )
 
     def test_post_generic_configuration_action_attachment_false_type(self):

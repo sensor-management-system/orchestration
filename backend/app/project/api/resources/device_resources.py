@@ -41,9 +41,10 @@ from ..permissions.rules import filter_visible, filter_visible_es
 from ..schemas.device_schema import DeviceSchema
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
 from .mixins.csv_export import CsvListMixin
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DeviceList(CsvListMixin, ResourceList):
+class DeviceList(MqttNotificationMixin, CsvListMixin, ResourceList):
     """
     Resource for the device list endpoint.
 
@@ -159,7 +160,7 @@ class DeviceList(CsvListMixin, ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DeviceDetail(ResourceDetail):
+class DeviceDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource class for devices.
 

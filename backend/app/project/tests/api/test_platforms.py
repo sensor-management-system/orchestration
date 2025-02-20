@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -27,9 +27,10 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import (
     BaseTestCase,
+    Fixtures,
     fake,
     generate_userinfo_data,
     test_file_path,
@@ -42,6 +43,45 @@ from project.tests.models.test_software_update_actions_model import (
 )
 from project.tests.models.test_user_model import add_user
 from project.tests.read_from_json import extract_data_from_json_file
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_platform1_in_group1", scope=lambda: db.session)
+def create_public_platform1_in_group1():
+    """Create a public platform that uses group 1 for permission management."""
+    result = Platform(
+        short_name="public platform1",
+        is_internal=False,
+        is_public=True,
+        group_ids=["1"],
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestPlatformServices(BaseTestCase):
@@ -231,6 +271,17 @@ class TestPlatformServices(BaseTestCase):
 
         msg = "create;basic data"
         self.assertEqual(msg, platform.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-platform")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform")
+        self.expect(notification_data["attributes"]["short_name"]).to_equal(
+            platforms_json[0]["short_name"]
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_description_after_update(self):
         """Make sure that update description field is updated after patch."""
@@ -532,4 +583,60 @@ class TestPlatformServices(BaseTestCase):
         self.assertEqual(get_one_response.status_code, 200)
         self.assertEqual(
             get_one_response.json["data"]["attributes"]["country"], "Germany"
+        )
+
+    @fixtures.use(["super_user", "public_platform1_in_group1"])
+    def test_patch_triggers_mqtt_notification(
+        self, super_user, public_platform1_in_group1
+    ):
+        """Ensure that we can patch a platform and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.platform_url}/{public_platform1_in_group1.id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "platform",
+                            "id": str(public_platform1_in_group1.id),
+                            "attributes": {"short_name": "new value"},
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-platform")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform")
+        self.expect(notification_data["attributes"]["short_name"]).to_equal("new value")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            public_platform1_in_group1.description
+        )
+
+    @fixtures.use(["super_user", "public_platform1_in_group1"])
+    def test_delete_triggers_mqtt_notification(
+        self, super_user, public_platform1_in_group1
+    ):
+        """Ensure that we can delete a platform and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.delete(
+                f"{self.platform_url}/{public_platform1_in_group1.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-platform")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "platform",
+                    "id": str(public_platform1_in_group1.id),
+                }
+            }
         )

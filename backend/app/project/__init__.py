@@ -33,6 +33,7 @@ from .config import env
 from .extensions.instances import (
     auth,
     idl,
+    mqtt,
     page_parameter_middleware,
     pidinst,
     remove_slash_redirect_middlware,
@@ -102,6 +103,7 @@ def create_app():
     pidinst.init_app(app)
     remove_slash_redirect_middlware.init_app(app)
     page_parameter_middleware.init_app(app)
+    mqtt.init_app(app)
 
     # shell context for flask cli
     @app.shell_context_processor

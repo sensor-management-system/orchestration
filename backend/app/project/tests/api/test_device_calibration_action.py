@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -13,11 +13,10 @@ import json
 from project import base_url
 from project.api.models import Contact, Device, DeviceCalibrationAction
 from project.api.models.base_model import db
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data, create_token
+from project.extensions.instances import mqtt
+from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
 from project.tests.models.test_device_calibration_action_model import (
     add_device_calibration_action,
-)
-from project.tests.models.test_device_calibration_action_model import (
     add_device_property_calibration_model,
 )
 from project.tests.models.test_device_calibration_attachment_model import (
@@ -68,12 +67,13 @@ class TestDeviceCalibrationAction(BaseTestCase):
         )
         db.session.add_all([device, contact])
         db.session.commit()
+        formula = fake.pystr()
         data = {
             "data": {
                 "type": self.object_type,
                 "attributes": {
                     "description": "Test DeviceCalibrationAction",
-                    "formula": fake.pystr(),
+                    "formula": formula,
                     "value": fake.pyfloat(),
                     "current_calibration_date": fake.future_datetime().__str__(),
                     "next_calibration_date": fake.future_datetime().__str__(),
@@ -97,6 +97,15 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
         msg = "create;calibration action"
         self.assertEqual(msg, result_action.device.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-device-calibration-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_calibration_action")
+        self.expect(notification_data["attributes"]["formula"]).to_equal(formula)
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_device_calibration_action(self):
         """Update DeviceCalibration."""
@@ -122,6 +131,17 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
         msg = "update;calibration action"
         self.assertEqual(msg, result_action.device.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-device-calibration-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_calibration_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal("updated")
+        self.expect(notification_data["attributes"]["formula"]).to_equal(
+            device_calibration_action.formula
+        )
 
     def test_delete_device_calibration_action(self):
         """Delete DeviceCalibrationAction."""
@@ -140,6 +160,19 @@ class TestDeviceCalibrationAction(BaseTestCase):
 
         msg = "delete;calibration action"
         self.assertEqual(msg, device.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-device-calibration-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "device_calibration_action",
+                    "id": str(device_calibration_action.id),
+                }
+            }
+        )
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific device."""
@@ -311,9 +344,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         self.assertEqual(len(response.json["data"]), 0)
 
     def test_delete_device_calibration_action_with_an_attachment_link(self):
-        """Make sure the deletion of a DeviceCalibrationAction can be done even
-        if it linked to an attachment."""
-
+        """Make sure the deletion can be done even if it links to an attachment."""
         device_calibration_action = add_device_calibration_attachment()
         access_headers = create_token()
         with self.client:
@@ -325,10 +356,7 @@ class TestDeviceCalibrationAction(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_delete_device_caliubration_action_with_device_property_link(self):
-        """
-        Make sure that the deletion of a DeviceCalibrationAction can be done
-        even it it links to an device property.
-        """
+        """Make sure that the deletion can be done even if it links to an device property."""
         device_property_calibration = add_device_property_calibration_model()
         device_calibration_action_id = device_property_calibration.calibration_action_id
         access_headers = create_token()

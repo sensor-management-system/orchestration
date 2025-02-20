@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -8,9 +8,12 @@
 
 """Test cases for the api usage for generic platform action attachments."""
 
+import json
+
 from project import base_url
 from project.api.models import PlatformAttachment
 from project.api.models.base_model import db
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, fake
 from project.tests.models.test_generic_action_attachment_model import (
     add_generic_platform_action_model,
@@ -93,6 +96,21 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/post-generic-platform-action-attachment"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "generic_platform_action_attachment"
+        )
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(platform_action.id))
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_generic_platform_action_attachment(self):
         """Update GenericPlatformActionAttachment."""
@@ -124,6 +142,23 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
             data_object=data,
             object_type=self.object_type,
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/patch-generic-platform-action-attachment"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "generic_platform_action_attachment"
+        )
+        self.expect(
+            notification_data["relationships"]["attachment"]["data"]["id"]
+        ).to_equal(str(attachment_new.id))
+        self.expect(
+            notification_data["relationships"]["action"]["data"]["id"]
+        ).to_equal(str(generic_platform_action_attachment.action_id))
 
     def test_delete_generic_platform_action_attachment(self):
         """Delete GenericPlatformActionAttachment."""
@@ -133,6 +168,20 @@ class TestGenericPlatformActionAttachment(BaseTestCase):
         )
         _ = super().delete_object(
             url=f"{self.url}/{generic_platform_action_attachment.id}",
+        )
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/delete-generic-platform-action-attachment"
+        )
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "generic_platform_action_attachment",
+                    "id": str(generic_platform_action_attachment.id),
+                }
+            }
         )
 
     def test_http_response_not_found(self):

@@ -35,9 +35,10 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.contact_schema import ContactSchema
 from .base_resource import check_if_object_not_found
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ContactList(ResourceList):
+class ContactList(MqttNotificationMixin, ResourceList):
     """
     Contact list resource.
 
@@ -129,7 +130,7 @@ class ContactList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ContactDetail(ResourceDetail):
+class ContactDetail(MqttNotificationMixin, ResourceDetail):
     """
     Detail resource for contacts.
 

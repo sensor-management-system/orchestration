@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -11,13 +11,85 @@
 import datetime
 import json
 
+import pytz
+
 from project import base_url, db
-from project.api.models import Configuration, Contact, Site
-from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
+from project.api.models import (
+    Configuration,
+    ConfigurationStaticLocationBeginAction,
+    Contact,
+    Site,
+    User,
+)
+from project.extensions.instances import mqtt
+from project.tests.base import (
+    BaseTestCase,
+    Fixtures,
+    create_token,
+    fake,
+    generate_userinfo_data,
+)
 from project.tests.models.test_configuration_static_action_model import (
     add_static_location_begin_action_model,
 )
 from project.tests.models.test_configurations_model import generate_configuration_model
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_configuration1_in_group1", scope=lambda: db.session)
+def create_public_configuration1_in_group1():
+    """Create a public configuration that uses group 1 for permission management."""
+    result = Configuration(
+        label="public configuration1",
+        is_internal=False,
+        is_public=True,
+        cfg_permission_group="1",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register(
+    "static_location1_of_public_configuration1_in_group1", scope=lambda: db.session
+)
+@fixtures.use(["public_configuration1_in_group1", "super_user_contact"])
+def create_static_location1_of_public_configuration1_in_group1(
+    public_configuration1_in_group1, super_user_contact
+):
+    """Create a static location for the public configuration."""
+    result = ConfigurationStaticLocationBeginAction(
+        configuration=public_configuration1_in_group1,
+        begin_date=datetime.datetime(2022, 1, 25, 0, 0, 0, tzinfo=pytz.UTC),
+        begin_contact=super_user_contact,
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestConfigurationStaticLocationActionServices(BaseTestCase):
@@ -422,7 +494,8 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         # Test only for the first one
         with self.client:
             url_get_for_config1 = (
-                base_url + f"/static-location-actions?filter[configuration_id]={config1.id}"
+                base_url
+                + f"/static-location-actions?filter[configuration_id]={config1.id}"
             )
             response = self.client.get(
                 url_get_for_config1, content_type="application/vnd.api+json"
@@ -498,3 +571,132 @@ class TestConfigurationStaticLocationActionServices(BaseTestCase):
         response = self.client.get(f"{self.url}/{static_location_begin_action.id}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["data"]["attributes"]["label"], "fancy location")
+
+    @fixtures.use(
+        ["super_user", "super_user_contact", "public_configuration1_in_group1"]
+    )
+    def test_post_triggers_mqtt_notification(
+        self,
+        super_user,
+        super_user_contact,
+        public_configuration1_in_group1,
+    ):
+        """Ensure that we can post a static location and publish the notification via mqtt."""
+        payload = {
+            "data": {
+                "type": "configuration_static_location_action",
+                "attributes": {
+                    "begin_date": "2022-01-24T00:00:00Z",
+                },
+                "relationships": {
+                    "configuration": {
+                        "data": {
+                            "type": "configuration",
+                            "id": str(
+                                public_configuration1_in_group1.id,
+                            ),
+                        }
+                    },
+                    "begin_contact": {
+                        "data": {
+                            "type": "contact",
+                            "id": str(
+                                super_user_contact.id,
+                            ),
+                        }
+                    },
+                },
+            }
+        }
+        with self.run_requests_as(super_user):
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(201)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/post-configuration-static-location-action"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "configuration_static_location_action"
+        )
+        self.expect(notification_data["attributes"]["begin_date"]).to_equal(
+            "2022-01-24T00:00:00+00:00"
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
+
+    @fixtures.use(["super_user", "static_location1_of_public_configuration1_in_group1"])
+    def test_patch_triggers_mqtt_notification(
+        self,
+        super_user,
+        static_location1_of_public_configuration1_in_group1,
+    ):
+        """Ensure that we can patch a static location and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.url}/{static_location1_of_public_configuration1_in_group1.id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "configuration_static_location_action",
+                            "id": str(
+                                static_location1_of_public_configuration1_in_group1.id
+                            ),
+                            "attributes": {"end_date": "2025-01-02T00:00:00Z"},
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/patch-configuration-static-location-action"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "configuration_static_location_action"
+        )
+        self.expect(notification_data["attributes"]["end_date"]).to_equal(
+            "2025-01-02T00:00:00+00:00"
+        )
+        self.expect(notification_data["attributes"]["begin_date"]).to_equal(
+            "2022-01-25T00:00:00+00:00"
+        )
+
+    @fixtures.use(["super_user", "static_location1_of_public_configuration1_in_group1"])
+    def test_delete_triggers_mqtt_notification(
+        self,
+        super_user,
+        static_location1_of_public_configuration1_in_group1,
+    ):
+        """Ensure that we can delete a static location and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.delete(
+                f"{self.url}/{static_location1_of_public_configuration1_in_group1.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/delete-configuration-static-location-action"
+        )
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "configuration_static_location_action",
+                    "id": str(static_location1_of_public_configuration1_in_group1.id),
+                }
+            }
+        )

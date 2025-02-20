@@ -27,7 +27,7 @@ from project.api.models import (
 )
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
+from project.extensions.instances import idl, mqtt
 from project.tests.base import BaseTestCase, Fixtures
 
 fixtures = Fixtures()
@@ -697,6 +697,19 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/post-involved-device-for-datastream-link"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "involved_device_for_datastream_link"
+        )
+        self.expect(notification_data["attributes"]["order_index"]).to_equal(123)
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
+
     @fixtures.use(["soil_moisture_datastream_link", "cr_1000_mount", "super_user"])
     def test_post_super_user(
         self, soil_moisture_datastream_link, cr_1000_mount, super_user
@@ -949,6 +962,20 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         )
         self.assertEqual(
             reloaded_involved_device.order_index,
+            new_order_index,
+        )
+
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/patch-involved-device-for-datastream-link"
+        )
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal(
+            "involved_device_for_datastream_link"
+        )
+        self.expect(notification_data["attributes"]["order_index"]).to_equal(
             new_order_index,
         )
 
@@ -1452,6 +1479,21 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             .first()
         )
         self.assertIsNone(reloaded)
+
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal(
+            "sms/delete-involved-device-for-datastream-link"
+        )
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "involved_device_for_datastream_link",
+                    "id": str(cr_1000_involvement_for_soil_moisture_datastream_link.id),
+                }
+            }
+        )
 
     @fixtures.use(
         ["cr_1000_involvement_for_soil_moisture_datastream_link", "super_user"]

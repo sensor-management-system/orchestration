@@ -22,6 +22,7 @@ from ..schemas.involved_device_for_datastream_link_schema import (
     InvolvedDeviceForDatastreamLinkSchema,
 )
 from .base_resource import check_if_object_not_found
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
 def ensure_create_doesnt_introduce_conflicts(model, data):
@@ -55,7 +56,7 @@ def ensure_update_doesnt_introduce_conflicts(object_):
         )
 
 
-class InvolvedDeviceForDatastreamLinkList(ResourceList):
+class InvolvedDeviceForDatastreamLinkList(MqttNotificationMixin, ResourceList):
     """Resource class for lists of involved devices (GET, POST)."""
 
     def query(self, view_kwargs):
@@ -79,7 +80,7 @@ class InvolvedDeviceForDatastreamLinkList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class InvolvedDeviceForDatastreamLinkDetail(ResourceDetail):
+class InvolvedDeviceForDatastreamLinkDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for details for involved devices (GET, PATCH, DELETE)."""
 
     def before_get(self, args, kwargs):

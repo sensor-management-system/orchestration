@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -24,9 +24,10 @@ from ..resources.base_resource import (
     set_update_description_text_user_and_pidinst,
 )
 from ..schemas.software_update_action_schema import PlatformSoftwareUpdateActionSchema
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class PlatformSoftwareUpdateActionList(ResourceList):
+class PlatformSoftwareUpdateActionList(MqttNotificationMixin, ResourceList):
     """List resource for platform software update actions (get, post)."""
 
     def before_create_object(self, data, *args, **kwargs):
@@ -82,7 +83,7 @@ class PlatformSoftwareUpdateActionList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class PlatformSoftwareUpdateActionDetail(ResourceDetail):
+class PlatformSoftwareUpdateActionDetail(MqttNotificationMixin, ResourceDetail):
     """Detail relationship for platform software update actions (get, delete, patch)."""
 
     def before_get(self, args, kwargs):

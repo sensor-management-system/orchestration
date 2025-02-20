@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -24,9 +24,10 @@ from .base_resource import (
     query_device_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DeviceCalibrationActionList(ResourceList):
+class DeviceCalibrationActionList(MqttNotificationMixin, ResourceList):
     """List resource for device calibration actions (get, post)."""
 
     def before_create_object(self, data, *args, **kwargs):
@@ -78,7 +79,7 @@ class DeviceCalibrationActionList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DeviceCalibrationActionDetail(ResourceDetail):
+class DeviceCalibrationActionDetail(MqttNotificationMixin, ResourceDetail):
     """Detail resource for device calibration action (get, delete, patch)."""
 
     def before_get(self, args, kwargs):

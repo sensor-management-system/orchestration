@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -26,7 +26,7 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
+from project.extensions.instances import mqtt, pidinst
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -107,6 +107,18 @@ class TestContactServices(BaseTestCase):
         # of the request), we don't have this field.
         self.assertIsNone(contact_by_system.created_by_id)
 
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-contact")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("contact")
+        self.expect(notification_data["attributes"]["given_name"]).to_equal(
+            contact["given_name"]
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
+
     def test_update_contact_as_self(self):
         """
         Ensure update contact behaves correctly.
@@ -138,6 +150,17 @@ class TestContactServices(BaseTestCase):
         self.assertEqual(response.json["data"]["attributes"]["given_name"], "updated")
         self.assertEqual(
             response.json["data"]["attributes"]["organization"], "Helmholtz"
+        )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-contact")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("contact")
+        self.expect(notification_data["attributes"]["given_name"]).to_equal("updated")
+        self.expect(notification_data["attributes"]["family_name"]).to_equal(
+            contact.family_name
         )
 
     def test_update_contact_as_superuser(self):
@@ -292,6 +315,14 @@ class TestContactServices(BaseTestCase):
                     content_type="application/vnd.api+json",
                 )
         self.assertEqual(response.status_code, 200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-contact")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {"data": {"type": "contact", "id": str(contact.id)}}
+        )
 
     def test_delete_contact_as_creator(self):
         """Ensure remove contact behaves correctly for a creator of that contact."""

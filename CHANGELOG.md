@@ -6,10 +6,13 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.17.3 (Unreleased)
+
+## 1.18.0 (Unreleased)
 
 Added:
 - Fuzzy matching mechanism to help with reducting cv suggestions for already existing cv entries ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/428))
+- MQTT interface to receive updates from the SMS ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/295))  
+
 
 Fixed:
 - problem on validation of mount contact when mounting devices or platforms ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/490))

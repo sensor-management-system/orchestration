@@ -24,6 +24,7 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
+from project.extensions.instances import mqtt
 from project.tests.base import (
     BaseTestCase,
     create_token,
@@ -164,6 +165,17 @@ class TestDatastreamLinks(BaseTestCase):
         self.assertEqual(
             reloaded_configuration.update_description, "create;datastream link"
         )
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-datastream-link")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("datastream_link")
+        self.expect(notification_data["attributes"]["datastream_name"]).to_equal(
+            "AirTemp+22m"
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_post_datastream_link_api_missing_mount(self):
         """Ensure that we don't add a datastream link with missing device mount action."""
@@ -898,4 +910,126 @@ class TestDatastreamLinks(BaseTestCase):
         self.assertEqual(resp1.json["included"][0]["attributes"]["name"], "tsm1")
         self.assertEqual(
             resp1.json["included"][0]["attributes"]["url"], "https://somewhere"
+        )
+
+    def test_patch_datastream_link_super_user(self):
+        """Ensure we can patch a datastream link if we are super user."""
+        configuration1 = Configuration(
+            label="c1", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        device1 = Device(short_name="d1", is_public=True, is_internal=False)
+        begin_contact = Contact(
+            given_name="begin", family_name="contact", email="begin.contact@localhost"
+        )
+        mount1 = DeviceMountAction(
+            configuration=configuration1,
+            device=device1,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        property1 = DeviceProperty(device=device1, property_name="prop1")
+        tsm_endpoint1 = TsmEndpoint(name="tsm1", url="https://somewhere")
+
+        linking1 = DatastreamLink(
+            device_mount_action=mount1,
+            device_property=property1,
+            tsm_endpoint=tsm_endpoint1,
+            datasource_id="1",
+            thing_id="1",
+            datastream_id="1",
+        )
+        super_user = User(
+            subject=begin_contact.email, contact=begin_contact, is_superuser=True
+        )
+        db.session.add_all(
+            [
+                configuration1,
+                device1,
+                begin_contact,
+                mount1,
+                property1,
+                tsm_endpoint1,
+                linking1,
+                super_user,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(super_user):
+            url = f"{self.url}/{linking1.id}"
+            payload = {
+                "data": {
+                    "id": str(linking1.id),
+                    "type": "datastream_link",
+                    "attributes": {"thing_name": "different"},
+                }
+            }
+            resp = self.client.patch(
+                url, data=json.dumps(payload), content_type="application/vnd.api+json"
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-datastream-link")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("datastream_link")
+        self.expect(notification_data["attributes"]["thing_name"]).to_equal("different")
+        self.expect(notification_data["attributes"]["datastream_name"]).to_equal(
+            linking1.datastream_name
+        )
+
+    def test_delete_datastream_link_super_user(self):
+        """Ensure we can delete a datastream link if we are super user."""
+        configuration1 = Configuration(
+            label="c1", is_public=True, is_internal=False, cfg_permission_group="123"
+        )
+        device1 = Device(short_name="d1", is_public=True, is_internal=False)
+        begin_contact = Contact(
+            given_name="begin", family_name="contact", email="begin.contact@localhost"
+        )
+        mount1 = DeviceMountAction(
+            configuration=configuration1,
+            device=device1,
+            begin_contact=begin_contact,
+            begin_date=datetime.datetime.now(),
+        )
+        property1 = DeviceProperty(device=device1, property_name="prop1")
+        tsm_endpoint1 = TsmEndpoint(name="tsm1", url="https://somewhere")
+
+        linking1 = DatastreamLink(
+            device_mount_action=mount1,
+            device_property=property1,
+            tsm_endpoint=tsm_endpoint1,
+            datasource_id="1",
+            thing_id="1",
+            datastream_id="1",
+        )
+        super_user = User(
+            subject=begin_contact.email, contact=begin_contact, is_superuser=True
+        )
+        db.session.add_all(
+            [
+                configuration1,
+                device1,
+                begin_contact,
+                mount1,
+                property1,
+                tsm_endpoint1,
+                linking1,
+                super_user,
+            ]
+        )
+        db.session.commit()
+        with self.run_requests_as(super_user):
+            url = f"{self.url}/{linking1.id}"
+            resp = self.client.delete(url)
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-datastream-link")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {"data": {"type": "datastream_link", "id": str(linking1.id)}}
         )

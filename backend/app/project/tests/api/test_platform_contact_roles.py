@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -16,8 +16,62 @@ from flask import current_app
 from project import base_url
 from project.api.models import Contact, Platform, PlatformContactRole, User
 from project.api.models.base_model import db
-from project.extensions.instances import pidinst
-from project.tests.base import BaseTestCase, fake, generate_userinfo_data
+from project.extensions.instances import mqtt, pidinst
+from project.tests.base import BaseTestCase, Fixtures, fake, generate_userinfo_data
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_platform1_in_group1", scope=lambda: db.session)
+def create_public_platform1_in_group1():
+    """Create a public platform that uses group 1 for permission management."""
+    result = Platform(
+        short_name="public platform1",
+        is_internal=False,
+        is_public=True,
+        group_ids=["1"],
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("platform_contact", scope=lambda: db.session)
+@fixtures.use(["public_platform1_in_group1", "super_user_contact"])
+def create_platform_contact(public_platform1_in_group1, super_user_contact):
+    """Create a contact for the platform."""
+    result = PlatformContactRole(
+        contact=super_user_contact,
+        platform=public_platform1_in_group1,
+        role_uri="http://localhost/cv/roles/1",
+        role_name="Owner",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 def add_a_contact():
@@ -84,8 +138,9 @@ class TestPlatformContactRolesServices(BaseTestCase):
         """Ensure post a platform_contact_role behaves correctly."""
         contact = add_a_contact()
         platform = add_a_platform()
+        role_name = fake.pystr()
         attributes = {
-            "role_name": fake.pystr(),
+            "role_name": role_name,
             "role_uri": fake.url(),
         }
         relationships = {
@@ -106,6 +161,15 @@ class TestPlatformContactRolesServices(BaseTestCase):
         platform_id = result["data"]["relationships"]["platform"]["data"]["id"]
         platform = db.session.query(Platform).filter_by(id=platform_id).first()
         self.assertEqual(platform.update_description, "create;contact")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-platform-contact-role")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform_contact_role")
+        self.expect(notification_data["attributes"]["role_name"]).to_equal(role_name)
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_a_contact_role(self):
         """Ensure update platform_contact_role behaves correctly."""
@@ -429,3 +493,59 @@ class TestPlatformContactRolesServices(BaseTestCase):
             )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json["data"]), 0)
+
+    @fixtures.use(["super_user", "platform_contact"])
+    def test_patch_triggers_mqtt_notification(
+        self,
+        super_user,
+        platform_contact,
+    ):
+        """Ensure that we can patch a platform contact and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.url}/{platform_contact.id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "platform_contact_role",
+                            "id": str(platform_contact.id),
+                            "attributes": {"role_name": "PI"},
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-platform-contact-role")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("platform_contact_role")
+        self.expect(notification_data["attributes"]["role_name"]).to_equal("PI")
+        self.expect(notification_data["attributes"]["role_uri"]).to_equal(
+            platform_contact.role_uri
+        )
+
+    @fixtures.use(["super_user", "platform_contact"])
+    def test_delete_triggers_mqtt_notification(self, super_user, platform_contact):
+        """Ensure that we can delete a platform contact and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.delete(
+                f"{self.url}/{platform_contact.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-platform-contact-role")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "platform_contact_role",
+                    "id": str(platform_contact.id),
+                }
+            }
+        )

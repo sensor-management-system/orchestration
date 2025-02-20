@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 - 2023
+# SPDX-FileCopyrightText: 2022 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -13,8 +13,47 @@ from project import base_url
 from project.api.models import Configuration, Contact, Site, SiteContactRole, User
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl
-from project.tests.base import BaseTestCase
+from project.extensions.instances import idl, mqtt
+from project.tests.base import BaseTestCase, Fixtures
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_site1_in_group1", scope=lambda: db.session)
+def create_public_site1_in_group1():
+    """Create a public site that uses group 1 for permission management."""
+    result = Site(
+        label="public site1",
+        is_internal=False,
+        is_public=True,
+        group_ids=["1"],
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestSiteApi(BaseTestCase):
@@ -276,6 +315,15 @@ class TestSiteApi(BaseTestCase):
         new_site = db.session.query(Site).filter_by(id=new_id).first()
 
         self.assertEqual(new_site.update_description, "create;basic data")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-site")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("site")
+        self.expect(notification_data["attributes"]["label"]).to_equal("some new site")
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_get_one_404(self):
         """Ensure we get a 404 response if we try to get a site that doesn't exist."""
@@ -529,6 +577,19 @@ class TestSiteApi(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
         reloaded_site = db.session.query(Site).filter_by(id=self.public_site.id).first()
         self.assertEqual(reloaded_site.update_description, "update;basic data")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-site")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("site")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            description
+        )
+        self.expect(notification_data["attributes"]["label"]).to_equal(
+            self.public_site.label
+        )
 
     def test_delete_anonymous(self):
         """Ensure we don't allow deletion without login."""
@@ -543,6 +604,19 @@ class TestSiteApi(BaseTestCase):
         self.assertEqual(resp.status_code, 200)
 
         self.assertEqual(db.session.query(Site).filter_by(id=site_id).first(), None)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-site")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "site",
+                    "id": str(site_id),
+                }
+            }
+        )
 
     def test_delete_by_normal_user(self):
         """Ensure we don't allow deletion for normal users."""

@@ -20,6 +20,7 @@ from project.api.models import (
     User,
 )
 from project.api.models.base_model import db
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, Fixtures
 from project.views import download_files
 
@@ -439,6 +440,7 @@ class TestExportControlAttachments(BaseTestCase):
             content_type="application/vnd.api+json",
         )
         self.expect(response.status_code).to_equal(401)
+        self.expect(mqtt.mqtt.publish.called).to_equal(False)
 
     @fixtures.use(["user1", "manufacturer_model1"])
     def test_post_normal_user(self, user1, manufacturer_model1):
@@ -506,6 +508,15 @@ class TestExportControlAttachments(BaseTestCase):
         self.expect(loaded_attachment.updated_by_id).to_equal(export_control_user.id)
         self.expect(loaded_attachment.created_at).not_.to_be(None)
         self.expect(loaded_attachment.updated_at).not_.to_be(None)
+
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+        self.expect(call_args[0]).to_equal("sms/post-export-control-attachment")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("export_control_attachment")
+        self.expect(notification_data["attributes"]["url"]).to_equal(
+            "https://gfz-potsdam.de"
+        )
 
     @fixtures.use(["super_user", "manufacturer_model1"])
     def test_post_super_user(self, super_user, manufacturer_model1):
@@ -613,6 +624,13 @@ class TestExportControlAttachments(BaseTestCase):
         self.expect(loaded_attachment.updated_by_id).to_equal(export_control_user.id)
         self.expect(loaded_attachment.updated_at).not_.to_be(None)
 
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+        self.expect(call_args[0]).to_equal("sms/patch-export-control-attachment")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("export_control_attachment")
+        self.expect(notification_data["attributes"]["label"]).to_equal("fancy")
+
     @fixtures.use(["super_user", "public_attachment_of_manufacturer_model1"])
     def test_patch_super_user(
         self, super_user, public_attachment_of_manufacturer_model1
@@ -669,6 +687,19 @@ class TestExportControlAttachments(BaseTestCase):
                 f"{self.url}/{public_attachment_of_manufacturer_model1.id}",
             )
         self.expect(response.status_code).to_equal(200)
+
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-export-control-attachment")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "export_control_attachment",
+                    "id": str(public_attachment_of_manufacturer_model1.id),
+                }
+            }
+        )
 
     @fixtures.use(["super_user", "public_attachment_of_manufacturer_model1"])
     def test_delete_super_user(

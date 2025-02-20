@@ -29,9 +29,10 @@ from ..permissions.common import DelegateToCanFunctions
 from ..permissions.rules import filter_visible
 from ..schemas.export_control_attachment_schema import ExportControlAttachmentSchema
 from .base_resource import check_if_object_not_found, delete_attachments_in_minio_by_url
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class ExportControlAttachmentList(ResourceList):
+class ExportControlAttachmentList(MqttNotificationMixin, ResourceList):
     """List endpoint resource for the export control attachments."""
 
     def query(self, view_kwargs):
@@ -108,7 +109,7 @@ class ExportControlAttachmentList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class ExportControlAttachmentDetail(ResourceDetail):
+class ExportControlAttachmentDetail(MqttNotificationMixin, ResourceDetail):
     """Detail endpoint resource for the export control attachments."""
 
     def before_get(self, args, kwargs):

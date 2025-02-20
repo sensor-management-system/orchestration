@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2023
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Luca Johannes Nendel <Luca-Johannes.Nendel@ufz.de>
@@ -30,9 +30,10 @@ from project.api.models import (
 )
 from project.api.models.base_model import db
 from project.extensions.idl.models.user_account import UserAccount
-from project.extensions.instances import idl, pidinst
+from project.extensions.instances import idl, mqtt, pidinst
 from project.tests.base import (
     BaseTestCase,
+    Fixtures,
     create_token,
     fake,
     generate_userinfo_data,
@@ -44,6 +45,45 @@ from project.tests.models.test_generic_actions_models import (
 from project.tests.models.test_user_model import add_user
 from project.tests.permissions import create_a_test_contact
 from project.tests.read_from_json import extract_data_from_json_file
+
+fixtures = Fixtures()
+
+
+@fixtures.register("public_configuration1_in_group1", scope=lambda: db.session)
+def create_public_configuration1_in_group1():
+    """Create a public configuration that uses group 1 for permission management."""
+    result = Configuration(
+        label="public configuration1",
+        is_internal=False,
+        is_public=True,
+        cfg_permission_group="1",
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user_contact", scope=lambda: db.session)
+def create_super_user_contact():
+    """Create a contact that can be used to make a super user."""
+    result = Contact(
+        given_name="super", family_name="contact", email="super.contact@localhost"
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
+
+
+@fixtures.register("super_user", scope=lambda: db.session)
+@fixtures.use(["super_user_contact"])
+def create_super_user(super_user_contact):
+    """Create super user to use it in the tests."""
+    result = User(
+        contact=super_user_contact, subject=super_user_contact.email, is_superuser=True
+    )
+    db.session.add(result)
+    db.session.commit()
+    return result
 
 
 class TestConfigurationsService(BaseTestCase):
@@ -628,6 +668,17 @@ class TestConfigurationsService(BaseTestCase):
 
         msg = "create;basic data"
         self.assertEqual(msg, cfg.update_description)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-configuration")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("configuration")
+        self.expect(notification_data["attributes"]["label"]).to_equal(
+            config_json[0]["label"]
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_description_after_update_basic_data(self):
         """Make sure that the update desription field is updated with a patch."""
@@ -1224,6 +1275,62 @@ class TestConfigurationsService(BaseTestCase):
         configuration = db.session.query(Configuration).filter_by(id=result_id).first()
         self.assertEqual(["word1", "word2"], configuration.keywords)
         self.assertEqual(["word1", "word2"], result["data"]["attributes"]["keywords"])
+
+    @fixtures.use(["super_user", "public_configuration1_in_group1"])
+    def test_patch_triggers_mqtt_notification(
+        self, super_user, public_configuration1_in_group1
+    ):
+        """Ensure that we can patch a configuration and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.configurations_url}/{public_configuration1_in_group1.id}",
+                data=json.dumps(
+                    {
+                        "data": {
+                            "type": "configuration",
+                            "id": str(public_configuration1_in_group1.id),
+                            "attributes": {"label": "new value"},
+                        }
+                    }
+                ),
+                content_type="application/vnd.api+json",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-configuration")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("configuration")
+        self.expect(notification_data["attributes"]["label"]).to_equal("new value")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            public_configuration1_in_group1.description
+        )
+
+    @fixtures.use(["super_user", "public_configuration1_in_group1"])
+    def test_delete_triggers_mqtt_notification(
+        self, super_user, public_configuration1_in_group1
+    ):
+        """Ensure that we can delete a configuration and publish the notification via mqtt."""
+        with self.run_requests_as(super_user):
+            resp = self.client.delete(
+                f"{self.configurations_url}/{public_configuration1_in_group1.id}",
+            )
+        self.expect(resp.status_code).to_equal(200)
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-configuration")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "configuration",
+                    "id": str(public_configuration1_in_group1.id),
+                }
+            }
+        )
 
     def test_add_to_index_on_patch(self):
         """Ensure we update the elasticsearch index after the patch."""

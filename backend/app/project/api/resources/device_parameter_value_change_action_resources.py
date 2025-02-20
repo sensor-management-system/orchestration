@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText:  2023
+# SPDX-FileCopyrightText:  2023 - 2024
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 #
@@ -22,9 +22,10 @@ from .base_resource import (
     query_device_set_update_description_and_update_pidinst,
     set_update_description_text_user_and_pidinst,
 )
+from .mixins.mqtt_notification import MqttNotificationMixin
 
 
-class DeviceParameterValueChangeActionList(ResourceList):
+class DeviceParameterValueChangeActionList(MqttNotificationMixin, ResourceList):
     """Resource class for the device parameter value change action list."""
 
     def query(self, kwargs):
@@ -73,7 +74,7 @@ class DeviceParameterValueChangeActionList(ResourceList):
     permission_classes = [DelegateToCanFunctions]
 
 
-class DeviceParameterValueChangeActionDetail(ResourceDetail):
+class DeviceParameterValueChangeActionDetail(MqttNotificationMixin, ResourceDetail):
     """Resource class for the device parameter value change action details."""
 
     def before_get(self, args, kwargs):

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2022
+# SPDX-FileCopyrightText: 2021 - 2024
 # - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
@@ -13,6 +13,7 @@ import json
 from project import base_url
 from project.api.models import Contact, Device, DeviceSoftwareUpdateAction
 from project.api.models.base_model import db
+from project.extensions.instances import mqtt
 from project.tests.base import BaseTestCase, fake, generate_userinfo_data
 from project.tests.models.test_software_update_actions_model import (
     add_device_software_update_action_model,
@@ -62,7 +63,7 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
             "data": {
                 "type": self.object_type,
                 "attributes": {
-                    "description": "Test DeviceCalibrationAction",
+                    "description": "Test DeviceSoftwareUpdateAction",
                     "version": f"v_{fake.pyint()}",
                     "software_type_name": fake.pystr(),
                     "software_type_uri": fake.uri(),
@@ -83,6 +84,17 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         device_id = result["data"]["relationships"]["device"]["data"]["id"]
         device = db.session.query(Device).filter_by(id=device_id).first()
         self.assertEqual(device.update_description, "create;software update action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/post-device-software-update-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_software_update_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal(
+            "Test DeviceSoftwareUpdateAction"
+        )
+        self.expect(str).of(notification_data["id"]).to_match(r"\d+")
 
     def test_update_device_software_update_action(self):
         """Update DeviceSoftwareUpdateAction."""
@@ -104,6 +116,17 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         device_id = result["data"]["relationships"]["device"]["data"]["id"]
         device = db.session.query(Device).filter_by(id=device_id).first()
         self.assertEqual(device.update_description, "update;software update action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/patch-device-software-update-action")
+        notification_data = json.loads(call_args[1])["data"]
+        self.expect(notification_data["type"]).to_equal("device_software_update_action")
+        self.expect(notification_data["attributes"]["description"]).to_equal("updated")
+        self.expect(notification_data["attributes"]["repository_url"]).to_equal(
+            device_software_update_action.repository_url
+        )
 
     def test_delete_device_software_update_action(self):
         """Delete DeviceSoftwareUpdateAction."""
@@ -114,6 +137,19 @@ class TestDeviceSoftwareUpdateAction(BaseTestCase):
         )
         device = db.session.query(Device).filter_by(id=device_id).first()
         self.assertEqual(device.update_description, "delete;software update action")
+        # And ensure that we trigger the mqtt.
+        mqtt.mqtt.publish.assert_called_once()
+        call_args = mqtt.mqtt.publish.call_args[0]
+
+        self.expect(call_args[0]).to_equal("sms/delete-device-software-update-action")
+        self.expect(json.loads).of(call_args[1]).to_equal(
+            {
+                "data": {
+                    "type": "device_software_update_action",
+                    "id": str(device_software_update_action.id),
+                }
+            }
+        )
 
     def test_filtered_by_device(self):
         """Ensure that I can prefilter by a specific devices."""
