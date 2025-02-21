@@ -19,6 +19,7 @@ Fixed:
 - corrected string when a device or platform is not available for mounting ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/495))  
 - corrected error message and removed duplicated loading of platform attachments([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/498))
 - Prod path updated for FZJ prod nginx image ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/503))
+- when unmounting offsets got overriden ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/502))  
 
 Changed:
 - mechanism to find the contact of the current user uses now the contact id of the user info object ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/491))
