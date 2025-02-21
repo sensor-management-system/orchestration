@@ -56,7 +56,7 @@ EXPOSE 80
 EXPOSE 443
 EXPOSE 8443
 COPY --from=js-builder /smsfrontend/dist/ /usr/share/nginx/html
-COPY ./docker/build/nginx/fzj/dev/nginx.conf /etc/nginx/nginx.conf
-COPY ./docker/build/nginx/fzj/dev/default.conf /etc/nginx/conf.d/default.conf
+COPY ./docker/build/nginx/fzj/prod/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/build/nginx/fzj/prod/default.conf /etc/nginx/conf.d/default.conf
 
 
