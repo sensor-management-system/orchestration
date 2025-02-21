@@ -25,6 +25,7 @@ Changed:
 - Removed usage of pytz ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/496))
 - Removed deprecated code for creating old ufz frontend image ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/487))
 - Action names defined in the SMS follow the same structure as for the CV with only one upper case letter ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/501))
+- Update to docker 27.5.1 for the builds in the CI pipeline ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/505))
 
 ## 1.17.2 - 2025-01-28
 
