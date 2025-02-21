@@ -217,7 +217,7 @@ services:
       - mq
     volumes:
       - mq-config:/etc/mosquitto
-      - ./mq/init:/etc/mq_init:ro
+      - ../../../../mq/init:/etc/mq_init:ro
     command: sh /etc/mq_init/setup-mosquitto.sh
 
   mq_db:
@@ -229,7 +229,7 @@ services:
       POSTGRES_PASSWORD: ${MQTT_AUTH_PASSWORD}
       POSTGRES_DB: ${MQTT_AUTH_DB}
     volumes:
-      - ./mq/db/mqtt_auth.sql:/docker-entrypoint-initdb.d/10_mqtt_auth.sql
+      - ../../../../mq/db/mqtt_auth.sql:/docker-entrypoint-initdb.d/10_mqtt_auth.sql
       - mq-db-data:/var/lib/postgresql/data
     shm_size: 128M
     networks:
