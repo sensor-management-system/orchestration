@@ -7,4 +7,4 @@
 FROM python:3.12-alpine
 
 COPY mq/init /etc/mq_init
-COMMAND ["sh", "/etc/mq_init/setup-mosquitto.sh"]
+CMD ["sh", "/etc/mq_init/setup-mosquitto.sh"]
