@@ -249,9 +249,6 @@ services:
   mq:
     build:
       context: 'mq'
-      args:
-        MOSQUITTO_VERSION: "${MOSQUITTO_VERSION:-2.0.19}"
-        DEBIAN_IMAGE: "${DEBIAN_IMAGE:-stable-slim}"
     container_name: sms_mq
     ports:
       - 8883:8883
