@@ -3,17 +3,22 @@
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 #
 # SPDX-License-Identifier: EUPL-1.2
-ARG DEBIAN_IMAGE=stable-slim
+ARG DEBIAN_IMAGE=bullseye-slim
 FROM debian:${DEBIAN_IMAGE} AS build
-ARG MOSQUITTO_VERSION
+ARG GO_VERSION=1.24.0
+ARG MOSQUITTO_VERSION=2.0.19
 WORKDIR /build
 
 # install dependencies
 RUN apt-get update && \
     apt-get install -y \
     wget git build-essential cmake \
-    libssl-dev libcjson-dev libwebsockets-dev \
-    golang-go
+    libssl-dev libcjson-dev libwebsockets-dev
+
+RUN wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
+    rm -rf /usr/local/go && \
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
+    ln -s /usr/local/go/bin/go /usr/bin/go
 
 # download mosquitto-go-auth repo
 RUN git clone https://github.com/iegomez/mosquitto-go-auth.git /build/mosquitto-go-auth
@@ -36,7 +41,7 @@ RUN cd mosquitto-go-auth; \
     go build pw-gen/pw.go
 
 FROM debian:${DEBIAN_IMAGE} AS final
-ARG MOSQUITTO_VERSION
+ARG MOSQUITTO_VERSION=2.0.19
 
 WORKDIR /mosquitto
 

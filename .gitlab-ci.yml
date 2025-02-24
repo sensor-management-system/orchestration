@@ -523,8 +523,6 @@ build-deploy-image-mq-staging:
     - |
         docker build \
           --tag "$CI_REGISTRY_IMAGE/mq:latest" \
-          --build-arg MOSQUITTO_VERSION=2.0.19 \
-          --build-arg DEBIAN_IMAGE=stable-slim \
           mq
     - docker push --all-tags "$CI_REGISTRY_IMAGE/mq"
   rules:
@@ -544,8 +542,6 @@ build-deploy-image-mq-prod:
           --tag "$CI_REGISTRY_IMAGE/mq:${CI_COMMIT_TAG}" \
           --tag "$CI_REGISTRY_IMAGE/mq:latest" \
           --tag "$CI_REGISTRY_IMAGE/mq:gfz-sandbox-latest" \
-          --build-arg MOSQUITTO_VERSION=2.0.19 \
-          --build-arg DEBIAN_IMAGE=stable-slim \
           mq
     - docker push --all-tags "$CI_REGISTRY_IMAGE/mq"
   rules:
