@@ -488,8 +488,8 @@ build-deploy-image-mq-init-gfz-sandbox:
   script:
     - |
         docker build \
-          --tag $CI_REGISTRY_IMAGE/mq_init:gfz-${CI_COMMIT_TAG}" \
-          --tag $CI_REGISTRY_IMAGE/mq_init:gfz-sandbox-latest" \
+          --tag "$CI_REGISTRY_IMAGE/mq_init:gfz-${CI_COMMIT_TAG}" \
+          --tag "$CI_REGISTRY_IMAGE/mq_init:gfz-sandbox-latest" \
           -f docker/build/mq_init/gfz/Dockerfile \
           .
     - docker push --all-tags "$CI_REGISTRY_IMAGE/mq_init"
@@ -505,8 +505,8 @@ build-deploy-image-mq-db-gfz-sandbox:
   script:
     - |
         docker build \
-          --tag $CI_REGISTRY_IMAGE/mq_db:gfz-${CI_COMMIT_TAG}" \
-          --tag $CI_REGISTRY_IMAGE/mq_db:gfz-sandbox-latest" \
+          --tag "$CI_REGISTRY_IMAGE/mq_db:gfz-${CI_COMMIT_TAG}" \
+          --tag "$CI_REGISTRY_IMAGE/mq_db:gfz-sandbox-latest" \
           -f docker/build/mq_db/gfz/Dockerfile \
           .
     - docker push --all-tags "$CI_REGISTRY_IMAGE/mq_db"
