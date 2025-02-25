@@ -7,7 +7,12 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.18.2 (Unreleased)
+## 1.18.3 (Unreleased)
+
+## 1.18.2 - 2025-02-25
+
+Fixed:
+- Volume name for the MQTT containers in the sms sandbox release ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/513))
 
 ## 1.18.1 - 2025-02-25
 
