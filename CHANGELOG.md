@@ -12,7 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 ## 1.18.1 - 2025-02-25
 
 Fixed:
-- tag names for the sms sandbox release for MQTT initialization containers ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/511]))
+- tag names for the sms sandbox release for MQTT initialization containers ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/511))
 
 ## 1.18.0 - 2025-02-25
 
