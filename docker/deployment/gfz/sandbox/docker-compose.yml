@@ -199,7 +199,7 @@ services:
       - mq
 
   mq:
-    image: ${CI_REGISTRY_IMAGE}/mq:gfz-sandbox-latest
+    image: registry.hzdr.de/hub-terra/sms/orchestration/mq:gfz-sandbox-latest
     restart: unless-stopped
     ports:
       - 8883:8883
