@@ -196,6 +196,7 @@ services:
       - backend
       - nginx
       - traefik
+      - mq
 
   mq:
     image: ${CI_REGISTRY_IMAGE}/mq:gfz-sandbox-latest
@@ -259,6 +260,7 @@ volumes:
   backend-static-files:
   mq-config:
   mq-data:
+  mq-db-data:
 networks:
   nginx:
   traefik:
