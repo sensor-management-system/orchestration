@@ -7,7 +7,15 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.18.3 (Unreleased)
+## 1.18.4 (Unreleased)
+
+## 1.18.3 - 2025-02-25
+
+Added:
+- button to easily set the begin and end date of a mount to the begin and end dates of the corresponding configuration ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/478))
+
+Fixed:
+- Reference for mq image in sms sandbox release ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/514))
 
 ## 1.18.2 - 2025-02-25
 
@@ -24,7 +32,6 @@ Fixed:
 Added:
 - Fuzzy matching mechanism to help with reducting cv suggestions for already existing cv entries ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/428))
 - MQTT interface to receive updates from the SMS ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/295))  
-- button to easily set the begin and end date of a mount to the begin and end dates of the corresponding configuration ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/478))
 
 Fixed:
 - problem on validation of mount contact when mounting devices or platforms ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/490))
