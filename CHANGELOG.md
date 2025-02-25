@@ -6,8 +6,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
+## 1.18.1 (Unreleased)
 
-## 1.18.0 (Unreleased)
+## 1.18.0 - 2025-02-25
 
 Added:
 - Fuzzy matching mechanism to help with reducting cv suggestions for already existing cv entries ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/428))
