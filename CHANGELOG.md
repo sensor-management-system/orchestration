@@ -24,7 +24,7 @@ Fixed:
 Added:
 - Fuzzy matching mechanism to help with reducting cv suggestions for already existing cv entries ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/428))
 - MQTT interface to receive updates from the SMS ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/295))  
-
+- button to easily set the begin and end date of a mount to the begin and end dates of the corresponding configuration ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/478))
 
 Fixed:
 - problem on validation of mount contact when mounting devices or platforms ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/490))

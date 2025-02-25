@@ -18,28 +18,64 @@ SPDX-License-Identifier: EUPL-1.2
   >
     <v-row justify="start" class="mb-6">
       <v-col cols="6" md="6">
-        <DateTimePicker
-          v-model="valueCopy.beginDate"
-          placeholder="e.g. 2000-01-31 12:00"
-          label="Select mount date"
-          hint="Mount date"
-          required
-          class="required"
-          :rules="[rules.required, additionalRules.validateMountingDates, ...beginDateRules]"
-          @input="dateChanged"
-        />
+        <v-row>
+          <v-col>
+            <DateTimePicker
+              v-model="valueCopy.beginDate"
+              placeholder="e.g. 2000-01-31 12:00"
+              label="Select mount date"
+              required
+              class="required"
+              :rules="[rules.required, additionalRules.validateMountingDates, ...beginDateRules]"
+              @input="dateChanged"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-btn
+              small
+              :disabled="isSetStartDateBtntoConfigurationDateDisabled"
+              @click="$emit('set-mount-date-to-begin-date')"
+            >
+              <v-icon>
+                mdi-calendar-cursor
+              </v-icon>
+              Set mount date to configuration start date
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-col>
       <v-col cols="6">
-        <DateTimePicker
-          v-model="valueCopy.endDate"
-          placeholder="Open End"
-          label="Select unmount date"
-          :hint="!endRequired ? 'Optional. Leave blank for open end' : ''"
-          :required="endRequired"
-          :rules="[additionalRules.validateMountingDates, ...endDateRules]"
-          :class="{'required' : endRequired}"
-          @input="dateChanged"
-        />
+        <v-row>
+          <v-col>
+            <DateTimePicker
+              v-model="valueCopy.endDate"
+              placeholder="Open End"
+              label="Select unmount date"
+              :hint="!endRequired ? 'Optional. Leave blank for open end' : ''"
+              :required="endRequired"
+              :rules="[additionalRules.validateMountingDates, ...endDateRules]"
+              :class="{'required' : endRequired}"
+              @input="dateChanged"
+            />
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col>
+            <v-btn
+              small
+              :disabled="isSetEndDateBtntoConfigurationDateDisabled"
+              @click="$emit('set-unmount-date-to-end-date')"
+            >
+              <v-icon>
+                mdi-calendar-cursor
+              </v-icon>
+              Set unmount date to configuration end date
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
   </v-form>
@@ -57,6 +93,8 @@ import Validator from '@/utils/validator'
 import DateTimePicker from '@/components/DateTimePicker.vue'
 
 import { Rules } from '@/mixins/Rules'
+import { Configuration } from '@/models/Configuration'
+import { dateTimesEqual } from '@/utils/dateHelper'
 
 @Component({
   components: {
@@ -69,6 +107,12 @@ export default class MountActionDateForm extends mixins(Rules) {
     type: Object
   })
   readonly value!: MountActionDateDTO
+
+  @Prop({
+    required: true,
+    type: Object
+  })
+  readonly configuration!: Configuration
 
   @Prop({
     default: () => [],
@@ -93,6 +137,30 @@ export default class MountActionDateForm extends mixins(Rules) {
 
   private valueCopy: MountActionDateDTO | null = null
   private formIsValid: boolean = true
+
+  get isSetStartDateBtntoConfigurationDateDisabled () {
+    if (!this.configuration.startDate) {
+      return true
+    }
+
+    if (this.valueCopy && this.valueCopy.beginDate && dateTimesEqual(this.configuration.startDate, this.valueCopy.beginDate)) {
+      return true
+    }
+
+    return false
+  }
+
+  get isSetEndDateBtntoConfigurationDateDisabled () {
+    if (!this.configuration.endDate) {
+      return true
+    }
+
+    if (this.valueCopy && this.valueCopy.endDate && dateTimesEqual(this.configuration.endDate, this.valueCopy.endDate)) {
+      return true
+    }
+
+    return false
+  }
 
   get additionalRules (): Object {
     return {

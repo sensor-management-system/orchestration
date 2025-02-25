@@ -35,6 +35,9 @@ SPDX-License-Identifier: EUPL-1.2
             :begin-date-rules="beginDateRules"
             :end-date-rules="endDateRules"
             :end-required="selectedNodeEndDate !== null"
+            :configuration="configuration"
+            @set-mount-date-to-begin-date="setMountDateToConfigurationDate"
+            @set-unmount-date-to-end-date="setUnmountDateToConfigurationDate"
           />
           <v-row class="mb-6">
             <v-btn
@@ -389,6 +392,14 @@ export default class MountWizard extends Vue {
     }
   }
 
+  setMountDateToConfigurationDate () {
+    this.selectedDate = this.configuration.startDate
+  }
+
+  setUnmountDateToConfigurationDate () {
+    this.selectedEndDate = this.configuration.endDate
+  }
+
   async mount () {
     if (!this.validateAllForms()) {
       this.$store.commit('snackbar/setError', 'Please correct your inputs')
@@ -631,7 +642,9 @@ export default class MountWizard extends Vue {
     const parentBeginDate = this.selectedNodeBeginDate || this.configuration.startDate
     const parentEndDate = this.selectedNodeEndDate || this.configuration.endDate
 
-    if (!mountBeginDate) { return false }
+    if (!mountBeginDate) {
+      return false
+    }
 
     if (parentBeginDate) {
       const error = MountActionValidator.actionConflictsWith(
