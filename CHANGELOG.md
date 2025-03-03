@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.18.4 (Unreleased)
 
+Changed:
+- MQTT will only be used if broker url, username and password are configured ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/519))
+
 ## 1.18.3 - 2025-02-25
 
 Added:

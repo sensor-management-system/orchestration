@@ -102,8 +102,8 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/post-generic-configuration-action-attachment"
@@ -151,8 +151,8 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/patch-generic-configuration-action-attachment"
@@ -177,8 +177,8 @@ class TestGenericConfigurationActionAttachment(BaseTestCase):
         _ = super().delete_object(
             url=f"{self.url}/{action_attachment.id}",
         )
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/delete-generic-configuration-action-attachment"

@@ -67,8 +67,8 @@ class TestGenericDeviceAction(BaseTestCase):
             device = db.session.query(Device).filter_by(id=device_id).first()
             self.assertEqual(device.update_description, "create;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-generic-device-action")
         notification_data = json.loads(call_args[1])["data"]
@@ -172,8 +172,8 @@ class TestGenericDeviceAction(BaseTestCase):
             device = db.session.query(Device).filter_by(id=device_id).first()
             self.assertEqual(device.update_description, "update;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-generic-device-action")
         notification_data = json.loads(call_args[1])["data"]
@@ -209,8 +209,8 @@ class TestGenericDeviceAction(BaseTestCase):
             device = db.session.query(Device).filter_by(id=device_id).first()
             self.assertEqual(device.update_description, "delete;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-generic-device-action")
         self.expect(json.loads).of(call_args[1]).to_equal(

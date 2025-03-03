@@ -158,8 +158,8 @@ class TestRestoreDevice(BaseTestCase):
         self.assertEqual(reloaded_device.update_description, "restore;basic data")
         self.assertEqual(reloaded_device.updated_by_id, self.normal_user.id)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-device")
         notification_data = json.loads(call_args[1])["data"]

@@ -96,8 +96,8 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-generic-device-action-attachment")
         notification_data = json.loads(call_args[1])["data"]
@@ -140,8 +140,8 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-generic-device-action-attachment")
         notification_data = json.loads(call_args[1])["data"]
@@ -165,8 +165,8 @@ class TestGenericDeviceActionAttachment(BaseTestCase):
             url=f"{self.url}/{generic_device_action_attachment.id}",
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/delete-generic-device-action-attachment"

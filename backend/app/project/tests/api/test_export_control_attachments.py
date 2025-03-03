@@ -440,7 +440,7 @@ class TestExportControlAttachments(BaseTestCase):
             content_type="application/vnd.api+json",
         )
         self.expect(response.status_code).to_equal(401)
-        self.expect(mqtt.mqtt.publish.called).to_equal(False)
+        self.expect(mqtt.publish.called).to_equal(False)
 
     @fixtures.use(["user1", "manufacturer_model1"])
     def test_post_normal_user(self, user1, manufacturer_model1):
@@ -509,8 +509,8 @@ class TestExportControlAttachments(BaseTestCase):
         self.expect(loaded_attachment.created_at).not_.to_be(None)
         self.expect(loaded_attachment.updated_at).not_.to_be(None)
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
         self.expect(call_args[0]).to_equal("sms/post-export-control-attachment")
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("export_control_attachment")
@@ -624,8 +624,8 @@ class TestExportControlAttachments(BaseTestCase):
         self.expect(loaded_attachment.updated_by_id).to_equal(export_control_user.id)
         self.expect(loaded_attachment.updated_at).not_.to_be(None)
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
         self.expect(call_args[0]).to_equal("sms/patch-export-control-attachment")
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("export_control_attachment")
@@ -688,8 +688,8 @@ class TestExportControlAttachments(BaseTestCase):
             )
         self.expect(response.status_code).to_equal(200)
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-export-control-attachment")
         self.expect(json.loads).of(call_args[1]).to_equal(

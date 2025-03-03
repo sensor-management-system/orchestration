@@ -1516,8 +1516,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             )
         self.expect(resp.status_code).to_equal(201)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/post-configuration-dynamic-location-action"
@@ -1558,8 +1558,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             )
         self.expect(resp.status_code).to_equal(200)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/patch-configuration-dynamic-location-action"
@@ -1590,8 +1590,8 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
             )
         self.expect(resp.status_code).to_equal(200)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/delete-configuration-dynamic-location-action"

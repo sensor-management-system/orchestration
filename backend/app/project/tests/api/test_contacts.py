@@ -108,8 +108,8 @@ class TestContactServices(BaseTestCase):
         self.assertIsNone(contact_by_system.created_by_id)
 
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-contact")
         notification_data = json.loads(call_args[1])["data"]
@@ -152,8 +152,8 @@ class TestContactServices(BaseTestCase):
             response.json["data"]["attributes"]["organization"], "Helmholtz"
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-contact")
         notification_data = json.loads(call_args[1])["data"]
@@ -316,8 +316,8 @@ class TestContactServices(BaseTestCase):
                 )
         self.assertEqual(response.status_code, 200)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-contact")
         self.expect(json.loads).of(call_args[1]).to_equal(

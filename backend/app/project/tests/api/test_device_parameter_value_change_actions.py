@@ -700,8 +700,8 @@ class TestDeviceParameterValueChangeActionServices(BaseTestCase):
             "create;device parameter value change action"
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/post-device-parameter-value-change-action"
@@ -1290,8 +1290,8 @@ class TestDeviceParameterValueChangeActionServices(BaseTestCase):
             "update;device parameter value change action"
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/patch-device-parameter-value-change-action"
@@ -1573,8 +1573,8 @@ class TestDeviceParameterValueChangeActionServices(BaseTestCase):
             "delete;device parameter value change action"
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/delete-device-parameter-value-change-action"

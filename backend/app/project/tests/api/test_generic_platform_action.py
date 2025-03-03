@@ -116,8 +116,8 @@ class TestGenericPlatformAction(BaseTestCase):
             self.assertEqual(platform.update_description, "create;action")
 
             # And ensure that we trigger the mqtt.
-            mqtt.mqtt.publish.assert_called_once()
-            call_args = mqtt.mqtt.publish.call_args[0]
+            mqtt.publish.assert_called_once()
+            call_args = mqtt.publish.call_args[0]
 
             self.expect(call_args[0]).to_equal("sms/post-generic-platform-action")
             notification_data = json.loads(call_args[1])["data"]
@@ -163,8 +163,8 @@ class TestGenericPlatformAction(BaseTestCase):
             platform = db.session.query(Platform).filter_by(id=platform_id).first()
             self.assertEqual(platform.update_description, "update;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-generic-platform-action")
         notification_data = json.loads(call_args[1])["data"]
@@ -200,8 +200,8 @@ class TestGenericPlatformAction(BaseTestCase):
             platform = db.session.query(Platform).filter_by(id=platform_id).first()
             self.assertEqual(platform.update_description, "delete;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-generic-platform-action")
         self.expect(json.loads).of(call_args[1]).to_equal(
