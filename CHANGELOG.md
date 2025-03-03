@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.18.4 (Unreleased)
+## 1.19.0 (Unreleased)
+
+## 1.18.4 - 2025-03-03
 
 Changed:
 - MQTT will only be used if broker url, username and password are configured ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/519))
