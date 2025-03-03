@@ -242,8 +242,8 @@ class TestPids(BaseTestCase, SetupMixin):
         )
         self.assertEqual(reloaded_device.updated_by, self.super_user)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-device")
         notification_data = json.loads(call_args[1])["data"]
@@ -305,8 +305,8 @@ class TestPids(BaseTestCase, SetupMixin):
         )
         self.assertEqual(reloaded_platform.updated_by, self.super_user)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-platform")
         notification_data = json.loads(call_args[1])["data"]
@@ -378,8 +378,8 @@ class TestPids(BaseTestCase, SetupMixin):
         self.assertEqual(reloaded_configuration.updated_by, self.super_user)
 
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-configuration")
         notification_data = json.loads(call_args[1])["data"]
@@ -415,8 +415,8 @@ class TestPids(BaseTestCase, SetupMixin):
         )
         self.assertEqual(reloaded_site.updated_by, self.super_user)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-site")
         notification_data = json.loads(call_args[1])["data"]

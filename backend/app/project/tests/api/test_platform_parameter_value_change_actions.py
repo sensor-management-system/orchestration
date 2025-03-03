@@ -704,8 +704,8 @@ class TestPlatformParameterValueChangeActionServices(BaseTestCase):
             "create;platform parameter value change action"
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/post-platform-parameter-value-change-action"
@@ -1296,8 +1296,8 @@ class TestPlatformParameterValueChangeActionServices(BaseTestCase):
             "update;platform parameter value change action"
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/patch-platform-parameter-value-change-action"
@@ -1581,8 +1581,8 @@ class TestPlatformParameterValueChangeActionServices(BaseTestCase):
             "delete;platform parameter value change action"
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/delete-platform-parameter-value-change-action"

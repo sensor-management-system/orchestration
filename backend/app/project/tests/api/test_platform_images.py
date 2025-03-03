@@ -633,7 +633,7 @@ class TestPlatformImageServices(BaseTestCase):
             self.url, data=json.dumps(payload), content_type="application/vnd.api+json"
         )
         self.expect(resp.status_code).to_equal(401)
-        self.expect(mqtt.mqtt.publish.called).to_equal(False)
+        self.expect(mqtt.publish.called).to_equal(False)
 
     @fixtures.use(["user1", "attachment1_of_public_platform1_in_group1"])
     def test_post_member(self, user1, attachment1_of_public_platform1_in_group1):
@@ -690,8 +690,8 @@ class TestPlatformImageServices(BaseTestCase):
         # At least they are on the panel in the sms frontend.
         self.expect(reloaded_platform.update_description).to_equal("update;basic data")
         # And we want to ensure that we called the mqtt interface.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
         self.expect(call_args[0]).to_equal("sms/post-platform-image")
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("platform_image")
@@ -1261,8 +1261,8 @@ class TestPlatformImageServices(BaseTestCase):
         # At least they are on the panel in the sms frontend.
         self.expect(reloaded_platform.update_description).to_equal("update;basic data")
         # And we want to ensure that we called the mqtt interface.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
         self.expect(call_args[0]).to_equal("sms/patch-platform-image")
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("platform_image")
@@ -1652,8 +1652,8 @@ class TestPlatformImageServices(BaseTestCase):
         # At least they are on the panel in the sms frontend.
         self.expect(reloaded_platform.update_description).to_equal("update;basic data")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-platform-image")
         self.expect(json.loads).of(call_args[1]).to_equal(

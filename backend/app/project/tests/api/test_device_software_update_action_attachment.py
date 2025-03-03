@@ -128,8 +128,8 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/post-device-software-update-action-attachment"
@@ -180,8 +180,8 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/patch-device-software-update-action-attachment"
@@ -206,8 +206,8 @@ class TestDeviceSoftwareUpdateActionAttachment(BaseTestCase):
             url=f"{self.url}/{device_software_update_action_attachment.id}",
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/delete-device-software-update-action-attachment"

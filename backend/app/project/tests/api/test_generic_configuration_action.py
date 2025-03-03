@@ -108,8 +108,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         )
         self.assertEqual(configuration.update_description, "create;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-generic-configuration-action")
         notification_data = json.loads(call_args[1])["data"]
@@ -142,8 +142,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         )
         self.assertEqual(configuration.update_description, "update;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-generic-configuration-action")
         notification_data = json.loads(call_args[1])["data"]
@@ -165,8 +165,8 @@ class TestGenericConfigurationAction(BaseTestCase):
         )
         self.assertEqual(configuration.update_description, "delete;action")
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-generic-configuration-action")
         self.expect(json.loads).of(call_args[1]).to_equal(

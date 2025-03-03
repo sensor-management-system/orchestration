@@ -456,7 +456,9 @@ class BaseTestCase(TestCase, ExpectMixin):
         # publish to a real queue within our tests.
         # By mocking it per test case, we can easier test that we
         # wrote our information out (in this small scope).
-        self.patch_for_mqtt_publish = patch("flask_mqtt.Mqtt.publish")
+        self.patch_for_mqtt_publish = patch(
+            "project.extensions.mqtt.LazyMqttInitWrapper.publish"
+        )
         self.patch_for_mqtt_publish.start()
 
     def tearDown(self):

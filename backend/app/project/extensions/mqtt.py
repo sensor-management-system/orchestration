@@ -41,5 +41,11 @@ class LazyMqttInitWrapper:
 
         Runs the initialization if needed.
         """
-        self._enforce_initialization(current_app)
-        return self.mqtt.publish(*args, **kwargs)
+        if self._mqtt_config(current_app):
+            self._enforce_initialization(current_app)
+            return self.mqtt.publish(*args, **kwargs)
+
+    def _mqtt_config(self, app):
+        config = app.config
+        fields_that_must_be_set = ["MQTT_BROKER_URL", "MQTT_USERNAME", "MQTT_PASSWORD"]
+        return all([config[f] for f in fields_that_must_be_set])

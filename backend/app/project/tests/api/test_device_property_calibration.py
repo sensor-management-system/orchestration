@@ -123,8 +123,8 @@ class TestDevicePropertyCalibration(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-device-property-calibration")
         notification_data = json.loads(call_args[1])["data"]
@@ -184,8 +184,8 @@ class TestDevicePropertyCalibration(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-device-property-calibration")
         notification_data = json.loads(call_args[1])["data"]
@@ -204,8 +204,8 @@ class TestDevicePropertyCalibration(BaseTestCase):
             url=f"{self.url}/{device_property_calibration.id}",
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-device-property-calibration")
         self.expect(json.loads).of(call_args[1]).to_equal(

@@ -129,8 +129,8 @@ class TestDevicePropertyServices(BaseTestCase):
         msg = "create;measured quantity"
         self.assertEqual(msg, device_property.device.update_description)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-device-property")
         notification_data = json.loads(call_args[1])["data"]
@@ -359,8 +359,8 @@ class TestDevicePropertyServices(BaseTestCase):
         msg = "update;measured quantity"
         self.assertEqual(msg, device_property_reloaded.device.update_description)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-device-property")
         notification_data = json.loads(call_args[1])["data"]
@@ -1039,8 +1039,8 @@ class TestDevicePropertyDeletion(BaseTestCase):
             )
         self.expect(resp.status_code).to_equal(200)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-device-property")
         self.expect(json.loads).of(call_args[1]).to_equal(

@@ -240,7 +240,7 @@ class TestExportControl(BaseTestCase):
             self.url, data=json.dumps(payload), content_type="application/vnd.api+json"
         )
         self.expect(response.status_code).to_equal(401)
-        self.expect(mqtt.mqtt.publish.called).to_equal(False)
+        self.expect(mqtt.publish.called).to_equal(False)
 
     @fixtures.use(["user1", "manufacturer_model1"])
     def test_post_normal_user(self, user1, manufacturer_model1):
@@ -310,8 +310,8 @@ class TestExportControl(BaseTestCase):
         self.expect(data["attributes"]["created_at"]).to_be_a_datetime_string()
         self.expect(data["attributes"]["updated_at"]).to_be_a_datetime_string()
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
         self.expect(call_args[0]).to_equal("sms/post-export-control")
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("export_control")
@@ -390,8 +390,8 @@ class TestExportControl(BaseTestCase):
             .first()
         ).to_equal(None)
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-export-control")
         self.expect(json.loads).of(call_args[1]).to_equal(
@@ -549,8 +549,8 @@ class TestExportControl(BaseTestCase):
 
         self.expect(data["attributes"]["updated_at"]).to_be_a_datetime_string()
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
         self.expect(call_args[0]).to_equal("sms/patch-export-control")
         notification_data = json.loads(call_args[1])["data"]
         self.expect(notification_data["type"]).to_equal("export_control")

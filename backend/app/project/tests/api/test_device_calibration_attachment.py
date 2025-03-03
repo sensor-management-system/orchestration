@@ -125,8 +125,8 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-device-calibration-attachment")
         notification_data = json.loads(call_args[1])["data"]
@@ -171,8 +171,8 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             object_type=self.object_type,
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-device-calibration-attachment")
         notification_data = json.loads(call_args[1])["data"]
@@ -191,8 +191,8 @@ class TestDeviceCalibrationAttachment(BaseTestCase):
             url=f"{self.url}/{dca.id}",
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-device-calibration-attachment")
         self.expect(json.loads).of(call_args[1]).to_equal(

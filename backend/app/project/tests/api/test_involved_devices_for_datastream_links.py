@@ -697,8 +697,8 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
 
         self.assertEqual(response.status_code, 201)
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/post-involved-device-for-datastream-link"
@@ -965,8 +965,8 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
             new_order_index,
         )
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/patch-involved-device-for-datastream-link"
@@ -1480,8 +1480,8 @@ class TestInvolvedDeviecsForDatastreamLinks(BaseTestCase):
         )
         self.assertIsNone(reloaded)
 
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal(
             "sms/delete-involved-device-for-datastream-link"

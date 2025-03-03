@@ -837,8 +837,8 @@ class TestPlatformMountAction(BaseTestCase):
             data["data"]["attributes"]["label"]
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-platform-mount-action")
         notification_data = json.loads(call_args[1])["data"]
@@ -878,8 +878,8 @@ class TestPlatformMountAction(BaseTestCase):
             msg, result_platform_mount_action.configuration.update_description
         )
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-platform-mount-action")
         notification_data = json.loads(call_args[1])["data"]
@@ -949,8 +949,8 @@ class TestPlatformMountAction(BaseTestCase):
         msg = "delete;platform mount action"
         self.assertEqual(msg, related_configuration.update_description)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-platform-mount-action")
         self.expect(json.loads).of(call_args[1]).to_equal(

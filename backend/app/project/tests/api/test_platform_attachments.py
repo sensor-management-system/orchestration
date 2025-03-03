@@ -759,8 +759,8 @@ class TestPlatformAttachmentServices(BaseTestCase):
             )
         self.expect(resp.status_code).to_equal(201)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/post-platform-attachment")
         notification_data = json.loads(call_args[1])["data"]
@@ -789,8 +789,8 @@ class TestPlatformAttachmentServices(BaseTestCase):
             )
         self.expect(resp.status_code).to_equal(200)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/patch-platform-attachment")
         notification_data = json.loads(call_args[1])["data"]
@@ -811,8 +811,8 @@ class TestPlatformAttachmentServices(BaseTestCase):
             )
         self.expect(resp.status_code).to_equal(200)
         # And ensure that we trigger the mqtt.
-        mqtt.mqtt.publish.assert_called_once()
-        call_args = mqtt.mqtt.publish.call_args[0]
+        mqtt.publish.assert_called_once()
+        call_args = mqtt.publish.call_args[0]
 
         self.expect(call_args[0]).to_equal("sms/delete-platform-attachment")
         self.expect(json.loads).of(call_args[1]).to_equal(
