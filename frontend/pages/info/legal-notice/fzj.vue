@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
       <h1 class="mb-3">
         Legal information / provider identification
       </h1>
-      <p>Imprint according to § 5 DDG (Digital Services Act) and § 18 RStV (German Interstate Treaty on Broadcasting)</p>
+      <p>Imprint according to § 5 DDG (Digital Services Act)</p>
     </section>
     <section class="mb-6">
       <h2 class="mb-1">
@@ -58,7 +58,9 @@ SPDX-License-Identifier: EUPL-1.2
         Editorship
       </h2>
       <p>
-        This is a user self-service platform. Responsible for the contents are the users.
+        This is a user self-service platform. Responsible for the contents are the users.<br>
+        Users can add content that describes the installations of the measurement devices that the users are managing.<br>
+        On the one hand, this content supports users in their management tasks. On the other hand, this device metadata can be used to automatically annotate the corresponding measurement data.
       </p>
     </section>
     <section class="mb-6">
