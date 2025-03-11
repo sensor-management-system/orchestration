@@ -131,7 +131,7 @@ SPDX-License-Identifier: EUPL-1.2
 
                 <v-card-text class="primary_text--text">
                   <p>
-                    The purpose of this application is to help scientists and technicans to manage sensors, measurement setups and campaigns.
+                    The purpose of this application is to help scientists and technicians to manage sensors, measurement setups and campaigns.
                   </p>
                   <p>
                     If you don't have an account, you can browse and view all datasets.<br>
@@ -225,7 +225,7 @@ Metainformation is recorded here, such as the type of device, the measured varia
 
   configurationInfo = {
     name: 'Configuration',
-    description: 'The configuration brings platforms and devices into a temporal and spatial relationship and thus describes a measurement campaign or experiment. This is also the place to add more information about the measurement ifself like the georeference, offsets, measuring periods, the real mounting setup and field activities and any changes during its lifetime.',
+    description: 'The configuration brings platforms and devices into a temporal and spatial relationship and thus describes a measurement campaign or experiment. This is also the place to add more information about the measurement itself like the georeference, offsets, measuring periods, the real mounting setup and field activities and any changes during its lifetime.',
     url: '/configurations',
     icon: 'mdi-file-cog'
   }
