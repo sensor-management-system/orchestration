@@ -1,11 +1,13 @@
 <!--
-SPDX-FileCopyrightText: 2021 - 2024
+SPDX-FileCopyrightText: 2021 - 2025
 - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
 - Norman Ziegner <norman.ziegner@ufz.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -82,7 +84,7 @@ This project is used by the following research centers:
 - GFZ Potsdam: https://sensors.gfz-potsdam.de
 - UFZ Leipzig: https://web.app.ufz.de/sms/
 - Karlsruhe Institute of Technology: https://sms.atmohub.kit.edu/
-- Research Centre Jülich: https://ibg3sms.ibg.kfa-juelich.de/ (FZJ intranet only)
+- Research Centre Jülich: https://sms.earth-data.fz-juelich.de/
 
 ## Changelog
 
