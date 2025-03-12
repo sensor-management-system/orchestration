@@ -10,6 +10,7 @@ SPDX-License-Identifier: EUPL-1.2
 ## 1.19.0 (Unreleased)
 Added:
 - Possibility to copy an existing mount setup (complete or partially) from any configuration and update the mount details ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/443))
+- Public SMS instance URL of FZJ is added in the README file ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/529))
 
 ## 1.18.4 - 2025-03-03
 
