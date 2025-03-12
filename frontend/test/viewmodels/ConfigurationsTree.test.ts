@@ -864,6 +864,11 @@ describe('ConfigurationsTree', () => {
       const platform3 = new Platform()
       const device = new Device()
 
+      platform1.id = '1'
+      platform2.id = '2'
+      platform3.id = '3'
+      device.id = '4'
+
       const platformNode1 = new PlatformNode(PlatformMountAction.createFromObject({
         id: '',
         platform: platform1,

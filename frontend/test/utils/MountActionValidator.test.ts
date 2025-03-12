@@ -579,7 +579,9 @@ describe('#nodeIsWithinParentRange', () => {
     // we don't need to test every case as #nodeIsWithinParentRange calls
     // #actionIsWithinParentRage for the node and its parent
     const parentPlatform = new Platform()
+    parentPlatform.id = '1'
     const platform = new Platform()
+    platform.id = '2'
 
     const mountAction = new PlatformMountAction(
       '3',

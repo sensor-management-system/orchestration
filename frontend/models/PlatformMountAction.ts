@@ -73,6 +73,10 @@ export class PlatformMountAction extends MountAction implements IPlatformMountAc
     return this._platform
   }
 
+  set platform (platform: Platform) {
+    this._platform = platform
+  }
+
   isPlatformMountAction (): this is IPlatformMountAction {
     return true
   }

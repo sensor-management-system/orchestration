@@ -12,6 +12,9 @@ SPDX-License-Identifier: EUPL-1.2
 <template>
   <div>
     <v-treeview
+      ref="treeview"
+      v-bind="$attrs"
+      v-model="selection"
       :active.sync="selectedNodeSingletonList"
       :items="items"
       :activatable="activatable"
@@ -62,6 +65,7 @@ SPDX-License-Identifier: EUPL-1.2
         <v-icon v-if="item.hasErrors" class="error--text">
           mdi-alert
         </v-icon>
+        <slot name="append" :item="item" />
       </template>
     </v-treeview>
   </div>
@@ -151,6 +155,8 @@ export default class ConfigurationsTreeView extends Vue {
   })
   readonly showDetailedNames!: boolean
 
+  private selection: ConfigurationsTreeNode[] = []
+
   created (): void {
     this.initializeOpenNodes()
   }
@@ -216,12 +222,37 @@ export default class ConfigurationsTreeView extends Vue {
     return item.hasErrors || item.hasChildErrors
   }
 
+  /**
+   * @description We've encountered the problem, that sometimes multiple nodes we're visibly active (marked with blue background) even though only one node was really active. This is a problem of v-treeviews rendering. This method fixes that problem.
+   */
+  async refreshTreeRendering () {
+    if (this.$refs.treeview) {
+      const treeRef = (this.$refs.treeview as Vue & {updateAll: (val: boolean) => void})
+      treeRef.updateAll(false)
+      await this.$nextTick()
+      treeRef.updateAll(true)
+    }
+  }
+
   @Watch('tree', {
     immediate: true,
     deep: true
   })
-  onTreeChanged () {
+  async onTreeChanged () {
+    await this.refreshTreeRendering()
     this.initializeOpenNodes()
+  }
+
+  /**
+   * Because v-miodel is already used by the selectedNodeSingletonList
+   * we're emitting an extra event for the selected nodes to use the sync property
+   */
+  @Watch('selection', {
+    immediate: true,
+    deep: true
+  })
+  onSelectionChange (newValue: ConfigurationsTreeNode[]) {
+    this.$emit('update:selection', newValue)
   }
 }
 </script>

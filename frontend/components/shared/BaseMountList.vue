@@ -64,7 +64,6 @@ SPDX-License-Identifier: EUPL-1.2
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'nuxt-property-decorator'
-import { DateTime } from 'luxon'
 
 import { mapGetters } from 'vuex'
 
@@ -73,11 +72,12 @@ import { CanModifyEntityGetter } from '@/store/permissions'
 import { Availability } from '@/models/Availability'
 import { Platform } from '@/models/Platform'
 import { Device } from '@/models/Device'
-import { dateToString } from '@/utils/dateHelper'
 
 import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
+import { availabilityReason } from '@/utils/mountHelper'
 
 @Component({
+  methods: { availabilityReason },
   components: {
     ExtendedItemName
   },
@@ -153,32 +153,6 @@ export default class BaseMountList extends Vue {
 
   compareEntities (a: Platform | Device, b: Platform | Device) {
     return a.id === b.id
-  }
-
-  availabilityReason (availability?: Availability): string {
-    if (!availability) {
-      return 'Not available'
-    }
-
-    let configString = availability.configurationID
-
-    if (availability.configurationLabel) {
-      configString = availability.configurationLabel
-    }
-
-    let endString = ''
-    if (!availability.endDate?.isValid) {
-      endString = 'indefinitely'
-    } else {
-      endString = `until ${dateToString(availability.endDate as DateTime)}`
-    }
-
-    let beginString = ''
-    if (availability.beginDate?.isValid) {
-      beginString = `from ${dateToString(availability.beginDate as DateTime)}`
-    }
-
-    return `Used in configuration "${configString}" ${beginString} ${endString}`
   }
 }
 

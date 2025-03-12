@@ -154,7 +154,9 @@ export class DeviceNode implements IConfigurationsTreeNode<DeviceMountAction> {
   }
 
   static createFromObject (someObject: DeviceNode): DeviceNode {
-    const newObject = new DeviceNode(someObject.unpack())
+    const copiedAction = DeviceMountAction.createFromObject(someObject.unpack())
+    const newObject = new DeviceNode(copiedAction)
+    newObject.errors = someObject.errors
     newObject.setTree(ConfigurationsTree.createFromObject(someObject.getTree()))
     return newObject
   }

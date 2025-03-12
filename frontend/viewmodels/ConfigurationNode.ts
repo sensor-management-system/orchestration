@@ -134,7 +134,13 @@ export class ConfigurationNode implements IConfigurationsTreeNodeWithChildren<Co
 
   static createFromObject (someObject: ConfigurationNode): ConfigurationNode {
     const newObject = new ConfigurationNode(someObject.unpack())
+    newObject.errors = someObject.errors
     newObject.setTree(ConfigurationsTree.createFromObject(someObject.getTree()))
+
+    if (someObject.disabled) {
+      newObject.disabled = true
+    }
+
     return newObject
   }
 }

@@ -180,6 +180,14 @@ const getters: GetterTree<DevicesState, RootState> = {
   deviceParametersSortedAlphabetically: (state: DevicesState): Parameter[] => {
     // @ts-ignore
     return state.deviceParameters.toSorted((a: Parameter, b: Parameter) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
+  },
+  getAvailability: (state: DevicesState) => (device: Device): Availability| null => {
+    const availability = state.deviceAvailabilities.find(availability => availability.id === device.id)
+
+    if (availability) {
+      return availability
+    }
+    return null
   }
 }
 

@@ -77,7 +77,8 @@ describe('PlatformNode', () => {
     const secondNode = PlatformNode.createFromObject(firstNode)
 
     expect(Object.is(secondNode, firstNode)).toBeFalsy()
-    expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeTruthy()
+    expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeFalsy()
+    expect(secondNode.unpack().id).toEqual(firstNode.unpack().id)
     expect(Object.is(secondNode.getTree(), firstNode.getTree())).toBeFalsy()
   })
   it('should be allowed to have children', () => {

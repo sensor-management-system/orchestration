@@ -35,6 +35,15 @@ SPDX-License-Identifier: EUPL-1.2
       >
         -Un-mount Platform or Device
       </v-btn>
+      <v-btn
+        v-if="editable"
+        color="grey lighten-1"
+        small
+        nuxt
+        :to="'/configurations/' + configurationId + '/platforms-and-devices/reuse'"
+      >
+        Copy Mounts
+      </v-btn>
     </v-card-actions>
     <v-row>
       <v-col cols="12" md="3">

@@ -10,7 +10,7 @@ SPDX-FileCopyrightText: 2022 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
-  <span>
+  <div>
     <v-form
       v-if="value"
       ref="mountForm"
@@ -32,7 +32,7 @@ SPDX-License-Identifier: EUPL-1.2
               v-model="mountActionInformationDTO.label"
               label="Label"
               :disabled="readonly"
-              @input="update"
+              @input="debouncedUpdate"
             />
           </v-col>
         </v-row>
@@ -96,7 +96,9 @@ SPDX-License-Identifier: EUPL-1.2
           </v-col>
         </v-row>
         <v-row no-gutters>
-          <v-col class="text-caption text--secondary">Offsets are relative to parent platform/root</v-col>
+          <v-col class="text-caption text--secondary">
+            Offsets are relative to parent platform/root
+          </v-col>
         </v-row>
         <v-row>
           <v-col md="12" lg="4" xl="3">
@@ -281,7 +283,7 @@ SPDX-License-Identifier: EUPL-1.2
               label="Mount description"
               rows="3"
               :disabled="readonly"
-              @input="update"
+              @input="debouncedUpdate"
             />
           </v-col>
           <v-col v-if="withUnmount">
@@ -291,13 +293,13 @@ SPDX-License-Identifier: EUPL-1.2
               label="Unmount description"
               rows="3"
               :disabled="readonly"
-              @input="update"
+              @input="debouncedUpdate"
             />
           </v-col>
         </v-row>
       </v-container>
     </v-form>
-  </span>
+  </div>
 </template>
 <script lang="ts">
 
@@ -384,6 +386,8 @@ export default class MountActionDetailsForm extends mixins(Rules) {
   })
   readonly parentOffsets!: IOffsets
 
+  debounceTimer: ReturnType<typeof setTimeout> | null = null
+
   // vuex definition for typescript check
   epsgCodes!: VocabularyState['epsgCodes']
   elevationData!: VocabularyState['elevationData']
@@ -450,6 +454,16 @@ export default class MountActionDetailsForm extends mixins(Rules) {
 
   async update () {
     await this.$emit('input', this.mountActionInformationDTO)
+  }
+
+  debouncedUpdate () {
+    if (this.debounceTimer !== null) {
+      clearTimeout(this.debounceTimer)
+    }
+
+    this.debounceTimer = setTimeout(() => {
+      this.update()
+    }, 250)
   }
 
   get absoluteOffsets (): IOffsets {
