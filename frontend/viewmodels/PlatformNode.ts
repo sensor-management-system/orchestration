@@ -154,7 +154,9 @@ export class PlatformNode implements IConfigurationsTreeNodeWithChildren<Platfor
   }
 
   static createFromObject (someObject: PlatformNode): PlatformNode {
-    const newObject = new PlatformNode(someObject.unpack())
+    const copiedAction = PlatformMountAction.createFromObject(someObject.unpack())
+    const newObject = new PlatformNode(copiedAction)
+    newObject.errors = someObject.errors
     newObject.setTree(ConfigurationsTree.createFromObject(someObject.getTree()))
     return newObject
   }

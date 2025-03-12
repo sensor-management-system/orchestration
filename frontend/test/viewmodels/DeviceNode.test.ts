@@ -77,7 +77,8 @@ describe('DeviceNode', () => {
     const secondNode = DeviceNode.createFromObject(firstNode)
 
     expect(Object.is(secondNode, firstNode)).toBeFalsy()
-    expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeTruthy()
+    expect(Object.is(secondNode.unpack(), firstNode.unpack())).toBeFalsy()
+    expect(secondNode.unpack().id).toEqual(firstNode.unpack().id)
   })
   it('should be allowed to have children', () => {
     const device = new Device()

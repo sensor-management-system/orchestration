@@ -206,6 +206,13 @@ const getters: GetterTree<PlatformsState, RootState> = {
   platformParametersSortedAlphabetically: (state: PlatformsState): Parameter[] => {
     // @ts-ignore
     return state.platformParameters.toSorted((a: Parameter, b: Parameter) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
+  },
+  getAvailability: (state: PlatformsState) => (paltform: Platform): Availability | null => {
+    const availability = state.platformAvailabilities.find(availability => availability.id === paltform.id)
+    if (availability) {
+      return availability
+    }
+    return null
   }
 }
 

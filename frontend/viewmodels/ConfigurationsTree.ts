@@ -221,7 +221,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
     const replaceRecursive = (node: ConfigurationsTreeNode, newNode: ConfigurationsTreeNode, nodes: ConfigurationsTree): boolean => {
       for (let i: number = 0; i < nodes.length; i++) {
         const iteratedNode: ConfigurationsTreeNode = nodes.at(i)
-        if (iteratedNode === node) {
+        if (iteratedNode.id === node.id) {
           nodes.replaceAt(i, newNode)
           return true
         }
@@ -358,6 +358,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
 
   /**
    * returns a flat list with all the nodes in the tree.
+   * IMPORTANT: the tree gets traversed in pre-order (NLR), parents appear always before their children in the resulting list
    * @returns {ConfigurationTreeNode[]} the flat list of all the nodes in the hierarchy
    */
   getAllNodesAsList (): ConfigurationsTreeNode[] {
@@ -403,7 +404,7 @@ export class ConfigurationsTree implements Iterable<ConfigurationsTreeNode> {
   getParent (node: ConfigurationsTreeNode): ConfigurationsTreeNode | null {
     const getParentRecursive = (node: ConfigurationsTreeNode, parentNode: ConfigurationsTreeNode | null, nodes: ConfigurationsTree): ConfigurationsTreeNode | null => {
       for (const iteratedNode of nodes) {
-        if (node === iteratedNode) {
+        if (node.id === iteratedNode.id) {
           return parentNode
         }
         if (!iteratedNode.canHaveChildren()) {

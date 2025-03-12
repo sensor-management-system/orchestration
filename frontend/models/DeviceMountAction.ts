@@ -78,8 +78,16 @@ export class DeviceMountAction extends MountAction implements IDeviceMountAction
     return this._device
   }
 
+  set device (device: Device) {
+    this._device = device
+  }
+
   get parentDevice (): Device | null {
     return this._parentDevice
+  }
+
+  set parentDevice (newDevice: Device | null) {
+    this._parentDevice = newDevice
   }
 
   isDeviceMountAction (): this is IDeviceMountAction {

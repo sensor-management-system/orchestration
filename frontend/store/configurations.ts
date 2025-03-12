@@ -173,6 +173,8 @@ export type AvailableDevicesGetter = Device[]
 
 export type ConfigurationFilter = {selectedActionTypes: IOptionsForActionType[], selectedYears: number[], selectedContacts: string[]}
 
+export type PageSizesGetter = number[]
+
 function formatMountActionString (value: ConfigurationMountingAction): string {
   const date = dateToDateTimeStringHHMM(value.timepoint)
 
@@ -407,6 +409,7 @@ export type HasActiveDevicesWithPropertiesForDate = (selectedDate: DateTime | nu
 export type LocationActionTimepointsExceptPassedIdAndTypeTypeGetter = (id: string | null, type: string | null) => ILocationTimepoint[]
 export type EarliestEndDateOfRelatedDeviceOfDynamicActionGetter = (action: DynamicLocationAction) => DateTime|null
 export type FilteredActionsGetter = (filter: ConfigurationFilter) => ITimelineAction[]
+export type MountActionDateItemsGetter = {text: string, value: DateTime}[]
 
 type IdParamReturnsVoidPromiseAction = (id: string) => Promise<void>
 
@@ -504,6 +507,9 @@ export type SetChosenKindOfConfigurationActionAction = (newval: IOptionsForActio
 export type DownloadAttachmentAction = (attachmentUrl: string) => Promise<Blob>
 export type SaveConfigurationAction = (confiuration: Configuration) => Promise<Configuration>
 export type CreatePidAction = (id: string | null) => Promise<string>
+
+export type SetPageSizeAction = (newPageSize: number) => void
+export type SetPageNumberAction = (newPageNumber: number) => void
 
 const actions: ActionTree<ConfigurationsState, RootState> = {
   setSelectedDate ({ commit }: { commit: Commit }, selectedDate: DateTime | null) {

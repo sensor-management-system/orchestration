@@ -229,8 +229,6 @@ import DotMenuActionSensorML from '@/components/DotMenuActionSensorML.vue'
 import DownloadDialog from '@/components/shared/DownloadDialog.vue'
 import BaseList from '@/components/shared/BaseList.vue'
 import PlatformsListItem from '@/components/platforms/PlatformsListItem.vue'
-import PlatformsBasicSearch from '@/components/platforms/PlatformsBasicSearch.vue'
-import PlatformsBasicSearchField from '@/components/platforms/PlatformsBasicSearchField.vue'
 import PageSizeSelect from '@/components/shared/PageSizeSelect.vue'
 import { SetLoadingAction, LoadingSpinnerState } from '@/store/progressindicator'
 
@@ -245,8 +243,6 @@ import FoundEntries from '@/components/shared/FoundEntries.vue'
   components: {
     FoundEntries,
     PlatformSearch,
-    PlatformsBasicSearchField,
-    PlatformsBasicSearch,
     PlatformsListItem,
     BaseList,
     DotMenuActionDelete,

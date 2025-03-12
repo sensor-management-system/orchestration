@@ -120,6 +120,10 @@ export class MountAction implements IMountAction {
     return this._parentPlatform
   }
 
+  set parentPlatform (newPlatform: Platform | null) {
+    this._parentPlatform = newPlatform
+  }
+
   get beginDate (): DateTime {
     return this._beginDate
   }

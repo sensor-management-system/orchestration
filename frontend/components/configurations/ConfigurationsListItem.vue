@@ -34,6 +34,19 @@ SPDX-License-Identifier: EUPL-1.2
     </template>
     <template #actions>
       <v-btn
+        v-if="target=='_blank'"
+        small
+        @click.stop.prevent="openLink"
+      >
+        <v-icon
+          small
+        >
+          mdi-open-in-new
+        </v-icon>
+        Open in new tab
+      </v-btn>
+      <v-btn
+        v-else
         nuxt
         :to="detailLink"
         color="primary"
@@ -43,6 +56,7 @@ SPDX-License-Identifier: EUPL-1.2
       >
         View
       </v-btn>
+      <slot name="additional-actions" />
     </template>
     <template #default>
       <v-tooltip v-if="configuration.archived" right>
@@ -248,6 +262,12 @@ export default class ConfigurationsListItem extends Vue {
   readonly configuration!: Configuration
 
   @Prop({
+    default: '_self',
+    type: String
+  })
+  private target!: string
+
+  @Prop({
     default: '',
     type: String
   })
@@ -259,6 +279,14 @@ export default class ConfigurationsListItem extends Vue {
       params = '?' + (new URLSearchParams({ from: this.from })).toString()
     }
     return `/configurations/${this.configuration.id}${params}`
+  }
+
+  openLink () {
+    if (this.target === '_self') {
+      this.$router.push(this.detailLink)
+    } else {
+      window.open(this.$router.resolve(this.detailLink).href, this.target)
+    }
   }
 }
 </script>
