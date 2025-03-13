@@ -7,7 +7,7 @@
 # KIT STAGING
 services:
     elastic-search:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.16.1
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.28
         container_name: sms_es
         environment:
             - discovery.type=single-node
