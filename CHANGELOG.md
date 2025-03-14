@@ -14,6 +14,7 @@ Added:
 
 Fixed:
 - Typos on frontend landing page were fixed ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/527))
+- Fixed a CORS issue when using the GFZ tsmdl ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/534))
 
 Changed:
 - Updated elasticsearch to version 7.17.28 ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/533))

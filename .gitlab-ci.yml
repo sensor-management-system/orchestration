@@ -714,7 +714,7 @@ deploy-gfz-staging:
     MINIO_ROOT_PASSWORD: ${GFZ_STAGING_MINIO_ROOT_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_STAGING_MINIO_ROOT_USER}
     PKCE_CLIENT_ID: ${GFZ_STAGING_HIFIS_OIDC_CLIENT_ID}
-    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_STAGING_B2INST_TOKEN}
     PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}
@@ -766,7 +766,7 @@ deploy-gfz-prod:
     MINIO_ROOT_PASSWORD: ${GFZ_PROD_MINIO_ROOT_PASSWORD}
     MINIO_ROOT_USER: ${GFZ_PROD_MINIO_ROOT_USER}
     PKCE_CLIENT_ID: ${GFZ_PROD_HIFIS_OIDC_CLIENT_ID}
-    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+    TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://timeseries.gfz.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
     B2INST_TOKEN: ${GFZ_PROD_B2INST_TOKEN}
     PID_SERVICE_USER: ${GFZ_PID_SERVICE_USER}
     PID_SERVICE_PASSWORD: ${GFZ_PID_SERVICE_PASSWORD}

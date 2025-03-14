@@ -163,7 +163,7 @@ services:
       PID_SERVICE_PASSWORD: ${PID_SERVICE_PASSWORD}
       PID_PREFIX: 20.500.14372
       PID_SUFFIX: SMS-Staging
-      TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz-potsdam.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
+      TSM_ENDPOINTS: '[{"fields": {"name": "GFZ", "url": "https://rz-vm65-dev.gfz.de/tsmdl/api/v1"}, "model": "TsmEndpoint", "pk": 1}]'
       EXPORT_CONTROL_VO_LIST: urn:geant:helmholtz.de:gfz:group:sensor-management-system-export-control#idp.gfz-potsdam.de
       # We only want to allow access to extenral resources via the proxy - not to internal ones
       PROXY_NETLOC_BLOCKLIST: 127.0.0.1,localhost,backend-db,backend,minio,elastic-search,idl-db,idl,nginx
