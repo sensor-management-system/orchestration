@@ -7,7 +7,16 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.19.0 (Unreleased)
+## 1.20.0 (Unreleased)
+
+Added:
+
+Fixed:
+
+Changed:
+
+## 1.19.0 - 2025-03-17
+
 Added:
 - Possibility to copy an existing mount setup (complete or partially) from any configuration and update the mount details ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/443))
 - Public SMS instance URL of FZJ is added in the README file ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/529))
@@ -15,9 +24,11 @@ Added:
 Fixed:
 - Typos on frontend landing page were fixed ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/527))
 - Fixed a CORS issue when using the GFZ tsmdl ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/534))
+- Being unable to edit mount dates was fixed ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/532))
 
 Changed:
 - Updated elasticsearch to version 7.17.28 ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/533))
+
 ## 1.18.4 - 2025-03-03
 
 Changed:

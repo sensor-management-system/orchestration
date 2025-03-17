@@ -61,7 +61,7 @@ import CheckEditAccess from '@/mixins/CheckEditAccess'
 import {
   ConfigurationsState,
   LoadMountingConfigurationForDateAction,
-  LoadPlatformMountActionAction,
+  LoadPlatformMountActionAction, SetSelectedDateAction,
   UpdatePlatformMountActionAction
 } from '@/store/configurations'
 import { ContactsState, LoadAllContactsAction } from '@/store/contacts'
@@ -88,10 +88,13 @@ import MountActionEditForm from '@/components/configurations/MountActionEditForm
   middleware: ['auth'],
   computed: {
     ...mapState('configurations', ['configuration', 'configurationMountingActionsForDate', 'selectedDate']),
+    ...mapState('configurations', {
+      originalAction: 'platformMountAction'
+    }),
     ...mapState('contacts', ['contacts'])
   },
   methods: {
-    ...mapActions('configurations', ['loadMountingConfigurationForDate', 'loadPlatformMountAction', 'updatePlatformMountAction']),
+    ...mapActions('configurations', ['loadMountingConfigurationForDate', 'loadPlatformMountAction', 'updatePlatformMountAction', 'setSelectedDate']),
     ...mapActions('contacts', ['loadAllContacts']),
     ...mapActions('progressindicator', ['setLoading'])
   }
@@ -104,6 +107,7 @@ export default class ConfigurationEditPlatformMountActionsPage extends mixins(Ch
   loadPlatformMountAction!: LoadPlatformMountActionAction
   updatePlatformMountAction!: UpdatePlatformMountActionAction
   setLoading!: SetLoadingAction
+  setSelectedDate!: SetSelectedDateAction
 
   contacts!: ContactsState['contacts']
   loadAllContacts!: LoadAllContactsAction
@@ -112,6 +116,7 @@ export default class ConfigurationEditPlatformMountActionsPage extends mixins(Ch
   private showNavigationWarning: boolean = false
   private to: RawLocation | null = null
   private mountActionHasChanged = false
+  private originalAction!: ConfigurationsState['platformMountAction']
 
   private tree: ConfigurationsTree = new ConfigurationsTree()
   private formIsValid: boolean = false
@@ -142,18 +147,36 @@ export default class ConfigurationEditPlatformMountActionsPage extends mixins(Ch
   }
 
   async fetch () {
+    await this.loadActionAndTree()
+  }
+
+  async loadActionAndTree () {
     this.setLoading(true)
     try {
       await Promise.all([
         this.loadPlatformMountAction(this.mountActionId),
         this.loadAllContacts()
       ])
-      const loadedPlatformMountAction = this.$store.state.configurations.platformMountAction
-      if (!loadedPlatformMountAction) {
+      if (!this.originalAction) {
         throw new Error('could not load mount action')
       }
-      this.platformMountAction = PlatformMountAction.createFromObject(loadedPlatformMountAction)
-      await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+      this.platformMountAction = PlatformMountAction.createFromObject(this.originalAction)
+
+      if (!this.selectedDate) {
+        throw new Error('no correct date')
+      }
+      /**
+       * We need to check if the "selectedDate" is in the range of the current action
+       * Reason:
+       *  - On a page releoad, the "selectedDate" selected by the user in the "platforms and devices" tab is no longer available
+       *  - We need to make sure to load the tree for the a date in order to use the form
+       */
+      if (this.selectedDateDoesNotMatchActionDates()) {
+        await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.platformMountAction.beginDate })
+      } else {
+        await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+      }
+
       this.createTreeWithConfigAsRootNode()
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of mount action failed')
@@ -162,10 +185,16 @@ export default class ConfigurationEditPlatformMountActionsPage extends mixins(Ch
     }
   }
 
+  selectedDateDoesNotMatchActionDates () {
+    return this.selectedDate! < this.platformMountAction!.beginDate ||
+      (this.platformMountAction?.endDate && this.selectedDate! > this.platformMountAction.endDate)
+  }
+
   createTreeWithConfigAsRootNode () {
     if (this.configuration && this.configurationMountingActionsForDate) {
       // construct the configuration as the root node of the tree
       const rootNode = new ConfigurationNode(new ConfigurationMountAction(this.configuration))
+      rootNode.disabled = true
       rootNode.children = ConfigurationsTree.createFromObject(this.configurationMountingActionsForDate).toArray()
       this.tree = ConfigurationsTree.fromArray([rootNode])
       this.tree.getAllNodesAsList().forEach((i) => {
