@@ -165,13 +165,34 @@ export default class ConfigurationEditDeviceMountActionsPage extends mixins(Chec
         throw new Error('could not load mount action')
       }
       this.deviceMountAction = DeviceMountAction.createFromObject(this.originalAction)
-      await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+
+      if (!this.selectedDate) {
+        throw new Error('no correct date')
+      }
+
+      /**
+       * We need to check if the "selectedDate" is in the range of the current action
+       * Reason:
+       *  - On a page releoad, the "selectedDate" selected by the user in the "platforms and devices" tab is no longer available
+       *  - We need to make sure to load the tree for the a date in order to use the form
+       */
+      if (this.selectedDateDoesNotMatchActionDates()) {
+        await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.deviceMountAction.beginDate })
+      } else {
+        await this.loadMountingConfigurationForDate({ id: this.configurationId, timepoint: this.selectedDate })
+      }
+
       this.createTreeWithConfigAsRootNode()
     } catch (error) {
       this.$store.commit('snackbar/setError', 'Loading of mount action failed')
     } finally {
       this.setLoading(false)
     }
+  }
+
+  selectedDateDoesNotMatchActionDates () {
+    return this.selectedDate! < this.deviceMountAction!.beginDate ||
+      (this.deviceMountAction?.endDate && this.selectedDate! > this.deviceMountAction.endDate)
   }
 
   createTreeWithConfigAsRootNode () {

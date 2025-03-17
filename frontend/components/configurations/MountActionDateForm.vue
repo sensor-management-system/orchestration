@@ -31,7 +31,7 @@ SPDX-License-Identifier: EUPL-1.2
             />
           </v-col>
         </v-row>
-        <v-row>
+        <v-row v-if="configuration">
           <v-col>
             <v-btn
               small
@@ -62,7 +62,7 @@ SPDX-License-Identifier: EUPL-1.2
           </v-col>
         </v-row>
 
-        <v-row>
+        <v-row v-if="configuration">
           <v-col>
             <v-btn
               small
@@ -109,7 +109,7 @@ export default class MountActionDateForm extends mixins(Rules) {
   readonly value!: MountActionDateDTO
 
   @Prop({
-    required: true,
+    required: false,
     type: Object
   })
   readonly configuration!: Configuration
@@ -139,7 +139,7 @@ export default class MountActionDateForm extends mixins(Rules) {
   private formIsValid: boolean = true
 
   get isSetStartDateBtntoConfigurationDateDisabled () {
-    if (!this.configuration.startDate) {
+    if (!this.configuration?.startDate) {
       return true
     }
 
@@ -151,7 +151,7 @@ export default class MountActionDateForm extends mixins(Rules) {
   }
 
   get isSetEndDateBtntoConfigurationDateDisabled () {
-    if (!this.configuration.endDate) {
+    if (!this.configuration?.endDate) {
       return true
     }
 
