@@ -12,26 +12,30 @@ SPDX-License-Identifier: EUPL-1.2
 <template>
   <v-row justify="center">
     <v-col cols="12" md="6">
-      <v-card>
-        <v-card-title class="primary white--text">
-          Mounted devices and platforms
-        </v-card-title>
-        <v-card-text>
-          <ConfigurationsTreeView
-            v-if="tree.length > 0"
-            ref="treeView"
-            :value="selectedNode"
-            :tree="tree"
-            disable-per-node
-            show-detailed-name
-            :activatable="false"
-            @input="$emit('select', $event)"
-          />
-        </v-card-text>
-      </v-card>
+      <div class="sticky">
+        <v-card>
+          <v-card-title class="primary white--text">
+            Mounted devices and platforms
+          </v-card-title>
+          <v-card-text>
+            <div style="max-height: calc(100vh - 350px); overflow-y: scroll;">
+              <ConfigurationsTreeView
+                v-if="tree.length > 0"
+                ref="treeView"
+                :value="selectedNode"
+                :tree="tree"
+                disable-per-node
+                show-detailed-name
+                :activatable="false"
+                @input="$emit('select', $event)"
+              />
+            </div>
+          </v-card-text>
+        </v-card>
+      </div>
     </v-col>
     <v-col cols="12" md="6">
-      <v-card class="mb-6">
+      <v-card>
         <v-card-title>Edit Mounting info for {{ mountActionName }}</v-card-title>
         <v-card-text>
           <v-form
@@ -417,3 +421,9 @@ export default class MountActionEditForm extends Vue {
   }
 }
 </script>
+<style scoped>
+.sticky {
+  position: sticky;
+  top: 168px;
+}
+</style>

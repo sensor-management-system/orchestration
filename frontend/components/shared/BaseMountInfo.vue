@@ -37,7 +37,7 @@ SPDX-License-Identifier: EUPL-1.2
     </v-row>
     <v-row dense>
       <v-col cols="4" class="font-weight-medium">
-        Label:
+        Mount label:
       </v-col>
       <v-col cols="8">
         {{ mountAction.label | orDefault }}
@@ -48,7 +48,21 @@ SPDX-License-Identifier: EUPL-1.2
         cols="4"
         class="font-weight-medium"
       >
-        Offsets:
+        Relative offsets:
+        <v-tooltip
+          bottom
+        >
+          <template #activator="{ on, attrs }">
+            <v-icon
+              small
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-help-circle
+            </v-icon>
+          </template>
+          Offsets are relative to the parent node.
+        </v-tooltip>
       </v-col>
       <v-col cols="8">
         X = {{ mountAction.offsetX }} m | Y = {{ mountAction.offsetY }} m | Z = {{ mountAction.offsetZ }} m
@@ -75,7 +89,7 @@ SPDX-License-Identifier: EUPL-1.2
               mdi-help-circle
             </v-icon>
           </template>
-          The offsets of the selected node are included.
+          Relative offsets of the selected node are included.
         </v-tooltip>
       </v-col>
       <v-col cols="8">

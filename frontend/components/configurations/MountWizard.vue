@@ -85,7 +85,7 @@ SPDX-License-Identifier: EUPL-1.2
                 <span>The selected parent platform is already archived.</span>
               </v-tooltip>
             </div>
-            <div v-if="isTryingToMountPlatformdUnderDevices()">
+            <div v-if="isTryingToMountPlatformsUnderDevices()">
               <v-tooltip right>
                 <template #activator="{ on, attrs }">
                   <v-icon v-bind="attrs" v-on="on">
@@ -100,7 +100,7 @@ SPDX-License-Identifier: EUPL-1.2
       </v-stepper-content>
 
       <v-stepper-step
-        :editable="selectedDate && selectedEntities.length > 0"
+        :editable="selectedDate && numberOfSelectedEntities > 0"
         :rules="[()=>!!selectedDate]"
         :complete="selectedEntities.length > 0"
         step="3"
@@ -122,12 +122,12 @@ SPDX-License-Identifier: EUPL-1.2
             <v-col>
               <v-btn
                 color="primary"
-                :disabled="selectedEntities.length === 0 || isTryingToMountPlatformdUnderDevices()"
-                @click="confirmSelection(); step++"
+                :disabled="!numberOfSelectedEntities || isTryingToMountPlatformsUnderDevices()"
+                @click="step++"
               >
-                Confirm selection
+                Continue
               </v-btn>
-              <span v-if="isTryingToMountPlatformdUnderDevices()">
+              <span v-if="isTryingToMountPlatformsUnderDevices()">
                 <v-tooltip right>
                   <template #activator="{ on, attrs }">
                     <v-icon v-bind="attrs" v-on="on">
@@ -147,15 +147,15 @@ SPDX-License-Identifier: EUPL-1.2
 
       <v-stepper-step
         :rules="[() => isMountInformationStepValid]"
-        :editable="selectedDevices.length > 0 || selectedPlatforms.length > 0"
-        :complete="platformsToMount.length > 0 || devicesToMount.length > 0"
+        :editable="numberOfSelectedEntities != 0 && numberOfEntitiesToMount != 0"
+        :complete="numberOfEntitiesToMount != 0"
         step="4"
       >
         Add mount information
       </v-stepper-step>
 
       <v-stepper-content step="4">
-        <v-container>
+        <v-container v-if="step >= 4">
           <mount-wizard-mount-form
             ref="mountActionMountDevicesForm"
             v-model="devicesToMount"
@@ -260,6 +260,14 @@ import MountActionDetailsForm from '@/components/configurations/MountActionDetai
 import { DeviceNode } from '@/viewmodels/DeviceNode'
 import { PermissionsState } from '@/store/permissions'
 
+type EntityToMount<T extends Device | Platform> = {
+  entity: T,
+  mountInfo: MountActionInformationDTO
+}
+
+type DeviceToMount = EntityToMount<Device>
+type PlatformToMount = EntityToMount<Platform>
+
 @Component({
   components: {
     ConfigurationsTreeView,
@@ -297,10 +305,10 @@ export default class MountWizard extends Vue {
   @ProvideReactive() private selectedDate: DateTime | null = DateTime.utc()
   @ProvideReactive() private selectedEndDate: DateTime | null = null
 
-  private platformsToMount: { entity: Platform, mountInfo: MountActionInformationDTO }[] = []
+  private platformsToMount: PlatformToMount[] = []
   private selectedPlatforms: Platform[] = []
 
-  private devicesToMount: { entity: Device, mountInfo: MountActionInformationDTO }[] = []
+  private devicesToMount: DeviceToMount[] = []
   private selectedDevices: Device[] = []
 
   private beginDateErrorMessage: string = ''
@@ -406,21 +414,23 @@ export default class MountWizard extends Vue {
       return
     }
 
-    this.devicesToMount.forEach((deviceMount) => {
-      try {
-        this.mountDevice(deviceMount!.entity, deviceMount!.mountInfo)
-      } catch (e) {
-        this.$store.commit('snackbar/setError', `Mounting of device ${deviceMount.entity.shortName} failed`)
+    let numberOfEntitiesMounted = 0
+    try {
+      for (const platformToMount of this.platformsToMount) {
+        await this.mountPlatform(platformToMount!.entity, platformToMount!.mountInfo)
+        numberOfEntitiesMounted++
       }
-    })
-
-    this.platformsToMount.forEach((platformMount) => {
-      try {
-        this.mountPlatform(platformMount!.entity, platformMount!.mountInfo)
-      } catch (e) {
-        this.$store.commit('snackbar/setError', `Mounting of platform ${platformMount.entity.shortName} failed`)
+      for (const deviceToMount of this.devicesToMount) {
+        await this.mountDevice(deviceToMount!.entity, deviceToMount!.mountInfo)
+        numberOfEntitiesMounted++
       }
-    })
+    } catch (_) {
+      if (numberOfEntitiesMounted === 0) {
+        this.$store.commit('snackbar/setError', 'Mounting of platforms and devices failed')
+      } else {
+        this.$store.commit('snackbar/setWarning', 'Mounting failed for some of the platforms and devices')
+      }
+    }
 
     this.clearDeviceAvailabilities()
     this.clearPlatformAvailabilities()
@@ -477,11 +487,8 @@ export default class MountWizard extends Vue {
         configurationId: this.configurationId,
         deviceMountAction: newDeviceMountAction
       })
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to add device mount action')
-    } finally {
-      this.setLoading(false)
+      throw new Error('Failed to add device mount action')
     }
   }
 
@@ -526,16 +533,25 @@ export default class MountWizard extends Vue {
         configurationId: this.configurationId,
         platformMountAction: newPlatformMountAction
       })
-      this.$store.commit('snackbar/setSuccess', 'Save successful')
     } catch (e) {
-      this.$store.commit('snackbar/setError', 'Failed to add platform mount action')
-    } finally {
-      this.setLoading(false)
+      throw new Error('Failed to add platform mount action')
     }
   }
 
   get selectedEntities () {
     return [...this.selectedPlatforms, ...this.selectedDevices]
+  }
+
+  get entitiesToMount () {
+    return [...this.devicesToMount, ...this.platformsToMount]
+  }
+
+  get numberOfSelectedEntities (): number {
+    return this.selectedEntities.length
+  }
+
+  get numberOfEntitiesToMount (): number {
+    return this.entitiesToMount.length
   }
 
   get rules (): { [index: string]: () => string | boolean } {
@@ -713,33 +729,53 @@ export default class MountWizard extends Vue {
     return true
   }
 
-  confirmSelection () {
-    type creatorFunc = <T>(entity: T) => { entity: T, mountInfo: MountActionInformationDTO }
-    const createNew: creatorFunc = (entity) => {
-      return {
-        entity,
-        mountInfo: {
-          beginContact: this.currentUserAsContact,
-          beginDate: this.selectedDate,
-          endContact: this.selectedEndDate ? this.currentUserAsContact : null,
-          endDate: this.selectedEndDate || null,
-          beginDescription: '',
-          endDescription: '',
-          offsetX: 0,
-          offsetY: 0,
-          offsetZ: 0,
-          epsgCode: '',
-          x: null,
-          y: null,
-          z: null,
-          elevationDatumName: '',
-          elevationDatumUri: '',
-          label: ''
-        }
-      }
+  get generatedMountInfo () {
+    return {
+      beginContact: this.currentUserAsContact,
+      beginDate: this.selectedDate,
+      endContact: this.selectedEndDate ? this.currentUserAsContact : null,
+      endDate: this.selectedEndDate || null,
+      beginDescription: '',
+      endDescription: '',
+      offsetX: 0,
+      offsetY: 0,
+      offsetZ: 0,
+      epsgCode: '',
+      x: null,
+      y: null,
+      z: null,
+      elevationDatumName: '',
+      elevationDatumUri: '',
+      label: ''
     }
-    this.devicesToMount = this.selectedDevices.map(i => createNew<Device>(i))
-    this.platformsToMount = this.selectedPlatforms.map(i => createNew<Platform>(i))
+  }
+
+  createNewPlatformToMount (entity: Platform) {
+    const existingPlatformToMount = this.platformsToMount.find(p => p.entity.id === entity.id)
+    if (existingPlatformToMount) {
+      return existingPlatformToMount
+    }
+    return {
+      entity,
+      mountInfo: this.generatedMountInfo
+    }
+  }
+
+  createNewDeviceToMount (entity: Device) {
+    const existingEntityToMount = this.devicesToMount.find(e => e.entity.id === entity.id)
+    if (existingEntityToMount) {
+      return existingEntityToMount
+    }
+    return {
+      entity,
+      mountInfo: this.generatedMountInfo
+    }
+  }
+
+  @Watch('selectedEntities', { deep: true })
+  updateSelection () {
+    this.devicesToMount = this.selectedDevices.map(i => this.createNewDeviceToMount(i))
+    this.platformsToMount = this.selectedPlatforms.map(i => this.createNewPlatformToMount(i))
   }
 
   get currentUserAsContact (): Contact | null {
@@ -776,10 +812,10 @@ export default class MountWizard extends Vue {
   }
 
   isStep2Complete (): boolean {
-    return this.selectedNode !== null && this.rules.validateMountingTimeRange() === true && this.rules.validateMountingDates() === true && (!this.isTryingToMountPlatformdUnderDevices())
+    return this.selectedNode !== null && this.rules.validateMountingTimeRange() === true && this.rules.validateMountingDates() === true && (!this.isTryingToMountPlatformsUnderDevices())
   }
 
-  isTryingToMountPlatformdUnderDevices (): boolean {
+  isTryingToMountPlatformsUnderDevices (): boolean {
     if (this.selectedNode && this.selectedNode.isDevice()) {
       if (this.platformsToMount.length > 0) {
         return true
