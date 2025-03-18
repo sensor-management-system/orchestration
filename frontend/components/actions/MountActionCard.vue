@@ -80,11 +80,11 @@ SPDX-License-Identifier: EUPL-1.2
             dense
           >
             <v-col cols="12" md="4">
-              <label>x</label>
+              <label>Longitude (x)</label>
               {{ value.basicData.x | orDefault }}
             </v-col>
             <v-col cols="12" md="4">
-              <label>y</label>
+              <label>Latitude (y)</label>
               {{ value.basicData.y | orDefault }}
             </v-col>
             <v-col cols="12" md="4">
@@ -97,7 +97,7 @@ SPDX-License-Identifier: EUPL-1.2
           >
             <v-col cols="12" md="4" />
             <v-col cols="12" md="4">
-              <label>z</label>
+              <label>Height (z)</label>
               {{ value.basicData.z | orDefault }}
             </v-col>
             <v-col cols="12" md="4">

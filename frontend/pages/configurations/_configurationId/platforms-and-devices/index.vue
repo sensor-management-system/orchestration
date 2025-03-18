@@ -12,7 +12,8 @@ SPDX-License-Identifier: EUPL-1.2
 <template>
   <div>
     <v-alert text type="info" dismissible>
-      Here you can see the setup of platforms and devices mounted for the configuration at a specific point in time. Feel free to select a different day to see the setup on that specific date, showing historical or future mounts.
+      Here you can see the setup of platforms and devices mounted for the configuration at a specific point in time.
+      Feel free to select a different day to see the setup on that specific date, showing historical or future mounts.
       The selection will also be used as default entry for the mount and un-mount dialogs.
     </v-alert>
     <v-card-actions>
@@ -88,25 +89,29 @@ SPDX-License-Identifier: EUPL-1.2
           <v-slide-x-reverse-transition>
             <v-card v-if="selectedNode">
               <configurations-tree-title :selected-node="selectedNode" />
-              <v-card-text>
-                <ConfigurationsTreeNodeDetail
-                  v-if="selectedNode"
-                  :node="selectedNode"
-                  :editable="editable"
-                  :deletable="isSelectedNodeDeletable"
-                  @delete="isDeleteDialogShown = true"
-                />
-                <delete-dialog
-                  v-if="selectedNode"
-                  v-model="isDeleteDialogShown"
-                  title="Delete the Mount Action?"
-                  :disabled="isLoading"
-                  @cancel="isDeleteDialogShown = false"
-                  @delete="deleteSelectedNode"
-                >
-                  <em>Please only delete mounts if you are sure that the {{ selectedNodeType }} is <strong> not being used effectively</strong> and <strong>no other software</strong> is referencing the mounted {{ selectedNodeType }}.</em>
-                </delete-dialog>
-              </v-card-text>
+              <div class="scrollable">
+                <v-card-text>
+                  <ConfigurationsTreeNodeDetail
+                    v-if="selectedNode"
+                    :node="selectedNode"
+                    :editable="editable"
+                    :deletable="isSelectedNodeDeletable"
+                    @delete="isDeleteDialogShown = true"
+                  />
+                  <delete-dialog
+                    v-if="selectedNode"
+                    v-model="isDeleteDialogShown"
+                    title="Delete the Mount Action?"
+                    :disabled="isLoading"
+                    @cancel="isDeleteDialogShown = false"
+                    @delete="deleteSelectedNode"
+                  >
+                    <em>Please only delete mounts if you are sure that the {{ selectedNodeType }} is <strong> not being
+                      used effectively</strong> and <strong>no other software</strong> is referencing the mounted
+                      {{ selectedNodeType }}.</em>
+                  </delete-dialog>
+                </v-card-text>
+              </div>
             </v-card>
           </v-slide-x-reverse-transition>
         </div>
@@ -354,8 +359,13 @@ export default class ConfigurationShowPlatformsAndDevicesPage extends Vue {
 }
 </script>
 <style scoped>
+.scrollable {
+  max-height: calc(100vh - 290px);
+  overflow-y: scroll;
+}
 .sticky {
   position: sticky;
-  top: 112px;
+  top: 140px;
+  bottom: 140px;
 }
 </style>

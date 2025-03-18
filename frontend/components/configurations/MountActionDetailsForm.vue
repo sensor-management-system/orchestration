@@ -30,77 +30,114 @@ SPDX-License-Identifier: EUPL-1.2
           <v-col>
             <v-text-field
               v-model="mountActionInformationDTO.label"
-              label="Label"
+              label="Mount label"
               :disabled="readonly"
               @input="debouncedUpdate"
             />
           </v-col>
         </v-row>
         <v-row class="pb-0">
+          <v-col cols="12">
+            <span>
+              <v-tooltip
+                bottom
+              >
+                <template #activator="{ on, attrs }">
+                  Relative offsets:
+                  <v-icon
+                    size="20"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle
+                  </v-icon>
+                </template>
+                Offsets are relative to parent node.
+              </v-tooltip></span>
+          </v-col>
           <v-col
             md="12"
             lg="4"
             xl="3"
+            dense
           >
             <v-text-field
               :value="mountActionInformationDTO.offsetX"
               data-role="textfield-offset-x"
-              label="Offset (x)"
+              label="Relative offset (x)"
               type="number"
               step="any"
               :disabled="readonly"
               required
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
+              hide-spin-buttons
               @wheel.prevent
-              @change="updateNumericFieldNonNull($event, 'offsetX')"
+              @input="debouncedUpdateNumericFieldNonNull($event, 'offsetX')"
             />
           </v-col>
           <v-col
             md="12"
             lg="4"
             xl="3"
+            dense
           >
             <v-text-field
               :value="mountActionInformationDTO.offsetY"
               data-role="textfield-offset-y"
-              label="Offset (y)"
+              label="Relative offset (y)"
               type="number"
               step="any"
               :disabled="readonly"
               required
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
+              hide-spin-buttons
               @wheel.prevent
-              @change="updateNumericFieldNonNull($event, 'offsetY')"
+              @input="debouncedUpdateNumericFieldNonNull($event, 'offsetY')"
             />
           </v-col>
           <v-col
             md="12"
             lg="4"
             xl="3"
+            dense
           >
             <v-text-field
               :value="mountActionInformationDTO.offsetZ"
               data-role="textfield-offset-z"
-              label="Offset (z)"
+              label="Relative offset (z)"
               type="number"
               step="any"
               :disabled="readonly"
               required
               :rules="[rules.numeric, rules.required]"
               class="required m-annotated"
+              hide-spin-buttons
               @wheel.prevent
-              @change="updateNumericFieldNonNull($event, 'offsetZ')"
+              @input="debouncedUpdateNumericFieldNonNull($event, 'offsetZ')"
             />
           </v-col>
         </v-row>
-        <v-row no-gutters>
-          <v-col class="text-caption text--secondary">
-            Offsets are relative to parent platform/root
-          </v-col>
-        </v-row>
         <v-row>
+          <v-col cols="12">
+            <span>
+              <v-tooltip
+                bottom
+              >
+                <template #activator="{ on, attrs }">
+                  Absolute offsets:
+                  <v-icon
+                    size="20"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-help-circle
+                  </v-icon>
+                </template>
+                Relative offsets of the node are included.
+              </v-tooltip></span>
+          </v-col>
           <v-col md="12" lg="4" xl="3">
             <v-row
               no-gutters
@@ -112,20 +149,6 @@ SPDX-License-Identifier: EUPL-1.2
                 class="text-caption text--secondary"
               >
                 Absolute offset (x):
-                <v-tooltip
-                  bottom
-                >
-                  <template #activator="{ on, attrs }">
-                    <v-icon
-                      small
-                      v-bind="attrs"
-                      v-on="on"
-                    >
-                      mdi-help-circle
-                    </v-icon>
-                  </template>
-                  The offsets of the node are included.
-                </v-tooltip>
               </v-col>
               <v-col
                 cols="12"
@@ -183,23 +206,25 @@ SPDX-License-Identifier: EUPL-1.2
           <v-col cols="12" md="4">
             <v-text-field
               :value="mountActionInformationDTO.x"
-              label="Coordinate (x)"
-              type="number"
+              label="Longitude (x)"
               step="any"
               clearable
+              :rules="[rules.numericOrEmpty]"
+              hide-spin-buttons
               @wheel.prevent
-              @change="updateNumericFieldNullable($event, 'x')"
+              @input="debouncedUpdateNumericFieldNullable($event, 'x')"
             />
           </v-col>
           <v-col cols="12" md="4">
             <v-text-field
               :value="mountActionInformationDTO.y"
-              label="Coordinate (y)"
-              type="number"
+              label="Latitude (y)"
               step="any"
               clearable
+              :rules="[rules.numericOrEmpty]"
+              hide-spin-buttons
               @wheel.prevent
-              @change="updateNumericFieldNullable($event, 'y')"
+              @input="debouncedUpdateNumericFieldNullable($event, 'y')"
             />
           </v-col>
           <v-col cols="12" md="4">
@@ -210,7 +235,7 @@ SPDX-License-Identifier: EUPL-1.2
               :items="epsgCodes"
               label="EPSG Code"
               clearable
-              @change="update"
+              @input="update"
             />
           </v-col>
         </v-row>
@@ -218,12 +243,13 @@ SPDX-License-Identifier: EUPL-1.2
           <v-col cols="12" md="4" offset-md="4">
             <v-text-field
               :value="mountActionInformationDTO.z"
-              label="Coordinate (z)"
-              type="number"
+              label="Height (z)"
               step="any"
               clearable
+              :rules="[rules.numericOrEmpty]"
+              hide-spin-buttons
               @wheel.prevent
-              @change="updateNumericFieldNullable($event, 'z')"
+              @input="debouncedUpdateNumericFieldNullable($event, 'z')"
             />
           </v-col>
           <v-col cols="12" md="4">
@@ -234,7 +260,7 @@ SPDX-License-Identifier: EUPL-1.2
               :items="elevationData"
               label="Elevation Datum"
               clearable
-              @change="update"
+              @input="update"
             />
           </v-col>
         </v-row>
@@ -442,18 +468,38 @@ export default class MountActionDetailsForm extends mixins(Rules) {
     return []
   }
 
-  async updateNumericFieldNonNull (value: any, field: 'offsetX' | 'offsetY' | 'offsetZ') {
+  updateNumericFieldNonNull (value: any, field: 'offsetX' | 'offsetY' | 'offsetZ') {
     this.mountActionInformationDTO[field] = parseFloatOrDefault(value, 0.0)
-    await this.update()
+    this.update()
   }
 
-  async updateNumericFieldNullable (value: any, field: 'x' | 'y' | 'z') {
+  debouncedUpdateNumericFieldNonNull (value: any, field: 'offsetX' | 'offsetY' | 'offsetZ') {
+    if (this.debounceTimer !== null) {
+      clearTimeout(this.debounceTimer)
+    }
+
+    this.debounceTimer = setTimeout(() => {
+      this.updateNumericFieldNonNull(value, field)
+    }, 250)
+  }
+
+  updateNumericFieldNullable (value: any, field: 'x' | 'y' | 'z') {
     this.mountActionInformationDTO[field] = parseFloatOrNull(value)
-    await this.update()
+    this.update()
   }
 
-  async update () {
-    await this.$emit('input', this.mountActionInformationDTO)
+  debouncedUpdateNumericFieldNullable (value: any, field: 'x' | 'y' | 'z') {
+    if (this.debounceTimer !== null) {
+      clearTimeout(this.debounceTimer)
+    }
+
+    this.debounceTimer = setTimeout(() => {
+      this.updateNumericFieldNullable(value, field)
+    }, 250)
+  }
+
+  update () {
+    this.$emit('input', this.mountActionInformationDTO)
   }
 
   debouncedUpdate () {
