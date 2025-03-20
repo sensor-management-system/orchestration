@@ -82,6 +82,20 @@ class ZenodoApi:
         response.raise_for_status()
         return response.json()
 
+    def delete_file(self, record_id, filename):
+        """Delete a file from a record.
+
+        This only works for drafts.
+        """
+        # Although there is documentation for the api for the deposits and their
+        # files (/api/deposit/depositions/:deposition_id/files/:file_id)
+        # the zenodo server returns just an 404.
+        # So we use what the zenodo frontend uses.
+        url = f"{self.base_url}/api/records/{record_id}/draft/files/{filename}"
+        response = requests.delete(url, params={"access_token": self.access_token})
+        response.raise_for_status()
+        return response.json()
+
     def upload_file(self, file, bucket_url):
         """Upload a file to the bucket."""
         path = pathlib.Path(file)
@@ -193,8 +207,14 @@ def main():
         handle.put(repository_url, "SMS-Repository")
         repository_url = "https://hdl.handle.net/20.500.14372/SMS-Repository"
 
-        handle.put("https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/blob/main/README.md", "SMS-Readme")
-        handle.put("https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home", "SMS-Wiki")
+        handle.put(
+            "https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/blob/main/README.md",
+            "SMS-Readme",
+        )
+        handle.put(
+            "https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home",
+            "SMS-Wiki",
+        )
 
     zenodo_api = ZenodoApi(base_url=zenodo_url, access_token=zenodo_access_token)
 
@@ -202,6 +222,15 @@ def main():
         deposition = zenodo_api.create_deposition()
     else:
         deposition = zenodo_api.create_new_version(existing_deposition_id)
+        # When we create a new version for the deposition.
+        # It is a new draft that is editable.
+        # It also copies all the existing files to the new draft.
+        # We don't need the old versions, as we upload zipped source code
+        # of the specific version we want to publish.
+        record_id = deposition["record_id"]
+        for file in deposition.get("files", []):
+            zenodo_api.delete_file(record_id, file["filename"])
+
     deposition_id = deposition["id"]
 
     zenodo_api.upload_file(file_to_upload, deposition["links"]["bucket"])
