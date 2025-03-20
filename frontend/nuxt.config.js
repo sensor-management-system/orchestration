@@ -68,6 +68,11 @@ if (NUXT_ENV_MATOMO_SITE_ID) {
   ])
 }
 
+let faviconHref = `${BASE_URL + '/'}favicon.ico`
+if (BASE_URL && BASE_URL.endsWith('/')) {
+  faviconHref = BASE_URL + 'favicon.ico'
+}
+
 export default {
   server,
   ssr: false,
@@ -105,7 +110,7 @@ export default {
 
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: `${BASE_URL + '/'}favicon.ico` }
+      { rel: 'icon', type: 'image/x-icon', href: faviconHref }
     ]
   },
   /*

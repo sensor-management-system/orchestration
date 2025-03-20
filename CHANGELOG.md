@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Added:
 
 Fixed:
+- Loading of favicon for a default base url ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/538))
 
 Changed:
 - Made several cosmetic improvements to UI of Mount wizard components ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/480))
