@@ -22,12 +22,6 @@ docs_routes = Blueprint(
 )
 
 
-@docs_routes.route("/swagger", methods=["GET"])
-def swagger():
-    """Render the swagger UI."""
-    return render_template("swaggerui.html")
-
-
 @docs_routes.route("/openapi", methods=["GET"])
 def openapi():
     """Render the OpenAPI UI."""
