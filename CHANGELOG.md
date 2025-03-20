@@ -13,6 +13,7 @@ Added:
 
 Fixed:
 - Loading of favicon for a default base url ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/538))
+- Zenodo publication now only contains the very latest version as zipped source code ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/539))
 
 Changed:
 - Made several cosmetic improvements to UI of Mount wizard components ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/480))
