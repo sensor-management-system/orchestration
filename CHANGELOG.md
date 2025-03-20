@@ -17,6 +17,7 @@ Fixed:
 
 Changed:
 - Made several cosmetic improvements to UI of Mount wizard components ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/480))
+- Old swagger endpoints are removed, openapi endpoints should be used instead ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/541))
 
 ## 1.19.0 - 2025-03-17
 
