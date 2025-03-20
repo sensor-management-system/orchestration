@@ -94,7 +94,6 @@ class ZenodoApi:
         url = f"{self.base_url}/api/records/{record_id}/draft/files/{filename}"
         response = requests.delete(url, params={"access_token": self.access_token})
         response.raise_for_status()
-        return response.json()
 
     def upload_file(self, file, bucket_url):
         """Upload a file to the bucket."""
