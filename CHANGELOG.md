@@ -10,6 +10,7 @@ SPDX-License-Identifier: EUPL-1.2
 ## 1.20.0 (Unreleased)
 
 Added:
+- Labels for datastream links ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/543))
 
 Fixed:
 - Loading of favicon for a default base url ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/538))

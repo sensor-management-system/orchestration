@@ -586,6 +586,7 @@ class TestDatastreamLinks(BaseTestCase):
             datasource_id="1",
             thing_id="1",
             datastream_id="1",
+            label="linking1 label",
         )
         linking2 = DatastreamLink(
             device_mount_action=mount2,
@@ -622,7 +623,9 @@ class TestDatastreamLinks(BaseTestCase):
         self.assertEqual(len(resp1.json["data"]), 1)
         self.assertEqual(len(resp2.json["data"]), 1)
         self.assertEqual(resp1.json["data"][0]["id"], str(linking1.id))
+        self.assertEqual(resp1.json["data"][0]["attributes"]["label"], linking1.label)
         self.assertEqual(resp2.json["data"][0]["id"], str(linking2.id))
+        self.assertEqual(resp2.json["data"][0]["attributes"]["label"], None)
 
     def test_get_elements_filtered_by_tsm_endpoint_id(self):
         """Ensure we can get a filtered list for a tsm endpoint id."""

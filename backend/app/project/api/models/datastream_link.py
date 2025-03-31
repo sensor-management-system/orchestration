@@ -74,3 +74,4 @@ class DatastreamLink(db.Model, AuditMixin):
     license_name = db.Column(db.String(256), nullable=True)
     # Aggregation period in seconds.
     aggregation_period = db.Column(db.Float(), nullable=True)
+    label = db.Column(db.String(256), nullable=True)
