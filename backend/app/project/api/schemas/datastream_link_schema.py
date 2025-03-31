@@ -38,6 +38,7 @@ class DatastreamLinkSchema(Schema):
     license_uri = fields.Str(allow_none=True)
     license_name = fields.Str(allow_none=True)
     aggregation_period = fields.Float(allow_none=True)
+    label = fields.Str(allow_none=True)
 
     tsm_endpoint_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     device_property_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
