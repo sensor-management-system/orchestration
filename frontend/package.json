@@ -76,6 +76,7 @@
     "nuxt-leaflet": "^0.0.27",
     "nuxt-matomo": "^1.2.4",
     "nuxt-property-decorator": "^2.9.1",
+    "portal-vue": "^2.1.7",
     "ufo": "^1.5.4",
     "vue": "^2.7.16",
     "vue-barcode-reader": "^1.0.3",

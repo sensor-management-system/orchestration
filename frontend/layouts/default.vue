@@ -299,7 +299,8 @@ SPDX-License-Identifier: EUPL-1.2
       >
         <template #message>
           <!-- eslint-disable -->
-          This site uses cookies to ensure technical functionality. To read more about what we store in the cookies, have
+          This site uses cookies to ensure technical functionality. To read more about what we store in the cookies,
+          have
           a look at our
           <nuxt-link to="/info/privacy-policy">Privacy Policy</nuxt-link>
           .
@@ -637,12 +638,16 @@ export default {
   watch: {
     hasSuccess (val) {
       if (val) {
-        setTimeout(() => { this.closeSuccess() }, 5000)
+        setTimeout(() => {
+          this.closeSuccess()
+        }, 5000)
       }
     },
     hasError (val) {
       if (val) {
-        setTimeout(() => { this.closeError() }, 5000)
+        setTimeout(() => {
+          this.closeError()
+        }, 5000)
       }
     }
   },
@@ -691,27 +696,28 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import '~vuetify/src/styles/styles.sass';
+@import '~vuetify/src/styles/styles.sass';
 
-  .Cookie--sms {
-    position: relative;
-    background: map-get($grey, 'lighten-3');
-    padding: $grid-gutter / 2;
-  }
+.Cookie--sms {
+  position: relative;
+  background: map-get($grey, 'lighten-3');
+  padding: $grid-gutter / 2;
+}
 
-  .link-footer {
-    z-index: 10;
-  }
+.link-footer {
+  z-index: 10;
+}
 
-  .logo-footer__landing {
-    z-index: 1 !important;
-    margin-bottom: 0 !important;
-  }
-  .error-list {
-    position: fixed;
-    top: 5px;
-    left: 50%;
-    transform: translate(-50%, 0);
-    z-index: 2401; /* display in v-dialog */
-  }
+.logo-footer__landing {
+  z-index: 1 !important;
+  margin-bottom: 0 !important;
+}
+
+.error-list {
+  position: fixed;
+  top: 5px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 2401; /* display in v-dialog */
+}
 </style>
