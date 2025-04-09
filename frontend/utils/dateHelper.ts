@@ -25,6 +25,12 @@ export const dateToDateTimeStringHHMM = (aDate: DateTime | null): string => {
   }
   return aDate.setZone('UTC').toFormat('yyyy-MM-dd HH:mm')
 }
+export const dateToDateString = (aDate: DateTime | null): string => {
+  if (!aDate) {
+    return ''
+  }
+  return aDate.setZone('UTC').toFormat('yyyy-MM-dd')
+}
 
 export const stringToDate = (aDate: string): DateTime => {
   return DateTime.fromISO(aDate, { zone: 'UTC' })

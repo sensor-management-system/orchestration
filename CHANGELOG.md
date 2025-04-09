@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Changed:
 - Device detail page now shows the extended name instead of the short name in the app bar ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/542))
+- improvements in table to view data linkings of a configuration ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/515))
 
 ## 1.20.0 - 2025-03-31
 

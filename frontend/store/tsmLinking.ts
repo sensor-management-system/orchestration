@@ -12,6 +12,7 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 import { ActionTree, Commit, GetterTree } from 'vuex'
+import { DateTime } from 'luxon'
 import { RootState } from '@/store/index'
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { DeviceMountAction } from '@/models/DeviceMountAction'
@@ -21,6 +22,23 @@ import { TsmdlDatastream } from '@/models/TsmdlDatastream'
 import { TsmdlDatasource } from '@/models/TsmdlDatasource'
 import { TsmDeviceMountPropertyCombination } from '@/utils/configurationInterfaces'
 import { TsmEndpoint } from '@/models/TsmEndpoint'
+import { Device } from '@/models/Device'
+import { filterLinkings } from '@/utils/dataLinkingHelper'
+
+export enum TSMLinkingDateFilterOperation {
+  GTE = 'gte',
+  LTE = 'lte'
+}
+
+export type TsmLinkingDateFilterOption = {
+  text: string
+  id: TSMLinkingDateFilterOperation
+}
+
+export type TSMLinkingDateFilter = {
+  date: DateTime
+  operation: TsmLinkingDateFilterOption
+}
 
 export interface ITsmLinkingState {
   tsmEndpoints: TsmEndpoint[]
@@ -31,6 +49,13 @@ export interface ITsmLinkingState {
   linkings: TsmLinking[]
   newLinkings: TsmLinking[]
   linking: TsmLinking | null
+  filterSelectedDevices: Device[]
+  filterSelectedMeasuredQuantities: DeviceProperty[],
+  filterSelectedStartDate: DateTime | null
+  filterSelectedStartDateOperation: TsmLinkingDateFilterOption | null
+  filterSelectedEndDate: DateTime | null
+  filterSelectedEndDateOperation: TsmLinkingDateFilterOption | null
+
 }
 
 const state = (): ITsmLinkingState => ({
@@ -41,7 +66,13 @@ const state = (): ITsmLinkingState => ({
   datastreams: [],
   linkings: [],
   newLinkings: [],
-  linking: null
+  linking: null,
+  filterSelectedDevices: [],
+  filterSelectedMeasuredQuantities: [],
+  filterSelectedStartDate: null,
+  filterSelectedStartDateOperation: null,
+  filterSelectedEndDate: null,
+  filterSelectedEndDateOperation: null
 })
 
 export type DevicesPropertiesWithoutLinkingGetter = (action: DeviceMountAction) => DeviceProperty[]
@@ -52,6 +83,10 @@ export type FindDatasourceByIdGetter = (id: String) => TsmdlDatasource | undefin
 export type SuggestedDatasourceIdGetter = (arg: TsmDeviceMountPropertyCombination) => string | null
 export type SuggestedTsmEndpointIdGetter = (arg: TsmDeviceMountPropertyCombination) => string | null
 export type SuggestedThingIdGetter = (arg: TsmDeviceMountPropertyCombination) => string | null
+export type DevicesInLinkingsGetter = Device []
+export type MeasuredQuantitiesInLinkingsGetter = DeviceProperty[]
+export type DateFilterGetter = TSMLinkingDateFilter | null
+export type FilteredLinkingsGetter = TsmLinking[]
 
 const getMatchingLinking = (state: ITsmLinkingState, selectedDeviceActionPropertyCombination: TsmDeviceMountPropertyCombination): TsmLinking | null => {
   let matchingLinking = null
@@ -159,7 +194,63 @@ const getters: GetterTree<ITsmLinkingState, RootState> = {
     }
 
     return matchingLinking.tsmEndpoint.id
+  },
+  devicesInLinkings: (state: ITsmLinkingState): Device[] => {
+    if (!state.linkings) {
+      return []
+    }
+
+    const devices = state.linkings.filter((linking) => {
+      return !(linking.device === null)
+    }).map(linking => linking.device) as Device[]
+
+    // one device can be in multiple linkings
+    // so we remove the duplicate occurences
+    return devices.filter((value, index, currentArray: Device[]) => {
+      return index === currentArray.findIndex(t => t.id === value.id)
+    })
+  },
+  measuredQuantitiesInLinkings: (state: ITsmLinkingState): DeviceProperty[] => {
+    if (!state.linkings) {
+      return []
+    }
+
+    const measuredQuantities = state.linkings.filter((linking) => {
+      return !(linking.deviceProperty === null)
+    }).map(linking => linking.deviceProperty) as DeviceProperty[]
+
+    // we don't use the measured quantities associated with one device (and therefore linking), but the distinct property names of the corresponding measured quantities
+    return measuredQuantities.filter((value, index, currentArray: DeviceProperty[]) => {
+      return index === currentArray.findIndex(t => t.propertyName === value.propertyName)
+    })
+  },
+  startDateFilter: (state: ITsmLinkingState): TSMLinkingDateFilter | null => {
+    if (state.filterSelectedStartDate && state.filterSelectedStartDateOperation) {
+      return {
+        date: state.filterSelectedStartDate,
+        operation: state.filterSelectedStartDateOperation
+      }
+    }
+    return null
+  },
+  endDateFilter: (state: ITsmLinkingState): TSMLinkingDateFilter | null => {
+    if (state.filterSelectedEndDate && state.filterSelectedEndDateOperation) {
+      return {
+        date: state.filterSelectedEndDate,
+        operation: state.filterSelectedEndDateOperation
+      }
+    }
+    return null
+  },
+
+  filteredLinkings: (state, getters): TsmLinking[] => {
+    if (!state.linkings) {
+      return []
+    }
+
+    return filterLinkings(state.linkings, state.filterSelectedDevices, state.filterSelectedMeasuredQuantities, getters.startDateFilter, getters.endDateFilter)
   }
+
 }
 
 export type LoadTsmEndpointsAction = () => Promise<void>
@@ -325,6 +416,25 @@ const mutations = {
   },
   setLinking (state: ITsmLinkingState, linking: TsmLinking) {
     state.linking = linking
+  },
+  setFilterSelectedDevices (state: ITsmLinkingState, selectedDevices: Device[]) {
+    state.filterSelectedDevices = selectedDevices
+  },
+  setFilterSelectedMeasuredQuantities (state: ITsmLinkingState, selectedMeasuredQuantities: DeviceProperty[]) {
+    state.filterSelectedMeasuredQuantities = selectedMeasuredQuantities
+  },
+
+  setFilterSelectedStartDate (state: ITsmLinkingState, date: DateTime | null) {
+    state.filterSelectedStartDate = date
+  },
+  setFilterSelectedStartDateOperation (state: ITsmLinkingState, operation: TsmLinkingDateFilterOption | null) {
+    state.filterSelectedStartDateOperation = operation
+  },
+  setFilterSelectedEndDate (state: ITsmLinkingState, date: DateTime | null) {
+    state.filterSelectedEndDate = date
+  },
+  setFilterSelectedEndDateOperation (state: ITsmLinkingState, operation: TsmLinkingDateFilterOption | null) {
+    state.filterSelectedEndDateOperation = operation
   }
 }
 
