@@ -17,7 +17,11 @@ SPDX-License-Identifier: EUPL-1.2
     >
       <v-icon>mdi-arrow-left</v-icon>
     </v-btn>
-    <v-toolbar-title>{{ title }}</v-toolbar-title>
+    <v-toolbar-title>
+      <portal-target name="app-bar-title">
+        {{ title }}
+      </portal-target>
+    </v-toolbar-title>
   </div>
 </template>
 

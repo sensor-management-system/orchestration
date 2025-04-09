@@ -24,9 +24,16 @@ SPDX-License-Identifier: EUPL-1.2
           outlined
           prominent
         >
-          The device is archived. It is not possible to change the values. To edit it, ask a group administrator to restore the entity.
+          The device is archived. It is not possible to change the values. To edit it, ask a group administrator to
+          restore the entity.
         </v-alert>
       </center>
+      <portal to="app-bar-title">
+        <ExtendedItemName
+          v-if="device"
+          :value="device"
+        />
+      </portal>
       <NuxtChild
         v-if="device"
       />
@@ -44,13 +51,21 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 
 import { SetTitleAction, SetTabsAction, SetShowBackButtonAction } from '@/store/appbar'
 import { DevicesState, LoadDeviceAction } from '@/store/devices'
-import { CanAccessEntityGetter, CanModifyEntityGetter, CanDeleteEntityGetter, CanArchiveEntityGetter, CanRestoreEntityGetter } from '@/store/permissions'
+import {
+  CanAccessEntityGetter,
+  CanModifyEntityGetter,
+  CanDeleteEntityGetter,
+  CanArchiveEntityGetter,
+  CanRestoreEntityGetter
+} from '@/store/permissions'
 
 import { SetLoadingAction } from '@/store/progressindicator'
 import ModificationInfo from '@/components/ModificationInfo.vue'
+import ExtendedItemName from '@/components/shared/ExtendedItemName.vue'
 
 @Component({
   components: {
+    ExtendedItemName,
     ModificationInfo
   },
   computed: {
@@ -171,9 +186,6 @@ export default class DevicePage extends Vue {
         name: 'Actions'
       }
     ])
-    if (this.device) {
-      this.setTitle(this.device.shortName)
-    }
   }
 
   updatePermissions (device: DevicesState['device']) {
@@ -188,7 +200,6 @@ export default class DevicePage extends Vue {
   @Watch('device', { immediate: true, deep: true })
   onDeviceChanged (val: DevicesState['device']) {
     if (val && val.id) {
-      this.setTitle(val.shortName)
       this.updatePermissions(val)
     }
   }

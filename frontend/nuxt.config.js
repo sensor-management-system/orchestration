@@ -150,6 +150,7 @@ export default {
     // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv',
     'nuxt-leaflet',
+    'portal-vue/nuxt',
     // Can be empty depending on the config
     ...matomoModule
   ],
