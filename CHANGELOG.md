@@ -13,6 +13,9 @@ Changed:
 - Device detail page now shows the extended name instead of the short name in the app bar ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/542))
 - improvements in table to view data linkings of a configuration ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/515))
 
+Fixed:
+- KIT deployment, docker-compose: make `SMS_FRONTEND_URL` env variable available to frontend container so that data linking works correctly ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/552))
+
 ## 1.20.0 - 2025-03-31
 
 Added:
