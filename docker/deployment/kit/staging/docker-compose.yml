@@ -166,6 +166,7 @@ services:
             SMS_VERSION: ${SMS_VERSION:-develop}
             BASE_URL: ${BASE_URL:-/}
             SMS_BACKEND_URL: ${SMS_BACKEND_URL:-/backend/api/v1}
+            SMS_FRONTEND_URL: ${SMS_FRONTEND_URL:-https://localhost.localdomain}
             CV_BACKEND_URL: ${CV_BACKEND_URL:-/cv/api/v1}
             NUXT_ENV_CLIENT_ID: ${NUXT_ENV_CLIENT_ID:-sms-client}
             # We reuse here the variable defined for the backend
