@@ -174,6 +174,7 @@ services:
       NUXT_ENV_PID_BASE_URL: ${NUXT_ENV_PID_BASE_URL:-https://hdl.handle.net}
       INSTITUTE: ${INSTITUTE:-ufz}
       IDL_SYNC_URL: ${IDL_SYNC_URL:-http://localhost/idl/api/hifis/sync-groups/}
+      SHOW_RELEASE_NOTES: ${SHOW_RELEASE_NOTES:-true}
     volumes:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw

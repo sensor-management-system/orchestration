@@ -277,6 +277,31 @@ test-openapi:
         - backend/**/*
         - .gitlab-ci.yml
 
+test-changelog:
+  stage: test
+  image: python:3.11-bullseye
+  script:
+    - pip install requests
+    - python -m scripts.bin.parse_changelog --file CHANGELOG.md # check whether changelog syntax is valid
+    - set +e # don't cancel the job on any non-zero code
+    - scripts/bin/compare_changelog_with_main.sh || EXIT_CODE=$? # check whether changelog entry was made
+    - exit $EXIT_CODE
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - changes:
+        - .gitlab-ci.yml
+        - CHANGELOG.md
+        - scripts/bin/parse_changelog/*.py
+        - scripts/bin/compare_changelog_with_main.sh
+  allow_failure:
+    exit_codes:
+      - 8 # returned if CHANGELOG.md file is unchanged
+
 
 build-deploy-image-nginx-gfz-fzj-staging:
   stage: build

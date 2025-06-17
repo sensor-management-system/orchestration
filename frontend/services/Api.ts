@@ -102,6 +102,7 @@ import { TsmdlDatastreamApi } from '@/services/tsmdl/DatastreamApi'
 import { TsmdlDatasourceApi } from '@/services/tsmdl/DatasourceApi'
 import { TsmdlThingApi } from '@/services/tsmdl/ThingApi'
 import { StaDatastreamApi, StaThingApi } from '@/services/sta/StaApi'
+import { ReleaseNotesApi } from '@/services/sms/ReleaseNotesApi'
 
 const SMS_BASE_URL = process.env.smsBackendUrl
 const CV_BASE_URL = process.env.cvBackendUrl
@@ -195,6 +196,7 @@ export class Api {
   private readonly _exportControlApi: ExportControlApi
   private readonly _exportControlAttachmentApi: ExportControlAttachmentApi
   private readonly _proxyApi: ProxyApi
+  private readonly _releaseNotesApi: ReleaseNotesApi
 
   constructor (
     getIdToken: () => string | null,
@@ -628,6 +630,10 @@ export class Api {
     this._exportControlApi = new ExportControlApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/export-control')
     this._exportControlAttachmentApi = new ExportControlAttachmentApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/export-control-attachments')
     this._proxyApi = new ProxyApi(smsBaseUrl!)
+    this._releaseNotesApi = new ReleaseNotesApi(createAxios(undefined, { headers: {} }),
+      this._proxyApi,
+      'https://codebase.helmholtz.cloud/api/v4/projects/3268/repository/files/CHANGELOG.md/raw?ref=main'
+    )
   }
 
   get devices (): DeviceApi {
@@ -920,5 +926,9 @@ export class Api {
 
   get staDatastreams (): StaDatastreamApi {
     return this._staDatastreamApi
+  }
+
+  get releaseNotes (): ReleaseNotesApi {
+    return this._releaseNotesApi
   }
 }

@@ -1,9 +1,11 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2024
+SPDX-FileCopyrightText: 2020 - 2025
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Maximilian Schaldach <maximilian.schaldach@ufz.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -13,7 +15,7 @@ SPDX-License-Identifier: EUPL-1.2
       v-slot="{ hover }"
     >
       <v-card
-        :elevation="hover ? 6 : 2"
+        :elevation="noElevation ? 0 : hover ? 6 : 2"
         class="ma-2"
         :color="backgroundColor"
       >
@@ -113,6 +115,13 @@ export default class BaseExpandableListItem extends Vue {
     type: String
   })
   private backgroundColor!: string
+
+  @Prop({
+    required: false,
+    type: Boolean,
+    default: false
+  })
+  private noElevation!: boolean
 
   private show: boolean = false
 
