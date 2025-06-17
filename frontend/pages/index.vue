@@ -1,11 +1,12 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2024
+SPDX-FileCopyrightText: 2020 - 2025
 - Kotyba Alhaj Taha <kotyba.alhaj-taha@ufz.de>
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
 - Erik Pongratz <erik.pongratz@ufz.de>
 - Tim Eder <tim.eder@ufz.de>
+- Maximilian Schaldach <maximilian.schaldach@ufz.de>
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 
@@ -32,7 +33,13 @@ SPDX-License-Identifier: EUPL-1.2
           <h1 class="text-h5">
             Welcome to the<br>
           </h1>
-          <v-img style="margin-left: -40px; margin-top: -20px; margin-bottom: -40px;" contain position="center left" height="10em" src="logos/ufz-sms_logo_weiss-transparent.svg" />
+          <v-img
+            style="margin-left: -40px; margin-top: -20px; margin-bottom: -40px;"
+            contain
+            position="center left"
+            height="10em"
+            src="logos/ufz-sms_logo_weiss-transparent.svg"
+          />
         </v-col>
       </v-row>
       <v-container class="mt-n20 px-12 pb-16">
@@ -66,6 +73,7 @@ SPDX-License-Identifier: EUPL-1.2
         </v-row>
       </v-container>
     </v-parallax>
+
     <v-container class="mt-n14 px-12">
       <v-row justify="center">
         <v-col cols="12" md="3" sm="12">
@@ -108,82 +116,125 @@ SPDX-License-Identifier: EUPL-1.2
           />
         </v-col>
       </v-row>
+
       <v-row v-if="!isLoggedIn" justify="center" align="stretch">
         <v-alert color="warning">
           You are are currently not logged in. You can not create or edit any data.
         </v-alert>
       </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-card>
-            <v-row no-gutters class="d-flex flex-no-wrap justify-space-between">
-              <v-col cols="8">
-                <div class="primary white--text rounded rounded-b-0 rounded-tr-0">
-                  <v-card-title
-                    class="text-h5 font-weight-bold"
-                  >
-                    SMS - Introduction
-                  </v-card-title>
 
-                  <v-card-subtitle>Sensor Management System</v-card-subtitle>
-                </div>
-                <v-divider />
+      <v-row class="d-flex">
+        <v-col cols="12" :md="showReleaseNotes ? 8 : 12">
+          <v-row>
+            <v-col cols="12">
+              <v-card>
+                <v-row no-gutters class="d-flex flex-no-wrap justify-space-between">
+                  <v-col cols="8">
+                    <div class="primary white--text rounded rounded-b-0 rounded-tr-0">
+                      <v-card-title class="text-h5 font-weight-bold">
+                        SMS - Introduction
+                      </v-card-title>
 
-                <v-card-text class="primary_text--text">
-                  <p>
-                    The purpose of this application is to help scientists and technicians to manage sensors, measurement setups and campaigns.
-                  </p>
-                  <p>
-                    If you don't have an account, you can browse and view all datasets.<br>
-                    If you're already registered, you can login above.
-                  </p>
-                  <p>
-                    Good places to get started are our
-                    <a href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home" target="_blank" style="text-decoration: none">Wiki Page</a>
-                    and the <a href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/SMS%20Tutorial%20Videos" target="_blank" style="text-decoration: none">Tutorial Videos</a>.
-                  </p>
-                </v-card-text>
-              </v-col>
-              <v-col cols="4">
-                <v-img class="rounded rounded-l-0" height="100%" width="100%" src="UFZ_Standort-7.jpg" />
-              </v-col>
-            </v-row>
-          </v-card>
+                      <v-card-subtitle>Sensor Management System</v-card-subtitle>
+                    </div>
+                    <v-divider />
+
+                    <v-card-text class="primary_text--text">
+                      <p>
+                        The purpose of this application is to help scientists and technicians to manage sensors,
+                        measurement setups and campaigns.
+                      </p>
+                      <p>
+                        If you don't have an account, you can browse and view all datasets.<br>
+                        If you're already registered, you can login above.
+                      </p>
+                      <p>
+                        Good places to get started are our
+                        <a
+                          href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/home"
+                          target="_blank"
+                          style="text-decoration: none"
+                        >Wiki Page</a>
+                        and the <a
+                          href="https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/wikis/SMS%20Tutorial%20Videos"
+                          target="_blank"
+                          style="text-decoration: none"
+                        >Tutorial Videos</a>.
+                      </p>
+                    </v-card-text>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-img class="rounded rounded-l-0" height="100%" width="100%" src="UFZ_Standort-7.jpg" />
+                  </v-col>
+                </v-row>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="isMobileView && showReleaseNotes" justify="center" align="stretch">
+            <v-col cols="12">
+              <ReleaseNotes
+                :link-to-release-notes="linkToReleaseNotes"
+                @close="showReleaseNotes = false"
+              />
+            </v-col>
+          </v-row>
+
+          <v-row v-if="isLoggedIn" justify="center" align="stretch">
+            <v-col cols="12">
+              <recent-activity-overview-card
+                :amount-of-recents="5"
+              />
+            </v-col>
+          </v-row>
         </v-col>
-      </v-row>
 
-      <v-row v-if="isLoggedIn" justify="center" align="stretch">
-        <v-col cols="12">
-          <recent-activity-overview-card
-            :amount-of-recents="5"
+        <v-col
+          v-if="isDesktopView && showReleaseNotes"
+          class="d-flex"
+          cols="12"
+          md="4"
+          style="align-self: start; min-height: 25vh"
+        >
+          <ReleaseNotes
+            :link-to-release-notes="linkToReleaseNotes"
+            @close="showReleaseNotes = false"
           />
         </v-col>
       </v-row>
     </v-container>
   </v-container>
 </template>
+
 <script lang="ts">
-import { Vue, Component } from 'nuxt-property-decorator'
+import { Component, mixins } from 'nuxt-property-decorator'
 import { mapActions } from 'vuex'
 import BasicOverviewCard from '@/components/overview/BasicOverviewCard.vue'
 import { StatisticsCount } from '@/models/Statistics'
 import RecentActivityOverviewCard from '@/components/overview/RecentActivityOverviewCard.vue'
 
 import { SetFullWidthAction, SetDefaultsAction } from '@/store/defaultlayout'
+import ReleaseNotes from '@/components/ReleaseNotes.vue'
+import { ViewPort } from '@/mixins/ViewportMixin'
 
 @Component({
   components: {
-    BasicOverviewCard, RecentActivityOverviewCard
+    ReleaseNotes,
+    BasicOverviewCard,
+    RecentActivityOverviewCard
   },
   methods: {
     ...mapActions('defaultlayout', ['setFullWidth', 'setDefaults'])
   }
 })
-export default class OverviewIndex extends Vue {
+export default class OverviewIndex extends mixins(ViewPort) {
   setFullWidth!: SetFullWidthAction
   setDefaults!: SetDefaultsAction
 
   private stats = new StatisticsCount()
+  private showReleaseNotes = !!process.env.showReleaseNotes
+
+  private linkToReleaseNotes = 'https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/blob/main/CHANGELOG.md'
 
   created () {
     this.setFullWidth(true)
@@ -241,8 +292,9 @@ Metainformation is recorded here, such as the type of device, the measured varia
 </script>
 <style>
 #parallax-bg .v-parallax__content {
-  background: linear-gradient(45deg, #1e1e1e , transparent);
+  background: linear-gradient(45deg, #1e1e1e, transparent);
 }
+
 .counter-number {
   font-size: 2.5em;
   font-weight: bold;

@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.20.1 (Unreleased)
 
+Added:
+- Show Release Notes (Changelog) on landing page ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/528))
+
 Changed:
 - Device detail page now shows the extended name instead of the short name in the app bar ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/542))
 - improvements in table to view data linkings of a configuration ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/515))
@@ -187,7 +190,7 @@ Changed:
 - Renamed tsm linking to data linking
 - Related units are now suggested, but all units are selectable for measured quantities
 - Harmonized field-titles "Begin description" & "End description" of the mount information
-- Improved the validation performance of the "mount information step" when mounting a platform/device on a configuration [MR389](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/389) 
+- Improved the validation performance of the "mount information step" when mounting a platform/device on a configuration ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/389)) 
 - improved messages for cases that mount edits can't be done
 - Revised README.md and moved institute-specific information to separate directory
 
@@ -199,7 +202,7 @@ Fixed:
 - Added CSRF trusted origins for the IDL component
 - Updated IDL image, so that github accounts can be used again
 - Fixes a bug in the management of manufacturer model entries
-- Fixed bug when deleting contact in mount wizard step 4 "Add mount information" [MR391](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/391)
+- Fixed bug when deleting contact in mount wizard step 4 "Add mount information" ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/391))
 - Bug on validating time span ranges on device mounts with child mounts
 
 ## 1.15.1 - 2024-04-24
@@ -248,7 +251,7 @@ Added:
 - Mounts can have explicit coordinates
 - Shortcut to add a value for a parameter of device, platform or configuration 
 - Endpoint URL is displayed in the tsm linking form when selecting a endpoint
-- Tooltip to explain why a paramter can not be deleted if the delete button is disabled
+- Tooltip to explain why a parameter can not be deleted if the delete button is disabled
 - Shortcut to edit or delete a value of a parameter of device, platform or configuration
 - Locations of configurations in sensorML
 - Autocompletion for device & platform model fields
@@ -393,7 +396,7 @@ Changed:
 - Update to psycopg3 for the CV. Please check all `SQL_ENGINE` env variables.
 - switch to a central CV instance (https://sms-cv.helmholtz.cloud)
 
-Fixes:
+Fixed:
 - problem resolved that mask for device creation stays open when creating a PID failed
 - improved wording for hint if a platform can't be unmounted due to still mounted child devices/platforms
 
@@ -414,7 +417,7 @@ Changed:
 - changed layout of action cards
 - store for loading spinner
 
-Fixes:
+Fixed:
 - improved file upload for mimetypes with encodings
 - less 406 responses when opening backend urls with the browser
 - better handling of url parameters for search pages
@@ -434,14 +437,14 @@ Fixes:
 Added:
 - license & aggregation period for tsm linkings
 
-Fixes:
+Fixed:
 - improved full text search with smaller search texts
 - removed entries with `updated_at=null` from recent activities
 - renamed sites to sites & labs
 
 ## 1.2.1 - 2023-07-03
 
-Fixes:
+Fixed:
 - organization names with special characters
 - better status codes when deleting datastreams or device properties
 

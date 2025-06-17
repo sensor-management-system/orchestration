@@ -45,6 +45,8 @@ ENV NUXT_ENV_MATOMO_SITE_ID 30
 ARG SMS_VERSION_ARG=develop
 ENV SMS_VERSION $SMS_VERSION_ARG
 
+ENV SHOW_RELEASE_NOTES true
+
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend
 WORKDIR /smsfrontend

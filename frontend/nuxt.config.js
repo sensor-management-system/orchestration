@@ -44,6 +44,8 @@ const NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME = process.env.NUXT_ENV_OIDC_REFRESH_IN
 
 const NUXT_ENV_ALLOWED_MIMETYPES = process.env.NUXT_ENV_ALLOWED_MIMETYPES || 'NUXT_ENV_ALLOWED_MIMETYPES_ENV_PLACEHOLDER'
 
+const SHOW_RELEASE_NOTES = process.env.SHOW_RELEASE_NOTES || 'SHOW_RELEASE_NOTES_PLACEHOLDER'
+
 const server = {
   port: 3000,
   host: '0.0.0.0'
@@ -91,7 +93,8 @@ export default {
     institute: INSTITUTE,
     pidBaseUrl: NUXT_ENV_PID_BASE_URL,
     refreshInterval: NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME,
-    allowedMimeTypesString: NUXT_ENV_ALLOWED_MIMETYPES
+    allowedMimeTypesString: NUXT_ENV_ALLOWED_MIMETYPES,
+    showReleaseNotes: SHOW_RELEASE_NOTES === 'true'
   },
   /*
   ** Headers of the page

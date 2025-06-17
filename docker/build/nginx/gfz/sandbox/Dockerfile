@@ -41,6 +41,8 @@ ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
 ARG SMS_VERSION_ARG=develop
 ENV SMS_VERSION $SMS_VERSION_ARG
 
+ENV SHOW_RELEASE_NOTES true
+
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend
 WORKDIR /smsfrontend

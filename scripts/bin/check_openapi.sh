@@ -12,7 +12,7 @@
 # 3) Run the openapi validation
 
 set -e
-url="https://localhost/backend/api/v1/openapi.json"
+url="http://localhost/backend/api/v1/openapi.json"
 path="./openapi.json"
 
 # Download it
