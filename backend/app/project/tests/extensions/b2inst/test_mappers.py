@@ -33,7 +33,7 @@ class TestB2InstDeviceMapper(BaseTestCase):
 
     def test_to_draft_post_minimal(self):
         """Ensure we can map a minimal set of data to b2inst."""
-        device = Device(short_name="", description="")
+        device = Device(short_name="")
         db.session.add(device)
         db.session.commit()
 
@@ -456,7 +456,7 @@ class TestB2InstPlatformMapper(BaseTestCase):
 
     def test_to_draft_post_minimal(self):
         """Ensure we can map a minimal set of data to b2inst."""
-        platform = Platform(short_name="", description="")
+        platform = Platform(short_name="")
         db.session.add(platform)
         db.session.commit()
 
@@ -855,7 +855,7 @@ class TestB2InstConfigurationMapper(BaseTestCase):
 
     def test_to_draft_post_minimal(self):
         """Ensure we can map a minimal set of data to b2inst."""
-        configuration = Configuration(label="", description="")
+        configuration = Configuration(label="")
         db.session.add(configuration)
         db.session.commit()
 

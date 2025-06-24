@@ -18,6 +18,7 @@ Changed:
 
 Fixed:
 - KIT deployment, docker-compose: make `SMS_FRONTEND_URL` env variable available to frontend container so that data linking works correctly ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/552))
+- PID generation while the description is still None ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/555))
 
 ## 1.20.0 - 2025-03-31
 
