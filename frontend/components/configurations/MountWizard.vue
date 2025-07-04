@@ -757,7 +757,7 @@ export default class MountWizard extends Vue {
     }
     return {
       entity,
-      mountInfo: this.generatedMountInfo
+      mountInfo: { ...this.generatedMountInfo }
     }
   }
 
@@ -768,7 +768,7 @@ export default class MountWizard extends Vue {
     }
     return {
       entity,
-      mountInfo: this.generatedMountInfo
+      mountInfo: { ...this.generatedMountInfo }
     }
   }
 
