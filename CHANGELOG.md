@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.20.1 (Unreleased)
+## 1.21.1 (Unreleased)
+
+## 1.21.0 - 2025-07-07
 
 Added:
 - Show Release Notes (Changelog) on landing page ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/528))
