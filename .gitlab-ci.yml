@@ -1032,7 +1032,7 @@ build-generic-frontend-image-versioned:
 
 publish-zenodo-staging:
   stage: publish
-  image: python:3.11-slim-buster
+  image: python:3.11-slim-bullseye
   variables:
     # We start here on the sandbox
     ZENODO_URL: https://sandbox.zenodo.org
@@ -1063,7 +1063,7 @@ publish-zenodo-staging:
 
 publish-zenodo-prod:
   stage: publish
-  image: python:3.11-slim-buster
+  image: python:3.11-slim-bullseye
   variables:
     ZENODO_URL: https://zenodo.org
     ZENODO_ACCESS_TOKEN: ${ZENODO_PROD_ACCESS_TOKEN}

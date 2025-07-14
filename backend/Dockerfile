@@ -8,7 +8,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-FROM python:3.11-slim-buster as base
+FROM python:3.11-slim-bullseye as base
 
 ARG BUILD_DATE
 ARG VCS_REF
