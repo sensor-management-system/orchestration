@@ -8,6 +8,9 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.21.2 (Unreleased)
 
+Fixed:
+- release notes are shown for the FZJ productive instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/564))
+
 ## 1.21.1 - 2025-07-14
 
 Changed:
