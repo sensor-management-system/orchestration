@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nginx.rule=Host(`${SMS_SANDBOX_FQDN}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}`)"
+      - "traefik.http.routers.nginx.rule=HostRegexp(`${SMS_SANDBOX_HOST_REGEXP}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}`)"
       - "traefik.http.routers.nginx.entrypoints=https"
       - "traefik.http.routers.nginx.tls.certresolver=sectigo"
     volumes:
@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'
-      DJANGO_ALLOWED_HOSTS: 'localhost idl sensors-sandbox.gfz-potsdam.de'
+      DJANGO_ALLOWED_HOSTS: 'localhost idl sensors-sandbox.gfz-potsdam.de sensors-sandbox.gfz.de'
       DJANGO_BASE_PATH: idl/
       DJANGO_STATIC_URL: /static/idl/
       DJANGO_STATIC_ROOT: /static/idl/
@@ -39,14 +39,14 @@ services:
       DJANGO_DB_HOST: idl-db
       DJANGO_DB_PORT: 5432
       DJANGO_SECRET_KEY: ${SMS_SANDBOX_IDL_SECRET_KEY}
-      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sensors-sandbox.gfz-potsdam.de'
+      DJANGO_CSRF_TRUSTED_ORIGINS: 'https://sensors-sandbox.gfz.de'
       IDL_TOKEN: $SMS_SANDBOX_IDL_TOKEN
       OIDC_WELL_KNOWN_URL: https://login.helmholtz.de/oauth2/.well-known/openid-configuration
       VO_ADMIN_CONVENTIONS: '*:gfz-sms-admin,*:ufz-sms-admin,*:kit-sms-admin,*:fzj-sms-admin'
       VO_MEMBER_CONVENTIONS: 'gfz:*,*:gfz-sms-member,*:ufz-sms-member,*:kit-sms-member,*:fzj-sms-member'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.idl.rule=Host(`${SMS_SANDBOX_FQDN}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}idl/`)"
+      - "traefik.http.routers.idl.rule=HostRegexp(`${SMS_SANDBOX_HOST_REGEXP}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}idl/`)"
       - "traefik.http.routers.idl.entrypoints=https"
       - "traefik.http.routers.idl.tls.certresolver=sectigo"
       - "traefik.http.services.idl.loadbalancer.server.port=8000"
@@ -103,7 +103,7 @@ services:
     #      MINIO_BROWSER: "off"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.minio.rule=Host(`${SMS_SANDBOX_FQDN}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}sms-attachments/`)"
+      - "traefik.http.routers.minio.rule=HostRegexp(`${SMS_SANDBOX_HOST_REGEXP}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}sms-attachments/`)"
       - "traefik.http.routers.minio.entrypoints=https"
       - "traefik.http.routers.minio.tls.certresolver=sectigo"
       - "traefik.http.services.minio.loadbalancer.server.port=9000"
@@ -154,7 +154,7 @@ services:
       MINIO_SECRET_KEY: ${SMS_SANDBOX_MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: ${SMS_SANDBOX_MINIO_BUCKET_NAME}
       MINIO_ENDPOINT: minio:9000
-      DOWNLOAD_ENDPOINT: https://sensors-sandbox.gfz-potsdam.de
+      DOWNLOAD_ENDPOINT: https://sensors-sandbox.gfz.de
       SECRET_KEY: ${SMS_SANDBOX_BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${SMS_SANDBOX_ALLOWED_MIME_TYPES}
       ELASTICSEARCH_URL: http://elastic-search:9200
@@ -166,7 +166,7 @@ services:
       PKCE_CLIENT_ID: ${SMS_SANDBOX_PKCE_CLIENT_ID}
       PKCE_SCOPES: profile openid email eduperson_principal_name
       INSTITUTE: gfz
-      SMS_FRONTEND_URL: https://sensors-sandbox.gfz-potsdam.de
+      SMS_FRONTEND_URL: https://sensors-sandbox.gfz.de
       B2INST_TOKEN: ${SMS_SANDBOX_B2INST_TOKEN}
       B2INST_URL: https://b2inst-test.gwdg.de
       B2INST_COMMUNITY: DataHub-Helmholtz-RF-EE
@@ -186,7 +186,7 @@ services:
       - backend-db
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`${SMS_SANDBOX_FQDN}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}backend/`)"
+      - "traefik.http.routers.backend.rule=HostRegexp(`${SMS_SANDBOX_HOST_REGEXP}`) && PathPrefix(`${SMS_SANDBOX_BASE_URL:-/}backend/`)"
       - "traefik.http.routers.backend.entrypoints=https"
       - "traefik.http.routers.backend.tls.certresolver=sectigo"
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
