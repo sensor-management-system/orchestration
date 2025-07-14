@@ -9,7 +9,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-FROM python:3.11-slim-buster as base
+FROM python:3.11-slim-bullseye as base
 
 ARG SMS_VERSION_ARG=develop
 ENV SMS_VERSION $SMS_VERSION_ARG

@@ -6,11 +6,13 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
+## 1.21.2 (Unreleased)
 
 ## 1.21.1 - 2025-07-14
 
 Changed:
 - Switch to sensors-sandbox.gfz.de for the SMS test user test system ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/562))
+- Updated debian base images ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/563))
 
 ## 1.21.0 - 2025-07-07
 

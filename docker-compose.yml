@@ -30,7 +30,7 @@ services:
       - sms
 
   backend:
-    image: python:3.11-slim-buster
+    image: python:3.11-slim-bullseye
     restart: unless-stopped
     container_name: sms_backend
     working_dir: /usr/src/app

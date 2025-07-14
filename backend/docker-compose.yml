@@ -27,7 +27,7 @@ services:
       - 9200:9200
 
   backend:
-    image: python:3.11-slim-buster
+    image: python:3.11-slim-bullseye
     working_dir: /usr/src/app
     volumes:
       - './app:/usr/src/app'
