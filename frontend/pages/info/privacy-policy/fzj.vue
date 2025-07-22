@@ -18,15 +18,21 @@ SPDX-License-Identifier: EUPL-1.2
       Addendum to the Forschungszentrum Jülich Privacy Policy
     </h2>
     <h3 class="mb-2">
-      VI. Contact form and e-mail contact
+      Use and application of the Sensor Management System
     </h3>
     <h4 class="mb-2">
       1. Description and scope of data processing
     </h4>
-    <p>In addition, the following user-related data are processed when contact is made via e-mail or the contact form:</p>
+    <p>
+      Forschungszentrum Jülich hosts instances of the Helmholtz Sensor Management System (https://helmholtz.software/software/sensor-management-system) as part of the self-organized digital infrastructure for environmental measurement facilities.
+    </p>
+    <h4 class="mb-2">
+      2. User data processed by Forschungszentrum Jülich
+    </h4>
+    <p>The following user-related data is processed when contacting by e-mail or using the contact form:</p>
     <p>
       Users are authenticated using the IdP of their respective institute. Passwords are not stored in the database.<br>
-      The user-related data collected for the purpose of running the application encompasses the following:
+      The types of user-related information collected to operate the application include the following:
       <ul class="mt-2">
         <li>Given name, surname</li>
         <li>E-mail address</li>
