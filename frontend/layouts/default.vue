@@ -206,6 +206,20 @@ SPDX-License-Identifier: EUPL-1.2
       </v-menu>
     </v-app-bar>
     <v-main>
+      <v-alert
+        v-if="maintenanceText"
+        color="#F9BA2E"
+        icon="mdi-bullhorn"
+        close-icon="mdi-close"
+        dismissible
+        dense
+        prominent
+        class="mb-0"
+      >
+        <!-- We really want to render those texts as they might contain Hyperlinks for more information. -->
+        <!-- eslint-disable vue/no-v-html-->
+        <span v-html="maintenanceText" />
+      </v-alert>
       <v-container :fluid="fullWidth" :class="fullWidth ? ['mx-0', 'px-0', 'pt-0']: []">
         <div class="error-list">
           <v-alert
@@ -310,7 +324,6 @@ SPDX-License-Identifier: EUPL-1.2
           <!-- eslint-enable -->
         </template>
       </cookie-law>
-
       <v-row
         no-gutters
       >
@@ -451,6 +464,8 @@ SPDX-License-Identifier: EUPL-1.2
 import CookieLaw from 'vue-cookie-law'
 import { mapActions, mapState, mapGetters } from 'vuex'
 
+import { marked } from 'marked'
+
 import AppBarTitle from '@/components/AppBarTitle'
 import AppBarTabsExtension from '@/components/AppBarTabsExtension'
 import LogoFooter from '@/components/LogoFooter'
@@ -484,7 +499,8 @@ export default {
       appBarContent: null,
       appBarExtension: null,
       showQrCode: false,
-      showQrCodeReader: false
+      showQrCodeReader: false,
+      maintenanceText: null
     }
   },
   head () {
@@ -651,13 +667,14 @@ export default {
       }
     }
   },
-  created () {
+  async created () {
     this.$nuxt.$on('app-bar-content', (component) => {
       this.appBarContent = component
     })
     this.$nuxt.$on('app-bar-extension', (component) => {
       this.appBarExtension = component
     })
+    this.maintenanceText = await this.fetchMaintenanceTextAsHtml()
   },
   methods: {
     ...mapActions('permissions', ['clearUserInfo']),
@@ -690,6 +707,25 @@ export default {
     clickAppBarBackButton () {
       // as soon as the back button was clicked, we hide it
       this.$store.commit('appbar/setShowBackButton', false)
+    },
+    async fetchMaintenanceTextAsHtml () {
+      try {
+        const url = process.env.maintenanceDocumentUrl
+        const markdownText = await this.$api.proxy.getContentViaProxy(url)
+
+        const markdownRenderer = new marked.Renderer()
+        markdownRenderer.link = function (href, _title, text) {
+          return '<a target="_blank" href="' + href + '">' + text + '</a>'
+        }
+        markdownRenderer.comments = function () {
+          return ''
+        }
+        const htmlText = marked(markdownText, { renderer: markdownRenderer })
+        return htmlText
+      } catch (e) {
+        // If we can't reach the URL, then we can't show anything.
+        return null
+      }
     }
   }
 }

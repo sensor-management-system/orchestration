@@ -41,6 +41,8 @@ ENV SMS_VERSION $SMS_VERSION_ARG
 
 ENV SHOW_RELEASE_NOTES true
 
+ENV NUXT_ENV_MAINTENANCE_DOCUMENT_URL https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-gfz-staging.md
+
 RUN mkdir /smsfrontend
 COPY ./frontend /smsfrontend
 WORKDIR /smsfrontend

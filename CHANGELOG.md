@@ -8,6 +8,9 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.21.2 (Unreleased)
 
+Added:
+- Option to show maintenance information without a redeployment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/568))
+
 Changed:
 - KIT deployment, frontend: bump node runtime to 22.17 on bookworm-slim base image, add IAI tsmdl endpoint ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/566))
 - KIT deployment, backend: bump base image to slim-bookworm ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/566))

@@ -197,6 +197,7 @@ services:
             NUXT_ENV_PID_BASE_URL: ${NUXT_ENV_PID_BASE_URL}
             INSTITUTE: ${INSTITUTE:-kit}
             IDL_SYNC_URL: ${IDL_SYNC_URL}
+            NUXT_ENV_MAINTENANCE_DOCUMENT_URL: https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-kit-staging.md
         volumes:
             - "${SMS_BASEPATH}/orchestration/frontend/:/home/node/"
             - "${SMS_BASEPATH}/orchestration/frontend/dist:/home/node/dist/:rw"

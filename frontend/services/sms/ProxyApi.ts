@@ -8,14 +8,24 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 
+import { AxiosInstance } from 'axios'
+
 export class ProxyApi {
+  private axiosApi: AxiosInstance
   private baseUrl: string
 
-  constructor (baseUrl: string) {
+  constructor (axiosInstance: AxiosInstance, baseUrl: string) {
+    this.axiosApi = axiosInstance
     this.baseUrl = baseUrl
   }
 
   getUrlViaProxy (url: string): string {
     return this.baseUrl + '/proxy?url=' + encodeURIComponent(url)
+  }
+
+  async getContentViaProxy (url: string): Promise<string> {
+    const proxyUrl = this.getUrlViaProxy(url)
+    const response = await this.axiosApi.get(proxyUrl)
+    return response.data
   }
 }
