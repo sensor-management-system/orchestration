@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
-import { AxiosRequestConfig } from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 
 import { SiteTypeApi } from './cv/SiteTypeApi'
 import { createAxios } from '@/utils/axiosHelper'
@@ -629,7 +629,7 @@ export class Api {
     this._manufacturerModelApi = new ManufacturerModelApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/manufacturer-models')
     this._exportControlApi = new ExportControlApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/export-control')
     this._exportControlAttachmentApi = new ExportControlAttachmentApi(createAxios(smsBaseUrl, smsConfig, getIdToken), '/export-control-attachments')
-    this._proxyApi = new ProxyApi(smsBaseUrl!)
+    this._proxyApi = new ProxyApi(axios.create(), smsBaseUrl!)
     this._releaseNotesApi = new ReleaseNotesApi(createAxios(undefined, { headers: {} }),
       this._proxyApi,
       'https://codebase.helmholtz.cloud/api/v4/projects/3268/repository/files/CHANGELOG.md/raw?ref=main'

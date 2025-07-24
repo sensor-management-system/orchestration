@@ -46,6 +46,8 @@ const NUXT_ENV_ALLOWED_MIMETYPES = process.env.NUXT_ENV_ALLOWED_MIMETYPES || 'NU
 
 const SHOW_RELEASE_NOTES = process.env.SHOW_RELEASE_NOTES || 'SHOW_RELEASE_NOTES_PLACEHOLDER'
 
+const NUXT_ENV_MAINTENANCE_DOCUMENT_URL = process.env.NUXT_ENV_MAINTENANCE_DOCUMENT_URL || 'NUXT_ENV_MAINTENANCE_DOCUMENT_URL_PLACEHOLDER'
+
 const server = {
   port: 3000,
   host: '0.0.0.0'
@@ -94,7 +96,8 @@ export default {
     pidBaseUrl: NUXT_ENV_PID_BASE_URL,
     refreshInterval: NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME,
     allowedMimeTypesString: NUXT_ENV_ALLOWED_MIMETYPES,
-    showReleaseNotes: SHOW_RELEASE_NOTES === 'true'
+    showReleaseNotes: SHOW_RELEASE_NOTES === 'true',
+    maintenanceDocumentUrl: NUXT_ENV_MAINTENANCE_DOCUMENT_URL
   },
   /*
   ** Headers of the page

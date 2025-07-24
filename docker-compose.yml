@@ -175,6 +175,8 @@ services:
       INSTITUTE: ${INSTITUTE:-ufz}
       IDL_SYNC_URL: ${IDL_SYNC_URL:-http://localhost/idl/api/hifis/sync-groups/}
       SHOW_RELEASE_NOTES: ${SHOW_RELEASE_NOTES:-true}
+      NUXT_ENV_MAINTENANCE_DOCUMENT_URL: ${NUXT_ENV_MAINTENANCE_DOCUMENT_URL:-https://codebase.helmholtz.cloud/hub-terra/sms/service-desk/-/raw/maintenance-messages/sms-dev.md}
+
     volumes:
       - ./frontend/:/home/node/
       - ./frontend/dist:/home/node/dist/:rw
