@@ -452,12 +452,12 @@ class AbstractMountActionValidator(abc.ABC):
 
     def _extract_updated_begin_and_end_dates(self, payload_dict, existing_mount):
         """Extract the begin and end dates for the update case."""
-        if "begin_date" in payload_dict["attributes"].keys():
+        if "begin_date" in payload_dict.get("attributes", {}).keys():
             begin_date_as_string = payload_dict["attributes"]["begin_date"]
             begin_date = self._parse_datetime(begin_date_as_string)
         else:
             begin_date = existing_mount.begin_date
-        if "end_date" in payload_dict["attributes"].keys():
+        if "end_date" in payload_dict.get("attributes", {}).keys():
             end_date_as_string = payload_dict["attributes"]["end_date"]
             if end_date_as_string is not None:
                 end_date = self._parse_datetime(end_date_as_string)

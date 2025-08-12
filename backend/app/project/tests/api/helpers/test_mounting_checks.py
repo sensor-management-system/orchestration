@@ -649,6 +649,57 @@ class TestDeviceMountActionValidator(BaseTestCase):
                 payload_dict, existing_device_mount_action.id
             )
 
+    def test_validate_update_no_attributes(self):
+        """Ensure we can run updates without attributes."""
+        existing_device_mount_action = DeviceMountAction(
+            configuration=self.configuration1,
+            device=self.device1,
+            begin_contact=self.contact1,
+            begin_date=datetime.datetime(
+                year=2022, month=1, day=1, tzinfo=datetime.timezone.utc
+            ),
+        )
+        db.session.add(existing_device_mount_action)
+        db.session.commit()
+
+        # Similar payloads as in the other tests, but without any attributes.
+        payloads = [
+            {
+                "relationships": {
+                    "configuration": {
+                        "data": {"id": self.configuration1.id},
+                    },
+                    "device": {
+                        "data": {"id": self.device1.id},
+                    },
+                },
+            },
+            {
+                "relationships": {
+                    "configuration": {
+                        "data": {"id": self.configuration2.id},
+                    },
+                    "device": {
+                        "data": {"id": self.device1.id},
+                    },
+                },
+            },
+            {
+                "relationships": {
+                    "configuration": {
+                        "data": {"id": self.configuration1.id},
+                    },
+                    "device": {
+                        "data": {"id": self.device2.id},
+                    },
+                },
+            },
+        ]
+        for payload_dict in payloads:
+            DeviceMountActionValidator().validate_update(
+                payload_dict, existing_device_mount_action.id
+            )
+
     def test_valdiate_update_overlapping_mount_for_same_device(self):
         """Ensure we can't introduce overlaps by updating the device mount."""
         existing_device_mount_action1 = DeviceMountAction(
