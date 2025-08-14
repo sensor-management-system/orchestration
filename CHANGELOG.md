@@ -10,6 +10,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 Added:
 - Option to show maintenance information without a redeployment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/568))
+- Display of mount ids in the confiugration page ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/573))
 
 Changed:
 - KIT deployment, frontend: bump node runtime to 22.17 on bookworm-slim base image, add IAI tsmdl endpoint ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/566))

@@ -10,6 +10,20 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 <template>
   <div>
+    <v-row
+      v-if="mountIdType"
+      dense
+    >
+      <v-col
+        cols="4"
+        class="font-weight-medium"
+      >
+        {{ mountIdType }}:
+      </v-col>
+      <v-col cols="8">
+        {{ mountAction.id }}
+      </v-col>
+    </v-row>
     <v-row dense>
       <v-col
         cols="4"
@@ -270,6 +284,16 @@ export default class BaseMountInfo extends Vue {
     return {
       path: removeTrailingSlash(this.$route.path) + '/' + ('device' in this.mountAction ? 'device-mount-actions' : 'platform-mount-actions') + '/' + this.mountAction.id + '/edit'
     }
+  }
+
+  get mountIdType (): string | null {
+    if ('device' in this.mountAction) {
+      return 'Device mount id'
+    }
+    if ('platform' in this.mountAction) {
+      return 'Platform mount id'
+    }
+    return null
   }
 
   getCoordinates (value: DeviceMountAction | PlatformMountAction): string {
