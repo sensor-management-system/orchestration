@@ -15,7 +15,8 @@ Added:
 Changed:
 - KIT deployment, frontend: bump node runtime to 22.17 on bookworm-slim base image, add IAI tsmdl endpoint ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/566))
 - KIT deployment, backend: bump base image to slim-bookworm ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/566))
--  Privacy Policy for FZJ instance has been updated with revised contents. ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/557))
+- Privacy Policy for FZJ instance has been updated with revised contents ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/557))
+- Configurations, reuse: rename button "Copy Mounts" to "Import Mounts" ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/574))
 
 Fixed:
 - Release notes are shown for the FZJ productive instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/564))
