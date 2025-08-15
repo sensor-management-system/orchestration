@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: 2020 - 2023
 - Tim Eder <tim.eder@ufz.de>
 - Maximilian Schaldach <maximilian.schaldach@ufz.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+- Karlsruhe Institute of Technology (KIT, https://www.kit.edu/)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -43,7 +44,7 @@ SPDX-License-Identifier: EUPL-1.2
         nuxt
         :to="'/configurations/' + configurationId + '/platforms-and-devices/reuse'"
       >
-        Copy Mounts
+        Import Mounts
       </v-btn>
     </v-card-actions>
     <v-row>
