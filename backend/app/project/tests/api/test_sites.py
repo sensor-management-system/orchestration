@@ -827,3 +827,29 @@ class TestSiteApi(BaseTestCase):
         new_site_id = data["id"]
         new_site = db.session.query(Site).filter_by(id=new_site_id).first()
         self.assertEqual(new_site.outer_site, site1)
+
+    def test_patch_unset_outer_site(self):
+        """Ensure that we can unset the outer site."""
+        outer_site = Site(label="Inner site", is_public=True)
+        inner_site = Site(label="Inner site", is_public=True, outer_site=outer_site)
+
+        db.session.add_all([outer_site, inner_site])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "site",
+                "id": str(inner_site.id),
+                "relationships": {
+                    "outer_site": {"data": None},
+                },
+            }
+        }
+        with self.run_requests_as(self.super_user):
+            response = self.client.patch(
+                f"{self.sites_url}/{inner_site.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
+
+        self.assertEqual(response.status_code, 200)

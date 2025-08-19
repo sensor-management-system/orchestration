@@ -21,6 +21,7 @@ Changed:
 Fixed:
 - Release notes are shown for the FZJ productive instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/564))
 - Fixed a problem on patching mount actions without any attributes ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/572))
+- Allow to unset end contacts for mount actions ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/576))
 
 ## 1.21.1 - 2025-07-14
 

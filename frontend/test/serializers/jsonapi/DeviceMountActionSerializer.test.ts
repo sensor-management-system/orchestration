@@ -104,6 +104,15 @@ describe('DeviceMountActionSerializer', () => {
               type: 'configuration',
               id: '3'
             }
+          },
+          end_contact: {
+            data: null
+          },
+          parent_platform: {
+            data: null
+          },
+          parent_device: {
+            data: null
           }
         }
       }
@@ -182,6 +191,12 @@ describe('DeviceMountActionSerializer', () => {
               type: 'platform',
               id: '4'
             }
+          },
+          end_contact: {
+            data: null
+          },
+          parent_device: {
+            data: null
           }
         }
       }
@@ -260,6 +275,12 @@ describe('DeviceMountActionSerializer', () => {
               type: 'device',
               id: '4'
             }
+          },
+          end_contact: {
+            data: null
+          },
+          parent_platform: {
+            data: null
           }
         }
       }
@@ -309,6 +330,15 @@ describe('DeviceMountActionSerializer', () => {
               type: 'configuration',
               id: '3'
             }
+          },
+          end_contact: {
+            data: null
+          },
+          parent_platform: {
+            data: null
+          },
+          parent_device: {
+            data: null
           }
         }
       }

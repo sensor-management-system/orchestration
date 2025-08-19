@@ -345,7 +345,7 @@ class AbstractMountActionValidator(abc.ABC):
         The begin date must be there for the creation while the
         end date is optional.
         """
-        if "begin_date" not in payload_dict["attributes"].keys():
+        if "begin_date" not in payload_dict.get("attributes", {}).keys():
             raise BadRequestError("begin_date is required.")
         begin_date_as_string = payload_dict["attributes"]["begin_date"]
         end_date_as_string = payload_dict["attributes"].get("end_date")
@@ -420,12 +420,12 @@ class AbstractMountActionValidator(abc.ABC):
         if "relationships" in payload_dict.keys():
             if "parent_platform" in payload_dict["relationships"].keys():
                 if "data" in payload_dict["relationships"]["parent_platform"].keys():
-                    if (
-                        "id"
-                        in payload_dict["relationships"]["parent_platform"][
-                            "data"
-                        ].keys()
-                    ):
+                    parent_platform_data = payload_dict["relationships"][
+                        "parent_platform"
+                    ]["data"]
+                    if parent_platform_data is None:
+                        return None
+                    if "id" in parent_platform_data.keys():
                         return payload_dict["relationships"]["parent_platform"]["data"][
                             "id"
                         ]
@@ -441,10 +441,12 @@ class AbstractMountActionValidator(abc.ABC):
         if "relationships" in payload_dict.keys():
             if "parent_device" in payload_dict["relationships"].keys():
                 if "data" in payload_dict["relationships"]["parent_device"].keys():
-                    if (
-                        "id"
-                        in payload_dict["relationships"]["parent_device"]["data"].keys()
-                    ):
+                    parent_device_data = payload_dict["relationships"]["parent_device"][
+                        "data"
+                    ]
+                    if parent_device_data is None:
+                        return None
+                    if "id" in parent_device_data.keys():
                         return payload_dict["relationships"]["parent_device"]["data"][
                             "id"
                         ]
