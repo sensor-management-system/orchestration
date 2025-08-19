@@ -76,12 +76,20 @@ export class DeviceMountActionSerializer {
             id: deviceMountAction.beginContact!.id
           }
         },
-
         configuration: {
           data: {
             type: 'configuration',
             id: configurationId
           }
+        },
+        end_contact: {
+          data: null
+        },
+        parent_platform: {
+          data: null
+        },
+        parent_device: {
+          data: null
         }
       }
 

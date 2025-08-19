@@ -67,6 +67,7 @@ class PlatformMountActionSchema(Schema):
         schema="PlatformSchema",
         type_="platform",
         id_field="id",
+        allow_none=True,
     )
     configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(
@@ -172,6 +173,7 @@ class DeviceMountActionSchema(Schema):
         schema="PlatformSchema",
         type_="platform",
         id_field="id",
+        allow_none=True,
     )
     parent_device_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     parent_device = Relationship(
@@ -182,6 +184,7 @@ class DeviceMountActionSchema(Schema):
         schema="DeviceSchema",
         type_="device",
         id_field="id",
+        allow_none=True,
     )
     configuration_id = fields.Integer(dump_only=True, load_only=True, as_string=True)
     configuration = Relationship(

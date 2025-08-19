@@ -16,7 +16,13 @@ from dateutil.relativedelta import relativedelta
 from flask import current_app
 
 from project import base_url
-from project.api.models import Configuration, Contact, Platform, PlatformMountAction
+from project.api.models import (
+    Configuration,
+    Contact,
+    Platform,
+    PlatformMountAction,
+    User,
+)
 from project.api.models.base_model import db
 from project.extensions.instances import mqtt, pidinst
 from project.tests.base import BaseTestCase, create_token, fake, generate_userinfo_data
@@ -1429,3 +1435,36 @@ class TestPlatformMountAction(BaseTestCase):
             self.assertEqual(
                 update_external_metadata.call_args.args[0].id, configuration.id
             )
+
+    def test_unset_non_required_relationships_via_patch_request(self):
+        """Ensure we can set the non required relationships via the api to null."""
+        mount_platform_action = add_mount_platform_action_model()
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+        db.session.add_all([contact, super_user, mount_platform_action])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_platform_action.id,
+                "relationships": {
+                    "parent_platform": {
+                        "data": None,
+                    },
+                    "end_contact": {
+                        "data": None,
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.url}/{mount_platform_action.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(resp.status_code, 200)

@@ -76,6 +76,12 @@ export class PlatformMountActionSerializer {
             type: 'configuration',
             id: configurationId
           }
+        },
+        end_contact: {
+          data: null
+        },
+        parent_platform: {
+          data: null
         }
       }
     }

@@ -136,7 +136,6 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         foreign_keys=[parent_platform_id],
         backref=db.backref(
             "outer_device_mount_actions",
-            cascade="save-update, merge, delete, delete-orphan",
         ),
     )
     parent_device_id = db.Column(
@@ -150,7 +149,6 @@ class DeviceMountAction(db.Model, AuditMixin, IndirectSearchableMixin):
         foreign_keys=[parent_device_id],
         backref=db.backref(
             "outer_device_mount_actions_for_devices",
-            cascade="save-update, merge, delete, delete-orphan",
         ),
     )
     begin_date = db.Column(db.DateTime(timezone=True), nullable=False)

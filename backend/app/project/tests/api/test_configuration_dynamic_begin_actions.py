@@ -1604,3 +1604,30 @@ class TestConfigurationDynamicLocationBeginActionServices(BaseTestCase):
                 }
             }
         )
+
+    @fixtures.use(
+        ["super_user", "dynamic_location1_of_public_configuration1_in_group1"]
+    )
+    def test_patch_unset_xyz_properties(
+        self, super_user, dynamic_location1_of_public_configuration1_in_group1
+    ):
+        """Ensure we can unset the z property via the api."""
+        payload = {
+            "data": {
+                "id": str(dynamic_location1_of_public_configuration1_in_group1.id),
+                "type": "configuration_dynamic_location_action",
+                "relationships": {
+                    "z_property": {
+                        "data": None,
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.url}/{dynamic_location1_of_public_configuration1_in_group1.id}",
+                json=payload,
+                headers={"Content-Type": "application/vnd.api+json"},
+            )
+        self.assertEqual(resp.status_code, 200)

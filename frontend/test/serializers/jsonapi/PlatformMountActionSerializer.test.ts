@@ -95,6 +95,12 @@ describe('PlatformMountActionSerializer', () => {
               type: 'configuration',
               id: '3'
             }
+          },
+          parent_platform: {
+            data: null
+          },
+          end_contact: {
+            data: null
           }
         }
       }
@@ -171,6 +177,9 @@ describe('PlatformMountActionSerializer', () => {
               type: 'platform',
               id: '4'
             }
+          },
+          end_contact: {
+            data: null
           }
         }
       }
@@ -240,6 +249,12 @@ describe('PlatformMountActionSerializer', () => {
               type: 'configuration',
               id: '3'
             }
+          },
+          parent_platform: {
+            data: null
+          },
+          end_contact: {
+            data: null
           }
         }
       }

@@ -1858,3 +1858,39 @@ class TestDeviceMountAction(BaseTestCase):
                     self.assertEqual(call_args.args[0], "configuration")
                     self.assertEqual(call_args.args[1].id, first_configuration.id)
         self.assertEqual(resp.status_code, 201)
+
+    def test_unset_non_required_relationships_via_patch_request(self):
+        """Ensure we can set the non required relationships via the api to null."""
+        mount_device_action = add_mount_device_action_model()
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+        db.session.add_all([contact, super_user, mount_device_action])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": self.object_type,
+                "id": mount_device_action.id,
+                "relationships": {
+                    "parent_platform": {
+                        "data": None,
+                    },
+                    "parent_device": {
+                        "data": None,
+                    },
+                    "end_contact": {
+                        "data": None,
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            resp = self.client.patch(
+                f"{self.url}/{mount_device_action.id}",
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(resp.status_code, 200)
