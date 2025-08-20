@@ -6,7 +6,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.21.2 (Unreleased)
+
+## 1.21.3 (Unreleased)
+
+## 1.21.2 - 2025-08-20
 
 Added:
 - Option to show maintenance information without a redeployment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/568))
