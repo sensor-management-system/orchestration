@@ -373,22 +373,18 @@ class AbstractMountActionValidator(abc.ABC):
     @staticmethod
     def _extract_parent_platform_id(payload_dict):
         """Extract the parent platform id from the payload. May be None."""
-        return (
-            payload_dict["relationships"]
-            .get("parent_platform", {})
-            .get("data", {})
-            .get("id", None)
-        )
+        data = payload_dict["relationships"].get("parent_platform", {}).get("data", {})
+        if data is None:
+            return None
+        return data.get("id", None)
 
     @staticmethod
     def _extract_parent_device_id(payload_dict):
         """Extract the parent device id from the payload. May be None."""
-        return (
-            payload_dict["relationships"]
-            .get("parent_device", {})
-            .get("data", {})
-            .get("id", None)
-        )
+        data = payload_dict["relationships"].get("parent_device", {}).get("data", {})
+        if data is None:
+            return None
+        return data.get("id", None)
 
     @staticmethod
     def _extract_updated_configuration_id(payload_dict, existing_mount):

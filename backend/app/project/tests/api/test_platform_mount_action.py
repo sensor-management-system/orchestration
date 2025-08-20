@@ -1468,3 +1468,68 @@ class TestPlatformMountAction(BaseTestCase):
                 content_type="application/vnd.api+json",
             )
         self.assertEqual(resp.status_code, 200)
+
+    def test_post_with_non_required_relationships(self):
+        """Ensure we can set the non required relationships via the post request."""
+        platform = Platform(
+            short_name="platform1",
+            manufacturer_name=fake.company(),
+            is_public=True,
+            is_private=False,
+            is_internal=False,
+        )
+        configuration = Configuration(
+            label="sample configuration",
+            is_public=True,
+            is_internal=False,
+        )
+        contact = Contact(
+            given_name="con", family_name="tact", email="contact@localhost"
+        )
+        super_user = User(contact=contact, subject=contact.email, is_superuser=True)
+
+        db.session.add_all([configuration, platform, contact, super_user])
+        db.session.commit()
+
+        payload = {
+            "data": {
+                "type": "platform_mount_action",
+                "attributes": {
+                    "begin_date": "2025-08-20T05:54:00Z",
+                },
+                "relationships": {
+                    "platform": {
+                        "data": {
+                            "id": str(platform.id),
+                            "type": "platform",
+                        }
+                    },
+                    "configuration": {
+                        "data": {
+                            "id": str(configuration.id),
+                            "type": "configuration",
+                        }
+                    },
+                    "begin_contact": {
+                        "data": {
+                            "id": str(contact.id),
+                            "type": "contact",
+                        }
+                    },
+                    "end_contact": {
+                        "data": None,
+                    },
+                    "parent_platform": {
+                        "data": None,
+                    },
+                },
+            }
+        }
+
+        with self.run_requests_as(super_user):
+            resp = self.client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/vnd.api+json",
+            )
+        self.assertEqual(resp.status_code, 201)

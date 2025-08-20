@@ -812,7 +812,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
         payload_dict_no_parent_platform = {
             "relationships": {
                 "parent_platform": {
-                    "data": {"id": None},
+                    "data": None,
                 }
             },
             "attributes": {
@@ -880,7 +880,7 @@ class TestDeviceMountActionValidator(BaseTestCase):
         payload_dict_no_parent_platform = {
             "relationships": {
                 "parent_device": {
-                    "data": {"id": None},
+                    "data": None,
                 }
             },
             "attributes": {
@@ -1929,7 +1929,7 @@ class TestPlatformMountActionValidator(BaseTestCase):
         payload_dict_no_parent_platform = {
             "relationships": {
                 "parent_platform": {
-                    "data": {"id": None},
+                    "data": None,
                 }
             },
             "attributes": {
