@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.21.3 (Unreleased)
 
+Changed:
+- KIT deployment, web server: bump nginx to 1.29 on alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/578))
+
 ## 1.21.2 - 2025-08-20
 
 Added:
