@@ -7,6 +7,7 @@
 """Tests for the usage statistics."""
 
 import datetime
+import urllib.parse
 
 from project import base_url
 from project.api.models import (
@@ -236,6 +237,34 @@ class TestUsageStatistics(BaseTestCase):
     def test_extended(self):
         """Ensure we can query for more data if we ask for."""
         response = self.client.get(self.url + "?extended=true")
+        self.assertEqual(response.status_code, 200)
+        data = response.json
+        self.assertIn("counts", data.keys())
+        self.assertEqual(
+            data["counts"],
+            {
+                "devices": 0,
+                "platforms": 0,
+                "configurations": 0,
+                "users": 0,
+                "sites": 0,
+                "organizations": 0,
+                "device_pids": 0,
+                "platform_pids": 0,
+                "configuration_pids": 0,
+                "site_pids": 0,
+                "pids": 0,
+                "uploads": 0,
+                "orcids": 0,
+                "datastreams": 0,
+            },
+        )
+
+    def test_extended_with_python_urlencode(self):
+        """Ensure we support the python query encode truish parameter."""
+        response = self.client.get(
+            self.url + "?" + urllib.parse.urlencode({"extended": True})
+        )
         self.assertEqual(response.status_code, 200)
         data = response.json
         self.assertIn("counts", data.keys())

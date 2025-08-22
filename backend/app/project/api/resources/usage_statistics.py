@@ -36,7 +36,7 @@ class UsageStatistics(ResourceList):
         we can extend those later.
         """
         true_values = ["true"]
-        extended = request.args.get("extended") in true_values
+        extended = request.args.get("extended", "").lower() in true_values
 
         models_to_query = {
             "devices": Device,
