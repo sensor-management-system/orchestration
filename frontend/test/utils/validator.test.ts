@@ -1,9 +1,11 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2024
+ * SPDX-FileCopyrightText: 2020 - 2025
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
+ * - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
+ * - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
@@ -809,6 +811,35 @@ describe('#validateVisibility', () => {
 
     const actual = validateVisibility(visibility, groups, entityName)
     expect(actual).toEqual(true)
+  })
+})
+
+describe('#validateVisibilityChangeToPrivate', () => {
+  const validate = Validator.validateVisibilityChangeToPrivate
+
+  it('should return true if visibility stays the same (e.g. public → public)', () => {
+    const result = validate(Visibility.Public, Visibility.Public, 'device')
+    expect(result).toBe(true)
+  })
+
+  it('should return true if visibility changes from private to internal', () => {
+    const result = validate(Visibility.Private, Visibility.Internal, 'device')
+    expect(result).toBe(true)
+  })
+
+  it('should return true if visibility changes from internal to public', () => {
+    const result = validate(Visibility.Internal, Visibility.Public, 'device')
+    expect(result).toBe(true)
+  })
+
+  it('should return validation error if changing from public to private (mentions public)', () => {
+    const result = validate(Visibility.Public, Visibility.Private, 'device')
+    expect(result).toBe('You cannot change the visibility of this device to private, as it was previously set to public and may already be in use.')
+  })
+
+  it('should return validation error if changing from internal to private (mentions internal)', () => {
+    const result = validate(Visibility.Internal, Visibility.Private, 'platform')
+    expect(result).toBe('You cannot change the visibility of this platform to private, as it was previously set to internal and may already be in use.')
   })
 })
 

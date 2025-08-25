@@ -17,6 +17,7 @@ Changed:
 
 Fixed:
 - the usage-statistics endpoint now works accepts `True` as truish value ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/579))
+- Missing frontend implementation for visibility restrictions ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/556))
 
 ## 1.21.2 - 2025-08-20
 
