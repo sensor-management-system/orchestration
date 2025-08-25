@@ -1,11 +1,13 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2024
+SPDX-FileCopyrightText: 2020 - 2025
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Tim Eder <tim.eder@ufz.de>
 - Tobias Kuhnert <tobias.kuhnert@ufz.de>
+- Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
 - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+- Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -448,7 +450,7 @@ SPDX-License-Identifier: EUPL-1.2
   </v-form>
 </template>
 <script lang="ts">
-import { Component, Prop, Vue, mixins } from 'nuxt-property-decorator'
+import { Component, Prop, Vue, mixins, Watch } from 'nuxt-property-decorator'
 import { mapActions, mapState } from 'vuex'
 
 import { Rules } from '@/mixins/Rules'
@@ -507,6 +509,7 @@ type ManufacturerSelectValue = Manufacturer | string | undefined
   }
 })
 export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMixin) {
+  private originalVisibility: Visibility | null = null
   private permissionGroups: PermissionGroup[] = []
   private userInfo: DetailedUserInfo | null = null
   private entityName: string = 'device'
@@ -567,6 +570,16 @@ export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMi
 
   created () {
     this.initialSerialNumber = this.value.serialNumber
+    if (this.value?.id && this.value.visibility && !this.originalVisibility) {
+      this.originalVisibility = this.value.visibility
+    }
+  }
+
+  @Watch('value.visibility', { immediate: true })
+  onVisibilityInit (v: Visibility) {
+    if (this.value?.id && v && !this.originalVisibility) {
+      this.originalVisibility = v
+    }
   }
 
   get pageRules (): {[index: string]: (a: any) => (boolean | string)} {
@@ -576,9 +589,16 @@ export default class DeviceBasicDataForm extends mixins(Rules, ExternalUrlLinkMi
   }
 
   get privateRules () {
-    return [
-      Validator.validateVisibility(this.value.visibility, this.value.permissionGroups, this.entityName)
-    ]
+    const preventDowngradeToPrivateRule = (v: string) => {
+      if (!this.value?.id || !this.originalVisibility) { return true }
+      return Validator.validateVisibilityChangeToPrivate(
+        this.originalVisibility,
+        v as Visibility,
+        this.entityName
+      )
+    }
+    const baseRule = Validator.validateVisibility(this.value.visibility, this.value.permissionGroups, this.entityName)
+    return [preventDowngradeToPrivateRule, baseRule]
   }
 
   async loadSerialNumbers (device: Device | null = null) {

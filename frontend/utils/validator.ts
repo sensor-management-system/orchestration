@@ -1,14 +1,16 @@
 /**
  * @license EUPL-1.2
- * SPDX-FileCopyrightText: 2020 - 2023
+ * SPDX-FileCopyrightText: 2020 - 2025
  * - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
  * - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
  * - Tobias Kuhnert <tobias.kuhnert@ufz.de>
  * - Tim Eder <tim.eder@ufz.de>
  * - Erik Pongratz <erik.pongratz@ufz.de>
  * - Maximilian Schaldach <maximilian.schaldach@ufz.de>
+ * - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
  * - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences (GFZ, https://www.gfz-potsdam.de)
  * - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+ * - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
@@ -190,6 +192,26 @@ export default {
   validateVisibility (visibility: Visibility, groups: IPermissionGroup[], entityName: string): boolean | string {
     if (visibility === Visibility.Private && groups.length) {
       return `You are not allowed to set the visibility to private as long as the ${entityName} has permission groups.`
+    }
+    return true
+  },
+  validateVisibilityChangeToPrivate (
+    oldVisibility: Visibility,
+    newVisibility: Visibility,
+    entityName: string
+  ): boolean | string {
+    if (
+      (oldVisibility === Visibility.Public || oldVisibility === Visibility.Internal) &&
+      newVisibility === Visibility.Private
+    ) {
+      const oldLabel =
+        oldVisibility === Visibility.Public
+          ? 'public'
+          : oldVisibility === Visibility.Internal
+            ? 'internal'
+            : String(oldVisibility).toLowerCase()
+
+      return `You cannot change the visibility of this ${entityName} to private, as it was previously set to ${oldLabel} and may already be in use.`
     }
     return true
   },
