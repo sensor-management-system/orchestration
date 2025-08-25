@@ -32,7 +32,7 @@ services:
       - "traefik.docker.network=reverseproxy"
 
   idl:
-    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest
+    image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:0.5.0
     restart: unless-stopped
     environment:
       DJANGO_DEBUG: 'false'

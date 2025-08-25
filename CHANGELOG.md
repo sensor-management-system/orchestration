@@ -7,7 +7,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.21.3 (Unreleased)
+## 1.22.0 (Unreleased)
+
+Added:
+- Support for resource capabilities for group management ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/580))
 
 Changed:
 - KIT deployment, web server: bump nginx to 1.29 on alpine ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/578))
