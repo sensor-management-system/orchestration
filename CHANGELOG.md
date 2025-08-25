@@ -7,7 +7,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.22.0 (Unreleased)
+## 1.22.1 (Unreleased)
+
+## 1.22.0 - 2025-08-26
 
 Added:
 - Support for resource capabilities for group management ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/580))
