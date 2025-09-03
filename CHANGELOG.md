@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.22.1 (Unreleased)
 
+Changed:
+- The latest version of docker compose file has been updated for the FZJ staging deployment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/569))
+
 ## 1.22.0 - 2025-08-26
 
 Added:
