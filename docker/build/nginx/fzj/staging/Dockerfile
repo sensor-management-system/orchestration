@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2024
+# SPDX-FileCopyrightText: 2021 - 2025
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 # - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
 # - Research Centre Juelich GmbH - Institute of Bio- and Geosciences Agrosphere (IBG-3, https://www.fz-juelich.de/en/ibg/ibg-3)
@@ -11,7 +11,7 @@ FROM node:20.17.0-bullseye as js-builder
 # First the urls for sms backend and cv backend
 ENV BASE_URL /
 ENV SMS_BACKEND_URL /backend/api/v1
-ENV SMS_FRONTEND_URL https://sms-staging.ibg3container.ibg.kfa-juelich.de/
+ENV SMS_FRONTEND_URL https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de/
 ENV CV_BACKEND_URL https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV IDL_SYNC_URL /idl/api/hifis/sync-groups
 

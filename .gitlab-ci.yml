@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 - 2024
+# SPDX-FileCopyrightText: 2021 - 2025
 # - Wilhelm Becker <wilhelm.becker@gfz-potsdam.de>
 # - Hannes Bohring <hannes.bohring@ufz.de>
 # - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
@@ -851,7 +851,7 @@ deploy-fzj-staging:
   stage: deploy
   environment:
     name: fzj-staging
-    url: https://sms-staging.ibg3container.ibg.kfa-juelich.de
+    url: https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de
   tags:
     - fzj
     - staging
