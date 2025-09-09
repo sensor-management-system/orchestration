@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.23.0 (Unreleased)
 
+Added:
+- Management command to update the urls of the registered handles for sites ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/586))
+
 Changed:
 - The latest version of docker compose file has been updated for the FZJ staging deployment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/569))
 - The new front-end URL has been updated for FZJ staging instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/583))
