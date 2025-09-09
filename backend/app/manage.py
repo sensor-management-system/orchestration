@@ -19,6 +19,7 @@ import click
 import coverage
 import requests
 from flask.cli import FlaskGroup
+
 from project import create_app
 from project.api.helpers.errors import ErrorResponse
 from project.api.models import Contact, User
@@ -504,6 +505,52 @@ def b2inst_update_all(skip_problematic):
                     raise e
 
 
+@cli.group("handle")
+def handle():
+    """Group for the handle sub comamnds."""
+    pass
+
+
+@handle.group("update")
+def handle_update():
+    """Group for the update commands for handles."""
+    pass
+
+
+@handle_update.command("site")
+@click.argument("site_id")
+def handle_update_site(site_id):
+    """Update the external url for one site."""
+    from project.api.models import Site
+    from project.extensions.instances import pidinst
+
+    base_landing_page = app.config["SMS_FRONTEND_URL"]
+    entry = db.session.query(Site).filter_by(id=site_id).first()
+    landing_page = f"{base_landing_page}/sites/{entry.id}"
+    pidinst.pid.update_external_url(entry.persistent_identifier, landing_page)
+
+
+@handle_update.command("all")
+def handle_update_all():
+    """Update all the external urls for the handles."""
+    from project.api.models import Site
+    from project.extensions.instances import pidinst
+
+    base_landing_page = app.config["SMS_FRONTEND_URL"]
+
+    # Devices, Platforms and Configurations have their support for b2inst.
+    # They are updated differently (more metadata).
+    # Here we just uppdate the external url (after some migration for example).
+    for model_class, url_part in [(Site, "sites")]:
+        for entry in (
+            db.session.query(model_class)
+            .filter(model_class.persistent_identifier.is_not(None))
+            .order_by("id")
+        ):
+            landing_page = f"{base_landing_page}/{url_part}/{entry.id}"
+            pidinst.pid.update_external_url(entry.persistent_identifier, landing_page)
+
+
 @cli.group("import")
 def import_group():
     """Group some import commands."""
@@ -520,6 +567,7 @@ def import_manufacturer_models():
 def import_manufacturer_models_from_gipp():
     """Import the manufacturer models from GIPP."""
     import requests
+
     from project.api.models import ManufacturerModel
     from project.api.models.base_model import db
 

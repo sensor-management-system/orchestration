@@ -336,37 +336,38 @@ class Pid:
         pid = response.json()["handle"]
         return pid
 
-    def update(self, source_object_pid, instrument_data):
-        """
-        Update an existing PID.
+    def update_external_url(self, persistent_identifier, url):
+        """Update an existing PID with a new url.
 
-        :param instrument_data: data to update
-        :param source_object_pid: The PID.
-        :return:
+        :param persistent_identifier: the pid to update (with prefix).
+        :param url: the url for the source object.
         """
-        header = {
-            "Content-Type": "application/json",
-            "Authorization": 'Handle clientCert="true"',
-        }
+        instrument_data = [
+            {
+                "index": 1,
+                "type": "URL",
+                "data": {
+                    "format": "string",
+                    "value": url,
+                },
+            }
+        ]
         instrument_data.append(self.get_request_body_admin_part())
         json_body = {"values": instrument_data}
+        url = f"{self.pid_service_url}/{persistent_identifier}"
         try:
             response = requests.put(
-                url=f"{self.pid_service_url}{self.pid_prefix}/{source_object_pid}",
-                cert=(self.pid_cert_file, self.pid_cert_key),
-                headers=header,
+                url=url,
                 json=json_body,
-                # Adding certificate verification is strongly advised but in this case when we try to access the handle
-                # API with verification we get a SSLCertVerificationError.
-                # Due to the need of adding PIDs we set verify=False whenever we make API calls to the GWDG handle API.
-                verify=False,
+                auth=requests.auth.HTTPBasicAuth(
+                    self.pid_service_user, self.pid_service_password
+                ),
             )
             response.raise_for_status()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             raise ServiceIsUnreachableError(repr(e))
         except requests.exceptions.HTTPError as e:
             raise ConflictError(repr(e))
-        return response.status_code  # 204
 
     def delete(self, object_pid):
         """
