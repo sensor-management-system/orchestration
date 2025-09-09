@@ -9,7 +9,7 @@ FROM node:20.17.0-bullseye as js-builder
 # First the urls for sms backend and cv backend
 ENV BASE_URL /
 ENV SMS_BACKEND_URL /backend/api/v1
-ENV SMS_FRONTEND_URL https://sensors.gfz-potsdam.de/
+ENV SMS_FRONTEND_URL https://sensors.gfz.de/
 ENV CV_BACKEND_URL https://sms-cv.helmholtz.cloud/sms/cv/api/v1
 ENV IDL_SYNC_URL /idl/api/hifis/sync-groups
 
@@ -37,9 +37,9 @@ ENV NUXT_ENV_OIDC_REFRESH_INTERVAL_TIME 1800000
 
 ENV NUXT_ENV_PID_BASE_URL https://hdl.handle.net
 
-ENV NUXT_ENV_MATOMO_URL https://webstats.gfz-potsdam.de/
-ENV NUXT_ENV_MATOMO_TRACKER_URL https://webstats.gfz-potsdam.de/matomo.php
-ENV NUXT_ENV_MATOMO_SCRIPT_URL https://webstats.gfz-potsdam.de/matomo.js
+ENV NUXT_ENV_MATOMO_URL https://webstats.gfz.de/
+ENV NUXT_ENV_MATOMO_TRACKER_URL https://webstats.gfz.de/matomo.php
+ENV NUXT_ENV_MATOMO_SCRIPT_URL https://webstats.gfz.de/matomo.js
 ENV NUXT_ENV_MATOMO_SITE_ID 30
 
 ARG SMS_VERSION_ARG=develop
