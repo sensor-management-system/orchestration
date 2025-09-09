@@ -7,11 +7,12 @@ SPDX-FileCopyrightText: 2023 - 2024
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-## 1.22.1 (Unreleased)
+## 1.23.0 (Unreleased)
 
 Changed:
 - The latest version of docker compose file has been updated for the FZJ staging deployment ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/569))
 - The new front-end URL has been updated for FZJ staging instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/583))
+- Moved the main url for the GFZ instance to sensors.gfz.de ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/585))
 
 ## 1.22.0 - 2025-08-26
 
