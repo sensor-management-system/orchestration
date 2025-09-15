@@ -8,6 +8,9 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 ## 1.23.1 (Unreleased)
 
+Fixed:
+- Call the sync with hifis groups for the idl no matter which institue ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/589))
+
 ## 1.23.0 - 2025-09-15
 
 Added:
