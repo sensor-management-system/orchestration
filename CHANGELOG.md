@@ -6,8 +6,9 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
+## 1.23.1 (Unreleased)
 
-## 1.23.0 (Unreleased)
+## 1.23.0 - 2025-09-15
 
 Added:
 - Management command to update the urls of the registered handles for sites ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/586))
