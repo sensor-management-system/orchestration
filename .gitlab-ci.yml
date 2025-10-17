@@ -334,6 +334,31 @@ build-deploy-image-nginx-gfz-fzj-staging:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
+build-deploy-image-nginx-fzj-dev:
+  stage: build
+  extends: .docker_build
+  variables:
+    CLIENT_ID: ${FZJ_DEV_HIFIS_OIDC_CLIENT_ID}
+  script:
+    - |
+        docker build --tag "$CI_REGISTRY_IMAGE/nginx:fzj-dev-latest" -f docker/build/nginx/fzj/dev/Dockerfile \
+          --build-arg CLIENT_ID_ARG=$CLIENT_ID \
+          --build-arg ALLOWED_MIME_TYPES_ARG=$ALLOWED_MIME_TYPES \
+          --build-arg SMS_VERSION_ARG=$CI_COMMIT_SHORT_SHA \
+          .
+    - docker push "$CI_REGISTRY_IMAGE/nginx:fzj-dev-latest"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - frontend/node_modules
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+
 build-deploy-image-nginx-gfz-sandbox:
   stage: build
   extends: .docker_build
@@ -430,7 +455,7 @@ build-deploy-image-backend-gfz-fzj-staging:
   extends: .docker_build
   script:
     - |
-        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-${CI_COMMIT_TAG:-staging-latest}" -f backend/Dockerfile \
+        docker build --tag "$CI_REGISTRY_IMAGE/backend:gfz-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-staging-latest" --tag "$CI_REGISTRY_IMAGE/backend:fzj-dev-latest" -f backend/Dockerfile \
           backend
     - docker push --all-tags "$CI_REGISTRY_IMAGE/backend"
   rules:
@@ -845,6 +870,25 @@ deploy-gfz-sandbox:
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
       when: never
     - if: '$GFZ_SANDBOX_HOOK_URL && $CI_COMMIT_REF_PROTECTED && $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+      when: always
+
+deploy-fzj-dev:
+  stage: deploy
+  environment:
+    name: fzj-dev
+    url: https://sms-dev.ibg3container.ibg.kfa-juelich.de
+  tags:
+    - fzj
+    - dev
+  image: alpine:latest
+  script:
+    - wget -q --post-data "" "$FZJ_DEV_HOOK_URL"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      when: never
+    - if: '$FZJ_DEV_HOOK_URL && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
       when: always
 
 deploy-fzj-staging:
