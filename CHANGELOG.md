@@ -16,6 +16,7 @@ Added:
 Fixed:
 - Call the sync with hifis groups for the idl no matter which institue ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/589))
 - In FZJ staging instance, the OIDC well known URL, Client ID and VO/RC conventions have been fixed for group management ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/590))
+- Added missing final nginx:alpine webserver stage in Dockerfile for FZJ dev build. ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/593))
 
 ## 1.23.0 - 2025-09-15
 
