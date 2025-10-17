@@ -53,7 +53,7 @@ RUN sed -i 's/"version": ".*"/"version": "'"$SMS_VERSION"'"/' package.json
 RUN npm ci
 RUN npm run build
 
-
+FROM nginx:alpine as webserver
 EXPOSE 80
 EXPOSE 443
 EXPOSE 8443
