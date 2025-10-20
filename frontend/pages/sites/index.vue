@@ -70,7 +70,7 @@ SPDX-License-Identifier: EUPL-1.2
           dense
         >
           <v-col cols="12" md="12">
-            <SiteUsageSelect v-model="selectedSearchSiteUsages" label="Select usage" />
+            <SiteUsageSelect v-model="selectedSearchSiteUsages" label="Select land use" />
           </v-col>
         </v-row>
         <v-row

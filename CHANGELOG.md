@@ -13,6 +13,9 @@ Added:
 - The FZJ dev instance has been implemented and deployed with Gitlab CI/CD workflow ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/591))
 
 
+Changed:
+- Switched from labeling the usage of sites to land use ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/582))
+
 Fixed:
 - Call the sync with hifis groups for the idl no matter which institue ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/589))
 - In FZJ staging instance, the OIDC well known URL, Client ID and VO/RC conventions have been fixed for group management ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/590))

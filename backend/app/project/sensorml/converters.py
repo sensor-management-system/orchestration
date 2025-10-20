@@ -1833,8 +1833,8 @@ class SiteConverter:
         sml_classifier_list = []
         if self.site.site_usage_name:
             sml_term = SmlTerm(
-                definition="SiteUsage",
-                sml_label=SmlLabel(text="site usage"),
+                definition="LandUse",
+                sml_label=SmlLabel(text="land use"),
                 sml_value=SmlValue(text=self.site.site_usage_name),
             )
             sml_classifier = SmlClassifier(sml_term=sml_term)

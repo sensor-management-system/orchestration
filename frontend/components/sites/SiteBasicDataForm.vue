@@ -68,7 +68,7 @@ SPDX-License-Identifier: EUPL-1.2
       <v-row>
         <v-col cols="12" md="6">
           <combobox
-            label="Usage"
+            label="Land use"
             clearable
             :items="siteUsages"
             item-text="name"
