@@ -33,8 +33,7 @@ const syncGroups = (getIdTokenFunc: () => string | null): null | Promise<AxiosRe
 }
 
 const loginSuccessMiddleware: Middleware = async function (context: Context) {
-  // const institute: string = context.env.institute
-  // just when on /login-success and for GFZ only
+  // just when on /login-success
   if (context.route.path.match('^/login-success/?$')) {
     const getIdToken = (): string | null => {
       // @ts-ignore
