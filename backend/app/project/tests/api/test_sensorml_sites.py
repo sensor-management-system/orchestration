@@ -443,13 +443,13 @@ class TestSensorMLSite(BaseTestCase):
             sml_classifier_site_usage.find(
                 "{http://www.opengis.net/sensorml/2.0}Term"
             ).attrib.get("definition"),
-            "SiteUsage",
+            "LandUse",
         )
         self.assertEqual(
             sml_classifier_site_usage.find("{http://www.opengis.net/sensorml/2.0}Term")
             .find("{http://www.opengis.net/sensorml/2.0}label")
             .text,
-            "site usage",
+            "land use",
         )
         self.assertEqual(
             sml_classifier_site_usage.find("{http://www.opengis.net/sensorml/2.0}Term")

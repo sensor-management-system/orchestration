@@ -17,10 +17,10 @@ SPDX-License-Identifier: EUPL-1.2
       scrollable
     >
       <v-card v-if="showDialog">
-        <v-card-title>Suggest new site / lab usage</v-card-title>
+        <v-card-title>Suggest new land use</v-card-title>
         <v-card-text>
           <p>
-            You can suggest a new site / lab usage for the controlled vocabulary. This is submitted as a proposal.
+            You can suggest a new land use for the controlled vocabulary. This is submitted as a proposal.
           </p>
           <p>
             A curator reviews your contribution before accepting it and including it in the full controlled vocabulary.
@@ -213,7 +213,7 @@ export default class SiteUsageDialog extends mixins(Rules) {
       this.$emit('aftersubmit', result)
       this.$store.commit('snackbar/setSuccess', 'Your proposal has been successfully submitted. Your changes will be reviewed soon.')
     } catch (err) {
-      this.$store.commit('snackbar/setError', 'Error on submitting the site / lab usage')
+      this.$store.commit('snackbar/setError', 'Error on submitting the land use')
     } finally {
       this.setLoading(false)
       this.resetInputs()
