@@ -37,7 +37,7 @@ services:
     image: registry.hzdr.de/hub-terra/sms/gfz-idl/backend:latest
     restart: unless-stopped
     ports:
-      - 28000:80
+      - 28000:8000
     environment:
       DJANGO_DEBUG: 'False'
       DJANGO_ALLOWED_HOSTS: 'sms-dev.ibg3container.ibg.kfa-juelich.de ibg3dev-idl'
@@ -125,7 +125,7 @@ services:
       - ibg3dev-backend
 
   ibg3dev-backend:
-    image: registry.hzdr.de/hub-terra/sms/orchestration/backend:fzj-1.16.2
+    image: registry.hzdr.de/hub-terra/sms/orchestration/backend:fzj-dev-latest 
     restart: unless-stopped
     ports:
       - 25000:5000
@@ -139,7 +139,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET_NAME: sms-attachments
-      MINIO_ENDPOINT: minio:9000
+      MINIO_ENDPOINT: ibg3dev-minio:9000
       DOWNLOAD_ENDPOINT: https://sms-dev.ibg3container.ibg.kfa-juelich.de/
       SECRET_KEY: ${BACKEND_SECRET_KEY}
       ALLOWED_MIME_TYPES: ${ALLOWED_MIME_TYPES}
@@ -165,7 +165,6 @@ services:
       PID_PREFIX: 20.500.14372
       PID_SUFFIX: SMS-Dev
       CLIENT_ID: sms_ibg3_fzj
-      CLIENT_SECRET: IBG-r3user
 
     depends_on:
       - ibg3dev-backend-db
