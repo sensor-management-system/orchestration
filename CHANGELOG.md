@@ -21,7 +21,7 @@ Fixed:
 - In FZJ staging instance, the OIDC well known URL, Client ID and VO/RC conventions have been fixed for group management ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/590))
 - Added missing final nginx:alpine webserver stage in Dockerfile for FZJ dev build. ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/593))
 - Fixed Docker Compose service names and container ports for the FZJ dev instance. ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/594))
-- Fixed Nginx upstream service names to ibg3dev-backend, ibg3dev-idl, and ibg3dev-minio for the FZJ dev instance. ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/596))
+- Fixed Nginx routes Minio within the ibg3dev environment for the FZJ dev instance. ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/597))
 
 ## 1.23.0 - 2025-09-15
 
