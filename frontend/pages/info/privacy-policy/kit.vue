@@ -77,7 +77,7 @@ SPDX-License-Identifier: EUPL-1.2
     <h4 class="mb-2">
       5. Right to withdrawal your consent
     </h4>
-    <p>Furthermore you can withdrawn your given consent at any time without given a reasons and with effect for the future. The withdrawal does not affect the lawfulness of the processing of your data on the basis of your consent, which took place before this withdrawal. You can withdrawal you consent by sending an e-mail to <a href="mailto:rdm@imk.kit.edu?subject=[SMS]">rdm@imk.kit.edu</a>.</p>
+    <p>Furthermore you can withdrawn your given consent at any time without given a reasons and with effect for the future. The withdrawal does not affect the lawfulness of the processing of your data on the basis of your consent, which took place before this withdrawal. You can withdrawal you consent by sending an e-mail to <a href="mailto:sms-curator@lists.kit.edu?subject=[SMS]">sms-curator@lists.kit.edu</a>.</p>
   </section>
 </template>
 
