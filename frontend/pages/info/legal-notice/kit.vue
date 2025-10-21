@@ -88,7 +88,7 @@ SPDX-License-Identifier: EUPL-1.2
         data management & IT group
         <a href="https://www.imk-asf.kit.edu/english/IAS.php" target="_blank">at IMKASF</a><br>
         E-Mail:
-        <a href="mailto:rdm@imk.kit.edu?subject=[SMS]">rdm@imk.kit.edu</a>
+        <a href="mailto:sms-curator@lists.kit.edu?subject=[SMS]">sms-curator@lists.kit.edu</a>
       </p>
     </section>
     <section>

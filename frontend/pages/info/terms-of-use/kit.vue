@@ -15,7 +15,7 @@ SPDX-License-Identifier: EUPL-1.2
         By using the offered services at <a href="https://sms.atmohub.kit.edu">sms.atmohub.kit.edu</a>
         (“Services”) you agree to the following terms of use by Karlsruhe Institute of Technology (“KIT”) under the laws of the Federal State of
         Baden-Wuerttemberg/Germany, Kaiserstraße 12, 76131 Karlsruhe, Germany.
-        Contact: <a href="mailto:rdm@imk.kit.edu?subject=[SMS]">rdm@imk.kit.edu</a>
+        Contact: <a href="mailto:sms-curator@lists.kit.edu?subject=[SMS]">sms-curator@lists.kit.edu</a>
       </p>
     </section>
     <section class="mb-6">

@@ -12,9 +12,9 @@ Added:
 - The resource capability for group management has been enabled to the FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/587))
 - The FZJ dev instance has been implemented and deployed with Gitlab CI/CD workflow ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/591))
 
-
 Changed:
 - Switched from labeling the usage of sites to land use ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/582))
+- Update KIT deployment data management contact email ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/595))
 
 Fixed:
 - Call the sync with hifis groups for the idl no matter which institue ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/589))
