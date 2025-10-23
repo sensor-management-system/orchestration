@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.23.2 (Unreleased)
 
+Changed:
+- Updated GFZ name for the zenodo publication ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/600))
+
 ## 1.23.1 - 2025-10-23
 
 Added:
