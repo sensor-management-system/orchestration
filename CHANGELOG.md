@@ -6,7 +6,10 @@ SPDX-FileCopyrightText: 2023 - 2024
 
 SPDX-License-Identifier: EUPL-1.2
 -->
-## 1.23.1 (Unreleased)
+
+## 1.23.2 (Unreleased)
+
+## 1.23.1 - 2025-10-23
 
 Added:
 - The resource capability for group management has been enabled to the FZJ prod instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/587))
