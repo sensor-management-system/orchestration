@@ -232,7 +232,7 @@ export default class OverviewIndex extends mixins(ViewPort) {
   setDefaults!: SetDefaultsAction
 
   private stats = new StatisticsCount()
-  private showReleaseNotes = !!process.env.showReleaseNotes
+  private showReleaseNotes = false
 
   private linkToReleaseNotes = 'https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/blob/main/CHANGELOG.md'
 
@@ -240,6 +240,13 @@ export default class OverviewIndex extends mixins(ViewPort) {
     this.setFullWidth(true)
     this.$store.dispatch('appbar/setDefaults')
     this.getUsageStatistics()
+
+    /**
+     * To make sure that the showReleaseNotes Env is evaluated during run time
+     * The toString() must be done due to weird behavior with the nuxt.process.env
+     */
+    const parsedShowReleaseNotesEnv = process.env.showReleaseNotes?.toString()
+    this.showReleaseNotes = parsedShowReleaseNotesEnv === 'true'
   }
 
   async getUsageStatistics (): Promise<void> {

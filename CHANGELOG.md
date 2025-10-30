@@ -13,6 +13,9 @@ Changed:
 - Updated GFZ name for the zenodo publication ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/600))
 - IDL component now supports fetching the entitlements ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/602))
 
+Fixed:
+- Show release notes now works with generic frontend image ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/603))
+
 ## 1.23.1 - 2025-10-23
 
 Added:
