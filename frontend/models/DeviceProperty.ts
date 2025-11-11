@@ -7,6 +7,8 @@
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
+import { DateTime } from 'luxon'
+
 import { IMeasuringRange, MeasuringRange } from '@/models/MeasuringRange'
 
 export interface IDeviceProperty {
@@ -31,6 +33,7 @@ export interface IDeviceProperty {
   resolutionUnitUri: string
   resolutionUnitName: string
   description: string
+  createdAt: DateTime | null
 }
 
 export class DeviceProperty implements IDeviceProperty {
@@ -55,6 +58,7 @@ export class DeviceProperty implements IDeviceProperty {
   private _resolutionUnitUri: string = ''
   private _resolutionUnitName: string = ''
   private _description: string = ''
+  private _createdAt: DateTime | null = null
 
   /**
    * creates an instance from another object
@@ -87,6 +91,7 @@ export class DeviceProperty implements IDeviceProperty {
     newObject.resolutionUnitUri = someObject.resolutionUnitUri
     newObject.resolutionUnitName = someObject.resolutionUnitName
     newObject.description = someObject.description
+    newObject.createdAt = someObject.createdAt
 
     return newObject
   }
@@ -257,6 +262,14 @@ export class DeviceProperty implements IDeviceProperty {
 
   set description (newDescription: string) {
     this._description = newDescription
+  }
+
+  get createdAt (): DateTime | null {
+    return this._createdAt
+  }
+
+  set createdAt (newValue: DateTime | null) {
+    this._createdAt = newValue
   }
 
   toString (): string {

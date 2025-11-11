@@ -36,7 +36,8 @@ describe('DeviceProperty Models', () => {
       resolutionUnitName: 'mm',
       aggregationTypeUri: 'http://foo/aggregationtypes/1',
       aggregationTypeName: 'Average',
-      description: 'test description'
+      description: 'test description',
+      createdAt: null
     })
     expect(typeof prop).toBe('object')
     expect(prop).toHaveProperty('id', null)

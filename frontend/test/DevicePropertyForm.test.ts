@@ -83,7 +83,8 @@ describe('DevicePropertyForm', () => {
           resolutionUnitName: 'mm',
           aggregationTypeUri: 'http://foo/aggregationtypes/1',
           aggregationTypeName: 'Average',
-          description: 'test description'
+          description: 'test description',
+          createdAt: null
         }),
         compartments: [
           Compartment.createWithData('1', 'bar', 'http://foo/compartment/1', 'foo'),

@@ -107,7 +107,8 @@ const createTestDevice = () => {
       resolutionUnitName: 'mm',
       aggregationTypeUri: 'http://foo/aggregationtypes/1',
       aggregationTypeName: 'Average',
-      description: 'first property'
+      description: 'first property',
+      createdAt: null
     }),
     DeviceProperty.createFromObject({
       id: '4',
@@ -133,7 +134,8 @@ const createTestDevice = () => {
       resolutionUnitName: 'mm',
       aggregationTypeUri: 'http://foo/aggregationtypes/1',
       aggregationTypeName: 'Average',
-      description: 'second property'
+      description: 'second property',
+      createdAt: null
     })
   ]
 
@@ -863,7 +865,8 @@ describe('DeviceSerializer', () => {
           // Not included in the paylod
           aggregationTypeUri: '',
           aggregationTypeName: '',
-          description: ''
+          description: '',
+          createdAt: null
         }),
         DeviceProperty.createFromObject({
           compartmentName: 'a',
@@ -889,7 +892,8 @@ describe('DeviceSerializer', () => {
           resolutionUnitName: 'mm',
           aggregationTypeUri: 'http://foo/aggregationtypes/1',
           aggregationTypeName: 'Average',
-          description: 'f description'
+          description: 'f description',
+          createdAt: null
         })
       ]
       expectedDevice.deviceTypeName = ''
