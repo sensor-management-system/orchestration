@@ -12,6 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 Changed:
 - Updated GFZ name for the zenodo publication ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/600))
 - IDL component now supports fetching the entitlements ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/602))
+- ordering of the measured quantities is kept when copying devices ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/605))
 
 Fixed:
 - Show release notes now works with generic frontend image ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/603))

@@ -7,6 +7,8 @@
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
+import { DateTime } from 'luxon'
+
 import { DeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
@@ -40,7 +42,8 @@ describe('DevicePropertySerializer', () => {
           resolutionUnitName: 'mm',
           aggregationTypeUri: 'http://foo/aggregationtypes/1',
           aggregationTypeName: 'Average',
-          description: 'first property'
+          description: 'first property',
+          createdAt: null
         }),
         DeviceProperty.createFromObject({
           id: null,
@@ -66,7 +69,8 @@ describe('DevicePropertySerializer', () => {
           resolutionUnitName: 'mm',
           aggregationTypeUri: 'http://foo/aggregationtypes/2',
           aggregationTypeName: 'Mean',
-          description: 'second property'
+          description: 'second property',
+          createdAt: null
         })
       ]
 
@@ -177,7 +181,8 @@ describe('DevicePropertySerializer', () => {
             resolution_unit_name: '°C',
             aggregation_type_uri: 'http://foo/aggregationtypes/2',
             aggregation_type_name: 'Mean',
-            description: 'abc description'
+            description: 'abc description',
+            created_at: '2020-08-28T13:49:48.015620+00:00'
           },
           relationships: {}
         }],
@@ -233,6 +238,7 @@ describe('DevicePropertySerializer', () => {
       expect(models[1].aggregationTypeUri).toEqual('http://foo/aggregationtypes/2')
       expect(models[1].aggregationTypeName).toEqual('Mean')
       expect(models[1].description).toEqual('abc description')
+      expect(models[1].createdAt).toEqual(DateTime.utc(2020, 8, 28, 13, 49, 48, 15))
     })
   })
   describe('#convertJsonApiObjectToModel', () => {
@@ -429,7 +435,8 @@ describe('DevicePropertySerializer', () => {
         resolutionUnitName: 'mm',
         aggregationTypeUri: 'http://foo/aggregationtypes/1',
         aggregationTypeName: 'Average',
-        description: 'desc'
+        description: 'desc',
+        createdAt: null
       })
       const serializer = new DevicePropertySerializer()
       const deviceId = '456'
@@ -518,7 +525,8 @@ describe('DevicePropertySerializer', () => {
         resolutionUnitName: 'mm',
         aggregationTypeUri: 'http://foo/aggregationtypes/4',
         aggregationTypeName: 'Sum',
-        description: 'desc'
+        description: 'desc',
+        createdAt: null
       })
       const serializer = new DevicePropertySerializer()
       const deviceId = '456'

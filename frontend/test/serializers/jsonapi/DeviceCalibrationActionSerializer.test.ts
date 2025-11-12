@@ -447,7 +447,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         resolutionUnitUri: 'RU/1',
         aggregationTypeUri: 'http://foo/aggregationtypes/1',
         aggregationTypeName: 'Average',
-        description: 'MQ one'
+        description: 'MQ one',
+        createdAt: null
       })
       const measuredQuantity2 = DeviceProperty.createFromObject({
         id: '222',
@@ -473,7 +474,8 @@ describe('DeviceCalibrationActionSerializer', () => {
         resolutionUnitUri: 'RU/2',
         aggregationTypeUri: '',
         aggregationTypeName: '',
-        description: 'MQ two'
+        description: 'MQ two',
+        createdAt: null
       })
       const expectedAction = new DeviceCalibrationAction()
       expectedAction.id = '3'

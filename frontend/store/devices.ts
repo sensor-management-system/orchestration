@@ -660,7 +660,23 @@ const actions: ActionTree<DevicesState, RootState> = {
     }
 
     if (copyMeasuredQuantities) {
-      const measuredQuantities = device.properties.map(DeviceProperty.createFromObject)
+      const measuredQuantities = device.properties.map(DeviceProperty.createFromObject).sort(function (a, b) {
+        // The included entries for the device properties are not sorted by default.
+        // We usually use the createdAt (the older ones first).
+        if (!b.createdAt) {
+          return 1
+        }
+        if (!a.createdAt) {
+          return -1
+        }
+        if (a.createdAt > b.createdAt) {
+          return 1
+        }
+        if (a.createdAt === b.createdAt) {
+          return 0
+        }
+        return -1
+      })
       for (const measuredQuantity of measuredQuantities) {
         measuredQuantity.id = null
         related.push(dispatch('addDeviceMeasuredQuantity', { deviceId: savedDeviceId, deviceMeasuredQuantity: measuredQuantity }))

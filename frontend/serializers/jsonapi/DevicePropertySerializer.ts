@@ -9,6 +9,8 @@
  *
  * SPDX-License-Identifier: EUPL-1.2
  */
+import { DateTime } from 'luxon'
+
 import { DeviceProperty, IDeviceProperty } from '@/models/DeviceProperty'
 import { MeasuringRange } from '@/models/MeasuringRange'
 
@@ -118,6 +120,7 @@ export class DevicePropertySerializer {
       newEntry.resolutionUnitUri = jsonApiData.attributes.resolution_unit_uri || ''
       newEntry.resolutionUnitName = jsonApiData.attributes.resolution_unit_name || ''
       newEntry.description = jsonApiData.attributes.description || ''
+      newEntry.createdAt = jsonApiData.attributes.created_at != null ? DateTime.fromISO(jsonApiData.attributes.created_at, { zone: 'UTC' }) : null
     }
 
     return newEntry

@@ -39,7 +39,8 @@ describe('DeviceCalibrationDevicePropertySerializer', () => {
         resolutionUnitUri: 'RU/1',
         aggregationTypeUri: 'http://foo/aggregationtypes/1',
         aggregationTypeName: 'Average',
-        description: 'desc'
+        description: 'desc',
+        createdAt: null
       })
       const actionId = '2'
 
