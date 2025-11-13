@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 - 2024
+SPDX-FileCopyrightText: 2020 - 2025
 - Nils Brinckmann <nils.brinckmann@gfz-potsdam.de>
 - Marc Hanisch <marc.hanisch@gfz-potsdam.de>
 - Rubankumar Moorthy <r.moorthy@fz-juelich.de>
@@ -29,7 +29,6 @@ SPDX-License-Identifier: EUPL-1.2
     <h4 class="mb-2">
       2. User data processed by Forschungszentrum Jülich
     </h4>
-    <p>The following user-related data is processed when contacting by e-mail or using the contact form:</p>
     <p>
       Users are authenticated using the IdP of their respective institute. Passwords are not stored in the database.<br>
       The types of user-related information collected to operate the application include the following:
@@ -64,7 +63,7 @@ SPDX-License-Identifier: EUPL-1.2
       <li>ORCID (if available)</li>
     </ul>
 
-    <p>The application cannot be used to analyse user behaviour.</p>
+    <p>The application cannot be used to analyze user behavior.</p>
   </section>
 </template>
 
