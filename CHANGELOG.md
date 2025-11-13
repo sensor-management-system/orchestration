@@ -17,6 +17,7 @@ Changed:
 
 Fixed:
 - Show release notes now works with generic frontend image ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/603))
+- The privacy policy page bugs have been fixed for the FZJ instance ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/607))
 
 ## 1.23.1 - 2025-10-23
 
