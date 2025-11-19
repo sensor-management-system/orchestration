@@ -28,8 +28,8 @@ You need an api key to run the script.
 
 
 ```python
->>> from csv_importer import SmsDeviceImporter
->>> SmsDeviceImporter(
+>>> from csv_importer import SMSDeviceImporter
+>>> SMSDeviceImporter(
         filepath="~/data/somewhere/former_devices_export.csv",
         run_type="local",
         api_key="ABC1234"

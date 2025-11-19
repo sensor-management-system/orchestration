@@ -14,7 +14,7 @@ Import processor for devices to an sms instance (currently UFZ only).
 
 How to call it:
 
->>> SmsDeviceImporter(
+>>> SMSDeviceImporter(
         filepath="~/data/somewhere/former_devices_export.csv",
         run_type="local",
         api_key="ABC1234"
@@ -35,12 +35,16 @@ class SMSDeviceImporter:
             "local": "https://localhost.localdomain/backend/api/v1/",
             "stage": "https://webapp-stage.intranet.ufz.de/sms/backend/api/v1/",
             "prod": "https://webapp.ufz.de/sms/backend/api/v1/",
+            "gfz": "https://sensors.gfz.de/backend/api/v1",
+            "sandbox": "https://sensors-sandbox.gfz.de/backend/api/v1",
         }
         self.url = self.base_urls[self.run_type]
         self.cv_base_urls = {
             "local": "http://localhost:8000/cv/api/v1/",
             "stage": "https://webapp-stage.intranet.ufz.de/sms/cv/api/v1/",
             "prod": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
+            "gfz": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
+            "sandbox": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
         }
         self.cv_base_url = self.cv_base_urls[self.run_type]
         self.cv_mapping = {
