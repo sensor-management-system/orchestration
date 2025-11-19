@@ -9,6 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1.23.3 (Unreleased)
 
+Changed:
+- Added gfz and sandbox endpoints for the sms device csv importer ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/609))
+
 ## 1.23.2 - 2025-11-17
 
 Changed:
