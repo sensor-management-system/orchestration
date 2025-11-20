@@ -34,17 +34,19 @@ class SMSDeviceImporter:
         self.base_urls = {
             "local": "https://localhost.localdomain/backend/api/v1/",
             "stage": "https://webapp-stage.intranet.ufz.de/sms/backend/api/v1/",
-            "prod": "https://webapp.ufz.de/sms/backend/api/v1/",
-            "gfz": "https://sensors.gfz.de/backend/api/v1",
-            "sandbox": "https://sensors-sandbox.gfz.de/backend/api/v1",
+            "ufz": "https://web.app.ufz.de/sms/backend/api/v1/",
+            "gfz": "https://sensors.gfz.de/backend/api/v1/",
+            "sandbox": "https://sensors-sandbox.gfz.de/backend/api/v1/",
+            "kit": "https://sms.atmohub.kit.edu/backend/api/v1/",
         }
         self.url = self.base_urls[self.run_type]
         self.cv_base_urls = {
             "local": "http://localhost:8000/cv/api/v1/",
             "stage": "https://webapp-stage.intranet.ufz.de/sms/cv/api/v1/",
-            "prod": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
+            "ufz": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
             "gfz": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
             "sandbox": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
+            "kit": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
         }
         self.cv_base_url = self.cv_base_urls[self.run_type]
         self.cv_mapping = {
@@ -177,7 +179,6 @@ class SMSDeviceImporter:
                     "serial_number": row.get("serial_number"),
                     "manufacturer_uri": row.get("manufacturer_uri", None),
                     "manufacturer_name": row.get("manufacturer_name"),
-                    "dual_use": row.get("dual_use", None),
                     "model": row.get("model", None),
                     "inventory_number": str(row.get("inventory_number", None)),
                     # "persistent_identifier": row.get("persistent_identifier"),
