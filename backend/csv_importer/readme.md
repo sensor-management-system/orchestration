@@ -40,8 +40,6 @@ You need an api key to run the script.
 
 There are some limitations that you should be aware about:
 
-- Currently it only supports UFZ SMS instances (staging, prod, as well as lcocal development instance)
-
 - there is only support for device related objects up to 99 elements for each device for:
   - device properties,
   - contacts`*`,
@@ -74,3 +72,4 @@ The following run types are supproted:
 | ufz | The production instance at UFZ. |
 | gfz | The production instance at GFZ. |
 | kit | The production instance at KIT. |
+| fzj | The production instance at FZJ. |
