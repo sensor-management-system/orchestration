@@ -114,14 +114,19 @@ services:
             TSM_ENDPOINTS: >
                 [
                   {
-                    "fields": {"name": "KIT-IFU", "url": "https://tsmdl-api.imk-ifu.kit.edu"},
+                    "fields": {"name": "KIT-IAI", "url": "https://sdm-tmsdl.cloud.iai.kit.edu"},
+                    "model": "TsmEndpoint",
+                    "pk": 5
+                  },
+                  {
+                    "fields": {"name": "KIT-IMKIFU", "url": "https://tsmdl-api.imk-ifu.kit.edu"},
                     "model": "TsmEndpoint",
                     "pk": 4
                   },
                   {
-                    "fields": {"name": "KIT-IAI", "url": "https://sdm-tmsdl.cloud.iai.kit.edu"},
-                    "model": "TsmEndpoint", 
-                    "pk": 5
+                    "fields": {"name": "KIT-IMKTRO", "url": "https://tsm.atmohub.kit.edu/wm/tsmdl"},
+                    "model": "TsmEndpoint",
+                    "pk": 6
                   }
                 ]
             B2INST_URL: https://b2inst.gwdg.de
