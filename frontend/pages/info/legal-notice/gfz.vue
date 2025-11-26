@@ -19,7 +19,7 @@ SPDX-License-Identifier: EUPL-1.2
         Provider
       </h2>
       <p>
-        The <a href="https://www.gfz.de" target="_blank">GFZ Helmholtz Centre for Geosciences</a> is the provider of this website <a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a>.
+        The <a href="https://www.gfz.de" target="_blank">GFZ Helmholtz Centre for Geosciences</a> is the provider of this website <a href="https://sensors.gfz.de">sensors.gfz.de</a>.
         This internet presence was developed within the DataHub initiative of the Helmholtz Association of German Research Centres.
       </p>
     </section>
@@ -45,7 +45,7 @@ SPDX-License-Identifier: EUPL-1.2
       <h2 class="mb-1">
         Representatives
       </h2>
-      <p>The GFZ is legally represented by Prof. Dr. Susanne Buiter (Scientific Executive Director and Chair of the Board) and Marco Kupzig (Administrative Executive Director (ad interim)).</p>
+      <p>The GFZ is legally represented by Prof. Dr. Susanne Buiter (Scientific Executive Director and Chair of the Board) and Lars-Christian Klinnert (Administrative Executive Director).</p>
     </section>
     <section class="mb-6">
       <h2 class="mb-1">
@@ -59,12 +59,12 @@ SPDX-License-Identifier: EUPL-1.2
       </h2>
       <p>
         Editorial responsibility for this website in accordance with § 18 (2) of the State Media Treaty:<br>
-        Marc Hanisch (Head of <a href="https://www.gfz.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
-        Phone: +49 331 6264-28929<br>
-        E-Mail: <a href="mailto:marc.hanisch@gfz.de">marc.hanisch@gfz.de</a>
+        Dr. Claire Donnelly (Head of <a href="https://www.gfz.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
+        Phone: +49 331 6264-3557<br>
+        E-Mail: <a href="mailto:claire.barbara.donnelly@gfz.de">claire.barbara.donnelly@gfz.de</a>
       </p>
       <p>
-        Editor, conception, coordination (<a href="https://sensors.gfz-potsdam.de">sensors.gfz-potsdam.de</a>)<br>
+        Editor, conception, coordination (<a href="https://sensors.gfz.de">sensors.gfz.de</a>)<br>
         Nils Brinckmann (<a href="https://www.gfz.de/en/section/escience-centre" target="_blank">eScience-Centre</a>)<br>
         Tel.: +49 331 6264-28940<br>
         E-Mail: <a href="mailto:nils.brinckmann@gfz.de">nils.brinckmann@gfz.de</a>
