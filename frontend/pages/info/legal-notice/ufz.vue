@@ -49,13 +49,13 @@ SPDX-License-Identifier: EUPL-1.2
     <section>
       <h2>Authorized representatives</h2>
       <p>
-        The UFZ is legally represented by Prof. Dr. Rolf Altenburger (Scientific Director) and Dr. Sabine König
+        The UFZ is legally represented by Prof. Dr. Katrin Böhning-Gaese (Scientific Director) and Dr. Sabine König
         (Administrative Director).
       </p>
     </section>
     <section>
       <h2>Chairwoman of Supervisory Board</h2>
-      <p>MinDirig´in Oda Keppler</p>
+      <p>MinDirig Daniel Rudolf</p>
     </section>
     <section>
       <h2>Responsibility for the content of the website</h2>
