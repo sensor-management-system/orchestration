@@ -38,7 +38,9 @@ class SMSDeviceImporter:
             "gfz": "https://sensors.gfz.de/backend/api/v1/",
             "sandbox": "https://sensors-sandbox.gfz.de/backend/api/v1/",
             "kit": "https://sms.atmohub.kit.edu/backend/api/v1/",
-            "fzj": "https://sms.earth-data.fz-juelich.de/backend/api/v1"
+            "fzj": "https://sms.earth-data.fz-juelich.de/backend/api/v1",
+            "fzj-staging": "https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de/backend/api/v1",
+            "fzj-dev": "https://sms-dev.ibg3container.ibg.kfa-juelich.de/backend/api/v1"
         }
         self.url = self.base_urls[self.run_type]
         self.cv_base_urls = {
@@ -48,7 +50,9 @@ class SMSDeviceImporter:
             "gfz": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
             "sandbox": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
             "kit": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
-            "fzj": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/"
+            "fzj": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
+            "fzj-staging": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
+            "fzj-dev": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/"
         }
         self.cv_base_url = self.cv_base_urls[self.run_type]
         self.cv_mapping = {
