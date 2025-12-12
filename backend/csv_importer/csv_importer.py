@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2020 - 2024
 # - Florian Gransee <florian.gransee@ufz.de>
 # - Helmholtz Centre for Environmental Research GmbH - UFZ (UFZ, https://www.ufz.de)
+# - Ulrich Loup
+# - Forschungszentrum Jülich GmbH - FZJ (https://www.fz-juelich.de)
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -8,53 +10,40 @@ import numbers
 
 import pandas as pd
 import requests
+import argparse
+import os
 
-"""
-Import processor for devices to an sms instance (currently UFZ only).
+## A run profile is a tuple (<SMS base URL>, <key of a CV base URL>).
+RUN_PROFILES = {
+    "local": ("http://localhost/backend/api/v1/", "local"),
+    "stage": ("https://webapp-stage.intranet.ufz.de/sms/backend/api/v1/", "stage"),
+    "ufz": ("https://web.app.ufz.de/sms/backend/api/v1/", "stage"),
+    "gfz": ("https://sensors.gfz.de/backend/api/v1/", "live"),
+    "sandbox": ("https://sensors-sandbox.gfz.de/backend/api/v1/", "live"),
+    "kit": ("https://sms.atmohub.kit.edu/backend/api/v1/", "live"),
+    "fzj": ("https://sms.earth-data.fz-juelich.de/backend/api/v1", "live"),
+    "fzj-staging": ("https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de/backend/api/v1", "live"),
+    "fzj-dev": ("https://sms-dev.ibg3container.ibg.kfa-juelich.de/backend/api/v1", "live")
+}
 
-How to call it:
-
->>> SMSDeviceImporter(
-        filepath="~/data/somewhere/former_devices_export.csv",
-        run_type="local",
-        api_key="ABC1234"
-    ).process()
-"""
+CV_BASE_URLS = {
+    "local": "http://localhost/cv/api/v1/",
+    "stage": "https://webapp-stage.intranet.ufz.de/sms/cv/api/v1/",
+    "live": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
+}
 
 
 class SMSDeviceImporter:
-    def __init__(self, filepath, run_type, api_key):
+    def __init__(self, filepath, run_profile, api_key):
         self.filepath = filepath
-        self.run_type = run_type
+        self.run_profile = run_profile
         self.api_key = api_key
         self.headers = {
             "X-APIKEY": self.api_key,
             "Content-Type": "application/vnd.api+json",
         }
-        self.base_urls = {
-            "local": "https://localhost.localdomain/backend/api/v1/",
-            "stage": "https://webapp-stage.intranet.ufz.de/sms/backend/api/v1/",
-            "ufz": "https://web.app.ufz.de/sms/backend/api/v1/",
-            "gfz": "https://sensors.gfz.de/backend/api/v1/",
-            "sandbox": "https://sensors-sandbox.gfz.de/backend/api/v1/",
-            "kit": "https://sms.atmohub.kit.edu/backend/api/v1/",
-            "fzj": "https://sms.earth-data.fz-juelich.de/backend/api/v1",
-            "fzj-staging": "https://sms-staging.ibg3jucloud-intern.ibg.kfa-juelich.de/backend/api/v1",
-            "fzj-dev": "https://sms-dev.ibg3container.ibg.kfa-juelich.de/backend/api/v1"
-        }
-        self.url = self.base_urls[self.run_type]
-        self.cv_base_urls = {
-            "local": "http://localhost:8000/cv/api/v1/",
-            "stage": "https://webapp-stage.intranet.ufz.de/sms/cv/api/v1/",
-            "ufz": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
-            "gfz": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
-            "sandbox": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
-            "kit": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
-            "fzj": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
-            "fzj-staging": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/",
-            "fzj-dev": "https://sms-cv.helmholtz.cloud/sms/cv/api/v1/"
-        }
-        self.cv_base_url = self.cv_base_urls[self.run_type]
+        self.url = RUN_PROFILES[self.run_profile][0]
+        self.cv_base_url = CV_BASE_URLS[RUN_PROFILES[self.run_profile][1]]
         self.cv_mapping = {
             "manufacturer_name": "manufacturers",
             "properties_([0-9]|[1-9][0-9])_unit_name": "units",
@@ -63,6 +52,7 @@ class SMSDeviceImporter:
             "properties_([0-9]|[1-9][0-9])_sample_medium_name": "samplingmedia",
             "contact_([0-9]|[1-9][0-9])_contact_role": "contactroles",
         }
+        self.log_file = f"IMPORT_{os.path.splitext(os.path.basename(self.filepath))[0]}_{self.run_profile}.csv"
 
     def get_cv_terms(self):
         cv_terms = dict()
@@ -391,6 +381,28 @@ class SMSDeviceImporter:
                 print("error posting device")
                 print(status_code)
                 print(device_id.text)
-        pd.DataFrame(log_list).to_csv(
-            f"IMPORT_'{self.filepath}'_{self.run_type}.csv", index=False
-        )
+        pd.DataFrame(log_list).to_csv(self.log_file, index=False)
+
+
+def parse_arguments():
+    """Configures and executes the argument parser and returns the command-line arguments in a Namespace."""
+    parser = argparse.ArgumentParser(
+        description='Tool to import device data from CSV into the Helmholtz Sensor Management System.',
+        formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('profile', choices=RUN_PROFILES.keys(), help="one of the predefined profiles")
+    parser.add_argument('filepath', help="path to the CSV file containing the device data to import")
+    parser.add_argument('apikey', help="APIKEY of the import user in the target SMS instance")
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = parse_arguments()
+    file_path = args.filepath
+    if os.path.isfile(file_path):
+        sms_device_importer = SMSDeviceImporter(args.filepath, args.profile, args.apikey)
+        print(f"Creating log file {sms_device_importer.log_file}...")
+        if not os.path.exists(sms_device_importer.log_file):
+            with open(sms_device_importer.log_file, 'w'): pass
+        sms_device_importer.process()
+    else:
+        print(f"Error: {file_path} not found!")

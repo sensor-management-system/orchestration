@@ -133,7 +133,7 @@ to `eduperson_principal_name`.
 
 ### Can I import devices?
 
-There is an csv importer script. You can find more details [here](./csv_importer/readme.md).
+There is an csv importer script. You can find more details [here](csv_importer/README.md).
 
 ## CLI commands for admins
 
