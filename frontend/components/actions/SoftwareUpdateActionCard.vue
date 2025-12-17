@@ -76,8 +76,17 @@ SPDX-License-Identifier: EUPL-1.2
             <label>
               Repository
             </label>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <span v-if="value.repositoryUrl" v-html="repositoryLink" />
+            <span v-if="value.repositoryUrl">
+              <span v-if="supportedRepositoryLinkForUrl">
+                <a
+                  :href="value.repositoryUrl"
+                  target="_blank"
+                >
+                  {{ value.repositoryUrl }}
+                </a>
+              </span>
+              <span v-else>{{ value.repositoryUrl }}</span>
+            </span>
             <span v-else>{{ null | orDefault }}</span>
           </v-col>
         </v-row>
@@ -157,22 +166,9 @@ export default class SoftwareUpdateActionCard extends Vue {
 
   private softwareTypes!: VocabularyState['softwareTypes']
 
-  /**
-   * returns an URL as an link
-   *
-   * All characters except 0-9, a-z, :, / and . are removed from the link to
-   * prevent xss attacks. If the URL doesn't start with a known protocol, it
-   * won't be wrapped.
-   *
-   * @return {string} the url wrapped in an HTML link element
-   */
-  get repositoryLink (): string {
-    // eslint-disable-next-line no-useless-escape
-    const url = this.value.repositoryUrl.replace(/[^a-zA-Z0-9:\/.-]/g, '')
-    if (protocolsInUrl(['https', 'http', 'ftp', 'ftps', 'sftp', 'dav', 'davs'], url)) {
-      return '<a href="' + url + '" target="_blank">' + url + '</a>'
-    }
-    return url
+  get supportedRepositoryLinkForUrl (): boolean {
+    const url = this.value.repositoryUrl.replace(/[^a-zA-Z0-9:/.-]/g, '')
+    return protocolsInUrl(['https', 'http', 'ftp', 'ftps', 'sftp', 'dav', 'davs'], url)
   }
 
   /**
