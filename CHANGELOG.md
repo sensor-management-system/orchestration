@@ -18,6 +18,7 @@ Changed:
 
 Fixed:
 - Removed the dual use field in the csv importer for devices as it was moved in a different model ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/610))
+- Fixed handling of complex links for software update action repository urls ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/619))
 
 ## 1.23.2 - 2025-11-17
 
