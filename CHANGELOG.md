@@ -15,6 +15,7 @@ Changed:
 - Updated the legal notice page for GFZ with new section head and new administrative director ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/614))
 - Updated the legal notice page for UFZ ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/615))
 - Improved usability an robustness of csv importer ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/617))
+- Fixed typos in URLs of the import profiles in the csv importer ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/620))
 
 Fixed:
 - Removed the dual use field in the csv importer for devices as it was moved in a different model ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/610))
