@@ -172,11 +172,11 @@ class SMSDeviceImporter:
                     "description": row.get("description", None),
                     "short_name": row.get("short_name"),
                     "long_name": row.get("long_name", None),
-                    "serial_number": row.get("serial_number"),
+                    "serial_number": str_or_none(row.get("serial_number", None)),
                     "manufacturer_uri": row.get("manufacturer_uri", None),
                     "manufacturer_name": row.get("manufacturer_name"),
                     "model": row.get("model", None),
-                    "inventory_number": str(row.get("inventory_number", None)),
+                    "inventory_number": str_or_none(row.get("inventory_number", None)),
                     # "persistent_identifier": row.get("persistent_identifier"),
                     "website": row.get("website", None),
                     "device_type_uri": row.get("device_type_uri", None),
@@ -393,6 +393,12 @@ def parse_arguments():
     parser.add_argument('filepath', help="path to the CSV file containing the device data to import")
     parser.add_argument('apikey', help="APIKEY of the import user in the target SMS instance")
     return parser.parse_args()
+
+def str_or_none(x):
+    """Return the value as a string, or None otherwise."""
+    if x is not None:
+        return str(x)
+    return x
 
 
 if __name__ == '__main__':

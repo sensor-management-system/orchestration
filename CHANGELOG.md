@@ -21,6 +21,7 @@ Fixed:
 - Removed the dual use field in the csv importer for devices as it was moved in a different model ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/610))
 - Fixed handling of complex links for software update action repository urls ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/619))
 - Removed non null constraint for manufacturer names ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/621))
+- Explicit conversion of serial number and inventory number to strings ([Merge Request](https://codebase.helmholtz.cloud/hub-terra/sms/orchestration/-/merge_requests/618))
 
 ## 1.23.2 - 2025-11-17
 
