@@ -107,9 +107,22 @@ SPDX-License-Identifier: EUPL-1.2
                     @cancel="isDeleteDialogShown = false"
                     @delete="deleteSelectedNode"
                   >
-                    <em>Please only delete mounts if you are sure that the {{ selectedNodeType }} is <strong> not being
-                      used effectively</strong> and <strong>no other software</strong> is referencing the mounted
-                      {{ selectedNodeType }}.</em>
+                    <em>
+                      Please only delete mounts if you are sure that the {{ selectedNodeType }} is
+                      <strong>
+                        not being used effectively nor was used in the past
+                      </strong>
+                      and
+                      <strong>
+                        no other software
+                      </strong>
+                      is referencing the mounted {{ selectedNodeType }}.
+
+                      Please note that all information regarding the {{ selectedNodeType }} usage in this configruation
+                      will be lost.
+
+                      Consider to unmount the {{ selectedNodeType }} instead.
+                    </em>
                   </delete-dialog>
                 </v-card-text>
               </div>
