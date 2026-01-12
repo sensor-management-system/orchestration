@@ -81,6 +81,10 @@ def upgrade():
         select_query = 'select id from "user" where subject = :name limit 1'
         cursor = connection.execute(sa.text(select_query), {"name": ua["userName"]})
         res = cursor.fetchall()
+
+        if (not res) or (not res[0]) or (not res[0][0]):
+            continue
+
         user_id = res[0][0]
 
         idl_groups_to_add_to = set()
